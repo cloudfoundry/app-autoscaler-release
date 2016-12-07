@@ -1,0 +1,3 @@
+[submodule "src/app-autoscaler"]
+	path = src/app-autoscaler
+	url = https://github.com/cloudfoundry-incubator/app-autoscaler.git
