@@ -1,0 +1,21 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+# Get the latest available postgresql version
+PG_VERSION=`ls -r postgresql/postgresql-*.tar.gz | sed 's/postgresql\/postgresql-\(.*\)\.tar\.gz/\1/' | head -1`
+echo "Using postgresql server version: ${PG_VERSION}"
+
+# Extract Postgresql package
+echo "Extracting postgresql"
+tar -xzf postgresql/postgresql-${PG_VERSION}.tar.gz
+if [[ $? != 0 ]] ; then
+  echo "Failed to extract postgresql"
+  exit 1 
+fi
+
+cd postgresql-${PG_VERSION}
+
+# Building postgresql 
+./configure --prefix=${BOSH_INSTALL_TARGET}
+make world
+make install-world

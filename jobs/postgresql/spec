@@ -1,0 +1,38 @@
+--- 
+name: postgresql 
+
+templates:
+  postgresql_ctl.erb: bin/postgresql_ctl
+  pg_hba.conf.erb: config/pg_hba.conf 
+  postgresql.conf.erb: config/postgresql.conf
+
+packages:
+  - postgresql 
+
+provides: 
+- name: db
+  type: postgresql
+  properties:
+   - port
+   - adapter
+   - user
+   - password
+   - dbname
+   - host
+   - maxconnections
+   
+properties:
+ port:
+    description: "Port on which the Postgresql server will listen"
+ adapter:
+    description: "Database adapter to be used to access Postgresql"
+ user:
+    description: "Username clients must use to access Postgresql"
+ password:
+    description: "Password clients must use to access Postgresql"
+ dbname:
+    description: "Default Postgres database (it will be created during the startup process)"
+ host:
+    description: "IP address on which the Postgressql server will listen"
+ maxconnections:
+    description: "Maximum number of open database connections to support"
