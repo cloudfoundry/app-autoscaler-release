@@ -1,0 +1,47 @@
+---
+
+director_uuid: ((merge))
+name: app-autoscaler-release
+
+## Release Details ###
+releases:
+  - name: app-autoscaler
+    version: latest
+  - name: postgres
+    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=10
+    version: '10'
+    sha1: 9753e00d4e5d5d2d33788643b9f43e5e64200aa8
+
+## Stemcell details ##
+stemcells:
+  - alias: default
+    os: ubuntu-trusty
+    version: latest
+
+## Canary details ##
+update:
+  canaries: 1
+  canary_watch_time: 1000-300000
+  max_in_flight: 3
+  update_watch_time: 1000-300000
+
+
+instance_groups:
+  - name: postgres
+    azs:
+      - z1
+    instances: 1
+    jobs:
+      - name: postgres
+        properties:
+          databases: (( dbs ))
+        release: postgres
+        update:
+          serial: true
+    networks:
+      - name: default
+        static_ips: 10.244.1.2
+    stemcell: default
+    vm_type: default
+
+dbs: (( merge ))

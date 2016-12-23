@@ -1,5 +1,3 @@
 #!/bin/bash
 
-bosh update cloud-config ./example/cloud-config.yml
-bosh deployment ./example/bosh-lite-manifest.yml
 bosh create release --force --name app-autoscaler && bosh upload release && bosh -n deploy

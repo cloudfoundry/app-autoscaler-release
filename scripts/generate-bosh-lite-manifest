@@ -1,0 +1,20 @@
+#!/bin/bash
+
+BOSH_STATUS=$(bosh status)
+DIRECTOR_UUID=$(bosh status --uuid)
+EXPECTED_DIRECTOR_NAME="Bosh Lite Director"
+
+if [[ "$(echo "$BOSH_STATUS" | grep Name)" != *"$EXPECTED_DIRECTOR_NAME"* ]]; then
+  echo "Can only target $EXPECTED_DIRECTOR_NAME. Please use 'bosh target' before running this script."
+  exit 1
+fi
+
+tmpdir=$(mktemp -d /tmp/bosh-lite-manifest.XXXXX)
+director_uuid=${tmpdir}/director.yml
+printf "director_uuid: %s" $(bosh status --uuid) > ${director_uuid}
+
+spiff merge ./example/bosh-lite-manifest-template.yml ${director_uuid} ./example/properties.yml > ${tmpdir}/bosh-lite-manifest.yml
+
+bosh update cloud-config ./example/cloud-config.yml
+bosh deployment ${tmpdir}/bosh-lite-manifest.yml
+

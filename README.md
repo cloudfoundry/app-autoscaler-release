@@ -12,10 +12,10 @@ Modify the cloud-config and deployment manifest settings by modifying the files 
 Installing on [bosh-lite](https://github.com/cloudfoundry/bosh-lite)
 
 ```
-bosh target BOSH_HOST
+bosh target BOSH_DIRECTOR_HOST
 git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
 cd app-autoscaler-release
-bosh add blob <path to your postgres tar.gz> postgresql
 ./scripts/update
+./scripts/generate-bosh-lite-manifest
 ./scripts/deploy
 ```
