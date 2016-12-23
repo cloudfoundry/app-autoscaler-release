@@ -8,8 +8,8 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
 ## Usage
 
 Modify the cloud-config and deployment manifest settings by modifying the files under /example directory.
-
-Installing on [bosh-lite](https://github.com/cloudfoundry/bosh-lite)
+Install [Spiff](https://github.com/cloudfoundry-incubator/spiff#installation)
+Instructions to install on [bosh-lite](https://github.com/cloudfoundry/bosh-lite) below:
 
 ```
 bosh target BOSH_DIRECTOR_HOST
