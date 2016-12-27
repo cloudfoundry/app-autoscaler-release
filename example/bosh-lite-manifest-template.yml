@@ -8,9 +8,9 @@ releases:
   - name: app-autoscaler
     version: latest
   - name: postgres
-    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=10
-    version: '10'
-    sha1: 9753e00d4e5d5d2d33788643b9f43e5e64200aa8
+    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=11
+    version: '11'
+    sha1: b9cbcbfa53c870441f55431ee4ef8f63f860b03a
 
 ## Stemcell details ##
 stemcells:
@@ -40,7 +40,7 @@ instance_groups:
           serial: true
     networks:
       - name: default
-        static_ips: 10.244.1.2
+        static_ips: 10.244.4.2
     stemcell: default
     vm_type: default
 

@@ -43,9 +43,9 @@ networks:
 - name: default
   type: manual
   subnets:
-  - range: 10.244.1.0/24
-    reserved: 10.244.1.1
-    static: [10.244.1.2]
+  - range: 10.244.4.0/24
+    reserved: 10.244.4.1
+    static: [10.244.4.2]
     az: z1
     cloud_properties:
       name: random
