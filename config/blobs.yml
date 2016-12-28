@@ -1,1 +1,21 @@
---- {}
+---
+golang/go1.7.4.linux-amd64.tar.gz:
+  object_id: d51c7ac3-ee2b-4d9e-badb-b4474247fd18
+  sha: 2e5baf03d1590e048c84d1d5b4b6f2540efaaea1
+  size: 84021919
+nodejs/node-v6.9.2-darwin-x64.tar.gz:
+  object_id: 837dfec9-2bb1-4c74-ab42-b4038d73e745
+  sha: 6a8edc55c2e6246ad3ee1b80236bcdec94521115
+  size: 12041020
+nodejs/node-v6.9.2-linux-x64.tar.xz:
+  object_id: 9cdab835-8968-4998-a0dd-b33065b03e47
+  sha: 96b6e389d415f95b413dc7ffec7675546b738973
+  size: 9342556
+openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz:
+  object_id: 76158715-a46b-4552-a6d4-ea8e9da9d2e0
+  sha: d9374652844bfd7bcdce8f8b605fb57fd76c9e36
+  size: 75550921
+openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz:
+  object_id: 6c3ab808-55e7-4555-aa59-2eb489b1200f
+  sha: d77ee059e289ae52fb87812f1a2932268427dc26
+  size: 77696717
