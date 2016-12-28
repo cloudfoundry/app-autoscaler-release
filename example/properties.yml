@@ -1,0 +1,10 @@
+---
+dbs:
+  address: 10.244.4.2
+  databases:
+    - name: autoscaler
+  db_scheme: postgres
+  port: 5432
+  roles:
+   - name: postgres
+     password: postgres
