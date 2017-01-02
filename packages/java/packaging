@@ -1,0 +1,21 @@
+set -e 
+
+# Make sure we can see uname
+export PATH=$PATH:/bin:/usr/bin
+
+#unpack Java - we support Mac OS 64bit and Linux 64bit otherwise we require JAVA_HOME to point to JDK
+if [ `uname` = "Darwin" ]; then
+  mkdir java
+  pushd java
+  tar xvf ../openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz
+elif [ `uname` = "Linux" ]; then
+  mkdir java
+  pushd java
+  tar xvf ../openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz
+else 
+  echo "Non Linux/Darwin based OS not supported"
+fi
+popd
+
+cp -R java/* ${BOSH_INSTALL_TARGET}/
+

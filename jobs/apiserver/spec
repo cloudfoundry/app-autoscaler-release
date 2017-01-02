@@ -1,0 +1,37 @@
+---
+name: apiserver
+
+templates:
+
+  apiserver.erb: bin/apiserver
+  config.json.erb: bin/config.json
+  pre-start.erb: bin/pre-start
+
+packages:
+  - nodejs
+  - apiserver
+  - db
+  - java
+
+properties:
+  api_server.port:
+    description: "Port where APIServer will run"
+  api_server.scheduler_uri:
+    description: "URL where scheduler is running"
+  api_server.db_config.max_connections:
+    description: "Maximum number of connections that may be held in the apiserver db pool"
+  api_server.db_config.min_connections:
+    description: "Minimum number of connections that should be held in the apiserver db pool"
+  api_server.db_config.idle_timeout:
+    description: "The idle timeout for connections (seconds)"
+  databases.address:
+    description: "IP address on which the Postgresql server will listen"
+  databases.databases:
+    description: "The list of databases used in Postgresql database including name"
+  databases.db_scheme:
+    description: "Database scheme to be used to access Postgresql"
+  databases.port:
+    description: "Port on which the Postgresql server will listen"
+  databases.roles:
+    description: "The list of database Roles used in Postgresql database including name/password"
+

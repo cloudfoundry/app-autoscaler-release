@@ -1,0 +1,56 @@
+set -x
+
+cd ${BUILD_DIR}
+
+# Make sure we can see uname
+export PATH=$PATH:/bin:/usr/bin
+
+#unpack Java - we support Mac OS 64bit and Linux 64bit otherwise we require JAVA_HOME to point to JDK
+if [ `uname` = "Darwin" ]; then
+  mkdir java
+  pushd java
+  tar zxvf ${RELEASE_DIR}/blobs/openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz
+  export JAVA_HOME=${BUILD_DIR}/java
+elif [ `uname` = "Linux" ]; then
+  mkdir java
+  pushd java
+  tar zxvf ${RELEASE_DIR}/blobs/openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz
+  export JAVA_HOME=${BUILD_DIR}/java
+else
+  if [ ! -d $JAVA_HOME ]; then
+    echo "Set JAVA_HOME properly for non Linux/Darwin builds."
+    exit 1
+  fi
+fi
+popd
+
+#setup Java path
+export PATH=$JAVA_HOME/bin:$PATH
+
+# Set up Maven
+which mvn
+if [[ $? != 0 ]]; then
+   echo "Maven Not installed! Installing ..."
+   if [ -f apache-maven-3.3.9-bin.tar.gz ] ; then
+     echo "Maven binary already exists"
+   else
+     echo "Downloading Maven binary"
+     wget -c http://mirror.ventraip.net.au/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+   fi
+   mkdir maven
+   pushd maven
+   tar zxvf ../apache-maven-3.3.9-bin.tar.gz
+   export M2_HOME=${BUILD_DIR}/maven/apache-maven-3.3.9
+   export PATH=$M2_HOME/bin:$PATH
+   popd
+else
+   echo "Maven already installed"
+fi
+
+cd ${RELEASE_DIR}/src/app-autoscaler/db && mvn package
+cp -R ${RELEASE_DIR}/src/app-autoscaler/db/target/ ${BUILD_DIR}/
+rm -rf ${RELEASE_DIR}/src/app-autoscaler/db/target/
+
+
+
+
