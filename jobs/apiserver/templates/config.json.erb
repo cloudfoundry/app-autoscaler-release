@@ -1,0 +1,27 @@
+<% 
+  # returns an empty array of the value is null
+  def p_arr(property)
+    p(property,nil) || []
+  end
+
+  db_scheme = p('databases.db_scheme')
+  address = p('databases.address')
+  db_port = p('databases.port')
+  role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
+  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
+ 
+  params = {
+    'port' => p('api_server.port'),
+    'db' => {
+       'maxConnections' => p('api_server.db_config.max_connections'),
+       'minConnections' => p('api_server.db_config.min_connections'),
+       'idleTimeout' => p('api_server.db_config.idle_timeout'),
+       'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
+     },
+    'schedulerUri' => p('api_server.scheduler_uri'),
+  }           
+ 
+%>
+
+<%=JSON.pretty_generate(params, :indentation => 2)%> 
+

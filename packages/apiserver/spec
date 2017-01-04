@@ -1,0 +1,8 @@
+---
+name: apiserver
+
+dependencies:
+ 
+files:
+- app-autoscaler/api/**/*
+- nodejs/*

@@ -1,0 +1,32 @@
+set -x
+
+cd ${BUILD_DIR}
+
+# Make sure we can see uname
+export PATH=$PATH:/bin:/usr/bin
+
+#unpack Nodejs - we support Mac OS 64bit and Linux 64bit
+if [ `uname` = "Darwin" ]; then
+  mkdir npm
+  pushd npm
+  tar xvf ../nodejs/node-v6.9.2-darwin-x64.tar.gz --strip-components=1
+elif [ `uname` = "Linux" ]; then
+  mkdir npm
+  pushd npm
+  tar xvf ../nodejs/node-v6.9.2-linux-x64.tar.xz --strip-components=1
+else
+   echo "Not suppored OS (non Linux/Darwin based)"
+fi
+
+popd
+
+export PATH=${BUILD_DIR}/npm/bin:$PATH
+cd app-autoscaler/api && npm install
+
+#clean build data
+cd ${BUILD_DIR}
+rm -rf npm
+rm -rf nodejs/
+
+
+

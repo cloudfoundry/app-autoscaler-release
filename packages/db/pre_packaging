@@ -1,0 +1,61 @@
+set -x
+
+cd ${BUILD_DIR}
+
+# Make sure we can see uname
+export PATH=$PATH:/bin:/usr/bin
+
+#unpack Java - we support Mac OS 64bit and Linux 64bit otherwise we require JAVA_HOME to point to JDK
+if [ `uname` = "Darwin" ]; then
+  mkdir java
+  pushd java
+  tar zxvf ../openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz
+  export JAVA_HOME=${BUILD_DIR}/java
+elif [ `uname` = "Linux" ]; then
+  mkdir java
+  pushd java
+  tar zxvf ../openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz
+  export JAVA_HOME=${BUILD_DIR}/java
+else
+  if [ ! -d $JAVA_HOME ]; then
+    echo "Set JAVA_HOME properly for non Linux/Darwin builds."
+    exit 1
+  fi
+fi
+popd
+
+#setup Java path
+export PATH=$JAVA_HOME/bin:$PATH
+
+# Set up Maven
+function version { echo "$@" | awk -F. '{ printf("%02d%02d%02d\n", $1,$2,$3); }'; }
+which mvn
+exit_code=$?
+# Get the current maven version
+if [[ $exit_code -eq 0 ]]; then
+  mvn_version=`mvn -v | grep Apache | awk '{print $3}'`
+fi
+if [[ $exit_code -eq 0 && "$(version "$mvn_version")" -gt "$(version "3.3.1")" ]] ; then
+  echo "Supported maven version is already installed."
+else
+  echo "Required version of maven not installed! Installing ..."
+  wget -c http://mirror.ventraip.net.au/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+  mkdir maven
+  pushd maven
+  tar zxvf ../apache-maven-3.3.9-bin.tar.gz
+  export M2_HOME=${BUILD_DIR}/maven/apache-maven-3.3.9
+  export PATH=$M2_HOME/bin:$PATH
+  popd
+fi
+
+# Packaging DB module
+cd app-autoscaler/db && mvn package
+
+#clean up build data
+cd ${BUILD_DIR}
+rm -rf java
+rm -rf openjdk/
+if [ -f apache-maven-3.3.9-bin.tar.gz ] ; then
+  rm -rf apache-maven-3.3.9-bin.tar.gz
+  rm -rf maven/
+fi

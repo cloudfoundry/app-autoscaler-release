@@ -1,0 +1,8 @@
+---
+name: java
+
+dependencies:
+
+files:
+
+- openjdk/*

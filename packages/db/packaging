@@ -1,0 +1,4 @@
+set -e
+
+cp -R app-autoscaler/db/* ${BOSH_INSTALL_TARGET}
+

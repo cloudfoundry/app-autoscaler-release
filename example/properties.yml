@@ -3,8 +3,18 @@ dbs:
   address: 10.244.4.2
   databases:
     - name: autoscaler
+      tag: default
   db_scheme: postgres
   port: 5432
   roles:
-   - name: postgres
-     password: postgres
+    - name: postgres
+      password: postgres
+      tag: default
+ 
+api_server_properties:
+  db_config:
+    idle_timeout: 1000
+    max_connections: 10
+    min_connections: 0
+  scheduler_uri: https://10.244.4.4:8080
+  port: 3002

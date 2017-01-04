@@ -1,0 +1,24 @@
+#!/bin/bash
+
+RUN_DIR=/var/vcap/sys/run/apiserver 
+LOG_DIR=/var/vcap/sys/log/apiserver 
+PIDFILE=${RUN_DIR}/apiserver.pid 
+
+case $1 in
+  start)
+    mkdir -p $RUN_DIR $LOG_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR
+    echo $$ > $PIDFILE
+    cd /var/vcap/packages/apiserver/
+    PATH=/var/vcap/packages/nodejs/bin:$PATH
+    export $PATH
+    exec node index.js -c /var/vcap/jobs/apiserver/bin/config.json\
+      >>  $LOG_DIR/apiserver.stdout.log \
+      2>> $LOG_DIR/apiserver.stderr.log
+    ;;
+  stop)
+    kill -9 `cat $PIDFILE`
+    rm -f $PIDFILE
+    ;;
+  *)
+    echo "Usage: ctl {start|stop}" ;; esac
