@@ -21,7 +21,7 @@ fi
 popd
 
 export PATH=${BUILD_DIR}/npm/bin:$PATH
-cd app-autoscaler/api && npm install
+cd app-autoscaler/api && npm install --production
 
 #clean build data
 cd ${BUILD_DIR}

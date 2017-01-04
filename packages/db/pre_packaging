@@ -1,6 +1,8 @@
-set -x
+set -e -x
 
 cd ${BUILD_DIR}
+
+MVN_VERSION=3.3.9
 
 # Make sure we can see uname
 export PATH=$PATH:/bin:/usr/bin
@@ -28,18 +30,13 @@ popd
 export PATH=$JAVA_HOME/bin:$PATH
 
 # Set up Maven
-function version { echo "$@" | awk -F. '{ printf("%02d%02d%02d\n", $1,$2,$3); }'; }
-which mvn
-exit_code=$?
 # Get the current maven version
-if [[ $exit_code -eq 0 ]]; then
-  mvn_version=`mvn -v | grep Apache | awk '{print $3}'`
-fi
-if [[ $exit_code -eq 0 && "$(version "$mvn_version")" -gt "$(version "3.3.1")" ]] ; then
+mvn_version=`mvn -v | head -n 1| cut -f 3 -d " "`
+if [ "$mvn_version" = "$MVN_VERSION" ] ; then
   echo "Supported maven version is already installed."
 else
   echo "Required version of maven not installed! Installing ..."
-  wget -c http://mirror.ventraip.net.au/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+  wget -c http://apache.claz.org/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
   mkdir maven
   pushd maven
   tar zxvf ../apache-maven-3.3.9-bin.tar.gz
@@ -54,7 +51,7 @@ cd app-autoscaler/db && mvn package
 #clean up build data
 cd ${BUILD_DIR}
 rm -rf java
-rm -rf openjdk/
+rm -rf openjdk
 if [ -f apache-maven-3.3.9-bin.tar.gz ] ; then
   rm -rf apache-maven-3.3.9-bin.tar.gz
   rm -rf maven/

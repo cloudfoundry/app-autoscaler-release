@@ -2,7 +2,6 @@
 name: apiserver
 
 templates:
-
   apiserver.erb: bin/apiserver
   config.json.erb: bin/config.json
   pre-start.erb: bin/pre-start
