@@ -9,11 +9,11 @@ export PATH=$PATH:/bin:/usr/bin
 if [ `uname` = "Darwin" ]; then
   mkdir npm
   pushd npm
-  tar xvf ${RELEASE_DIR}/blobs/nodejs/node-v6.9.2-darwin-x64.tar.gz --strip-components=1
+  tar xvf ../nodejs/node-v6.9.2-darwin-x64.tar.gz --strip-components=1
 elif [ `uname` = "Linux" ]; then
   mkdir npm
   pushd npm
-  tar xvf ${RELEASE_DIR}/blobs/nodejs/node-v6.9.2-linux-x64.tar.xz --strip-components=1
+  tar xvf ../nodejs/node-v6.9.2-linux-x64.tar.xz --strip-components=1
 else
    echo "Not suppored OS (non Linux/Darwin based)"
 fi
@@ -21,7 +21,12 @@ fi
 popd
 
 export PATH=${BUILD_DIR}/npm/bin:$PATH
-cd ${RELEASE_DIR}/src/app-autoscaler/api && npm install
-mv ${RELEASE_DIR}/src/app-autoscaler/api/node_modules/ ${BUILD_DIR}/
+cd app-autoscaler/api && npm install
+
+#clean build data
+cd ${BUILD_DIR}
+rm -rf npm
+rm -rf nodejs/
+
 
 

@@ -1,4 +1,4 @@
 set -e
 
 cp -R app-autoscaler/db/* ${BOSH_INSTALL_TARGET}
-cp -R ${BOSH_COMPILE_TARGET}/target/ ${BOSH_INSTALL_TARGET}
+

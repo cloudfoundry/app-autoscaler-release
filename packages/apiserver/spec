@@ -5,3 +5,4 @@ dependencies:
  
 files:
 - app-autoscaler/api/**/*
+- nodejs/*

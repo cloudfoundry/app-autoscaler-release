@@ -2,4 +2,4 @@
 set -e
 
 cp -R app-autoscaler/api/* ${BOSH_INSTALL_TARGET}
-cp -R ${BOSH_COMPILE_TARGET}/node_modules/ ${BOSH_INSTALL_TARGET}
+

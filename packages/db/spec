@@ -6,3 +6,4 @@ dependencies:
 files:
 
 - app-autoscaler/db/**/*
+- openjdk/*
