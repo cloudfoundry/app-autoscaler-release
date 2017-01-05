@@ -8,42 +8,30 @@ MVN_VERSION=3.3.9
 export PATH=$PATH:/bin:/usr/bin
 
 #unpack Java - we support Mac OS 64bit and Linux 64bit otherwise we require JAVA_HOME to point to JDK
-if [ `uname` = "Darwin" ]; then
-  mkdir java
-  pushd java
-  tar zxvf ../openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz
-  export JAVA_HOME=${BUILD_DIR}/java
-elif [ `uname` = "Linux" ]; then
-  mkdir java
-  pushd java
-  tar zxvf ../openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz
-  export JAVA_HOME=${BUILD_DIR}/java
-else
-  if [ ! -d $JAVA_HOME ]; then
-    echo "Set JAVA_HOME properly for non Linux/Darwin builds."
-    exit 1
-  fi
-fi
-popd
+mkdir java
+case "$OSTYPE" in
+  darwin*)
+    tar zxvf openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz -C java
+    ;;
+  linux*)
+    tar zxvf openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz -C java
+    ;;
+  *)
+    if [ ! -d $JAVA_HOME ]; then
+      echo "Set JAVA_HOME properly for non Linux/Darwin builds."
+      exit 1
+    fi
+    ;;
+esac
+export JAVA_HOME=${BUILD_DIR}/java
 
 #setup Java path
 export PATH=$JAVA_HOME/bin:$PATH
 
 # Set up Maven
-# Get the current maven version
-mvn_version=`mvn -v | head -n 1| cut -f 3 -d " "`
-if [ "$mvn_version" = "$MVN_VERSION" ] ; then
-  echo "Supported maven version is already installed."
-else
-  echo "Required version of maven not installed! Installing ..."
-  wget -c http://apache.claz.org/apache/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-  mkdir maven
-  pushd maven
-  tar zxvf ../apache-maven-3.3.9-bin.tar.gz
-  export M2_HOME=${BUILD_DIR}/maven/apache-maven-3.3.9
-  export PATH=$M2_HOME/bin:$PATH
-  popd
-fi
+tar zxvf maven/apache-maven-3.3.9-bin.tar.gz -C maven --strip-components=1
+export M2_HOME=${BUILD_DIR}/maven
+export PATH=$M2_HOME/bin:$PATH
 
 # Packaging DB module
 cd app-autoscaler/db && mvn package
@@ -52,7 +40,4 @@ cd app-autoscaler/db && mvn package
 cd ${BUILD_DIR}
 rm -rf java
 rm -rf openjdk
-if [ -f apache-maven-3.3.9-bin.tar.gz ] ; then
-  rm -rf apache-maven-3.3.9-bin.tar.gz
-  rm -rf maven/
-fi
+rm -rf maven

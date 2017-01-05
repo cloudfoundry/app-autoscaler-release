@@ -19,3 +19,7 @@ openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz:
   object_id: 6c3ab808-55e7-4555-aa59-2eb489b1200f
   sha: d77ee059e289ae52fb87812f1a2932268427dc26
   size: 77696717
+maven/apache-maven-3.3.9-bin.tar.gz:
+  object_id: 0c491801-2394-4610-bde5-b2334a84c52c
+  sha: 5b4c117854921b527ab6190615f9435da730ba05
+  size: 8491533
