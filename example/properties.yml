@@ -37,3 +37,15 @@ service_broker_properties:
   username: username
   password: password
   http_request_timeout: 5000
+
+cf_properties:
+  api: https://api.bosh-lite.com
+  grant_type: password
+  username: admin
+  password: admin
+  client_id: admin
+  secret: admin-secret
+  
+metricscollector_properties:
+  logging:
+    level: debug
