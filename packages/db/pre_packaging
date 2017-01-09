@@ -1,43 +1,15 @@
 set -e -x
 
-cd ${BUILD_DIR}
+source common/pre-packaging-helper.sh
 
-MVN_VERSION=3.3.9
+# Setting up required dependencies
+setup_java
+setup_maven
 
-# Make sure we can see uname
-export PATH=$PATH:/bin:/usr/bin
+cd ${BUILD_DIR}/app-autoscaler/db && mvn clean package
 
-#unpack Java - we support Mac OS 64bit and Linux 64bit otherwise we require JAVA_HOME to point to JDK
-mkdir java
-case "$OSTYPE" in
-  darwin*)
-    tar zxvf openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz -C java
-    ;;
-  linux*)
-    tar zxvf openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz -C java
-    ;;
-  *)
-    if [ ! -d $JAVA_HOME ]; then
-      echo "Set JAVA_HOME properly for non Linux/Darwin builds."
-      exit 1
-    fi
-    ;;
-esac
-export JAVA_HOME=${BUILD_DIR}/java
+# Cleaning up
+rm -rf common/pre-packaging-helper.sh
+cleanup_java
+cleanup_maven
 
-#setup Java path
-export PATH=$JAVA_HOME/bin:$PATH
-
-# Set up Maven
-tar zxvf maven/apache-maven-3.3.9-bin.tar.gz -C maven --strip-components=1
-export M2_HOME=${BUILD_DIR}/maven
-export PATH=$M2_HOME/bin:$PATH
-
-# Packaging DB module
-cd app-autoscaler/db && mvn package
-
-#clean up build data
-cd ${BUILD_DIR}
-rm -rf java
-rm -rf openjdk
-rm -rf maven
