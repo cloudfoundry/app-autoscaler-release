@@ -11,6 +11,7 @@ packages:
   - apiserver
   - db
   - java
+  - common
 
 properties:
   api_server.port:

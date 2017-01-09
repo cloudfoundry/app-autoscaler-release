@@ -4,11 +4,15 @@ RUN_DIR=/var/vcap/sys/run/apiserver
 LOG_DIR=/var/vcap/sys/log/apiserver 
 PIDFILE=${RUN_DIR}/apiserver.pid 
 
+source /var/vcap/packages/common/utils.sh
+
 case $1 in
   start)
+    pid_guard $PIDFILE "apiserver"
     mkdir -p $RUN_DIR $LOG_DIR
     chown -R vcap:vcap $RUN_DIR $LOG_DIR
     echo $$ > $PIDFILE
+    chown vcap:vcap $PIDFILE
     cd /var/vcap/packages/apiserver/
     PATH=/var/vcap/packages/nodejs/bin:$PATH
     export $PATH
@@ -17,8 +21,7 @@ case $1 in
       2>> $LOG_DIR/apiserver.stderr.log
     ;;
   stop)
-    kill -9 `cat $PIDFILE`
-    rm -f $PIDFILE
+    kill_and_wait $PIDFILE
     ;;
   *)
     echo "Usage: ctl {start|stop}" ;; esac
