@@ -18,3 +18,5 @@ api_server_properties:
     min_connections: 0
   scheduler_uri: https://10.244.4.4:8080
   port: 3002
+  drain_timeout: 10
+

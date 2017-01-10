@@ -5,6 +5,7 @@ templates:
   apiserver.erb: bin/apiserver
   config.json.erb: bin/config.json
   pre-start.erb: bin/pre-start
+  drain-script.erb: bin/drain
 
 packages:
   - nodejs
@@ -24,6 +25,8 @@ properties:
     description: "Minimum number of connections that should be held in the apiserver db pool"
   api_server.db_config.idle_timeout:
     description: "The idle timeout for connections (seconds)"
+  api_server.drain_timeout:
+    description: "Timeout(in seconds) for drain script"
   databases.address:
     description: "IP address on which the Postgresql server will listen"
   databases.databases:

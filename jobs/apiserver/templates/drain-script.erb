@@ -1,0 +1,54 @@
+#!/bin/bash
+
+RUN_DIR=/var/vcap/sys/run/apiserver
+LOG_DIR=/var/vcap/sys/log/apiserver
+LOGFILE=$LOG_DIR/drain.log
+PIDFILE=$RUN_DIR/apiserver.pid
+
+exec 3>&1
+
+exec 1>> $LOGFILE
+exec 2>> $LOGFILE
+
+if [ ! -f $PIDFILE ]; then
+  echo "$(date): $PIDFILE does not exist"
+  echo 0 >&3
+  exit 0
+fi
+
+pid=$(cat $PIDFILE)
+if [ -z "$pid" ]; then
+  echo "Unable to get pid from $PIDFILE"
+  echo 0 >&3
+  exit 0
+fi
+
+kill -USR2 $pid
+
+echo "$(date): drain triggered for $pid"
+
+timeout=<%= p("api_server.drain_timeout") + 1 %>
+countdown=$(( $timeout * 10 ))
+if [ -e /proc/$pid ]; then
+  while [ -e /proc/$pid ]; do
+    sleep 0.1
+    [ "$countdown" != '0' -a $(( $countdown % 10 )) = '0' ] && echo -n .
+    if [ $countdown -eq 0 ]; then
+      break
+    else
+      countdown=$(( $countdown - 1 ))
+    fi
+  done
+
+  if [ -e /proc/$pid ]; then
+    echo "Timed Out"
+  else
+    echo "Drained successfully"
+  fi
+else
+  echo "Process $pid is not running"
+fi
+
+echo 0 >&3
+exit 0
+
