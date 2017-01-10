@@ -1,0 +1,37 @@
+---
+name: scheduler
+templates:
+  scheduler.erb: bin/scheduler
+  pre-start.erb: bin/pre-start
+  application.properties.erb: bin/application.properties
+  
+
+packages:
+  - scheduler
+  - db
+  - java
+  - common
+
+properties:
+  scheduler.port:
+    description: "Port on which Scheduler will listen"
+  scheduler.scaling_engine.job_reschedule_interval_millisecond:
+    description: "Rescheduling interval for quartz job in milliseconds"
+  scheduler.scaling_engine.job_reschedule_maxcount: 
+    description: "Maximum no of jobs can be re-scheduled"
+  scheduler.scaling_engine.notification_reschedule_maxcount:
+    description: "Maximum number of notification sent to scaling engine for job re-schedule"
+  scheduler.scaling_engine.url:
+    description: "URL where Scaling-engine is running"
+  databases.address:
+    description: "IP address on which the Postgresql server will listen"
+  databases.databases:
+    description: "The list of databases used in Postgresql database including name"
+  databases.db_scheme:
+    description: "Database scheme to be used to access Postgresql"
+  databases.port:
+    description: "Port on which the Postgresql server will listen"
+  databases.roles:
+    description: "The list of database Roles used in Postgresql database including name/password"
+
+
