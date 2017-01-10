@@ -1,0 +1,30 @@
+#!/bin/bash
+
+RUN_DIR=/var/vcap/sys/run/scheduler
+LOG_DIR=/var/vcap/sys/log/scheduler
+PIDFILE=${RUN_DIR}/scheduler.pid
+
+source /var/vcap/packages/common/utils.sh
+
+case $1 in
+  start)
+    pid_guard $PIDFILE "scheduler"
+    mkdir -p $RUN_DIR $LOG_DIR
+    chown -R vcap:vcap $RUN_DIR $LOG_DIR
+    echo $$ > $PIDFILE
+    chown vcap:vcap $PIDFILE
+    PATH=/var/vcap/packages/java/bin:$PATH
+    export $PATH
+    cd /var/vcap/packages/scheduler/
+    exec java -Dspring.config.location=/var/vcap/jobs/scheduler/bin/application.properties -jar /var/vcap/packages/scheduler/scheduler-*.war \
+      >>  $LOG_DIR/scheduler.stdout.log 
+      2>> $LOG_DIR/scheduler.stderr.log
+    ;;
+  stop)
+    kill_and_wait $PIDFILE
+    ;;
+  *)
+    echo "Usage: ctl {start|stop}" ;; esac
+
+
+

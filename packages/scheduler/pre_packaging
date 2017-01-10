@@ -1,0 +1,15 @@
+set -e -x
+
+source common/pre-packaging-helper.sh
+
+# Setting up required dependencies
+setup_java
+setup_maven
+
+cd ${BUILD_DIR}/app-autoscaler/scheduler && mvn clean package -Dmaven.test.skip=true
+
+# Cleaning up
+rm -rf common/pre-packaging-helper.sh
+cleanup_java
+cleanup_maven
+
