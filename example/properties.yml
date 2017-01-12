@@ -16,11 +16,11 @@ api_server_properties:
     idle_timeout: 1000
     max_connections: 10
     min_connections: 0
-  scheduler_uri: http://10.244.4.4:8080
+  scheduler_uri: http://10.244.4.4:3004
   port: 3002
 
 scheduler_properties:
-  port: 8080
+  port: 3004
   scaling_engine:
     job_reschedule_interval_millisecond: 10000
     job_reschedule_maxcount: 6
@@ -33,7 +33,7 @@ service_broker_properties:
     max_connections: 10
     min_connections: 0
   api_server_uri : http://10.244.4.3:3002
-  port : 8080
+  port : 3003
   username: username
   password: password
   http_request_timeout: 5000
