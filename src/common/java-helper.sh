@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #Java Setup
 setup_java(){
   cd ${BUILD_DIR}

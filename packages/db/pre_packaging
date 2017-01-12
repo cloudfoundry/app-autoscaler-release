@@ -1,6 +1,6 @@
 set -e -x
 
-source common/pre-packaging-helper.sh
+source common/java-helper.sh
 
 # Setting up required dependencies
 setup_java
@@ -9,7 +9,7 @@ setup_maven
 cd ${BUILD_DIR}/app-autoscaler/db && mvn clean package
 
 # Cleaning up
-rm -rf common/pre-packaging-helper.sh
+rm -rf common/java-helper.sh
 cleanup_java
 cleanup_maven
 

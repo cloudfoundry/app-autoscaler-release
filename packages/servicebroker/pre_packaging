@@ -5,9 +5,8 @@ source common/node-helper.sh
 # Setup NPM
 setup_npm
 
-cd ${BUILD_DIR}/app-autoscaler/api && npm install
+cd ${BUILD_DIR}/app-autoscaler/servicebroker && npm install
 
 # Clean up NPM
 rm -rf common/node-helper.sh
 cleanup_npm
-

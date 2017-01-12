@@ -76,7 +76,25 @@ instance_groups:
     stemcell: default
     vm_type: default
 
+  - name: servicebroker
+    azs:
+      - z1
+    instances: 1
+    jobs:
+      - name: servicebroker
+        properties:
+          service_broker: (( service_broker_properties ))
+          databases: (( dbs ))
+        release: app-autoscaler
+    networks:
+      - name: default
+        static_ips: 10.244.4.5
+    stemcell: default
+    vm_type: default
+
+
 dbs: (( merge ))
 api_server_properties: (( merge ))
 scheduler_properties: (( merge ))
+service_broker_properties: ((merge))
 

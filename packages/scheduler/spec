@@ -9,5 +9,5 @@ files:
 - openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz  
 - openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz
 - maven/apache-maven-3.3.9-bin.tar.gz
-- common/pre-packaging-helper.sh
+- common/java-helper.sh
 
