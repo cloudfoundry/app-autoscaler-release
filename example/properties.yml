@@ -26,3 +26,14 @@ scheduler_properties:
     job_reschedule_maxcount: 6
     notification_reschedule_maxcount: 3
     url: http://10.244.4.5:8000
+
+service_broker_properties:
+  db_config:
+    idle_timeout: 1000
+    max_connections: 10
+    min_connections: 0
+  api_server_uri : http://10.244.4.3:3002
+  port : 8080
+  username: username
+  password: password
+  http_request_timeout: 5000

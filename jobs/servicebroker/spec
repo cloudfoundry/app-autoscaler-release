@@ -1,0 +1,44 @@
+---
+name: servicebroker
+
+templates:
+
+  servicebroker.erb: bin/servicebroker
+  config.json.erb: bin/config.json
+  pre-start.erb: bin/pre-start
+
+packages:
+  - nodejs
+  - servicebroker
+  - db
+  - java
+
+properties:
+  service_broker.port:
+    description: "Port where servicebroker will run"
+  service_broker.api_server_uri:
+    description: "URL where APIserver is running"
+  service_broker.username:
+    description: "client username for UAA"
+  service_broker.password:
+    description: "client password for validation from UAA"
+  service_broker.db_config.max_connections:
+    description: "Maximum number of connections that may be held in the serverbroker db pool"
+  service_broker.db_config.min_connections:
+    description: "Minimum number of connections that should be held in the servicebroker db pool"
+  service_broker.db_config.idle_timeout:
+    description: "The idle timeout for connections (seconds)"
+  service_broker.http_request_timeout:
+    description: "The timeout for http request"
+  databases.address:
+    description: "IP address on which the Postgresql server will listen"
+  databases.databases:
+    description: "The list of databases used in Postgresql database including name"
+  databases.db_scheme:
+    description: "Database scheme to be used to access Postgresql"
+  databases.port:
+    description: "Port on which the Postgresql server will listen"
+  databases.roles:
+    description: "The list of database Roles used in Postgresql database including name/password"
+
+

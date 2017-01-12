@@ -45,7 +45,7 @@ networks:
   subnets:
   - range: 10.244.4.0/24
     reserved: 10.244.4.1
-    static: [10.244.4.2, 10.244.4.3, 10.244.4.4]
+    static: [10.244.4.2 - 10.244.4.5]
     az: z1
     cloud_properties:
       name: random

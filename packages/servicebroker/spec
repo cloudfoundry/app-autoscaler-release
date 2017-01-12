@@ -1,0 +1,10 @@
+---
+name: servicebroker
+
+dependencies:
+
+files:
+- app-autoscaler/servicebroker/**/*
+- nodejs/node-v6.9.2-darwin-x64.tar.gz
+- nodejs/node-v6.9.2-linux-x64.tar.xz
+- common/pre-packaging-helper.sh
