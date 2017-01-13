@@ -16,6 +16,7 @@ packages:
 properties:
   api_server.port:
     description: "Port where APIServer will run"
+    default: 6100
   api_server.scheduler_uri:
     description: "URL where scheduler is running"
   api_server.db_config.max_connections:
@@ -34,4 +35,3 @@ properties:
     description: "Port on which the Postgresql server will listen"
   databases.roles:
     description: "The list of database Roles used in Postgresql database including name/password"
-

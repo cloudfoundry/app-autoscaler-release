@@ -41,7 +41,7 @@ properties:
     default: "info"
   metricscollector.server.port:
     description: "the listening port of server"
-    default: 80
+    default: 6103
   metricscollector.collector.refresh_interval: 
     description: "the time interval to refresh app policies from policy database"
     default: 60s

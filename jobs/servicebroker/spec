@@ -16,6 +16,7 @@ packages:
 properties:
   service_broker.port:
     description: "Port where servicebroker will run"
+    default: 6101
   service_broker.api_server_uri:
     description: "URL where APIserver is running"
   service_broker.username:
