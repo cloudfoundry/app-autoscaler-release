@@ -1,0 +1,29 @@
+<%
+  def p_arr(property)
+    p(property,nil) || []
+  end
+  db_scheme = p('databases.db_scheme')
+  address = p('databases.address')
+  db_port = p('databases.port')
+  role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
+  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
+  dburl = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?sslmode=disable"
+%>
+
+logging:
+  level: <%= p("pruner.logging.level") %>
+
+instance_metrics_db:
+  db_url: <%= dburl %>
+  refresh_interval: <%= p("pruner.instance_metrics_db.refresh_interval") %>
+  cutoff_days: <%= p("pruner.instance_metrics_db.cutoff_days") %>
+
+app_metrics_db:
+  db_url: <%= dburl %>
+  refresh_interval: <%= p("pruner.app_metrics_db.refresh_interval") %>
+  cutoff_days: <%= p("pruner.app_metrics_db.cutoff_days") %>
+
+scaling_engine_db:
+  db_url: <%= dburl %>
+  refresh_interval: <%= p("pruner.scaling_engine_db.refresh_interval") %>
+  cutoff_days: <%= p("pruner.scaling_engine_db.cutoff_days") %>
