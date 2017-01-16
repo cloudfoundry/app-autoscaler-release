@@ -1,0 +1,50 @@
+---
+name: metricscollector
+templates:
+  pre-start.erb: bin/pre-start
+  metricscollector_ctl: bin/metricscollector_ctl
+  metricscollector.yml.erb: config/metricscollector.yml
+
+packages:
+  - java
+  - db
+  - metricscollector
+  - common
+
+properties:
+  databases.address:
+    description: "IP address on which the Postgresql server will listen"
+  databases.databases:
+    description: "The list of databases used in Postgresql database including name"
+  databases.db_scheme:
+    description: "Database scheme to be used to access Postgresql"
+  databases.port:
+    description: "Port on which the Postgresql server will listen"
+  databases.roles:
+    description: "The list of database Roles used in Postgresql database including name/password"
+
+  cf.api:
+    description: "the Cloud Foundry API endpoint"
+  cf.grant_type:
+    description: "the grant type to log in cf" 
+  cf.username:
+    description: "the user name to log in cf"
+  cf.password:
+    description: "the password to log in cf"
+  cf.client_id:
+    description: "the client id to log in cf"
+  cf.secret:
+    description: "the secret to log in cf"	
+
+  metricscollector.logging.level:
+    description: "the level of logging"
+    default: "info"
+  metricscollector.server.port:
+    description: "the listening port of server"
+    default: 6103
+  metricscollector.collector.refresh_interval: 
+    description: "the time interval to refresh app policies from policy database"
+    default: 60s
+  metricscollector.collector.poll_interval:
+    description: "the time interval to poll container metrics from loggregator"
+    default: 30s

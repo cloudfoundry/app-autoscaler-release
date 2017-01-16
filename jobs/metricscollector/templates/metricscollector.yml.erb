@@ -1,0 +1,35 @@
+<%
+  def p_arr(property)
+    p(property,nil) || []
+  end
+
+  db_scheme = p('databases.db_scheme')
+  address = p('databases.address')
+  db_port = p('databases.port')
+  role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
+  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
+  dburl = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?sslmode=disable"
+%>
+
+
+cf:
+  api:  <%= p("cf.api") %>
+  grant_type: <%= p("cf.grant_type") %>
+  username:  <%= p("cf.username") %>
+  password:  <%= p("cf.password") %>
+  client_id: <%= p("cf.client_id") %>
+  secret: <%= p("cf.secret") %>
+
+server:
+  port:  <%= p("metricscollector.server.port") %>
+
+logging:
+  level: <%= p("metricscollector.logging.level") %>
+
+db:
+  policy_db_url: <%= dburl %>
+  instance_metrics_db_url: <%= dburl %>
+
+collector:
+  refresh_interval: <%= p("metricscollector.collector.refresh_interval") %>
+  poll_interval: <%= p("metricscollector.collector.poll_interval") %>

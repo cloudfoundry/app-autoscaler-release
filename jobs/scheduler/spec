@@ -15,6 +15,7 @@ packages:
 properties:
   scheduler.port:
     description: "Port on which Scheduler will listen"
+    default: 6102
   scheduler.scaling_engine.job_reschedule_interval_millisecond:
     description: "Rescheduling interval for quartz job in milliseconds"
   scheduler.scaling_engine.job_reschedule_maxcount: 
