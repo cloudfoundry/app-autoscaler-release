@@ -1,0 +1,47 @@
+---
+name: scalingengine
+templates:
+  pre-start.erb: bin/pre-start
+  scalingengine_ctl: bin/scalingengine_ctl
+  scalingengine.yml.erb: config/scalingengine.yml
+
+packages:
+  - java
+  - db
+  - scalingengine
+  - common
+
+properties:
+  databases.address:
+    description: "IP address on which the Postgresql server will listen"
+  databases.databases:
+    description: "The list of databases used in Postgresql database including name"
+  databases.db_scheme:
+    description: "Database scheme to be used to access Postgresql"
+  databases.port:
+    description: "Port on which the Postgresql server will listen"
+  databases.roles:
+    description: "The list of database Roles used in Postgresql database including name/password"
+
+  cf.api:
+    description: "the Cloud Foundry API endpoint"
+  cf.grant_type:
+    description: "the grant type to log in cf" 
+  cf.username:
+    description: "the user name to log in cf"
+  cf.password:
+    description: "the password to log in cf"
+  cf.client_id:
+    description: "the client id to log in cf"
+  cf.secret:
+    description: "the secret to log in cf"	
+
+  scalingengine.logging.level:
+    description: "the level of logging"
+    default: "info"
+  scalingengine.server.port:
+    description: "the listening port of server"
+    default: 6104
+  scalingengine.synchronizer.active_schedule_sync_interval:
+    description: "the time interval to synchronize the active schedulesr"
+    default: 600s

@@ -92,6 +92,21 @@ instance_groups:
     stemcell: default
     vm_type: default
 
+  - name: pruner
+    azs:
+      - z1
+    instances: 1
+    jobs:
+      - name: pruner
+        properties:
+          databases: (( dbs ))
+          pruner: (( pruner_properties ))
+        release: app-autoscaler
+    networks:
+      - name: default
+        static_ips: 10.244.4.10
+    stemcell: default
+    vm_type: default
 
   - name: metricscollector
     azs:
@@ -109,27 +124,32 @@ instance_groups:
         static_ips: 10.244.4.7
     stemcell: default
     vm_type: default
-    
-  - name: pruner
+
+  - name: scalingengine
     azs:
       - z1
     instances: 1
     jobs:
-      - name: pruner
+      - name: scalingengine
         properties:
           databases: (( dbs ))
-          pruner: (( pruner_properties ))
+          cf: (( cf_properties ))
+          scalingengine: (( scalingengine_properties ))
         release: app-autoscaler
     networks:
       - name: default
-        static_ips: 10.244.4.10
+        static_ips: 10.244.4.9
     stemcell: default
     vm_type: default
+
 
 dbs: (( merge ))
 cf_properties: (( merge ))
 api_server_properties: (( merge ))
 scheduler_properties: (( merge ))
 service_broker_properties: ((merge))
-metricscollector_properties: (( merge ))
 pruner_properties: ((merge))
+metricscollector_properties: (( merge ))
+scalingengine_properties: (( merge ))
+
+
