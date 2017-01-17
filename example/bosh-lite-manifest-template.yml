@@ -125,6 +125,23 @@ instance_groups:
     stemcell: default
     vm_type: default
 
+  - name: eventgenerator
+    azs:
+      - z1
+    instances: 1
+    jobs:
+      - name: eventgenerator
+        properties:
+          databases: (( dbs ))
+          eventgenerator: (( eventgenerator_properties ))
+        release: app-autoscaler
+    networks:
+      - name: default
+        static_ips: 10.244.4.8
+    stemcell: default
+    vm_type: default
+
+
   - name: scalingengine
     azs:
       - z1
@@ -150,6 +167,7 @@ scheduler_properties: (( merge ))
 service_broker_properties: ((merge))
 pruner_properties: ((merge))
 metricscollector_properties: (( merge ))
+eventgenerator_properties: (( merge ))
 scalingengine_properties: (( merge ))
 
 

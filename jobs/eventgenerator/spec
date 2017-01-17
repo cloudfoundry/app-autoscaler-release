@@ -1,0 +1,60 @@
+---
+name: eventgenerator
+templates:
+  pre-start.erb: bin/pre-start
+  eventgenerator_ctl: bin/eventgenerator_ctl
+  eventgenerator.yml.erb: config/eventgenerator.yml
+
+packages:
+  - java
+  - db
+  - eventgenerator
+  - common
+
+properties:
+  databases.address:
+    description: "IP address on which the Postgresql server will listen"
+  databases.databases:
+    description: "The list of databases used in Postgresql database including name"
+  databases.db_scheme:
+    description: "Database scheme to be used to access Postgresql"
+  databases.port:
+    description: "Port on which the Postgresql server will listen"
+  databases.roles:
+    description: "The list of database Roles used in Postgresql database including name/password"
+
+  eventgenerator.logging.level:
+    description: "the level of logging"
+    default: "info"
+  eventgenerator.server.port:
+    description: "the listening port of server"
+    default: 6105
+
+  eventgenerator.aggregator.aggregator_execute_interval: 
+    description: "the time interval to aggregate metrics data"
+    default: 40s
+  eventgenerator.aggregator.policy_poller_interval: 
+    description: "the time interval to poll policies"
+    default: 40s
+  eventgenerator.aggregator.metric_poller_count: 
+    description: "the number of metrics poller"
+    default: 20
+  eventgenerator.aggregator.app_monitor_channel_size: 
+    description: "the size of app monitor channel"
+    default: 200
+
+  eventgenerator.evaluator.evaluation_manager_execute_interval: 
+    description: "the time interval to evaluate rules"
+    default: 40s
+  eventgenerator.evaluator.evaluator_count: 
+    description: "the number of evaluators"
+    default: 20
+  eventgenerator.evaluator.trigger_array_channel_size: 
+    description: "the size of the trigger array channel"
+    default: 200
+  
+  eventgenerator.scalingEngine.scaling_engine_url: 
+    description: "the url of the scaling engine"
+
+  eventgenerator.metricCollector.metric_collector_url: 
+    description: "the url of the metrics collector"

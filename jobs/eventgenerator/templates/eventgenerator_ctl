@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -x -e
+
+RUN_DIR=/var/vcap/sys/run/eventgenerator
+LOG_DIR=/var/vcap/sys/log/eventgenerator
+CONF_DIR=/var/vcap/jobs/eventgenerator/config
+PIDFILE=$RUN_DIR/eventgenerator.pid
+
+source /var/vcap/packages/common/utils.sh
+
+case $1 in
+
+  start)
+    pid_guard $PIDFILE "eventgenerator"
+
+    mkdir -p $RUN_DIR
+    chown -R vcap:vcap $RUN_DIR
+    mkdir -p $LOG_DIR
+    chown -R vcap:vcap $LOG_DIR
+
+    echo $$ > $PIDFILE
+    
+    exec /var/vcap/packages/eventgenerator/eventgenerator -c $CONF_DIR/eventgenerator.yml >>$LOG_DIR/eventgenerator.stdout.log 2>>$LOG_DIR/eventgenerator.stderr.log
+    ;;
+
+  stop)
+    kill_and_wait $PIDFILE
+    ;;
+
+  *)
+  echo "Usage: eventgenerator_ctl {start|stop}" ;;
+esac
+exit 0
