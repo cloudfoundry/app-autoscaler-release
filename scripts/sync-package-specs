@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e -x
+set -e
 
 
 export GOPATH=$PWD/src/app-autoscaler
@@ -34,7 +34,10 @@ function sync_package() {
   )
 }
 
-sync_package metricscollector   -app  autoscaler/metricscollector/... 
+sync_package metricscollector -app  autoscaler/metricscollector/... 
+sync_package eventgenerator -app  autoscaler/eventgenerator/... 
+sync_package scalingengine -app  autoscaler/scalingengine/... 
+sync_package pruner -app  autoscaler/pruner/... 
 
-
-git diff --name-only packages/*/spec
+git diff --name-only packages/metricscollector/spec packages/eventgenerator/spec \
+          packages/scalingengine/spec packages/pruner/spec
