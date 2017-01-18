@@ -1,0 +1,40 @@
+#!/bin/bash
+set -e -x
+
+
+export GOPATH=$PWD/src/app-autoscaler
+export PATH=$GOPATH/bin:$PATH
+
+go get github.com/vito/gosub
+
+if [ ! $(which gosub) ]; then
+    echo "Gosub required to update dependencies in bosh/*/spec files."
+    echo 'Please install with `go get github.com/vito/gosub`'
+    exit 1
+fi
+
+
+function sync_package() {
+  bosh_pkg=${1}
+
+  shift
+
+  (
+    set -e
+
+    cd packages/${bosh_pkg}
+
+    {
+      cat spec | grep -v '# gosub'
+      gosub list "$@" | \
+        sed -e 's|\(.*\)|- app-autoscaler/src/\1/*.go # gosub|g'
+    } > spec.new
+
+    mv spec.new spec
+  )
+}
+
+sync_package metricscollector   -app  autoscaler/metricscollector/... 
+
+
+git diff --name-only packages/*/spec

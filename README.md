@@ -16,6 +16,7 @@ bosh target BOSH_DIRECTOR_HOST
 git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
 cd app-autoscaler-release
 ./scripts/update
+./scripts/sync-package-specs
 ./scripts/generate-bosh-lite-manifest
 ./scripts/deploy
 ```
