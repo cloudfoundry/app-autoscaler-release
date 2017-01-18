@@ -38,6 +38,7 @@ scheduler_properties:
     notification_reschedule_maxcount: 3
     url: http://10.244.4.5:6104
 
+
 cf_properties:
   api: https://api.bosh-lite.com
   grant_type: password
@@ -46,12 +47,26 @@ cf_properties:
   client_id: admin
   secret: admin-secret
   
+pruner_properties:
+  logging:
+    level: debug
+
 metricscollector_properties:
   logging:
     level: debug
   server:
     port: 6103
 
-pruner_properties:
+scalingengine_properties:
   logging:
     level: debug
+  server:
+    port: 6104
+
+eventgenerator_properties:
+  logging:
+    level: debug
+  scalingEngine:
+    scaling_engine_url: http://10.244.4.9:6104
+  metricCollector:
+    metric_collector_url: http://10.244.4.7:6103

@@ -1,0 +1,40 @@
+<%
+  def p_arr(property)
+    p(property,nil) || []
+  end
+
+  db_scheme = p('databases.db_scheme')
+  address = p('databases.address')
+  db_port = p('databases.port')
+  role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
+  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
+  dburl = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?sslmode=disable"
+%>
+
+
+server:
+  port:  <%= p("eventgenerator.server.port") %>
+
+logging:
+  level: <%= p("eventgenerator.logging.level") %>
+
+db:
+  policy_db_url: <%= dburl %>
+  app_metrics_db_url: <%= dburl %>
+
+aggregator: 
+  aggregator_execute_interval: <%= p("eventgenerator.aggregator.aggregator_execute_interval") %>
+  policy_poller_interval: <%= p("eventgenerator.aggregator.policy_poller_interval") %>
+  metric_poller_count: <%= p("eventgenerator.aggregator.metric_poller_count") %>
+  app_monitor_channel_size: <%= p("eventgenerator.aggregator.app_monitor_channel_size") %>
+
+evaluator:
+  evaluation_manager_execute_interval: <%= p("eventgenerator.evaluator.evaluation_manager_execute_interval") %>
+  evaluator_count: <%= p("eventgenerator.evaluator.evaluator_count") %>
+  trigger_array_channel_size: <%= p("eventgenerator.evaluator.trigger_array_channel_size") %>
+
+scalingEngine:
+  scaling_engine_url: <%= p("eventgenerator.scalingEngine.scaling_engine_url") %>
+  
+metricCollector:
+  metric_collector_url: <%= p("eventgenerator.metricCollector.metric_collector_url") %>
