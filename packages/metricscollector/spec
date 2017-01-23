@@ -30,7 +30,6 @@ files:
 - app-autoscaler/src/github.com/gogo/protobuf/gogoproto/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/proto/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/protoc-gen-gogo/descriptor/*.go # gosub
-- app-autoscaler/src/github.com/gorilla/context/*.go # gosub
 - app-autoscaler/src/github.com/gorilla/mux/*.go # gosub
 - app-autoscaler/src/github.com/gorilla/websocket/*.go # gosub
 - app-autoscaler/src/github.com/lib/pq/*.go # gosub
