@@ -11,3 +11,10 @@ blobs
 .final_builds/jobs/**/*.tgz
 .final_builds/packages/**/*.tgz
 *.swp
+# gosub and friends
+src/github.com/vito/gosub
+# lol bet you were looking for this
+src/github.com/codegangsta/cli
+
+/bin/
+/pkg/
