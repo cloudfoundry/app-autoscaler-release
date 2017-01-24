@@ -19,6 +19,6 @@ which spiff > /dev/null 2>&1 || {
   exit 1
 }
 
-spiff merge ./example/bosh-lite-manifest-template.yml ${director_uuid} ./example/properties.yml > ${tmpdir}/bosh-lite-manifest.yml
+spiff merge ./example/bosh-lite-manifest-template.yml ${director_uuid} ./example/properties.yml ./example/consul-properties.yml > ${tmpdir}/bosh-lite-manifest.yml
 bosh update cloud-config ./example/cloud-config.yml
 bosh deployment ${tmpdir}/bosh-lite-manifest.yml

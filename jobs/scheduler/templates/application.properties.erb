@@ -22,7 +22,7 @@ scalingenginejob.reschedule.maxcount=<%=p('scheduler.scaling_engine.job_reschedu
 scalingengine.notification.reschedule.maxcount=<%=p('scheduler.scaling_engine.notification_reschedule_maxcount') %>
 
 # scaling engine url
-autoscaler.scalingengine.url=<%=p('scheduler.scaling_engine.url') %>
+autoscaler.scalingengine.url=http://<%=p('scheduler.scaling_engine.host') %>:<%=p('scheduler.scaling_engine.port') %>
 
 # scheduler port
 server.port=<%=p('scheduler.port') %>

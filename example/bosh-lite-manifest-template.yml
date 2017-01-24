@@ -11,6 +11,10 @@ releases:
     url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=11
     version: '11'
     sha1: b9cbcbfa53c870441f55431ee4ef8f63f860b03a
+  - name: consul
+    url: https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=151
+    version: 151
+    sha1: 05d0976cda58819888a6a67c7abc1ef264072c85
 
 ## Stemcell details ##
 stemcells:
@@ -25,149 +29,348 @@ update:
   max_in_flight: 3
   update_watch_time: 1000-300000
 
+## Instance Group details ##
 
 instance_groups:
+
+# Consul instance group
+  - name: consul
+    azs:
+      - z1
+    instances: 1
+    update:
+      serial: true
+    stemcell: default
+    vm_type: default
+    networks:
+      - name: default
+        static_ips: &consul_ips
+          (( consul_properties.static_ips ))
+    jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: server
+              domain: cf.internal
+              servers: &consul_servers
+                lan: *consul_ips
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
+
+# Postgres Instance Group
+
   - name: postgres
     azs:
       - z1
     instances: 1
+    update:
+      serial: true
+    stemcell: default
+    vm_type: default
+    networks:
+      - name: default
     jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: client
+              domain: cf.internal
+              services:
+                postgres:
+                  name: postgres
+                  tags:
+                  - postgres
+                  - db
+                  check:
+                    tcp: 127.0.0.1:5432
+                    interval: 30s
+                    timeout: 10s
+              servers: *consul_servers
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
       - name: postgres
         properties:
           databases: (( dbs ))
         release: postgres
-        update:
-          serial: true
-    networks:
-      - name: default
-        static_ips: 10.244.4.2
-    stemcell: default
-    vm_type: default
+
+ # APIServer Instance Group
   
   - name: apiserver
     azs:
       - z1
     instances: 1
+    networks:
+      - name: default
+    stemcell: default
+    vm_type: default
     jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: client
+              domain: cf.internal
+              services:
+                apiserver:
+                  name: apiserver
+                  tags:
+                  - apiserver
+                  check:
+                    script: /var/vcap/jobs/apiserver/bin/health-check
+                    interval: 30s
+              servers: *consul_servers
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
       - name: apiserver
         properties:
           api_server: (( api_server_properties ))
           databases: (( dbs ))
         release: app-autoscaler
-    networks:
-      - name: default
-        static_ips: 10.244.4.3
-    stemcell: default
-    vm_type: default
+
+# Scheduler Instance Group
 
   - name: scheduler
     azs:
       - z1
     instances: 1
+    networks:
+      - name: default
+    stemcell: default
+    vm_type: default
     jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: client
+              domain: cf.internal
+              services:
+                scheduler:
+                  name: scheduler
+                  tags:
+                  - scheduler
+                  check:
+                    script: /var/vcap/jobs/scheduler/bin/health-check
+                    interval: 30s
+              servers: *consul_servers
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
       - name: scheduler
         properties:
           scheduler: (( scheduler_properties ))
           databases: (( dbs ))
         release: app-autoscaler
-    networks:
-      - name: default
-        static_ips: 10.244.4.4
-    stemcell: default
-    vm_type: default
+
+# Service-Broker Instance Group
 
   - name: servicebroker
     azs:
       - z1
     instances: 1
+    networks:
+      - name: default
+    stemcell: default
+    vm_type: default
     jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: client
+              domain: cf.internal
+              services:
+                servicebroker:
+                  name: servicebroker
+                  tags:
+                  - servicebroker
+                  check:
+                    script: /var/vcap/jobs/servicebroker/bin/health-check
+                    interval: 30s
+              servers: *consul_servers
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
       - name: servicebroker
         properties:
           service_broker: (( service_broker_properties ))
           databases: (( dbs ))
         release: app-autoscaler
-    networks:
-      - name: default
-        static_ips: 10.244.4.5
-    stemcell: default
-    vm_type: default
+
+# Pruner Instance Group
 
   - name: pruner
     azs:
       - z1
     instances: 1
+    networks:
+      - name: default
+    stemcell: default
+    vm_type: default
     jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: client
+              domain: cf.internal
+              servers: *consul_servers
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
       - name: pruner
         properties:
           databases: (( dbs ))
           pruner: (( pruner_properties ))
         release: app-autoscaler
-    networks:
-      - name: default
-        static_ips: 10.244.4.10
-    stemcell: default
-    vm_type: default
+
+# Metric-collector Instance Group
 
   - name: metricscollector
     azs:
       - z1
     instances: 1
+    networks:
+      - name: default
+    stemcell: default
+    vm_type: default
     jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: client
+              domain: cf.internal
+              services:
+                metricscollector:
+                  name: metricscollector
+                  tags:
+                  - metricscollector
+                  check:
+                    script: /var/vcap/jobs/metricscollector/bin/health-check
+                    interval: 30s
+              servers: *consul_servers
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
       - name: metricscollector
         properties:
           databases: (( dbs ))
           cf: (( cf_properties ))
           metricscollector: (( metricscollector_properties ))
         release: app-autoscaler
-    networks:
-      - name: default
-        static_ips: 10.244.4.7
-    stemcell: default
-    vm_type: default
+
+# Event-Generator Instance Group
 
   - name: eventgenerator
     azs:
       - z1
     instances: 1
+    networks:
+      - name: default
+    stemcell: default
+    vm_type: default
     jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: client
+              domain: cf.internal
+              servers: *consul_servers
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
       - name: eventgenerator
         properties:
           databases: (( dbs ))
           eventgenerator: (( eventgenerator_properties ))
         release: app-autoscaler
-    networks:
-      - name: default
-        static_ips: 10.244.4.8
-    stemcell: default
-    vm_type: default
 
+# Scaling-Engine Instance Group
 
   - name: scalingengine
     azs:
       - z1
     instances: 1
+    networks:
+      - name: default
+    stemcell: default
+    vm_type: default
     jobs:
+      - name: consul_agent
+        properties:
+          consul:
+            agent:
+              mode: client
+              domain: cf.internal
+              services:
+                scalingengine:
+                  name: scalingengine
+                  tags:
+                  - scalingengine
+                  check:
+                    script: /var/vcap/jobs/scalingengine/bin/health-check
+                    interval: 30s
+              servers: *consul_servers
+            ca_cert: (( consul_properties.ca_cert ))
+            agent_cert: (( consul_properties.agent_cert ))
+            agent_key: (( consul_properties.agent_key ))
+            server_cert: (( consul_properties.server_cert ))
+            server_key: (( consul_properties.server_key ))
+            encrypt_keys: (( consul_properties.encrypt_keys ))
+        release: consul
       - name: scalingengine
         properties:
           databases: (( dbs ))
           cf: (( cf_properties ))
           scalingengine: (( scalingengine_properties ))
         release: app-autoscaler
-    networks:
-      - name: default
-        static_ips: 10.244.4.9
-    stemcell: default
-    vm_type: default
-
 
 dbs: (( merge ))
 cf_properties: (( merge ))
 api_server_properties: (( merge ))
 scheduler_properties: (( merge ))
-service_broker_properties: ((merge))
+service_broker_properties: (( merge ))
+consul_properties: (( merge ))
 pruner_properties: ((merge))
 metricscollector_properties: (( merge ))
 eventgenerator_properties: (( merge ))
 scalingengine_properties: (( merge ))
-
-

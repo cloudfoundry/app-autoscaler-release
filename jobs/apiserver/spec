@@ -5,6 +5,7 @@ templates:
   apiserver.erb: bin/apiserver
   config.json.erb: bin/config.json
   pre-start.erb: bin/pre-start
+  dns_health_check.erb: bin/health-check
 
 packages:
   - nodejs
@@ -17,8 +18,12 @@ properties:
   api_server.port:
     description: "Port where APIServer will run"
     default: 6100
-  api_server.scheduler_uri:
-    description: "URL where scheduler is running"
+  api_server.scheduler_host:
+    description: "Host where scheduler is running"
+    default: "scheduler.service.cf.internal"
+  api_server.scheduler_port:
+    description: "Port where scheduler will listen"
+    default: 6102
   api_server.db_config.max_connections:
     description: "Maximum number of connections that may be held in the apiserver db pool"
   api_server.db_config.min_connections:
@@ -27,6 +32,7 @@ properties:
     description: "The idle timeout for connections (seconds)"
   databases.address:
     description: "IP address on which the Postgresql server will listen"
+    default: "postgres.service.cf.internal"
   databases.databases:
     description: "The list of databases used in Postgresql database including name"
   databases.db_scheme:

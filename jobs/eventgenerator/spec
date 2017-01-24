@@ -14,6 +14,7 @@ packages:
 properties:
   databases.address:
     description: "IP address on which the Postgresql server will listen"
+    default: "postgres.service.cf.internal"
   databases.databases:
     description: "The list of databases used in Postgresql database including name"
   databases.db_scheme:
@@ -53,8 +54,18 @@ properties:
     description: "the size of the trigger array channel"
     default: 200
   
-  eventgenerator.scalingEngine.scaling_engine_url: 
-    description: "the url of the scaling engine"
+  eventgenerator.scalingEngine.scaling_engine_host:
+    description: "Host where the scaling engine is running"
+    default: "scalingengine.service.cf.internal"
 
-  eventgenerator.metricCollector.metric_collector_url: 
-    description: "the url of the metrics collector"
+  eventgenerator.scalingEngine.scaling_engine_port:
+    description: "Port where the scaling engine will listen"
+    default: 6104
+
+  eventgenerator.metricCollector.metric_collector_host:
+    description: "Host where the metrics collector is running"
+    default: "metricscollector.service.cf.internal"
+
+  eventgenerator.metricCollector.metric_collector_port:
+    description: "Port where the metrics collector will listen"
+    default: 6103

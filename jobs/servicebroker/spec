@@ -6,19 +6,25 @@ templates:
   servicebroker.erb: bin/servicebroker
   config.json.erb: bin/config.json
   pre-start.erb: bin/pre-start
+  dns_health_check.erb: bin/health-check
 
 packages:
   - nodejs
   - servicebroker
   - db
   - java
+  - common
 
 properties:
   service_broker.port:
     description: "Port where servicebroker will run"
     default: 6101
-  service_broker.api_server_uri:
-    description: "URL where APIserver is running"
+  service_broker.api_server_host:
+    description: "Host where APIserver is running"
+    default: "apiserver.service.cf.internal"
+  service_broker.api_server_port:
+    description: "Port where APIserver will listen"
+    default: 6100
   service_broker.username:
     description: "client username for UAA"
   service_broker.password:
@@ -33,6 +39,7 @@ properties:
     description: "The timeout for http request"
   databases.address:
     description: "IP address on which the Postgresql server will listen"
+    default: "postgres.service.cf.internal"
   databases.databases:
     description: "The list of databases used in Postgresql database including name"
   databases.db_scheme:

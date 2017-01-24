@@ -9,7 +9,8 @@
   db_port = p('databases.port')
   role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
   database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
- 
+  apiserverHost = p('service_broker.api_server_host')
+  apiserverPort = p('service_broker.api_server_port')
   params = {
     'port' => p('service_broker.port'),
     'username' => p('service_broker.username'),
@@ -20,7 +21,7 @@
        'idleTimeout' => p('service_broker.db_config.idle_timeout'),
        'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
      },
-    'apiServerUri' => p('service_broker.api_server_uri'),
+    'apiServerUri' => "http://" + apiserverHost + ":"+ apiserverPort.to_s,
     'httpRequestTimeout' => p('service_broker.http_request_timeout'),
   }           
  
