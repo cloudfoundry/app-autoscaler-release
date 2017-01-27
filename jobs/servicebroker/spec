@@ -6,7 +6,7 @@ templates:
   servicebroker.erb: bin/servicebroker
   config.json.erb: bin/config.json
   pre-start.erb: bin/pre-start
-  dns_health_check.erb: bin/health-check
+  dns_health_check.erb: bin/dns_health_check
 
 packages:
   - nodejs

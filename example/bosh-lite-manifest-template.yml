@@ -1,6 +1,7 @@
 ---
 
 director_uuid: ((merge))
+
 name: app-autoscaler-release
 
 ## Release Details ###
@@ -11,10 +12,8 @@ releases:
     url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=11
     version: '11'
     sha1: b9cbcbfa53c870441f55431ee4ef8f63f860b03a
-  - name: consul
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=151
-    version: 151
-    sha1: 05d0976cda58819888a6a67c7abc1ef264072c85
+  - name: cf
+    version: latest
 
 ## Stemcell details ##
 stemcells:
@@ -33,36 +32,6 @@ update:
 
 instance_groups:
 
-# Consul instance group
-  - name: consul
-    azs:
-      - z1
-    instances: 1
-    update:
-      serial: true
-    stemcell: default
-    vm_type: default
-    networks:
-      - name: default
-        static_ips: &consul_ips
-          (( consul_properties.static_ips ))
-    jobs:
-      - name: consul_agent
-        properties:
-          consul:
-            agent:
-              mode: server
-              domain: cf.internal
-              servers: &consul_servers
-                lan: *consul_ips
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
-
 # Postgres Instance Group
 
   - name: postgres
@@ -77,6 +46,7 @@ instance_groups:
       - name: default
     jobs:
       - name: consul_agent
+        release: cf
         properties:
           consul:
             agent:
@@ -84,22 +54,18 @@ instance_groups:
               domain: cf.internal
               services:
                 postgres:
-                  name: postgres
-                  tags:
-                  - postgres
-                  - db
                   check:
                     tcp: 127.0.0.1:5432
                     interval: 30s
                     timeout: 10s
-              servers: *consul_servers
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
+              servers:
+                lan: (( config_from_cf.consul.lan_servers ))
+            ca_cert: (( config_from_cf.consul.ca_cert ))
+            agent_cert: (( config_from_cf.consul.agent_cert ))
+            agent_key: (( config_from_cf.consul.agent_key ))
+            server_cert: (( config_from_cf.consul.server_cert ))
+            server_key: (( config_from_cf.consul.server_key ))
+            encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: postgres
         properties:
           databases: (( dbs ))
@@ -117,27 +83,22 @@ instance_groups:
     vm_type: default
     jobs:
       - name: consul_agent
+        release: cf
         properties:
           consul:
             agent:
               mode: client
               domain: cf.internal
               services:
-                apiserver:
-                  name: apiserver
-                  tags:
-                  - apiserver
-                  check:
-                    script: /var/vcap/jobs/apiserver/bin/health-check
-                    interval: 30s
-              servers: *consul_servers
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
+                apiserver: {}
+              servers: 
+                lan: (( config_from_cf.consul.lan_servers ))
+            ca_cert: (( config_from_cf.consul.ca_cert ))
+            agent_cert: (( config_from_cf.consul.agent_cert ))
+            agent_key: (( config_from_cf.consul.agent_key ))
+            server_cert: (( config_from_cf.consul.server_cert ))
+            server_key: (( config_from_cf.consul.server_key ))
+            encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: apiserver
         properties:
           api_server: (( api_server_properties ))
@@ -156,27 +117,22 @@ instance_groups:
     vm_type: default
     jobs:
       - name: consul_agent
+        release: cf
         properties:
           consul:
             agent:
               mode: client
               domain: cf.internal
               services:
-                scheduler:
-                  name: scheduler
-                  tags:
-                  - scheduler
-                  check:
-                    script: /var/vcap/jobs/scheduler/bin/health-check
-                    interval: 30s
-              servers: *consul_servers
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
+                scheduler: {}
+              servers: 
+                lan: (( config_from_cf.consul.lan_servers ))
+            ca_cert: (( config_from_cf.consul.ca_cert ))
+            agent_cert: (( config_from_cf.consul.agent_cert ))
+            agent_key: (( config_from_cf.consul.agent_key ))
+            server_cert: (( config_from_cf.consul.server_cert ))
+            server_key: (( config_from_cf.consul.server_key ))
+            encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: scheduler
         properties:
           scheduler: (( scheduler_properties ))
@@ -195,27 +151,22 @@ instance_groups:
     vm_type: default
     jobs:
       - name: consul_agent
+        release: cf
         properties:
           consul:
             agent:
               mode: client
               domain: cf.internal
               services:
-                servicebroker:
-                  name: servicebroker
-                  tags:
-                  - servicebroker
-                  check:
-                    script: /var/vcap/jobs/servicebroker/bin/health-check
-                    interval: 30s
-              servers: *consul_servers
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
+                servicebroker: {}
+              servers: 
+                lan: (( config_from_cf.consul.lan_servers ))
+            ca_cert: (( config_from_cf.consul.ca_cert ))
+            agent_cert: (( config_from_cf.consul.agent_cert ))
+            agent_key: (( config_from_cf.consul.agent_key ))
+            server_cert: (( config_from_cf.consul.server_cert ))
+            server_key: (( config_from_cf.consul.server_key ))
+            encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: servicebroker
         properties:
           service_broker: (( service_broker_properties ))
@@ -234,19 +185,20 @@ instance_groups:
     vm_type: default
     jobs:
       - name: consul_agent
+        release: cf
         properties:
           consul:
             agent:
               mode: client
               domain: cf.internal
-              servers: *consul_servers
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
+              servers: 
+                lan: (( config_from_cf.consul.lan_servers ))
+            ca_cert: (( config_from_cf.consul.ca_cert ))
+            agent_cert: (( config_from_cf.consul.agent_cert ))
+            agent_key: (( config_from_cf.consul.agent_key ))
+            server_cert: (( config_from_cf.consul.server_cert ))
+            server_key: (( config_from_cf.consul.server_key ))
+            encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: pruner
         properties:
           databases: (( dbs ))
@@ -265,27 +217,22 @@ instance_groups:
     vm_type: default
     jobs:
       - name: consul_agent
+        release: cf
         properties:
           consul:
             agent:
               mode: client
               domain: cf.internal
               services:
-                metricscollector:
-                  name: metricscollector
-                  tags:
-                  - metricscollector
-                  check:
-                    script: /var/vcap/jobs/metricscollector/bin/health-check
-                    interval: 30s
-              servers: *consul_servers
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
+                metricscollector: {}
+              servers: 
+                lan: (( config_from_cf.consul.lan_servers ))
+            ca_cert: (( config_from_cf.consul.ca_cert ))
+            agent_cert: (( config_from_cf.consul.agent_cert ))
+            agent_key: (( config_from_cf.consul.agent_key ))
+            server_cert: (( config_from_cf.consul.server_cert ))
+            server_key: (( config_from_cf.consul.server_key ))
+            encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: metricscollector
         properties:
           databases: (( dbs ))
@@ -305,19 +252,20 @@ instance_groups:
     vm_type: default
     jobs:
       - name: consul_agent
+        release: cf
         properties:
           consul:
             agent:
               mode: client
               domain: cf.internal
-              servers: *consul_servers
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
+              servers:
+                lan: (( config_from_cf.consul.lan_servers ))
+            ca_cert: (( config_from_cf.consul.ca_cert ))
+            agent_cert: (( config_from_cf.consul.agent_cert ))
+            agent_key: (( config_from_cf.consul.agent_key ))
+            server_cert: (( config_from_cf.consul.server_cert ))
+            server_key: (( config_from_cf.consul.server_key ))
+            encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: eventgenerator
         properties:
           databases: (( dbs ))
@@ -336,27 +284,22 @@ instance_groups:
     vm_type: default
     jobs:
       - name: consul_agent
+        release: cf
         properties:
           consul:
             agent:
               mode: client
               domain: cf.internal
               services:
-                scalingengine:
-                  name: scalingengine
-                  tags:
-                  - scalingengine
-                  check:
-                    script: /var/vcap/jobs/scalingengine/bin/health-check
-                    interval: 30s
-              servers: *consul_servers
-            ca_cert: (( consul_properties.ca_cert ))
-            agent_cert: (( consul_properties.agent_cert ))
-            agent_key: (( consul_properties.agent_key ))
-            server_cert: (( consul_properties.server_cert ))
-            server_key: (( consul_properties.server_key ))
-            encrypt_keys: (( consul_properties.encrypt_keys ))
-        release: consul
+                scalingengine: {}
+              servers:
+                lan: (( config_from_cf.consul.lan_servers ))
+            ca_cert: (( config_from_cf.consul.ca_cert ))
+            agent_cert: (( config_from_cf.consul.agent_cert ))
+            agent_key: (( config_from_cf.consul.agent_key ))
+            server_cert: (( config_from_cf.consul.server_cert ))
+            server_key: (( config_from_cf.consul.server_key ))
+            encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: scalingengine
         properties:
           databases: (( dbs ))
@@ -369,7 +312,7 @@ cf_properties: (( merge ))
 api_server_properties: (( merge ))
 scheduler_properties: (( merge ))
 service_broker_properties: (( merge ))
-consul_properties: (( merge ))
+config_from_cf: (( merge ))
 pruner_properties: ((merge))
 metricscollector_properties: (( merge ))
 eventgenerator_properties: (( merge ))

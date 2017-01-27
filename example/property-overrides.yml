@@ -1,6 +1,5 @@
 ---
 dbs:
-  address: ~
   databases:
     - name: autoscaler
       tag: default
@@ -16,8 +15,6 @@ api_server_properties:
     idle_timeout: 1000
     max_connections: 10
     min_connections: 0
-  scheduler_host: ~
-  scheduler_port: ~
   port: 6100
 
 service_broker_properties:
@@ -25,8 +22,6 @@ service_broker_properties:
     idle_timeout: 1000
     max_connections: 10
     min_connections: 0
-  api_server_host: ~
-  api_server_port: ~
   port : 6101
   username: username
   password: password
@@ -38,8 +33,6 @@ scheduler_properties:
     job_reschedule_interval_millisecond: 10000
     job_reschedule_maxcount: 6
     notification_reschedule_maxcount: 3
-    host: ~
-    port: ~
 
 cf_properties:
   api: https://api.bosh-lite.com
@@ -68,10 +61,4 @@ scalingengine_properties:
 eventgenerator_properties:
   logging:
     level: debug
-  scalingEngine:
-    scaling_engine_host: ~
-    scaling_engine_port: ~
-  metricCollector:
-    metric_collector_host: ~
-    metric_collector_port: ~
 
