@@ -11,6 +11,7 @@ packages:
 properties:
   databases.address:
     description: "IP address on which the Postgresql server will listen"
+    default: "postgres.service.cf.internal"
   databases.databases:
     description: "The list of databases used in Postgresql database including name"
   databases.db_scheme:

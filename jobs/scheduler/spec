@@ -4,7 +4,7 @@ templates:
   scheduler.erb: bin/scheduler
   pre-start.erb: bin/pre-start
   application.properties.erb: bin/application.properties
-  
+  dns_health_check.erb: bin/dns_health_check
 
 packages:
   - scheduler
@@ -22,10 +22,15 @@ properties:
     description: "Maximum no of jobs can be re-scheduled"
   scheduler.scaling_engine.notification_reschedule_maxcount:
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
-  scheduler.scaling_engine.url:
+  scheduler.scaling_engine.host:
     description: "URL where Scaling-engine is running"
+    default: "scalingengine.service.cf.internal"
+  scheduler.scaling_engine.port:
+    description: "Port where Scaling-engine will listen"
+    default: 6104
   databases.address:
     description: "IP address on which the Postgresql server will listen"
+    default: "postgres.service.cf.internal"
   databases.databases:
     description: "The list of databases used in Postgresql database including name"
   databases.db_scheme:

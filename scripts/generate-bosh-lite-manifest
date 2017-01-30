@@ -1,5 +1,85 @@
 #!/bin/bash
 
+set -e
+
+example=$(dirname $0)/../example
+
+usage() {
+  >&2 cat <<EOF
+SYNOPSIS:
+    Generate a manifest for a Autoscaler deployment to accompany an existing CF deployment.
+USAGE:
+    $0 <MANDATORY ARGUMENTS> [OPTIONAL ARGUMENTS]
+MANDATORY ARGUMENTS:
+    -c <cf-path>                Path to CF manifest file.
+    -i <cloud-config-path>      Path to cloud-config stub file.
+    -p <property-path>          Path to property-overrides stub file.
+EXAMPLE:
+    $0 \\
+      -c ../cf-release/bosh-lite/deployments/cf.yml \\
+      -i ./example/cloud-config.yml \\
+      -p ./example/property-overrides.yml \\
+EOF
+  exit 1
+}
+
+
+while getopts "c:i:p:" opt; do
+  case "$opt" in
+    c)
+        cf_manifest_file=$OPTARG
+        ;;
+    i)
+        cloud_config_file=$OPTARG
+        ;;
+    p)
+        property_overrides=$OPTARG
+        ;;
+    *)  echo "Unknown arguments"
+        usage
+        ;;
+  esac
+done
+
+
+if [ -z ${cf_manifest_file} ]; then
+  >&2 echo "ERROR: CF manifest file is missing"
+  argument_error=true
+else
+  if [ ! -f "${cf_manifest_file}" ]; then
+    >&2 echo "ERROR: CF manifest '${cf_manifest_file}' is not a regular file"
+    argument_error=true
+  fi
+fi
+
+if [ -z ${cloud_config_file} ]; then
+  >&2 echo "ERROR: Cloud-config stub file is missing"
+  argument_error=true
+else
+  if [ ! -f "${cloud_config_file}" ]; then
+    >&2 echo "ERROR: Cloud-config stub '${cloud_config_file}' is not a regular file"
+    argument_error=true
+  fi
+fi
+
+if [ -z ${property_overrides} ]; then
+  >&2 echo "ERROR: Property-overrides stub file is missing"
+  argument_error=true
+
+else
+  if [ ! -f "${property_overrides}" ]; then
+    >&2 echo "ERROR: Property-overrides stub '${property_overrides}' is not a regular file"
+    argument_error=true
+  fi
+fi
+
+
+if [ ! -z $argument_error ]; then
+  echo
+  usage
+fi
+
+
 BOSH_STATUS=$(bosh status)
 DIRECTOR_UUID=$(bosh status --uuid)
 EXPECTED_DIRECTOR_NAME="Bosh Lite Director"
@@ -9,7 +89,7 @@ if [[ "$(echo "$BOSH_STATUS" | grep Name)" != *"$EXPECTED_DIRECTOR_NAME"* ]]; th
   exit 1
 fi
 
-tmpdir=$(mktemp -d /tmp/bosh-lite-manifest.XXXXX)
+tmpdir=$(mktemp -d /tmp/autoscaler-bosh-lite-manifest.XXXXX)
 director_uuid=${tmpdir}/director.yml
 printf "director_uuid: %s" $(bosh status --uuid) > ${director_uuid}
 
@@ -19,6 +99,18 @@ which spiff > /dev/null 2>&1 || {
   exit 1
 }
 
-spiff merge ./example/bosh-lite-manifest-template.yml ${director_uuid} ./example/properties.yml > ${tmpdir}/bosh-lite-manifest.yml
-bosh update cloud-config ./example/cloud-config.yml
-bosh deployment ${tmpdir}/bosh-lite-manifest.yml
+spiff merge \
+  ${example}/config-from-cf.yml \
+  ${cf_manifest_file} \
+  > ${tmpdir}/config-from-cf-merged.yml
+
+spiff merge \
+${example}/bosh-lite-manifest-template.yml \
+${director_uuid} \
+${property_overrides} \
+${tmpdir}/config-from-cf-merged.yml  \
+> ${tmpdir}/autoscaler-bosh-lite-manifest.yml
+
+bosh update cloud-config  ${cloud_config_file}
+bosh deployment ${tmpdir}/autoscaler-bosh-lite-manifest.yml
+

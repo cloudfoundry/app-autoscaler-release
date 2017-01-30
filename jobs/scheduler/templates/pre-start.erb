@@ -14,6 +14,10 @@ SCHEDULER_DIR=/var/vcap/packages/scheduler
 
 export PATH=/var/vcap/packages/java/bin:$PATH 
 
+# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
+source /var/vcap/packages/common/consul-helper.sh
+start_consul_agent
+
 # Getting Database config 
 HOST='<%= p("databases.address") %>'
 DBNAME='<%= database['name'] %> '
