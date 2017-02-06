@@ -26,9 +26,9 @@ properties:
     description: "Port where APIserver will listen"
     default: 6100
   service_broker.username:
-    description: "client username for UAA"
+    description: "username to authenticate with service broker"
   service_broker.password:
-    description: "client password for validation from UAA"
+    description: "password to authenticate with service broker"
   service_broker.db_config.max_connections:
     description: "Maximum number of connections that may be held in the serverbroker db pool"
   service_broker.db_config.min_connections:
