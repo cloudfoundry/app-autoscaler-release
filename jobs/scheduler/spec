@@ -16,11 +16,11 @@ properties:
   scheduler.port:
     description: "Port on which Scheduler will listen"
     default: 6102
-  scheduler.scaling_engine.job_reschedule_interval_millisecond:
+  scheduler.job_reschedule_interval_millisecond:
     description: "Rescheduling interval for quartz job in milliseconds"
-  scheduler.scaling_engine.job_reschedule_maxcount: 
+  scheduler.job_reschedule_maxcount: 
     description: "Maximum no of jobs can be re-scheduled"
-  scheduler.scaling_engine.notification_reschedule_maxcount:
+  scheduler.notification_reschedule_maxcount:
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
   scheduler.scaling_engine.host:
     description: "URL where Scaling-engine is running"
