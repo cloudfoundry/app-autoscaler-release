@@ -29,10 +29,9 @@ service_broker_properties:
 
 scheduler_properties:
   port: 6102
-  scaling_engine:
-    job_reschedule_interval_millisecond: 10000
-    job_reschedule_maxcount: 6
-    notification_reschedule_maxcount: 3
+  job_reschedule_interval_millisecond: 10000
+  job_reschedule_maxcount: 6
+  notification_reschedule_maxcount: 3
 
 cf_properties:
   api: https://api.bosh-lite.com
