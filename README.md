@@ -25,3 +25,7 @@ cd app-autoscaler-release
 
 
 > ** cf-release deployment manifest should be cf-release/bosh-lite/deployments/cf.yml
+
+## Acceptance test
+
+Refer to [AutoScaler UAT guide](src/acceptance/README.md) to run acceptance test. 
