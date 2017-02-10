@@ -36,6 +36,10 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		Expect(bindService).To(Exit(1))
 		Eventually(bindService.Out).Should(gbytes.Say("Policy is required as a parameter"))
 
+		bindService = cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
+		Expect(bindService).To(Exit(1))
+		Eventually(bindService.Out).Should(gbytes.Say("400 Bad Request"))
+
 		bindService = cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/all.json").Wait(cfg.DefaultTimeoutDuration())
 		Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 
