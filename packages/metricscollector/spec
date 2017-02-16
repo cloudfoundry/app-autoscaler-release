@@ -9,7 +9,8 @@ files:
 - app-autoscaler/src/autoscaler/cf/*.go # gosub
 - app-autoscaler/src/autoscaler/db/*.go # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/*.go # gosub
-- app-autoscaler/src/autoscaler/eventgenerator/model/*.go # gosub
+- app-autoscaler/src/autoscaler/models/*.go # gosub
+- app-autoscaler/src/autoscaler/routes/*.go # gosub
 - app-autoscaler/src/autoscaler/metricscollector/cmd/metricscollector/*.go # gosub
 - app-autoscaler/src/autoscaler/metricscollector/collector/*.go # gosub
 - app-autoscaler/src/autoscaler/metricscollector/config/*.go # gosub
