@@ -7,24 +7,26 @@ example=$(dirname $0)/../example
 usage() {
   >&2 cat <<EOF
 SYNOPSIS:
-    Generate a manifest for a Autoscaler deployment to accompany an existing CF deployment.
+    Generate a bosh-lite manifest for an Autoscaler deployment to accompany an existing CF deployment.
 USAGE:
     $0 <MANDATORY ARGUMENTS> [OPTIONAL ARGUMENTS]
 MANDATORY ARGUMENTS:
     -c <cf-path>                Path to CF manifest file.
     -i <cloud-config-path>      Path to cloud-config stub file.
     -p <property-path>          Path to property-overrides stub file.
+OPTIONAL ARGUMENTS:
+    -d <db-stub-path>           Path to database stub file.
 EXAMPLE:
     $0 \\
       -c ../cf-release/bosh-lite/deployments/cf.yml \\
       -i ./example/cloud-config.yml \\
       -p ./example/property-overrides.yml \\
+      -d ./example/dbstubs/db-stub-external.yml \\
 EOF
   exit 1
 }
 
-
-while getopts "c:i:p:" opt; do
+while getopts "c:i:p:d:" opt; do
   case "$opt" in
     c)
         cf_manifest_file=$OPTARG
@@ -34,6 +36,9 @@ while getopts "c:i:p:" opt; do
         ;;
     p)
         property_overrides=$OPTARG
+        ;;
+    d)
+        db_settings=$OPTARG
         ;;
     *)  echo "Unknown arguments"
         usage
@@ -73,6 +78,10 @@ else
   fi
 fi
 
+if [[ ! -z "${db_settings}" && ! -f "${db_settings}" ]]; then
+  >&2 echo "ERROR: Database Setting stub '${db_settings}' is not a regular file"
+  argument_error=true
+fi
 
 if [ ! -z $argument_error ]; then
   echo
@@ -108,6 +117,7 @@ spiff merge \
 ${example}/bosh-lite-manifest-template.yml \
 ${director_uuid} \
 ${property_overrides} \
+${db_settings} \
 ${tmpdir}/config-from-cf-merged.yml  \
 > ${tmpdir}/autoscaler-bosh-lite-manifest.yml
 

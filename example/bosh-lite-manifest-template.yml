@@ -37,7 +37,7 @@ instance_groups:
   - name: postgres
     azs:
       - z1
-    instances: 1
+    instances: (( instance_count_overrides.postgres.instances || 1 ))
     update:
       serial: true
     stemcell: default
@@ -68,7 +68,7 @@ instance_groups:
             encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: postgres
         properties:
-          databases: (( dbs ))
+          databases: (( default_dbs ))
         release: postgres
 
  # APIServer Instance Group
@@ -102,7 +102,7 @@ instance_groups:
       - name: apiserver
         properties:
           api_server: (( api_server_properties ))
-          databases: (( dbs ))
+          policy_db: (( policydb ))
         release: app-autoscaler
 
 # Scheduler Instance Group
@@ -136,7 +136,7 @@ instance_groups:
       - name: scheduler
         properties:
           scheduler: (( scheduler_properties ))
-          databases: (( dbs ))
+          scheduler_db: (( schedulerdb ))
         release: app-autoscaler
 
 # Service-Broker Instance Group
@@ -170,7 +170,7 @@ instance_groups:
       - name: servicebroker
         properties:
           service_broker: (( service_broker_properties ))
-          databases: (( dbs ))
+          binding_db: (( bindingdb ))
         release: app-autoscaler
 
 # Pruner Instance Group
@@ -201,7 +201,9 @@ instance_groups:
             encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: pruner
         properties:
-          databases: (( dbs ))
+          appmetrics_db: (( appmetricsdb ))
+          instancemetrics_db: (( instancemetricsdb ))
+          scalingengine_db: (( scalingenginedb ))
           pruner: (( pruner_properties ))
         release: app-autoscaler
 
@@ -235,7 +237,8 @@ instance_groups:
             encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: metricscollector
         properties:
-          databases: (( dbs ))
+          instancemetrics_db: (( instancemetricsdb ))
+          policy_db: (( policydb ))
           cf: (( cf_properties ))
           metricscollector: (( metricscollector_properties ))
         release: app-autoscaler
@@ -268,7 +271,8 @@ instance_groups:
             encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: eventgenerator
         properties:
-          databases: (( dbs ))
+          appmetrics_db: (( appmetricsdb ))
+          policy_db: (( policydb ))
           eventgenerator: (( eventgenerator_properties ))
         release: app-autoscaler
 
@@ -302,12 +306,13 @@ instance_groups:
             encrypt_keys: (( config_from_cf.consul.encrypt_keys ))
       - name: scalingengine
         properties:
-          databases: (( dbs ))
+          scalingengine_db: (( scalingenginedb ))
+          scheduler_db: (( schedulerdb ))
+          policy_db: (( policydb ))
           cf: (( cf_properties ))
           scalingengine: (( scalingengine_properties ))
         release: app-autoscaler
 
-dbs: (( merge ))
 cf_properties: (( merge ))
 api_server_properties: (( merge ))
 scheduler_properties: (( merge ))
@@ -317,3 +322,13 @@ pruner_properties: ((merge))
 metricscollector_properties: (( merge ))
 eventgenerator_properties: (( merge ))
 scalingengine_properties: (( merge ))
+default_dbs: (( merge ))
+instance_count_overrides: (( merge || nil ))
+databases: (( merge || default_dbs ))
+policydb: (( merge || databases ))
+schedulerdb: (( merge || databases ))
+scalingenginedb: (( merge || databases ))
+appmetricsdb: (( merge || databases ))
+instancemetricsdb: (( merge || databases ))
+bindingdb: (( merge || databases ))
+

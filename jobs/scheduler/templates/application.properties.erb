@@ -1,18 +1,18 @@
 #!/bin/bash
 
-<% 
+<%
   # returns an empty array of the value is null
   def p_arr(property)
     p(property,nil) || []
   end
 
-  role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
-  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' }
+  role = p_arr('scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' } 
+  database = p_arr('scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' } 
 %>
 #datasource for application and quartz
 
 spring.datasource.driverClassName=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://<%=p('databases.address')%>:<%=p('databases.port') %>/<%=database['name'] %>
+spring.datasource.url=jdbc:postgresql://<%=p('scheduler_db.address')%>:<%=p('scheduler_db.port') %>/<%=database['name'] %>
 spring.datasource.username=<%=role['name'] %>
 spring.datasource.password=<%=role['password'] %>
 

@@ -45,16 +45,15 @@ properties:
   scheduler.scaling_engine.port:
     description: "Port where Scaling-engine will listen"
     default: 6104
-  databases.address:
-    description: "IP address on which the Postgresql server will listen"
+  scheduler_db.address:
+    description: "IP address on which the schedulerdb server will listen"
     default: "postgres.service.cf.internal"
-  databases.databases:
-    description: "The list of databases used in Postgresql database including name"
-  databases.db_scheme:
-    description: "Database scheme to be used to access Postgresql"
-  databases.port:
-    description: "Port on which the Postgresql server will listen"
-  databases.roles:
-    description: "The list of database Roles used in Postgresql database including name/password"
-
+  scheduler_db.databases:
+    description: "The list of databases used in schedulerdb database including name"
+  scheduler_db.db_scheme:
+    description: "Database scheme to be used to access schedulerdb"
+  scheduler_db.port:
+    description: "Port on which the schedulerdb server will listen"
+  scheduler_db.roles:
+    description: "The list of database roles used in schedulerdb database including name/password"
 

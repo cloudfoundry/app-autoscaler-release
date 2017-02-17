@@ -39,14 +39,15 @@ properties:
     description: "Minimum number of connections that should be held in the apiserver db pool"
   api_server.db_config.idle_timeout:
     description: "The idle timeout for connections (seconds)"
-  databases.address:
-    description: "IP address on which the Postgresql server will listen"
+  policy_db.address:
+    description: "IP address on which the policydb server will listen"
     default: "postgres.service.cf.internal"
-  databases.databases:
-    description: "The list of databases used in Postgresql database including name"
-  databases.db_scheme:
-    description: "Database scheme to be used to access Postgresql"
-  databases.port:
-    description: "Port on which the Postgresql server will listen"
-  databases.roles:
-    description: "The list of database Roles used in Postgresql database including name/password"
+  policy_db.databases:
+    description: "The list of databases used in policydb database including name"
+  policy_db.db_scheme:
+    description: "Database scheme to be used to access policydb"
+  policy_db.port:
+    description: "Port on which the policydb server will listen"
+  policy_db.roles:
+    description: "The list of database roles used in policydb database including name/password"
+
