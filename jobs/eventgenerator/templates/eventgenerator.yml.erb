@@ -34,7 +34,14 @@ evaluator:
   trigger_array_channel_size: <%= p("eventgenerator.evaluator.trigger_array_channel_size") %>
 
 scalingEngine:
-  scaling_engine_url: http://<%= p("eventgenerator.scalingEngine.scaling_engine_host") %>:<%= p("eventgenerator.scalingEngine.scaling_engine_port") %>
-  
+  scaling_engine_url: https://<%= p("eventgenerator.scalingEngine.scaling_engine_host") %>:<%= p("eventgenerator.scalingEngine.scaling_engine_port") %>
+  tls:
+    key_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine_client.key
+    cert_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine_client.crt
+    ca_file: /var/vcap/jobs/eventgenerator/config/certs/autoscaler-ca.crt
 metricCollector:
-  metric_collector_url: http://<%= p("eventgenerator.metricCollector.metric_collector_host") %>:<%= p("eventgenerator.metricCollector.metric_collector_port") %>
+  metric_collector_url: https://<%= p("eventgenerator.metricCollector.metric_collector_host") %>:<%= p("eventgenerator.metricCollector.metric_collector_port") %>
+  tls:
+    key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector_client.key
+    cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector_client.crt
+    ca_file: /var/vcap/jobs/eventgenerator/config/certs/autoscaler-ca.crt

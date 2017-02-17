@@ -8,7 +8,7 @@
   address = p('databases.address')
   db_port = p('databases.port')
   role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
-  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
+  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' }
   apiserverHost = p('service_broker.api_server_host')
   apiserverPort = p('service_broker.api_server_port')
   params = {
@@ -21,10 +21,14 @@
        'idleTimeout' => p('service_broker.db_config.idle_timeout'),
        'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
      },
-    'apiServerUri' => "http://" + apiserverHost + ":"+ apiserverPort.to_s,
+    'apiServerUri' => "https://" + apiserverHost + ":"+ apiserverPort.to_s,
     'httpRequestTimeout' => p('service_broker.http_request_timeout'),
-  }           
- 
+    'tls' => {
+        'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker_server.key",
+        'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker_server.crt",
+        'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/autoscaler-ca.crt",
+    },
+  }
 %>
 
 <%=JSON.pretty_generate(params, :indentation => 2)%> 

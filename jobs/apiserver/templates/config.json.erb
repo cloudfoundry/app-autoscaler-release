@@ -19,9 +19,13 @@
        'idleTimeout' => p('api_server.db_config.idle_timeout'),
        'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
      },
-    'schedulerUri' => "http://" + schedulerHost + ":" + schedulerPort.to_s,
-  }           
- 
+    'schedulerUri' => "https://" + schedulerHost + ":" + schedulerPort.to_s,
+    'tls' => {
+        'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver_server.key",
+        'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver_server.crt",
+        'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/autoscaler-ca.crt"
+    },
+  }
 %>
 
 <%=JSON.pretty_generate(params, :indentation => 2)%> 

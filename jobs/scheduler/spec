@@ -5,6 +5,13 @@ templates:
   pre-start.erb: bin/pre-start
   application.properties.erb: bin/application.properties
   dns_health_check.erb: bin/dns_health_check
+  install_crt_keystore.erb: bin/install_crt_keystore
+  install_crt_truststore.erb: bin/install_crt_truststore
+  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
+  scheduler_server.crt.erb: config/certs/scheduler_server.crt
+  scheduler_server.key.erb: config/certs/scheduler_server.key
+  scalingengine_client.crt.erb: config/certs/scalingengine_client.crt
+  scalingengine_client.key.erb: config/certs/scalingengine_client.key
 
 packages:
   - scheduler
@@ -16,9 +23,19 @@ properties:
   scheduler.port:
     description: "Port on which Scheduler will listen"
     default: 6102
+  scheduler.tls.autoscaler.ca_cert:
+    description: "CA cert for communication to the autoscaler components"
+  scheduler.tls.server.cert:
+    description: "Server cert for the scheduler"
+  scheduler.tls.server.key:
+    description: "Server key for the scheduler"
+  scheduler.tls.client_scalingengine.cert:
+    description: "Client cert for communicating with scalingengine"
+  scheduler.tls.client_scalingengine.key:
+    description: "Client cert for communicating with scalingengine"
   scheduler.job_reschedule_interval_millisecond:
     description: "Rescheduling interval for quartz job in milliseconds"
-  scheduler.job_reschedule_maxcount: 
+  scheduler.job_reschedule_maxcount:
     description: "Maximum no of jobs can be re-scheduled"
   scheduler.notification_reschedule_maxcount:
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
