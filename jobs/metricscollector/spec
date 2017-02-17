@@ -5,6 +5,9 @@ templates:
   metricscollector_ctl: bin/metricscollector_ctl
   metricscollector.yml.erb: config/metricscollector.yml
   dns_health_check.erb: bin/dns_health_check
+  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
+  metricscollector_server.crt.erb: config/certs/metricscollector_server.crt
+  metricscollector_server.key.erb: config/certs/metricscollector_server.key
 
 packages:
   - java
@@ -44,7 +47,13 @@ properties:
   metricscollector.server.port:
     description: "the listening port of server"
     default: 6103
-  metricscollector.collector.refresh_interval: 
+  metricscollector.tls.autoscaler.ca_cert:
+    description: "CA cert for communication to the autoscaler components"
+  metricscollector.tls.server.cert:
+    description: "Server certificate for communication"
+  metricscollector.tls.server.key:
+    description: "Private key for communication"
+  metricscollector.collector.refresh_interval:
     description: "the time interval to refresh app policies from policy database"
     default: 60s
   metricscollector.collector.poll_interval:

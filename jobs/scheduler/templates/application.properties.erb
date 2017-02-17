@@ -7,7 +7,7 @@
   end
 
   role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
-  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
+  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' }
 %>
 #datasource for application and quartz
 
@@ -22,7 +22,19 @@ scalingenginejob.reschedule.maxcount=<%=p('scheduler.job_reschedule_maxcount') %
 scalingengine.notification.reschedule.maxcount=<%=p('scheduler.notification_reschedule_maxcount') %>
 
 # scaling engine url
-autoscaler.scalingengine.url=http://<%=p('scheduler.scaling_engine.host') %>:<%=p('scheduler.scaling_engine.port') %>
+autoscaler.scalingengine.url=https://<%=p('scheduler.scaling_engine.host') %>:<%=p('scheduler.scaling_engine.port') %>
+
+# Server key store for communication with the api server.
+server.ssl.key-store=/var/vcap/data/autoscaler/scheduler_server.p12
+server.ssl.key-alias=scheduler_server
+server.ssl.key-store-password=123456
+server.ssl.key-store-type=PKCS12
+
+# Client key and trust store for communication with the scaling engine.
+client.ssl.keyStore=/var/vcap/data/autoscaler/scalingengine_client.p12
+client.ssl.keyStorePassword=123456
+client.ssl.trustStore=/var/vcap/data/autoscaler/cacerts
+client.ssl.trustStorePassword=123456
 
 # scheduler port
 server.port=<%=p('scheduler.port') %>

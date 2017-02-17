@@ -14,7 +14,7 @@ case $1 in
     echo $$ > $PIDFILE
     chown vcap:vcap $PIDFILE
     PATH=/var/vcap/packages/java/bin:$PATH
-    export $PATH
+    export PATH
     cd /var/vcap/packages/scheduler/
     exec java -Dspring.config.location=/var/vcap/jobs/scheduler/bin/application.properties -jar /var/vcap/packages/scheduler/scheduler-*.war \
       >>  $LOG_DIR/scheduler.stdout.log 

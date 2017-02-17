@@ -4,6 +4,11 @@ templates:
   pre-start.erb: bin/pre-start
   eventgenerator_ctl: bin/eventgenerator_ctl
   eventgenerator.yml.erb: config/eventgenerator.yml
+  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
+  metricscollector_client.crt.erb: config/certs/metricscollector_client.crt
+  metricscollector_client.key.erb: config/certs/metricscollector_client.key
+  scalingengine_client.crt.erb: config/certs/scalingengine_client.crt
+  scalingengine_client.key.erb: config/certs/scalingengine_client.key
 
 packages:
   - java
@@ -69,3 +74,18 @@ properties:
   eventgenerator.metricCollector.metric_collector_port:
     description: "Port where the metrics collector will listen"
     default: 6103
+
+  eventgenerator.tls.autoscaler.ca_cert:
+    description: "CA cert for communication to the autoscaler components"
+
+  eventgenerator.tls.client_metricscollector.cert:
+    description: "Client cert for communicating with metricscollector."
+
+  eventgenerator.tls.client_metricscollector.key:
+    description: "Client key for communicating with metricscollector."
+
+  eventgenerator.tls.client_scalingengine.cert:
+    description: "Client cert for communicating with scalingengine."
+
+  eventgenerator.tls.client_scalingengine.key:
+    description: "Client key for communicating with scalingengine."

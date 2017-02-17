@@ -32,3 +32,9 @@ java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdb
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$SCHEDULER_DIR/db/quartz.changelog-master.yaml update
 
+# Generate key store for the clients communicate with scheduler.
+/var/vcap/jobs/scheduler/bin/install_crt_keystore scheduler_server
+/var/vcap/jobs/scheduler/bin/install_crt_keystore scalingengine_client
+
+# Generate trust store for scheduler to communicate with scaling engine.
+/var/vcap/jobs/scheduler/bin/install_crt_truststore scalingengine autoscaler-ca.crt

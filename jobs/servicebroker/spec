@@ -7,6 +7,9 @@ templates:
   config.json.erb: bin/config.json
   pre-start.erb: bin/pre-start
   dns_health_check.erb: bin/dns_health_check
+  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
+  servicebroker_server.crt.erb: config/certs/servicebroker_server.crt
+  servicebroker_server.key.erb: config/certs/servicebroker_server.key
 
 packages:
   - nodejs
@@ -19,6 +22,12 @@ properties:
   service_broker.port:
     description: "Port where servicebroker will run"
     default: 6101
+  service_broker.tls.autoscaler.ca_cert:
+    description: "CA cert for communication to the autoscaler components"
+  service_broker.tls.server.cert:
+    description: "Server cert for the service broker"
+  service_broker.tls.server.key:
+    description: "Private key for the service broker"
   service_broker.api_server_host:
     description: "Host where APIserver is running"
     default: "apiserver.service.cf.internal"

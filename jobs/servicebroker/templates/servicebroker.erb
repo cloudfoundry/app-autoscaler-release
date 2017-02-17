@@ -15,7 +15,7 @@ case $1 in
     chown vcap:vcap $PIDFILE
     cd /var/vcap/packages/servicebroker/
     PATH=/var/vcap/packages/nodejs/bin:$PATH
-    export $PATH
+    export PATH
     exec node lib/index.js -c /var/vcap/jobs/servicebroker/bin/config.json\
       >>  $LOG_DIR/servicebroker.stdout.log \
       2>> $LOG_DIR/servicebroker.stderr.log
