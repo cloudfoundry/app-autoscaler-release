@@ -1,14 +1,11 @@
 ---
-default_dbs: 
+default_db:
   databases:
-    - name: autoscaler
-      tag: default
+    - {name: autoscaler, tag: default}
   db_scheme: postgres
   port: 5432
   roles:
-    - name: postgres
-      password: postgres
-      tag: default
+    - {name: postgres, password: postgres, tag: default}
 
 api_server_properties:
   db_config:
