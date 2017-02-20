@@ -17,17 +17,29 @@ packages:
   - common
 
 properties:
-  databases.address:
-    description: "IP address on which the Postgresql server will listen"
+  policy_db.address:
+    description: "IP address on which the policydb server will listen"
     default: "postgres.service.cf.internal"
-  databases.databases:
-    description: "The list of databases used in Postgresql database including name"
-  databases.db_scheme:
-    description: "Database scheme to be used to access Postgresql"
-  databases.port:
-    description: "Port on which the Postgresql server will listen"
-  databases.roles:
-    description: "The list of database Roles used in Postgresql database including name/password"
+  policy_db.databases:
+    description: "The list of databases used in policydb database including name"
+  policy_db.db_scheme:
+    description: "Database scheme to be used to access policydb"
+  policy_db.port:
+    description: "Port on which the policydb server will listen"
+  policy_db.roles:
+    description: "The list of database roles used in policydb database including name/password"
+
+  appmetrics_db.address:
+    description: "IP address on which the appmetricsdb server will listen"
+    default: "postgres.service.cf.internal"
+  appmetrics_db.databases:
+    description: "The list of databases used in appmetricsdb database including name"
+  appmetrics_db.db_scheme:
+    description: "Database scheme to be used to access appmetricsdb"
+  appmetrics_db.port:
+    description: "Port on which the appmetricsdb server will listen"
+  appmetrics_db.roles:
+    description: "The list of database roles used in appmetricsdb database including name/password"
 
   eventgenerator.logging.level:
     description: "the level of logging"

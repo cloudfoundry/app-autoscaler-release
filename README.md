@@ -14,12 +14,15 @@ Install [Spiff](https://github.com/cloudfoundry-incubator/spiff#installation)
 
 Instructions to install on [bosh-lite](https://github.com/cloudfoundry/bosh-lite) below:
 
-```
+```sh
 bosh target BOSH_DIRECTOR_HOST
 git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
 cd app-autoscaler-release
 ./scripts/update
-./scripts/generate-bosh-lite-manifest -c <path to cf-release deployment manifest> -i ./example/cloud-config.yml -p ./example/property-overrides.yml
+./scripts/generate-bosh-lite-manifest \
+	-c <path to cf-release deployment manifest> \
+	-i ./example/cloud-config.yml \
+	-p ./example/property-overrides.yml
 ./scripts/deploy
 ```
 
@@ -29,3 +32,14 @@ cd app-autoscaler-release
 ## Acceptance test
 
 Refer to [AutoScaler UAT guide](src/acceptance/README.md) to run acceptance test. 
+>
+> To use pre-existing postgres server(s), it is required to pass db-stubs while generating manifest. Otherwise an instance of default postgres server will be provided as part of app-autoscaler deployment.
+
+```sh
+./scripts/generate-bosh-lite-manifest \
+	-c <path to cf-release deployment manifest> \
+	-i ./example/cloud-config.yml \
+	-p ./example/property-overrides.yml \
+	-d ./example/dbstubs/db-stub-external.yml \
+```
+

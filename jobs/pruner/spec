@@ -9,17 +9,41 @@ packages:
   - common
 
 properties:
-  databases.address:
-    description: "IP address on which the Postgresql server will listen"
+  instancemetrics_db.address:
+    description: "IP address on which the instancemetricsdb server will listen"
     default: "postgres.service.cf.internal"
-  databases.databases:
-    description: "The list of databases used in Postgresql database including name"
-  databases.db_scheme:
-    description: "Database scheme to be used to access Postgresql"
-  databases.port:
-    description: "Port on which the Postgresql server will listen"
-  databases.roles:
-    description: "The list of database Roles used in Postgresql database including name/password"
+  instancemetrics_db.databases:
+    description: "The list of databases used in instancemetricsdb database including name"
+  instancemetrics_db.db_scheme:
+    description: "Database scheme to be used to access instancemetricsdb"
+  instancemetrics_db.port:
+    description: "Port on which the instancemetricsdb server will listen"
+  instancemetrics_db.roles:
+    description: "The list of database roles used in instancemetricsdb database including name/password"
+
+  appmetrics_db.address:
+    description: "IP address on which the appmetricsdb server will listen"
+    default: "postgres.service.cf.internal"
+  appmetrics_db.databases:
+    description: "The list of databases used in appmetricsdb database including name"
+  appmetrics_db.db_scheme:
+    description: "Database scheme to be used to access appmetricsdb"
+  appmetrics_db.port:
+    description: "Port on which the appmetricsdb server will listen"
+  appmetrics_db.roles:
+    description: "The list of database roles used in appmetricsdb database including name/password"
+
+  scalingengine_db.address:
+    description: "IP address on which the scalingenginedb server will listen"
+    default: "postgres.service.cf.internal"
+  scalingengine_db.databases:
+    description: "The list of databases used in scalingenginedb database including name"
+  scalingengine_db.db_scheme:
+    description: "Database scheme to be used to access scalingenginedb"
+  scalingengine_db.port:
+    description: "Port on which the scalingenginedb server will listen"
+  scalingengine_db.roles:
+    description: "The list of database roles used in scalingenginedb database including name/password"
 
 
   pruner.logging.level:

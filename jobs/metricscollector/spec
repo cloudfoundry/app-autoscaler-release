@@ -16,17 +16,30 @@ packages:
   - common
 
 properties:
-  databases.address:
-    description: "IP address on which the Postgresql server will listen"
+  policy_db.address:
+    description: "IP address on which the policydb server will listen"
     default: "postgres.service.cf.internal"
-  databases.databases:
-    description: "The list of databases used in Postgresql database including name"
-  databases.db_scheme:
-    description: "Database scheme to be used to access Postgresql"
-  databases.port:
-    description: "Port on which the Postgresql server will listen"
-  databases.roles:
-    description: "The list of database Roles used in Postgresql database including name/password"
+  policy_db.databases:
+    description: "The list of databases used in policydb database including name"
+  policy_db.db_scheme:
+    description: "Database scheme to be used to access policydb"
+  policy_db.port:
+    description: "Port on which the policydb server will listen"
+  policy_db.roles:
+    description: "The list of database roles used in policydb database including name/password"
+
+  instancemetrics_db.address:
+    description: "IP address on which the instancemetricsdb server will listen"
+    default: "postgres.service.cf.internal"
+  instancemetrics_db.databases:
+    description: "The list of databases used in instancemetricsdb database including name"
+  instancemetrics_db.db_scheme:
+    description: "Database scheme to be used to access instancemetricsdb"
+  instancemetrics_db.port:
+    description: "Port on which the instancemetricsdb server will listen"
+  instancemetrics_db.roles:
+    description: "The list of database roles used in instancemetricsdb database including name/password"
+
 
   cf.api:
     description: "the Cloud Foundry API endpoint"
@@ -59,3 +72,4 @@ properties:
   metricscollector.collector.poll_interval:
     description: "the time interval to poll container metrics from loggregator"
     default: 30s
+

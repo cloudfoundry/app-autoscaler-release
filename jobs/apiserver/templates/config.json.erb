@@ -4,13 +4,13 @@
     p(property,nil) || []
   end
 
-  db_scheme = p('databases.db_scheme')
-  address = p('databases.address')
-  db_port = p('databases.port')
-  role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
-  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
-  schedulerHost = p('api_server.scheduler_host')
-  schedulerPort = p('api_server.scheduler_port')
+  db_scheme = p('policy_db.db_scheme')
+  address = p('policy_db.address')
+  db_port = p('policy_db.port')
+  role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'} 
+  database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default'} 
+  scheduler_host = p('api_server.scheduler_host')
+  scheduler_port = p('api_server.scheduler_port')
   params = {
     'port' => p('api_server.port'),
     'db' => {
@@ -19,7 +19,7 @@
        'idleTimeout' => p('api_server.db_config.idle_timeout'),
        'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
      },
-    'schedulerUri' => "https://" + schedulerHost + ":" + schedulerPort.to_s,
+    'schedulerUri' => "https://" + scheduler_host + ":" + scheduler_port.to_s,
     'tls' => {
         'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver_server.key",
         'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver_server.crt",

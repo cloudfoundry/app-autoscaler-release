@@ -3,12 +3,20 @@
     p(property,nil) || []
   end
 
-  db_scheme = p('databases.db_scheme')
-  address = p('databases.address')
-  db_port = p('databases.port')
-  role = p_arr('databases.roles').find { |role| role['tag'] == 'default' } 
-  database = p_arr('databases.databases').find { |database| database['tag'] == 'default' } 
-  dburl = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?sslmode=disable"
+  instance_metrics_db_scheme = p('instancemetrics_db.db_scheme')
+  instance_metrics_db_address = p('instancemetrics_db.address')
+  instance_metrics_db_port = p('instancemetrics_db.port')
+  instance_metrics_db_role = p_arr('instancemetrics_db.roles').find { |role| role['tag'] == 'instancemetricsdb' or role['tag'] == 'default' } 
+  instance_metrics_db_database = p_arr('instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' } 
+  instance_metrics_db_url = instance_metrics_db_scheme + "://" + instance_metrics_db_role['name'] + ":" + instance_metrics_db_role['password'] + "@" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + "/" + instance_metrics_db_database['name'] + "?sslmode=disable"
+
+  policy_db_scheme = p('policy_db.db_scheme')
+  policy_db_address = p('policy_db.address')
+  policy_db_port = p('policy_db.port')
+  policy_db_role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
+  policy_db_database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
+  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
+
 %>
 
 
@@ -31,9 +39,10 @@ logging:
   level: <%= p("metricscollector.logging.level") %>
 
 db:
-  policy_db_url: <%= dburl %>
-  instance_metrics_db_url: <%= dburl %>
+  policy_db_url: <%= policy_db_url %>
+  instance_metrics_db_url: <%= instance_metrics_db_url %>
 
 collector:
   refresh_interval: <%= p("metricscollector.collector.refresh_interval") %>
   poll_interval: <%= p("metricscollector.collector.poll_interval") %>
+
