@@ -16,12 +16,12 @@ Instructions to install on [bosh-lite](https://github.com/cloudfoundry/bosh-lite
 
 ```sh
 bosh target BOSH_DIRECTOR_HOST
+bosh update cloud-config <PATH_TO_CLOUD_CONFIG>
 git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
 cd app-autoscaler-release
 ./scripts/update
 ./scripts/generate-bosh-lite-manifest \
 	-c <path to cf-release deployment manifest> \
-	-i ./example/cloud-config.yml \
 	-p ./example/property-overrides.yml
 ./scripts/deploy
 ```
@@ -38,7 +38,6 @@ Refer to [AutoScaler UAT guide](src/acceptance/README.md) to run acceptance test
 ```sh
 ./scripts/generate-bosh-lite-manifest \
 	-c <path to cf-release deployment manifest> \
-	-i ./example/cloud-config.yml \
 	-p ./example/property-overrides.yml \
 	-d ./example/dbstubs/db-stub-external.yml \
 ```

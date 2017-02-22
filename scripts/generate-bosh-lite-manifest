@@ -12,27 +12,22 @@ USAGE:
     $0 <MANDATORY ARGUMENTS> [OPTIONAL ARGUMENTS]
 MANDATORY ARGUMENTS:
     -c <cf-path>                Path to CF manifest file.
-    -i <cloud-config-path>      Path to cloud-config stub file.
     -p <property-path>          Path to property-overrides stub file.
 OPTIONAL ARGUMENTS:
     -d <db-stub-path>           Path to database stub file.
 EXAMPLE:
     $0 \\
       -c ../cf-release/bosh-lite/deployments/cf.yml \\
-      -i ./example/cloud-config.yml \\
       -p ./example/property-overrides.yml \\
       -d ./example/dbstubs/db-stub-external.yml \\
 EOF
   exit 1
 }
 
-while getopts "c:i:p:d:" opt; do
+while getopts "c:p:d:" opt; do
   case "$opt" in
     c)
         cf_manifest_file=$OPTARG
-        ;;
-    i)
-        cloud_config_file=$OPTARG
         ;;
     p)
         property_overrides=$OPTARG
@@ -53,16 +48,6 @@ if [ -z ${cf_manifest_file} ]; then
 else
   if [ ! -f "${cf_manifest_file}" ]; then
     >&2 echo "ERROR: CF manifest '${cf_manifest_file}' is not a regular file"
-    argument_error=true
-  fi
-fi
-
-if [ -z ${cloud_config_file} ]; then
-  >&2 echo "ERROR: Cloud-config stub file is missing"
-  argument_error=true
-else
-  if [ ! -f "${cloud_config_file}" ]; then
-    >&2 echo "ERROR: Cloud-config stub '${cloud_config_file}' is not a regular file"
     argument_error=true
   fi
 fi
@@ -121,6 +106,5 @@ ${db_settings} \
 ${tmpdir}/config-from-cf-merged.yml  \
 > ${tmpdir}/autoscaler-bosh-lite-manifest.yml
 
-bosh update cloud-config  ${cloud_config_file}
 bosh deployment ${tmpdir}/autoscaler-bosh-lite-manifest.yml
 
