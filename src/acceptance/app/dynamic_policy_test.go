@@ -37,12 +37,11 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Expect(guid).To(Exit(0))
 		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
 
+		Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
+		waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 	})
 
 	AfterEach(func() {
-		unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
-
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteService).To(Exit(0))
 
@@ -53,14 +52,16 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	Context("when scale by memoryused", func() {
 
 		JustBeforeEach(func() {
-			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
-			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
-
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/dynamic.json").Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 		})
 
-		Context("and 1 intance initially", func() {
+		AfterEach(func() {
+			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+		})
+
+		Context("and 1 instance initially", func() {
 			BeforeEach(func() {
 				initialInstanceCount = 1
 			})
@@ -73,7 +74,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				var previousMemoryUsed, newMemoryUsed, quota uint64
 				Eventually(func() int {
 					memoryAdded := false
-					// add memory if we are < quota (128MB)
+					// add memory if memory used < 80%
 					if previousMemoryUsed == 0 || float64(previousMemoryUsed)/float64(quota) < 0.8 {
 						status, _, err := helpers.Curl(cfg, "-k", "-s", addURL)
 						Expect(err).NotTo(HaveOccurred())
