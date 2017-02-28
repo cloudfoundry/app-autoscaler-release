@@ -31,10 +31,12 @@ server.ssl.key-store-password=123456
 server.ssl.key-store-type=PKCS12
 
 # Client key and trust store for communication with the scaling engine.
-client.ssl.keyStore=/var/vcap/data/autoscaler/scalingengine_client.p12
-client.ssl.keyStorePassword=123456
-client.ssl.trustStore=/var/vcap/data/autoscaler/cacerts
-client.ssl.trustStorePassword=123456
+client.ssl.key-store=/var/vcap/data/autoscaler/scalingengine_client.p12
+client.ssl.key-store-password=123456
+client.ssl.key-store-type=PKCS12
+client.ssl.trust-store=/var/vcap/data/autoscaler/cacerts
+client.ssl.trust-store-password=123456
+client.ssl.protocol=TLSv1.2
 
 # scheduler port
 server.port=<%=p('scheduler.port') %>

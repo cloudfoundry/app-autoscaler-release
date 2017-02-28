@@ -32,7 +32,7 @@ properties:
   scheduler.tls.client_scalingengine.cert:
     description: "Client cert for communicating with scalingengine"
   scheduler.tls.client_scalingengine.key:
-    description: "Client cert for communicating with scalingengine"
+    description: "Client key for communicating with scalingengine"
   scheduler.job_reschedule_interval_millisecond:
     description: "Rescheduling interval for quartz job in milliseconds"
   scheduler.job_reschedule_maxcount:
