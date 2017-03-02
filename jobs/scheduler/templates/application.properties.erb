@@ -38,6 +38,9 @@ client.ssl.trust-store=/var/vcap/data/certs/scalingengine/cacerts
 client.ssl.trust-store-password=123456
 client.ssl.protocol=TLSv1.2
 
+#Quartz
+org.quartz.scheduler.instanceName=app-autoscaler
+
 # scheduler port
 server.port=<%=p('scheduler.port') %>
 
