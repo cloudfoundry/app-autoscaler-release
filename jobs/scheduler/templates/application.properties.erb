@@ -25,16 +25,21 @@ scalingengine.notification.reschedule.maxcount=<%=p('scheduler.notification_resc
 autoscaler.scalingengine.url=https://<%=p('scheduler.scaling_engine.host') %>:<%=p('scheduler.scaling_engine.port') %>
 
 # Server key store for communication with the api server.
-server.ssl.key-store=/var/vcap/data/autoscaler/scheduler_server.p12
-server.ssl.key-alias=scheduler_server
+server.ssl.key-store=/var/vcap/data/certs/scheduler/server.p12
+server.ssl.key-alias=scheduler
 server.ssl.key-store-password=123456
 server.ssl.key-store-type=PKCS12
 
 # Client key and trust store for communication with the scaling engine.
-client.ssl.keyStore=/var/vcap/data/autoscaler/scalingengine_client.p12
-client.ssl.keyStorePassword=123456
-client.ssl.trustStore=/var/vcap/data/autoscaler/cacerts
-client.ssl.trustStorePassword=123456
+client.ssl.key-store=/var/vcap/data/certs/scalingengine/client.p12
+client.ssl.key-store-password=123456
+client.ssl.key-store-type=PKCS12
+client.ssl.trust-store=/var/vcap/data/certs/scalingengine/cacerts
+client.ssl.trust-store-password=123456
+client.ssl.protocol=TLSv1.2
+
+#Quartz
+org.quartz.scheduler.instanceName=app-autoscaler
 
 # scheduler port
 server.port=<%=p('scheduler.port') %>

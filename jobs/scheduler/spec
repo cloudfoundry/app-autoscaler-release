@@ -3,15 +3,16 @@ name: scheduler
 templates:
   scheduler.erb: bin/scheduler
   pre-start.erb: bin/pre-start
-  application.properties.erb: bin/application.properties
+  application.properties.erb: config/application.properties
   dns_health_check.erb: bin/dns_health_check
   install_crt_keystore.erb: bin/install_crt_keystore
   install_crt_truststore.erb: bin/install_crt_truststore
-  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
-  scheduler_server.crt.erb: config/certs/scheduler_server.crt
-  scheduler_server.key.erb: config/certs/scheduler_server.key
-  scalingengine_client.crt.erb: config/certs/scalingengine_client.crt
-  scalingengine_client.key.erb: config/certs/scalingengine_client.key
+  scheduler_ca.crt.erb: config/certs/ca.crt
+  scheduler_server.crt.erb: config/certs/server.crt
+  scheduler_server.key.erb: config/certs/server.key
+  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
+  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
+  scalingengine_client.key.erb: config/certs/scalingengine/client.key
 
 packages:
   - scheduler
@@ -21,18 +22,20 @@ packages:
 
 properties:
   scheduler.port:
-    description: "Port on which Scheduler will listen"
+    description: "Scheduler's port"
     default: 6102
-  scheduler.tls.autoscaler.ca_cert:
-    description: "CA cert for communication to the autoscaler components"
-  scheduler.tls.server.cert:
-    description: "Server cert for the scheduler"
-  scheduler.tls.server.key:
-    description: "Server key for the scheduler"
-  scheduler.tls.client_scalingengine.cert:
-    description: "Client cert for communicating with scalingengine"
-  scheduler.tls.client_scalingengine.key:
-    description: "Client cert for communicating with scalingengine"
+  scheduler.ca_cert:
+    description: "PEM-encoded CA certificate"
+  scheduler.server_cert:
+    description: "PEM-encoded server certificate"
+  scheduler.server_key:
+    description: "PEM-encoded server key"
+  scheduler.scalingengine.ca_cert:
+    description: "PEM-encoded CA certificate"
+  scheduler.scalingengine.client_cert:
+    description: "PEM-encoded client certificate"
+  scheduler.scalingengine.client_key:
+    description: "PEM-encoded client key"
   scheduler.job_reschedule_interval_millisecond:
     description: "Rescheduling interval for quartz job in milliseconds"
   scheduler.job_reschedule_maxcount:
@@ -43,7 +46,7 @@ properties:
     description: "URL where Scaling-engine is running"
     default: "scalingengine.service.cf.internal"
   scheduler.scaling_engine.port:
-    description: "Port where Scaling-engine will listen"
+    description: "Scaling Engine's port"
     default: 6104
   scheduler_db.address:
     description: "IP address on which the schedulerdb server will listen"
@@ -56,4 +59,3 @@ properties:
     description: "Port on which the schedulerdb server will listen"
   scheduler_db.roles:
     description: "The list of database roles used in schedulerdb database including name/password"
-

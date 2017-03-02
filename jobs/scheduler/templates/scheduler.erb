@@ -16,7 +16,7 @@ case $1 in
     PATH=/var/vcap/packages/java/bin:$PATH
     export PATH
     cd /var/vcap/packages/scheduler/
-    exec java -Dspring.config.location=/var/vcap/jobs/scheduler/bin/application.properties -jar /var/vcap/packages/scheduler/scheduler-*.war \
+    exec java -Dspring.config.location=/var/vcap/jobs/scheduler/config/application.properties -jar /var/vcap/packages/scheduler/scheduler-*.war \
       >>  $LOG_DIR/scheduler.stdout.log \
       2>> $LOG_DIR/scheduler.stderr.log
     ;;
