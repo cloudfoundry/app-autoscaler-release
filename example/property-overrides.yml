@@ -41,15 +41,13 @@ scheduler_properties:
   job_reschedule_interval_millisecond: 10000
   job_reschedule_maxcount: 6
   notification_reschedule_maxcount: 3
-  tls:
-    autoscaler:
-      ca_cert: (( app_autoscaler_ca_cert ))
-    server:
-      cert: (( scheduler_server_cert ))
-      key: (( scheduler_server_key ))
-    client_scalingengine:
-      cert: (( scalingengine_client_cert ))
-      key: (( scalingengine_client_key ))
+  ca_cert: (( app_autoscaler_ca_cert ))
+  server_cert: (( scheduler_server_cert ))
+  server_key: (( scheduler_server_key ))
+  scalingengine:
+    ca_cert: (( app_autoscaler_ca_cert ))
+    client_cert: (( scalingengine_client_cert ))
+    client_key: (( scalingengine_client_key ))
 
 cf_properties:
   api: https://api.bosh-lite.com

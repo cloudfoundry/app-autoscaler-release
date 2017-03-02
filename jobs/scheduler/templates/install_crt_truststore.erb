@@ -5,20 +5,20 @@
 #define JDK_HOME
 JDK_HOME=/var/vcap/packages/java
 
-#define the alias
 CERT_ALIAS=$1
+CERT=$2
 
 #define the certificate to import
-CERT_FILE=/var/vcap/jobs/scheduler/config/certs/$2
+CERT_FILE=/var/vcap/jobs/scheduler/config/certs/$CERT
 
 #define the key store
-TRUST_STORE_FILE=/var/vcap/data/autoscaler/cacerts
+TRUST_STORE_FILE=/var/vcap/data/certs/$CERT_ALIAS/cacerts
 
 #define the password
 PASSWORD=123456
 
 #create directory for trust store
-mkdir -p /var/vcap/data/autoscaler/
+mkdir -p /var/vcap/data/certs/$CERT_ALIAS
 
 manage_truststore () {
     operation=$1
