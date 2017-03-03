@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x -e
+set -e
 
 RUN_DIR=/var/vcap/sys/run/scalingengine
 LOG_DIR=/var/vcap/sys/log/scalingengine

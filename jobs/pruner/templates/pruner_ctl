@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x -e
+set -e
 
 RUN_DIR=/var/vcap/sys/run/pruner
 LOG_DIR=/var/vcap/sys/log/pruner
