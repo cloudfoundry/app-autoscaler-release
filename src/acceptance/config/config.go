@@ -42,7 +42,6 @@ type Config struct {
 
 	ServiceName    string `json:"service_name"`
 	ServicePlan    string `json:"service_plan"`
-	APIUrl         string `json:"api_url"`
 	ReportInterval int    `json:"report_interval"`
 
 	CfJavaTimeout   int    `json:"cf_java_timeout"`
@@ -111,9 +110,6 @@ func validate(t *testing.T, c *Config) {
 		t.Fatal("missing configuration 'service_plan'")
 	}
 
-	if c.APIUrl == "" {
-		t.Fatal("missing configuration 'api_url'")
-	}
 	if c.ReportInterval == 0 {
 		t.Fatal("missing configuration 'report_interval'")
 	}

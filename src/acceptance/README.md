@@ -40,7 +40,6 @@ cat > integration_config.json <<EOF
 
   "service_name": "CF-AutoScaler",
   "service_plan": "autoscaler-free-plan",
-  "api_url": "https://autoscalingapi.bosh-lite.com",
   "report_interval": 120
 }
 EOF
@@ -50,7 +49,7 @@ export CONFIG=$PWD/integration_config.json
 The full set of config parameters is explained below:
 
 * `service_name` (required): The name of the registered auto-scaler service, use `cf marketplace` to determine the name.
-* `api_url` (required): The url of the API service of the auto-scaler
+* `service_plan` (required): The plan name of the registered auto-scaler service, use `cf marketplace` to determine the plan.
 * `report_interval` (required): How frequently metrics are collected. This value must match the value configured in your deployment.
 
 * `api` (required): Cloud Controller API endpoint.
@@ -62,7 +61,6 @@ The full set of config parameters is explained below:
 * `keep_user_at_suite_end` (optional): If using an existing user (see above), set this to `true` unless you are okay having your existing user being deleted at the end. You can also set this to `true` when not using an existing user if you want to leave the temporary user around for debugging purposes after the test teardown.
 * `existing_user` (optional): Name of the existing user to use.
 * `existing_user_password` (optional): Password for the existing user to use.
-* `backend` (optional): Set to 'diego' or 'dea' to determine the backend used. If unspecified the default backend will be used.
 * `artifacts_directory` (optional): If set, `cf` CLI trace output from test runs will be captured in files and placed in this directory. [See below](#capturing-test-output) for more.
 * `default_timeout` (optional): Default time (in seconds) to wait for polling assertions that wait for asynchronous results.
 * `cf_push_timeout` (optional): Default time (in seconds) to wait for `cf push` commands to succeed.
@@ -70,6 +68,7 @@ The full set of config parameters is explained below:
 * `test_password` (optional): Used to set the password for the test user. This may be needed if your CF installation has password policies.
 * `timeout_scale` (optional): Used primarily to scale default timeouts for test setup and teardown actions (e.g. creating an org) as opposed to main test actions (e.g. pushing an app).
 * `use_http` (optional): Set to true if you would like CF Acceptance Tests to use HTTP when making api and application requests. (default is HTTPS)
+* `node_memory_limit` (option): the memory limit of  node.js test application
 
 * `java_buildpack_name` (optional) [See below](#buildpack-names).
 * `nodejs_buildpack_name` (optional) [See below](#buildpack-names).
