@@ -225,8 +225,6 @@ instance_groups:
             agent:
               mode: client
               domain: cf.internal
-              services:
-                metricscollector: {}
               servers: 
                 lan: (( config_from_cf.consul.lan_servers ))
             ca_cert: (( config_from_cf.consul.ca_cert ))

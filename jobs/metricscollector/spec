@@ -4,7 +4,6 @@ templates:
   pre-start.erb: bin/pre-start
   metricscollector_ctl: bin/metricscollector_ctl
   metricscollector.yml.erb: config/metricscollector.yml
-  dns_health_check.erb: bin/dns_health_check
   autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
   metricscollector_server.crt.erb: config/certs/metricscollector_server.crt
   metricscollector_server.key.erb: config/certs/metricscollector_server.key
@@ -72,4 +71,14 @@ properties:
   metricscollector.collector.poll_interval:
     description: "the time interval to poll container metrics from loggregator"
     default: 30s
+
+  metricscollector.lock.lock_ttl:
+    description: "consul lock ttl duration"
+    default: 15s
+  metricscollector.lock.lock_retry_interval:
+    description: "consul lock retry interval"
+    default: 10s
+  metricscollector.lock.consul_cluster_config:
+    description: "consul cluster configuration"
+    default: http://127.0.0.1:8500
 
