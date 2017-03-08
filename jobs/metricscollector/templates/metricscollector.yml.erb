@@ -46,3 +46,7 @@ collector:
   refresh_interval: <%= p("metricscollector.collector.refresh_interval") %>
   poll_interval: <%= p("metricscollector.collector.poll_interval") %>
 
+lock:
+  lock_ttl: <%= p("metricscollector.lock.lock_ttl") %>
+  lock_retry_interval: <%= p("metricscollector.lock.lock_retry_interval") %>
+  consul_cluster_config: <%= p("metricscollector.lock.consul_cluster_config") %>

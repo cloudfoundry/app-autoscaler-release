@@ -101,3 +101,13 @@ properties:
 
   eventgenerator.tls.client_scalingengine.key:
     description: "Client key for communicating with scalingengine."
+
+  eventgenerator.lock.lock_ttl:
+    description: "consul lock ttl duration"
+    default: 15s
+  eventgenerator.lock.lock_retry_interval:
+    description: "consul lock retry interval"
+    default: 10s
+  eventgenerator.lock.consul_cluster_config:
+    description: "consul cluster configuration"
+    default: http://127.0.0.1:8500

@@ -54,3 +54,8 @@ metricCollector:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector_client.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector_client.crt
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/autoscaler-ca.crt
+
+lock:
+  lock_ttl: <%= p("eventgenerator.lock.lock_ttl") %>
+  lock_retry_interval: <%= p("eventgenerator.lock.lock_retry_interval") %>
+  consul_cluster_config: <%= p("eventgenerator.lock.consul_cluster_config") %>
