@@ -74,8 +74,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				var previousMemoryUsed, newMemoryUsed, quota uint64
 				Eventually(func() int {
 					memoryAdded := false
-					// add memory if memory used < 80%
-					if previousMemoryUsed == 0 || float64(previousMemoryUsed)/float64(quota) < 0.8 {
+					// add memory if memory used < 70%
+					if previousMemoryUsed == 0 || float64(previousMemoryUsed)/float64(quota) < 0.7 {
 						status, _, err := helpers.Curl(cfg, "-k", "-s", addURL)
 						Expect(err).NotTo(HaveOccurred())
 						Expect(status).To(Equal(http.StatusOK))
