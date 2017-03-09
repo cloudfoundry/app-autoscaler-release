@@ -101,6 +101,7 @@ func memoryUsed(appGUID string, index int, timeout time.Duration) (uint64, uint6
 	if instance == nil {
 		return 0, 0
 	}
+
 	return instance.Stats.Usage.Mem, instance.Stats.MemQuota
 }
 
@@ -123,7 +124,6 @@ func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
 		Expect(err).NotTo(HaveOccurred())
 		mem[i] = instance.Stats.Usage.Mem
 	}
-
 	return mem
 }
 
