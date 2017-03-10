@@ -9,6 +9,9 @@ templates:
   autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
   apiserver_server.crt.erb: config/certs/apiserver_server.crt
   apiserver_server.key.erb: config/certs/apiserver_server.key
+  scheduler-ca.crt.erb: config/certs/scheduler-ca.crt
+  scheduler_client.crt.erb: config/certs/scheduler_client.crt
+  scheduler_client.key.erb: config/certs/scheduler_client.key
 
 packages:
   - nodejs
@@ -33,6 +36,12 @@ properties:
   api_server.scheduler_port:
     description: "Port where scheduler will listen"
     default: 6102
+  api_server.scheduler.ca_cert:
+    description: "PEM-encoded CA certificate"
+  api_server.scheduler.client_cert:
+    description: "PEM-encoded client certificate"
+  api_server.scheduler.client_key:
+    description: "PEM-encoded client key"
   api_server.db_config.max_connections:
     description: "Maximum number of connections that may be held in the apiserver db pool"
   api_server.db_config.min_connections:

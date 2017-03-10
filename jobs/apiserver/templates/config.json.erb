@@ -19,7 +19,14 @@
        'idleTimeout' => p('api_server.db_config.idle_timeout'),
        'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
      },
-    'schedulerUri' => "https://" + scheduler_host + ":" + scheduler_port.to_s,
+    'scheduler' => {
+       'uri' => "https://" + scheduler_host + ":" + scheduler_port.to_s,
+       'tls' => {
+           'keyFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler_client.key",
+           'certFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler_client.crt",
+           'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler-ca.crt"
+       },
+    },
     'tls' => {
         'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver_server.key",
         'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver_server.crt",
