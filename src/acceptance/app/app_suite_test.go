@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
+	"io/ioutil"
 	"math"
 	"strconv"
 	"time"
@@ -140,4 +141,15 @@ func averageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
 	}
 
 	return memSum / uint64(len(memoryUsedArray))
+}
+
+func appReport(appName string, timeout time.Duration) {
+	Eventually(cf.Cf("app", appName, "--guid"), timeout).Should(Exit())
+	Eventually(cf.Cf("logs", appName, "--recent"), timeout).Should(Exit())
+}
+
+func readPolicyFromFile(filename string) []byte {
+	content, err := ioutil.ReadFile(filename)
+	Expect(err).NotTo(HaveOccurred())
+	return content
 }

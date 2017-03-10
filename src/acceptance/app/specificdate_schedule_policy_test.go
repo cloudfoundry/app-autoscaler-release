@@ -2,24 +2,26 @@ package app
 
 import (
 	"acceptance/config"
-	"acceptance/helpers"
 	"fmt"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 )
 
-var _ = Describe("AutoScaler dynamic policy", func() {
-	var appName string
-	var appGUID string
-	var instanceName string
-	var initialInstanceCount int
+var _ = Describe("AutoScaler specific date schedule policy", func() {
+	var (
+		appName              string
+		appGUID              string
+		instanceName         string
+		initialInstanceCount int
+		location             *time.Location
+		endDateTime          time.Time
+	)
 
 	BeforeEach(func() {
 		instanceName = generator.PrefixedRandomName("autoscaler", "service")
@@ -49,10 +51,18 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 	})
 
-	Context("when scale by memoryused", func() {
+	Context("when scale out by schedule", func() {
 
 		JustBeforeEach(func() {
-			bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/dynamic.json").Wait(cfg.DefaultTimeoutDuration())
+			policyByte := readPolicyFromFile("../assets/file/policy/specificdate.json")
+			timeZone := "GMT"
+			location, _ = time.LoadLocation(timeZone)
+			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second)
+			startDateTime := timeNowInTimeZoneWithOffset
+			endDateTime = timeNowInTimeZoneWithOffset.Add(4 * time.Minute)
+
+			policyStr := setSpecificDateScheduleDateTime(policyByte, timeZone, startDateTime, endDateTime)
+			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 		})
 
@@ -61,63 +71,37 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})
 
-		Context("and 1 instance initially", func() {
+		Context("with 1 instance initially", func() {
 			BeforeEach(func() {
 				initialInstanceCount = 1
 			})
 
-			It("should scale out", func() {
+			It("should scale", func() {
 				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
-				addURL := fmt.Sprintf("https://%s.%s?cmd=add&mode=normal&num=50000", appName, cfg.AppsDomain)
-				finishTime := time.Now().Add(totalTime)
-
-				var previousMemoryUsed, newMemoryUsed, quota uint64
+				By("Start schedule")
 				Eventually(func() int {
-					memoryAdded := false
-					// add memory if memory used < 70%
-					if previousMemoryUsed == 0 || float64(previousMemoryUsed)/float64(quota) < 0.7 {
-						status, _, err := helpers.Curl(cfg, "-k", "-s", addURL)
-						Expect(err).NotTo(HaveOccurred())
-						Expect(status).To(Equal(http.StatusOK))
-						memoryAdded = true
-					}
+					return runningInstances(appGUID, totalTime)
+				}, totalTime, 15*time.Second).Should(Equal(3))
 
-					remaining := finishTime.Sub(time.Now())
+				By("Within schedule")
+				jobRunTime := endDateTime.Sub(time.Now().In(location))
+				Consistently(func() int {
+					return runningInstances(appGUID, jobRunTime)
+				}, jobRunTime, 15*time.Second).Should(BeNumerically(">=", 2))
 
-					if memoryAdded {
-						// wait until memory bumps
-						Eventually(func() uint64 {
-							newMemoryUsed, quota = memoryUsed(appGUID, 0, remaining)
-							return newMemoryUsed
-						}, remaining, 15*time.Second).Should(BeNumerically(">", previousMemoryUsed))
-						previousMemoryUsed = newMemoryUsed
-					}
-
-					remaining = finishTime.Sub(time.Now())
-					return runningInstances(appGUID, remaining)
-				}, totalTime, 15*time.Second).Should(BeNumerically(">", initialInstanceCount))
-
-			})
-
-		})
-
-		Context("and 2 instances initially", func() {
-			BeforeEach(func() {
-				initialInstanceCount = 2
-			})
-
-			It("should scale in", func() {
-				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + time.Minute
-				finishTime := time.Now().Add(totalTime)
-
-				// make sure our threshold is < 60 MB
-				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
-				}, totalTime, 15*time.Second).Should(BeNumerically("<", 60*MB))
-
-				waitForNInstancesRunning(appGUID, initialInstanceCount-1, finishTime.Sub(time.Now()))
+				By("End schedule")
+				Eventually(func() int {
+					return runningInstances(appGUID, totalTime)
+				}, totalTime, 15*time.Second).Should(Equal(1))
 			})
 		})
-
 	})
+
 })
+
+func setSpecificDateScheduleDateTime(policyByte []byte, timeZone string, startDateTime time.Time, endDateTime time.Time) string {
+	dateTimeParseFormat := "2006-01-02T15:04"
+	startDateTimeStr := startDateTime.Format(dateTimeParseFormat)
+	endDateTimeStr := endDateTime.Format(dateTimeParseFormat)
+	return fmt.Sprintf(string(policyByte), timeZone, startDateTimeStr, endDateTimeStr)
+}
