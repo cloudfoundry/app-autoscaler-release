@@ -29,6 +29,8 @@ server.ssl.key-store=/var/vcap/data/certs/scheduler/server.p12
 server.ssl.key-alias=scheduler
 server.ssl.key-store-password=123456
 server.ssl.key-store-type=PKCS12
+server.ssl.trust-store=/var/vcap/data/certs/scheduler/cacerts
+server.ssl.trust-store-password=123456
 
 # Client key and trust store for communication with the scaling engine.
 client.ssl.key-store=/var/vcap/data/certs/scalingengine/client.p12
@@ -44,3 +46,10 @@ org.quartz.scheduler.instanceName=app-autoscaler
 # scheduler port
 server.port=<%=p('scheduler.port') %>
 
+spring.cloud.consul.discovery.serviceName=scheduler
+spring.cloud.consul.discovery.instanceId=scheduler
+spring.cloud.consul.discovery.heartbeat.enabled=true
+spring.cloud.consul.discovery.heartbeat.ttlValue=<%=p('scheduler.consul.ttl') %>
+spring.cloud.consul.discovery.hostname=
+
+spring.application.name=scheduler

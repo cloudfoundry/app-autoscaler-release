@@ -34,3 +34,4 @@ generate_cert servicebroker.service.cf.internal servicebroker_server
 # Generate client certificates for autoscaler components
 generate_cert metricscollector metricscollector_client
 generate_cert scalingengine scalingengine_client
+generate_cert scheduler scheduler_client
