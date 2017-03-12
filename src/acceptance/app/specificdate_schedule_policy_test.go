@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -44,17 +45,17 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	})
 
 	AfterEach(func() {
+		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteService).To(Exit(0))
-
-		appReport(appName, cfg.DefaultTimeoutDuration())
-		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 	})
 
 	Context("when scale out by schedule", func() {
 
 		JustBeforeEach(func() {
-			policyByte := readPolicyFromFile("../assets/file/policy/specificdate.json")
+			policyByte, err := ioutil.ReadFile("../assets/file/policy/specificdate.json")
+			Expect(err).NotTo(HaveOccurred())
 			timeZone := "GMT"
 			location, _ = time.LoadLocation(timeZone)
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second)
@@ -79,9 +80,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			It("should scale", func() {
 				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
 				By("Start schedule")
-				Eventually(func() int {
-					return runningInstances(appGUID, totalTime)
-				}, totalTime, 15*time.Second).Should(Equal(3))
+				waitForNInstancesRunning(appGUID, 3, totalTime)
 
 				By("Within schedule")
 				jobRunTime := endDateTime.Sub(time.Now().In(location))
@@ -90,9 +89,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 				}, jobRunTime, 15*time.Second).Should(BeNumerically(">=", 2))
 
 				By("End schedule")
-				Eventually(func() int {
-					return runningInstances(appGUID, totalTime)
-				}, totalTime, 15*time.Second).Should(Equal(1))
+				waitForNInstancesRunning(appGUID, 1, totalTime)
 			})
 		})
 	})

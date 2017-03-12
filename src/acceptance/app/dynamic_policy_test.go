@@ -42,11 +42,10 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	})
 
 	AfterEach(func() {
+		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteService).To(Exit(0))
-
-		appReport(appName, cfg.DefaultTimeoutDuration())
-		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 	})
 
 	Context("when scale by memoryused", func() {
