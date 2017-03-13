@@ -6,12 +6,12 @@ templates:
   config.json.erb: bin/config.json
   pre-start.erb: bin/pre-start
   dns_health_check.erb: bin/dns_health_check
-  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
-  apiserver_server.crt.erb: config/certs/apiserver_server.crt
-  apiserver_server.key.erb: config/certs/apiserver_server.key
-  scheduler-ca.crt.erb: config/certs/scheduler-ca.crt
-  scheduler_client.crt.erb: config/certs/scheduler_client.crt
-  scheduler_client.key.erb: config/certs/scheduler_client.key
+  apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
+  apiserver_server.crt.erb: config/certs/apiserver/server.crt
+  apiserver_server.key.erb: config/certs/apiserver/server.key
+  scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
+  scheduler_client.crt.erb: config/certs/scheduler/client.crt
+  scheduler_client.key.erb: config/certs/scheduler/client.key
 
 packages:
   - nodejs
@@ -24,16 +24,16 @@ properties:
   api_server.port:
     description: "Port where APIServer will run"
     default: 6100
-  api_server.tls.autoscaler.ca_cert:
-    description: "CA cert for communication to the autoscaler components"
-  api_server.tls.server.cert:
-    description: "Server cert for the api server"
-  api_server.tls.server.key:
-    description: "Private key for the api server"
-  api_server.scheduler_host:
+  api_server.ca_cert:
+    description: "PEM-encoded CA certificate"
+  api_server.server_cert:
+    description: "PEM-encoded server certificate"
+  api_server.server_key:
+    description: "PEM-encoded server key"
+  api_server.scheduler.host:
     description: "Host where scheduler is running"
     default: "scheduler.service.cf.internal"
-  api_server.scheduler_port:
+  api_server.scheduler.port:
     description: "Port where scheduler will listen"
     default: 6102
   api_server.scheduler.ca_cert:

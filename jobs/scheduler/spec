@@ -29,12 +29,6 @@ properties:
     description: "PEM-encoded server certificate"
   scheduler.server_key:
     description: "PEM-encoded server key"
-  scheduler.scalingengine.ca_cert:
-    description: "PEM-encoded CA certificate"
-  scheduler.scalingengine.client_cert:
-    description: "PEM-encoded client certificate"
-  scheduler.scalingengine.client_key:
-    description: "PEM-encoded client key"
   scheduler.job_reschedule_interval_millisecond:
     description: "Rescheduling interval for quartz job in milliseconds"
   scheduler.job_reschedule_maxcount:
@@ -47,6 +41,12 @@ properties:
   scheduler.scaling_engine.port:
     description: "Scaling Engine's port"
     default: 6104
+  scheduler.scaling_engine.ca_cert:
+    description: "PEM-encoded CA certificate"
+  scheduler.scaling_engine.client_cert:
+    description: "PEM-encoded client certificate"
+  scheduler.scaling_engine.client_key:
+    description: "PEM-encoded client key"
   scheduler.consul.ttl:
     description: "TTL timeout seconds"
     default: 20

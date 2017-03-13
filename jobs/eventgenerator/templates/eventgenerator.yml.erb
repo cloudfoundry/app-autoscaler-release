@@ -43,17 +43,17 @@ evaluator:
   trigger_array_channel_size: <%= p("eventgenerator.evaluator.trigger_array_channel_size") %>
 
 scalingEngine:
-  scaling_engine_url: https://<%= p("eventgenerator.scalingEngine.scaling_engine_host") %>:<%= p("eventgenerator.scalingEngine.scaling_engine_port") %>
+  scaling_engine_url: https://<%= p("eventgenerator.scaling_engine.host") %>:<%= p("eventgenerator.scaling_engine.port") %>
   tls:
-    key_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine_client.key
-    cert_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine_client.crt
-    ca_file: /var/vcap/jobs/eventgenerator/config/certs/autoscaler-ca.crt
+    key_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/client.key
+    cert_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/client.crt
+    ca_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/ca.crt
 metricCollector:
-  metric_collector_url: https://<%= p("eventgenerator.metricCollector.metric_collector_host") %>:<%= p("eventgenerator.metricCollector.metric_collector_port") %>
+  metric_collector_url: https://<%= p("eventgenerator.metricscollector.host") %>:<%= p("eventgenerator.metricscollector.port") %>
   tls:
-    key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector_client.key
-    cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector_client.crt
-    ca_file: /var/vcap/jobs/eventgenerator/config/certs/autoscaler-ca.crt
+    key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.key
+    cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.crt
+    ca_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/ca.crt
 
 lock:
   lock_ttl: <%= p("eventgenerator.lock.lock_ttl") %>

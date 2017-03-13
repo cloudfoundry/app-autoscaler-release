@@ -8,8 +8,8 @@
   db_port = p('binding_db.port')
   role = p_arr('binding_db.roles').find { |role| role['tag'] == 'bindingdb' or role['tag'] == 'default'} 
   database = p_arr('binding_db.databases').find { |database| database['tag'] == 'bindingdb' or database['tag'] == 'default'} 
-  apiserver_host = p('service_broker.api_server_host')
-  apiserver_port = p('service_broker.api_server_port')
+  apiserver_host = p('service_broker.api_server.host')
+  apiserver_port = p('service_broker.api_server.port')
   params = {
     'port' => p('service_broker.port'),
     'username' => p('service_broker.username'),
@@ -20,12 +20,19 @@
        'idleTimeout' => p('service_broker.db_config.idle_timeout'),
        'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
      },
-    'apiServerUri' => "https://" + apiserver_host + ":"+ apiserver_port.to_s,
+    'apiserver' => {
+        'uri' => "https://" + apiserver_host + ":"+ apiserver_port.to_s,
+        'tls' => {
+            'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/apiserver/client.key",
+            'certFile' => "/var/vcap/jobs/servicebroker/config/certs/apiserver/client.crt",
+            'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/apiserver/ca.crt",
+        },
+    },
     'httpRequestTimeout' => p('service_broker.http_request_timeout'),
     'tls' => {
-        'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker_server.key",
-        'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker_server.crt",
-        'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/autoscaler-ca.crt",
+        'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.key",
+        'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
+        'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
     },
   }
 %>
