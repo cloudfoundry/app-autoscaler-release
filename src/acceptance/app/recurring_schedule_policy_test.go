@@ -2,12 +2,13 @@ package app
 
 import (
 	"acceptance/config"
-	"fmt"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
+
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -16,7 +17,7 @@ import (
 
 type days string
 
-const(
+const (
 	daysOfMonth days = "days_of_month"
 	daysOfWeek       = "days_of_week"
 )
@@ -41,7 +42,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		initialInstanceCount = 1
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
-		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", cfg.NodeMemoryLimit, "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
+		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", fmt.Sprintf("%dM", cfg.NodeMemoryLimit), "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createApp).To(Exit(0), "failed creating app")
 
 		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeout)
@@ -85,7 +86,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			})
 
 			It("should scale", func() {
-				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
+				totalTime := time.Duration(interval*2)*time.Second + 2*time.Minute
 
 				By("setting to initial_min_instance_count")
 				waitForNInstancesRunning(appGUID, 3, totalTime)
@@ -113,7 +114,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			})
 
 			It("should scale", func() {
-				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
+				totalTime := time.Duration(interval*2)*time.Second + 2*time.Minute
 
 				By("setting to initial_min_instance_count")
 				waitForNInstancesRunning(appGUID, 3, totalTime)
@@ -140,13 +141,12 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 func getStartAndEndTime(location *time.Location) (time.Time, time.Time) {
 	// Since the validation of time could fail if spread over two days and will result in acceptance test failure
 	// Need to fix dates in that case.
-	jobDuration := 4 * time.Minute;
+	jobDuration := 4 * time.Minute
 	offset := 70 * time.Second
 	startTime := time.Now().In(location).Add(offset).Truncate(time.Minute)
 
-
 	if startTime.Day() != startTime.Add(jobDuration).Day() {
-		startTime = startTime.Add(jobDuration).Truncate(24*time.Hour)
+		startTime = startTime.Add(jobDuration).Truncate(24 * time.Hour)
 	}
 
 	endTime := startTime.Add(jobDuration)

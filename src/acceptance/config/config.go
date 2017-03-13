@@ -40,12 +40,12 @@ type Config struct {
 	NodejsBuildpackName          string  `json:"nodejs_buildpack_name"`
 	NamePrefix                   string  `json:"name_prefix"`
 
-	ServiceName    string `json:"service_name"`
-	ServicePlan    string `json:"service_plan"`
-	ReportInterval int    `json:"report_interval"`
+	ServiceName       string `json:"service_name"`
+	ServicePlan       string `json:"service_plan"`
+	AggregateInterval int    `json:"aggregate_interval"`
 
-	CfJavaTimeout   int    `json:"cf_java_timeout"`
-	NodeMemoryLimit string `json:"node_memory_limit"`
+	CfJavaTimeout   int `json:"cf_java_timeout"`
+	NodeMemoryLimit int `json:"node_memory_limit"`
 }
 
 var defaults = Config{
@@ -66,8 +66,8 @@ var defaults = Config{
 	ArtifactsDirectory:           filepath.Join("..", "results"),
 	NamePrefix:                   "ASATS",
 
-	CfJavaTimeout:   10, // minutes
-	NodeMemoryLimit: "128M",
+	CfJavaTimeout:   10,  // minutes
+	NodeMemoryLimit: 128, // MB
 }
 
 func LoadConfig(t *testing.T) *Config {
@@ -110,8 +110,8 @@ func validate(t *testing.T, c *Config) {
 		t.Fatal("missing configuration 'service_plan'")
 	}
 
-	if c.ReportInterval == 0 {
-		t.Fatal("missing configuration 'report_interval'")
+	if c.AggregateInterval == 0 {
+		t.Fatal("missing configuration 'aggregate_interval'")
 	}
 }
 
@@ -169,7 +169,7 @@ func (c Config) GetScaledTimeout(timeout time.Duration) time.Duration {
 	return time.Duration(float64(timeout) * c.TimeoutScale)
 }
 
-func (c *Config) GetNodeMemoryLimit() string {
+func (c *Config) GetNodeMemoryLimit() int {
 	return c.NodeMemoryLimit
 }
 
