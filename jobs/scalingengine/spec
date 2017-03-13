@@ -5,9 +5,9 @@ templates:
   scalingengine_ctl: bin/scalingengine_ctl
   scalingengine.yml.erb: config/scalingengine.yml
   dns_health_check.erb: bin/dns_health_check
-  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
-  scalingengine_server.crt.erb: config/certs/scalingengine_server.crt
-  scalingengine_server.key.erb: config/certs/scalingengine_server.key
+  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
+  scalingengine_server.crt.erb: config/certs/scalingengine/server.crt
+  scalingengine_server.key.erb: config/certs/scalingengine/server.key
 
 packages:
   - java
@@ -72,12 +72,12 @@ properties:
   scalingengine.server.port:
     description: "the listening port of server"
     default: 6104
-  scalingengine.tls.autoscaler.ca_cert:
-    description: "CA cert for communication to the autoscaler components"
-  scalingengine.tls.server.cert:
-    description: "Server cert for the scaligengine"
-  scalingengine.tls.server.key:
-    description: "Private key for the scalingengine"
+  scalingengine.ca_cert:
+    description: "PEM-encoded CA certificate"
+  scalingengine.server_cert:
+    description: "PEM-encoded server certificate"
+  scalingengine.server_key:
+    description: "PEM-encoded server key"
   scalingengine.synchronizer.active_schedule_sync_interval:
     description: "the time interval to synchronize the active schedulesr"
     default: 600s

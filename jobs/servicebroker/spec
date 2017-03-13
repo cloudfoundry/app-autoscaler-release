@@ -7,9 +7,12 @@ templates:
   config.json.erb: bin/config.json
   pre-start.erb: bin/pre-start
   dns_health_check.erb: bin/dns_health_check
-  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
-  servicebroker_server.crt.erb: config/certs/servicebroker_server.crt
-  servicebroker_server.key.erb: config/certs/servicebroker_server.key
+  servicebroker_ca.crt.erb: config/certs/servicebroker/ca.crt
+  servicebroker_server.crt.erb: config/certs/servicebroker/server.crt
+  servicebroker_server.key.erb: config/certs/servicebroker/server.key
+  apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
+  apiserver_client.crt.erb: config/certs/apiserver/client.crt
+  apiserver_client.key.erb: config/certs/apiserver/client.key
 
 packages:
   - nodejs
@@ -22,18 +25,24 @@ properties:
   service_broker.port:
     description: "Port where servicebroker will run"
     default: 6101
-  service_broker.tls.autoscaler.ca_cert:
-    description: "CA cert for communication to the autoscaler components"
-  service_broker.tls.server.cert:
-    description: "Server cert for the service broker"
-  service_broker.tls.server.key:
-    description: "Private key for the service broker"
-  service_broker.api_server_host:
+  service_broker.ca_cert:
+    description: "PEM-encoded CA certificate"
+  service_broker.server_cert:
+    description: "PEM-encoded server certificate"
+  service_broker.server_key:
+    description: "PEM-encoded server key"
+  service_broker.api_server.host:
     description: "Host where APIserver is running"
     default: "apiserver.service.cf.internal"
-  service_broker.api_server_port:
+  service_broker.api_server.port:
     description: "Port where APIserver will listen"
     default: 6100
+  service_broker.api_server.ca_cert:
+    description: "PEM-encoded CA certificate"
+  service_broker.api_server.client_cert:
+    description: "PEM-encoded client certificate"
+  service_broker.api_server.client_key:
+    description: "PEM-encoded client key"
   service_broker.username:
     description: "username to authenticate with service broker"
   service_broker.password:

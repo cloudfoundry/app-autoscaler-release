@@ -35,3 +35,4 @@ generate_cert servicebroker.service.cf.internal servicebroker_server
 generate_cert metricscollector metricscollector_client
 generate_cert scalingengine scalingengine_client
 generate_cert scheduler scheduler_client
+generate_cert apiserver apiserver_client

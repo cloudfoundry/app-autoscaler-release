@@ -4,11 +4,12 @@ templates:
   pre-start.erb: bin/pre-start
   eventgenerator_ctl: bin/eventgenerator_ctl
   eventgenerator.yml.erb: config/eventgenerator.yml
-  autoscaler-ca.crt.erb: config/certs/autoscaler-ca.crt
-  metricscollector_client.crt.erb: config/certs/metricscollector_client.crt
-  metricscollector_client.key.erb: config/certs/metricscollector_client.key
-  scalingengine_client.crt.erb: config/certs/scalingengine_client.crt
-  scalingengine_client.key.erb: config/certs/scalingengine_client.key
+  metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
+  metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
+  metricscollector_client.key.erb: config/certs/metricscollector/client.key
+  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
+  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
+  scalingengine_client.key.erb: config/certs/scalingengine/client.key
 
 packages:
   - java
@@ -71,36 +72,39 @@ properties:
     description: "the size of the trigger array channel"
     default: 200
   
-  eventgenerator.scalingEngine.scaling_engine_host:
+  eventgenerator.scaling_engine.host:
     description: "Host where the scaling engine is running"
     default: "scalingengine.service.cf.internal"
 
-  eventgenerator.scalingEngine.scaling_engine_port:
+  eventgenerator.scaling_engine.port:
     description: "Port where the scaling engine will listen"
     default: 6104
 
-  eventgenerator.metricCollector.metric_collector_host:
+  eventgenerator.scaling_engine.ca_cert:
+    description: "PEM-encoded CA certificate"
+
+  eventgenerator.scaling_engine.client_cert:
+    description: "PEM-encoded client certificate"
+
+  eventgenerator.scaling_engine.client_key:
+    description: "PEM-encoded client key"
+
+  eventgenerator.metricscollector.host:
     description: "Host where the metrics collector is running"
     default: "metricscollector.service.cf.internal"
 
-  eventgenerator.metricCollector.metric_collector_port:
+  eventgenerator.metricscollector.port:
     description: "Port where the metrics collector will listen"
     default: 6103
 
-  eventgenerator.tls.autoscaler.ca_cert:
-    description: "CA cert for communication to the autoscaler components"
+  eventgenerator.metricscollector.ca_cert:
+    description: "PEM-encoded CA certificate"
 
-  eventgenerator.tls.client_metricscollector.cert:
-    description: "Client cert for communicating with metricscollector."
+  eventgenerator.metricscollector.client_cert:
+    description: "PEM-encoded client certificate"
 
-  eventgenerator.tls.client_metricscollector.key:
-    description: "Client key for communicating with metricscollector."
-
-  eventgenerator.tls.client_scalingengine.cert:
-    description: "Client cert for communicating with scalingengine."
-
-  eventgenerator.tls.client_scalingengine.key:
-    description: "Client key for communicating with scalingengine."
+  eventgenerator.metricscollector.client_key:
+    description: "PEM-encoded client key"
 
   eventgenerator.lock.lock_ttl:
     description: "consul lock ttl duration"

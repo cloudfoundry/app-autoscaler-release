@@ -9,8 +9,8 @@
   db_port = p('policy_db.port')
   role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'} 
   database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default'} 
-  scheduler_host = p('api_server.scheduler_host')
-  scheduler_port = p('api_server.scheduler_port')
+  scheduler_host = p('api_server.scheduler.host')
+  scheduler_port = p('api_server.scheduler.port')
   params = {
     'port' => p('api_server.port'),
     'db' => {
@@ -22,15 +22,15 @@
     'scheduler' => {
        'uri' => "https://" + scheduler_host + ":" + scheduler_port.to_s,
        'tls' => {
-           'keyFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler_client.key",
-           'certFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler_client.crt",
-           'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler-ca.crt"
+           'keyFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler/client.key",
+           'certFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler/client.crt",
+           'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler/ca.crt"
        },
     },
     'tls' => {
-        'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver_server.key",
-        'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver_server.crt",
-        'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/autoscaler-ca.crt"
+        'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.key",
+        'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.crt",
+        'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/ca.crt"
     },
   }
 %>

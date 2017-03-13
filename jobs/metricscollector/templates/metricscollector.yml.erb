@@ -31,9 +31,9 @@ cf:
 server:
   port:  <%= p("metricscollector.server.port") %>
   tls:
-    key_file: /var/vcap/jobs/metricscollector/config/certs/metricscollector_server.key
-    cert_file: /var/vcap/jobs/metricscollector/config/certs/metricscollector_server.crt
-    ca_file: /var/vcap/jobs/metricscollector/config/certs/autoscaler-ca.crt
+    key_file: /var/vcap/jobs/metricscollector/config/certs/metricscollector/server.key
+    cert_file: /var/vcap/jobs/metricscollector/config/certs/metricscollector/server.crt
+    ca_file: /var/vcap/jobs/metricscollector/config/certs/metricscollector/ca.crt
 
 logging:
   level: <%= p("metricscollector.logging.level") %>

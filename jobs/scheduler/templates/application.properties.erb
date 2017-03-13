@@ -42,6 +42,7 @@ client.ssl.protocol=TLSv1.2
 
 #Quartz
 org.quartz.scheduler.instanceName=app-autoscaler
+org.quartz.scheduler.instanceId=<%= spec.id %>
 
 # scheduler port
 server.port=<%=p('scheduler.port') %>
