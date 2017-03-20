@@ -10,15 +10,6 @@
       "operator": "<",
       "cool_down_secs": 60,
       "adjustment": "-1"
-    },
-    {
-      "metric_type": "memoryused",
-      "stat_window_secs": 60,
-      "breach_duration_secs": 60,
-      "threshold": 70,
-      "operator": ">=",
-      "cool_down_secs": 60,
-      "adjustment": "+1"
     }
   ]
 }
