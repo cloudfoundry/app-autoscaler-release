@@ -25,6 +25,9 @@ files:
 - app-autoscaler/src/code.cloudfoundry.org/consuladapter/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/lager/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/locket/*.go # gosub
+- app-autoscaler/src/code.cloudfoundry.org/runtimeschema/metric/*.go # gosub
+- app-autoscaler/src/github.com/cloudfoundry/dropsonde/metric_sender/*.go # gosub
+- app-autoscaler/src/github.com/cloudfoundry/dropsonde/metrics/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/noaa/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/noaa/consumer/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/noaa/consumer/internal/*.go # gosub
@@ -36,6 +39,8 @@ files:
 - app-autoscaler/src/github.com/gorilla/mux/*.go # gosub
 - app-autoscaler/src/github.com/gorilla/websocket/*.go # gosub
 - app-autoscaler/src/github.com/hashicorp/consul/api/*.go # gosub
+- app-autoscaler/src/github.com/hashicorp/consul/vendor/github.com/hashicorp/go-cleanhttp/*.go # gosub
+- app-autoscaler/src/github.com/hashicorp/consul/vendor/github.com/hashicorp/serf/coordinate/*.go # gosub
 - app-autoscaler/src/github.com/lib/pq/*.go # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/*.go # gosub
 - app-autoscaler/src/github.com/nu7hatch/gouuid/*.go # gosub
