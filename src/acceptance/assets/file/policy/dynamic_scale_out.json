@@ -1,0 +1,15 @@
+{
+  "instance_min_count": 1,
+  "instance_max_count": 2,
+  "scaling_rules": [
+    {
+      "metric_type": "memoryused",
+      "stat_window_secs": 60,
+      "breach_duration_secs": 60,
+      "threshold": 30,
+      "operator": ">=",
+      "cool_down_secs": 60,
+      "adjustment": "+1"
+    }
+  ]
+}

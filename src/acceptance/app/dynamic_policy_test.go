@@ -2,24 +2,24 @@ package app
 
 import (
 	"acceptance/config"
-	"acceptance/helpers"
-	"fmt"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 )
 
 var _ = Describe("AutoScaler dynamic policy", func() {
-	var appName string
-	var appGUID string
-	var instanceName string
-	var initialInstanceCount int
+	var (
+		appName              string
+		appGUID              string
+		instanceName         string
+		initialInstanceCount int
+		policyFileName       string
+	)
 
 	BeforeEach(func() {
 		instanceName = generator.PrefixedRandomName("autoscaler", "service")
@@ -51,7 +51,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	Context("when scale by memoryused", func() {
 
 		JustBeforeEach(func() {
-			bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/dynamic.json").Wait(cfg.DefaultTimeoutDuration())
+			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyFileName).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 		})
 
@@ -63,39 +63,19 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("and 1 instance initially", func() {
 			BeforeEach(func() {
 				initialInstanceCount = 1
+				policyFileName = "../assets/file/policy/dynamic_scale_out.json"
 			})
 
 			It("should scale out", func() {
 				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
-				addURL := fmt.Sprintf("https://%s.%s?cmd=add&mode=normal&num=50000", appName, cfg.AppsDomain)
 				finishTime := time.Now().Add(totalTime)
 
-				var previousMemoryUsed, newMemoryUsed, quota uint64
-				Eventually(func() int {
-					memoryAdded := false
-					// add memory if memory used < 70%
-					if previousMemoryUsed == 0 || float64(previousMemoryUsed)/float64(quota) < 0.7 {
-						status, _, err := helpers.Curl(cfg, "-k", "-s", addURL)
-						Expect(err).NotTo(HaveOccurred())
-						Expect(status).To(Equal(http.StatusOK))
-						memoryAdded = true
-					}
+				// make sure our threshold is >= 30 MB
+				Eventually(func() uint64 {
+					return averageMemoryUsedByInstance(appGUID, totalTime)
+				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 30*MB))
 
-					remaining := finishTime.Sub(time.Now())
-
-					if memoryAdded {
-						// wait until memory bumps
-						Eventually(func() uint64 {
-							newMemoryUsed, quota = memoryUsed(appGUID, 0, remaining)
-							return newMemoryUsed
-						}, remaining, 15*time.Second).Should(BeNumerically(">", previousMemoryUsed))
-						previousMemoryUsed = newMemoryUsed
-					}
-
-					remaining = finishTime.Sub(time.Now())
-					return runningInstances(appGUID, remaining)
-				}, totalTime, 15*time.Second).Should(BeNumerically(">", initialInstanceCount))
-
+				waitForNInstancesRunning(appGUID, initialInstanceCount+1, finishTime.Sub(time.Now()))
 			})
 
 		})
@@ -103,6 +83,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("and 2 instances initially", func() {
 			BeforeEach(func() {
 				initialInstanceCount = 2
+				policyFileName = "../assets/file/policy/dynamic_scale_in.json"
 			})
 
 			It("should scale in", func() {
