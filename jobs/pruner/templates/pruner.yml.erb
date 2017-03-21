@@ -43,3 +43,7 @@ scaling_engine_db:
   refresh_interval: <%= p("pruner.scaling_engine_db.refresh_interval") %>
   cutoff_days: <%= p("pruner.scaling_engine_db.cutoff_days") %>
 
+lock:
+  lock_ttl: <%= p("pruner.lock.lock_ttl") %>
+  lock_retry_interval: <%= p("pruner.lock.lock_retry_interval") %>
+  consul_cluster_config: <%= p("pruner.lock.consul_cluster_config") %>
