@@ -14,23 +14,31 @@ import (
 	"time"
 )
 
-var _ = Describe("AutoScaler specific date schedule policy", func() {
+type days string
+
+const(
+	daysOfMonth days = "days_of_month"
+	daysOfWeek       = "days_of_week"
+)
+
+var _ = Describe("AutoScaler recurring schedule policy", func() {
 	var (
 		appName              string
 		appGUID              string
 		instanceName         string
 		initialInstanceCount int
+		daysOfMonthOrWeek    days
 		location             *time.Location
-		endDateTime          time.Time
+		startTime            time.Time
+		endTime              time.Time
 	)
 
 	BeforeEach(func() {
 		instanceName = generator.PrefixedRandomName("autoscaler", "service")
 		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
-	})
 
-	JustBeforeEach(func() {
+		initialInstanceCount = 1
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
 		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", cfg.NodeMemoryLimit, "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
@@ -48,18 +56,17 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		Expect(deleteService).To(Exit(0))
 	})
 
-	Context("when scale out by schedule", func() {
+	Context("when scale out by recurring schedule", func() {
 
 		JustBeforeEach(func() {
-			policyByte, err := ioutil.ReadFile("../assets/file/policy/specificdate.json")
-			Expect(err).NotTo(HaveOccurred())
 			timeZone := "GMT"
 			location, _ = time.LoadLocation(timeZone)
-			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
-			startDateTime := timeNowInTimeZoneWithOffset
-			endDateTime = timeNowInTimeZoneWithOffset.Add(4 * time.Minute)
+			startTime, endTime = getStartAndEndTime(location)
 
-			policyStr := setSpecificDateScheduleDateTime(policyByte, timeZone, startDateTime, endDateTime)
+			policyByte, err := ioutil.ReadFile("../assets/file/policy/recurringschedule.json")
+			Expect(err).NotTo(HaveOccurred())
+
+			policyStr := setRecurringScheduleDateTime(policyByte, timeZone, startTime, endTime, daysOfMonthOrWeek)
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 
@@ -72,23 +79,52 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})
 
-		Context("with 1 instance initially", func() {
+		Context("with days of month", func() {
 			BeforeEach(func() {
-				initialInstanceCount = 1
+				daysOfMonthOrWeek = daysOfMonth
 			})
 
 			It("should scale", func() {
 				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
+
 				By("setting to initial_min_instance_count")
 				waitForNInstancesRunning(appGUID, 3, totalTime)
 
 				By("setting schedule's instance_min_count")
-				jobRunTime := endDateTime.Sub(time.Now().In(location))
+				jobRunTime := endTime.Sub(time.Now().In(location))
 				Eventually(func() int {
 					return runningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-				jobRunTime = endDateTime.Sub(time.Now().In(location))
+				jobRunTime = endTime.Sub(time.Now().In(location))
+				Consistently(func() int {
+					return runningInstances(appGUID, jobRunTime)
+				}, jobRunTime, 15*time.Second).Should(Equal(2))
+
+				By("setting to default instance_min_count")
+				waitForNInstancesRunning(appGUID, 1, totalTime)
+			})
+
+		})
+
+		Context("with days of week", func() {
+			BeforeEach(func() {
+				daysOfMonthOrWeek = daysOfWeek
+			})
+
+			It("should scale", func() {
+				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
+
+				By("setting to initial_min_instance_count")
+				waitForNInstancesRunning(appGUID, 3, totalTime)
+
+				By("setting schedule's instance_min_count")
+				jobRunTime := endTime.Sub(time.Now().In(location))
+				Eventually(func() int {
+					return runningInstances(appGUID, jobRunTime)
+				}, jobRunTime, 15*time.Second).Should(Equal(2))
+
+				jobRunTime = endTime.Sub(time.Now().In(location))
 				Consistently(func() int {
 					return runningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
@@ -101,9 +137,35 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 
 })
 
-func setSpecificDateScheduleDateTime(policyByte []byte, timeZone string, startDateTime time.Time, endDateTime time.Time) string {
-	dateTimeParseFormat := "2006-01-02T15:04"
-	startDateTimeStr := startDateTime.Format(dateTimeParseFormat)
-	endDateTimeStr := endDateTime.Format(dateTimeParseFormat)
-	return fmt.Sprintf(string(policyByte), timeZone, startDateTimeStr, endDateTimeStr)
+func getStartAndEndTime(location *time.Location) (time.Time, time.Time) {
+	// Since the validation of time could fail if spread over two days and will result in acceptance test failure
+	// Need to fix dates in that case.
+	jobDuration := 4 * time.Minute;
+	offset := 70 * time.Second
+	startTime := time.Now().In(location).Add(offset).Truncate(time.Minute)
+
+
+	if startTime.Day() != startTime.Add(jobDuration).Day() {
+		startTime = startTime.Add(jobDuration).Truncate(24*time.Hour)
+	}
+
+	endTime := startTime.Add(jobDuration)
+	return startTime, endTime
+}
+
+func setRecurringScheduleDateTime(policyByte []byte, timeZone string, startTime time.Time, endTime time.Time, daysOfMonthOrWeek days) string {
+	var day int
+	timeParseFormat := "15:04"
+	startTimeStr := startTime.Format(timeParseFormat)
+	endTimeStr := endTime.Format(timeParseFormat)
+	if daysOfMonthOrWeek == daysOfMonth {
+		day = startTime.Day()
+	} else {
+		day = int(startTime.Weekday())
+		// 0 here is Sunday, scheduler expects 7 for Sunday
+		if day == 0 {
+			day = 7
+		}
+	}
+	return fmt.Sprintf(string(policyByte), timeZone, startTimeStr, endTimeStr, daysOfMonthOrWeek, day)
 }
