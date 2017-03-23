@@ -17,7 +17,7 @@
     "recurring_schedule": [{
       "start_time": "%s",
       "end_time": "%s",
-      "days_of_week": [
+      "%s": [
         %d
       ],
       "instance_min_count": 2,

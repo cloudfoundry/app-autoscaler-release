@@ -14,16 +14,23 @@ import (
 	"time"
 )
 
+type days string
+
+const(
+	daysOfMonth days = "days_of_month"
+	daysOfWeek       = "days_of_week"
+)
+
 var _ = Describe("AutoScaler recurring schedule policy", func() {
 	var (
 		appName              string
 		appGUID              string
 		instanceName         string
-		dayOfMonthOrWeek     string
+		initialInstanceCount int
+		daysOfMonthOrWeek    days
 		location             *time.Location
 		startTime            time.Time
 		endTime              time.Time
-		policyByte           []byte
 	)
 
 	BeforeEach(func() {
@@ -31,7 +38,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
 
-		initialInstanceCount := 1
+		initialInstanceCount = 1
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
 		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", cfg.NodeMemoryLimit, "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
@@ -40,9 +47,6 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeout)
 		Expect(guid).To(Exit(0))
 		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
-
-		Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
-		waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 	})
 
 	AfterEach(func() {
@@ -59,9 +63,15 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			location, _ = time.LoadLocation(timeZone)
 			startTime, endTime = getStartAndEndTime(location)
 
-			policyStr := setRecurringScheduleDateTime(policyByte, timeZone, startTime, endTime, dayOfMonthOrWeek)
+			policyByte, err := ioutil.ReadFile("../assets/file/policy/recurringschedule.json")
+			Expect(err).NotTo(HaveOccurred())
+
+			policyStr := setRecurringScheduleDateTime(policyByte, timeZone, startTime, endTime, daysOfMonthOrWeek)
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+
+			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
+			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		})
 
 		AfterEach(func() {
@@ -69,52 +79,57 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})
 
-		Context("with day of month", func() {
+		Context("with days of month", func() {
 			BeforeEach(func() {
-				var err error
-				dayOfMonthOrWeek = "dom"
-				policyByte, err = ioutil.ReadFile("../assets/file/policy/recurringschedule_dom.json")
-				Expect(err).NotTo(HaveOccurred())
-
+				daysOfMonthOrWeek = daysOfMonth
 			})
 
 			It("should scale", func() {
 				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
-				By("Start schedule")
+
+				By("setting to initial_min_instance_count")
 				waitForNInstancesRunning(appGUID, 3, totalTime)
 
-				By("Within schedule")
+				By("setting schedule's instance_min_count")
 				jobRunTime := endTime.Sub(time.Now().In(location))
+				Eventually(func() int {
+					return runningInstances(appGUID, jobRunTime)
+				}, jobRunTime, 15*time.Second).Should(Equal(2))
+
+				jobRunTime = endTime.Sub(time.Now().In(location))
 				Consistently(func() int {
 					return runningInstances(appGUID, jobRunTime)
-				}, jobRunTime, 15*time.Second).Should(BeNumerically(">=", 2))
+				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-				By("End schedule")
+				By("setting to default instance_min_count")
 				waitForNInstancesRunning(appGUID, 1, totalTime)
 			})
 
 		})
 
-		Context("with day of week", func() {
+		Context("with days of week", func() {
 			BeforeEach(func() {
-				var err error
-				dayOfMonthOrWeek = "dow"
-				policyByte, err = ioutil.ReadFile("../assets/file/policy/recurringschedule_dow.json")
-				Expect(err).NotTo(HaveOccurred())
+				daysOfMonthOrWeek = daysOfWeek
 			})
 
 			It("should scale", func() {
 				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
-				By("Start schedule")
+
+				By("setting to initial_min_instance_count")
 				waitForNInstancesRunning(appGUID, 3, totalTime)
 
-				By("Within schedule")
+				By("setting schedule's instance_min_count")
 				jobRunTime := endTime.Sub(time.Now().In(location))
+				Eventually(func() int {
+					return runningInstances(appGUID, jobRunTime)
+				}, jobRunTime, 15*time.Second).Should(Equal(2))
+
+				jobRunTime = endTime.Sub(time.Now().In(location))
 				Consistently(func() int {
 					return runningInstances(appGUID, jobRunTime)
-				}, jobRunTime, 15*time.Second).Should(BeNumerically(">=", 2))
+				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-				By("End schedule")
+				By("setting to default instance_min_count")
 				waitForNInstancesRunning(appGUID, 1, totalTime)
 			})
 		})
@@ -138,12 +153,12 @@ func getStartAndEndTime(location *time.Location) (time.Time, time.Time) {
 	return startTime, endTime
 }
 
-func setRecurringScheduleDateTime(policyByte []byte, timeZone string, startTime time.Time, endTime time.Time, dayOfMonthOrWeek string) string {
+func setRecurringScheduleDateTime(policyByte []byte, timeZone string, startTime time.Time, endTime time.Time, daysOfMonthOrWeek days) string {
 	var day int
 	timeParseFormat := "15:04"
 	startTimeStr := startTime.Format(timeParseFormat)
 	endTimeStr := endTime.Format(timeParseFormat)
-	if dayOfMonthOrWeek == "dom" {
+	if daysOfMonthOrWeek == daysOfMonth {
 		day = startTime.Day()
 	} else {
 		day = int(startTime.Weekday())
@@ -152,5 +167,5 @@ func setRecurringScheduleDateTime(policyByte []byte, timeZone string, startTime 
 			day = 7
 		}
 	}
-	return fmt.Sprintf(string(policyByte), timeZone, startTimeStr, endTimeStr, day)
+	return fmt.Sprintf(string(policyByte), timeZone, startTimeStr, endTimeStr, daysOfMonthOrWeek, day)
 }
