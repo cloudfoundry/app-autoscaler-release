@@ -39,9 +39,6 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeout)
 		Expect(guid).To(Exit(0))
 		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
-
-		Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
-		waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 	})
 
 	AfterEach(func() {
@@ -65,6 +62,9 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			policyStr := setSpecificDateScheduleDateTime(policyByte, timeZone, startDateTime, endDateTime)
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+
+			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
+			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		})
 
 		AfterEach(func() {
@@ -79,16 +79,21 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 
 			It("should scale", func() {
 				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
-				By("Start schedule")
+				By("setting to initial_min_instance_count")
 				waitForNInstancesRunning(appGUID, 3, totalTime)
 
-				By("Within schedule")
+				By("setting schedule's instance_min_count")
 				jobRunTime := endDateTime.Sub(time.Now().In(location))
+				Eventually(func() int {
+					return runningInstances(appGUID, jobRunTime)
+				}, jobRunTime, 15*time.Second).Should(Equal(2))
+
+				jobRunTime = endDateTime.Sub(time.Now().In(location))
 				Consistently(func() int {
 					return runningInstances(appGUID, jobRunTime)
-				}, jobRunTime, 15*time.Second).Should(BeNumerically(">=", 2))
+				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-				By("End schedule")
+				By("setting to default instance_min_count")
 				waitForNInstancesRunning(appGUID, 1, totalTime)
 			})
 		})
