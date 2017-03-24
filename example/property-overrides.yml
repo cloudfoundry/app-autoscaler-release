@@ -33,6 +33,11 @@ service_broker_properties:
   username: username
   password: password
   http_request_timeout: 5000
+  catalog:
+    service_name: autoscaler
+    service_id: autoscaler-guid
+    service_plan_name: autoscaler-free-plan
+    service_plan_id: autoscaler-free-plan-id
   api_server:
     ca_cert: (( app_autoscaler_ca_cert ))
     client_cert: (( apiserver_client_cert ))
