@@ -4,7 +4,7 @@ name: servicebroker
 templates:
 
   servicebroker.erb: bin/servicebroker
-  config.json.erb: bin/config.json
+  config.json.erb: config/config.json
   pre-start.erb: bin/pre-start
   dns_health_check.erb: bin/dns_health_check
   servicebroker_ca.crt.erb: config/certs/servicebroker/ca.crt
@@ -13,6 +13,7 @@ templates:
   apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
   apiserver_client.crt.erb: config/certs/apiserver/client.crt
   apiserver_client.key.erb: config/certs/apiserver/client.key
+  catalog.json.erb: config/catalog.json
 
 packages:
   - nodejs
@@ -66,4 +67,11 @@ properties:
     description: "Port on which the bindingdb server will listen"
   binding_db.roles:
     description: "The list of database roles used in bindingdb database including name/password"
-
+  service_broker.catalog.service_name:
+    description: "Service Name"
+  service_broker.catalog.service_id:
+    description: "Service ID"
+  service_broker.catalog.service_plan_name: 
+    description: "Service Plan Name"
+  service_broker.catalog.service_plan_id: 
+    description: "Service Plan Id"

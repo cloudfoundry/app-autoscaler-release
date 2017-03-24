@@ -18,7 +18,7 @@ case $1 in
     cd /var/vcap/packages/servicebroker/
     PATH=/var/vcap/packages/nodejs/bin:$PATH
     export PATH
-    exec node lib/index.js -c /var/vcap/jobs/servicebroker/bin/config.json\
+    exec node lib/index.js -c /var/vcap/jobs/servicebroker/config/config.json\
       >>  $LOG_DIR/servicebroker.stdout.log \
       2>> $LOG_DIR/servicebroker.stderr.log
     ;;
