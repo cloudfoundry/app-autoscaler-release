@@ -1,0 +1,103 @@
+---
+packages:
+- name: golang1.7
+  version: 651d77736c6087be1ca1df72eb8e4d2e701778f9
+  fingerprint: 651d77736c6087be1ca1df72eb8e4d2e701778f9
+  sha1: 26bab0dee1b2e862b834e780d51c28e1f7ffe354
+  dependencies: []
+- name: db
+  version: 5eb59eeffe739dcf942a45cc0c6e06996cbd8f45
+  fingerprint: 5eb59eeffe739dcf942a45cc0c6e06996cbd8f45
+  sha1: ddc2c89ee297f737a405b6159bf9614fe0a019a6
+  dependencies: []
+- name: nodejs
+  version: 78d4ee5eeb7010fd7d15a1d2986992942940229f
+  fingerprint: 78d4ee5eeb7010fd7d15a1d2986992942940229f
+  sha1: 4c9279f3348109cfac14fe629fc09cb8f4297bcf
+  dependencies: []
+- name: common
+  version: 306e7eb1a8187457885ce91eb4bc22f5aed734e8
+  fingerprint: 306e7eb1a8187457885ce91eb4bc22f5aed734e8
+  sha1: 8d818cae247943ceafef7b6f068632f08124198b
+  dependencies: []
+- name: metricscollector
+  version: 29aa2e589f34e467e9d80760c62e32552ebbd9dc
+  fingerprint: 29aa2e589f34e467e9d80760c62e32552ebbd9dc
+  sha1: 4a3478b898537c113d1cfcd5895c6ac7fa5243fd
+  dependencies:
+  - golang1.7
+- name: scalingengine
+  version: e287d4dda62467d216cfcfb343ef15ba81b10f70
+  fingerprint: e287d4dda62467d216cfcfb343ef15ba81b10f70
+  sha1: a284c4a7ae88c467e4b5966b386c18e1ef0ac73d
+  dependencies:
+  - golang1.7
+- name: servicebroker
+  version: 75a6c49055bb2745cff3da8acd5d53b19436e987
+  fingerprint: 75a6c49055bb2745cff3da8acd5d53b19436e987
+  sha1: 871c52d6971a54d4066454432f4123b13901730a
+  dependencies: []
+- name: eventgenerator
+  version: 5e172027a3b2b56a7516c9cec89b5116db813b32
+  fingerprint: 5e172027a3b2b56a7516c9cec89b5116db813b32
+  sha1: 97ace39ff5abff115d6c5d1139b72c57ebe4b14f
+  dependencies:
+  - golang1.7
+- name: pruner
+  version: 2e5f83c03c068c0922fd16575c10a1b0ca0827ee
+  fingerprint: 2e5f83c03c068c0922fd16575c10a1b0ca0827ee
+  sha1: 8fdbffc3d4b0a23b11ddc7168efc3f191b240d0a
+  dependencies:
+  - golang1.7
+- name: apiserver
+  version: e92d7457e9a37d53ae5cb613f30cd891d930ddfa
+  fingerprint: e92d7457e9a37d53ae5cb613f30cd891d930ddfa
+  sha1: e2345f9610b40a631e9597627850435fa2195d12
+  dependencies: []
+- name: java
+  version: d6f4a8bb4e3bfb6c4f3121f231f1a0c569d7fdaf
+  fingerprint: d6f4a8bb4e3bfb6c4f3121f231f1a0c569d7fdaf
+  sha1: e3e3aa153ba4ab6fabbc26155449a05e06c0a4b7
+  dependencies: []
+- name: scheduler
+  version: affadb81d10d062596977eaa4f301c04a2d5e7d8
+  fingerprint: affadb81d10d062596977eaa4f301c04a2d5e7d8
+  sha1: 04c9b2bf25b984ff699a8bb418c9d6a80d524b5d
+  dependencies: []
+jobs:
+- name: metricscollector
+  version: 6acdb9d525d8818ad38479546f8bcd15be2d683e
+  fingerprint: 6acdb9d525d8818ad38479546f8bcd15be2d683e
+  sha1: 932e32f3c98e9a10524a90f5fc9449d3f4595b42
+- name: scalingengine
+  version: f19959cc38c6142f019ea82ab57b4de4b570aeff
+  fingerprint: f19959cc38c6142f019ea82ab57b4de4b570aeff
+  sha1: 104a57711e4af561810b3c11b5573dc79818c11d
+- name: servicebroker
+  version: 77d354e9d37a5b617dbe0081641279ad9ede1581
+  fingerprint: 77d354e9d37a5b617dbe0081641279ad9ede1581
+  sha1: 3faaa4809cd7467c9da7af5fcafe44a4647d3895
+- name: eventgenerator
+  version: fa282337b2b68dc80c7cdf7fab0fce43a037495a
+  fingerprint: fa282337b2b68dc80c7cdf7fab0fce43a037495a
+  sha1: 9ccf5e0208941591463102f4e8ecfb3c0f416524
+- name: pruner
+  version: 480130a24acdd8079c6955f8c61890cc2a8788c7
+  fingerprint: 480130a24acdd8079c6955f8c61890cc2a8788c7
+  sha1: 083d237c8551983a81574fa331b70644d389e10a
+- name: apiserver
+  version: 293462192638caaa30e88a358b5a972c8f079ef4
+  fingerprint: 293462192638caaa30e88a358b5a972c8f079ef4
+  sha1: f71f0b5b5de9bb179b5dcd9dacf33da4ebcf7e37
+- name: scheduler
+  version: d5176f098d7e30b22252eebc8da54964e5538f8f
+  fingerprint: d5176f098d7e30b22252eebc8da54964e5538f8f
+  sha1: 269f3fac36676a43d5dbbbf99c4942dcc5598bc3
+license:
+  version: 48b61b4116b8f3c1f4ac32fc3d3c5b7821d576b0
+  fingerprint: 48b61b4116b8f3c1f4ac32fc3d3c5b7821d576b0
+  sha1: 181fbb12c30ca806706daedc0af29d68cb4e946d
+commit_hash: 4ceb1899
+uncommitted_changes: true
+name: app-autoscaler
+version: 0.0.1
