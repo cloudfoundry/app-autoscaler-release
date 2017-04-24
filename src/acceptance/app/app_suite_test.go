@@ -170,7 +170,7 @@ func generateDynamicScaleOutPolicy(instanceMin, instanceMax int, threshold int64
 		MetricType:            "memoryused",
 		StatWindowSeconds:     interval,
 		BreachDurationSeconds: interval,
-		Threshold:             int64(threshold),
+		Threshold:             threshold,
 		Operator:              ">=",
 		CoolDownSeconds:       interval,
 		Adjustment:            "+1",
