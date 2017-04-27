@@ -18,14 +18,22 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
+type Days string
+
+const (
+	daysOfMonth Days = "days_of_month"
+	daysOfWeek       = "days_of_week"
+)
+
 type appSummary struct {
 	RunningInstances int `json:"running_instances"`
 }
 
 type ScalingPolicy struct {
-	InstanceMin  int            `json:"instance_min_count"`
-	InstanceMax  int            `json:"instance_max_count"`
-	ScalingRules []*ScalingRule `json:"scaling_rules"`
+	InstanceMin  int              `json:"instance_min_count"`
+	InstanceMax  int              `json:"instance_max_count"`
+	ScalingRules []*ScalingRule   `json:"scaling_rules,omitempty"`
+	Schedules    ScalingSchedules `json:"schedules,omitempty"`
 }
 
 type ScalingRule struct {
@@ -36,6 +44,30 @@ type ScalingRule struct {
 	Operator              string `json:"operator"`
 	CoolDownSeconds       int    `json:"cool_down_secs"`
 	Adjustment            string `json:"adjustment"`
+}
+
+type ScalingSchedules struct {
+	Timezone              string                  `json:"timezone"`
+	RecurringSchedules    []*RecurringSchedule    `json:"recurring_schedule,omitempty"`
+	SpecificDateSchedules []*SpecificDateSchedule `json:"specific_date,omitempty"`
+}
+
+type RecurringSchedule struct {
+	StartTime             string `json:"start_time"`
+	EndTime               string `json:"end_time"`
+	DaysOfWeek            []int  `json:"days_of_week,omitempty"`
+	DaysOfMonth           []int  `json:"days_of_month,omitempty"`
+	ScheduledInstanceMin  int    `json:"instance_min_count"`
+	ScheduledInstanceMax  int    `json:"instance_max_count"`
+	ScheduledInstanceInit int    `json:"initial_min_instance_count"`
+}
+
+type SpecificDateSchedule struct {
+	StartDateTime         string `json:"start_date_time"`
+	EndDateTime           string `json:"end_date_time"`
+	ScheduledInstanceMin  int    `json:"instance_min_count"`
+	ScheduledInstanceMax  int    `json:"instance_max_count"`
+	ScheduledInstanceInit int    `json:"initial_min_instance_count"`
 }
 
 const MB = 1024 * 1024
@@ -207,4 +239,103 @@ func generateDynamicScaleInPolicy(instanceMin, instanceMax int, threshold int64)
 	Expect(err).NotTo(HaveOccurred())
 
 	return string(bytes)
+}
+
+func generateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, threshold int64,
+	timezone string, startDateTime, endDateTime time.Time,
+	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
+
+	scalingInRule := ScalingRule{
+		MetricType:            "memoryused",
+		StatWindowSeconds:     interval,
+		BreachDurationSeconds: interval,
+		Threshold:             threshold,
+		Operator:              "<",
+		CoolDownSeconds:       interval,
+		Adjustment:            "-1",
+	}
+
+	specificDateSchedule := SpecificDateSchedule{
+		StartDateTime:         startDateTime.Format("2006-01-02T15:04"),
+		EndDateTime:           endDateTime.Format("2006-01-02T15:04"),
+		ScheduledInstanceMin:  scheduledInstanceMin,
+		ScheduledInstanceMax:  scheduledInstanceMax,
+		ScheduledInstanceInit: scheduledInstanceInit,
+	}
+
+	policy := ScalingPolicy{
+		InstanceMin:  instanceMin,
+		InstanceMax:  instanceMax,
+		ScalingRules: []*ScalingRule{&scalingInRule},
+		Schedules: ScalingSchedules{
+			Timezone:              timezone,
+			SpecificDateSchedules: []*SpecificDateSchedule{&specificDateSchedule},
+		},
+	}
+
+	bytes, err := json.Marshal(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(bytes)
+}
+
+func generateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, threshold int64,
+	timezone string, startTime, endTime time.Time, daysOfMonthOrWeek Days,
+	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
+
+	scalingInRule := ScalingRule{
+		MetricType:            "memoryused",
+		StatWindowSeconds:     interval,
+		BreachDurationSeconds: interval,
+		Threshold:             threshold,
+		Operator:              "<",
+		CoolDownSeconds:       interval,
+		Adjustment:            "-1",
+	}
+
+	recurringSchedule := RecurringSchedule{
+		StartTime:             startTime.Format("15:04"),
+		EndTime:               endTime.Format("15:04"),
+		ScheduledInstanceMin:  scheduledInstanceMin,
+		ScheduledInstanceMax:  scheduledInstanceMax,
+		ScheduledInstanceInit: scheduledInstanceInit,
+	}
+
+	if daysOfMonthOrWeek == daysOfMonth {
+		day := startTime.Day()
+		recurringSchedule.DaysOfMonth = []int{day}
+
+	} else {
+		day := int(startTime.Weekday())
+		if day == 0 {
+			day = 7
+		}
+		recurringSchedule.DaysOfWeek = []int{day}
+	}
+
+	policy := ScalingPolicy{
+		InstanceMin:  instanceMin,
+		InstanceMax:  instanceMax,
+		ScalingRules: []*ScalingRule{&scalingInRule},
+		Schedules: ScalingSchedules{
+			Timezone:           timezone,
+			RecurringSchedules: []*RecurringSchedule{&recurringSchedule},
+		},
+	}
+
+	bytes, err := json.Marshal(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(bytes)
+}
+
+func getStartAndEndTime(location *time.Location, offset, duration time.Duration) (time.Time, time.Time) {
+	// Since the validation of time could fail if spread over two days and will result in acceptance test failure
+	// Need to fix dates in that case.
+	startTime := time.Now().In(location).Add(offset).Truncate(time.Minute)
+	if startTime.Day() != startTime.Add(duration).Day() {
+		startTime = startTime.Add(duration).Truncate(24 * time.Hour)
+	}
+	endTime := startTime.Add(duration)
+	return startTime, endTime
 }
