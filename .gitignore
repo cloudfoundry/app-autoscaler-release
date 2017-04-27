@@ -3,7 +3,7 @@ config/private.yml
 releases/*.tgz
 releases/**/*.tgz
 dev_releases
-deployments
+manifests
 .blobs
 blobs
 .dev_builds
