@@ -9,17 +9,9 @@ import (
 	. "github.com/onsi/gomega/gexec"
 
 	"fmt"
-	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
-)
-
-type days string
-
-const (
-	daysOfMonth days = "days_of_month"
-	daysOfWeek       = "days_of_week"
 )
 
 var _ = Describe("AutoScaler recurring schedule policy", func() {
@@ -28,8 +20,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		appGUID              string
 		instanceName         string
 		initialInstanceCount int
-		daysOfMonthOrWeek    days
-		location             *time.Location
+		daysOfMonthOrWeek    Days
 		startTime            time.Time
 		endTime              time.Time
 	)
@@ -60,14 +51,11 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 	Context("when scale out by recurring schedule", func() {
 
 		JustBeforeEach(func() {
-			timeZone := "GMT"
-			location, _ = time.LoadLocation(timeZone)
-			startTime, endTime = getStartAndEndTime(location)
-
-			policyByte, err := ioutil.ReadFile("../assets/file/policy/recurringschedule.json")
+			location, err := time.LoadLocation("GMT")
 			Expect(err).NotTo(HaveOccurred())
+			startTime, endTime = getStartAndEndTime(location, 70*time.Second, 4*time.Minute)
+			policyStr := generateDynamicAndRecurringSchedulePolicy(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 
-			policyStr := setRecurringScheduleDateTime(policyByte, timeZone, startTime, endTime, daysOfMonthOrWeek)
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 
@@ -86,24 +74,23 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			})
 
 			It("should scale", func() {
-				totalTime := time.Duration(interval*2)*time.Second + 2*time.Minute
-
+				waitTime := startTime.Sub(time.Now()) + 1*time.Minute
 				By("setting to initial_min_instance_count")
-				waitForNInstancesRunning(appGUID, 3, totalTime)
+				waitForNInstancesRunning(appGUID, 3, waitTime)
 
 				By("setting schedule's instance_min_count")
-				jobRunTime := endTime.Sub(time.Now().In(location))
+				jobRunTime := endTime.Sub(time.Now())
 				Eventually(func() int {
 					return runningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-				jobRunTime = endTime.Sub(time.Now().In(location))
+				jobRunTime = endTime.Sub(time.Now())
 				Consistently(func() int {
 					return runningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 				By("setting to default instance_min_count")
-				waitForNInstancesRunning(appGUID, 1, totalTime)
+				waitForNInstancesRunning(appGUID, 1, 1*time.Minute)
 			})
 
 		})
@@ -114,58 +101,26 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			})
 
 			It("should scale", func() {
-				totalTime := time.Duration(interval*2)*time.Second + 2*time.Minute
+				waitTime := startTime.Sub(time.Now()) + 1*time.Minute
 
 				By("setting to initial_min_instance_count")
-				waitForNInstancesRunning(appGUID, 3, totalTime)
+				waitForNInstancesRunning(appGUID, 3, waitTime)
 
 				By("setting schedule's instance_min_count")
-				jobRunTime := endTime.Sub(time.Now().In(location))
+				jobRunTime := endTime.Sub(time.Now())
 				Eventually(func() int {
 					return runningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-				jobRunTime = endTime.Sub(time.Now().In(location))
+				jobRunTime = endTime.Sub(time.Now())
 				Consistently(func() int {
 					return runningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 				By("setting to default instance_min_count")
-				waitForNInstancesRunning(appGUID, 1, totalTime)
+				waitForNInstancesRunning(appGUID, 1, 1*time.Minute)
 			})
 		})
 	})
 
 })
-
-func getStartAndEndTime(location *time.Location) (time.Time, time.Time) {
-	// Since the validation of time could fail if spread over two days and will result in acceptance test failure
-	// Need to fix dates in that case.
-	jobDuration := 4 * time.Minute
-	offset := 70 * time.Second
-	startTime := time.Now().In(location).Add(offset).Truncate(time.Minute)
-
-	if startTime.Day() != startTime.Add(jobDuration).Day() {
-		startTime = startTime.Add(jobDuration).Truncate(24 * time.Hour)
-	}
-
-	endTime := startTime.Add(jobDuration)
-	return startTime, endTime
-}
-
-func setRecurringScheduleDateTime(policyByte []byte, timeZone string, startTime time.Time, endTime time.Time, daysOfMonthOrWeek days) string {
-	var day int
-	timeParseFormat := "15:04"
-	startTimeStr := startTime.Format(timeParseFormat)
-	endTimeStr := endTime.Format(timeParseFormat)
-	if daysOfMonthOrWeek == daysOfMonth {
-		day = startTime.Day()
-	} else {
-		day = int(startTime.Weekday())
-		// 0 here is Sunday, scheduler expects 7 for Sunday
-		if day == 0 {
-			day = 7
-		}
-	}
-	return fmt.Sprintf(string(policyByte), timeZone, startTimeStr, endTimeStr, daysOfMonthOrWeek, day)
-}
