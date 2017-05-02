@@ -67,11 +67,5 @@ properties:
     description: "Port on which the bindingdb server will listen"
   binding_db.roles:
     description: "The list of database roles used in bindingdb database including name/password"
-  service_broker.catalog.service_name:
-    description: "Service Name"
-  service_broker.catalog.service_id:
-    description: "Service ID"
-  service_broker.catalog.service_plan_name: 
-    description: "Service Plan Name"
-  service_broker.catalog.service_plan_id: 
-    description: "Service Plan Id"
+  service_broker.catalog:
+    description: "The service broker catalog"
