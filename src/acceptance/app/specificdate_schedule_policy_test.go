@@ -33,7 +33,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	JustBeforeEach(func() {
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
-		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", cfg.NodeMemoryLimit, "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
+		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", fmt.Sprintf("%dM", cfg.NodeMemoryLimit), "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createApp).To(Exit(0), "failed creating app")
 
 		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeout)
@@ -78,7 +78,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			})
 
 			It("should scale", func() {
-				totalTime := time.Duration(cfg.ReportInterval*2)*time.Second + 2*time.Minute
+				totalTime := time.Duration(interval*2)*time.Second + 2*time.Minute
 				By("setting to initial_min_instance_count")
 				waitForNInstancesRunning(appGUID, 3, totalTime)
 

@@ -2,6 +2,7 @@ package broker
 
 import (
 	"acceptance/config"
+	"fmt"
 	"time"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
@@ -17,7 +18,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 
 	BeforeEach(func() {
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
-		createApp := cf.Cf("push", appName, "--no-start", "-b", cfg.NodejsBuildpackName, "-m", cfg.NodeMemoryLimit, "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
+		createApp := cf.Cf("push", appName, "--no-start", "-b", cfg.NodejsBuildpackName, "-m", fmt.Sprintf("%dM", cfg.NodeMemoryLimit), "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createApp).To(Exit(0), "failed creating app")
 	})
 
