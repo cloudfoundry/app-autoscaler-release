@@ -82,3 +82,7 @@ properties:
     description: "the time interval to synchronize the active schedulesr"
     default: 600s
 
+  scalingengine.consul.cluster:
+    description: "Consul Cluster configuration. If not specified, scaling engine will not register itself with consul."
+    default: ""
+
