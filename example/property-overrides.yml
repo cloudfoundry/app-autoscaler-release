@@ -85,6 +85,8 @@ scalingengine_properties:
   ca_cert: (( app_autoscaler_ca_cert ))
   server_cert: (( scalingengine_server_cert ))
   server_key: (( scalingengine_server_key ))
+  consul:
+    cluster: http://127.0.0.1:8500
 
 eventgenerator_properties:
   logging:
