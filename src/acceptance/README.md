@@ -40,7 +40,7 @@ cat > integration_config.json <<EOF
 
   "service_name": "CF-AutoScaler",
   "service_plan": "autoscaler-free-plan",
-  "report_interval": 120
+  "aggregate_interval": 120
 }
 EOF
 export CONFIG=$PWD/integration_config.json
@@ -50,7 +50,7 @@ The full set of config parameters is explained below:
 
 * `service_name` (required): The name of the registered auto-scaler service, use `cf marketplace` to determine the name.
 * `service_plan` (required): The plan name of the registered auto-scaler service, use `cf marketplace` to determine the plan.
-* `report_interval` (required): How frequently metrics are collected. This value must match the value configured in your deployment.
+* `aggregate_interval` (required): How frequently metrics are aggregated. This value must match the value configured in your deployment.
 
 * `api` (required): Cloud Controller API endpoint.
 * `admin_user` (required): Name of a user in your CF instance with admin credentials.  This admin user must have the `doppler.firehose` scope if running the `logging` firehose tests.
@@ -68,7 +68,7 @@ The full set of config parameters is explained below:
 * `test_password` (optional): Used to set the password for the test user. This may be needed if your CF installation has password policies.
 * `timeout_scale` (optional): Used primarily to scale default timeouts for test setup and teardown actions (e.g. creating an org) as opposed to main test actions (e.g. pushing an app).
 * `use_http` (optional): Set to true if you would like CF Acceptance Tests to use HTTP when making api and application requests. (default is HTTPS)
-* `node_memory_limit` (option): the memory limit of  node.js test application
+* `node_memory_limit` (option): the memory limit of  node.js test application, should be greater than 128 (MB)
 
 * `java_buildpack_name` (optional) [See below](#buildpack-names).
 * `nodejs_buildpack_name` (optional) [See below](#buildpack-names).

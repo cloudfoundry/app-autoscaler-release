@@ -1,32 +1,49 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
+	"math"
+	"strconv"
 	"testing"
+	"time"
 
 	"acceptance/config"
 
-	"encoding/json"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/workflowhelpers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
-	"math"
-	"strconv"
-	"time"
 )
 
 type appSummary struct {
 	RunningInstances int `json:"running_instances"`
 }
 
+type ScalingPolicy struct {
+	InstanceMin  int            `json:"instance_min_count"`
+	InstanceMax  int            `json:"instance_max_count"`
+	ScalingRules []*ScalingRule `json:"scaling_rules"`
+}
+
+type ScalingRule struct {
+	MetricType            string `json:"metric_type"`
+	StatWindowSeconds     int    `json:"stat_window_secs"`
+	BreachDurationSeconds int    `json:"breach_duration_secs"`
+	Threshold             int64  `json:"threshold"`
+	Operator              string `json:"operator"`
+	CoolDownSeconds       int    `json:"cool_down_secs"`
+	Adjustment            string `json:"adjustment"`
+}
+
 const MB = 1024 * 1024
 
 var (
-	cfg   *config.Config
-	setup *workflowhelpers.ReproducibleTestSuiteSetup
+	cfg      *config.Config
+	setup    *workflowhelpers.ReproducibleTestSuiteSetup
+	interval int
 )
 
 func TestAcceptance(t *testing.T) {
@@ -51,6 +68,12 @@ var _ = BeforeSuite(func() {
 
 	serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
 	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
+
+	interval = cfg.AggregateInterval
+	if interval < 60 {
+		interval = 60
+	}
+
 })
 
 var _ = AfterSuite(func() {
@@ -140,4 +163,48 @@ func averageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
 	}
 
 	return memSum / uint64(len(memoryUsedArray))
+}
+
+func generateDynamicScaleOutPolicy(instanceMin, instanceMax int, threshold int64) string {
+	scalingOutRule := ScalingRule{
+		MetricType:            "memoryused",
+		StatWindowSeconds:     interval,
+		BreachDurationSeconds: interval,
+		Threshold:             threshold,
+		Operator:              ">=",
+		CoolDownSeconds:       interval,
+		Adjustment:            "+1",
+	}
+
+	policy := ScalingPolicy{
+		InstanceMin:  instanceMin,
+		InstanceMax:  instanceMax,
+		ScalingRules: []*ScalingRule{&scalingOutRule},
+	}
+	bytes, err := json.Marshal(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(bytes)
+}
+
+func generateDynamicScaleInPolicy(instanceMin, instanceMax int, threshold int64) string {
+	scalingInRule := ScalingRule{
+		MetricType:            "memoryused",
+		StatWindowSeconds:     interval,
+		BreachDurationSeconds: interval,
+		Threshold:             threshold,
+		Operator:              "<",
+		CoolDownSeconds:       interval,
+		Adjustment:            "-1",
+	}
+
+	policy := ScalingPolicy{
+		InstanceMin:  instanceMin,
+		InstanceMax:  instanceMax,
+		ScalingRules: []*ScalingRule{&scalingInRule},
+	}
+	bytes, err := json.Marshal(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(bytes)
 }
