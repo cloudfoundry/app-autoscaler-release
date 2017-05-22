@@ -15,6 +15,7 @@ MANDATORY ARGUMENTS:
     -p <property-path>          Path to property-overrides stub file.
 OPTIONAL ARGUMENTS:
     -d <db-stub-path>           Path to database stub file.
+    --v1                        Flag to use BOSH V1 manifest template
 EXAMPLE:
     $0 \\
       -c ../cf-release/bosh-lite/deployments/cf.yml \\
@@ -24,17 +25,28 @@ EOF
   exit 1
 }
 
-while getopts "c:p:d:" opt; do
-  case "$opt" in
-    c)
-        cf_manifest_file=$OPTARG
-        ;;
-    p)
-        property_overrides=$OPTARG
-        ;;
-    d)
-        db_settings=$OPTARG
-        ;;
+V1=false
+TEMP=`getopt -o c:p:d:v --long c:,p:,d::,v1 -n 'generate-bosh-lite-manifest.sh' -- "$@"`
+
+if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
+
+eval set -- "$TEMP"
+
+while true ; do
+  case "$1" in
+    -c)
+        cf_manifest_file=$2
+        shift 2 ;;
+    -p)
+        property_overrides=$2
+        shift 2 ;;
+    -d)
+	db_settings=$2
+        shift 2 ;;
+    --v1)
+        V1=true
+        shift ;;
+    -- ) shift; break ;;
     *)  echo "Unknown arguments"
         usage
         ;;
@@ -66,6 +78,13 @@ fi
 if [[ ! -z "${db_settings}" && ! -f "${db_settings}" ]]; then
   >&2 echo "ERROR: Database Setting stub '${db_settings}' is not a regular file"
   argument_error=true
+fi
+if [[ $V1 == true ]]; then
+   template_file="bosh-lite-manifest-template-v1.yml"
+   echo "Generating BOSH V1 manifest using " ${template_file} "as manifest template"
+else
+   template_file="bosh-lite-manifest-template-v2.yml"
+   echo "Generating BOSH V2 manifest using " ${template_file} "as manifest template"
 fi
 
 if [ ! -z $argument_error ]; then
@@ -99,7 +118,7 @@ spiff merge \
   > ${tmpdir}/config-from-cf-merged.yml
 
 spiff merge \
-${example}/bosh-lite-manifest-template.yml \
+${example}/${template_file} \
 ${director_uuid} \
 ${property_overrides} \
 ${db_settings} \

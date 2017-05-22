@@ -28,7 +28,8 @@ cd app-autoscaler-release
 
 
 > ** cf-release deployment manifest should be cf-release/bosh-lite/deployments/cf.yml
-
+>
+> ** To generate BOSH V1 manifest template use --v1 flag with generate-bosh-lite-manifest. By default BOSH V2 manifest will be generated.
 >
 > To use pre-existing postgres server(s), it is required to pass db-stubs while generating manifest. Otherwise an instance of default postgres server will be provided as part of app-autoscaler deployment.
 
