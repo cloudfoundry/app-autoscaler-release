@@ -102,7 +102,12 @@ if [[ "$(echo "$BOSH_STATUS" | grep Name)" != *"$EXPECTED_DIRECTOR_NAME"* ]]; th
   exit 1
 fi
 
-tmpdir=$(mktemp -d /tmp/autoscaler-bosh-lite-manifest.XXXXX)
+manifests_dir=$(cd $(dirname $(dirname $0)) && pwd)/manifests
+if [ ! -d ${manifests_dir} ]; then
+  mkdir ${manifests_dir}
+fi
+tmpdir=$(mktemp -d ${manifests_dir}/autoscaler-bosh-lite-manifest.XXXXX)
+
 director_uuid=${tmpdir}/director.yml
 printf "director_uuid: %s" $(bosh status --uuid) > ${director_uuid}
 
