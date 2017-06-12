@@ -26,7 +26,7 @@ EOF
 }
 
 V1=false
-TEMP=`getopt -o c:p:d:v --long c:,p:,d::,v1 -n 'generate-bosh-lite-manifest.sh' -- "$@"`
+TEMP=`getopt -o c:p:d: --long v1 -n 'generate-bosh-lite-manifest.sh' -- "$@"`
 
 if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 
