@@ -2,7 +2,8 @@
 
 set -e
 
-example=$(dirname $0)/../example
+root_dir=$(cd "$(dirname "$0")/.." && pwd)
+templates_dir=${root_dir}/templates
 
 usage() {
   >&2 cat <<EOF
@@ -26,11 +27,11 @@ EOF
 }
 
 V1=false
-TEMP=`getopt -o c:p:d:v --long c:,p:,d::,v1 -n 'generate-bosh-lite-manifest.sh' -- "$@"`
+ARGS=`getopt -o c:p:d: --long v1 -n 'generate-bosh-lite-manifest.sh' -- "$@"`
 
 if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 
-eval set -- "$TEMP"
+eval set -- "$ARGS"
 
 while true ; do
   case "$1" in
@@ -41,7 +42,7 @@ while true ; do
         property_overrides=$2
         shift 2 ;;
     -d)
-	db_settings=$2
+	      db_settings=$2
         shift 2 ;;
     --v1)
         V1=true
@@ -94,7 +95,6 @@ fi
 
 
 BOSH_STATUS=$(bosh status)
-DIRECTOR_UUID=$(bosh status --uuid)
 EXPECTED_DIRECTOR_NAME="Bosh Lite Director"
 
 if [[ "$(echo "$BOSH_STATUS" | grep Name)" != *"$EXPECTED_DIRECTOR_NAME"* ]]; then
@@ -103,8 +103,8 @@ if [[ "$(echo "$BOSH_STATUS" | grep Name)" != *"$EXPECTED_DIRECTOR_NAME"* ]]; th
 fi
 
 tmpdir=$(mktemp -d /tmp/autoscaler-bosh-lite-manifest.XXXXX)
-director_uuid=${tmpdir}/director.yml
-printf "director_uuid: %s" $(bosh status --uuid) > ${director_uuid}
+director_uuid_file=${tmpdir}/director.yml
+printf "director_uuid: %s" $(bosh status --uuid) > ${director_uuid_file}
 
 # Check for spiff installation
 which spiff > /dev/null 2>&1 || {
@@ -113,17 +113,19 @@ which spiff > /dev/null 2>&1 || {
 }
 
 spiff merge \
-  ${example}/config-from-cf.yml \
+  ${templates_dir}/config-from-cf.yml \
   ${cf_manifest_file} \
   > ${tmpdir}/config-from-cf-merged.yml
 
+mkdir -p ${root_dir}/bosh-lite/deployments
+
 spiff merge \
-${example}/${template_file} \
-${director_uuid} \
+${templates_dir}/${template_file} \
+${director_uuid_file} \
 ${property_overrides} \
 ${db_settings} \
 ${tmpdir}/config-from-cf-merged.yml  \
-> ${tmpdir}/autoscaler-bosh-lite-manifest.yml
+> ${root_dir}/bosh-lite/deployments/autoscaler.yml
 
-bosh deployment ${tmpdir}/autoscaler-bosh-lite-manifest.yml
+bosh deployment ${root_dir}/bosh-lite/deployments/autoscaler.yml
 
