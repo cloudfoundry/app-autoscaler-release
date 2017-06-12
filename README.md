@@ -16,7 +16,7 @@ Instructions to install on [bosh-lite](https://github.com/cloudfoundry/bosh-lite
 
 ```sh
 bosh target BOSH_DIRECTOR_HOST
-bosh update cloud-config <PATH_TO_CLOUD_CONFIG>
+bosh update cloud-config ./example/cloud-config.yml
 git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
 cd app-autoscaler-release
 ./scripts/update
