@@ -57,7 +57,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			startDateTime := timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(4 * time.Minute)
 
-			policyStr := generateDynamicAndSpecificDatePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
+			policyStr := generateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 
