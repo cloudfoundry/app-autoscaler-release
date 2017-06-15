@@ -28,10 +28,13 @@ properties:
     default: 6101
   service_broker.ca_cert:
     description: "PEM-encoded CA certificate"
+    default: ""
   service_broker.server_cert:
     description: "PEM-encoded server certificate"
+    default: ""
   service_broker.server_key:
     description: "PEM-encoded server key"
+    default: ""
   service_broker.api_server.host:
     description: "Host where APIserver is running"
     default: "apiserver.service.cf.internal"

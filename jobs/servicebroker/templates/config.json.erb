@@ -36,6 +36,10 @@
     },
     'serviceCatalogPath' => "/var/vcap/jobs/servicebroker/config/catalog.json"
   }
+
+  if p('service_broker.server_cert') == "" || p('service_broker.server_key') == ""
+    params.delete('tls')
+  end
 %>
 
 <%=JSON.pretty_generate(params, :indentation => 2)%> 
