@@ -53,20 +53,6 @@ compilation:
 
 ## Jobs ##
 jobs:
-  - name: consul
-    instances: 1
-    update:
-      serial: true
-    resource_pool: default
-    networks:
-      - name: default
-    templates:
-      - {name: consul_agent, release: cf}
-    properties: 
-     consul:
-      agent:
-        mode: server
-  
   - name: postgres
     instances: (( instance_count_overrides.postgres.instances || 1 ))
     update:
@@ -122,8 +108,6 @@ jobs:
       consul:
         agent:
           mode: client
-          services:
-            scheduler: {}
 
   - name: servicebroker
     instances: 1
@@ -177,8 +161,6 @@ jobs:
       consul:
         agent:
           mode: client
-          services:
-            metricscollector: {}
 
 
   - name: eventgenerator
@@ -214,8 +196,6 @@ jobs:
       consul:
         agent:
           mode: client
-          services:
-            scalingengine: {}
 
 properties:
   consul: (( config_from_cf.consul ))

@@ -18,3 +18,5 @@ src/github.com/codegangsta/cli
 
 /bin/
 /pkg/
+
+bosh-lite/deployments/*

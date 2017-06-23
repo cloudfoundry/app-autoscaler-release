@@ -38,7 +38,7 @@ cat > integration_config.json <<EOF
   "skip_ssl_validation": true,
   "use_http": true,
 
-  "service_name": "CF-AutoScaler",
+  "service_name": "autoscaler",
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120
 }

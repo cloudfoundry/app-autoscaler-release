@@ -16,20 +16,32 @@ Instructions to install on [bosh-lite](https://github.com/cloudfoundry/bosh-lite
 
 ```sh
 bosh target BOSH_DIRECTOR_HOST
-bosh update cloud-config ./example/cloud-config.yml
 git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
 cd app-autoscaler-release
 ./scripts/update
+```
+
+> Deploy using BOSH v2 manifest
+
+```sh
+bosh update cloud-config ./example/cloud-config.yml
 ./scripts/generate-bosh-lite-manifest \
 	-c <path to cf-release deployment manifest> \
 	-p ./example/property-overrides.yml
 ./scripts/deploy
 ```
 
+> Deploy using BOSH v1 manifest
+
+```sh
+./scripts/generate-bosh-lite-manifest \
+	-c <path to cf-release deployment manifest> \
+	-p ./example/property-overrides.yml \
+	--v1
+./scripts/deploy
+```
 
 > ** cf-release deployment manifest should be cf-release/bosh-lite/deployments/cf.yml
->
-> ** To generate BOSH V1 manifest template use --v1 flag with generate-bosh-lite-manifest. By default BOSH V2 manifest will be generated.
 >
 > To use pre-existing postgres server(s), it is required to pass db-stubs while generating manifest. Otherwise an instance of default postgres server will be provided as part of app-autoscaler deployment.
 
