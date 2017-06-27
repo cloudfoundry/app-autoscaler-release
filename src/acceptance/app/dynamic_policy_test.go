@@ -8,7 +8,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -32,19 +31,19 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	JustBeforeEach(func() {
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
-		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", fmt.Sprintf("%dM", cfg.NodeMemoryLimit), "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
+		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createApp).To(Exit(0), "failed creating app")
 
-		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeout)
+		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
 		Expect(guid).To(Exit(0))
 		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
 
-		Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
+		Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeoutDuration() * 3)).To(Exit(0))
 		waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 	})
 
 	AfterEach(func() {
-		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteService).To(Exit(0))
