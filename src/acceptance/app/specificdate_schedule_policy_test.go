@@ -25,6 +25,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	)
 
 	BeforeEach(func() {
+		initialInstanceCount = 1
 		instanceName = generator.PrefixedRandomName("autoscaler", "service")
 		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
@@ -57,12 +58,12 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			startDateTime := timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(4 * time.Minute)
 
+			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
+			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+
 			policyStr := generateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
-
-			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
-			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		})
 
 		AfterEach(func() {

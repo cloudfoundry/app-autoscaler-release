@@ -31,10 +31,10 @@ type appSummary struct {
 }
 
 type ScalingPolicy struct {
-	InstanceMin  int              `json:"instance_min_count"`
-	InstanceMax  int              `json:"instance_max_count"`
-	ScalingRules []*ScalingRule   `json:"scaling_rules,omitempty"`
-	Schedules    ScalingSchedules `json:"schedules,omitempty"`
+	InstanceMin  int               `json:"instance_min_count"`
+	InstanceMax  int               `json:"instance_max_count"`
+	ScalingRules []*ScalingRule    `json:"scaling_rules,omitempty"`
+	Schedules    *ScalingSchedules `json:"schedules,omitempty"`
 }
 
 type ScalingRule struct {
@@ -48,7 +48,7 @@ type ScalingRule struct {
 }
 
 type ScalingSchedules struct {
-	Timezone              string                  `json:"timezone"`
+	Timezone              string                  `json:"timezone,omitempty"`
 	RecurringSchedules    []*RecurringSchedule    `json:"recurring_schedule,omitempty"`
 	SpecificDateSchedules []*SpecificDateSchedule `json:"specific_date,omitempty"`
 }
@@ -275,7 +275,7 @@ func generateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, 
 		InstanceMin:  instanceMin,
 		InstanceMax:  instanceMax,
 		ScalingRules: []*ScalingRule{&scalingInRule},
-		Schedules: ScalingSchedules{
+		Schedules: &ScalingSchedules{
 			Timezone:              timezone,
 			SpecificDateSchedules: []*SpecificDateSchedule{&specificDateSchedule},
 		},
@@ -325,7 +325,7 @@ func generateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 		InstanceMin:  instanceMin,
 		InstanceMax:  instanceMax,
 		ScalingRules: []*ScalingRule{&scalingInRule},
-		Schedules: ScalingSchedules{
+		Schedules: &ScalingSchedules{
 			Timezone:           timezone,
 			RecurringSchedules: []*RecurringSchedule{&recurringSchedule},
 		},

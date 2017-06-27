@@ -2,6 +2,7 @@ package app
 
 import (
 	"acceptance/config"
+
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	. "github.com/onsi/ginkgo"
@@ -54,13 +55,14 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			location, err := time.LoadLocation("GMT")
 			Expect(err).NotTo(HaveOccurred())
 			startTime, endTime = getStartAndEndTime(location, 70*time.Second, 4*time.Minute)
+
+			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
+			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+
 			policyStr := generateDynamicAndRecurringSchedulePolicy(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
-
-			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeout * 2)).To(Exit(0))
-			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		})
 
 		AfterEach(func() {
