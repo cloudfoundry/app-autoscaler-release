@@ -45,6 +45,7 @@ db:
 collector:
   refresh_interval: <%= p("metricscollector.collector.refresh_interval") %>
   poll_interval: <%= p("metricscollector.collector.poll_interval") %>
+  collect_method: <%= p("metricscollector.collector.collect_method") %>
 
 lock:
   lock_ttl: <%= p("metricscollector.lock.lock_ttl") %>

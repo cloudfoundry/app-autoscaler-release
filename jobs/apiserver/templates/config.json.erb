@@ -11,6 +11,9 @@
   database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default'} 
   scheduler_host = p('api_server.scheduler.host')
   scheduler_port = p('api_server.scheduler.port')
+  scaling_engine_host = p('api_server.scaling_engine.host')
+  scaling_engine_port = p('api_server.scaling_engine.port')
+
   params = {
     'port' => p('api_server.port'),
     'db' => {
@@ -25,6 +28,14 @@
            'keyFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler/client.key",
            'certFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler/client.crt",
            'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/scheduler/ca.crt"
+       },
+    },
+    'scalingEngine' => {
+       'uri' => "https://" + scaling_engine_host + ":" + scaling_engine_port.to_s,
+       'tls' => {
+           'keyFile' => "/var/vcap/jobs/apiserver/config/certs/scalingengine/client.key",
+           'certFile' => "/var/vcap/jobs/apiserver/config/certs/scalingengine/client.crt",
+           'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/scalingengine/ca.crt"
        },
     },
     'tls' => {

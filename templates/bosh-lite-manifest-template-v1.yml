@@ -105,6 +105,7 @@ jobs:
     properties:
       scheduler: (( scheduler_properties ))
       scheduler_db: (( schedulerdb ))
+      policy_db: (( policydb ))
       consul:
         agent:
           mode: client

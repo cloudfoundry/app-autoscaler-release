@@ -205,9 +205,9 @@ func averageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
 	return memSum / uint64(len(memoryUsedArray))
 }
 
-func generateDynamicScaleOutPolicy(instanceMin, instanceMax int, threshold int64) string {
+func generateDynamicScaleOutPolicy(instanceMin, instanceMax int, metricName string, threshold int64) string {
 	scalingOutRule := ScalingRule{
-		MetricType:            "memoryused",
+		MetricType:            metricName,
 		StatWindowSeconds:     interval,
 		BreachDurationSeconds: interval,
 		Threshold:             threshold,
@@ -227,9 +227,9 @@ func generateDynamicScaleOutPolicy(instanceMin, instanceMax int, threshold int64
 	return string(bytes)
 }
 
-func generateDynamicScaleInPolicy(instanceMin, instanceMax int, threshold int64) string {
+func generateDynamicScaleInPolicy(instanceMin, instanceMax int, metricName string, threshold int64) string {
 	scalingInRule := ScalingRule{
-		MetricType:            "memoryused",
+		MetricType:            metricName,
 		StatWindowSeconds:     interval,
 		BreachDurationSeconds: interval,
 		Threshold:             threshold,
