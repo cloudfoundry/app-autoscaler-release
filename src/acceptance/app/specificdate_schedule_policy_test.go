@@ -20,6 +20,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		instanceName         string
 		initialInstanceCount int
 		location             *time.Location
+		startDateTime        time.Time
 		endDateTime          time.Time
 	)
 
@@ -52,12 +53,12 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 
 		JustBeforeEach(func() {
 
-			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeoutDuration() * 3)).To(Exit(0))
+			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 
 			location, _ = time.LoadLocation("GMT")
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
-			startDateTime := timeNowInTimeZoneWithOffset
+			startDateTime = timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(3 * time.Minute)
 
 			policyStr := generateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
@@ -71,23 +72,24 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		})
 
 		It("should scale", func() {
-			totalTime := time.Duration(interval*2)*time.Second + 2*time.Minute
 			By("setting to initial_min_instance_count")
-			waitForNInstancesRunning(appGUID, 3, totalTime)
+			jobRunTime := startDateTime.Add(1 * time.Minute).Sub(time.Now())
+			waitForNInstancesRunning(appGUID, 3, jobRunTime)
 
 			By("setting to schedule's instance_min_count")
-			jobRunTime := endDateTime.Sub(time.Now().In(location))
+			jobRunTime = endDateTime.Sub(time.Now())
 			Eventually(func() int {
 				return runningInstances(appGUID, jobRunTime)
 			}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-			jobRunTime = endDateTime.Sub(time.Now().In(location))
+			jobRunTime = endDateTime.Sub(time.Now())
 			Consistently(func() int {
 				return runningInstances(appGUID, jobRunTime)
 			}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 			By("setting to default instance_min_count")
-			waitForNInstancesRunning(appGUID, 1, totalTime)
+			waitForNInstancesRunning(appGUID, 1, 1*time.Minute)
+
 		})
 
 	})

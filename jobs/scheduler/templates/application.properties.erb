@@ -6,15 +6,27 @@
     p(property,nil) || []
   end
 
-  role = p_arr('scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' } 
-  database = p_arr('scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' } 
+  schedulerdb_role = p_arr('scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' } 
+  schedulerdb_database = p_arr('scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' } 
+
+  policydb_role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
+  policydb_database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
+
 %>
 #datasource for application and quartz
 
 spring.datasource.driverClassName=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://<%=p('scheduler_db.address')%>:<%=p('scheduler_db.port') %>/<%=database['name'] %>
-spring.datasource.username=<%=role['name'] %>
-spring.datasource.password=<%=role['password'] %>
+spring.datasource.url=jdbc:postgresql://<%=p('scheduler_db.address')%>:<%=p('scheduler_db.port') %>/<%=schedulerdb_database['name'] %>
+spring.datasource.username=<%=schedulerdb_role['name'] %>
+spring.datasource.password=<%=schedulerdb_role['password'] %>
+
+#datasource for policy 
+
+spring.policyDbDataSource.driverClassName=org.postgresql.Driver
+spring.policyDbDataSource.url=jdbc:postgresql://<%=p('policy_db.address')%>:<%=p('policy_db.port') %>/<%=policydb_database['name'] %>
+spring.policyDbDataSource.password=<%=policydb_role['name'] %>
+spring.policyDbDataSource.username=<%=policydb_role['password'] %>
+
 
 #quartz job
 scalingenginejob.reschedule.interval.millisecond=<%=p('scheduler.job_reschedule_interval_millisecond') %>

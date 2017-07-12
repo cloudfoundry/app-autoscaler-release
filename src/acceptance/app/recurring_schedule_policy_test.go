@@ -48,11 +48,11 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		Expect(deleteService).To(Exit(0))
 	})
 
-	Context("when scale out by recurring schedule", func() {
+	Context("when scaling by recurring schedule", func() {
 
 		JustBeforeEach(func() {
 
-			Expect(cf.Cf("start", appName).Wait(cfg.DefaultTimeoutDuration() * 3)).To(Exit(0))
+			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 
 			location, err := time.LoadLocation("GMT")
@@ -75,12 +75,12 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			})
 
 			It("should scale", func() {
-				waitTime := startTime.Sub(time.Now()) + 1*time.Minute
 				By("setting to initial_min_instance_count")
-				waitForNInstancesRunning(appGUID, 3, waitTime)
+				jobRunTime := startTime.Add(1 * time.Minute).Sub(time.Now())
+				waitForNInstancesRunning(appGUID, 3, jobRunTime)
 
 				By("setting schedule's instance_min_count")
-				jobRunTime := endTime.Sub(time.Now())
+				jobRunTime = endTime.Sub(time.Now())
 				Eventually(func() int {
 					return runningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
@@ -102,13 +102,12 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			})
 
 			It("should scale", func() {
-				waitTime := startTime.Sub(time.Now()) + 1*time.Minute
-
 				By("setting to initial_min_instance_count")
-				waitForNInstancesRunning(appGUID, 3, waitTime)
+				jobRunTime := startTime.Add(1 * time.Minute).Sub(time.Now())
+				waitForNInstancesRunning(appGUID, 3, jobRunTime)
 
 				By("setting schedule's instance_min_count")
-				jobRunTime := endTime.Sub(time.Now())
+				jobRunTime = endTime.Sub(time.Now())
 				Eventually(func() int {
 					return runningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))

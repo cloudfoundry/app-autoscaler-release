@@ -69,8 +69,12 @@ properties:
     description: "the time interval to refresh app policies from policy database"
     default: 60s
   metricscollector.collector.poll_interval:
-    description: "the time interval to poll container metrics from loggregator"
+    description: "the time interval to collect container metrics from loggregator"
     default: 30s
+  metricscollector.collector.collect_method:
+    description: "the method to collect metrics from loggregator"
+    default: "polling"
+
 
   metricscollector.lock.lock_ttl:
     description: "consul lock ttl duration"

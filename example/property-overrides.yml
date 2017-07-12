@@ -20,6 +20,10 @@ api_server_properties:
     ca_cert: (( app_autoscaler_ca_cert ))
     client_cert: (( scheduler_client_cert ))
     client_key: (( scheduler_client_key ))
+  scaling_engine:
+    ca_cert: (( app_autoscaler_ca_cert ))
+    client_cert: (( scalingengine_client_cert ))
+    client_key: (( scalingengine_client_key ))
 
 service_broker_properties:
   db_config:

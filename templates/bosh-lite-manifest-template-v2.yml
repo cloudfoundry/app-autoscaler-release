@@ -135,6 +135,7 @@ instance_groups:
         properties:
           scheduler: (( scheduler_properties ))
           scheduler_db: (( schedulerdb ))
+          policy_db: (( policydb ))
         release: app-autoscaler
 
 # Service-Broker Instance Group

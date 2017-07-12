@@ -9,6 +9,9 @@ templates:
   apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
   apiserver_server.crt.erb: config/certs/apiserver/server.crt
   apiserver_server.key.erb: config/certs/apiserver/server.key
+  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
+  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
+  scalingengine_client.key.erb: config/certs/scalingengine/client.key
   scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
   scheduler_client.crt.erb: config/certs/scheduler/client.crt
   scheduler_client.key.erb: config/certs/scheduler/client.key
@@ -30,6 +33,7 @@ properties:
     description: "PEM-encoded server certificate"
   api_server.server_key:
     description: "PEM-encoded server key"
+
   api_server.scheduler.host:
     description: "Host where scheduler is running"
     default: "scheduler.service.cf.internal"
@@ -42,6 +46,23 @@ properties:
     description: "PEM-encoded client certificate"
   api_server.scheduler.client_key:
     description: "PEM-encoded client key"
+
+
+  api_server.scaling_engine.host:
+    description: "Host where scalingengine is running"
+    default: "scalingengine.service.cf.internal"
+  api_server.scaling_engine.port:
+    description: "Port where scalingengine will listen"
+    default: 6104
+  api_server.scaling_engine.ca_cert:
+    description: "PEM-encoded CA certificate"
+  api_server.scaling_engine.client_cert:
+    description: "PEM-encoded client certificate"
+  api_server.scaling_engine.client_key:
+    description: "PEM-encoded client key"
+
+
+
   api_server.db_config.max_connections:
     description: "Maximum number of connections that may be held in the apiserver db pool"
   api_server.db_config.min_connections:
