@@ -9,9 +9,9 @@ releases:
   - name: app-autoscaler
     version: latest
   - name: postgres
-    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=11
-    version: '11'
-    sha1: b9cbcbfa53c870441f55431ee4ef8f63f860b03a
+    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release
+    version: '17'
+    sha1: b062e32a5409ccd4e4161337c48705c793a58412
   - name: cf
     version: latest
 
