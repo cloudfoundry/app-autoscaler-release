@@ -52,7 +52,9 @@ bosh update cloud-config ./example/cloud-config.yml
 	-d ./example/dbstubs/db-stub-external.yml \
 ```
 
-## Register service 
+** please note `./script/generate-bosh-lite-manifest` uses GNU `getopt` to parse command options. GNU `getopt` is installed by default on Linux, but on Mac OS X and FreeBSD it needs to be installed separately. On Mac OS, use `brew install gnu-getopt`, or install [MacPorts](http://www.macports.org) and then do `sudo port install getopt` to install GNU getopt (usually into `/opt/local/bin`), and make sure that `/opt/local/bin` is in your shell path ahead of `/usr/bin`. On FreeBSD, install `misc/getopt`.
+
+## Register service
 
 Log in to Cloud Foundry with admin user, and use the following commands to register `app-autoscaler` service
 
