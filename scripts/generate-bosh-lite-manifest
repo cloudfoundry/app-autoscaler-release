@@ -16,7 +16,7 @@ MANDATORY ARGUMENTS:
     -p <property-path>          Path to property-overrides stub file.
 OPTIONAL ARGUMENTS:
     -d <db-stub-path>           Path to database stub file.
-    --v1                        Flag to use BOSH V1 manifest template
+    -v <bosh-manifest-version>  v1 or v2(default).
 EXAMPLE:
     $0 \\
       -c ../cf-release/bosh-lite/deployments/cf.yml \\
@@ -26,28 +26,22 @@ EOF
   exit 1
 }
 
-V1=false
-ARGS=`getopt -o c:p:d: --long v1 -n 'generate-bosh-lite-manifest.sh' -- "$@"`
+manifest_version="v2"
 
-if [ $? != 0 ] ; then echo "Failed parsing options." >&2 ; exit 1 ; fi
-
-eval set -- "$ARGS"
-
-while true ; do
-  case "$1" in
-    -c)
-        cf_manifest_file=$2
-        shift 2 ;;
-    -p)
-        property_overrides=$2
-        shift 2 ;;
-    -d)
-	      db_settings=$2
-        shift 2 ;;
-    --v1)
-        V1=true
-        shift ;;
-    -- ) shift; break ;;
+while getopts "c:p:d:v:" opt ; do
+  case "$opt" in
+    c)
+        cf_manifest_file=$OPTARG
+        ;;
+    p)
+        property_overrides=$OPTARG
+        ;;
+    d)
+        db_settings=$OPTARG
+        ;;
+    v)
+        manifest_version=$OPTARG
+        ;;
     *)  echo "Unknown arguments"
         usage
         ;;
@@ -80,12 +74,15 @@ if [[ ! -z "${db_settings}" && ! -f "${db_settings}" ]]; then
   >&2 echo "ERROR: Database Setting stub '${db_settings}' is not a regular file"
   argument_error=true
 fi
-if [[ $V1 == true ]]; then
+if [[ "${manifest_version}" == "v1" || "${manifest_version}" == "V1" ]]; then
    template_file="bosh-lite-manifest-template-v1.yml"
    echo "Generating BOSH V1 manifest using " ${template_file} "as manifest template"
-else
+elif [[ "${manifest_version}" == "v2" || "${manifest_version}" == "V2" ]]; then
    template_file="bosh-lite-manifest-template-v2.yml"
    echo "Generating BOSH V2 manifest using " ${template_file} "as manifest template"
+else
+  >&2 echo "ERROR: Invalid bosh manifest version '${manifest_version}'"
+  argument_error=true
 fi
 
 if [ ! -z $argument_error ]; then
