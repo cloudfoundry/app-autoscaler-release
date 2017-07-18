@@ -1,0 +1,35 @@
+#!/bin/bash
+
+<%
+  # returns an empty array of the value is null
+  def p_arr(property)
+    p(property,nil) || []
+  end
+
+  role = p_arr('database.roles').find { |role| role['tag'] == 'default'}
+  database = p_arr('database.databases').find { |database| database['tag'] == 'default' }
+%>
+
+set -e 
+
+export PATH=/var/vcap/packages/java/bin:$PATH
+
+# Getting Database config
+HOST='<%= p("database.address") %>'
+DBNAME='<%= database['name'] %>'
+USER='<%= role['name'] %>'
+PASSWORD='<%= role['password'] %>'
+PORT='<%= p("database.port") %>'
+
+run_migrate(){
+    java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
+    --driver=org.postgresql.Driver --changeLogFile="$1" update 
+}
+
+run_migrate "/var/vcap/packages/apiserver/db/api.db.changelog.yml"
+run_migrate "/var/vcap/packages/servicebroker/db/servicebroker.db.changelog.json"
+run_migrate "/var/vcap/packages/scheduler/db/scheduler.changelog-master.yaml"
+run_migrate "/var/vcap/packages/scheduler/db/quartz.changelog-master.yaml"
+run_migrate "/var/vcap/packages/metricscollector/metricscollector.db.changelog.yml"
+run_migrate "/var/vcap/packages/eventgenerator/dataaggregator.db.changelog.yml"
+run_migrate "/var/vcap/packages/scalingengine/scalingengine.db.changelog.yml"
