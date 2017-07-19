@@ -37,7 +37,7 @@ bosh update cloud-config ./example/cloud-config.yml
 ./scripts/generate-bosh-lite-manifest \
 	-c <path to cf-release deployment manifest> \
 	-p ./example/property-overrides.yml \
-	-v v1
+	--v1
 ./scripts/deploy
 ```
 
