@@ -9,7 +9,7 @@ import (
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gexec"
+	. "github.com/onsi/gomega/gexec"
 )
 
 func Curl(cfg *config.Config, args ...string) (int, []byte, error) {
@@ -26,6 +26,16 @@ func Curl(cfg *config.Config, args ...string) (int, []byte, error) {
 
 func OauthToken(cfg *config.Config) string {
 	cmd := cf.Cf("oauth-token")
-	Expect(cmd.Wait(cfg.DefaultTimeoutDuration())).To(gexec.Exit(0))
+	Expect(cmd.Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 	return strings.TrimSpace(string(cmd.Out.Contents()))
+}
+
+func EnableServiceAccess(cfg *config.Config, orgName string) {
+	enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
+}
+
+func DisableServiceAccess(cfg *config.Config, orgName string) {
+	enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
 }

@@ -35,6 +35,7 @@ properties:
     description: "Maximum no of jobs can be re-scheduled"
   scheduler.notification_reschedule_maxcount:
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
+  
   scheduler.scaling_engine.host:
     description: "URL where Scaling-engine is running"
     default: "scalingengine.service.cf.internal"
@@ -47,9 +48,11 @@ properties:
     description: "PEM-encoded client certificate"
   scheduler.scaling_engine.client_key:
     description: "PEM-encoded client key"
+  
   scheduler.consul.ttl:
     description: "TTL timeout seconds"
     default: 20
+
   scheduler_db.address:
     description: "IP address on which the schedulerdb server will listen"
     default: "postgres.service.cf.internal"
@@ -61,3 +64,15 @@ properties:
     description: "Port on which the schedulerdb server will listen"
   scheduler_db.roles:
     description: "The list of database roles used in schedulerdb database including name/password"
+
+  policy_db.address:
+    description: "IP address on which the policydb server will listen"
+    default: "postgres.service.cf.internal"
+  policy_db.databases:
+    description: "The list of databases used in policydb database including name"
+  policy_db.db_scheme:
+    description: "Database scheme to be used to access policydb"
+  policy_db.port:
+    description: "Port on which the policydb server will listen"
+  policy_db.roles:
+    description: "The list of database roles used in policydb database including name/password"  

@@ -9,9 +9,9 @@ releases:
   - name: app-autoscaler
     version: latest
   - name: postgres
-    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=11
-    version: '11'
-    sha1: b9cbcbfa53c870441f55431ee4ef8f63f860b03a
+    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=17
+    version: '17'
+    sha1: b062e32a5409ccd4e4161337c48705c793a58412
   - name: cf
     version: latest
 
@@ -135,6 +135,7 @@ instance_groups:
         properties:
           scheduler: (( scheduler_properties ))
           scheduler_db: (( schedulerdb ))
+          policy_db: (( policydb ))
         release: app-autoscaler
 
 # Service-Broker Instance Group
@@ -290,8 +291,6 @@ instance_groups:
             agent:
               mode: client
               domain: cf.internal
-              services:
-                scalingengine: {}
               servers:
                 lan: (( config_from_cf.consul.lan_servers ))
             ca_cert: (( config_from_cf.consul.ca_cert ))

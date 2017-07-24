@@ -20,6 +20,10 @@ api_server_properties:
     ca_cert: (( app_autoscaler_ca_cert ))
     client_cert: (( scheduler_client_cert ))
     client_key: (( scheduler_client_key ))
+  scaling_engine:
+    ca_cert: (( app_autoscaler_ca_cert ))
+    client_cert: (( scalingengine_client_cert ))
+    client_key: (( scalingengine_client_key ))
 
 service_broker_properties:
   db_config:
@@ -90,6 +94,8 @@ scalingengine_properties:
   ca_cert: (( app_autoscaler_ca_cert ))
   server_cert: (( scalingengine_server_cert ))
   server_key: (( scalingengine_server_key ))
+  consul:
+    cluster: http://127.0.0.1:8500
 
 eventgenerator_properties:
   logging:

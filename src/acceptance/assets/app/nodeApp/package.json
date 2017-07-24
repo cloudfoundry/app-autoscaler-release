@@ -4,5 +4,8 @@
 	"description": "A sample nodejs app for AutoScaler",
 	"scripts": {
 		"start": "node test.js"
+	},
+	"engines": {
+  		"node": "6.x"
 	}
 }

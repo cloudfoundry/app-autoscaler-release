@@ -2,7 +2,8 @@
 
 set -e
 
-example=$(dirname $0)/../example
+root_dir=$(cd "$(dirname "$0")/.." && pwd)
+templates_dir=${root_dir}/templates
 
 usage() {
   >&2 cat <<EOF
@@ -15,6 +16,7 @@ MANDATORY ARGUMENTS:
     -p <property-path>          Path to property-overrides stub file.
 OPTIONAL ARGUMENTS:
     -d <db-stub-path>           Path to database stub file.
+    -v <bosh-manifest-version>  v1 or v2(default).
 EXAMPLE:
     $0 \\
       -c ../cf-release/bosh-lite/deployments/cf.yml \\
@@ -24,7 +26,9 @@ EOF
   exit 1
 }
 
-while getopts "c:p:d:" opt; do
+manifest_version="v2"
+
+while getopts "c:p:d:v:" opt ; do
   case "$opt" in
     c)
         cf_manifest_file=$OPTARG
@@ -34,6 +38,9 @@ while getopts "c:p:d:" opt; do
         ;;
     d)
         db_settings=$OPTARG
+        ;;
+    v)
+        manifest_version=$OPTARG
         ;;
     *)  echo "Unknown arguments"
         usage
@@ -67,6 +74,16 @@ if [[ ! -z "${db_settings}" && ! -f "${db_settings}" ]]; then
   >&2 echo "ERROR: Database Setting stub '${db_settings}' is not a regular file"
   argument_error=true
 fi
+if [[ "${manifest_version}" == "v1" || "${manifest_version}" == "V1" ]]; then
+   template_file="bosh-lite-manifest-template-v1.yml"
+   echo "Generating BOSH V1 manifest using " ${template_file} "as manifest template"
+elif [[ "${manifest_version}" == "v2" || "${manifest_version}" == "V2" ]]; then
+   template_file="bosh-lite-manifest-template-v2.yml"
+   echo "Generating BOSH V2 manifest using " ${template_file} "as manifest template"
+else
+  >&2 echo "ERROR: Invalid bosh manifest version '${manifest_version}'"
+  argument_error=true
+fi
 
 if [ ! -z $argument_error ]; then
   echo
@@ -75,7 +92,6 @@ fi
 
 
 BOSH_STATUS=$(bosh status)
-DIRECTOR_UUID=$(bosh status --uuid)
 EXPECTED_DIRECTOR_NAME="Bosh Lite Director"
 
 if [[ "$(echo "$BOSH_STATUS" | grep Name)" != *"$EXPECTED_DIRECTOR_NAME"* ]]; then
@@ -84,8 +100,8 @@ if [[ "$(echo "$BOSH_STATUS" | grep Name)" != *"$EXPECTED_DIRECTOR_NAME"* ]]; th
 fi
 
 tmpdir=$(mktemp -d /tmp/autoscaler-bosh-lite-manifest.XXXXX)
-director_uuid=${tmpdir}/director.yml
-printf "director_uuid: %s" $(bosh status --uuid) > ${director_uuid}
+director_uuid_file=${tmpdir}/director.yml
+printf "director_uuid: %s" $(bosh status --uuid) > ${director_uuid_file}
 
 # Check for spiff installation
 which spiff > /dev/null 2>&1 || {
@@ -94,17 +110,19 @@ which spiff > /dev/null 2>&1 || {
 }
 
 spiff merge \
-  ${example}/config-from-cf.yml \
+  ${templates_dir}/config-from-cf.yml \
   ${cf_manifest_file} \
   > ${tmpdir}/config-from-cf-merged.yml
 
+mkdir -p ${root_dir}/bosh-lite/deployments
+
 spiff merge \
-${example}/bosh-lite-manifest-template.yml \
-${director_uuid} \
+${templates_dir}/${template_file} \
+${director_uuid_file} \
 ${property_overrides} \
 ${db_settings} \
 ${tmpdir}/config-from-cf-merged.yml  \
-> ${tmpdir}/autoscaler-bosh-lite-manifest.yml
+> ${root_dir}/bosh-lite/deployments/autoscaler.yml
 
-bosh deployment ${tmpdir}/autoscaler-bosh-lite-manifest.yml
+bosh deployment ${root_dir}/bosh-lite/deployments/autoscaler.yml
 
