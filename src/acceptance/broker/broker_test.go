@@ -33,18 +33,22 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
 
-		bindService := cf.Cf("bind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(1))
-		Eventually(bindService.Out).Should(gbytes.Say("Policy is required as a parameter"))
-
-		bindService = cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
+		bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
 		Expect(bindService).To(Exit(1))
 		Eventually(bindService.Out).Should(gbytes.Say("400 Bad Request"))
 
+		By("Test bind&unbind with policy")
 		bindService = cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/all.json").Wait(cfg.DefaultTimeoutDuration())
 		Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 
 		unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+
+		By("Test bind&unbind without policy")
+		bindService = cf.Cf("bind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(bindService).To(Exit(0), "failed binding service to app without policy")
+
+		unbindService = cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
