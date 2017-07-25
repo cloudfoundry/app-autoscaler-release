@@ -15,6 +15,9 @@ templates:
   scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
   scheduler_client.crt.erb: config/certs/scheduler/client.crt
   scheduler_client.key.erb: config/certs/scheduler/client.key
+  metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
+  metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
+  metricscollector_client.key.erb: config/certs/metricscollector/client.key
 
 packages:
   - nodejs
@@ -59,6 +62,19 @@ properties:
   api_server.scaling_engine.client_cert:
     description: "PEM-encoded client certificate"
   api_server.scaling_engine.client_key:
+    description: "PEM-encoded client key"
+
+  api_server.metrics_collector.host:
+    description: "Host where metricsCollector is running"
+    default: "metricscollector.service.cf.internal"
+  api_server.metrics_collector.port:
+    description: "Port where metricsCollector will listen"
+    default: 6103
+  api_server.metrics_collector.ca_cert:
+    description: "PEM-encoded CA certificate"
+  api_server.metrics_collector.client_cert:
+    description: "PEM-encoded client certificate"
+  api_server.metrics_collector.client_key:
     description: "PEM-encoded client key"
 
 

@@ -24,6 +24,10 @@ api_server_properties:
     ca_cert: (( app_autoscaler_ca_cert ))
     client_cert: (( scalingengine_client_cert ))
     client_key: (( scalingengine_client_key ))
+  metrics_collector:
+    ca_cert: (( app_autoscaler_ca_cert ))
+    client_cert: (( metricscollector_client_cert ))
+    client_key: (( metricscollector_client_key ))
 
 service_broker_properties:
   db_config:
