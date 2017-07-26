@@ -72,3 +72,22 @@ properties:
     description: "The list of database roles used in bindingdb database including name/password"
   service_broker.catalog:
     description: "The service broker catalog"
+  service_broker.quota.quota_switch:
+    default: false
+    description: "Whether quota check is enabled or not"
+  service_broker.quota.oauth_url:
+    description: "Auth URL for quota api"
+  service_broker.quota.onboarding_service_url:
+    description: "Tenant onboarding service url"
+  service_broker.quota.xsuaa_client_id:
+    description: "XSUAA client id"
+  service_broker.quota.xsuaa_client_secret:
+    description: "XSUAA client secret"
+  service_broker.quota.uaa_url:
+    description: "CF UAA url"
+  service_broker.quota.cf_api_service_url:
+    description: "Cloud Foundry API URL"
+  service_broker.quota.uaa_client_id:
+    description: "CF UAA client id"
+  service_broker.quota.uaa_client_secret:
+    description: "CF UAA client secret"
