@@ -86,6 +86,8 @@ metricscollector_properties:
     level: debug
   server:
     port: 6103
+  collector:
+    refresh_interval: 30s
   ca_cert: (( app_autoscaler_ca_cert ))
   server_cert: (( metricscollector_server_cert ))
   server_key: (( metricscollector_server_key ))

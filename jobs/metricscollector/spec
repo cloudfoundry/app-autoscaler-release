@@ -68,7 +68,7 @@ properties:
   metricscollector.collector.refresh_interval:
     description: "the time interval to refresh app policies from policy database"
     default: 60s
-  metricscollector.collector.poll_interval:
+  metricscollector.collector.collect_interval:
     description: "the time interval to collect container metrics from loggregator"
     default: 30s
   metricscollector.collector.collect_method:
