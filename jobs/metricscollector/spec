@@ -73,7 +73,7 @@ properties:
     default: 30s
   metricscollector.collector.collect_method:
     description: "the method to collect metrics from loggregator"
-    default: "polling"
+    default: "streaming"
 
 
   metricscollector.lock.lock_ttl:
