@@ -4,6 +4,7 @@ import (
 	"acceptance/config"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
+	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
@@ -148,4 +149,56 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		})
 
 	})
+
+	Context("when scaling by responsetime", func() {
+
+		JustBeforeEach(func() {
+			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
+			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+		})
+
+		AfterEach(func() {
+			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+		})
+
+		Context("when responsetime is greater than scaling out threshold", func() {
+			BeforeEach(func() {
+				policy = generateDynamicScaleOutPolicy(1, 2, "responsetime", 5000)
+				initialInstanceCount = 1
+			})
+
+			It("should scale out", func() {
+				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				timeout := 2 * time.Minute
+				for i := 0; i < 10; i++ {
+					Eventually(func() string {
+						return helpers.CurlApp(cfg, appName, "/slow/20000")
+					}, timeout, 5*time.Second).Should(ContainSubstring("dummy application with slow response"))
+				}
+				waitForNInstancesRunning(appGUID, 2, finishTime)
+			})
+
+		})
+
+		Context("when responsetime is less than scaling in threshold", func() {
+			BeforeEach(func() {
+				policy = generateDynamicScaleInPolicy(1, 2, "responsetime", 1000)
+				initialInstanceCount = 2
+			})
+
+			It("should scale in", func() {
+				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				timeout := 1 * time.Minute
+				for i := 0; i < 100; i++ {
+					Eventually(func() string {
+						return helpers.CurlAppWithTimeout(cfg, appName, "/fast", timeout)
+					}, timeout, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+				}
+				waitForNInstancesRunning(appGUID, 1, finishTime)
+			})
+		})
+
+	})
+
 })
