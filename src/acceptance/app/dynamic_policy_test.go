@@ -173,7 +173,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				timeout := 2 * time.Minute
 				for i := 0; i < 10; i++ {
 					Eventually(func() string {
-						return helpers.CurlApp(cfg, appName, "/slow/20000")
+						return helpers.CurlAppWithTimeout(cfg, appName, "/slow/20000",timeout)
 					}, timeout, 5*time.Second).Should(ContainSubstring("dummy application with slow response"))
 				}
 				waitForNInstancesRunning(appGUID, 2, finishTime)
