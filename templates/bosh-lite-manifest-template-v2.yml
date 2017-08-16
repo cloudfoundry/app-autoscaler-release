@@ -47,6 +47,7 @@ instance_groups:
     jobs:
       - name: consul_agent
         release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
         properties:
           consul:
             agent:
@@ -84,6 +85,7 @@ instance_groups:
     jobs:
       - name: consul_agent
         release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
         properties:
           consul:
             agent:
@@ -118,6 +120,7 @@ instance_groups:
     jobs:
       - name: consul_agent
         release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
         properties:
           consul:
             agent:
@@ -151,6 +154,7 @@ instance_groups:
     jobs:
       - name: consul_agent
         release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
         properties:
           consul:
             agent:
@@ -185,6 +189,7 @@ instance_groups:
     jobs:
       - name: consul_agent
         release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
         properties:
           consul:
             agent:
@@ -219,6 +224,7 @@ instance_groups:
     jobs:
       - name: consul_agent
         release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
         properties:
           consul:
             agent:
@@ -253,6 +259,7 @@ instance_groups:
     jobs:
       - name: consul_agent
         release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
         properties:
           consul:
             agent:
@@ -286,6 +293,7 @@ instance_groups:
     jobs:
       - name: consul_agent
         release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
         properties:
           consul:
             agent:
