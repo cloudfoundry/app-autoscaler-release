@@ -67,15 +67,23 @@ git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
 cd app-autoscaler-release
 ./scripts/update
 bosh create-release
-bosh -e env upload-release
+bosh -e YOUR_ENV upload-release
 ```
 Deploy app-autoscaler
 ```sh
-bosh -e env -d app-autoscaler \
-     deploy app-autoscaler-deployment.yml \
-     --vars-store=autoscaler-deployment-vars.yml \
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
      -v system_domain=bosh-lite.com \
-     -v cf_admin_password=admin
+     -v cf_admin_password=<cf admin password>
+```
+Alternatively you can use cf-deployment vars file to provide the cf_admin_password
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
+     --vars-file=<path to cf deployment vars file>
 ```
 
 ## Register service 
