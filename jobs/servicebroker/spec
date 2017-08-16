@@ -91,3 +91,6 @@ properties:
     description: "CF UAA client id"
   service_broker.quota.uaa_client_secret:
     description: "CF UAA client secret"
+  service_broker.quota.skip_plans:
+    description: "plan-ids to be skip from quota validation"
+  
