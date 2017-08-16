@@ -61,8 +61,11 @@ jobs:
     networks:
       - name: default
     templates:
-      - {name: consul_agent, release: cf}
-      - {name: postgres, release: postgres}
+      - name: consul_agent
+        release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
+      - name: postgres
+        release: postgres
     properties:
       databases: (( default_db ))
       consul:
@@ -81,8 +84,11 @@ jobs:
       - name: default
     resource_pool: default
     templates:
-      - {name: consul_agent, release: cf}
-      - {name: apiserver, release: app-autoscaler}
+      - name: consul_agent
+        release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
+      - name: apiserver
+        release: app-autoscaler
     properties:
       api_server: (( api_server_properties ))
       policy_db: (( policydb ))
@@ -100,8 +106,11 @@ jobs:
       - name: default
     resource_pool: default
     templates:
-      - {name: consul_agent, release: cf}
-      - {name: scheduler, release: app-autoscaler}
+      - name: consul_agent
+        release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
+      - name: scheduler
+        release: app-autoscaler
     properties:
       scheduler: (( scheduler_properties ))
       scheduler_db: (( schedulerdb ))
@@ -116,8 +125,11 @@ jobs:
       - name: default
     resource_pool: default
     templates:
-      - {name: consul_agent, release: cf}
-      - {name: servicebroker, release: app-autoscaler}
+      - name: consul_agent
+        release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
+      - name: servicebroker
+        release: app-autoscaler
     properties:
       service_broker: (( service_broker_properties ))
       binding_db: (( bindingdb ))
@@ -134,8 +146,11 @@ jobs:
       - name: default
     resource_pool: default
     templates:
-      - {name: consul_agent, release: cf}
-      - {name: pruner, release: app-autoscaler}
+      - name: consul_agent
+        release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
+      - name: pruner
+        release: app-autoscaler
     properties:
       appmetrics_db: (( appmetricsdb ))
       instancemetrics_db: (( instancemetricsdb ))
@@ -152,8 +167,11 @@ jobs:
       - name: default
     resource_pool: default
     templates:
-      - {name: consul_agent, release: cf}
-      - {name: metricscollector, release: app-autoscaler}
+      - name: consul_agent
+        release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
+      - name: metricscollector
+        release: app-autoscaler
     properties:
       instancemetrics_db: (( instancemetricsdb ))
       policy_db: (( policydb ))
@@ -170,8 +188,11 @@ jobs:
       - name: default
     resource_pool: default
     templates:
-      - {name: consul_agent, release: cf}
-      - {name: eventgenerator, release: app-autoscaler}
+      - name: consul_agent
+        release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
+      - name: eventgenerator
+        release: app-autoscaler
     properties:
       appmetrics_db: (( appmetricsdb ))
       policy_db: (( policydb ))
@@ -186,8 +207,11 @@ jobs:
       - name: default
     resource_pool: default
     templates:
-      - {name: consul_agent, release: cf}
-      - {name: scalingengine, release: app-autoscaler}
+      - name: consul_agent
+        release: cf
+        consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
+      - name: scalingengine
+        release: app-autoscaler
     properties:
       scalingengine_db: (( scalingenginedb ))
       scheduler_db: (( schedulerdb ))
