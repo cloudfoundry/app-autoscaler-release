@@ -18,6 +18,7 @@
 
   params = {
     'port' => p('api_server.port'),
+    'publicPort' => p('api_server.publicPort'),
     'db' => {
        'maxConnections' => p('api_server.db_config.max_connections'),
        'minConnections' => p('api_server.db_config.min_connections'),
@@ -52,6 +53,11 @@
         'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.key",
         'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.crt",
         'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/ca.crt"
+    },
+    'publicTls' => {
+        'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/public_server.key",
+        'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/public_server.crt",
+        'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/public_ca.crt"
     },
   }
 %>
