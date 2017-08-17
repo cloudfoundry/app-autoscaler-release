@@ -1,18 +1,11 @@
 var express = require('express');
 var app = express();
 var http = require('http');
-
-function causeDelay(howMuch) {
-    var current = new Date().getTime();
-    var till = current + howMuch;
-    while (current < till) {
-        current = new Date().getTime();
-    }
-}
+var sleep = require('sleep');
 
 app.get('/slow/:time', function (req, res) {
     var delayInMS = parseInt(req.params.time, 10);
-    causeDelay(delayInMS);
+    sleep.msleep(delayInMS);
     res.send('dummy application with slow response');
 });
 
