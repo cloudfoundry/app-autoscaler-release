@@ -21,6 +21,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		instanceName         string
 		initialInstanceCount int
 		policy               string
+		doneChan             chan bool
+		ticker               *time.Ticker
 	)
 
 	BeforeEach(func() {
@@ -155,30 +157,40 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		JustBeforeEach(func() {
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+			doneChan = make(chan bool)
 		})
 
 		AfterEach(func() {
 			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+			ticker.Stop()
+			close(doneChan)
 		})
 
 		Context("when responsetime is greater than scaling out threshold", func() {
 			BeforeEach(func() {
-				policy = generateDynamicScaleOutPolicy(1, 2, "responsetime", 5000)
+				policy = generateDynamicScaleOutPolicy(1, 2, "responsetime", 3000)
 				initialInstanceCount = 1
 			})
 
 			It("should scale out", func() {
-				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
-				timeout := 2 * time.Minute
-				for i := 0; i < 10; i++ {
-					Eventually(func() string {
-						return helpers.CurlAppWithTimeout(cfg, appName, "/slow/20000",timeout)
-					}, timeout, 5*time.Second).Should(ContainSubstring("dummy application with slow response"))
-				}
+				finishTime := time.Duration(interval*2)*time.Second + 5*time.Minute
+				ticker = time.NewTicker(10 * time.Second)
+				go func(chan bool) {
+					defer GinkgoRecover()
+					for {
+						select {
+						case <-doneChan:
+							return
+						case <-ticker.C:
+							Eventually(func() string {
+								return helpers.CurlAppWithTimeout(cfg, appName, "/slow/10000", 1*time.Minute)
+							}, 1*time.Minute, 2*time.Second).Should(ContainSubstring("dummy application with slow response"))
+						}
+					}
+				}(doneChan)
 				waitForNInstancesRunning(appGUID, 2, finishTime)
 			})
-
 		})
 
 		Context("when responsetime is less than scaling in threshold", func() {
@@ -189,12 +201,20 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			It("should scale in", func() {
 				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
-				timeout := 1 * time.Minute
-				for i := 0; i < 100; i++ {
-					Eventually(func() string {
-						return helpers.CurlAppWithTimeout(cfg, appName, "/fast", timeout)
-					}, timeout, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
-				}
+				ticker = time.NewTicker(2 * time.Second)
+				go func(chan bool) {
+					defer GinkgoRecover()
+					for {
+						select {
+						case <-doneChan:
+							return
+						case <-ticker.C:
+							Eventually(func() string {
+								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
+							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+						}
+					}
+				}(doneChan)
 				waitForNInstancesRunning(appGUID, 1, finishTime)
 			})
 		})
