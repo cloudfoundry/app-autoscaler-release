@@ -8,8 +8,8 @@ setup_npm
 cd ${BUILD_DIR}/app-autoscaler/servicebroker && npm install
 
 # Installing sap plan check and quota check api node modules
-npm install git+https://github.infra.hana.ondemand.com/autoscaler/node-planapi.git
-npm install git+https://github.infra.hana.ondemand.com/autoscaler/node-generic-quotaapi.git
+npm install git+https://github.infra.hana.ondemand.com/autoscaler/node-planapi.git#v0.0.1
+npm install git+https://github.infra.hana.ondemand.com/autoscaler/node-generic-quotaapi.git#v0.0.1
 
 # Clean up NPM
 rm -rf common/node-helper.sh
