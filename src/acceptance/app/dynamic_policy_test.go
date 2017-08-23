@@ -2,6 +2,7 @@ package app
 
 import (
 	"acceptance/config"
+
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
@@ -223,6 +224,84 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			It("should scale in", func() {
 				finishTime := time.Duration(interval*2)*time.Second + 5*time.Minute
+				waitForNInstancesRunning(appGUID, 1, finishTime)
+			})
+		})
+
+	})
+
+	Context("when scaling by throughput", func() {
+
+		JustBeforeEach(func() {
+			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
+			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+			doneChan = make(chan bool)
+		})
+
+		AfterEach(func() {
+			doneChan <- true
+			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+		})
+
+		Context("when throughput is greater than scaling out threshold", func() {
+
+			BeforeEach(func() {
+				policy = generateDynamicScaleOutPolicy(1, 2, "throughput", 2)
+				initialInstanceCount = 1
+			})
+
+			JustBeforeEach(func() {
+				ticker = time.NewTicker(25 * time.Millisecond)
+				go func(chan bool) {
+					defer GinkgoRecover()
+					for {
+						select {
+						case <-doneChan:
+							ticker.Stop()
+							return
+						case <-ticker.C:
+							Eventually(func() string {
+								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
+							}, 10*time.Second, 25*time.Millisecond).Should(ContainSubstring("dummy application with fast response"))
+						}
+					}
+				}(doneChan)
+			})
+
+			It("should scale out", func() {
+				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				waitForNInstancesRunning(appGUID, 2, finishTime)
+			})
+
+		})
+
+		Context("when throughput is less than scaling in threshold", func() {
+
+			BeforeEach(func() {
+				policy = generateDynamicScaleInPolicy(1, 2, "throughput", 1)
+				initialInstanceCount = 2
+			})
+
+			JustBeforeEach(func() {
+				ticker = time.NewTicker(10 * time.Second)
+				go func(chan bool) {
+					defer GinkgoRecover()
+					for {
+						select {
+						case <-doneChan:
+							ticker.Stop()
+							return
+						case <-ticker.C:
+							Eventually(func() string {
+								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
+							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+						}
+					}
+				}(doneChan)
+			})
+			It("should scale in", func() {
+				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
 				waitForNInstancesRunning(appGUID, 1, finishTime)
 			})
 		})
