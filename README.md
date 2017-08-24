@@ -8,7 +8,9 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
 ## Usage
 
 ### Bosh Lite Deployment 
-Install and start [BOSH-Lite](https://github.com/cloudfoundry/bosh-lite), following its   [README](https://github.com/cloudfoundry/bosh-lite/blob/master/README.md).
+
+#### Deploy on bosh-lite with cf-release
+Install and start [BOSH-Lite](https://github.com/cloudfoundry/bosh-lite), following its [README](https://github.com/cloudfoundry/bosh-lite/blob/master/README.md).
 Modify the cloud-config and deployment manifest settings by modifying the files under /example directory.
 Install [Spiff](https://github.com/cloudfoundry-incubator/spiff#installation)
 
@@ -50,6 +52,38 @@ bosh update cloud-config ./example/cloud-config.yml
 	-c <path to cf-release deployment manifest> \
 	-p ./example/property-overrides.yml \
 	-d ./example/dbstubs/db-stub-external.yml \
+```
+
+#### Deploy on bosh-lite with cf-deployment
+Install [Bosh-cli-v2](https://bosh.io/docs/cli-v2.html#install)
+
+Install and start [BOSH-Deployment](https://github.com/cloudfoundry/bosh-deployment), following its [README](https://github.com/cloudfoundry/bosh-deployment/blob/master/README.md). 
+
+Install [CF-deployment](https://github.com/cloudfoundry/cf-deployment/blob/master/cf-deployment.yml)
+
+Create and upload release
+```sh
+git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
+cd app-autoscaler-release
+./scripts/update
+bosh create-release
+bosh -e YOUR_ENV upload-release
+```
+Deploy app-autoscaler
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_admin_password=<cf admin password>
+```
+Alternatively you can use cf-deployment vars file to provide the cf_admin_password
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
+     --vars-file=<path to cf deployment vars file>
 ```
 
 ## Register service 

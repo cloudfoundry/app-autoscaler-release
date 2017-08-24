@@ -3,9 +3,13 @@
 	"version": "0.0.1",
 	"description": "A sample nodejs app for AutoScaler",
 	"scripts": {
-		"start": "node test.js"
+		"start": "node app.js"
+	},
+	"dependencies": {
+		"express": "^3.2.6",
+		"sleep": "^5.1.1"
 	},
 	"engines": {
-  		"node": "6.x"
+		"node": "6.x"
 	}
 }

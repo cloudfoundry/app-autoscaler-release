@@ -9,12 +9,18 @@ templates:
   apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
   apiserver_server.crt.erb: config/certs/apiserver/server.crt
   apiserver_server.key.erb: config/certs/apiserver/server.key
+  apiserver_public_ca.crt.erb: config/certs/apiserver/public_ca.crt
+  apiserver_public_server.crt.erb: config/certs/apiserver/public_server.crt
+  apiserver_public_server.key.erb: config/certs/apiserver/public_server.key
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
   scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
   scheduler_client.crt.erb: config/certs/scheduler/client.crt
   scheduler_client.key.erb: config/certs/scheduler/client.key
+  metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
+  metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
+  metricscollector_client.key.erb: config/certs/metricscollector/client.key
 
 packages:
   - nodejs
@@ -27,12 +33,21 @@ properties:
   api_server.port:
     description: "Port where APIServer will run"
     default: 6100
+  api_server.publicPort:
+    description: "Port where APIServer public api will run"
+    default: 6106
   api_server.ca_cert:
     description: "PEM-encoded CA certificate"
   api_server.server_cert:
     description: "PEM-encoded server certificate"
   api_server.server_key:
     description: "PEM-encoded server key"
+  api_server.public_ca_cert:
+    description: "PEM-encoded CA certificate for public api"
+  api_server.public_server_cert:
+    description: "PEM-encoded server certificate for public api"
+  api_server.public_server_key:
+    description: "PEM-encoded server key for public api"
 
   api_server.scheduler.host:
     description: "Host where scheduler is running"
@@ -59,6 +74,19 @@ properties:
   api_server.scaling_engine.client_cert:
     description: "PEM-encoded client certificate"
   api_server.scaling_engine.client_key:
+    description: "PEM-encoded client key"
+
+  api_server.metrics_collector.host:
+    description: "Host where metricsCollector is running"
+    default: "metricscollector.service.cf.internal"
+  api_server.metrics_collector.port:
+    description: "Port where metricsCollector will listen"
+    default: 6103
+  api_server.metrics_collector.ca_cert:
+    description: "PEM-encoded CA certificate"
+  api_server.metrics_collector.client_cert:
+    description: "PEM-encoded client certificate"
+  api_server.metrics_collector.client_key:
     description: "PEM-encoded client key"
 
 

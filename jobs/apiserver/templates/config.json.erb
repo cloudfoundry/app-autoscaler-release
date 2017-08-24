@@ -13,9 +13,12 @@
   scheduler_port = p('api_server.scheduler.port')
   scaling_engine_host = p('api_server.scaling_engine.host')
   scaling_engine_port = p('api_server.scaling_engine.port')
+  metrics_collector_host = p('api_server.metrics_collector.host')
+  metrics_collector_port = p('api_server.metrics_collector.port')
 
   params = {
     'port' => p('api_server.port'),
+    'publicPort' => p('api_server.publicPort'),
     'db' => {
        'maxConnections' => p('api_server.db_config.max_connections'),
        'minConnections' => p('api_server.db_config.min_connections'),
@@ -38,10 +41,23 @@
            'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/scalingengine/ca.crt"
        },
     },
+    'metricsCollector' => {
+       'uri' => "https://" + metrics_collector_host + ":" + metrics_collector_port.to_s,
+       'tls' => {
+           'keyFile' => "/var/vcap/jobs/apiserver/config/certs/metricscollector/client.key",
+           'certFile' => "/var/vcap/jobs/apiserver/config/certs/metricscollector/client.crt",
+           'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/metricscollector/ca.crt"
+       },
+    },
     'tls' => {
         'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.key",
         'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.crt",
         'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/ca.crt"
+    },
+    'publicTls' => {
+        'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/public_server.key",
+        'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/public_server.crt",
+        'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/public_ca.crt"
     },
   }
 %>
