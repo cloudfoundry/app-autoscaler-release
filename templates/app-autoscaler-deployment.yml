@@ -102,6 +102,9 @@ instance_groups:
         ca_cert: ((apiserver_ca.ca))
         server_cert: ((apiserver_server.certificate))
         server_key:  ((apiserver_server.private_key))
+        public_ca_cert: ((apiserver_public_ca.ca))
+        public_server_cert: ((apiserver_public_server.certificate))
+        public_server_key:  ((apiserver_public_server.private_key))
         scheduler:
           ca_cert: ((scheduler_ca.ca))
           client_cert: ((scheduler_client.certificate))
@@ -382,6 +385,19 @@ variables:
   options:
     ca: apiserver_ca
     common_name: apiserver.service.cf.internal
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: apiserver_public_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: apiserverpublicCA
+- name: apiserver_public_server
+  type: certificate
+  options:
+    ca: apiserver_public_ca
+    common_name: apiserverpublic.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
