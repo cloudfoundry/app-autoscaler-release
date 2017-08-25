@@ -1,0 +1,107 @@
+---
+packages:
+- name: scalingengine
+  version: 6371f6bf056ec697b5a480784e88b007dbd078ed
+  fingerprint: 6371f6bf056ec697b5a480784e88b007dbd078ed
+  sha1: 77c21b3e1f1edc509ee1fd7fca4f3a89b534ba27
+  dependencies:
+  - golang1.7
+- name: common
+  version: 306e7eb1a8187457885ce91eb4bc22f5aed734e8
+  fingerprint: 306e7eb1a8187457885ce91eb4bc22f5aed734e8
+  sha1: 8d818cae247943ceafef7b6f068632f08124198b
+  dependencies: []
+- name: nodejs
+  version: 78d4ee5eeb7010fd7d15a1d2986992942940229f
+  fingerprint: 78d4ee5eeb7010fd7d15a1d2986992942940229f
+  sha1: 4c9279f3348109cfac14fe629fc09cb8f4297bcf
+  dependencies: []
+- name: java
+  version: d6f4a8bb4e3bfb6c4f3121f231f1a0c569d7fdaf
+  fingerprint: d6f4a8bb4e3bfb6c4f3121f231f1a0c569d7fdaf
+  sha1: e3e3aa153ba4ab6fabbc26155449a05e06c0a4b7
+  dependencies: []
+- name: eventgenerator
+  version: 0ddd32b54bed4d93072336948cdb639691c05ee5
+  fingerprint: 0ddd32b54bed4d93072336948cdb639691c05ee5
+  sha1: b533547179af9393eb685936e6e4bd2cadad6d6f
+  dependencies:
+  - golang1.7
+- name: servicebroker
+  version: 780b4805a98cf1c8f6dba135b3bcc2998bee621a
+  fingerprint: 780b4805a98cf1c8f6dba135b3bcc2998bee621a
+  sha1: e10c89eaccf0db37da5f2334d953d32a64d744ab
+  dependencies: []
+- name: metricscollector
+  version: 866c42fc0cbd1aa3e760bb2c84058b640a9db368
+  fingerprint: 866c42fc0cbd1aa3e760bb2c84058b640a9db368
+  sha1: 84fce789a399b3f2e2683abdc0b628800b71fee6
+  dependencies:
+  - golang1.7
+- name: golang1.7
+  version: 651d77736c6087be1ca1df72eb8e4d2e701778f9
+  fingerprint: 651d77736c6087be1ca1df72eb8e4d2e701778f9
+  sha1: 26bab0dee1b2e862b834e780d51c28e1f7ffe354
+  dependencies: []
+- name: apiserver
+  version: b138a8acfee895f3211848e555430b6b82bed465
+  fingerprint: b138a8acfee895f3211848e555430b6b82bed465
+  sha1: a0f6cda38d1e2405ad4379e2abe0aade31df9eac
+  dependencies: []
+- name: db
+  version: 5eb59eeffe739dcf942a45cc0c6e06996cbd8f45
+  fingerprint: 5eb59eeffe739dcf942a45cc0c6e06996cbd8f45
+  sha1: ddc2c89ee297f737a405b6159bf9614fe0a019a6
+  dependencies: []
+- name: scheduler
+  version: 8459c8ef0e82f345720e2fbbab5924a74159da0e
+  fingerprint: 8459c8ef0e82f345720e2fbbab5924a74159da0e
+  sha1: 68bd5cb5984a2c15b9a49f983b5048dafaede4df
+  dependencies: []
+- name: pruner
+  version: 0a8952978a0c226f84db1a057df244df2cbd7975
+  fingerprint: 0a8952978a0c226f84db1a057df244df2cbd7975
+  sha1: 97eebf9cd0317cadd6dfeeaabf0331b908c87afb
+  dependencies:
+  - golang1.7
+jobs:
+- name: scalingengine
+  version: 4398d6bc3b0d7236d21c9ac25258c192771b54f6
+  fingerprint: 4398d6bc3b0d7236d21c9ac25258c192771b54f6
+  sha1: 059dac3fad0d17f356b3958dd97b48617571dd56
+- name: liquibase-migrate
+  version: 3d8eb6eb8e038fed600302c5f1374093950d1faa
+  fingerprint: 3d8eb6eb8e038fed600302c5f1374093950d1faa
+  sha1: d6a876eefab4514d42986c7af8fad8d4df3e157a
+- name: eventgenerator
+  version: fa282337b2b68dc80c7cdf7fab0fce43a037495a
+  fingerprint: fa282337b2b68dc80c7cdf7fab0fce43a037495a
+  sha1: 9ccf5e0208941591463102f4e8ecfb3c0f416524
+- name: servicebroker
+  version: 07d3ba93e91a32422c43588454c57cc80189fe1c
+  fingerprint: 07d3ba93e91a32422c43588454c57cc80189fe1c
+  sha1: c3c6f0a568ed71f51d60534e26f56c1f1839ceda
+- name: metricscollector
+  version: dc38353e013622d82a59de0d291f266dad8e4108
+  fingerprint: dc38353e013622d82a59de0d291f266dad8e4108
+  sha1: 6a324bb9c67125aa1f3abb5ee21b27c8f6ca988b
+- name: apiserver
+  version: 9a2ac8ffd395a64da8ef4c964dd4319d4a43c947
+  fingerprint: 9a2ac8ffd395a64da8ef4c964dd4319d4a43c947
+  sha1: 57b197a72ecce8f4275c401815b25afdafc934bc
+- name: scheduler
+  version: 190ace43d570ee3942012713847e9df492961aa2
+  fingerprint: 190ace43d570ee3942012713847e9df492961aa2
+  sha1: 456a451a3579917e994971ac76e89c8e1cea63bf
+- name: pruner
+  version: 480130a24acdd8079c6955f8c61890cc2a8788c7
+  fingerprint: 480130a24acdd8079c6955f8c61890cc2a8788c7
+  sha1: 083d237c8551983a81574fa331b70644d389e10a
+license:
+  version: 48b61b4116b8f3c1f4ac32fc3d3c5b7821d576b0
+  fingerprint: 48b61b4116b8f3c1f4ac32fc3d3c5b7821d576b0
+  sha1: 181fbb12c30ca806706daedc0af29d68cb4e946d
+commit_hash: 97527b93
+uncommitted_changes: true
+name: app-autoscaler
+version: v0.0.9
