@@ -44,10 +44,13 @@ properties:
     description: "PEM-encoded server key"
   api_server.public_ca_cert:
     description: "PEM-encoded CA certificate for public api"
+    default: ""
   api_server.public_server_cert:
     description: "PEM-encoded server certificate for public api"
+    default: ""
   api_server.public_server_key:
     description: "PEM-encoded server key for public api"
+    default: ""
 
   api_server.scheduler.host:
     description: "Host where scheduler is running"
