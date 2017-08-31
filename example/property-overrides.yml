@@ -98,6 +98,7 @@ metricscollector_properties:
 scalingengine_properties:
   logging:
     level: debug
+  defaultCoolDownSecs: 300
   server:
     port: 6104
   ca_cert: (( app_autoscaler_ca_cert ))
@@ -109,6 +110,8 @@ scalingengine_properties:
 eventgenerator_properties:
   logging:
     level: debug
+  defaultStatWindowSecs: 300
+  defaultBreachDurationSecs: 300
   scaling_engine:
     ca_cert: (( app_autoscaler_ca_cert ))
     client_cert: (( scalingengine_client_cert ))
