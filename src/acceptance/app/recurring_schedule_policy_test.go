@@ -57,7 +57,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 			location, err := time.LoadLocation("GMT")
 			Expect(err).NotTo(HaveOccurred())
-			startTime, endTime = getStartAndEndTime(location, 70*time.Second, 3*time.Minute)
+			startTime, endTime = getStartAndEndTime(location, 70*time.Second, time.Duration(interval+120)*time.Second)
 			policyStr := generateDynamicAndRecurringSchedulePolicy(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
@@ -91,7 +91,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 				By("setting to default instance_min_count")
-				waitForNInstancesRunning(appGUID, 1, 1*time.Minute)
+				waitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
 			})
 
 		})
@@ -118,7 +118,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 				By("setting to default instance_min_count")
-				waitForNInstancesRunning(appGUID, 1, 1*time.Minute)
+				waitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
 			})
 		})
 	})
