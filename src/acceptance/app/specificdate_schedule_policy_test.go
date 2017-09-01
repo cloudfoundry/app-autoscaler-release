@@ -34,7 +34,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	JustBeforeEach(func() {
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
-		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
+		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.CfPushTimeoutDuration())
 		Expect(createApp).To(Exit(0), "failed creating app")
 
 		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
@@ -59,7 +59,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			location, _ = time.LoadLocation("GMT")
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
 			startDateTime = timeNowInTimeZoneWithOffset
-			endDateTime = timeNowInTimeZoneWithOffset.Add(3 * time.Minute)
+			endDateTime = timeNowInTimeZoneWithOffset.Add(time.Duration(interval+120) * time.Second)
 
 			policyStr := generateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
@@ -88,7 +88,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 			By("setting to default instance_min_count")
-			waitForNInstancesRunning(appGUID, 1, 1*time.Minute)
+			waitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
 
 		})
 

@@ -85,3 +85,6 @@ properties:
     description: "Consul Cluster configuration. If not specified, scaling engine will not register itself with consul."
     default: ""
 
+  scalingengine.defaultCoolDownSecs:
+    description: "Default value for cool_down_secs"
+    default: 300
