@@ -289,6 +289,8 @@ instance_groups:
       eventgenerator:
         logging:
           level: debug
+        defaultStatWindowSecs: 300
+        defaultBreachDurationSecs: 300
         scaling_engine:
           ca_cert: ((scalingengine_ca.ca))
           client_cert: ((scalingengine_client.certificate))
@@ -326,6 +328,7 @@ instance_groups:
           level: debug
         server:
           port: 6104
+        defaultCoolDownSecs: 300
         ca_cert: ((scalingengine_ca.ca))
         server_cert: ((scalingengine_server.certificate))
         server_key: ((scalingengine_server.private_key))

@@ -115,3 +115,11 @@ properties:
   eventgenerator.lock.consul_cluster_config:
     description: "consul cluster configuration"
     default: http://127.0.0.1:8500
+
+  eventgenerator.defaultStatWindowSecs:
+    description: "Default value for stat_window_secs"
+    default: 300
+
+  eventgenerator.defaultBreachDurationSecs:
+    description: "Default value for breach_duration_secs"
+    default: 300
