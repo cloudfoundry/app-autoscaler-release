@@ -35,7 +35,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	JustBeforeEach(func() {
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
-		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "512M", "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.CfPushTimeoutDuration())
+		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.CfPushTimeoutDuration())
 		Expect(createApp).To(Exit(0), "failed creating app")
 
 		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
@@ -116,7 +116,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		Context("when memoryutil is greater than scaling out threshold", func() {
 			BeforeEach(func() {
-				policy = generateDynamicScaleOutPolicy(1, 2, "memoryutil", 5)
+				policy = generateDynamicScaleOutPolicy(1, 2, "memoryutil", 20)
 				initialInstanceCount = 1
 			})
 
@@ -215,7 +215,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 30*time.Second)
+								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
 							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
@@ -262,7 +262,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 30*time.Second)
+								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
 							}, 10*time.Second, 25*time.Millisecond).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
@@ -294,7 +294,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 30*time.Second)
+								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
 							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
