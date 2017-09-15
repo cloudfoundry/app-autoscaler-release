@@ -99,6 +99,7 @@ instance_groups:
           max_connections: 10
           min_connections: 0
         port: 6100
+        publicPort: 6106
         ca_cert: ((apiserver_ca.ca))
         server_cert: ((apiserver_server.certificate))
         server_key:  ((apiserver_server.private_key))
@@ -118,6 +119,8 @@ instance_groups:
           client_cert: ((metricscollector_client.certificate))
           client_key: ((metricscollector_client.private_key))
       policy_db: *database
+      cf:
+        api: "https://api.((system_domain))"
       
 # Scheduler Instance Group
 - name: scheduler

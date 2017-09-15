@@ -105,6 +105,7 @@ instance_groups:
         properties:
           api_server: (( api_server_properties ))
           policy_db: (( policydb ))
+          cf: (( cf_properties ))
         release: app-autoscaler
 
 # Scheduler Instance Group
