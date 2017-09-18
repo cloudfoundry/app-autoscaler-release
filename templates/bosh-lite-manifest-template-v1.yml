@@ -92,7 +92,8 @@ jobs:
     properties:
       api_server: (( api_server_properties ))
       policy_db: (( policydb ))
-      cf: (( cf_properties ))
+      cf:
+        api: (( cf_properties.api ))
       consul:
         agent:
           mode: client
