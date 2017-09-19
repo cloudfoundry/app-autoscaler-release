@@ -44,6 +44,7 @@ service_broker_properties:
   username: username
   password: password
   http_request_timeout: 5000
+  dashboard_redirect_uri: ""
   catalog: 
     services:
     - id: autoscaler-guid
