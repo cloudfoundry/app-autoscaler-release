@@ -34,7 +34,8 @@
         'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
         'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
     },
-    'serviceCatalogPath' => "/var/vcap/jobs/servicebroker/config/catalog.json"
+    'serviceCatalogPath' => "/var/vcap/jobs/servicebroker/config/catalog.json",
+    'dashboardRedirectUri' => p('service_broker.dashboard_redirect_uri')
   }
 %>
 
