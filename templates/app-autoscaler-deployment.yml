@@ -36,7 +36,7 @@ instance_groups:
   update:
     serial: true
   stemcell: default
-  vm_type: minimal
+  vm_type: small
   networks:
   - name: default
   jobs:
@@ -130,7 +130,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: minimal
+  vm_type: small-highmem
   jobs:
   - name: consul_agent
     release: consul
@@ -239,7 +239,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: minimal
+  vm_type: small
   jobs:
   - name: consul_agent
     release: consul
@@ -276,7 +276,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: minimal
+  vm_type: small
   jobs:
   - name: consul_agent
     release: consul
