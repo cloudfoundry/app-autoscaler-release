@@ -196,6 +196,20 @@ instance_groups:
         agent:
           services:
             servicebroker: {}
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+        - name: autoscaler_service_broker
+          registration_interval: 20s
+          port: 6101
+          tags:
+            component: autoscaler_service_broker
+          uris:
+            - autoscalerservicebroker.bosh-lite.com
   - name: servicebroker
     release: app-autoscaler
     properties:
