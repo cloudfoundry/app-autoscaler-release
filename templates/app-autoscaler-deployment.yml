@@ -94,21 +94,6 @@ instance_groups:
         agent:
           services:
             apiserver: {}
-  - name: route_registrar
-    release: routing
-    consumes:
-      nats: {from: nats, deployment: cf}
-    properties:
-      route_registrar:
-        routes:
-        - name: api_server_public_api
-          registration_interval: 20s
-          port: 6106
-          tags:
-            component: api_server
-          uris:
-            - autoscaler.bosh-lite.com
-
   - name: apiserver
     release: app-autoscaler
     properties:
@@ -118,7 +103,7 @@ instance_groups:
           max_connections: 10
           min_connections: 0
         port: 6100
-        publicPort: 6106
+        publicPort: &apiServerPublicPort 6106
         ca_cert: ((apiserver_ca.ca))
         server_cert: ((apiserver_server.certificate))
         server_key:  ((apiserver_server.private_key))
@@ -140,6 +125,20 @@ instance_groups:
       policy_db: *database
       cf:
         api: "https://api.((system_domain))"
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+        - name: api_server_public_api
+          registration_interval: 20s
+          port: *apiServerPublicPort
+          tags:
+            component: api_server
+          uris:
+            - autoscaler.((system_domain))
       
 # Scheduler Instance Group
 - name: scheduler
@@ -199,9 +198,9 @@ instance_groups:
   - name: servicebroker
     release: app-autoscaler
     properties:
-      service_broker:
+      service_broker: 
         db_config: *db_config
-        port : 6101
+        port : &servicebrokerPort 6101
         ca_cert: ((servicebroker_ca.ca))
         server_cert: ((servicebroker_server.certificate))
         server_key: ((servicebroker_server.private_key))
@@ -224,6 +223,20 @@ instance_groups:
           client_cert: ((apiserver_client.certificate))
           client_key: ((apiserver_client.private_key))
       binding_db: *database
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+        - name: autoscaler_service_broker
+          registration_interval: 20s
+          port: *servicebrokerPort
+          tags:
+            component: autoscaler_service_broker
+          uris:
+            - autoscalerservicebroker.((system_domain))
 
 # Pruner Instance Group
 - name: pruner

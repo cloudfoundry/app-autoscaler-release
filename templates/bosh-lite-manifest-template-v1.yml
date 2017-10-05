@@ -111,7 +111,7 @@ jobs:
         routes:
         - name: api_server_public_api
           registration_interval: 20s
-          port: 6106
+          port: (( api_server_properties.publicPort ))
           tags:
             component: api_server
           uris:
@@ -149,6 +149,10 @@ jobs:
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: servicebroker
         release: app-autoscaler
+      - name: route_registrar
+      release: routing
+      consumes:
+        nats: {from: nats, deployment: cf}
     properties:
       service_broker: (( service_broker_properties ))
       binding_db: (( bindingdb ))
@@ -157,6 +161,15 @@ jobs:
           mode: client
           services:
             servicebroker: {}
+      route_registrar:
+            routes:
+            - name: autoscaler_service_broker
+              registration_interval: 20s
+              port: (( service_broker_properties.port ))
+              tags:
+                component: autoscaler_service_broker
+              uris:
+                - autoscalerservicebroker.bosh-lite.com
 
 
   - name: pruner
