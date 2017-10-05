@@ -159,8 +159,6 @@ jobs:
       consul:
         agent:
           mode: client
-          services:
-            servicebroker: {}
       route_registrar:
             routes:
             - name: autoscaler_service_broker

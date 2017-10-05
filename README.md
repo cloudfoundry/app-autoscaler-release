@@ -101,7 +101,7 @@ cf create-service-broker autoscaler <brokerUserName> <brokerPassword> <brokerURL
 All these parameters are configured in the bosh deployment. If you are using default values of deployment manifest, register the service with the commands below.
 
 ```
-cf create-service-broker autoscaler username password https://servicebroker.service.cf.internal:6101
+cf create-service-broker autoscaler username password https://autoscalerservicebroker.bosh-lite.com
 ```
 
 ## Acceptance test
