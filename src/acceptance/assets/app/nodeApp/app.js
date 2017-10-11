@@ -17,6 +17,15 @@ app.get('/', function (req, res) {
     res.send('dummy application root');
 });
 
+app.get('/cpuload/:ms', function (req, res) {
+  var now = new Date().getTime();
+  var result = 0;
+  while (new Date().getTime() < now + parseInt(req.params.ms)) {
+    result += Math.random() * Math.random();
+  }
+  res.send('dummy application cpuload ' + req.params.ms + 'ms');
+})
+
 app.listen(process.env.PORT || 8080, function () {
   console.log('dummy application started');
 });

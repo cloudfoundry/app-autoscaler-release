@@ -75,7 +75,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
+					memStat, _ := averageStatsUsedByInstance(appGUID, totalTime)
+					return memStat
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 30*MB))
 
 				waitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
@@ -93,7 +94,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
+					memStat, _ := averageStatsUsedByInstance(appGUID, totalTime)
+					return memStat
 				}, totalTime, 15*time.Second).Should(BeNumerically("<", 80*MB))
 
 				waitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
@@ -125,7 +127,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
+					memStat, _ := averageStatsUsedByInstance(appGUID, totalTime)
+					return memStat
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 26*MB))
 
 				waitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
@@ -143,7 +146,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
+					memStat, _ := averageStatsUsedByInstance(appGUID, totalTime)
+					return memStat
 				}, totalTime, 15*time.Second).Should(BeNumerically("<", 115*MB))
 
 				waitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
@@ -306,6 +310,74 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 		})
 
+	})
+
+	Context("when scaling by cpu", func() {
+		JustBeforeEach(func() {
+			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
+			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+			doneChan = make(chan bool)
+		})
+
+		AfterEach(func() {
+			close(doneChan)
+			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+		})
+
+		Context("when cpu used is greater than scaling out threshold", func() {
+			BeforeEach(func() {
+				policy = generateDynamicScaleOutPolicy(1, 2, "cpuPercentage", 1)
+				initialInstanceCount = 1
+
+			})
+
+			JustBeforeEach(func() {
+				ticker = time.NewTicker(1 * time.Second)
+				go func(chan bool) {
+					defer GinkgoRecover()
+					for {
+						select {
+						case <-doneChan:
+							ticker.Stop()
+							return
+						case <-ticker.C:
+							response := helpers.CurlAppWithTimeout(cfg, appName, "/cpuload/500", 10*time.Second)
+							Expect(response).Should(
+								ContainSubstring("dummy application cpuload 500ms"),
+							)
+						}
+					}
+				}(doneChan)
+			})
+
+			It("should scale out", func() {
+				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				finishTime := time.Now().Add(totalTime)
+
+				Eventually(func() float64 {
+					_, cpuStat := averageStatsUsedByInstance(appGUID, totalTime)
+					return cpuStat
+				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 0.01))
+
+				waitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+			})
+		})
+
+		Context("when cpu used is lower than scaling in threshold", func() {
+			BeforeEach(func() {
+				policy = generateDynamicScaleInPolicy(1, 2, "cpuPercentage", 90)
+				initialInstanceCount = 2
+			})
+
+
+			It("should scale in", func() {
+				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				finishTime := time.Now().Add(totalTime)
+				waitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
+			})
+
+		})
 	})
 
 })
