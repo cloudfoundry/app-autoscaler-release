@@ -51,7 +51,7 @@ properties:
 
   api_server.scheduler.host:
     description: "Host where scheduler is running"
-    default: "scheduler.service.cf.internal"
+    default: "scheduler-autoscaler.service.cf.internal"
   api_server.scheduler.port:
     description: "Port where scheduler will listen"
     default: 6102

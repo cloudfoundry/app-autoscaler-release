@@ -59,7 +59,7 @@ org.quartz.scheduler.instanceId=<%= spec.id %>
 # scheduler port
 server.port=<%=p('scheduler.port') %>
 
-spring.cloud.consul.discovery.serviceName=scheduler
+spring.cloud.consul.discovery.serviceName=scheduler-autoscaler
 spring.cloud.consul.discovery.instanceId=scheduler
 spring.cloud.consul.discovery.heartbeat.enabled=true
 spring.cloud.consul.discovery.heartbeat.ttlValue=<%=p('scheduler.consul.ttl') %>

@@ -141,7 +141,7 @@ instance_groups:
             - autoscaler.((system_domain))
       
 # Scheduler Instance Group
-- name: scheduler
+- name: scheduler_autoscaler
   azs:
   - z1
   instances: 1
@@ -464,7 +464,7 @@ variables:
   type: certificate
   options:
     ca: scheduler_ca
-    common_name: scheduler.service.cf.internal
+    common_name: scheduler-autoscaler.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
