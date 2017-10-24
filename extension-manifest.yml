@@ -1,0 +1,53 @@
+extension:
+  name: app-autoscaler-cm-deploy
+  version: 1.0
+  type: bosh-release
+uiconfig:
+- name: ext_parameters
+  title: "Properties for external template sample"
+  properties:
+  - name: servicebroker_port
+    label: "Service broker port"
+    description: "Port to access service broker"
+    type: text
+    validation-regex: "^(?:[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+    mandatory: true
+    hidden: false
+    sample-value: "E.g. 35880"
+  - name: servicebroker_username
+    label: "Service broker username"
+    description: "User name for the service broker"
+    mandatory: true
+    sample-value: "E.g. admin"
+    default: "admin"
+  - name: servicebroker_password
+    label: "Service broker password"
+    type: password
+    mandatory: true
+    sample-value: "E.g. mypassword"
+    default: "admin"
+  - name: api-port
+    label: "API Port"
+    description: "Port for api"
+    type: text
+    validation-regex: "^(?:[0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$"
+    mandatory: true
+    hidden: false
+    sample-value: "E.g. 35880"
+states:
+- name: Sync Blobs
+  phase: "Syncing Bosh Blobs"
+  script: bosh2 sync-blobs
+- name: Create Release
+  phase: "Creating a release for App Autoscaler"
+  script: bosh2 -e IBMCloudPrivate create-release --force --name app-autoscaler
+- name: Upload Release
+  phase: "Uploading a release for App Autoscaler"
+  script: bosh2 upload-release -e IBMCloudPrivate -d app-autoscaler
+- name: Generate deployment yaml
+  phase: "Generating the deployment yaml"
+  script: ./scripts/generate-bosh-lite-manifest -r ./manifests/cf-merge-property-overrides.yaml  -p ./manifests/property-overrides.yaml  -d ./manifests/db-stub-override.yaml -v v1
+- name: Deploy App Autoscaler
+  phase: "Deploying App Autoscaler"
+  script: bosh2 deploy -e IBMCloudPrivate -d app-autoscaler ./bosh/deployments/autoscaler.yml -n
+

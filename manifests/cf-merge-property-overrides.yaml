@@ -1,0 +1,6 @@
+---
+properties: (( prune ))
+jobs: (( prune ))
+name: (( prune ))
+releases: (( prune ))
+update: (( prune ))

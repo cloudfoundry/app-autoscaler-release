@@ -1,0 +1,68 @@
+---
+policydb:
+  address: 192.168.243.203
+  databases:
+    - {name: autoscaler, tag: policydb}
+  db_scheme: postgres
+  port: 5432
+  roles:
+    - {name: postgres, password: postgres, tag: policydb}
+
+schedulerdb:
+  address: 192.168.243.203
+  databases:
+    - {name: autoscaler, tag: schedulerdb}
+  db_scheme: postgres
+  port: 5432
+  roles:
+    - {name: postgres, password: postgres, tag: schedulerdb}
+
+scalingenginedb:
+  address: 192.168.243.203
+  databases:
+    - {name: autoscaler, tag: scalingenginedb}
+  db_scheme: postgres
+  port: 5432
+  roles:
+    - {name: postgres, password: postgres, tag: scalingenginedb}
+
+appmetricsdb:
+  address: 192.168.243.203
+  databases:
+    - {name: autoscaler, tag: appmetricsdb}
+  db_scheme: postgres
+  port: 5432
+  roles:
+    - {name: postgres, password: postgres, tag: appmetricsdb}
+
+instancemetricsdb:
+  address: 192.168.243.203
+  databases:
+    - {name: autoscaler, tag: instancemetricsdb}
+  db_scheme: postgres
+  port: 5432
+  roles:
+    - {name: postgres, password: postgres, tag: instancemetricsdb}
+
+bindingdb:
+  address: 192.168.243.203
+  databases:
+    - {name: autoscaler, tag: bindingdb}
+  db_scheme: postgres
+  port: 5432
+  roles:
+    - {name: postgres, password: postgres, tag: bindingdb}
+
+lockdb:
+  address: 192.168.243.203
+  databases:
+    - {name: autoscaler, tag: lockdb}
+  db_scheme: postgres
+  port: 5432
+  roles:
+    - {name: postgres, password: postgres, tag: lockdb}
+
+instance_count_overrides:
+  - name: postgres
+    instances: 1
+

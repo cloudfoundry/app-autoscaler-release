@@ -3,4 +3,3 @@ config_from_cf:
       consul: (( grab properties.consul ))
       unbound: (( grab properties.unbound ))
       nats: (( grab properties.nats ))
-      dashboard: (( grab properties.dashboard ))

@@ -1,0 +1,47 @@
+{
+  "instance_min_count": 1,
+  "instance_max_count": 5,
+  "scaling_rules": [{
+    "metric_type": "memoryutil",
+    "stat_window_secs": 300,
+    "breach_duration_secs": 600,
+    "threshold": 30,
+    "operator": "<",
+    "cool_down_secs": 300,
+    "adjustment": "-1"
+  }, {
+    "metric_type": "memoryutil",
+    "stat_window_secs": 300,
+    "breach_duration_secs": 600,
+    "threshold": 55,
+    "operator": ">=",
+    "cool_down_secs": 300,
+    "adjustment": "+1"
+  }],
+  "schedules": {
+    "timezone": "America/Los_Angeles",
+    "recurring_schedule": [{
+      "start_time": "01:00",
+      "end_time": "23:00",
+      "days_of_week": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "instance_min_count": 1,
+      "instance_max_count": 5,
+      "initial_min_instance_count": 5
+    }],
+    "specific_date": [{
+      "start_date_time": "2016-06-02T10:00",
+      "end_date_time": "2018-06-15T13:59",
+      "instance_min_count": 1,
+      "instance_max_count": 4,
+      "initial_min_instance_count": 1
+    }]
+  }
+}

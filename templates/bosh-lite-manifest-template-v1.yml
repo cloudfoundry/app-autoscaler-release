@@ -1,23 +1,23 @@
 --- 
 
-director_uuid: ((merge))
-
-name: app-autoscaler-release
+name: (( grab deployment_name ))
 
 ## Release Details ###
 releases:
-  - name: app-autoscaler
-    version: latest
-  - name: postgres
-    url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=17
-    version: '17'
-    sha1: b062e32a5409ccd4e4161337c48705c793a58412
-  - name: cf
-    version: latest
-  - name: routing
-    url: https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.162.0
-    sha1: f17cf09d2414f5f486d18bbd57b17fd48fb69773
-    version: '0.162.0'
+- name: app-autoscaler
+  version: latest
+- name: postgres
+  url: file:///repo_local/postgres-release/v17/postgres-release-17.tgz
+  version: "17"
+- name: routing
+  url: file:///repo_local/cf-routing-release/v0.162.0/cf-routing-release-0.162.0.tgz
+  version: 0.162.0
+- location: file:///repo_local/cfp-cf-release/253.36.0/253.36.0-ibm-cf.tgz 
+  name: cf-235031 
+  version: ibm-v235.31
+- location: file:///repo_local/cfp-unbound/v0.2-15/unbound-v0.2-15.tgz
+  name: unbound
+  version: v0.2-4
 
 ## Network Section ##
 networks:
@@ -58,20 +58,27 @@ compilation:
 ## Jobs ##
 jobs:
   - name: postgres
-    instances: (( instance_count_overrides.postgres.instances || 1 ))
+    instances: (( grab instance_count_overrides.postgres.instances || 1 ))
     update:
       serial: true
-    resource_pool: default
+    resource_pool: (( grab resource_pool ))
     networks:
-      - name: default
+    - default:
+      - dns
+      - gateway
+      name: default
+      static_ips: 
+        - (( grab default_db.address))
     templates:
       - name: consul_agent
-        release: cf
+        release: (( grab meta.cf_release_name ))
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: postgres
         release: postgres
+      - name: unbound
+        release: unbound
     properties:
-      databases: (( default_db ))
+      databases: (( grab default_db || null ))
       consul:
         agent:
           mode: client
@@ -86,22 +93,25 @@ jobs:
     instances: 1
     networks:
       - name: default
-    resource_pool: default
+    resource_pool: (( grab resource_pool ))
     templates:
       - name: consul_agent
-        release: cf
+        release: (( grab meta.cf_release_name ))
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: apiserver
         release: app-autoscaler
       - name: route_registrar
         release: routing
         consumes:
-          nats: {from: nats, deployment: cf}
+          nats: {deployment: (( grab meta.cf_release_name ))}
+      - name: unbound
+        release: unbound
     properties:
-      api_server: (( api_server_properties ))
-      policy_db: (( policydb ))
+      api_server: (( grab api_server_properties ))
+      policy_db: (( grab policydb ))
       cf:
-        api: (( cf_properties.api ))
+        api: (( grab cf_properties.api ))
+        skip_ssl_validation: (( grab cf_properties.skip_ssl_validation))
       consul:
         agent:
           mode: client
@@ -111,11 +121,11 @@ jobs:
         routes:
         - name: api_server_public_api
           registration_interval: 20s
-          port: (( api_server_properties.publicPort ))
+          port: (( grab api_server_properties.publicPort ))
           tags:
             component: api_server
           uris:
-            - autoscaler.bosh-lite.com
+            - (( grab api_server_properties.uri ))
 
 
 
@@ -123,17 +133,19 @@ jobs:
     instances: 1
     networks:
       - name: default
-    resource_pool: default
+    resource_pool: (( grab resource_pool ))
     templates:
       - name: consul_agent
-        release: cf
+        release: (( grab meta.cf_release_name ))
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: scheduler
         release: app-autoscaler
+      - name: unbound
+        release: unbound
     properties:
-      scheduler: (( scheduler_properties ))
-      scheduler_db: (( schedulerdb ))
-      policy_db: (( policydb ))
+      scheduler: (( grab scheduler_properties ))
+      scheduler_db: (( grab schedulerdb ))
+      policy_db: (( grab policydb ))
       consul:
         agent:
           mode: client
@@ -142,20 +154,22 @@ jobs:
     instances: 1
     networks:
       - name: default
-    resource_pool: default
+    resource_pool: (( grab resource_pool ))
     templates:
       - name: consul_agent
-        release: cf
+        release: (( grab meta.cf_release_name )) 
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: servicebroker
         release: app-autoscaler
       - name: route_registrar
-      release: routing
-      consumes:
-        nats: {from: nats, deployment: cf}
+        release: routing
+        consumes:
+          nats: {deployment: (( grab meta.cf_release_name ))}
+      - name: unbound
+        release: unbound
     properties:
-      service_broker: (( service_broker_properties ))
-      binding_db: (( bindingdb ))
+      service_broker: (( grab service_broker_properties ))
+      binding_db: (( grab bindingdb ))
       consul:
         agent:
           mode: client
@@ -163,29 +177,31 @@ jobs:
             routes:
             - name: autoscaler_service_broker
               registration_interval: 20s
-              port: (( service_broker_properties.port ))
+              port: (( grab service_broker_properties.port ))
               tags:
                 component: autoscaler_service_broker
               uris:
-                - autoscalerservicebroker.bosh-lite.com
+                - (( grab service_broker_properties.uri ))
 
 
   - name: pruner
     instances: 1
     networks:
       - name: default
-    resource_pool: default
+    resource_pool: (( grab resource_pool ))
     templates:
       - name: consul_agent
-        release: cf
+        release: (( grab meta.cf_release_name ))
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: pruner
         release: app-autoscaler
+      - name: unbound
+        release: unbound
     properties:
-      appmetrics_db: (( appmetricsdb ))
-      instancemetrics_db: (( instancemetricsdb ))
-      scalingengine_db: (( scalingenginedb ))
-      pruner: (( pruner_properties ))
+      appmetrics_db: (( grab appmetricsdb ))
+      instancemetrics_db: (( grab instancemetricsdb ))
+      scalingengine_db: (( grab scalingenginedb ))
+      pruner: (( grab pruner_properties ))
       consul:
         agent:
           mode: client
@@ -195,18 +211,21 @@ jobs:
     instances: 1
     networks:
       - name: default
-    resource_pool: default
+    resource_pool: (( grab resource_pool ))
     templates:
       - name: consul_agent
-        release: cf
+        release: (( grab meta.cf_release_name ))
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: metricscollector
         release: app-autoscaler
+      - name: unbound
+        release: unbound
     properties:
-      instancemetrics_db: (( instancemetricsdb ))
-      policy_db: (( policydb ))
-      cf: (( cf_properties ))
-      metricscollector: (( metricscollector_properties ))
+      instancemetrics_db: (( grab instancemetricsdb ))
+      policy_db: (( grab policydb ))
+      lock_db: (( grab lockdb ))
+      cf: (( grab cf_properties ))
+      metricscollector: (( grab metricscollector_properties ))
       consul:
         agent:
           mode: client
@@ -216,17 +235,19 @@ jobs:
     instances: 1
     networks:
       - name: default
-    resource_pool: default
+    resource_pool: (( grab resource_pool ))
     templates:
       - name: consul_agent
-        release: cf
+        release: (( grab meta.cf_release_name ))
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: eventgenerator
         release: app-autoscaler
+      - name: unbound
+        release: unbound
     properties:
-      appmetrics_db: (( appmetricsdb ))
-      policy_db: (( policydb ))
-      eventgenerator: (( eventgenerator_properties ))
+      appmetrics_db: (( grab appmetricsdb ))
+      policy_db: (( grab policydb ))
+      eventgenerator: (( grab eventgenerator_properties ))
       consul:
         agent:
           mode: client
@@ -235,41 +256,23 @@ jobs:
     instances: 1
     networks:
       - name: default
-    resource_pool: default
+    resource_pool: (( grab resource_pool ))
     templates:
       - name: consul_agent
-        release: cf
+        release: (( grab meta.cf_release_name ))
         consumes: {consul_client: nil, consul_server: nil, consul_common: nil}
       - name: scalingengine
         release: app-autoscaler
+      - name: unbound
+        release: unbound
     properties:
-      scalingengine_db: (( scalingenginedb ))
-      scheduler_db: (( schedulerdb ))
-      policy_db: (( policydb ))
-      cf: (( cf_properties ))
-      scalingengine: (( scalingengine_properties ))
+      scalingengine_db: (( grab scalingenginedb ))
+      scheduler_db: (( grab schedulerdb ))
+      policy_db: (( grab policydb ))
+      cf: (( grab cf_properties ))
+      scalingengine: (( grab scalingengine_properties ))
       consul:
         agent:
           mode: client
 
-properties:
-  consul: (( config_from_cf.consul ))
-
-cf_properties: (( merge )) 
-api_server_properties: (( merge )) 
-scheduler_properties: (( merge )) 
-service_broker_properties: (( merge )) 
-pruner_properties: ((merge)) 
-metricscollector_properties: (( merge )) 
-eventgenerator_properties: (( merge )) 
-scalingengine_properties: (( merge )) 
-default_db: (( merge )) 
-instance_count_overrides: (( merge || nil )) 
-database: (( merge || default_db )) 
-policydb: (( merge || database )) 
-schedulerdb: (( merge || database )) 
-scalingenginedb: (( merge || database )) 
-appmetricsdb: (( merge || database )) 
-instancemetricsdb: (( merge || database )) 
-bindingdb: (( merge || database ))
-config_from_cf: (( merge ))
+properties: (( grab config_from_cf.properties ))

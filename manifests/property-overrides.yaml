@@ -1,7 +1,8 @@
 ---
-deployment_name: app-autoscaler-replease
+deployment_name: app-autoscaler
 
 default_db:
+  address: 192.168.243.203
   databases:
     - {name: autoscaler, tag: default}
   db_scheme: postgres
@@ -14,7 +15,7 @@ api_server_properties:
     idle_timeout: 1000
     max_connections: 10
     min_connections: 0
-  uri: autoscaler.bosh-lite.com
+  uri: autoscaler.ops.icp.net
   port: 6100
   publicPort: 6106
   ca_cert: (( grab app_autoscaler_ca_cert ))
@@ -41,8 +42,8 @@ service_broker_properties:
     idle_timeout: 1000
     max_connections: 10
     min_connections: 0
-  uri: autoscalerservicebroker.bosh-lite.com
-  port : 6101
+  uri: autoscalerservicebroker.ops.icp.net
+  port : 80
   ca_cert: (( grab app_autoscaler_ca_cert ))
   server_cert: (( grab servicebroker_server_cert ))
   server_key: (( grab servicebroker_server_key ))
@@ -79,12 +80,13 @@ scheduler_properties:
     client_key: (( grab scalingengine_client_key ))
 
 cf_properties:
-  api: https://api.bosh-lite.com
+  api: https://api.ops.icp.net
   grant_type: password
-  username: admin
-  password: admin
-  client_id: admin
-  secret: admin-secret
+  username: (( grab bmxconfig.main_user_name ))
+  password: (( grab bmxconfig.main_user_password ))
+  client_id: ((grab properties.dashboard.uaa.client_id ))
+  secret: ((grab properties.dashboard.uaa.client_secret ))
+  skip_ssl_validation: true
 
 pruner_properties:
   logging:
@@ -127,7 +129,7 @@ eventgenerator_properties:
     client_cert: (( grab metricscollector_client_cert ))
     client_key: (( grab metricscollector_client_key ))
 
-resource_pool: default
+resource_pool: coreNode
 
 app_autoscaler_ca_cert: |
   -----BEGIN CERTIFICATE-----
@@ -732,3 +734,16 @@ servicebroker_server_key: |
   rUshFsujkwjvBQFkw4D/ZzuSOQaffBRBtVAcECKhQ1VGN77kLD3I6qF/cmDalcw8
   gCqXGniC/xdQsXDswzEQBbU98eS55q4cgmTkeP1qB+CEq5eebkeM
   -----END RSA PRIVATE KEY-----
+
+stemcell_releases: (( prune ))
+bmxconfig: (( prune ))
+director_releases: (( prune ))
+certificates: (( prune ))
+credentials: (( prune ))
+cf_releases: (( prune ))
+NOT_USED_properties: (( prune ))
+diego_releases: (( prune ))
+resource_pools: (( prune ))
+compilation: (( prune ))
+disk_pools: (( prune ))
+networks: (( prune ))

@@ -12,8 +12,10 @@ SYNOPSIS:
 USAGE:
     $0 <MANDATORY ARGUMENTS> [OPTIONAL ARGUMENTS]
 MANDATORY ARGUMENTS:
-    -c <cf-path>                Path to CF manifest file.
+    -r <cf-property-overrides>  Path to cf-property-overrides file.
     -p <property-path>          Path to property-overrides stub file.
+    -cp <cf-merge-property-overrides> Path to prunning extra data from the cf merge
+
 OPTIONAL ARGUMENTS:
     -d <db-stub-path>           Path to database stub file.
     -v <bosh-manifest-version>  v1 or v2(default).
@@ -26,15 +28,15 @@ EOF
   exit 1
 }
 
-manifest_version="v2"
+manifest_version="v1"
 
-while getopts "c:p:d:v:" opt ; do
+while getopts "p:r:d:v:" opt ; do
   case "$opt" in
-    c)
-        cf_manifest_file=$OPTARG
-        ;;
     p)
         property_overrides=$OPTARG
+        ;;
+    r)
+        cf_property_overrides=$OPTARG
         ;;
     d)
         db_settings=$OPTARG
@@ -48,17 +50,6 @@ while getopts "c:p:d:v:" opt ; do
   esac
 done
 
-
-if [ -z ${cf_manifest_file} ]; then
-  >&2 echo "ERROR: CF manifest file is missing"
-  argument_error=true
-else
-  if [ ! -f "${cf_manifest_file}" ]; then
-    >&2 echo "ERROR: CF manifest '${cf_manifest_file}' is not a regular file"
-    argument_error=true
-  fi
-fi
-
 if [ -z ${property_overrides} ]; then
   >&2 echo "ERROR: Property-overrides stub file is missing"
   argument_error=true
@@ -70,6 +61,17 @@ else
   fi
 fi
 
+if [ -z ${cf_property_overrides} ]; then
+  >&2 echo "ERROR: Cloud Foundry prunning overrides stub file is missing"
+  argument_error=true
+
+else
+  if [ ! -f "${cf_property_overrides}" ]; then
+    >&2 echo "ERROR: Cloud Foundry prunning overrides stub '${cf_property_overrides}' is not a regular file"
+    argument_error=true
+  fi
+fi
+
 if [[ ! -z "${db_settings}" && ! -f "${db_settings}" ]]; then
   >&2 echo "ERROR: Database Setting stub '${db_settings}' is not a regular file"
   argument_error=true
@@ -77,9 +79,6 @@ fi
 if [[ "${manifest_version}" == "v1" || "${manifest_version}" == "V1" ]]; then
    template_file="bosh-lite-manifest-template-v1.yml"
    echo "Generating BOSH V1 manifest using " ${template_file} "as manifest template"
-elif [[ "${manifest_version}" == "v2" || "${manifest_version}" == "V2" ]]; then
-   template_file="bosh-lite-manifest-template-v2.yml"
-   echo "Generating BOSH V2 manifest using " ${template_file} "as manifest template"
 else
   >&2 echo "ERROR: Invalid bosh manifest version '${manifest_version}'"
   argument_error=true
@@ -90,39 +89,21 @@ if [ ! -z $argument_error ]; then
   usage
 fi
 
-
-BOSH_STATUS=$(bosh status)
-EXPECTED_DIRECTOR_NAME="Bosh Lite Director"
-
-if [[ "$(echo "$BOSH_STATUS" | grep Name)" != *"$EXPECTED_DIRECTOR_NAME"* ]]; then
-  echo "Can only target $EXPECTED_DIRECTOR_NAME. Please use 'bosh target' before running this script."
-  exit 1
-fi
-
 tmpdir=$(mktemp -d /tmp/autoscaler-bosh-lite-manifest.XXXXX)
-director_uuid_file=${tmpdir}/director.yml
-printf "director_uuid: %s" $(bosh status --uuid) > ${director_uuid_file}
-
-# Check for spiff installation
-which spiff > /dev/null 2>&1 || {
-  echo "Aborted. Please install spiff by following https://github.com/cloudfoundry-incubator/spiff#installation" 1>&2
-  exit 1
-}
-
-spiff merge \
+CLOUDFOUNDRY_DIR="/data/CloudFoundry/"
+spruce merge \
   ${templates_dir}/config-from-cf.yml \
-  ${cf_manifest_file} \
+  "${CLOUDFOUNDRY_DIR}/cf-deploy.yml" \
+  ${cf_property_overrides} \
   > ${tmpdir}/config-from-cf-merged.yml
 
-mkdir -p ${root_dir}/bosh-lite/deployments
+mkdir -p ${root_dir}/bosh/deployments
 
-spiff merge \
+spruce merge \
 ${templates_dir}/${template_file} \
-${director_uuid_file} \
 ${property_overrides} \
 ${db_settings} \
+"${CLOUDFOUNDRY_DIR}/bmxconfig.yml" \
+"${CLOUDFOUNDRY_DIR}/credentials.yml" \
 ${tmpdir}/config-from-cf-merged.yml  \
-> ${root_dir}/bosh-lite/deployments/autoscaler.yml
-
-bosh deployment ${root_dir}/bosh-lite/deployments/autoscaler.yml
-
+> ${root_dir}/bosh/deployments/autoscaler.yml
