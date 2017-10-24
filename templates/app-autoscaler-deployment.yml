@@ -12,6 +12,10 @@ releases:
   sha1: b062e32a5409ccd4e4161337c48705c793a58412
 - name: consul
   version: latest
+- name: routing
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.162.0
+  sha1: f17cf09d2414f5f486d18bbd57b17fd48fb69773
+  version: '0.162.0'
 
 # Stemcell details
 stemcells:
@@ -36,7 +40,7 @@ instance_groups:
   update:
     serial: true
   stemcell: default
-  vm_type: default
+  vm_type: small
   networks:
   - name: default
   jobs:
@@ -77,7 +81,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: default
+  vm_type: minimal
   jobs:
   - name: consul_agent
     release: consul
@@ -99,6 +103,7 @@ instance_groups:
           max_connections: 10
           min_connections: 0
         port: 6100
+        publicPort: &apiServerPublicPort 6106
         ca_cert: ((apiserver_ca.ca))
         server_cert: ((apiserver_server.certificate))
         server_key:  ((apiserver_server.private_key))
@@ -118,6 +123,22 @@ instance_groups:
           client_cert: ((metricscollector_client.certificate))
           client_key: ((metricscollector_client.private_key))
       policy_db: *database
+      cf:
+        api: "https://api.((system_domain))"
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+        - name: api_server_public_api
+          registration_interval: 20s
+          port: *apiServerPublicPort
+          tags:
+            component: api_server
+          uris:
+            - autoscaler.((system_domain))
       
 # Scheduler Instance Group
 - name: scheduler
@@ -127,7 +148,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: default
+  vm_type: small-highmem
   jobs:
   - name: consul_agent
     release: consul
@@ -161,7 +182,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: default
+  vm_type: minimal
   jobs:
   - name: consul_agent
     release: consul
@@ -169,23 +190,19 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
-    properties:
-      consul:
-        agent:
-          services:
-            servicebroker: {}
   - name: servicebroker
     release: app-autoscaler
     properties:
-      service_broker:
+      service_broker: 
         db_config: *db_config
-        port : 6101
+        port : &servicebrokerPort 6101
         ca_cert: ((servicebroker_ca.ca))
         server_cert: ((servicebroker_server.certificate))
         server_key: ((servicebroker_server.private_key))
         username: username
         password: password
         http_request_timeout: 5000
+        dashboard_redirect_uri: ""
         catalog: 
           services:
           - id: autoscaler-guid
@@ -201,6 +218,20 @@ instance_groups:
           client_cert: ((apiserver_client.certificate))
           client_key: ((apiserver_client.private_key))
       binding_db: *database
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+        - name: autoscaler_service_broker
+          registration_interval: 20s
+          port: *servicebrokerPort
+          tags:
+            component: autoscaler_service_broker
+          uris:
+            - autoscalerservicebroker.((system_domain))
 
 # Pruner Instance Group
 - name: pruner
@@ -210,7 +241,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: default
+  vm_type: minimal
   jobs:
   - name: consul_agent
     release: consul
@@ -236,7 +267,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: default
+  vm_type: small
   jobs:
   - name: consul_agent
     release: consul
@@ -273,7 +304,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: default
+  vm_type: small
   jobs:
   - name: consul_agent
     release: consul
@@ -308,7 +339,7 @@ instance_groups:
   networks:
   - name: default
   stemcell: default
-  vm_type: default
+  vm_type: minimal
   jobs:
   - name: consul_agent
     release: consul

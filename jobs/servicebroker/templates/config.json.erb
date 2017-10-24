@@ -29,11 +29,6 @@
         },
     },
     'httpRequestTimeout' => p('service_broker.http_request_timeout'),
-    'tls' => {
-        'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.key",
-        'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
-        'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
-    },
     'serviceCatalogPath' => "/var/vcap/jobs/servicebroker/config/catalog.json",
     'quota' => {
       'quota_switch' => p('service_broker.quota.quota_switch'),
@@ -46,12 +41,14 @@
       'uaa_client_id' => p('service_broker.quota.uaa_client_id'),
       'uaa_client_secret' => p('service_broker.quota.uaa_client_secret'),
       'skip_plans' => p('service_broker.quota.skip_plans'),
-    }
+    },
+    # 'tls' => {
+    #     'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.key",
+    #     'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
+    #     'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
+    # },
+    'dashboardRedirectUri' => p('service_broker.dashboard_redirect_uri')
   }
-
-  if p('service_broker.server_cert') == "" || p('service_broker.server_key') == ""
-    params.delete('tls')
-  end
 %>
 
 <%=JSON.pretty_generate(params, :indentation => 2)%> 

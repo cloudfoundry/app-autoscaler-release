@@ -161,7 +161,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		})
 
 		AfterEach(func() {
-			doneChan <- true
+			close(doneChan)
 			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})
@@ -239,7 +239,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		})
 
 		AfterEach(func() {
-			doneChan <- true
+			close(doneChan)
 			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})

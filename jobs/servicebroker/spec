@@ -93,4 +93,6 @@ properties:
     description: "CF UAA client secret"
   service_broker.quota.skip_plans:
     description: "plan-ids to be skip from quota validation"
-  
+  service_broker.dashboard_redirect_uri:
+    description: "service dashboard redirect uri"
+    default: ""

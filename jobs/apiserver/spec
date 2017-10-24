@@ -64,7 +64,7 @@ properties:
     description: "PEM-encoded client certificate"
   api_server.scheduler.client_key:
     description: "PEM-encoded client key"
-
+  
 
   api_server.scaling_engine.host:
     description: "Host where scalingengine is running"
@@ -111,4 +111,7 @@ properties:
     description: "Port on which the policydb server will listen"
   policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
+
+  cf.api:
+    description: "the Cloud Foundry API endpoint"
 

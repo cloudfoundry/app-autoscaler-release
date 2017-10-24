@@ -13,6 +13,7 @@ api_server_properties:
     max_connections: 10
     min_connections: 0
   port: 6100
+  publicPort: 6106
   ca_cert: (( app_autoscaler_ca_cert ))
   server_cert: (( apiserver_server_cert ))
   server_key:  (( apiserver_server_key))
@@ -44,6 +45,7 @@ service_broker_properties:
   username: username
   password: password
   http_request_timeout: 5000
+  dashboard_redirect_uri: ""
   catalog: 
     services:
     - id: autoscaler-guid
