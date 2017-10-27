@@ -150,9 +150,9 @@ jobs:
       - name: servicebroker
         release: app-autoscaler
       - name: route_registrar
-      release: routing
-      consumes:
-        nats: {from: nats, deployment: cf}
+        release: routing
+        consumes:
+          nats: {from: nats, deployment: cf}
     properties:
       service_broker: (( service_broker_properties ))
       binding_db: (( bindingdb ))
