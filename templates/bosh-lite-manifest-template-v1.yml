@@ -205,6 +205,7 @@ jobs:
     properties:
       instancemetrics_db: (( instancemetricsdb ))
       policy_db: (( policydb ))
+      lock_db: (( lockdb ))
       cf: (( cf_properties ))
       metricscollector: (( metricscollector_properties ))
       consul:
@@ -272,4 +273,5 @@ scalingenginedb: (( merge || database ))
 appmetricsdb: (( merge || database )) 
 instancemetricsdb: (( merge || database )) 
 bindingdb: (( merge || database ))
+lockdb: (( merge || database ))
 config_from_cf: (( merge ))

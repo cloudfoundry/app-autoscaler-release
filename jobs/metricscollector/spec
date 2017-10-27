@@ -39,6 +39,17 @@ properties:
   instancemetrics_db.roles:
     description: "The list of database roles used in instancemetricsdb database including name/password"
 
+  lock_db.address:
+    description: "IP address on which the lockdb server will listen"
+    default: "postgres.service.cf.internal"
+  lock_db.databases:
+    description: "The list of databases used in lockdb database including name"
+  lock_db.db_scheme:
+    description: "Database scheme to be used to access lockdb"
+  lock_db.port:
+    description: "Port on which the lockdb server will listen"
+  lock_db.roles:
+    description: "The list of database roles used in lockdb database including name/password"
 
   cf.api:
     description: "the Cloud Foundry API endpoint"
@@ -86,3 +97,7 @@ properties:
     description: "consul cluster configuration"
     default: http://127.0.0.1:8500
 
+  metricscollector.enable_db_lock:
+    descrption: "Enable database lock flag"
+    default: false
+    

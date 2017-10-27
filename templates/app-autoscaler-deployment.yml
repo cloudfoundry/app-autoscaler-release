@@ -280,6 +280,7 @@ instance_groups:
     properties:
       instancemetrics_db: *database
       policy_db: *database
+      lock_db: *database
       cf: &cf_credentials
         api: "https://api.((system_domain))"
         grant_type: password
@@ -292,6 +293,7 @@ instance_groups:
           level: debug
         server:
           port: 6103
+        enable_db_lock: false
         ca_cert: ((metricscollector_ca.ca))
         server_cert: ((metricscollector_server.certificate))
         server_key: ((metricscollector_server.private_key))
