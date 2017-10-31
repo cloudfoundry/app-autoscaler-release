@@ -464,7 +464,7 @@ variables:
   type: certificate
   options:
     ca: scheduler_ca
-    common_name: scheduler-autoscaler.service.cf.internal
+    common_name: autoscalerscheduler.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
