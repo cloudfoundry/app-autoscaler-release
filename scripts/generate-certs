@@ -28,11 +28,11 @@ generate_cert () {
 generate_cert apiserver.service.cf.internal apiserver_server
 generate_cert scalingengine.service.cf.internal scalingengine_server
 generate_cert metricscollector.service.cf.internal metricscollector_server
-generate_cert scheduler.service.cf.internal scheduler_server
+generate_cert autoscalerscheduler.service.cf.internal scheduler_server
 generate_cert servicebroker.service.cf.internal servicebroker_server
 
 # Generate client certificates for autoscaler components
 generate_cert metricscollector metricscollector_client
 generate_cert scalingengine scalingengine_client
-generate_cert scheduler scheduler_client
+generate_cert autoscalerscheduler scheduler_client
 generate_cert apiserver apiserver_client

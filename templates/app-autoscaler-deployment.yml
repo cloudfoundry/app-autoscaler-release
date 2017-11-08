@@ -140,9 +140,9 @@ instance_groups:
       policy_db: *database
       cf:
         api: "https://api.((system_domain))"
-      
+
 # Scheduler Instance Group
-- name: scheduler
+- name: autoscalerscheduler
   azs:
   - z1
   instances: 1
@@ -456,7 +456,7 @@ variables:
   type: certificate
   options:
     ca: scheduler_ca
-    common_name: scheduler.service.cf.internal
+    common_name: autoscalerscheduler.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
