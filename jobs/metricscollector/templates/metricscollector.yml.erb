@@ -17,6 +17,12 @@
   policy_db_database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
   policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
 
+  lock_db_scheme = p('lock_db.db_scheme')
+  lock_db_address = p('lock_db.address')
+  lock_db_port = p('lock_db.port')
+  lock_db_role = p_arr('lock_db.roles').find { |role| role['tag'] == 'lockdb' or role['tag'] == 'default'  }
+  lock_db_database = p_arr('lock_db.databases').find { |database| database['tag'] == 'lockdb' or database['tag'] == 'default' }
+  lock_db_url = lock_db_scheme + "://" + lock_db_role['name'] + ":" + lock_db_role['password'] + "@" + lock_db_address + ":" + lock_db_port.to_s + "/" + lock_db_database['name'] + "?sslmode=disable"
 %>
 
 
@@ -51,3 +57,8 @@ lock:
   lock_ttl: <%= p("metricscollector.lock.lock_ttl") %>
   lock_retry_interval: <%= p("metricscollector.lock.lock_retry_interval") %>
   consul_cluster_config: <%= p("metricscollector.lock.consul_cluster_config") %>
+
+db_lock:
+  url: <%= lock_db_url %>
+
+enable_db_lock: <%= p("metricscollector.enable_db_lock") %>

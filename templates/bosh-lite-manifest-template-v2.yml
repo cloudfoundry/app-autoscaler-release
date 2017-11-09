@@ -273,6 +273,7 @@ instance_groups:
         properties:
           instancemetrics_db: (( instancemetricsdb ))
           policy_db: (( policydb ))
+          lock_db: (( lockdb ))
           cf: (( cf_properties ))
           metricscollector: (( metricscollector_properties ))
         release: app-autoscaler
@@ -365,4 +366,5 @@ scalingenginedb: (( merge || database ))
 appmetricsdb: (( merge || database ))
 instancemetricsdb: (( merge || database ))
 bindingdb: (( merge || database ))
+lockdb: (( merge || database ))
 
