@@ -293,6 +293,10 @@ instance_groups:
           level: debug
         server:
           port: 6103
+        collector:
+          refresh_interval: 60s
+          collect_interval: 30s
+          save_interval: 5s
         enable_db_lock: false
         ca_cert: ((metricscollector_ca.ca))
         server_cert: ((metricscollector_server.certificate))

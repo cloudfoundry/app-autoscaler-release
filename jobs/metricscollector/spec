@@ -82,6 +82,9 @@ properties:
   metricscollector.collector.collect_interval:
     description: "the time interval to collect container metrics from loggregator"
     default: 30s
+  metricscollector.collector.save_interval:
+    description: "the time interval to save metrics in database"
+    default: 5s
   metricscollector.collector.collect_method:
     description: "the method to collect metrics from loggregator"
     default: "streaming"

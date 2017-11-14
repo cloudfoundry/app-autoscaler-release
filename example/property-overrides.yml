@@ -92,7 +92,9 @@ metricscollector_properties:
   server:
     port: 6103
   collector:
-    refresh_interval: 30s
+    refresh_interval: 60s
+    collect_interval: 30s
+    save_interval: 5s
   ca_cert: (( app_autoscaler_ca_cert ))
   server_cert: (( metricscollector_server_cert ))
   server_key: (( metricscollector_server_key ))
