@@ -125,6 +125,7 @@ instance_groups:
       policy_db: *database
       cf:
         api: "https://api.((system_domain))"
+        skip_ssl_validation: "((skip_ssl_validation))"
   - name: route_registrar
     release: routing
     consumes:
@@ -288,6 +289,7 @@ instance_groups:
         password: "((cf_admin_password))"
         client_id: admin
         secret: "((cf_admin_client_secret))"
+        skip_ssl_validation: "((skip_ssl_validation))"
       metricscollector:
         logging:
           level: debug

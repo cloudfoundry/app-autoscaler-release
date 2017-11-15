@@ -62,7 +62,10 @@ properties:
   cf.client_id:
     description: "the client id to log in cf"
   cf.secret:
-    description: "the secret to log in cf"	
+    description: "the secret to log in cf"
+  cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
 
   metricscollector.logging.level:
     description: "the level of logging"
@@ -103,4 +106,3 @@ properties:
   metricscollector.enable_db_lock:
     descrption: "Enable database lock flag"
     default: false
-    
