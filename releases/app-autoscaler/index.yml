@@ -24,4 +24,6 @@ builds:
     version: v0.0.13
   5901f572-762f-4684-8b87-340d3d162a42:
     version: v0.0.14
+  11ac73c5-488e-452e-bc2c-9592d11e635f:
+    version: v0.0.15
 format-version: '2'
