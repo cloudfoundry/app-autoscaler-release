@@ -111,4 +111,7 @@ properties:
 
   cf.api:
     description: "the Cloud Foundry API endpoint"
+  cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
 

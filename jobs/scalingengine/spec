@@ -63,7 +63,10 @@ properties:
   cf.client_id:
     description: "the client id to log in cf"
   cf.secret:
-    description: "the secret to log in cf"	
+    description: "the secret to log in cf"
+  cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
 
   scalingengine.logging.level:
     description: "the level of logging"
@@ -88,3 +91,4 @@ properties:
   scalingengine.defaultCoolDownSecs:
     description: "Default value for cool_down_secs"
     default: 300
+

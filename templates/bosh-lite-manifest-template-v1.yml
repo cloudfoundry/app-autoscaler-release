@@ -102,6 +102,7 @@ jobs:
       policy_db: (( policydb ))
       cf:
         api: (( cf_properties.api ))
+        skip_ssl_validation: ((cf_properties.skip_ssl_validation))
       consul:
         agent:
           mode: client

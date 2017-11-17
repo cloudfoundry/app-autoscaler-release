@@ -81,6 +81,7 @@ cf_properties:
   password: admin
   client_id: admin
   secret: admin-secret
+  skip_ssl_validation: true
 
 pruner_properties:
   logging:
