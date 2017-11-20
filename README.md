@@ -75,16 +75,21 @@ bosh -e YOUR_ENV -d app-autoscaler \
      deploy templates/app-autoscaler-deployment.yml \
      --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
      -v system_domain=bosh-lite.com \
-     -v cf_admin_password=<cf admin password>
+     -v cf_admin_password=<cf admin password> \
+     -v skip_ssl_validation=true
 ```
+
 Alternatively you can use cf-deployment vars file to provide the cf_admin_password
 ```sh
 bosh -e YOUR_ENV -d app-autoscaler \
      deploy templates/app-autoscaler-deployment.yml \
      --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
      -v system_domain=bosh-lite.com \
+     -v skip_ssl_validation=true \
      --vars-file=<path to cf deployment vars file>
 ```
+>** It's advised not to make skip_ssl_validation=true for non-development environment
+
 
 ## Register service 
 

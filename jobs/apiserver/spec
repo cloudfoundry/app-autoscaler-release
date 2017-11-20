@@ -54,7 +54,7 @@ properties:
 
   api_server.scheduler.host:
     description: "Host where scheduler is running"
-    default: "scheduler.service.cf.internal"
+    default: "autoscalerscheduler.service.cf.internal"
   api_server.scheduler.port:
     description: "Port where scheduler will listen"
     default: 6102
@@ -114,4 +114,7 @@ properties:
 
   cf.api:
     description: "the Cloud Foundry API endpoint"
+  cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
 

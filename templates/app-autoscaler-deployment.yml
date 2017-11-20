@@ -125,6 +125,7 @@ instance_groups:
       policy_db: *database
       cf:
         api: "https://api.((system_domain))"
+        skip_ssl_validation: "((skip_ssl_validation))"
   - name: route_registrar
     release: routing
     consumes:
@@ -141,7 +142,7 @@ instance_groups:
             - autoscaler.((system_domain))
       
 # Scheduler Instance Group
-- name: scheduler
+- name: scheduler_autoscaler
   azs:
   - z1
   instances: 1
@@ -280,6 +281,7 @@ instance_groups:
     properties:
       instancemetrics_db: *database
       policy_db: *database
+      lock_db: *database
       cf: &cf_credentials
         api: "https://api.((system_domain))"
         grant_type: password
@@ -287,11 +289,17 @@ instance_groups:
         password: "((cf_admin_password))"
         client_id: admin
         secret: "((cf_admin_client_secret))"
+        skip_ssl_validation: "((skip_ssl_validation))"
       metricscollector:
         logging:
           level: debug
         server:
           port: 6103
+        collector:
+          refresh_interval: 60s
+          collect_interval: 30s
+          save_interval: 5s
+        enable_db_lock: false
         ca_cert: ((metricscollector_ca.ca))
         server_cert: ((metricscollector_server.certificate))
         server_key: ((metricscollector_server.private_key))
@@ -464,7 +472,7 @@ variables:
   type: certificate
   options:
     ca: scheduler_ca
-    common_name: scheduler.service.cf.internal
+    common_name: autoscalerscheduler.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth

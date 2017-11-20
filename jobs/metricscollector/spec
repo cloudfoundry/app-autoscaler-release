@@ -39,6 +39,17 @@ properties:
   instancemetrics_db.roles:
     description: "The list of database roles used in instancemetricsdb database including name/password"
 
+  lock_db.address:
+    description: "IP address on which the lockdb server will listen"
+    default: "postgres.service.cf.internal"
+  lock_db.databases:
+    description: "The list of databases used in lockdb database including name"
+  lock_db.db_scheme:
+    description: "Database scheme to be used to access lockdb"
+  lock_db.port:
+    description: "Port on which the lockdb server will listen"
+  lock_db.roles:
+    description: "The list of database roles used in lockdb database including name/password"
 
   cf.api:
     description: "the Cloud Foundry API endpoint"
@@ -51,7 +62,10 @@ properties:
   cf.client_id:
     description: "the client id to log in cf"
   cf.secret:
-    description: "the secret to log in cf"	
+    description: "the secret to log in cf"
+  cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
 
   metricscollector.logging.level:
     description: "the level of logging"
@@ -71,6 +85,9 @@ properties:
   metricscollector.collector.collect_interval:
     description: "the time interval to collect container metrics from loggregator"
     default: 30s
+  metricscollector.collector.save_interval:
+    description: "the time interval to save metrics in database"
+    default: 5s
   metricscollector.collector.collect_method:
     description: "the method to collect metrics from loggregator"
     default: "streaming"
@@ -86,3 +103,6 @@ properties:
     description: "consul cluster configuration"
     default: http://127.0.0.1:8500
 
+  metricscollector.enable_db_lock:
+    descrption: "Enable database lock flag"
+    default: false

@@ -14,13 +14,15 @@ case $1 in
   start)
     pid_guard $PIDFILE "metricscollector"
 
+    ulimit -n 8192
+
     mkdir -p $RUN_DIR
     chown -R vcap:vcap $RUN_DIR
     mkdir -p $LOG_DIR
     chown -R vcap:vcap $LOG_DIR
 
     echo $$ > $PIDFILE
-    
+
     exec /var/vcap/packages/metricscollector/metricscollector -c $CONF_DIR/metricscollector.yml >>$LOG_DIR/metricscollector.stdout.log 2>>$LOG_DIR/metricscollector.stderr.log
     ;;
 

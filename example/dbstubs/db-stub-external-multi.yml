@@ -53,6 +53,14 @@ bindingdb:
   roles:
     - {name: postgres, password: postgres, tag: bindingdb}
 
+lockdb:
+  address: 10.0.2.2
+  databases:
+    - {name: lockdb, tag: lockdb}
+  db_scheme: postgres
+  port: 5432
+  roles:
+    - {name: postgres, password: postgres, tag: lockdb}
 
 instance_count_overrides:
   - name: postgres

@@ -102,6 +102,7 @@ jobs:
       policy_db: (( policydb ))
       cf:
         api: (( cf_properties.api ))
+        skip_ssl_validation: ((cf_properties.skip_ssl_validation))
       consul:
         agent:
           mode: client
@@ -150,9 +151,9 @@ jobs:
       - name: servicebroker
         release: app-autoscaler
       - name: route_registrar
-      release: routing
-      consumes:
-        nats: {from: nats, deployment: cf}
+        release: routing
+        consumes:
+          nats: {from: nats, deployment: cf}
     properties:
       service_broker: (( service_broker_properties ))
       binding_db: (( bindingdb ))
@@ -205,6 +206,7 @@ jobs:
     properties:
       instancemetrics_db: (( instancemetricsdb ))
       policy_db: (( policydb ))
+      lock_db: (( lockdb ))
       cf: (( cf_properties ))
       metricscollector: (( metricscollector_properties ))
       consul:
@@ -272,4 +274,5 @@ scalingenginedb: (( merge || database ))
 appmetricsdb: (( merge || database )) 
 instancemetricsdb: (( merge || database )) 
 bindingdb: (( merge || database ))
+lockdb: (( merge || database ))
 config_from_cf: (( merge ))
