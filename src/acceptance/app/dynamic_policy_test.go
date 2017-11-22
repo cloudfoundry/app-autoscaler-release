@@ -23,6 +23,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		initialInstanceCount int
 		policy               string
 		doneChan             chan bool
+		doneAcceptChan       chan bool
 		ticker               *time.Ticker
 	)
 
@@ -158,10 +159,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 			doneChan = make(chan bool)
+			doneAcceptChan = make(chan bool)
 		})
 
 		AfterEach(func() {
 			close(doneChan)
+			Eventually(doneAcceptChan, 10*time.Second).Should(Receive())
 			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})
@@ -169,7 +172,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = generateDynamicScaleOutPolicy(1, 2, "responsetime", 3000)
+				policy = generateDynamicScaleOutPolicy(1, 2, "responsetime", 2000)
 				initialInstanceCount = 1
 			})
 
@@ -181,11 +184,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 						select {
 						case <-doneChan:
 							ticker.Stop()
+							doneAcceptChan <- true
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/slow/10000", 1*time.Minute)
-							}, 1*time.Minute, 2*time.Second).Should(ContainSubstring("dummy application with slow response"))
+								return helpers.CurlAppWithTimeout(cfg, appName, "/slow/3000", 10*time.Second)
+							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with slow response"))
 						}
 					}
 				}(doneChan)
@@ -212,6 +216,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 						select {
 						case <-doneChan:
 							ticker.Stop()
+							doneAcceptChan <- true
 							return
 						case <-ticker.C:
 							Eventually(func() string {
@@ -236,10 +241,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 			doneChan = make(chan bool)
+			doneAcceptChan = make(chan bool)
 		})
 
 		AfterEach(func() {
 			close(doneChan)
+			Eventually(doneAcceptChan, 10*time.Second).Should(Receive())
 			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})
@@ -259,6 +266,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 						select {
 						case <-doneChan:
 							ticker.Stop()
+							doneAcceptChan <- true
 							return
 						case <-ticker.C:
 							Eventually(func() string {
@@ -291,6 +299,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 						select {
 						case <-doneChan:
 							ticker.Stop()
+							doneAcceptChan <- true
 							return
 						case <-ticker.C:
 							Eventually(func() string {
