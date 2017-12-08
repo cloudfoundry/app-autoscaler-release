@@ -90,6 +90,48 @@ bosh -e YOUR_ENV -d app-autoscaler \
 ```
 >** It's advised not to make skip_ssl_validation=true for non-development environment
 
+#### Deploy autoscaler with `client_credentials` flow
+
+Install the UAA CLI, `uaac`.
+
+```sh
+gem install cf-uaac
+```
+
+Obtain `uaa_admin_client_secret`
+
+```sh
+bosh interpolate --path /uaa_admin_client_secret /path/to/cf-deployment/deployment-vars.yml
+```
+
+Use the `uaac target uaa.YOUR-DOMAIN` command to target your UAA server and obtain an access token for the admin client.
+
+```sh
+ uaac target uaa.bosh-lite.com --skip-ssl-validation
+ uaac token client get admin -s <uaa_admin_client_secret>
+ ```
+
+Create a new autoscaler client
+
+```sh
+uaac client add "autoscaler_client_id" \
+    --authorized_grant_types "client_credentials" \
+    --authorities "cloud_controller.read,cloud_controller.admin" \
+    --secret "autoscaler_client_secret"
+```
+
+Deploy autoscaler with the newly created autoscaler client
+
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
+     -v autoscaler_client_id=autoscaler_client_id \
+     -v autoscaler_client_secret=autoscaler_client_secret \
+     -v skip_ssl_validation=true \
+     -o example/operation/client-credentials.yml
+```
 
 ## Register service 
 
