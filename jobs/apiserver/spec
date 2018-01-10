@@ -4,6 +4,7 @@ name: apiserver
 templates:
   apiserver.erb: bin/apiserver
   config.json.erb: bin/config.json
+  info.json.erb: bin/info.json
   pre-start.erb: bin/pre-start
   dns_health_check.erb: bin/dns_health_check
   apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
@@ -89,7 +90,18 @@ properties:
   api_server.metrics_collector.client_key:
     description: "PEM-encoded client key"
 
-
+  api_server.info.name:
+    description: "Name of the autoscaler application to be shown in /info path"
+    default: "Autoscaler"
+  api_server.info.build:
+    description: "Autoscaler application build number"
+    default: "001"
+  api_server.info.support_url:
+    description: "Autoscaler application support page URL"
+    default: "https://github.com/cloudfoundry-incubator/app-autoscaler"
+  api_server.info.description:
+    description: "Autoscaler application short description"
+    default: "Automatically increase or decrease the number of application instances based on a policy you define."
 
   api_server.db_config.max_connections:
     description: "Maximum number of connections that may be held in the apiserver db pool"

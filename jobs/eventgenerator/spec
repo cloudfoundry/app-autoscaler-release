@@ -42,6 +42,18 @@ properties:
   appmetrics_db.roles:
     description: "The list of database roles used in appmetricsdb database including name/password"
 
+  lock_db.address:
+    description: "IP address on which the lockdb server will listen"
+    default: "postgres.service.cf.internal"
+  lock_db.databases:
+    description: "The list of databases used in lockdb database including name"
+  lock_db.db_scheme:
+    description: "Database scheme to be used to access lockdb"
+  lock_db.port:
+    description: "Port on which the lockdb server will listen"
+  lock_db.roles:
+    description: "The list of database roles used in lockdb database including name/password"
+
   eventgenerator.logging.level:
     description: "the level of logging"
     default: "info"
@@ -123,3 +135,7 @@ properties:
   eventgenerator.defaultBreachDurationSecs:
     description: "Default value for breach_duration_secs"
     default: 300
+
+  eventgenerator.enable_db_lock:
+    descrption: "Enable database lock flag"
+    default: false
