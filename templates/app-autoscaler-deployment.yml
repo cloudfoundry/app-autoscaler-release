@@ -287,8 +287,8 @@ instance_groups:
         grant_type: password
         username: admin
         password: "((cf_admin_password))"
-        client_id: admin
-        secret: "((cf_admin_client_secret))"
+        client_id: ""
+        secret: ""
         skip_ssl_validation: "((skip_ssl_validation))"
       metricscollector:
         logging:
