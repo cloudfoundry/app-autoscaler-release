@@ -325,11 +325,13 @@ instance_groups:
     properties:
       appmetrics_db: *database
       policy_db: *database
+      lock_db: *database
       eventgenerator:
         logging:
           level: debug
         defaultStatWindowSecs: 300
         defaultBreachDurationSecs: 300
+        enable_db_lock: false
         scaling_engine:
           ca_cert: ((scalingengine_ca.ca))
           client_cert: ((scalingengine_client.certificate))
