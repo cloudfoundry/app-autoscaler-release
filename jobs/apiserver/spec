@@ -130,3 +130,9 @@ properties:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
 
+  auditLogSharedSecret:
+    description: "autoscaler audit-log shared secret"
+  auditLogSharedEncryptSecret:
+    description: "autoscaler audit-log shared encrypt secret"
+
+

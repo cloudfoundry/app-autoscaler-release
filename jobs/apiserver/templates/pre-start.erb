@@ -26,3 +26,6 @@ PORT='<%= p("policy_db.port") %>'
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$API_DIR/db/api.db.changelog.yml update
 
+java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
+--driver=org.postgresql.Driver --changeLogFile=$API_DIR/db/user-session.db.changelog.yml update
+

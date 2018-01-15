@@ -97,6 +97,8 @@ instance_groups:
   - name: apiserver
     release: app-autoscaler
     properties:
+      auditLogSharedSecret: 'e36e1c7f-0902-46b3-8c88-9336351d0966'
+      auditLogSharedEncryptSecret: '57c80554-76a4-48e2-aad9-40bddb06a3cf'
       api_server:
         db_config: &db_config
           idle_timeout: 1000

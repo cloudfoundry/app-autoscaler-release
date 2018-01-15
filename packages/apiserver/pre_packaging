@@ -6,6 +6,7 @@ source common/node-helper.sh
 setup_npm
 
 cd ${BUILD_DIR}/app-autoscaler/api && npm install
+npm install jsonwebtoken
 
 # Clean up NPM
 rm -rf common/node-helper.sh
