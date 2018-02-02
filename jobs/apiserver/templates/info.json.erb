@@ -1,0 +1,10 @@
+<% 
+  params = {
+    'name' => p('api_server.info.name'),
+    'build' => p('api_server.info.build'),
+    'support' => p('api_server.info.support_url'),
+    'description' => p('api_server.info.description'),
+  }
+%>
+
+<%=JSON.pretty_generate(params, :indentation => 2)%> 
