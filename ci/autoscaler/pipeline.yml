@@ -1,0 +1,104 @@
+resources:
+- name: app-autoscaler-ci
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-incubator/app-autoscaler-ci.git
+    branch: master
+
+- name: app-autoscaler-release
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry-incubator/app-autoscaler-release.git
+    branch: master
+
+- name: cf-deployment
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-deployment.git
+    branch: master
+
+
+jobs:
+- name: unit-tests
+  max_in_flight: 1
+  plan:
+  - aggregate:
+    - get: app-autoscaler-release
+      trigger: true
+    - get: app-autoscaler-ci
+  - task: unit
+    file: app-autoscaler-ci/autoscaler/tasks/autoscaler-unit-tests.yml
+  # - put: tracker
+  #   params:
+  #     repos:
+  #       - app-autoscaler
+
+- name: integration-tests
+  max_in_flight: 1
+  plan:
+  - aggregate:
+    - get: app-autoscaler-release
+      passed: [unit-tests]
+      trigger: true
+    - get: app-autoscaler-ci
+  - task: integration
+    file: app-autoscaler-ci/autoscaler/tasks/autoscaler-integration-tests.yml
+
+- name: deploy-cf
+  serial_groups:
+  - bosh-app-autoscaler
+  plan:
+  - aggregate:
+    - get: cf-deployment
+      trigger: true
+    - get: app-autoscaler-ci
+  - task: deploy
+    privileged: true
+    file: app-autoscaler-ci/autoscaler/tasks/deploy-cf.yml
+    params:
+      BOSH_TARGET: {{bosh-lite-ip}}
+      BOSH_CA: {{bosh-ca}}
+      BOSH_USERNAME: {{bosh-username}}
+      BOSH_PASSWORD: {{bosh-password}}
+      CF_ADMIN_PASSWORD: {{cf-password}}
+      CF_ADMIN_CLIENT_SECRET: {{cf-secrect}}
+        
+
+- name: deploy-autoscaler
+  serial_groups:
+  - bosh-app-autoscaler
+  plan:
+  - aggregate:
+    - get: app-autoscaler-release
+      trigger: true
+    - get: app-autoscaler-ci
+  - task: deploy
+    privileged: true
+    file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
+    params:
+      BOSH_TARGET: {{bosh-lite-ip}}
+      BOSH_USERNAME: {{bosh-username}}
+      BOSH_PASSWORD: {{bosh-password}}
+      BOSH_CA: {{bosh-ca}}
+      CF_ADMIN_PASSWORD: {{cf-password}}
+      CF_ADMIN_CLIENT_SECRET: {{cf-secrect}}
+
+          
+
+- name: acceptance
+  serial_groups:
+  - bosh-app-autoscaler
+  plan:
+  - aggregate:
+    - get: app-autoscaler-release
+      trigger: true
+      passed: [deploy-autoscaler]
+      params:
+        paths: [src/acceptance]
+    - get: app-autoscaler-ci
+  - task: run-acceptance
+    file: app-autoscaler-ci/autoscaler/tasks/autoscaler-acceptance.yml
+    privileged: true
+    params:
+      BOSH_TARGET: {{bosh-lite-ip}}
+      CF_ADMIN_PASSWORD: {{cf-password}}

@@ -1,0 +1,13 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: qibobo/autoscaler-test, tag: v1}
+
+inputs:
+- name: app-autoscaler-release
+- name: app-autoscaler-ci
+
+run:
+  path: app-autoscaler-ci/autoscaler/scripts/integration-tests.sh

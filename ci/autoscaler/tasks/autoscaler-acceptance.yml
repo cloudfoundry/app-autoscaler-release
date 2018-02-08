@@ -1,0 +1,13 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: qibobo/autoscaler-deploy, tag: v1}
+
+inputs:
+- name: app-autoscaler-ci
+- name: app-autoscaler-release
+
+run:
+  path: app-autoscaler-ci/autoscaler/scripts/autoscaler-acceptance.sh
