@@ -44,7 +44,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
 
 		Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
-		waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+		waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DetectTimeoutDuration())
 	})
 
 	AfterEach(func() {
@@ -72,7 +72,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			It("should scale out", func() {
-				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				totalTime := time.Duration(interval*2)*time.Second + 5*time.Minute
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
@@ -90,7 +90,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
-				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				totalTime := time.Duration(interval*2)*time.Second + 5*time.Minute
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
@@ -122,7 +122,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			It("should scale out", func() {
-				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				totalTime := time.Duration(interval*2)*time.Second + 5*time.Minute
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
@@ -140,7 +140,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
-				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				totalTime := time.Duration(interval*2)*time.Second + 5*time.Minute
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
@@ -177,7 +177,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				ticker = time.NewTicker(10 * time.Second)
+				ticker = time.NewTicker(15 * time.Second)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -187,9 +187,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/slow/3000", 10*time.Second)
-							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with slow response"))
+							helpers.CurlApp(cfg, appName, "/slow/3000")
 						}
 					}
 				}(doneChan)
@@ -204,12 +202,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = generateDynamicScaleInPolicy(1, 2, "responsetime", 1000)
+				policy = generateDynamicScaleInPolicy(1, 2, "responsetime", 5000)
 				initialInstanceCount = 2
 			})
 
 			JustBeforeEach(func() {
-				ticker = time.NewTicker(2 * time.Second)
+				ticker = time.NewTicker(10 * time.Second)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -219,9 +217,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
-							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+							helpers.CurlApp(cfg, appName, "/fast")
 						}
 					}
 				}(doneChan)
@@ -259,7 +255,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				ticker = time.NewTicker(25 * time.Millisecond)
+				ticker = time.NewTicker(100 * time.Millisecond)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -269,16 +265,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
-							}, 10*time.Second, 25*time.Millisecond).Should(ContainSubstring("dummy application with fast response"))
+							helpers.CurlApp(cfg, appName, "/fast")
 						}
 					}
 				}(doneChan)
 			})
 
 			It("should scale out", func() {
-				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				finishTime := time.Duration(interval*2)*time.Second + 5*time.Minute
 				waitForNInstancesRunning(appGUID, 2, finishTime)
 			})
 
@@ -292,7 +286,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				ticker = time.NewTicker(10 * time.Second)
+				ticker = time.NewTicker(20 * time.Second)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -302,15 +296,13 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
-							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+							helpers.CurlApp(cfg, appName, "/fast")
 						}
 					}
 				}(doneChan)
 			})
 			It("should scale in", func() {
-				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				finishTime := time.Duration(interval*2)*time.Second + 5*time.Minute
 				waitForNInstancesRunning(appGUID, 1, finishTime)
 			})
 		})
