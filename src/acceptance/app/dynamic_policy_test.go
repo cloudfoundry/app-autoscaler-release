@@ -164,7 +164,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		AfterEach(func() {
 			close(doneChan)
-			Eventually(doneAcceptChan, 10*time.Second).Should(Receive())
+			Eventually(doneAcceptChan, 30*time.Second).Should(Receive())
 			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})
@@ -187,7 +187,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							helpers.CurlApp(cfg, appName, "/slow/3000")
+							Eventually(func() string {
+								return helpers.CurlApp(cfg, appName, "/slow/3000")
+							}, cfg.DefaultTimeoutDuration(), 1*time.Second).Should(ContainSubstring("dummy application with slow response"))
 						}
 					}
 				}(doneChan)
@@ -217,7 +219,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							helpers.CurlApp(cfg, appName, "/fast")
+							Eventually(func() string {
+								return helpers.CurlApp(cfg, appName, "/fast")
+							}, cfg.DefaultTimeoutDuration(), 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
 				}(doneChan)
@@ -242,7 +246,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		AfterEach(func() {
 			close(doneChan)
-			Eventually(doneAcceptChan, 10*time.Second).Should(Receive())
+			Eventually(doneAcceptChan, 30*time.Second).Should(Receive())
 			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 		})
@@ -265,7 +269,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							helpers.CurlApp(cfg, appName, "/fast")
+							Eventually(func() string {
+								return helpers.CurlApp(cfg, appName, "/fast")
+							}, cfg.DefaultTimeoutDuration(), 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
 				}(doneChan)
@@ -296,7 +302,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							helpers.CurlApp(cfg, appName, "/fast")
+							Eventually(func() string {
+								return helpers.CurlApp(cfg, appName, "/fast")
+							}, cfg.DefaultTimeoutDuration(), 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
 				}(doneChan)

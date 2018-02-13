@@ -254,7 +254,7 @@ func generateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, 
 	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
 
 	scalingInRule := ScalingRule{
-		MetricType:            "memoryused",
+		MetricType:            "throughput",
 		StatWindowSeconds:     interval,
 		BreachDurationSeconds: interval,
 		Threshold:             threshold,
@@ -292,7 +292,7 @@ func generateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
 
 	scalingInRule := ScalingRule{
-		MetricType:            "memoryused",
+		MetricType:            "throughput",
 		StatWindowSeconds:     interval,
 		BreachDurationSeconds: interval,
 		Threshold:             threshold,
