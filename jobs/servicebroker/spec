@@ -10,6 +10,9 @@ templates:
   servicebroker_ca.crt.erb: config/certs/servicebroker/ca.crt
   servicebroker_server.crt.erb: config/certs/servicebroker/server.crt
   servicebroker_server.key.erb: config/certs/servicebroker/server.key
+  servicebroker_public_ca.crt.erb: config/certs/servicebroker/public_ca.crt
+  servicebroker_public_server.crt.erb: config/certs/servicebroker/public_server.crt
+  servicebroker_public_server.key.erb: config/certs/servicebroker/public_server.key
   apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
   apiserver_client.crt.erb: config/certs/apiserver/client.crt
   apiserver_client.key.erb: config/certs/apiserver/client.key
@@ -23,15 +26,24 @@ packages:
   - common
 
 properties:
-  service_broker.port:
-    description: "Port where servicebroker will run"
+  service_broker.publicPort:
+    description: "Port where servicebroker public server will run"
     default: 6101
+  service_broker.port:
+    description: "Port where servicebroker internal server will run"
+    default: 6107
   service_broker.ca_cert:
     description: "PEM-encoded CA certificate"
   service_broker.server_cert:
     description: "PEM-encoded server certificate"
   service_broker.server_key:
     description: "PEM-encoded server key"
+  service_broker.public_ca_cert:
+    description: "PEM-encoded public CA certificate"
+  service_broker.public_server_cert:
+    description: "PEM-encoded public server certificate"
+  service_broker.public_server_key:
+    description: "PEM-encoded public server key"
   service_broker.api_server.host:
     description: "Host where APIserver is running"
     default: "apiserver.service.cf.internal"
