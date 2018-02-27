@@ -122,6 +122,10 @@ instance_groups:
           ca_cert: ((metricscollector_ca.ca))
           client_cert: ((metricscollector_client.certificate))
           client_key: ((metricscollector_client.private_key))
+        service_broker:
+          ca_cert: ((servicebroker_ca.ca))
+          client_cert: ((servicebroker_client.certificate))
+          client_key: ((servicebroker_client.private_key))
       policy_db: *database
       cf:
         api: "https://api.((system_domain))"
@@ -196,10 +200,14 @@ instance_groups:
     properties:
       service_broker: 
         db_config: *db_config
-        port : &servicebrokerPort 6101
+        publicPort : &servicebrokerPort 6101
+        port: 6107
         ca_cert: ((servicebroker_ca.ca))
         server_cert: ((servicebroker_server.certificate))
         server_key: ((servicebroker_server.private_key))
+        public_ca_cert: ((servicebroker_public_ca.ca))
+        public_server_cert: ((servicebroker_public_server.certificate))
+        public_server_key: ((servicebroker_public_server.private_key))
         username: username
         password: password
         http_request_timeout: 5000
@@ -441,7 +449,7 @@ variables:
   type: certificate
   options:
     ca: apiserver_public_ca
-    common_name: apiserverpublic.service.cf.internal
+    common_name: autoscaler.((system_domain))
     extended_key_usage:
     - client_auth
     - server_auth
@@ -462,6 +470,26 @@ variables:
   options:
     ca: servicebroker_ca
     common_name: servicebroker.service.cf.internal
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: servicebroker_client
+  type: certificate
+  options:
+    ca: servicebroker_ca
+    common_name: servicebroker client
+    extended_key_usage:
+    - client_auth
+- name: servicebroker_public_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: servicebrokerCA
+- name: servicebroker_public_server
+  type: certificate
+  options:
+    ca: servicebroker_public_ca
+    common_name: autoscalerservicebroker.((system_domain))
     extended_key_usage:
     - client_auth
     - server_auth
