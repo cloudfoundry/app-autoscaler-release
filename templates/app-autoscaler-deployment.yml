@@ -195,6 +195,11 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            servicebroker: {}
   - name: servicebroker
     release: app-autoscaler
     properties:
