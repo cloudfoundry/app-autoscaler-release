@@ -22,6 +22,7 @@ templates:
   metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
   metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
   metricscollector_client.key.erb: config/certs/metricscollector/client.key
+  environment_variables.erb: bin/environment_variables
 
 packages:
   - nodejs
@@ -129,10 +130,15 @@ properties:
   cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
+  cf.auth_endpoint:
+    description: "the Cloud Foundry Auth endpoint"
+  
+  autoscaler_api_client_id:
+    description: "Autoscaler Public API Client ID"
+  autoscaler_api_verification_client_id:
+    description: "Autoscaler Public API Verification Client ID"
+  autoscaler_api_verification_client_secret:
+    description: "Autoscaler Public API Verification Client Secret"
 
-  auditLogSharedSecret:
-    description: "autoscaler audit-log shared secret"
-  auditLogSharedEncryptSecret:
-    description: "autoscaler audit-log shared encrypt secret"
 
 

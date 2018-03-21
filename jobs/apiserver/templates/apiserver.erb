@@ -9,9 +9,8 @@ PIDFILE=${RUN_DIR}/apiserver.pid
 source /var/vcap/packages/common/utils.sh
 
 case $1 in
-  start) 
-    export AuditLogSharedSecret="<%= p('auditLogSharedSecret') %>"
-    export AuditLogSharedEncryptSecret="<%= p('auditLogSharedEncryptSecret') %>"
+  start)
+    source /var/vcap/jobs/apiserver/bin/environment_variables
   
     pid_guard $PIDFILE "apiserver"
     mkdir -p $RUN_DIR $LOG_DIR
