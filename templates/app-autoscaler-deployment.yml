@@ -161,6 +161,15 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            autoscalerscheduler: 
+              check:
+                tcp: 127.0.0.1:6102
+                interval: 30s
+                timeout: 10s
   - name: scheduler
     release: app-autoscaler
     properties:
@@ -263,6 +272,12 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            pruner: 
+              check: {}
   - name: pruner
     release: app-autoscaler
     properties:
@@ -289,6 +304,15 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            metricscollector:
+              check:
+                tcp: 127.0.0.1:6103
+                interval: 30s
+                timeout: 10s
   - name: metricscollector
     release: app-autoscaler
     properties:
@@ -333,6 +357,12 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            eventgenerator: 
+              check: {}
   - name: eventgenerator
     release: app-autoscaler
     properties:
@@ -370,6 +400,15 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            scalingengine: 
+              check:
+                tcp: 127.0.0.1:6104
+                interval: 30s
+                timeout: 10s
   - name: scalingengine
     release: app-autoscaler
     properties:
