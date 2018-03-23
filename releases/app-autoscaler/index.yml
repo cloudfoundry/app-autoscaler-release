@@ -36,4 +36,6 @@ builds:
     version: v0.0.19
   bf633f8c-5704-4585-a543-999f36c25889:
     version: v0.0.20
+  281174be-de12-4a25-897f-ae2c9df9dddb:
+    version: v0.0.21
 format-version: '2'
