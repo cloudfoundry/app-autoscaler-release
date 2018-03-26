@@ -6,7 +6,6 @@ dependencies:
 
 files:
 - app-autoscaler/src/autoscaler/eventgenerator/db/*
-- app-autoscaler/src/autoscaler/commons/*.go # gosub
 - app-autoscaler/src/autoscaler/db/*.go # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/*.go # gosub
@@ -15,7 +14,7 @@ files:
 - app-autoscaler/src/autoscaler/eventgenerator/cmd/eventgenerator/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/config/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/generator/*.go # gosub
-- app-autoscaler/src/autoscaler/logger/*.go # gosub
+- app-autoscaler/src/autoscaler/helpers/*.go # gosub
 - app-autoscaler/src/autoscaler/models/*.go # gosub
 - app-autoscaler/src/autoscaler/routes/*.go # gosub
 - app-autoscaler/src/autoscaler/sync/*.go # gosub
@@ -26,9 +25,11 @@ files:
 - app-autoscaler/src/code.cloudfoundry.org/lager/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/locket/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/runtimeschema/metric/*.go # gosub
+- app-autoscaler/src/github.com/cenk/backoff/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/dropsonde/metric_sender/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/dropsonde/metrics/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/sonde-go/events/*.go # gosub
+- app-autoscaler/src/github.com/facebookgo/clock/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/gogoproto/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/proto/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/protoc-gen-gogo/descriptor/*.go # gosub
@@ -39,7 +40,9 @@ files:
 - app-autoscaler/src/github.com/lib/pq/*.go # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/*.go # gosub
 - app-autoscaler/src/github.com/nu7hatch/gouuid/*.go # gosub
+- app-autoscaler/src/github.com/rubyist/circuitbreaker/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/grouper/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/sigmon/*.go # gosub
+- app-autoscaler/src/golang.org/x/net/context/*.go # gosub
 - app-autoscaler/src/gopkg.in/yaml.v2/*.go # gosub
