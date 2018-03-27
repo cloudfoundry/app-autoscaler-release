@@ -139,3 +139,15 @@ properties:
   eventgenerator.enable_db_lock:
     descrption: "Enable database lock flag"
     default: false
+
+  eventgenerator.circuitBreaker.back_off_initial_interval:
+    description: "Initial exponential back off interval"
+    default: 5m
+
+  eventgenerator.circuitBreaker.back_off_max_interval:
+    description: "Maximum exponential back off interval"
+    default: 120m
+
+  eventgenerator.circuitBreaker.consecutive_failure_count:
+    description: "Number of consecutive failure to trip the circuit down"
+    default: 3

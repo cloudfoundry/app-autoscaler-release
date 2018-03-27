@@ -69,6 +69,11 @@ lock:
 defaultStatWindowSecs: <%= p("eventgenerator.defaultStatWindowSecs") %>
 defaultBreachDurationSecs: <%= p("eventgenerator.defaultBreachDurationSecs") %>
 
+circuitBreaker:
+  back_off_initial_interval: <%= p("eventgenerator.circuitBreaker.back_off_initial_interval") %>
+  back_off_max_interval: <%= p("eventgenerator.circuitBreaker.back_off_max_interval") %>
+  consecutive_failure_count: <%= p("eventgenerator.circuitBreaker.consecutive_failure_count") %>
+
 db_lock:
   url: <%= lock_db_url %>
 
