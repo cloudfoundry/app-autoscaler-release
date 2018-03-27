@@ -24,8 +24,8 @@ spring.datasource.password=<%=schedulerdb_role['password'] %>
 
 spring.policyDbDataSource.driverClassName=org.postgresql.Driver
 spring.policyDbDataSource.url=jdbc:postgresql://<%=p('policy_db.address')%>:<%=p('policy_db.port') %>/<%=policydb_database['name'] %>
-spring.policyDbDataSource.password=<%=policydb_role['name'] %>
-spring.policyDbDataSource.username=<%=policydb_role['password'] %>
+spring.policyDbDataSource.password=<%=policydb_role['password'] %>
+spring.policyDbDataSource.username=<%=policydb_role['name'] %>
 
 
 #quartz job
@@ -58,12 +58,6 @@ org.quartz.scheduler.instanceId=<%= spec.id %>
 
 # scheduler port
 server.port=<%=p('scheduler.port') %>
-
-spring.cloud.consul.discovery.serviceName=autoscalerscheduler
-spring.cloud.consul.discovery.instanceId=scheduler
-spring.cloud.consul.discovery.heartbeat.enabled=true
-spring.cloud.consul.discovery.heartbeat.ttlValue=<%=p('scheduler.consul.ttl') %>
-spring.cloud.consul.discovery.hostname=
 
 spring.application.name=scheduler
 spring.mvc.servlet.load-on-startup=1

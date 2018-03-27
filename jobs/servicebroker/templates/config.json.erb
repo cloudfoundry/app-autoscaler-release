@@ -12,6 +12,7 @@
   apiserver_port = p('service_broker.api_server.port')
   params = {
     'port' => p('service_broker.port'),
+    'publicPort' => p('service_broker.publicPort'),
     'username' => p('service_broker.username'),
     'password' => p('service_broker.password'),
     'db' => {
@@ -47,6 +48,17 @@
     #     'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
     #     'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
     # },
+    # 'publicTls' => {
+    #     'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_server.key",
+    #     'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_server.crt",
+    #     'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_ca.crt",
+    # },
+    'tls' => {
+        'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.key",
+        'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
+        'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
+    },
+    'serviceCatalogPath' => "/var/vcap/jobs/servicebroker/config/catalog.json",
     'dashboardRedirectUri' => p('service_broker.dashboard_redirect_uri')
   }
 %>

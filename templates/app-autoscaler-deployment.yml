@@ -122,6 +122,10 @@ instance_groups:
           ca_cert: ((metricscollector_ca.ca))
           client_cert: ((metricscollector_client.certificate))
           client_key: ((metricscollector_client.private_key))
+        service_broker:
+          ca_cert: ((servicebroker_ca.ca))
+          client_cert: ((servicebroker_client.certificate))
+          client_key: ((servicebroker_client.private_key))
       policy_db: *database
       cf:
         api: "https://api.((system_domain))"
@@ -161,6 +165,15 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            autoscalerscheduler: 
+              check:
+                tcp: 127.0.0.1:6102
+                interval: 30s
+                timeout: 10s
   - name: scheduler
     release: app-autoscaler
     properties:
@@ -195,15 +208,24 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            servicebroker: {}
   - name: servicebroker
     release: app-autoscaler
     properties:
       service_broker: 
         db_config: *db_config
-        port : &servicebrokerPort 6101
+        publicPort : &servicebrokerPort 6101
+        port: 6107
         ca_cert: ((servicebroker_ca.ca))
         server_cert: ((servicebroker_server.certificate))
         server_key: ((servicebroker_server.private_key))
+        public_ca_cert: ((servicebroker_public_ca.ca))
+        public_server_cert: ((servicebroker_public_server.certificate))
+        public_server_key: ((servicebroker_public_server.private_key))
         username: username
         password: password
         http_request_timeout: 5000
@@ -254,6 +276,12 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            pruner: 
+              check: {}
   - name: pruner
     release: app-autoscaler
     properties:
@@ -280,6 +308,15 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            metricscollector:
+              check:
+                tcp: 127.0.0.1:6103
+                interval: 30s
+                timeout: 10s
   - name: metricscollector
     release: app-autoscaler
     properties:
@@ -324,6 +361,12 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            eventgenerator: 
+              check: {}
   - name: eventgenerator
     release: app-autoscaler
     properties:
@@ -361,6 +404,15 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            scalingengine: 
+              check:
+                tcp: 127.0.0.1:6104
+                interval: 30s
+                timeout: 10s
   - name: scalingengine
     release: app-autoscaler
     properties:
@@ -445,7 +497,7 @@ variables:
   type: certificate
   options:
     ca: apiserver_public_ca
-    common_name: apiserverpublic.service.cf.internal
+    common_name: autoscaler.((system_domain))
     extended_key_usage:
     - client_auth
     - server_auth
@@ -466,6 +518,26 @@ variables:
   options:
     ca: servicebroker_ca
     common_name: servicebroker.service.cf.internal
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: servicebroker_client
+  type: certificate
+  options:
+    ca: servicebroker_ca
+    common_name: servicebroker client
+    extended_key_usage:
+    - client_auth
+- name: servicebroker_public_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: servicebrokerCA
+- name: servicebroker_public_server
+  type: certificate
+  options:
+    ca: servicebroker_public_ca
+    common_name: autoscalerservicebroker.((system_domain))
     extended_key_usage:
     - client_auth
     - server_auth

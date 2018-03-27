@@ -1,0 +1,73 @@
+
+- type: remove
+  path: /instance_groups/name=postgres_autoscaler
+
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=apiserver/properties/policy_db
+  value: &external_database
+    databases:
+    - name: ((database_name))
+      tag: default
+    address: ((database_host))
+    db_scheme: postgres
+    port: ((database_port))
+    roles:
+    - name: ((database_username))
+      password: ((database_password))
+      tag: default 
+
+- type: replace
+  path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/policy_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/scheduler_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=servicebroker/jobs/name=servicebroker/properties/binding_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=pruner/jobs/name=pruner/properties/appmetrics_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=pruner/jobs/name=pruner/properties/instancemetrics_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=pruner/jobs/name=pruner/properties/scalingengine_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/instancemetrics_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/policy_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/lock_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/appmetrics_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/policy_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/scalingengine_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/scheduler_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/policy_db
+  value: *external_database

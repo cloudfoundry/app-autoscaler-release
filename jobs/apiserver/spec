@@ -23,6 +23,9 @@ templates:
   metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
   metricscollector_client.key.erb: config/certs/metricscollector/client.key
   environment_variables.erb: bin/environment_variables
+  servicebroker_ca.crt.erb: config/certs/servicebroker/ca.crt
+  servicebroker_client.crt.erb: config/certs/servicebroker/client.crt
+  servicebroker_client.key.erb: config/certs/servicebroker/client.key
 
 packages:
   - nodejs
@@ -94,6 +97,22 @@ properties:
   api_server.metrics_collector.client_key:
     description: "PEM-encoded client key"
 
+<<<<<<< HEAD
+=======
+  api_server.service_broker.host:
+    description: "Host where serviceBroker is running"
+    default: "servicebroker.service.cf.internal"
+  api_server.service_broker.port:
+    description: "Port where serviceBroker will listen"
+    default: 6107
+  api_server.service_broker.ca_cert:
+    description: "PEM-encoded CA certificate"
+  api_server.service_broker.client_cert:
+    description: "PEM-encoded client certificate"
+  api_server.service_broker.client_key:
+    description: "PEM-encoded client key"
+
+>>>>>>> upstream/develop
   api_server.info.name:
     description: "Name of the autoscaler application to be shown in /info path"
     default: "Autoscaler"
