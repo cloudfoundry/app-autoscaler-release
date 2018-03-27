@@ -43,21 +43,16 @@
       'uaa_client_secret' => p('service_broker.quota.uaa_client_secret'),
       'skip_plans' => p('service_broker.quota.skip_plans'),
     },
-    # 'tls' => {
-    #     'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.key",
-    #     'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
-    #     'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
-    # },
-    # 'publicTls' => {
-    #     'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_server.key",
-    #     'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_server.crt",
-    #     'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_ca.crt",
-    # },
     'tls' => {
         'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.key",
         'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
         'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
     },
+    # 'publicTls' => {
+    #     'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_server.key",
+    #     'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_server.crt",
+    #     'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_ca.crt",
+    # },
     'serviceCatalogPath' => "/var/vcap/jobs/servicebroker/config/catalog.json",
     'dashboardRedirectUri' => p('service_broker.dashboard_redirect_uri')
   }

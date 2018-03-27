@@ -97,8 +97,6 @@ properties:
   api_server.metrics_collector.client_key:
     description: "PEM-encoded client key"
 
-<<<<<<< HEAD
-=======
   api_server.service_broker.host:
     description: "Host where serviceBroker is running"
     default: "servicebroker.service.cf.internal"
@@ -112,7 +110,6 @@ properties:
   api_server.service_broker.client_key:
     description: "PEM-encoded client key"
 
->>>>>>> upstream/develop
   api_server.info.name:
     description: "Name of the autoscaler application to be shown in /info path"
     default: "Autoscaler"
