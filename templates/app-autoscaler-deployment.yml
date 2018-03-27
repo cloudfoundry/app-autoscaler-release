@@ -240,6 +240,233 @@ instance_groups:
             - id: autoscaler-free-plan-id
               name: autoscaler-free-plan
               description: This is the free service plan for the Auto-Scaling service.
+              schemas:
+                service_binding:
+                  create:
+                    parameters:
+                      "$schema": http://json-schema.org/draft-06/schema#
+                      description: schema for autoscaler policy
+                      type: object
+                      properties:
+                        instance_min_count:
+                          type: integer
+                          minimum: 1
+                          description: Minimum number of application instance always runs
+                        instance_max_count:
+                          type: integer
+                          minimum: 1
+                          description: Maximum how many instances of application can be provisioned as part of application scaling
+                        scaling_rules:
+                          type: array
+                          items:
+                            "$ref": "#/definitions/scaling_rules"
+                        schedules:
+                            "$ref": "#/definitions/schedules"
+                      required:
+                        - instance_min_count
+                        - instance_max_count
+                      anyOf:
+                        - required:
+                          - scaling_rules
+                        - required:
+                          - schedules
+                      definitions:
+                          scaling_rules:
+                            type: object
+                            properties:
+                              metric_type:
+                                type: string
+                                enum:
+                                  - memoryused
+                                  - memoryutil
+                                  - responsetime
+                                  - throughput
+                              stat_window_secs:
+                                type: number
+                                minimum: 60
+                                maximum: 3600
+                                description: Interval to aggregate metrics statictics in seconds
+                              breach_duration_secs:
+                                type: number
+                                minimum: 60
+                                maximum: 3600
+                                description: The length of the past period when a scaling action might be triggered based on metric usage
+                              threshold:
+                                type: number
+                              operator:
+                                type: string
+                                enum:
+                                  - "<"
+                                  - ">"
+                                  - "<="
+                                  - ">="
+                              cool_down_secs:
+                                type: number
+                                minimum: 60
+                                maximum: 3600
+                                description: The interval between two successive scaling activity
+                              adjustment:
+                                type: string
+                                pattern: "^[-+][1-9]+[0-9]*$"
+                                description: Magnitude of scaling in each step, +1 means scale up 1 Instance -2 means scale down 2 instances
+                            required:
+                              - metric_type
+                              - threshold
+                              - operator
+                              - adjustment
+                          recurring_schedule:
+                            type: object
+                            properties:
+                              start_date:
+                                description: Start date of the recurrence in YYYY-MM-DD format
+                                oneOf:
+                                  - type: string
+                                    pattern: "^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$"
+                                  - type: string
+                                    enum:
+                                      - ''
+                              start_time:
+                                type: string
+                                pattern: "^(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$"
+                                description: Start time of the recurrence in 24 hour format
+                              end_date:
+                                description: End date of the recurrence in YYYY-MM-DD format
+                                oneOf:
+                                  - type: string
+                                    pattern: "^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$"
+                                  - type: string
+                                    enum:
+                                      - ''
+                              end_time:
+                                type: string
+                                pattern: "^(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$"
+                                description: End time of the recurrence in 24 hour format
+                              instance_min_count:
+                                type: integer
+                                minimum: 1
+                                description: The number of instances to scale down to once recurrence period
+                              instance_max_count:
+                                type: integer
+                                minimum: 1
+                                description: Maximum number of instances to scale up during recurrence period
+                              initial_min_instance_count:
+                                type: integer
+                                minimum: 1
+                                description: The number of instances to scale up to as soon as the recurrence period starts
+                              days_of_week:
+                                type: array
+                                description: The list of the days of the week when to trigger scaling. Values ranging from 1 to 7
+                                uniqueItems: true
+                                minItems: 1
+                                items:
+                                  type: number
+                                  enum:
+                                    - 1
+                                    - 2
+                                    - 3
+                                    - 4
+                                    - 5
+                                    - 6
+                                    - 7
+                              days_of_month:
+                                type: array
+                                uniqueItems: true
+                                minItems: 1
+                                description: The list of the days of the month when to trigger scaling. Values ranging from 1 to 31
+                                items:
+                                  type: number
+                                  enum:
+                                    - 1
+                                    - 2
+                                    - 3
+                                    - 4
+                                    - 5
+                                    - 6
+                                    - 7
+                                    - 8
+                                    - 9
+                                    - 10
+                                    - 11
+                                    - 12
+                                    - 13
+                                    - 14
+                                    - 15
+                                    - 16
+                                    - 17
+                                    - 18
+                                    - 19
+                                    - 20
+                                    - 21
+                                    - 22
+                                    - 23
+                                    - 24
+                                    - 25
+                                    - 26
+                                    - 27
+                                    - 28
+                                    - 29
+                                    - 30
+                                    - 31
+                            required:
+                              - start_time
+                              - end_time
+                              - instance_min_count
+                              - instance_max_count
+                            oneOf:
+                              - required:
+                                - days_of_week
+                              - required:
+                                - days_of_month
+                          specific_date:
+                            type: object
+                            properties:
+                              start_date_time:
+                                type: string
+                                pattern: "^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$"
+                                description: Start date and time to scale in YYYY-MM-DDTHH:MM format
+                              end_date_time:
+                                type: string
+                                pattern: "^2[0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|1[0-9]|0[0-9]):([0-5][0-9])$"
+                                description: End date and time to scale in YYYY-MM-DDTHH:MM format
+                              instance_min_count:
+                                type: integer
+                                minimum: 1
+                                description: The number of instances to scale down to once recurrence period
+                              instance_max_count:
+                                type: integer
+                                minimum: 1
+                                description: Maximum number of instances to scale up during recurrence period
+                              initial_min_instance_count:
+                                type: integer
+                                minimum: 1
+                                description: The number of instances to scale up to as soon as the recurrence period starts
+                            required:
+                              - start_date_time
+                              - end_date_time
+                              - instance_min_count
+                              - instance_max_count
+                          schedules:
+                            type: object
+                            properties:
+                              timezone:
+                                type: string
+                              recurring_schedule:
+                                type: array
+                                items:
+                                  "$ref": "#/definitions/recurring_schedule"
+                                minItems: 1
+                              specific_date:
+                                type: array
+                                items:
+                                  "$ref": "#/definitions/specific_date"
+                                minItems: 1
+                            required:
+                              - timezone
+                            anyOf:
+                              - required:
+                                - specific_date
+                              - required:
+                                - recurring_schedule
         api_server:
           ca_cert: ((apiserver_ca.ca))
           client_cert: ((apiserver_client.certificate))
@@ -378,6 +605,10 @@ instance_groups:
           level: debug
         defaultStatWindowSecs: 300
         defaultBreachDurationSecs: 300
+        circuitBreaker:
+          back_off_initial_interval: 5m
+          back_off_max_interval: 120m
+          consecutive_failure_count: 5
         enable_db_lock: false
         scaling_engine:
           ca_cert: ((scalingengine_ca.ca))
