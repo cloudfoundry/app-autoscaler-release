@@ -7,10 +7,9 @@ dependencies:
 files:
 - app-autoscaler/src/autoscaler/metricscollector/db/*
 - app-autoscaler/src/autoscaler/cf/*.go # gosub
-- app-autoscaler/src/autoscaler/commons/*.go # gosub
 - app-autoscaler/src/autoscaler/db/*.go # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/*.go # gosub
-- app-autoscaler/src/autoscaler/logger/*.go # gosub
+- app-autoscaler/src/autoscaler/helpers/*.go # gosub
 - app-autoscaler/src/autoscaler/metricscollector/*.go # gosub
 - app-autoscaler/src/autoscaler/metricscollector/cmd/metricscollector/*.go # gosub
 - app-autoscaler/src/autoscaler/metricscollector/collector/*.go # gosub

@@ -91,6 +91,23 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -o example/operation/client-credentials.yml
 ```
 
+#### Deploy autoscaler with external postgres database
+
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_admin_password=<cf admin password> \
+     -v skip_ssl_validation=true \
+     -v database_host=<database_host> \
+     -v database_port=<database_port> \
+     -v database_username=<database_username> \
+     -v database_password=<database_password> \
+     -v database_name=<database_name> \
+     -o example/operation/external-db.yml
+```
+
 >** It's advised not to make skip_ssl_validation=true for non-development environment
 
 ## Register service

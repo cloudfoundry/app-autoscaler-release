@@ -15,6 +15,8 @@
   scaling_engine_port = p('api_server.scaling_engine.port')
   metrics_collector_host = p('api_server.metrics_collector.host')
   metrics_collector_port = p('api_server.metrics_collector.port')
+  service_broker_host = p('api_server.service_broker.host')
+  service_broker_port = p('api_server.service_broker.port')
 
   params = {
     'port' => p('api_server.port'),
@@ -50,6 +52,14 @@
            'keyFile' => "/var/vcap/jobs/apiserver/config/certs/metricscollector/client.key",
            'certFile' => "/var/vcap/jobs/apiserver/config/certs/metricscollector/client.crt",
            'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/metricscollector/ca.crt"
+       },
+    },
+    'serviceBroker' => {
+       'uri' => "https://" + service_broker_host + ":" + service_broker_port.to_s,
+       'tls' => {
+           'keyFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/client.key",
+           'certFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/client.crt",
+           'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/ca.crt"
        },
     },
     'tls' => {
