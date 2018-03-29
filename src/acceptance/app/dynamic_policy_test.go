@@ -2,6 +2,7 @@ package app
 
 import (
 	"acceptance/config"
+	. "acceptance/helpers"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -44,7 +45,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
 
 		Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
-		waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+		WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 	})
 
 	AfterEach(func() {
@@ -67,7 +68,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		Context("when memory used is greater than scaling out threshold", func() {
 			BeforeEach(func() {
-				policy = generateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
+				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryused", 30)
 				initialInstanceCount = 1
 			})
 
@@ -76,17 +77,17 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
+					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 30*MB))
 
-				waitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
 			})
 
 		})
 
 		Context("when  memory used is lower than scaling in threshold", func() {
 			BeforeEach(func() {
-				policy = generateDynamicScaleInPolicy(1, 2, "memoryused", 80)
+				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "memoryused", 80)
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
@@ -94,10 +95,10 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
+					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically("<", 80*MB))
 
-				waitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
 			})
 		})
 
@@ -117,7 +118,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		Context("when memoryutil is greater than scaling out threshold", func() {
 			BeforeEach(func() {
-				policy = generateDynamicScaleOutPolicy(1, 2, "memoryutil", 20)
+				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryutil", 20)
 				initialInstanceCount = 1
 			})
 
@@ -126,17 +127,17 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
+					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 26*MB))
 
-				waitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
 			})
 
 		})
 
 		Context("when  memoryutil is lower than scaling in threshold", func() {
 			BeforeEach(func() {
-				policy = generateDynamicScaleInPolicy(1, 2, "memoryutil", 80)
+				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "memoryutil", 80)
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
@@ -144,10 +145,10 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return averageMemoryUsedByInstance(appGUID, totalTime)
+					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically("<", 115*MB))
 
-				waitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
 			})
 		})
 
@@ -172,7 +173,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = generateDynamicScaleOutPolicy(1, 2, "responsetime", 2000)
+				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "responsetime", 2000)
 				initialInstanceCount = 1
 			})
 
@@ -197,14 +198,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			It("should scale out", func() {
 				finishTime := time.Duration(interval*2)*time.Second + 5*time.Minute
-				waitForNInstancesRunning(appGUID, 2, finishTime)
+				WaitForNInstancesRunning(appGUID, 2, finishTime)
 			})
 		})
 
 		Context("when responsetime is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = generateDynamicScaleInPolicy(1, 2, "responsetime", 1000)
+				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "responsetime", 1000)
 				initialInstanceCount = 2
 			})
 
@@ -229,7 +230,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			It("should scale in", func() {
 				finishTime := time.Duration(interval*2)*time.Second + 5*time.Minute
-				waitForNInstancesRunning(appGUID, 1, finishTime)
+				WaitForNInstancesRunning(appGUID, 1, finishTime)
 			})
 		})
 
@@ -254,7 +255,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = generateDynamicScaleOutPolicy(1, 2, "throughput", 2)
+				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "throughput", 2)
 				initialInstanceCount = 1
 			})
 
@@ -279,7 +280,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			It("should scale out", func() {
 				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
-				waitForNInstancesRunning(appGUID, 2, finishTime)
+				WaitForNInstancesRunning(appGUID, 2, finishTime)
 			})
 
 		})
@@ -287,7 +288,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = generateDynamicScaleInPolicy(1, 2, "throughput", 1)
+				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "throughput", 1)
 				initialInstanceCount = 2
 			})
 
@@ -311,7 +312,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 			It("should scale in", func() {
 				finishTime := time.Duration(interval*2)*time.Second + 3*time.Minute
-				waitForNInstancesRunning(appGUID, 1, finishTime)
+				WaitForNInstancesRunning(appGUID, 1, finishTime)
 			})
 		})
 
