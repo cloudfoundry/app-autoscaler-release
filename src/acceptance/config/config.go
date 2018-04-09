@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -46,6 +47,8 @@ type Config struct {
 
 	CfJavaTimeout   int `json:"cf_java_timeout"`
 	NodeMemoryLimit int `json:"node_memory_limit"`
+
+	ASApiEndpoint string `json:"autoscaler_api"`
 }
 
 var defaults = Config{
@@ -112,6 +115,25 @@ func validate(t *testing.T, c *Config) {
 
 	if c.AggregateInterval == 0 {
 		t.Fatal("missing configuration 'aggregate_interval'")
+	} else {
+		if c.AggregateInterval < 60 {
+			c.AggregateInterval = 60
+		}
+	}
+
+	if c.ASApiEndpoint == "" {
+		t.Fatal("missing configuration 'autoscaler_api'")
+	} else {
+		if strings.HasSuffix(c.ASApiEndpoint, "/") {
+			c.ASApiEndpoint = strings.TrimSuffix(c.ASApiEndpoint, "/")
+		}
+		if !strings.HasPrefix(c.ASApiEndpoint, "http") {
+			if c.UseHttp {
+				c.ASApiEndpoint = "http://" + c.ASApiEndpoint
+			} else {
+				c.ASApiEndpoint = "https://" + c.ASApiEndpoint
+			}
+		}
 	}
 }
 
