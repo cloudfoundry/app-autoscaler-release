@@ -511,6 +511,9 @@ instance_groups:
       appmetrics_db: *database
       instancemetrics_db: *database
       scalingengine_db: *database
+      appmetrics_db_connection_config: *databaseConnectionConfig
+      instancemetrics_db_connection_config: *databaseConnectionConfig
+      scalingengine_db_connection_config: *databaseConnectionConfig
       pruner:
         logging:
           level: debug 
@@ -546,6 +549,12 @@ instance_groups:
       instancemetrics_db: *database
       policy_db: *database
       lock_db: *database
+      instancemetrics_db_connection_config: &databaseConnectionConfig
+        max_open_connections: 100
+        max_idle_connections: 10
+        connection_max_lifetime: 60s
+      policy_db_connection_config: *databaseConnectionConfig
+      lock_db_connection_config: *databaseConnectionConfig
       cf: &cf_credentials
         api: "https://api.((system_domain))"
         grant_type: password
@@ -558,7 +567,7 @@ instance_groups:
         logging:
           level: debug
         server:
-          port: 6103
+          port: &metricsCollectorPort 6103
         collector:
           refresh_interval: 60s
           collect_interval: 30s
@@ -596,9 +605,23 @@ instance_groups:
       appmetrics_db: *database
       policy_db: *database
       lock_db: *database
+      appmetrics_db_connection_config: *databaseConnectionConfig
+      policy_db_connection_config: *databaseConnectionConfig
+      lock_db_connection_config: *databaseConnectionConfig
       eventgenerator:
         logging:
           level: debug
+        aggregator:
+          aggregator_execute_interval: 40s
+          policy_poller_interval: 40s
+          metric_poller_count: 20
+          app_monitor_channel_size: 200
+          save_interval: 5s
+          app_metric_channel_size: 1000
+        evaluator:
+          evaluation_manager_execute_interval: 40s
+          evaluator_count: 20
+          trigger_array_channel_size: 200
         defaultStatWindowSecs: 300
         defaultBreachDurationSecs: 300
         circuitBreaker:
@@ -607,10 +630,14 @@ instance_groups:
           consecutive_failure_count: 5
         enable_db_lock: false
         scaling_engine:
+          host: scalingengine.service.cf.internal
+          port: *scalingEnginePort
           ca_cert: ((scalingengine_ca.ca))
           client_cert: ((scalingengine_client.certificate))
           client_key: ((scalingengine_client.private_key))
         metricscollector:
+          host: metricscollector.service.cf.internal
+          port: *metricsCollectorPort
           ca_cert: ((metricscollector_ca.ca))
           client_cert: ((metricscollector_client.certificate))
           client_key: ((metricscollector_client.private_key))
@@ -646,13 +673,17 @@ instance_groups:
       scalingengine_db: *database
       scheduler_db: *database
       policy_db: *database
+      scalingengine_db_connection_config: *databaseConnectionConfig
+      scheduler_db_connection_config: *databaseConnectionConfig
+      policy_db_connection_config: *databaseConnectionConfig
       cf: *cf_credentials
       scalingengine:
         logging:
           level: debug
         server:
-          port: 6104
+          port: &scalingEnginePort 6104
         defaultCoolDownSecs: 300
+        lockSize: 32
         ca_cert: ((scalingengine_ca.ca))
         server_cert: ((scalingengine_server.certificate))
         server_key: ((scalingengine_server.private_key))

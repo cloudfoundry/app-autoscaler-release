@@ -29,17 +29,29 @@ logging:
   level: <%= p("pruner.logging.level") %>
 
 instance_metrics_db:
-  db_url: <%= instance_metrics_db_url %>
+  db:
+    url: <%= instance_metrics_db_url %>
+    max_open_connections: <%= p("instancemetrics_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("instancemetrics_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("instancemetrics_db_connection_config.connection_max_lifetime") %>
   refresh_interval: <%= p("pruner.instance_metrics_db.refresh_interval") %>
   cutoff_days: <%= p("pruner.instance_metrics_db.cutoff_days") %>
 
 app_metrics_db:
-  db_url: <%= app_metrics_db_url %>
+  db:
+    url: <%= app_metrics_db_url %>
+    max_open_connections: <%= p("appmetrics_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("appmetrics_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("appmetrics_db_connection_config.connection_max_lifetime") %>
   refresh_interval: <%= p("pruner.app_metrics_db.refresh_interval") %>
   cutoff_days: <%= p("pruner.app_metrics_db.cutoff_days") %>
 
 scaling_engine_db:
-  db_url: <%= scaling_engine_db_url %>
+  db:
+    url: <%= scaling_engine_db_url %>
+    max_open_connections: <%= p("scalingengine_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("scalingengine_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("scalingengine_db_connection_config.connection_max_lifetime") %>
   refresh_interval: <%= p("pruner.scaling_engine_db.refresh_interval") %>
   cutoff_days: <%= p("pruner.scaling_engine_db.cutoff_days") %>
 

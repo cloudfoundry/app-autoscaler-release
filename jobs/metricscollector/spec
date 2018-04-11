@@ -51,6 +51,27 @@ properties:
   lock_db.roles:
     description: "The list of database roles used in lockdb database including name/password"
 
+  instancemetrics_db_connection_config.max_open_connections:
+    default: 100
+  instancemetrics_db_connection_config.max_idle_connections:
+    default: 10
+  instancemetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  policy_db_connection_config.max_open_connections:
+    default: 100
+  policy_db_connection_config.max_idle_connections:
+    default: 10
+  policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  lock_db_connection_config.max_open_connections:
+    default: 100
+  lock_db_connection_config.max_idle_connections:
+    default: 10
+  lock_db_connection_config.connection_max_lifetime:
+    default: 60s
+  
   cf.api:
     description: "the Cloud Foundry API endpoint"
   cf.grant_type:
