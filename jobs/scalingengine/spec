@@ -50,7 +50,27 @@ properties:
     description: "Port on which the schedulerdb server will listen"
   scheduler_db.roles:
     description: "The list of database roles used in schedulerdb database including name/password"
+  
+  scheduler_db_connection_config.max_open_connections:
+    default: 100
+  scheduler_db_connection_config.max_idle_connections:
+    default: 10
+  scheduler_db_connection_config.connection_max_lifetime:
+    default: 60s
 
+  policy_db_connection_config.max_open_connections:
+    default: 100
+  policy_db_connection_config.max_idle_connections:
+    default: 10
+  policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  scalingengine_db_connection_config.max_open_connections:
+    default: 100
+  scalingengine_db_connection_config.max_idle_connections:
+    default: 10
+  scalingengine_db_connection_config.connection_max_lifetime:
+    default: 60s
 
   cf.api:
     description: "the Cloud Foundry API endpoint"
@@ -91,4 +111,7 @@ properties:
   scalingengine.defaultCoolDownSecs:
     description: "Default value for cool_down_secs"
     default: 300
+  scalingengine.lockSize:
+    description: "the lock size of scalingengine"
+    default: 32
 

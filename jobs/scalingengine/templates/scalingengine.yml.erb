@@ -48,9 +48,21 @@ logging:
   level: <%= p("scalingengine.logging.level") %>
 
 db:
-  policy_db_url: <%= policy_db_url %>
-  scalingengine_db_url: <%= scaling_engine_db_url %>
-  scheduler_db_url: <%= scheduler_db_url %>
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("policy_db_connection_config.connection_max_lifetime") %>
+  scalingengine_db:
+    url: <%= scaling_engine_db_url %>
+    max_open_connections: <%= p("scalingengine_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("scalingengine_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("scalingengine_db_connection_config.connection_max_lifetime") %>
+  scheduler_db:
+    url: <%= scheduler_db_url %>
+    max_open_connections: <%= p("scheduler_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("scheduler_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("scheduler_db_connection_config.connection_max_lifetime") %>
 
 synchronizer:
   active_schedule_sync_interval: <%= p("scalingengine.synchronizer.active_schedule_sync_interval") %>
@@ -59,3 +71,4 @@ consul:
   cluster: <%= p("scalingengine.consul.cluster") %>
 
 defaultCoolDownSecs : <%= p("scalingengine.defaultCoolDownSecs") %>
+lockSize : <%= p("scalingengine.lockSize") %>

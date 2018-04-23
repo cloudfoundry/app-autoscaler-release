@@ -15,6 +15,10 @@
     - name: ((database_username))
       password: ((database_password))
       tag: default 
+    connection_config: &databaseConnectionConfig
+      max_open_connections: 100
+      max_idle_connections: 10
+      connection_max_lifetime: 60s
 
 - type: replace
   path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/policy_db

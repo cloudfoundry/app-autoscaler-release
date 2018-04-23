@@ -45,6 +45,26 @@ properties:
   scalingengine_db.roles:
     description: "The list of database roles used in scalingenginedb database including name/password"
 
+  appmetrics_db_connection_config.max_open_connections:
+    default: 100
+  appmetrics_db_connection_config.max_idle_connections:
+    default: 10
+  appmetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  instancemetrics_db_connection_config.max_open_connections:
+    default: 100
+  instancemetrics_db_connection_config.max_idle_connections:
+    default: 10
+  instancemetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  scalingengine_db_connection_config.max_open_connections:
+    default: 100
+  scalingengine_db_connection_config.max_idle_connections:
+    default: 10
+  scalingengine_db_connection_config.connection_max_lifetime:
+    default: 60s
 
   pruner.logging.level:
      description: "the leve of logging"
