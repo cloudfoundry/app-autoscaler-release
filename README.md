@@ -120,7 +120,7 @@ cf create-service-broker autoscaler <brokerUserName> <brokerPassword> <brokerURL
 
 * `brokerUserName`: the user name to authenticate with service broker
 * `brokerPassword`: the password to authenticate with service broker
-* `borkerURL`: the URL of the service broker
+* `brokerURL`: the URL of the service broker
 
 All these parameters are configured in the bosh deployment. If you are using default values of deployment manifest, register the service with the commands below.
 
