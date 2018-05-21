@@ -518,7 +518,12 @@ instance_groups:
       appmetrics_db_connection_config: *databaseConnectionConfig
       instancemetrics_db_connection_config: *databaseConnectionConfig
       scalingengine_db_connection_config: *databaseConnectionConfig
+      lock_db: *database
       pruner:
+        db_lock: 
+          ttl: 15s
+          retry_interval: 5s
+        enable_db_lock: false
         logging:
           level: debug 
 
