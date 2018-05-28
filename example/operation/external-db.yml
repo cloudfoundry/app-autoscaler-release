@@ -75,3 +75,7 @@
 - type: replace
   path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/policy_db
   value: *external_database
+
+- type: replace
+  path: /instance_groups/name=pruner/jobs/name=pruner/properties/lock_db
+  value: *external_database

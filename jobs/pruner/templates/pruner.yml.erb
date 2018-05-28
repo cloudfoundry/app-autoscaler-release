@@ -23,6 +23,12 @@
   scaling_engine_db_database = p_arr('scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' }
   scaling_engine_db_url = scaling_engine_db_scheme + "://" + scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?sslmode=disable"
 
+  lock_db_scheme = p('lock_db.db_scheme')
+  lock_db_address = p('lock_db.address')
+  lock_db_port = p('lock_db.port')
+  lock_db_role = p_arr('lock_db.roles').find { |role| role['tag'] == 'lockdb' or role['tag'] == 'default' }
+  lock_db_database = p_arr('lock_db.databases').find { |database| database['tag'] == 'lockdb' or database['tag'] == 'default' }
+  lock_db_url = lock_db_scheme + "://" + lock_db_role['name'] + ":" + lock_db_role['password'] + "@" + lock_db_address + ":" + lock_db_port.to_s + "/" + lock_db_database['name'] + "?sslmode=disable"
 %>
 
 logging:
@@ -59,3 +65,9 @@ lock:
   lock_ttl: <%= p("pruner.lock.lock_ttl") %>
   lock_retry_interval: <%= p("pruner.lock.lock_retry_interval") %>
   consul_cluster_config: <%= p("pruner.lock.consul_cluster_config") %>
+
+db_lock:
+  ttl: <%= p("pruner.db_lock.ttl") %>
+  url: <%= lock_db_url %>
+  retry_interval: <%= p("pruner.db_lock.retry_interval") %>
+enable_db_lock: <%= p("pruner.enable_db_lock") %>
