@@ -15,6 +15,10 @@
     - name: ((database_username))
       password: ((database_password))
       tag: default 
+    connection_config: &databaseConnectionConfig
+      max_open_connections: 100
+      max_idle_connections: 10
+      connection_max_lifetime: 60s
 
 - type: replace
   path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/policy_db
@@ -70,4 +74,8 @@
 
 - type: replace
   path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/policy_db
+  value: *external_database
+
+- type: replace
+  path: /instance_groups/name=pruner/jobs/name=pruner/properties/lock_db
   value: *external_database

@@ -3,10 +3,13 @@ name: pruner
 templates:
   pruner_ctl: bin/pruner_ctl
   pruner.yml.erb: config/pruner.yml
+  pre-start.erb: bin/pre-start
 
 packages:
   - pruner
   - common
+  - db
+  - java
 
 properties:
   instancemetrics_db.address:
@@ -45,6 +48,26 @@ properties:
   scalingengine_db.roles:
     description: "The list of database roles used in scalingenginedb database including name/password"
 
+  appmetrics_db_connection_config.max_open_connections:
+    default: 100
+  appmetrics_db_connection_config.max_idle_connections:
+    default: 10
+  appmetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  instancemetrics_db_connection_config.max_open_connections:
+    default: 100
+  instancemetrics_db_connection_config.max_idle_connections:
+    default: 10
+  instancemetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  scalingengine_db_connection_config.max_open_connections:
+    default: 100
+  scalingengine_db_connection_config.max_idle_connections:
+    default: 10
+  scalingengine_db_connection_config.connection_max_lifetime:
+    default: 60s
 
   pruner.logging.level:
      description: "the leve of logging"
@@ -79,3 +102,26 @@ properties:
   pruner.lock.consul_cluster_config:
     description: "consul cluster configuration"
     default: http://127.0.0.1:8500
+  
+  lock_db.address:
+    description: "IP address on which the lockdb server will listen"
+    default: "postgres.service.cf.internal"
+  lock_db.databases:
+    description: "The list of databases used in lockdb database including name"
+  lock_db.db_scheme:
+    description: "Database scheme to be used to access lockdb"
+  lock_db.port:
+    description: "Port on which the lockdb server will listen"
+  lock_db.roles:
+    description: "The list of database roles used in lockdb database including name/password"
+
+  pruner.db_lock.ttl:
+    description: "database lock ttl"
+    default: 15s
+  pruner.db_lock.retry_interval:
+    description: "lock db retry interval"
+    default: 5s 
+  
+  pruner.enable_db_lock:
+    description: "Enable database lock flag"
+    default: false

@@ -34,14 +34,24 @@ logging:
   level: <%= p("eventgenerator.logging.level") %>
 
 db:
-  policy_db_url: <%= policy_db_url %>
-  app_metrics_db_url: <%= app_metrics_db_url %>
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("policy_db_connection_config.connection_max_lifetime") %>
+  app_metrics_db:
+    url: <%= app_metrics_db_url %>
+    max_open_connections: <%= p("appmetrics_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("appmetrics_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("appmetrics_db_connection_config.connection_max_lifetime") %>
 
 aggregator: 
   aggregator_execute_interval: <%= p("eventgenerator.aggregator.aggregator_execute_interval") %>
   policy_poller_interval: <%= p("eventgenerator.aggregator.policy_poller_interval") %>
   metric_poller_count: <%= p("eventgenerator.aggregator.metric_poller_count") %>
   app_monitor_channel_size: <%= p("eventgenerator.aggregator.app_monitor_channel_size") %>
+  save_interval: <%= p("eventgenerator.aggregator.save_interval") %>
+  app_metric_channel_size: <%= p("eventgenerator.aggregator.app_metric_channel_size") %>
 
 evaluator:
   evaluation_manager_execute_interval: <%= p("eventgenerator.evaluator.evaluation_manager_execute_interval") %>
@@ -75,6 +85,10 @@ circuitBreaker:
   consecutive_failure_count: <%= p("eventgenerator.circuitBreaker.consecutive_failure_count") %>
 
 db_lock:
-  url: <%= lock_db_url %>
+  lock_db:
+    url: <%= lock_db_url %>
+    max_open_connections: <%= p("lock_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("lock_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("lock_db_connection_config.connection_max_lifetime") %>
 
 enable_db_lock: <%= p("eventgenerator.enable_db_lock") %>
