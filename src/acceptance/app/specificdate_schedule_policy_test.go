@@ -2,6 +2,8 @@ package app
 
 import (
 	"acceptance/config"
+	. "acceptance/helpers"
+
 	"strconv"
 	"strings"
 	"time"
@@ -58,14 +60,14 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		JustBeforeEach(func() {
 
 			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
-			waitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DetectTimeoutDuration())
+			WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DetectTimeoutDuration())
 
 			location, _ = time.LoadLocation("GMT")
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
 			startDateTime = timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(time.Duration(interval+360) * time.Second)
 
-			policyStr := generateDynamicAndSpecificDateSchedulePolicy(1, 4, 4, "GMT", startDateTime, endDateTime, 2, 5, 3)
+			policyStr := GenerateDynamicAndSpecificDateSchedulePolicy(cfg, 1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 
@@ -99,21 +101,21 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		It("should scale", func() {
 			By("setting to initial_min_instance_count")
 			jobRunTime := startDateTime.Add(4 * time.Minute).Sub(time.Now())
-			waitForNInstancesRunning(appGUID, 3, jobRunTime)
+			WaitForNInstancesRunning(appGUID, 3, jobRunTime)
 
 			By("setting to schedule's instance_min_count")
 			jobRunTime = endDateTime.Sub(time.Now())
 			Eventually(func() int {
-				return runningInstances(appGUID, jobRunTime)
+				return RunningInstances(appGUID, jobRunTime)
 			}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 			jobRunTime = endDateTime.Sub(time.Now())
 			Consistently(func() int {
-				return runningInstances(appGUID, jobRunTime)
+				return RunningInstances(appGUID, jobRunTime)
 			}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 			By("setting to default instance_min_count")
-			waitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second+5*time.Minute)
+			WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second+5*time.Minute)
 
 		})
 

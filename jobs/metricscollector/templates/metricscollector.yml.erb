@@ -46,8 +46,16 @@ logging:
   level: <%= p("metricscollector.logging.level") %>
 
 db:
-  policy_db_url: <%= policy_db_url %>
-  instance_metrics_db_url: <%= instance_metrics_db_url %>
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("policy_db_connection_config.connection_max_lifetime") %>
+  instance_metrics_db:
+    url: <%= instance_metrics_db_url %>
+    max_open_connections: <%= p("instancemetrics_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("instancemetrics_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("instancemetrics_db_connection_config.connection_max_lifetime") %>
 
 collector:
   refresh_interval: <%= p("metricscollector.collector.refresh_interval") %>
@@ -60,6 +68,10 @@ lock:
   consul_cluster_config: <%= p("metricscollector.lock.consul_cluster_config") %>
 
 db_lock:
-  url: <%= lock_db_url %>
+  lock_db:
+    url: <%= lock_db_url %>
+    max_open_connections: <%= p("lock_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("lock_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("lock_db_connection_config.connection_max_lifetime") %>
 
 enable_db_lock: <%= p("metricscollector.enable_db_lock") %>
