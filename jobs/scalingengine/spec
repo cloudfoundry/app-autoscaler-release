@@ -115,3 +115,7 @@ properties:
     description: "the lock size of scalingengine"
     default: 32
 
+  scalingengine.need_consul:
+    description: "whether to start consul agent"
+    default: true
+

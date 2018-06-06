@@ -125,3 +125,7 @@ properties:
   pruner.enable_db_lock:
     description: "Enable database lock flag"
     default: false
+
+  pruner.need_consul:
+    description: "whether to start consul agent"
+    default: true

@@ -84,3 +84,7 @@ properties:
   service_broker.dashboard_redirect_uri:
     description: "service dashboard redirect uri"
     default: ""
+
+  service_broker.need_consul:
+    description: "whether to start consul agent"
+    default: true

@@ -127,3 +127,8 @@ properties:
   metricscollector.enable_db_lock:
     descrption: "Enable database lock flag"
     default: false
+
+
+  metricscollector.need_consul:
+    description: "whether to start consul agent"
+    default: true

@@ -76,3 +76,8 @@ properties:
     description: "Port on which the policydb server will listen"
   policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"  
+
+
+  scheduler.need_consul:
+    description: "whether to start consul agent"
+    default: true

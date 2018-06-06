@@ -14,9 +14,16 @@ SCHEDULER_DIR=/var/vcap/packages/scheduler
 
 export PATH=/var/vcap/packages/java/bin:$PATH 
 
-# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
-source /var/vcap/packages/common/consul-helper.sh
-start_consul_agent
+need_consul='<%= p("scheduler.need_consul") %>'
+
+if [ $need_consul = 'true' ];then
+	echo "start consul agent"
+	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
+	source /var/vcap/packages/common/consul-helper.sh
+	start_consul_agent
+else
+	echo "consul agent is not needed"
+fi
 
 # Getting Database config
 HOST='<%= p("scheduler_db.address") %>'

@@ -142,4 +142,7 @@ properties:
   cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
+  api_server.need_consul:
+    description: "whether to start consul agent"
+    default: true
 
