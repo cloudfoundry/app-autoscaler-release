@@ -75,6 +75,9 @@ properties:
   lock_db_connection_config.connection_max_lifetime:
     default: 60s  
 
+  eventgenerator.require_consul:
+    description: "whether to start consul agent"
+    default: true
   eventgenerator.logging.level:
     description: "the level of logging"
     default: "info"
@@ -178,3 +181,5 @@ properties:
   eventgenerator.circuitBreaker.consecutive_failure_count:
     description: "Number of consecutive failure to trip the circuit down"
     default: 3
+    
+  

@@ -34,6 +34,9 @@ packages:
   - common
 
 properties:
+  api_server.require_consul:
+    description: "whether to start consul agent"
+    default: true
   api_server.port:
     description: "Port where APIServer will run"
     default: 6100
@@ -142,4 +145,5 @@ properties:
   cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
+  
 

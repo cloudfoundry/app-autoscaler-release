@@ -87,7 +87,10 @@ properties:
   cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
-
+    
+  scalingengine.require_consul:
+    description: "whether to start consul agent"
+    default: true
   scalingengine.logging.level:
     description: "the level of logging"
     default: "info"
@@ -114,4 +117,6 @@ properties:
   scalingengine.lockSize:
     description: "the lock size of scalingengine"
     default: 32
+
+  
 

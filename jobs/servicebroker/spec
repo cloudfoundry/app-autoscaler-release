@@ -26,6 +26,9 @@ packages:
   - common
 
 properties:
+  service_broker.require_consul:
+    description: "whether to start consul agent"
+    default: true
   service_broker.publicPort:
     description: "Port where servicebroker public server will run"
     default: 6101
@@ -84,3 +87,5 @@ properties:
   service_broker.dashboard_redirect_uri:
     description: "service dashboard redirect uri"
     default: ""
+
+  
