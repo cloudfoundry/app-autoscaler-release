@@ -88,6 +88,9 @@ properties:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
 
+  metricscollector.require_consul:
+    description: "whether to start consul agent"
+    default: true
   metricscollector.logging.level:
     description: "the level of logging"
     default: "info"
@@ -129,6 +132,4 @@ properties:
     default: false
 
 
-  metricscollector.need_consul:
-    description: "whether to start consul agent"
-    default: true
+  

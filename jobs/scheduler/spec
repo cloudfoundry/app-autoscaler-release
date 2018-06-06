@@ -20,6 +20,9 @@ packages:
   - common
 
 properties:
+  scheduler.require_consul:
+    description: "whether to start consul agent"
+    default: true
   scheduler.port:
     description: "Scheduler's port"
     default: 6102
@@ -78,6 +81,4 @@ properties:
     description: "The list of database roles used in policydb database including name/password"  
 
 
-  scheduler.need_consul:
-    description: "whether to start consul agent"
-    default: true
+  

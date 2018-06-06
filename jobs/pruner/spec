@@ -69,6 +69,9 @@ properties:
   scalingengine_db_connection_config.connection_max_lifetime:
     default: 60s
 
+  pruner.require_consul:
+    description: "whether to start consul agent"
+    default: true
   pruner.logging.level:
      description: "the leve of logging"
      default: "info"
@@ -126,6 +129,4 @@ properties:
     description: "Enable database lock flag"
     default: false
 
-  pruner.need_consul:
-    description: "whether to start consul agent"
-    default: true
+  

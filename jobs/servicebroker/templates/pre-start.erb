@@ -13,9 +13,9 @@ SERVICEBROKER_DIR=/var/vcap/packages/servicebroker
 
 export PATH=/var/vcap/packages/java/bin:$PATH 
 
-need_consul='<%= p("service_broker.need_consul") %>'
+require_consul='<%= p("service_broker.require_consul") %>'
 
-if [ $need_consul = 'true' ];then
+if [ $require_consul = 'true' ];then
 	echo "start consul agent"
 	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
 	source /var/vcap/packages/common/consul-helper.sh
