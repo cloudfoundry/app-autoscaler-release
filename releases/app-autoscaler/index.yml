@@ -40,4 +40,6 @@ builds:
     version: v0.0.21
   fa47bcd7-f636-4d3b-a18f-b8c3191a352d:
     version: v0.0.22
+  1e655755-86d8-4683-a62d-4e8cc1510f18:
+    version: v0.0.23
 format-version: '2'
