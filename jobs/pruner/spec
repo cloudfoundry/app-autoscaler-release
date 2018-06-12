@@ -118,6 +118,13 @@ properties:
   lock_db.roles:
     description: "The list of database roles used in lockdb database including name/password"
 
+  lock_db_connection_config.max_open_connections:
+    default: 100
+  lock_db_connection_config.max_idle_connections:
+    default: 10
+  lock_db_connection_config.connection_max_lifetime:
+    default: 60s
+
   pruner.db_lock.ttl:
     description: "database lock ttl"
     default: 15s

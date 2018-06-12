@@ -67,7 +67,9 @@ lock:
   consul_cluster_config: <%= p("pruner.lock.consul_cluster_config") %>
 
 db_lock:
-  ttl: <%= p("pruner.db_lock.ttl") %>
-  url: <%= lock_db_url %>
-  retry_interval: <%= p("pruner.db_lock.retry_interval") %>
+  lock_db:
+    url: <%= lock_db_url %>
+    max_open_connections: <%= p("lock_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("lock_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("lock_db_connection_config.connection_max_lifetime") %>
 enable_db_lock: <%= p("pruner.enable_db_lock") %>
