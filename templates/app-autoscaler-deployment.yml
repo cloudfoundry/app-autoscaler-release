@@ -452,9 +452,11 @@ instance_groups:
       scalingengine_db: *database
       scheduler_db: *database
       policy_db: *database
+      lock_db: *database
       scalingengine_db_connection_config: *databaseConnectionConfig
       scheduler_db_connection_config: *databaseConnectionConfig
       policy_db_connection_config: *databaseConnectionConfig
+      lock_db_connection_config: *databaseConnectionConfig
       cf: *cf_credentials
       scalingengine:
         logging:
@@ -466,9 +468,11 @@ instance_groups:
         ca_cert: ((scalingengine_ca.ca))
         server_cert: ((scalingengine_server.certificate))
         server_key: ((scalingengine_server.private_key))
-        consul:
-          cluster: http://127.0.0.1:8500
-
+        db_lock:
+          ttl: 15s
+          retry_interval: 5s
+        enable_db_lock: true
+          
 variables:
 - name: database_password
   type: password
