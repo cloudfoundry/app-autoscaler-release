@@ -104,7 +104,7 @@ properties:
   autoscaler.scalingengine.server_key:
     description: "PEM-encoded server key"
   autoscaler.scalingengine.synchronizer.active_schedule_sync_interval:
-    description: "the time interval to synchronize the active schedulesr"
+    description: "the time interval to synchronize the active schedules"
     default: 600s
 
   autoscaler.scalingengine.consul.cluster:
