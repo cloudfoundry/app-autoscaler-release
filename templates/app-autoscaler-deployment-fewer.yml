@@ -37,6 +37,8 @@ instance_groups:
   azs:
   - z1
   instances: 1
+  update:
+    serial: true
   stemcell: default
   vm_type: small
   networks:
