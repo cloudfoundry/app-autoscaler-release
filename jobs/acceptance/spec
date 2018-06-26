@@ -1,0 +1,118 @@
+---
+name: acceptance
+
+description: >
+  This job runs the AutoScaler user acceptance tests
+
+packages:
+- golang1.7
+- acceptance
+# cli
+
+templates:
+  run.erb: bin/run
+  config.json.erb: bin/config.json
+
+properties:
+  autoscaler.acceptance.service_name:
+    description: >
+      The name of the registered auto-scaler service, use cf marketplace to
+      determine the name.
+    default: autoscaler
+  autoscaler.acceptance.service_plan:
+    description: >
+      The plan name of the registered auto-scaler service, use cf marketplace
+      to determine the plan.
+    default: autoscaler-free-plan
+  autoscaler.eventgenerator.aggregator.aggregator_execute_interval:
+    description: >
+      How frequently metrics are aggregated. This value must match the value
+      configured in your deployment.
+    default: 120
+  autoscaler.acceptance.autoscaler_api:
+    description: AutoScaler API endpoint
+    example: autoscaler.bosh-lite.com
+  autoscaler.acceptance.api:
+    description: Cloud Controller API endpoint
+    example: api.bosh-lite.com
+  autoscaler.cf.username:
+    description: >
+      Name of a user in your CF instance with admin credentials. This admin user
+      must have the doppler.firehose scope if running the logging firehose tests
+    example: admin
+  autoscaler.cf.password:
+    description: Password of the admin user above.
+  autoscaler.acceptance.apps_domain:
+    description: >
+      A shared domain that tests can use to create subdomains that will route to
+      applications also created in the tests.
+    example: bosh-lite.com
+  autoscaler.acceptance.skip_ssl_validation:
+    description: >
+      Set to true if using an invalid (e.g. self-signed) cert for traffic routed
+      to your CF instance; this is generally always true for BOSH-Lite
+      deployments of CF.
+    default: false
+  autoscaler.acceptance.use_existing_user:
+    description: >
+      The admin user configured above will normally be used to create a
+      temporary user (with lesser permissions) to perform actions (such as push
+      applications) during tests, and then delete said user after the tests have
+      run; set this to true if you want to use an existing user, configured via
+      the following properties.
+    default: false
+  autoscaler.acceptance.keep_user_at_suite_end:
+    description: >
+      If using an existing user (see above), set this to true unless you are
+      okay having your existing user being deleted at the end. You can also set
+      this to true when not using an existing user if you want to leave the
+      temporary user around for debugging purposes after the test teardown.
+    default: false
+  autoscaler.acceptance.existing_user:
+    description: Name of the existing user to use.
+    example: cf-user
+  autoscaler.acceptance.existing_user_password:
+    description: Password for the existing user to use.
+  autoscaler.acceptance.default_timeout:
+    description: >
+      Default time (in seconds) to wait for polling assertions that wait for
+      asynchronous results.
+  autoscaler.acceptance.cf_push_timeout:
+    description: >
+      Default time (in seconds) to wait for cf push commands to succeed
+  autoscaler.acceptance.long_curl_timeout:
+    description: >
+      Default time (in seconds) to wait for assertions that curl slow endpoints
+      of test applications.
+  autoscaler.acceptance.test_password:
+    description: >
+      Used to set the password for the test user. This may be needed if your CF
+      installation has password policies.
+  autoscaler.acceptance.timeout_scale:
+    description: >
+      Used primarily to scale default timeouts for test setup and teardown
+      actions (e.g. creating an org) as opposed to main test actions (e.g.
+      pushing an app).
+  autoscaler.acceptance.use_http:
+    description: >
+      Set to true if you would like CF Acceptance Tests to use HTTP when making
+      api and application requests. (default is HTTPS)
+    default: false
+  autoscaler.acceptance.node_memory_limit:
+    description: >
+      the memory limit of node.js test application, should be greater than 128
+      (MB)
+  autoscaler.acceptance.java_buildpack_name:
+    description: The name of the Java buildpack
+    default: java_buildpack
+  autoscaler.acceptance.nodejs_buildpack_name:
+    description: The name of the Node.JS buildpack
+    default: nodejs_buildpack
+  autoscaler.service_broker.username:
+    description: username to authenticate with service broker
+  autoscaler.service_broker.password:
+    description: password to authenticate with service broker
+  autoscaler.service_broker.api_server.host:
+    description: Host where APIserver is running
+  autoscaler.service_broker.api_server.port:
+    description: Port where APIserver will listen

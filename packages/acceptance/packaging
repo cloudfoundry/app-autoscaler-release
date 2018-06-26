@@ -1,0 +1,11 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+mkdir -p ${BOSH_INSTALL_TARGET}/src
+ls -l
+cp -a \
+    acceptance \
+    github.com \
+    gopkg.in \
+    \
+    ${BOSH_INSTALL_TARGET}/src/

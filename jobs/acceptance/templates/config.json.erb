@@ -1,0 +1,40 @@
+{
+    "service_name":                 "<%= p('autoscaler.acceptance.service_name') %>",
+    "service_plan":                 "<%= p('autoscaler.acceptance.service_plan') %>",
+    "aggregate_interval":           <%= p('autoscaler.eventgenerator.aggregator.aggregator_execute_interval').delete('s') %>,
+    "autoscaler_api":               "<%= p('autoscaler.acceptance.autoscaler_api') %>",
+    "api":                          "<%= p('autoscaler.acceptance.api') %>",
+    "admin_user":                   "<%= p('autoscaler.cf.username') %>",
+    "admin_password":               "<%= p('autoscaler.cf.password') %>",
+    "apps_domain":                  "<%= p('autoscaler.acceptance.apps_domain') %>",
+    "skip_ssl_validation":          <%= p('autoscaler.acceptance.skip_ssl_validation') %>,
+    "use_existing_user":            <%= p('autoscaler.acceptance.use_existing_user') %>,
+    "keep_user_at_suite_end":       <%= p('autoscaler.acceptance.keep_user_at_suite_end') %>,
+    <% if_p('autoscaler.acceptance.existing_user') do |v| %>
+        "existing_user":            "<%= v %>",
+    <% end %>
+    <% if_p('autoscaler.acceptance.existing_user_password') do |v| %>
+        "existing_user_password":   "<%= v %>",
+    <% end %>
+    <% if_p('autoscaler.acceptance.default_timeout') do |v|%>
+        "default_timeout":          <%= v %>,
+    <% end %>
+    <% if_p('autoscaler.acceptance.cf_push_timeout') do |v| %>
+        "cf_push_timeout":          <%= v %>,
+    <% end %>
+    <% if_p('autoscaler.acceptance.long_curl_timeout') do |v| %>
+        "long_curl_timeout":        <%= v %>,
+    <% end %>
+    <% if_p('autoscaler.acceptance.test_password') do |v| %>
+        "test_password":            "<%= v %>",
+    <% end %>
+    <% if_p('autoscaler.acceptance.timeout_scale') do |v| %>
+        "timeout_scale":            <%= v %>,
+    <% end %>
+    "use_http": <%= p('autoscaler.acceptance.use_http') %>,
+    <% if_p('autoscaler.acceptance.node_memory_limit') do |v| %>
+        "node_memory_limit":        <%= v %>,
+    <% end %>
+    "java_buildpack_name":          "<%= p('autoscaler.acceptance.java_buildpack_name') %>",
+    "nodejs_buildpack_name":        "<%= p('autoscaler.acceptance.nodejs_buildpack_name') %>"
+}

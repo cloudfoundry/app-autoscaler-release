@@ -1,0 +1,11 @@
+---
+name: acceptance
+
+dependencies:
+- golang1.7
+# cli
+
+files:
+- acceptance/**/*
+- github.com/**/*
+- gopkg.in/**/*
