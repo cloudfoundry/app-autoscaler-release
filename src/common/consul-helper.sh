@@ -10,3 +10,4 @@ function start_consul_agent {
     set -e
   fi
 }
+
