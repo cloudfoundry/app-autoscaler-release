@@ -8,7 +8,7 @@
   role = p_arr('autoscaler.binding_db.roles').find { |role| role['tag'] == 'bindingdb' or role['tag'] == 'default' }
   database = p_arr('autoscaler.binding_db.databases').find { |database| database['tag'] == 'bindingdb' or database['tag'] == 'default' }
 %>
-source /var/vcap/packages/common/consul-helper.sh
+source /var/vcap/packages/common/dns-helper.sh
 
 DB_DIR=/var/vcap/packages/db 
 SERVICEBROKER_DIR=/var/vcap/packages/servicebroker 
@@ -20,7 +20,8 @@ require_consul='<%= p("autoscaler.service_broker.require_consul") %>'
 if [ $require_consul = 'true' ];then
 	echo "start consul agent"
 	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
-	start_consul_agent
+  source /var/vcap/packages/common/consul-helper.sh
+  start_consul_agent
 else
 	echo "consul agent is not needed"
 fi
@@ -32,7 +33,7 @@ USER='<%= role['name'] %>'
 PASSWORD='<%= role['password'] %>'
 PORT='<%= p("autoscaler.binding_db.port") %>'
 
-wait_consul_agent $HOST $PORT
+detect_dns $HOST $PORT
 
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$SERVICEBROKER_DIR/db/servicebroker.db.changelog.json update

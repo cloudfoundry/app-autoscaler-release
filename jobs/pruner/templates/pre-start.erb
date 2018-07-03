@@ -8,7 +8,7 @@
   role = p_arr('autoscaler.lock_db.roles').find { |role| role['tag'] == 'lockdb' or role['tag'] == 'default'}
   database = p_arr('autoscaler.lock_db.databases').find { |database| database['tag'] == 'lockdb' or  database['tag'] == 'default' }
 %>
-source /var/vcap/packages/common/consul-helper.sh
+source /var/vcap/packages/common/dns-helper.sh
 
 DB_DIR=/var/vcap/packages/db
 PRUNER_DIR=/var/vcap/packages/pruner
@@ -20,7 +20,8 @@ require_consul='<%= p("autoscaler.pruner.require_consul") %>'
 if [ $require_consul = 'true' ];then
 	echo "start consul agent"
 	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
-	start_consul_agent
+  source /var/vcap/packages/common/consul-helper.sh
+  start_consul_agent
 else
 	echo "consul agent is not needed"
 fi
@@ -32,7 +33,7 @@ USER='<%= role['name'] %>'
 PASSWORD='<%= role['password'] %>'
 PORT='<%= p("autoscaler.lock_db.port") %>'
 
-wait_consul_agent $HOST $PORT
+detect_dns $HOST $PORT
 
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$PRUNER_DIR/pruner.db.changelog.yml update
