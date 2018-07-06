@@ -20,59 +20,65 @@ packages:
   - common
 
 properties:
-  scheduler.port:
+  autoscaler.scheduler.require_consul:
+    description: "whether to start consul agent"
+    default: true
+  autoscaler.scheduler.port:
     description: "Scheduler's port"
     default: 6102
-  scheduler.ca_cert:
+  autoscaler.scheduler.ca_cert:
     description: "PEM-encoded CA certificate"
-  scheduler.server_cert:
+  autoscaler.scheduler.server_cert:
     description: "PEM-encoded server certificate"
-  scheduler.server_key:
+  autoscaler.scheduler.server_key:
     description: "PEM-encoded server key"
-  scheduler.job_reschedule_interval_millisecond:
+  autoscaler.scheduler.job_reschedule_interval_millisecond:
     description: "Rescheduling interval for quartz job in milliseconds"
-  scheduler.job_reschedule_maxcount:
+  autoscaler.scheduler.job_reschedule_maxcount:
     description: "Maximum no of jobs can be re-scheduled"
-  scheduler.notification_reschedule_maxcount:
+  autoscaler.scheduler.notification_reschedule_maxcount:
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
   
-  scheduler.scaling_engine.host:
+  autoscaler.scheduler.scaling_engine.host:
     description: "URL where Scaling-engine is running"
     default: "scalingengine.service.cf.internal"
-  scheduler.scaling_engine.port:
+  autoscaler.scheduler.scaling_engine.port:
     description: "Scaling Engine's port"
     default: 6104
-  scheduler.scaling_engine.ca_cert:
+  autoscaler.scheduler.scaling_engine.ca_cert:
     description: "PEM-encoded CA certificate"
-  scheduler.scaling_engine.client_cert:
+  autoscaler.scheduler.scaling_engine.client_cert:
     description: "PEM-encoded client certificate"
-  scheduler.scaling_engine.client_key:
+  autoscaler.scheduler.scaling_engine.client_key:
     description: "PEM-encoded client key"
   
-  scheduler.consul.ttl:
+  autoscaler.scheduler.consul.ttl:
     description: "TTL timeout seconds"
     default: 20
 
-  scheduler_db.address:
+  autoscaler.scheduler_db.address:
     description: "IP address on which the schedulerdb server will listen"
     default: "postgres.service.cf.internal"
-  scheduler_db.databases:
+  autoscaler.scheduler_db.databases:
     description: "The list of databases used in schedulerdb database including name"
-  scheduler_db.db_scheme:
+  autoscaler.scheduler_db.db_scheme:
     description: "Database scheme to be used to access schedulerdb"
-  scheduler_db.port:
+  autoscaler.scheduler_db.port:
     description: "Port on which the schedulerdb server will listen"
-  scheduler_db.roles:
+  autoscaler.scheduler_db.roles:
     description: "The list of database roles used in schedulerdb database including name/password"
 
-  policy_db.address:
+  autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "postgres.service.cf.internal"
-  policy_db.databases:
+  autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
-  policy_db.db_scheme:
+  autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
-  policy_db.port:
+  autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
-  policy_db.roles:
+  autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"  
+
+
+  

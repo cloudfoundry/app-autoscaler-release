@@ -18,108 +18,168 @@ packages:
   - common
 
 properties:
-  policy_db.address:
+  autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "postgres.service.cf.internal"
-  policy_db.databases:
+  autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
-  policy_db.db_scheme:
+  autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
-  policy_db.port:
+  autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
-  policy_db.roles:
+  autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
 
-  appmetrics_db.address:
+  autoscaler.appmetrics_db.address:
     description: "IP address on which the appmetricsdb server will listen"
     default: "postgres.service.cf.internal"
-  appmetrics_db.databases:
+  autoscaler.appmetrics_db.databases:
     description: "The list of databases used in appmetricsdb database including name"
-  appmetrics_db.db_scheme:
+  autoscaler.appmetrics_db.db_scheme:
     description: "Database scheme to be used to access appmetricsdb"
-  appmetrics_db.port:
+  autoscaler.appmetrics_db.port:
     description: "Port on which the appmetricsdb server will listen"
-  appmetrics_db.roles:
+  autoscaler.appmetrics_db.roles:
     description: "The list of database roles used in appmetricsdb database including name/password"
 
-  eventgenerator.logging.level:
+  autoscaler.lock_db.address:
+    description: "IP address on which the lockdb server will listen"
+    default: "postgres.service.cf.internal"
+  autoscaler.lock_db.databases:
+    description: "The list of databases used in lockdb database including name"
+  autoscaler.lock_db.db_scheme:
+    description: "Database scheme to be used to access lockdb"
+  autoscaler.lock_db.port:
+    description: "Port on which the lockdb server will listen"
+  autoscaler.lock_db.roles:
+    description: "The list of database roles used in lockdb database including name/password"
+
+  autoscaler.appmetrics_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.appmetrics_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.appmetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.policy_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.policy_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.lock_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.lock_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.lock_db_connection_config.connection_max_lifetime:
+    default: 60s  
+
+  autoscaler.eventgenerator.require_consul:
+    description: "whether to start consul agent"
+    default: true
+  autoscaler.eventgenerator.logging.level:
     description: "the level of logging"
     default: "info"
-  eventgenerator.server.port:
+  autoscaler.eventgenerator.server.port:
     description: "the listening port of server"
     default: 6105
 
-  eventgenerator.aggregator.aggregator_execute_interval: 
+  autoscaler.eventgenerator.aggregator.aggregator_execute_interval: 
     description: "the time interval to aggregate metrics data"
     default: 40s
-  eventgenerator.aggregator.policy_poller_interval: 
+  autoscaler.eventgenerator.aggregator.policy_poller_interval: 
     description: "the time interval to poll policies"
     default: 40s
-  eventgenerator.aggregator.metric_poller_count: 
+  autoscaler.eventgenerator.aggregator.metric_poller_count: 
     description: "the number of metrics poller"
     default: 20
-  eventgenerator.aggregator.app_monitor_channel_size: 
+  autoscaler.eventgenerator.aggregator.app_monitor_channel_size: 
     description: "the size of app monitor channel"
     default: 200
+  autoscaler.eventgenerator.aggregator.save_interval: 
+    description: "the time interval to save appmetric to database"
+    default: 5s
+  autoscaler.eventgenerator.aggregator.app_metric_channel_size: 
+    description: "the size of appmetric channel"
+    default: 1000
 
-  eventgenerator.evaluator.evaluation_manager_execute_interval: 
+  autoscaler.eventgenerator.evaluator.evaluation_manager_execute_interval: 
     description: "the time interval to evaluate rules"
     default: 40s
-  eventgenerator.evaluator.evaluator_count: 
+  autoscaler.eventgenerator.evaluator.evaluator_count: 
     description: "the number of evaluators"
     default: 20
-  eventgenerator.evaluator.trigger_array_channel_size: 
+  autoscaler.eventgenerator.evaluator.trigger_array_channel_size: 
     description: "the size of the trigger array channel"
     default: 200
   
-  eventgenerator.scaling_engine.host:
+  autoscaler.eventgenerator.scaling_engine.host:
     description: "Host where the scaling engine is running"
     default: "scalingengine.service.cf.internal"
 
-  eventgenerator.scaling_engine.port:
+  autoscaler.eventgenerator.scaling_engine.port:
     description: "Port where the scaling engine will listen"
     default: 6104
 
-  eventgenerator.scaling_engine.ca_cert:
+  autoscaler.eventgenerator.scaling_engine.ca_cert:
     description: "PEM-encoded CA certificate"
 
-  eventgenerator.scaling_engine.client_cert:
+  autoscaler.eventgenerator.scaling_engine.client_cert:
     description: "PEM-encoded client certificate"
 
-  eventgenerator.scaling_engine.client_key:
+  autoscaler.eventgenerator.scaling_engine.client_key:
     description: "PEM-encoded client key"
 
-  eventgenerator.metricscollector.host:
+  autoscaler.eventgenerator.metricscollector.host:
     description: "Host where the metrics collector is running"
     default: "metricscollector.service.cf.internal"
 
-  eventgenerator.metricscollector.port:
+  autoscaler.eventgenerator.metricscollector.port:
     description: "Port where the metrics collector will listen"
     default: 6103
 
-  eventgenerator.metricscollector.ca_cert:
+  autoscaler.eventgenerator.metricscollector.ca_cert:
     description: "PEM-encoded CA certificate"
 
-  eventgenerator.metricscollector.client_cert:
+  autoscaler.eventgenerator.metricscollector.client_cert:
     description: "PEM-encoded client certificate"
 
-  eventgenerator.metricscollector.client_key:
+  autoscaler.eventgenerator.metricscollector.client_key:
     description: "PEM-encoded client key"
 
-  eventgenerator.lock.lock_ttl:
+  autoscaler.eventgenerator.lock.lock_ttl:
     description: "consul lock ttl duration"
     default: 15s
-  eventgenerator.lock.lock_retry_interval:
+  autoscaler.eventgenerator.lock.lock_retry_interval:
     description: "consul lock retry interval"
     default: 10s
-  eventgenerator.lock.consul_cluster_config:
+  autoscaler.eventgenerator.lock.consul_cluster_config:
     description: "consul cluster configuration"
     default: http://127.0.0.1:8500
 
-  eventgenerator.defaultStatWindowSecs:
+  autoscaler.eventgenerator.defaultStatWindowSecs:
     description: "Default value for stat_window_secs"
     default: 300
 
-  eventgenerator.defaultBreachDurationSecs:
+  autoscaler.eventgenerator.defaultBreachDurationSecs:
     description: "Default value for breach_duration_secs"
     default: 300
+
+  autoscaler.eventgenerator.enable_db_lock:
+    descrption: "Enable database lock flag"
+    default: false
+
+  autoscaler.eventgenerator.circuitBreaker.back_off_initial_interval:
+    description: "Initial exponential back off interval"
+    default: 5m
+
+  autoscaler.eventgenerator.circuitBreaker.back_off_max_interval:
+    description: "Maximum exponential back off interval"
+    default: 120m
+
+  autoscaler.eventgenerator.circuitBreaker.consecutive_failure_count:
+    description: "Number of consecutive failure to trip the circuit down"
+    default: 3
+    
+  

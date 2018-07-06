@@ -4,4 +4,4 @@ $(dirname $0)/test \
   -slowSpecThreshold=120 \
   -randomizeAllSpecs \
   $@ \
-  . broker app
+  . broker app api

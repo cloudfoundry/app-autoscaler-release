@@ -5,13 +5,16 @@ dependencies:
 - golang1.7
 
 files:
+- app-autoscaler/src/autoscaler/pruner/db/*
 - app-autoscaler/src/autoscaler/db/*.go # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/*.go # gosub
+- app-autoscaler/src/autoscaler/helpers/*.go # gosub
 - app-autoscaler/src/autoscaler/models/*.go # gosub
 - app-autoscaler/src/autoscaler/pruner/*.go # gosub
 - app-autoscaler/src/autoscaler/pruner/cmd/pruner/*.go # gosub
 - app-autoscaler/src/autoscaler/pruner/config/*.go # gosub
 - app-autoscaler/src/autoscaler/pruner/fakes/*.go # gosub
+- app-autoscaler/src/autoscaler/sync/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/unix_transport/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/clock/*.go # gosub
