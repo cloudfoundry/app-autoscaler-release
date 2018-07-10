@@ -18,7 +18,7 @@ case $1 in
     cd /var/vcap/packages/apiserver/
     PATH=/var/vcap/packages/nodejs/bin:$PATH
     export PATH
-    exec node index.js -c /var/vcap/jobs/apiserver/bin/config.json\
+    exec node index.js -c /var/vcap/jobs/apiserver/config/config.json\
       >>  $LOG_DIR/apiserver.stdout.log \
       2>> $LOG_DIR/apiserver.stderr.log
     ;;
