@@ -54,6 +54,10 @@ server:
 logging:
   level: <%= p("autoscaler.scalingengine.logging.level") %>
 
+health:
+  port: <%= p("autoscaler.scalingengine.health.port") %>
+  emit_interval: <%= p("autoscaler.scalingengine.health.emit_internal") %>
+  
 db:
   policy_db:
     url: <%= policy_db_url %>

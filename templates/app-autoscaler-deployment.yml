@@ -469,6 +469,9 @@ instance_groups:
             level: debug
           server:
             port: &scalingEnginePort 6104
+          health:
+            port: &scalingEngineHealthPort 6204
+            emit_interval: 15s
           defaultCoolDownSecs: 300
           lockSize: 32
           ca_cert: ((scalingengine_ca.ca))
