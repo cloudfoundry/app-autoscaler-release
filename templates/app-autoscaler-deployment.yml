@@ -379,7 +379,10 @@ instance_groups:
         agent:
           services:
             eventgenerator: 
-              check: {}
+              check:
+                tcp: 127.0.0.1:6105
+                interval: 30s
+                timeout: 10s
   - name: eventgenerator
     release: app-autoscaler
     properties:

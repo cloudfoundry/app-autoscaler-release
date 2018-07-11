@@ -18,7 +18,7 @@ provides:
 - name: metricscollector
   type: metricscollector
   properties:
-  - metricscollector.server.port
+  - autoscaler.metricscollector.server.port
 
 consumes:
 - name: metricscollector

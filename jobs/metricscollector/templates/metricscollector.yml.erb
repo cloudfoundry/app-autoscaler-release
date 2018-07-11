@@ -19,7 +19,7 @@
 
   sorted_instances=link("metricscollector").instances.sort_by {|i|i.address}
   nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
-  addrs=sorted_instances.map{|i| "'#{i.address}:#{p('metricscollector.server.port')}'"}
+  addrs=sorted_instances.map{|i| "'#{i.address}:#{p('autoscaler.metricscollector.server.port')}'"}
   nodeAddrs="[" + addrs.join(",") +"]"  
 
 %>
