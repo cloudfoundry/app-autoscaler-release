@@ -87,7 +87,7 @@ properties:
   autoscaler.cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
-    
+
   autoscaler.scalingengine.require_consul:
     description: "whether to start consul agent"
     default: true
@@ -107,6 +107,14 @@ properties:
     description: "the time interval to synchronize the active schedules"
     default: 600s
 
+  autoscaler.scalingengine.health.port:
+    description: "the listening port of health endpoint"
+    default: 8081
+  autoscaler.scalingengine.health.emit_interval:
+    description: "the time interval to emit health metrics"
+    default: 15s
+
+
   autoscaler.scalingengine.consul.cluster:
     description: "Consul Cluster configuration. If not specified, scaling engine will not register itself with consul."
     default: ""
@@ -118,7 +126,6 @@ properties:
     description: "the lock size of scalingengine"
     default: 32
 
-  
   autoscaler.lock_db.address:
     description: "IP address on which the lockdb server will listen"
     default: "postgres.service.cf.internal"

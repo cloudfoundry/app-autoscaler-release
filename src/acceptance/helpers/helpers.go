@@ -20,6 +20,9 @@ const (
 	DaysOfMonth Days = "days_of_month"
 	DaysOfWeek       = "days_of_week"
 	MB               = 1024 * 1024
+
+	TestBreachDurationSeconds = 60
+	TestCoolDownSeconds       = 60
 )
 
 type appSummary struct {
@@ -53,7 +56,6 @@ type ScalingPolicy struct {
 
 type ScalingRule struct {
 	MetricType            string `json:"metric_type"`
-	StatWindowSeconds     int    `json:"stat_window_secs"`
 	BreachDurationSeconds int    `json:"breach_duration_secs"`
 	Threshold             int64  `json:"threshold"`
 	Operator              string `json:"operator"`
@@ -116,11 +118,10 @@ func DisableServiceAccess(cfg *config.Config, orgName string) {
 func GenerateDynamicScaleOutPolicy(cfg *config.Config, instanceMin, instanceMax int, metricName string, threshold int64) string {
 	scalingOutRule := ScalingRule{
 		MetricType:            metricName,
-		StatWindowSeconds:     cfg.AggregateInterval,
-		BreachDurationSeconds: cfg.AggregateInterval,
+		BreachDurationSeconds: TestBreachDurationSeconds,
 		Threshold:             threshold,
 		Operator:              ">=",
-		CoolDownSeconds:       cfg.AggregateInterval,
+		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "+1",
 	}
 
@@ -138,11 +139,10 @@ func GenerateDynamicScaleOutPolicy(cfg *config.Config, instanceMin, instanceMax 
 func GenerateDynamicScaleInPolicy(cfg *config.Config, instanceMin, instanceMax int, metricName string, threshold int64) string {
 	scalingInRule := ScalingRule{
 		MetricType:            metricName,
-		StatWindowSeconds:     cfg.AggregateInterval,
-		BreachDurationSeconds: cfg.AggregateInterval,
+		BreachDurationSeconds: TestBreachDurationSeconds,
 		Threshold:             threshold,
 		Operator:              "<",
-		CoolDownSeconds:       cfg.AggregateInterval,
+		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "-1",
 	}
 
@@ -163,11 +163,10 @@ func GenerateDynamicAndSpecificDateSchedulePolicy(cfg *config.Config, instanceMi
 
 	scalingInRule := ScalingRule{
 		MetricType:            "memoryused",
-		StatWindowSeconds:     cfg.AggregateInterval,
-		BreachDurationSeconds: cfg.AggregateInterval,
+		BreachDurationSeconds: TestBreachDurationSeconds,
 		Threshold:             threshold,
 		Operator:              "<",
-		CoolDownSeconds:       cfg.AggregateInterval,
+		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "-1",
 	}
 
@@ -201,11 +200,10 @@ func GenerateDynamicAndRecurringSchedulePolicy(cfg *config.Config, instanceMin, 
 
 	scalingInRule := ScalingRule{
 		MetricType:            "memoryused",
-		StatWindowSeconds:     cfg.AggregateInterval,
-		BreachDurationSeconds: cfg.AggregateInterval,
+		BreachDurationSeconds: TestBreachDurationSeconds,
 		Threshold:             threshold,
 		Operator:              "<",
-		CoolDownSeconds:       cfg.AggregateInterval,
+		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "-1",
 	}
 

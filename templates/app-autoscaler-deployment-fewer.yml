@@ -225,17 +225,18 @@ instance_groups:
                 interval: 30s
                 timeout: 10s
             eventgenerator: 
-              check: {}
+              check:
+                tcp: 127.0.0.1:6105
+                interval: 30s
+                timeout: 10s
   - name: metricscollector
     release: app-autoscaler
     properties:
       autoscaler:
         instancemetrics_db: *database
         policy_db: *database
-        lock_db: *database
         instancemetrics_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
-        lock_db_connection_config: *databaseConnectionConfig
         cf: &cf_credentials
           api: "https://api.((system_domain))"
           grant_type: password
@@ -253,7 +254,6 @@ instance_groups:
             refresh_interval: 60s
             collect_interval: 30s
             save_interval: 5s
-          enable_db_lock: false
           ca_cert: ((metricscollector_ca.ca))
           server_cert: ((metricscollector_server.certificate))
           server_key: ((metricscollector_server.private_key))
@@ -264,13 +264,16 @@ instance_groups:
       autoscaler:
         appmetrics_db: *database
         policy_db: *database
-        lock_db: *database
         appmetrics_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
-        lock_db_connection_config: *databaseConnectionConfig
         eventgenerator:
           logging:
             level: debug
+          server:
+            port: &eventGeneratorPort 6105
+          ca_cert: ((eventgenerator_ca.ca))
+          server_cert: ((eventgenerator_server.certificate))
+          server_key: ((eventgenerator_server.private_key))
           aggregator:
             aggregator_execute_interval: 40s
             policy_poller_interval: 40s
@@ -288,7 +291,6 @@ instance_groups:
             back_off_initial_interval: 5m
             back_off_max_interval: 120m
             consecutive_failure_count: 5
-          enable_db_lock: false
           scaling_engine:
             host: scalingengine.service.cf.internal
             port: *scalingEnginePort
@@ -301,7 +303,7 @@ instance_groups:
             ca_cert: ((metricscollector_ca.ca))
             client_cert: ((metricscollector_client.certificate))
             client_key: ((metricscollector_client.private_key))
-          require_consul: false
+          require_consul: true
   
 
 # asactors Instance Group: scalingengine&scheduler&pruner
@@ -357,6 +359,9 @@ instance_groups:
             level: debug
           server:
             port: &scalingEnginePort 6104
+          health:
+            port: &scalingEngineHealthPort 6204
+            emit_interval: 15s  
           defaultCoolDownSecs: 300
           lockSize: 32
           ca_cert: ((scalingengine_ca.ca))
@@ -449,6 +454,19 @@ variables:
     common_name: metricscollector client
     extended_key_usage:
     - client_auth
+- name: eventgenerator_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: eventgeneratorCA
+- name: eventgenerator_server
+  type: certificate
+  options:
+    ca: eventgenerator_ca
+    common_name: eventgenerator.service.cf.internal
+    extended_key_usage:
+    - client_auth
+    - server_auth
 - name: apiserver_ca
   type: certificate
   options:
