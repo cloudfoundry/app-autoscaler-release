@@ -27,7 +27,7 @@ stemcells:
 update:
   canaries: 1
   canary_watch_time: 1000-300000
-  max_in_flight: 3
+  max_in_flight: 1
   update_watch_time: 1000-300000
 
 # Instance Group details
@@ -77,8 +77,8 @@ instance_groups:
           max_idle_connections: 10
           connection_max_lifetime: 60s
 
-# APIServer Instance Group
-- name: apiserver
+# asapi Instance Group : apiserver&servicebroker
+- name: asapi
   azs:
   - z1
   instances: 1
@@ -86,6 +86,9 @@ instance_groups:
   - name: default
   stemcell: default
   vm_type: minimal
+  update:
+    max_in_flight: 1
+    serial: true
   jobs:
   - name: consul_agent
     release: consul
@@ -98,6 +101,7 @@ instance_groups:
         agent:
           services:
             apiserver: {}
+            servicebroker: {}
   - name: apiserver
     release: app-autoscaler
     properties:
@@ -131,93 +135,11 @@ instance_groups:
             ca_cert: ((servicebroker_ca.ca))
             client_cert: ((servicebroker_client.certificate))
             client_key: ((servicebroker_client.private_key))
+          require_consul: true
         policy_db: *database
         cf:
           api: "https://api.((system_domain))"
           skip_ssl_validation: "((skip_ssl_validation))"
-      autoscaler_api_client_id: autoscaler_id
-      autoscaler_api_verification_client_id: autoscaler_verification_id
-      autoscaler_api_verification_client_secret: autoscaler_verification_secret
-  - name: route_registrar
-    release: routing
-    consumes:
-      nats: {from: nats, deployment: cf}
-    properties:
-      route_registrar:
-        routes:
-        - name: api_server_public_api
-          registration_interval: 20s
-          port: *apiServerPublicPort
-          tags:
-            component: api_server
-          uris:
-            - autoscaler.((system_domain))
-      
-# Scheduler Instance Group
-- name: scheduler_autoscaler
-  azs:
-  - z1
-  instances: 1
-  networks:
-  - name: default
-  stemcell: default
-  vm_type: small-highmem
-  jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link, deployment: cf}
-      consul_server: nil
-      consul_client: {from: consul_client_link, deployment: cf}
-    properties:
-      consul:
-        agent:
-          services:
-            autoscalerscheduler: 
-              check:
-                tcp: 127.0.0.1:6102
-                interval: 30s
-                timeout: 10s
-  - name: scheduler
-    release: app-autoscaler
-    properties:
-      autoscaler:
-        scheduler:
-          port: 6102
-          job_reschedule_interval_millisecond: 10000
-          job_reschedule_maxcount: 6
-          notification_reschedule_maxcount: 3
-          ca_cert: ((scheduler_ca.ca))
-          server_cert: ((scheduler_server.certificate))
-          server_key: ((scheduler_server.private_key))
-          scaling_engine:
-            ca_cert: ((scalingengine_ca.ca))
-            client_cert: ((scalingengine_client.certificate))
-            client_key: ((scalingengine_client.private_key))
-        scheduler_db: *database
-        policy_db: *database
-      
-# Service-Broker Instance Group
-- name: servicebroker
-  azs:
-  - z1
-  instances: 1
-  networks:
-  - name: default
-  stemcell: default
-  vm_type: minimal
-  jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link, deployment: cf}
-      consul_server: nil
-      consul_client: {from: consul_client_link, deployment: cf}
-    properties:
-      consul:
-        agent:
-          services:
-            servicebroker: {}
   - name: servicebroker
     release: app-autoscaler
     properties:
@@ -250,6 +172,7 @@ instance_groups:
             ca_cert: ((apiserver_ca.ca))
             client_cert: ((apiserver_client.certificate))
             client_key: ((apiserver_client.private_key))
+          require_consul: false
         binding_db: *database
   - name: route_registrar
     release: routing
@@ -258,6 +181,13 @@ instance_groups:
     properties:
       route_registrar:
         routes:
+        - name: api_server_public_api
+          registration_interval: 20s
+          port: *apiServerPublicPort
+          tags:
+            component: api_server
+          uris:
+            - autoscaler.((system_domain))
         - name: autoscaler_service_broker
           registration_interval: 20s
           port: *servicebrokerPort
@@ -266,49 +196,8 @@ instance_groups:
           uris:
             - autoscalerservicebroker.((system_domain))
 
-# Pruner Instance Group
-- name: pruner
-  azs:
-  - z1
-  instances: 1
-  networks:
-  - name: default
-  stemcell: default
-  vm_type: minimal
-  jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link, deployment: cf}
-      consul_server: nil
-      consul_client: {from: consul_client_link, deployment: cf}
-    properties:
-      consul:
-        agent:
-          services:
-            pruner: 
-              check: {}
-  - name: pruner
-    release: app-autoscaler
-    properties:
-      autoscaler:
-        appmetrics_db: *database
-        instancemetrics_db: *database
-        scalingengine_db: *database
-        appmetrics_db_connection_config: *databaseConnectionConfig
-        instancemetrics_db_connection_config: *databaseConnectionConfig
-        scalingengine_db_connection_config: *databaseConnectionConfig
-        lock_db: *database
-        pruner:
-          db_lock: 
-            ttl: 15s
-            retry_interval: 5s
-          enable_db_lock: false
-          logging:
-            level: debug 
-
-# Metric-collector Instance Group
-- name: metricscollector
+# asmetrics Instance Group: metricscollector&eventgenerator
+- name: asmetrics
   azs:
   - z1
   instances: 1
@@ -316,6 +205,9 @@ instance_groups:
   - name: default
   stemcell: default
   vm_type: small
+  update:
+    max_in_flight: 1
+    serial: true
   jobs:
   - name: consul_agent
     release: consul
@@ -330,6 +222,11 @@ instance_groups:
             metricscollector:
               check:
                 tcp: 127.0.0.1:6103
+                interval: 30s
+                timeout: 10s
+            eventgenerator: 
+              check:
+                tcp: 127.0.0.1:6105
                 interval: 30s
                 timeout: 10s
   - name: metricscollector
@@ -360,32 +257,7 @@ instance_groups:
           ca_cert: ((metricscollector_ca.ca))
           server_cert: ((metricscollector_server.certificate))
           server_key: ((metricscollector_server.private_key))
-
-# Event-Generator Instance Group
-- name: eventgenerator
-  azs:
-  - z1
-  instances: 1
-  networks:
-  - name: default
-  stemcell: default
-  vm_type: small
-  jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link, deployment: cf}
-      consul_server: nil
-      consul_client: {from: consul_client_link, deployment: cf}
-    properties:
-      consul:
-        agent:
-          services:
-            eventgenerator: 
-              check:
-                tcp: 127.0.0.1:6105
-                interval: 30s
-                timeout: 10s
+          require_consul: true
   - name: eventgenerator
     release: app-autoscaler
     properties:
@@ -431,9 +303,11 @@ instance_groups:
             ca_cert: ((metricscollector_ca.ca))
             client_cert: ((metricscollector_client.certificate))
             client_key: ((metricscollector_client.private_key))
+          require_consul: true
+  
 
-# Scaling-Engine Instance Group
-- name: scalingengine
+# asactors Instance Group: scalingengine&scheduler&pruner
+- name: asactors
   azs:
   - z1
   instances: 1
@@ -441,6 +315,9 @@ instance_groups:
   - name: default
   stemcell: default
   vm_type: minimal
+  update:
+    max_in_flight: 1
+    serial: true
   jobs:
   - name: consul_agent
     release: consul
@@ -457,6 +334,13 @@ instance_groups:
                 tcp: 127.0.0.1:6104
                 interval: 30s
                 timeout: 10s
+            autoscalerscheduler: 
+              check:
+                tcp: 127.0.0.1:6102
+                interval: 30s
+                timeout: 10s
+            pruner: 
+              check: {}
   - name: scalingengine
     release: app-autoscaler
     properties:
@@ -477,7 +361,7 @@ instance_groups:
             port: &scalingEnginePort 6104
           health:
             port: &scalingEngineHealthPort 6204
-            emit_interval: 15s
+            emit_interval: 15s  
           defaultCoolDownSecs: 300
           lockSize: 32
           ca_cert: ((scalingengine_ca.ca))
@@ -487,7 +371,46 @@ instance_groups:
             ttl: 15s
             retry_interval: 5s
           enable_db_lock: true
-          
+          require_consul: true
+  - name: scheduler
+    release: app-autoscaler
+    properties:
+      autoscaler:
+        scheduler:
+          port: 6102
+          job_reschedule_interval_millisecond: 10000
+          job_reschedule_maxcount: 6
+          notification_reschedule_maxcount: 3
+          ca_cert: ((scheduler_ca.ca))
+          server_cert: ((scheduler_server.certificate))
+          server_key: ((scheduler_server.private_key))
+          scaling_engine:
+            ca_cert: ((scalingengine_ca.ca))
+            client_cert: ((scalingengine_client.certificate))
+            client_key: ((scalingengine_client.private_key))
+          require_consul: false
+        scheduler_db: *database
+        policy_db: *database
+  - name: pruner
+    release: app-autoscaler
+    properties:
+      autoscaler:
+        appmetrics_db: *database
+        instancemetrics_db: *database
+        scalingengine_db: *database
+        appmetrics_db_connection_config: *databaseConnectionConfig
+        instancemetrics_db_connection_config: *databaseConnectionConfig
+        scalingengine_db_connection_config: *databaseConnectionConfig
+        lock_db: *database
+        pruner:
+          db_lock: 
+            ttl: 15s
+            retry_interval: 5s
+          enable_db_lock: false
+          logging:
+            level: debug 
+          require_consul: false
+
 variables:
 - name: database_password
   type: password

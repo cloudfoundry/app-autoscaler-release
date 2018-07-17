@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -322,10 +323,14 @@ var _ = Describe("AutoScaler Public API", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 
 				for _, entry := range histories.Histories {
-					Expect(entry.AppId).Should(Equal(appGUID))
+					Expect(entry.AppId).To(Equal(appGUID))
 					Expect(entry.ScalingType).Should(BeNumerically("==", 0))
 					Expect(entry.Status).Should(BeNumerically("==", 0))
+<<<<<<< HEAD
 					Expect(entry.Reason).Should(Equal("+1 instance(s) because memoryused >= 30MB for 60 seconds"))
+=======
+					Expect(entry.Reason).To(Equal(fmt.Sprintf("+1 instance(s) because memoryused >= 30MB for %d seconds", TestBreachDurationSeconds)))
+>>>>>>> incubator/develop
 				}
 
 			})

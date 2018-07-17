@@ -26,85 +26,98 @@ packages:
   - common
 
 properties:
-  service_broker.publicPort:
+  autoscaler.service_broker.require_consul:
+    description: "whether to start consul agent"
+    default: true
+  autoscaler.service_broker.publicPort:
     description: "Port where servicebroker public server will run"
     default: 6101
-  service_broker.port:
+  autoscaler.service_broker.port:
     description: "Port where servicebroker internal server will run"
     default: 6107
-  service_broker.ca_cert:
+  autoscaler.service_broker.ca_cert:
     description: "PEM-encoded CA certificate"
-    default: ""
-  service_broker.server_cert:
+  autoscaler.service_broker.server_cert:
     description: "PEM-encoded server certificate"
-    default: ""
-  service_broker.server_key:
+  autoscaler.service_broker.server_key:
     description: "PEM-encoded server key"
-    default: ""
-  service_broker.public_ca_cert:
+  autoscaler.service_broker.public_ca_cert:
     description: "PEM-encoded public CA certificate"
-  service_broker.public_server_cert:
+  autoscaler.service_broker.public_server_cert:
     description: "PEM-encoded public server certificate"
-  service_broker.public_server_key:
+  autoscaler.service_broker.public_server_key:
     description: "PEM-encoded public server key"
-  service_broker.api_server.host:
+  autoscaler.service_broker.api_server.host:
     description: "Host where APIserver is running"
     default: "apiserver.service.cf.internal"
-  service_broker.api_server.port:
+  autoscaler.service_broker.api_server.port:
     description: "Port where APIserver will listen"
     default: 6100
-  service_broker.api_server.ca_cert:
+  autoscaler.service_broker.api_server.ca_cert:
     description: "PEM-encoded CA certificate"
-  service_broker.api_server.client_cert:
+  autoscaler.service_broker.api_server.client_cert:
     description: "PEM-encoded client certificate"
-  service_broker.api_server.client_key:
+  autoscaler.service_broker.api_server.client_key:
     description: "PEM-encoded client key"
-  service_broker.username:
+  autoscaler.service_broker.username:
     description: "username to authenticate with service broker"
-  service_broker.password:
+  autoscaler.service_broker.password:
     description: "password to authenticate with service broker"
-  service_broker.db_config.max_connections:
+  autoscaler.service_broker.db_config.max_connections:
     description: "Maximum number of connections that may be held in the serverbroker db pool"
-  service_broker.db_config.min_connections:
+  autoscaler.service_broker.db_config.min_connections:
     description: "Minimum number of connections that should be held in the servicebroker db pool"
-  service_broker.db_config.idle_timeout:
+  autoscaler.service_broker.db_config.idle_timeout:
     description: "The idle timeout for connections (seconds)"
-  service_broker.http_request_timeout:
+  autoscaler.service_broker.http_request_timeout:
     description: "The timeout for http request"
-  binding_db.address:
+  autoscaler.binding_db.address:
     description: "IP address on which the bindingdb server will listen"
     default: "postgres.service.cf.internal"
-  binding_db.databases:
+  autoscaler.binding_db.databases:
     description: "The list of databases used in bindingdb database including name"
-  binding_db.db_scheme:
+  autoscaler.binding_db.db_scheme:
     description: "Database scheme to be used to access bindingdb"
-  binding_db.port:
+  autoscaler.binding_db.port:
     description: "Port on which the bindingdb server will listen"
-  binding_db.roles:
+  autoscaler.binding_db.roles:
     description: "The list of database roles used in bindingdb database including name/password"
-  service_broker.catalog:
+  autoscaler.service_broker.catalog:
     description: "The service broker catalog"
-  service_broker.quota.quota_switch:
+    default:
+      services:
+      - id: autoscaler-guid
+        name: autoscaler
+        description: Automatically increase or decrease the number of application instances based on a policy you define.
+        bindable: true
+        plans:
+        - id: autoscaler-free-plan-id
+          name: autoscaler-free-plan
+          description: This is the free service plan for the Auto-Scaling service.
+  autoscaler.service_broker.quota.quota_switch:
     default: false
     description: "Whether quota check is enabled or not"
-  service_broker.quota.oauth_url:
+  autoscaler.service_broker.quota.oauth_url:
     description: "Auth URL for quota api"
-  service_broker.quota.onboarding_service_url:
+  autoscaler.service_broker.quota.onboarding_service_url:
     description: "Tenant onboarding service url"
-  service_broker.quota.xsuaa_client_id:
+  autoscaler.service_broker.quota.xsuaa_client_id:
     description: "XSUAA client id"
-  service_broker.quota.xsuaa_client_secret:
+  autoscaler.service_broker.quota.xsuaa_client_secret:
     description: "XSUAA client secret"
-  service_broker.quota.uaa_url:
+  autoscaler.service_broker.quota.uaa_url:
     description: "CF UAA url"
-  service_broker.quota.cf_api_service_url:
+  autoscaler.service_broker.quota.cf_api_service_url:
     description: "Cloud Foundry API URL"
-  service_broker.quota.uaa_client_id:
+  autoscaler.service_broker.quota.uaa_client_id:
     description: "CF UAA client id"
-  service_broker.quota.uaa_client_secret:
+  autoscaler.service_broker.quota.uaa_client_secret:
     description: "CF UAA client secret"
-  service_broker.quota.skip_plans:
+  autoscaler.service_broker.quota.skip_plans:
     description: "plan-ids to be skip from quota validation"
-  service_broker.dashboard_redirect_uri:
+    
+  autoscaler.service_broker.dashboard_redirect_uri:
     description: "service dashboard redirect uri"
     default: ""
+
+  

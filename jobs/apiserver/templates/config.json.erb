@@ -4,30 +4,30 @@
     p(property,nil) || []
   end
 
-  db_scheme = p('policy_db.db_scheme')
-  address = p('policy_db.address')
-  db_port = p('policy_db.port')
-  role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'} 
-  database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default'} 
-  scheduler_host = p('api_server.scheduler.host')
-  scheduler_port = p('api_server.scheduler.port')
-  scaling_engine_host = p('api_server.scaling_engine.host')
-  scaling_engine_port = p('api_server.scaling_engine.port')
-  metrics_collector_host = p('api_server.metrics_collector.host')
-  metrics_collector_port = p('api_server.metrics_collector.port')
-  service_broker_host = p('api_server.service_broker.host')
-  service_broker_port = p('api_server.service_broker.port')
+  db_scheme = p('autoscaler.policy_db.db_scheme')
+  address = p('autoscaler.policy_db.address')
+  db_port = p('autoscaler.policy_db.port')
+  role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'} 
+  database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default'} 
+  scheduler_host = p('autoscaler.api_server.scheduler.host')
+  scheduler_port = p('autoscaler.api_server.scheduler.port')
+  scaling_engine_host = p('autoscaler.api_server.scaling_engine.host')
+  scaling_engine_port = p('autoscaler.api_server.scaling_engine.port')
+  metrics_collector_host = p('autoscaler.api_server.metrics_collector.host')
+  metrics_collector_port = p('autoscaler.api_server.metrics_collector.port')
+  service_broker_host = p('autoscaler.api_server.service_broker.host')
+  service_broker_port = p('autoscaler.api_server.service_broker.port')
 
   params = {
-    'port' => p('api_server.port'),
-    'publicPort' => p('api_server.publicPort'),
+    'port' => p('autoscaler.api_server.port'),
+    'publicPort' => p('autoscaler.api_server.publicPort'),
     'infoFilePath' => "/var/vcap/jobs/apiserver/bin/info.json",
-    'cfApi' => p('cf.api'),
-    'skipSSLValidation' => p('cf.skip_ssl_validation'),
+    'cfApi' => p('autoscaler.cf.api'),
+    'skipSSLValidation' => p('autoscaler.cf.skip_ssl_validation'),
     'db' => {
-       'maxConnections' => p('api_server.db_config.max_connections'),
-       'minConnections' => p('api_server.db_config.min_connections'),
-       'idleTimeout' => p('api_server.db_config.idle_timeout'),
+       'maxConnections' => p('autoscaler.api_server.db_config.max_connections'),
+       'minConnections' => p('autoscaler.api_server.db_config.min_connections'),
+       'idleTimeout' => p('autoscaler.api_server.db_config.idle_timeout'),
        'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
      },
     'scheduler' => {
@@ -54,13 +54,16 @@
            'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/metricscollector/ca.crt"
        },
     },
-    'serviceBroker' => {
-       'uri' => "https://" + service_broker_host + ":" + service_broker_port.to_s,
-       'tls' => {
-           'keyFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/client.key",
-           'certFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/client.crt",
-           'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/ca.crt"
-       },
+    'serviceOffering':{
+        'enabled': p('autoscaler.api_server.service_offering.enabled'),
+        'serviceBroker' => {
+            'uri' => "https://" + service_broker_host + ":" + service_broker_port.to_s,
+            'tls' => {
+                'keyFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/client.key",
+                'certFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/client.crt",
+                'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/servicebroker/ca.crt"
+            },
+        }   
     },
     'tls' => {
         'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.key",
@@ -73,7 +76,7 @@
     #     'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/public_ca.crt"
     # },
   }
-  if p('api_server.public_ca_cert') == "" || p('api_server.public_server_cert') == "" || p('api_server.public_server_key') == ""
+  if p('autoscaler.api_server.public_ca_cert') == "" || p('autoscaler.api_server.public_server_cert') == "" || p('autoscaler.api_server.public_server_key') == ""
     params.delete('publicTls')
   end
 

@@ -2,72 +2,74 @@
   def p_arr(property)
     p(property,nil) || []
   end
-  instance_metrics_db_scheme = p('instancemetrics_db.db_scheme')
-  instance_metrics_db_address = p('instancemetrics_db.address')
-  instance_metrics_db_port = p('instancemetrics_db.port')
-  instance_metrics_db_role = p_arr('instancemetrics_db.roles').find { |role| role['tag'] == 'instancemetricsdb' or role['tag'] == 'default' } 
-  instance_metrics_db_database = p_arr('instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' } 
+  instance_metrics_db_scheme = p('autoscaler.instancemetrics_db.db_scheme')
+  instance_metrics_db_address = p('autoscaler.instancemetrics_db.address')
+  instance_metrics_db_port = p('autoscaler.instancemetrics_db.port')
+  instance_metrics_db_role = p_arr('autoscaler.instancemetrics_db.roles').find { |role| role['tag'] == 'instancemetricsdb' or role['tag'] == 'default' } 
+  instance_metrics_db_database = p_arr('autoscaler.instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' } 
   instance_metrics_db_url = instance_metrics_db_scheme + "://" + instance_metrics_db_role['name'] + ":" + instance_metrics_db_role['password'] + "@" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + "/" + instance_metrics_db_database['name'] + "?sslmode=disable"
   
-  app_metrics_db_scheme = p('appmetrics_db.db_scheme')
-  app_metrics_db_address = p('appmetrics_db.address')
-  app_metrics_db_port = p('appmetrics_db.port')
-  app_metrics_db_role = p_arr('appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
-  app_metrics_db_database = p_arr('appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
+  app_metrics_db_scheme = p('autoscaler.appmetrics_db.db_scheme')
+  app_metrics_db_address = p('autoscaler.appmetrics_db.address')
+  app_metrics_db_port = p('autoscaler.appmetrics_db.port')
+  app_metrics_db_role = p_arr('autoscaler.appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
+  app_metrics_db_database = p_arr('autoscaler.appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
   app_metrics_db_url = app_metrics_db_scheme + "://" + app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?sslmode=disable"
 
-  scaling_engine_db_scheme = p('scalingengine_db.db_scheme')
-  scaling_engine_db_address = p('scalingengine_db.address')
-  scaling_engine_db_port = p('scalingengine_db.port')
-  scaling_engine_db_role = p_arr('scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' }
-  scaling_engine_db_database = p_arr('scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' }
+  scaling_engine_db_scheme = p('autoscaler.scalingengine_db.db_scheme')
+  scaling_engine_db_address = p('autoscaler.scalingengine_db.address')
+  scaling_engine_db_port = p('autoscaler.scalingengine_db.port')
+  scaling_engine_db_role = p_arr('autoscaler.scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' }
+  scaling_engine_db_database = p_arr('autoscaler.scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' }
   scaling_engine_db_url = scaling_engine_db_scheme + "://" + scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?sslmode=disable"
 
-  lock_db_scheme = p('lock_db.db_scheme')
-  lock_db_address = p('lock_db.address')
-  lock_db_port = p('lock_db.port')
-  lock_db_role = p_arr('lock_db.roles').find { |role| role['tag'] == 'lockdb' or role['tag'] == 'default' }
-  lock_db_database = p_arr('lock_db.databases').find { |database| database['tag'] == 'lockdb' or database['tag'] == 'default' }
+  lock_db_scheme = p('autoscaler.lock_db.db_scheme')
+  lock_db_address = p('autoscaler.lock_db.address')
+  lock_db_port = p('autoscaler.lock_db.port')
+  lock_db_role = p_arr('autoscaler.lock_db.roles').find { |role| role['tag'] == 'lockdb' or role['tag'] == 'default' }
+  lock_db_database = p_arr('autoscaler.lock_db.databases').find { |database| database['tag'] == 'lockdb' or database['tag'] == 'default' }
   lock_db_url = lock_db_scheme + "://" + lock_db_role['name'] + ":" + lock_db_role['password'] + "@" + lock_db_address + ":" + lock_db_port.to_s + "/" + lock_db_database['name'] + "?sslmode=disable"
 %>
 
 logging:
-  level: <%= p("pruner.logging.level") %>
+  level: <%= p("autoscaler.pruner.logging.level") %>
 
 instance_metrics_db:
   db:
     url: <%= instance_metrics_db_url %>
-    max_open_connections: <%= p("instancemetrics_db_connection_config.max_open_connections") %>
-    max_idle_connections: <%= p("instancemetrics_db_connection_config.max_idle_connections") %>
-    connection_max_lifetime: <%= p("instancemetrics_db_connection_config.connection_max_lifetime") %>
-  refresh_interval: <%= p("pruner.instance_metrics_db.refresh_interval") %>
-  cutoff_days: <%= p("pruner.instance_metrics_db.cutoff_days") %>
+    max_open_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.instancemetrics_db_connection_config.connection_max_lifetime") %>
+  refresh_interval: <%= p("autoscaler.pruner.instance_metrics_db.refresh_interval") %>
+  cutoff_days: <%= p("autoscaler.pruner.instance_metrics_db.cutoff_days") %>
 
 app_metrics_db:
   db:
     url: <%= app_metrics_db_url %>
-    max_open_connections: <%= p("appmetrics_db_connection_config.max_open_connections") %>
-    max_idle_connections: <%= p("appmetrics_db_connection_config.max_idle_connections") %>
-    connection_max_lifetime: <%= p("appmetrics_db_connection_config.connection_max_lifetime") %>
-  refresh_interval: <%= p("pruner.app_metrics_db.refresh_interval") %>
-  cutoff_days: <%= p("pruner.app_metrics_db.cutoff_days") %>
+    max_open_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.appmetrics_db_connection_config.connection_max_lifetime") %>
+  refresh_interval: <%= p("autoscaler.pruner.app_metrics_db.refresh_interval") %>
+  cutoff_days: <%= p("autoscaler.pruner.app_metrics_db.cutoff_days") %>
 
 scaling_engine_db:
   db:
     url: <%= scaling_engine_db_url %>
-    max_open_connections: <%= p("scalingengine_db_connection_config.max_open_connections") %>
-    max_idle_connections: <%= p("scalingengine_db_connection_config.max_idle_connections") %>
-    connection_max_lifetime: <%= p("scalingengine_db_connection_config.connection_max_lifetime") %>
-  refresh_interval: <%= p("pruner.scaling_engine_db.refresh_interval") %>
-  cutoff_days: <%= p("pruner.scaling_engine_db.cutoff_days") %>
+    max_open_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.scalingengine_db_connection_config.connection_max_lifetime") %>
+  refresh_interval: <%= p("autoscaler.pruner.scaling_engine_db.refresh_interval") %>
+  cutoff_days: <%= p("autoscaler.pruner.scaling_engine_db.cutoff_days") %>
 
 lock:
-  lock_ttl: <%= p("pruner.lock.lock_ttl") %>
-  lock_retry_interval: <%= p("pruner.lock.lock_retry_interval") %>
-  consul_cluster_config: <%= p("pruner.lock.consul_cluster_config") %>
+  lock_ttl: <%= p("autoscaler.pruner.lock.lock_ttl") %>
+  lock_retry_interval: <%= p("autoscaler.pruner.lock.lock_retry_interval") %>
+  consul_cluster_config: <%= p("autoscaler.pruner.lock.consul_cluster_config") %>
 
 db_lock:
-  ttl: <%= p("pruner.db_lock.ttl") %>
-  url: <%= lock_db_url %>
-  retry_interval: <%= p("pruner.db_lock.retry_interval") %>
-enable_db_lock: <%= p("pruner.enable_db_lock") %>
+  lock_db:
+    url: <%= lock_db_url %>
+    max_open_connections: <%= p("autoscaler.lock_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.lock_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.lock_db_connection_config.connection_max_lifetime") %>
+enable_db_lock: <%= p("autoscaler.pruner.enable_db_lock") %>
