@@ -1,7 +1,10 @@
 package app
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net"
+	"net/http"
 	"testing"
 	"time"
 
@@ -16,10 +19,15 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
+const (
+	PolicyPath = "/v1/apps/{appId}/policy"
+)
+
 var (
 	cfg      *config.Config
 	setup    *workflowhelpers.ReproducibleTestSuiteSetup
 	interval int
+	client   *http.Client
 )
 
 func TestAcceptance(t *testing.T) {
@@ -48,8 +56,24 @@ var _ = BeforeSuite(func() {
 
 	serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
 	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
-
 	interval = cfg.AggregateInterval
+
+	client = &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			Dial: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout: 10 * time.Second,
+			DisableCompression:  true,
+			DisableKeepAlives:   true,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: cfg.SkipSSLValidation,
+			},
+		},
+		Timeout: 30 * time.Second,
+	}
 
 })
 
@@ -69,4 +93,9 @@ func getStartAndEndTime(location *time.Location, offset, duration time.Duration)
 	}
 	endTime := startTime.Add(duration)
 	return startTime, endTime
+}
+
+func DoAPIRequest(req *http.Request) (*http.Response, error) {
+	resp, err := client.Do(req)
+	return resp, err
 }

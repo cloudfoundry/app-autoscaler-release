@@ -3,6 +3,9 @@ package app
 import (
 	"acceptance/config"
 	. "acceptance/helpers"
+	"bytes"
+	"fmt"
+	"net/http"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -24,12 +27,16 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		daysOfMonthOrWeek    Days
 		startTime            time.Time
 		endTime              time.Time
+		policyURL            string
+		oauthToken           string
 	)
 
 	BeforeEach(func() {
-		instanceName = generator.PrefixedRandomName("autoscaler", "service")
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
+		if cfg.IsServiceOfferingEnabled() {
+			instanceName = generator.PrefixedRandomName("autoscaler", "service")
+			createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(createService).To(Exit(0), "failed creating service")
+		}
 
 		initialInstanceCount = 1
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
@@ -45,8 +52,10 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 	AfterEach(func() {
 		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 
-		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0))
+		if cfg.IsServiceOfferingEnabled() {
+			deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+			Expect(deleteService).To(Exit(0))
+		}
 	})
 
 	Context("when scaling by recurring schedule", func() {
@@ -61,13 +70,28 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			startTime, endTime = getStartAndEndTime(location, 70*time.Second, time.Duration(interval+120)*time.Second)
 			policyStr := GenerateDynamicAndRecurringSchedulePolicy(cfg, 1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 
-			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
-			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+			if cfg.IsServiceOfferingEnabled() {
+				bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
+				Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+			} else {
+				oauthToken = OauthToken(cfg)
+				policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
+				req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policyStr)))
+				req.Header.Add("Authorization", oauthToken)
+				req.Header.Add("Content-Type", "application/json")
+
+				resp, err := DoAPIRequest(req)
+				Expect(err).ShouldNot(HaveOccurred())
+				defer resp.Body.Close()
+				Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
+			}
 		})
 
 		AfterEach(func() {
-			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+			if cfg.IsServiceOfferingEnabled() {
+				unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+				Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+			}
 		})
 
 		Context("with days of month", func() {

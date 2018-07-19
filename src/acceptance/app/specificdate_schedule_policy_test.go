@@ -3,6 +3,9 @@ package app
 import (
 	"acceptance/config"
 	. "acceptance/helpers"
+	"bytes"
+	"fmt"
+	"net/http"
 
 	"strconv"
 	"strings"
@@ -24,16 +27,19 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		location             *time.Location
 		startDateTime        time.Time
 		endDateTime          time.Time
+		policyURL            string
+		oauthToken           string
 	)
 
 	BeforeEach(func() {
-		initialInstanceCount = 1
-		instanceName = generator.PrefixedRandomName("autoscaler", "service")
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
-	})
 
-	JustBeforeEach(func() {
+		if cfg.IsServiceOfferingEnabled() {
+			instanceName = generator.PrefixedRandomName("autoscaler", "service")
+			createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(createService).To(Exit(0), "failed creating service")
+		}
+
+		initialInstanceCount = 1
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
 		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.CfPushTimeoutDuration())
@@ -47,8 +53,10 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	AfterEach(func() {
 		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 
-		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0))
+		if cfg.IsServiceOfferingEnabled() {
+			deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+			Expect(deleteService).To(Exit(0))
+		}
 	})
 
 	Context("when scaling by specific date schedule ", func() {
@@ -62,15 +70,30 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
 			startDateTime = timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(time.Duration(interval+120) * time.Second)
-
 			policyStr := GenerateDynamicAndSpecificDateSchedulePolicy(cfg, 1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
-			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
-			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+
+			if cfg.IsServiceOfferingEnabled() {
+				bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
+				Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+			} else {
+				oauthToken = OauthToken(cfg)
+				policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
+				req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policyStr)))
+				req.Header.Add("Authorization", oauthToken)
+				req.Header.Add("Content-Type", "application/json")
+
+				resp, err := DoAPIRequest(req)
+				Expect(err).ShouldNot(HaveOccurred())
+				defer resp.Body.Close()
+				Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
+			}
 		})
 
 		AfterEach(func() {
-			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+			if cfg.IsServiceOfferingEnabled() {
+				unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+				Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+			}
 		})
 
 		It("should scale", func() {
