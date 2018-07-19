@@ -44,4 +44,6 @@ builds:
     version: v0.0.23
   6c5f0405-7edb-49d7-ad41-a59ba52ace09:
     version: v0.0.24
+  32429a2d-f50c-4913-9fcc-a306ac41b25a:
+    version: v0.0.25
 format-version: '2'
