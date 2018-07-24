@@ -3,9 +3,6 @@ package app
 import (
 	"acceptance/config"
 	. "acceptance/helpers"
-	"bytes"
-	"fmt"
-	"net/http"
 
 	"strconv"
 	"strings"
@@ -27,8 +24,6 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		location             *time.Location
 		startDateTime        time.Time
 		endDateTime          time.Time
-		policyURL            string
-		oauthToken           string
 	)
 
 	BeforeEach(func() {
@@ -76,16 +71,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 				bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
 				Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 			} else {
-				oauthToken = OauthToken(cfg)
-				policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-				req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policyStr)))
-				req.Header.Add("Authorization", oauthToken)
-				req.Header.Add("Content-Type", "application/json")
-
-				resp, err := DoAPIRequest(req)
-				Expect(err).ShouldNot(HaveOccurred())
-				defer resp.Body.Close()
-				Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
+				CreatePolicyWithAPI(appGUID, policyStr)
 			}
 		})
 

@@ -1,10 +1,12 @@
 package app
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -95,7 +97,21 @@ func getStartAndEndTime(location *time.Location, offset, duration time.Duration)
 	return startTime, endTime
 }
 
-func DoAPIRequest(req *http.Request) (*http.Response, error) {
+func doAPIRequest(req *http.Request) (*http.Response, error) {
 	resp, err := client.Do(req)
 	return resp, err
+}
+
+func CreatePolicyWithAPI(appGUID string, policy string) {
+	oauthToken := OauthToken(cfg)
+	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
+	req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policy)))
+	req.Header.Add("Authorization", oauthToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := doAPIRequest(req)
+	Expect(err).ShouldNot(HaveOccurred())
+	defer resp.Body.Close()
+	Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
+
 }

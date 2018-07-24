@@ -3,9 +3,6 @@ package app
 import (
 	"acceptance/config"
 	. "acceptance/helpers"
-	"bytes"
-	"fmt"
-	"net/http"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -26,8 +23,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		instanceName         string
 		initialInstanceCount int
 		policy               string
-		policyURL            string
-		oauthToken           string
 		doneChan             chan bool
 		doneAcceptChan       chan bool
 		ticker               *time.Ticker
@@ -57,16 +52,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
 			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
 		} else {
-			oauthToken = OauthToken(cfg)
-			policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-			req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policy)))
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-			defer resp.Body.Close()
-			Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
+			CreatePolicyWithAPI(appGUID, policy)
 		}
 	})
 
