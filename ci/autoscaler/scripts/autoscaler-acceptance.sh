@@ -40,7 +40,9 @@ cat > acceptance_config.json <<EOF
 
   "service_name": "autoscaler",
   "service_plan": "autoscaler-free-plan",
-  "aggregate_interval": 120
+  "aggregate_interval": 120,
+
+  "autoscaler_api": "autoscaler.bosh-lite.com"
 }
 EOF
 CONFIG=$PWD/acceptance_config.json ./bin/test_default -trace
