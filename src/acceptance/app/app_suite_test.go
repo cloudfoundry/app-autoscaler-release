@@ -14,6 +14,7 @@ import (
 	. "acceptance/helpers"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
+	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/workflowhelpers"
 	. "github.com/onsi/ginkgo"
@@ -30,6 +31,9 @@ var (
 	setup    *workflowhelpers.ReproducibleTestSuiteSetup
 	interval int
 	client   *http.Client
+
+	instanceName         string
+	initialInstanceCount int
 )
 
 func TestAcceptance(t *testing.T) {
@@ -102,7 +106,7 @@ func doAPIRequest(req *http.Request) (*http.Response, error) {
 	return resp, err
 }
 
-func CreatePolicyWithAPI(appGUID string, policy string) {
+func CreatePolicyWithAPI(appGUID, policy string) {
 	oauthToken := OauthToken(cfg)
 	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
 	req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policy)))
@@ -113,5 +117,44 @@ func CreatePolicyWithAPI(appGUID string, policy string) {
 	Expect(err).ShouldNot(HaveOccurred())
 	defer resp.Body.Close()
 	Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
+
+}
+
+func DeletePolicyWithAPI(appGUID string) {
+	oauthToken := OauthToken(cfg)
+	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
+	req, err := http.NewRequest("DELETE", policyURL, nil)
+	req.Header.Add("Authorization", oauthToken)
+
+	resp, err := doAPIRequest(req)
+	Expect(err).ShouldNot(HaveOccurred())
+	defer resp.Body.Close()
+	Expect(resp.StatusCode == 200).Should(BeTrue())
+
+}
+
+func CreatePolicy(appName, appGUID, policy string) {
+	if cfg.IsServiceOfferingEnabled() {
+		instanceName = generator.PrefixedRandomName("autoscaler", "service")
+		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(createService).To(Exit(0), "failed creating service")
+
+		bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
+		Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+	} else {
+		CreatePolicyWithAPI(appGUID, policy)
+	}
+
+}
+
+func DeletePolicy(appName, appGUID string) {
+	if cfg.IsServiceOfferingEnabled() {
+		unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+		Expect(deleteService).To(Exit(0))
+	} else {
+		DeletePolicyWithAPI(appGUID)
+	}
 
 }

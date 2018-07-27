@@ -67,7 +67,7 @@
         service_broker_port = p('autoscaler.api_server.service_broker.port').to_s
 
         params["serviceOffering"] = {
-        'enabled' => service_offering_enabled,
+        'enabled' => true,
         'serviceBroker' => {
             'uri' => "https://" + service_broker_host + ":" + service_broker_port,
             'tls' => {
@@ -80,7 +80,7 @@
     %>
 <% else %>
     <% params["serviceOffering"] = {
-        'enabled' => service_offering_enabled,
+        'enabled' => false,
     }
     %>
 <% end %> 

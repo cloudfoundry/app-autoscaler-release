@@ -19,11 +19,11 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	var (
 		appName              string
 		appGUID              string
-		instanceName         string
 		initialInstanceCount int
 		location             *time.Location
 		startDateTime        time.Time
 		endDateTime          time.Time
+		policy               string
 	)
 
 	BeforeEach(func() {
@@ -46,12 +46,9 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	})
 
 	AfterEach(func() {
+		DeletePolicy(appName, appGUID)
 		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 
-		if cfg.IsServiceOfferingEnabled() {
-			deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-			Expect(deleteService).To(Exit(0))
-		}
 	})
 
 	Context("when scaling by specific date schedule ", func() {
@@ -65,21 +62,9 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
 			startDateTime = timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(time.Duration(interval+120) * time.Second)
-			policyStr := GenerateDynamicAndSpecificDateSchedulePolicy(cfg, 1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
+			policy = GenerateDynamicAndSpecificDateSchedulePolicy(cfg, 1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
 
-			if cfg.IsServiceOfferingEnabled() {
-				bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
-				Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
-			} else {
-				CreatePolicyWithAPI(appGUID, policyStr)
-			}
-		})
-
-		AfterEach(func() {
-			if cfg.IsServiceOfferingEnabled() {
-				unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-				Expect(unbindService).To(Exit(0), "failed unbinding service from app")
-			}
+			CreatePolicy(appName, appGUID, policy)
 		})
 
 		It("should scale", func() {

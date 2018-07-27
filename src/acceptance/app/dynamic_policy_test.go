@@ -18,22 +18,17 @@ import (
 
 var _ = Describe("AutoScaler dynamic policy", func() {
 	var (
-		appName              string
-		appGUID              string
-		instanceName         string
-		initialInstanceCount int
-		policy               string
-		doneChan             chan bool
-		doneAcceptChan       chan bool
-		ticker               *time.Ticker
+		appName string
+		appGUID string
+		policy  string
+
+		doneChan       chan bool
+		doneAcceptChan chan bool
+		ticker         *time.Ticker
 	)
 
 	BeforeEach(func() {
-		if cfg.IsServiceOfferingEnabled() {
-			instanceName = generator.PrefixedRandomName("autoscaler", "service")
-			createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(createService).To(Exit(0), "failed creating service")
-		}
+
 	})
 
 	JustBeforeEach(func() {
@@ -47,23 +42,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
 		Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 		WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+		CreatePolicy(appName, appGUID, policy)
 
-		if cfg.IsServiceOfferingEnabled() {
-			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
-			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
-		} else {
-			CreatePolicyWithAPI(appGUID, policy)
-		}
 	})
 
 	AfterEach(func() {
-		if cfg.IsServiceOfferingEnabled() {
-			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
-			deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-			Expect(deleteService).To(Exit(0))
-		}
-
+		DeletePolicy(appName, appGUID)
 		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 	})
 

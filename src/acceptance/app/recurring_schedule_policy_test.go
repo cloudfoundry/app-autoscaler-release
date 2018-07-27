@@ -19,11 +19,11 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 	var (
 		appName              string
 		appGUID              string
-		instanceName         string
 		initialInstanceCount int
 		daysOfMonthOrWeek    Days
 		startTime            time.Time
 		endTime              time.Time
+		policy               string
 	)
 
 	BeforeEach(func() {
@@ -45,12 +45,8 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 	})
 
 	AfterEach(func() {
+		DeletePolicy(appName, appGUID)
 		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
-
-		if cfg.IsServiceOfferingEnabled() {
-			deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-			Expect(deleteService).To(Exit(0))
-		}
 	})
 
 	Context("when scaling by recurring schedule", func() {
@@ -63,21 +59,9 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			location, err := time.LoadLocation("GMT")
 			Expect(err).NotTo(HaveOccurred())
 			startTime, endTime = getStartAndEndTime(location, 70*time.Second, time.Duration(interval+120)*time.Second)
-			policyStr := GenerateDynamicAndRecurringSchedulePolicy(cfg, 1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
+			policy = GenerateDynamicAndRecurringSchedulePolicy(cfg, 1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 
-			if cfg.IsServiceOfferingEnabled() {
-				bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
-				Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
-			} else {
-				CreatePolicyWithAPI(appGUID, policyStr)
-			}
-		})
-
-		AfterEach(func() {
-			if cfg.IsServiceOfferingEnabled() {
-				unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-				Expect(unbindService).To(Exit(0), "failed unbinding service from app")
-			}
+			CreatePolicy(appName, appGUID, policy)
 		})
 
 		Context("with days of month", func() {
@@ -129,7 +113,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
 				By("setting to default instance_min_count")
-				WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
+				WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+120)*time.Second)
 			})
 		})
 	})
