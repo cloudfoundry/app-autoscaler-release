@@ -103,6 +103,7 @@ instance_groups:
     properties:
       autoscaler:
         api_server:
+          service_offering_enabled: true
           db_config: &db_config
             idle_timeout: 1000
             max_connections: 10
@@ -112,9 +113,6 @@ instance_groups:
           ca_cert: ((apiserver_ca.ca))
           server_cert: ((apiserver_server.certificate))
           server_key:  ((apiserver_server.private_key))
-          public_ca_cert: ((apiserver_public_ca.ca))
-          public_server_cert: ((apiserver_public_server.certificate))
-          public_server_key:  ((apiserver_public_server.private_key))
           scheduler:
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))

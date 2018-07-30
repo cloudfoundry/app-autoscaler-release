@@ -31,8 +31,9 @@ func TestAcceptance(t *testing.T) {
 		helpers.EnableCFTrace(cfg, componentName)
 		rs = append(rs, helpers.NewJUnitReporter(cfg, componentName))
 	}
-
-	RunSpecsWithDefaultAndCustomReporters(t, componentName, rs)
+	if cfg.IsServiceOfferingEnabled() {
+		RunSpecsWithDefaultAndCustomReporters(t, componentName, rs)
+	}
 }
 
 var _ = BeforeSuite(func() {

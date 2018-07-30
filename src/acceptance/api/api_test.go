@@ -53,6 +53,10 @@ type HistoryResults struct {
 	Histories    []*AppScalingHistory `json:"resources"`
 }
 
+var (
+	oauthToken string
+)
+
 var _ = Describe("AutoScaler Public API", func() {
 
 	var (

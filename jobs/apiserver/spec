@@ -96,6 +96,10 @@ properties:
   autoscaler.api_server.metrics_collector.client_key:
     description: "PEM-encoded client key"
 
+  autoscaler.api_server.service_offering_enabled:
+    description: "the offering approach of auto-scaler"
+    default: true
+    
   autoscaler.api_server.service_broker.host:
     description: "Host where serviceBroker is running"
     default: "servicebroker.service.cf.internal"
