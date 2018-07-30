@@ -229,8 +229,8 @@ instance_groups:
           public_ca_cert: ((servicebroker_public_ca.ca))
           public_server_cert: ((servicebroker_public_server.certificate))
           public_server_key: ((servicebroker_public_server.private_key))
-          username: username
-          password: password
+          username: autoscaler_service_broker_user
+          password: ((autoscaler_service_broker_password))
           http_request_timeout: 5000
           dashboard_redirect_uri: ""
           catalog: 
@@ -487,6 +487,8 @@ instance_groups:
           
 variables:
 - name: database_password
+  type: password
+- name: autoscaler_service_broker_password
   type: password
 - name: scalingengine_ca
   type: certificate
