@@ -129,6 +129,10 @@ instance_groups:
             ca_cert: ((metricscollector_ca.ca))
             client_cert: ((metricscollector_client.certificate))
             client_key: ((metricscollector_client.private_key))
+          eventgenerator:
+            ca_cert: ((eventgenerator_ca.ca))
+            client_cert: ((eventgenerator_client.certificate))
+            client_key: ((eventgenerator_client.private_key))               
           service_broker:
             ca_cert: ((servicebroker_ca.ca))
             client_cert: ((servicebroker_client.certificate))
@@ -465,6 +469,13 @@ variables:
     extended_key_usage:
     - client_auth
     - server_auth
+- name: eventgenerator_client
+  type: certificate
+  options:
+    ca: eventgenerator_ca
+    common_name: eventgenerator client
+    extended_key_usage:
+    - client_auth      
 - name: apiserver_ca
   type: certificate
   options:

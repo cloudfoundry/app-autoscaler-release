@@ -15,6 +15,8 @@
   scaling_engine_port = p('autoscaler.api_server.scaling_engine.port')
   metrics_collector_host = p('autoscaler.api_server.metrics_collector.host')
   metrics_collector_port = p('autoscaler.api_server.metrics_collector.port')
+  eventgenerator_host = p('autoscaler.api_server.eventgenerator.host')
+  eventgenerator_port = p('autoscaler.api_server.eventgenerator.port')
   service_offering_enabled = p('autoscaler.api_server.service_offering_enabled')
 
   params = {
@@ -53,6 +55,14 @@
            'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/metricscollector/ca.crt"
        },
     },
+    'eventGenerator' => {
+       'uri' => "https://" + eventgenerator_host + ":" + eventgenerator_port.to_s,
+       'tls' => {
+           'keyFile' => "/var/vcap/jobs/apiserver/config/certs/eventgenerator/client.key",
+           'certFile' => "/var/vcap/jobs/apiserver/config/certs/eventgenerator/client.crt",
+           'caCertFile' => "/var/vcap/jobs/apiserver/config/certs/eventgenerator/ca.crt"
+       },
+    },    
     'tls' => {
         'keyFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.key",
         'certFile' => "/var/vcap/jobs/apiserver/config/certs/apiserver/server.crt",
