@@ -58,7 +58,7 @@ The full set of config parameters is explained below:
 * `api` (required): Cloud Controller API endpoint.
 * `admin_user` (required): Name of a user in your CF instance with admin credentials.  This admin user must have the `doppler.firehose` scope if running the `logging` firehose tests.
 * `admin_password` (required): Password of the admin user above.
-* `apps_domain` (required): A shared domain that tests can use to create subdomains that will route to applications also craeted in the tests.
+* `apps_domain` (required): A shared domain that tests can use to create subdomains that will route to applications also created in the tests.
 
 * `skip_ssl_validation` (optional): Set to true if using an invalid (e.g. self-signed) cert for traffic routed to your CF instance; this is generally always true for BOSH-Lite deployments of CF.
 * `use_existing_user` (optional): The admin user configured above will normally be used to create a temporary user (with lesser permissions) to perform actions (such as push applications) during tests, and then delete said user after the tests have run; set this to `true` if you want to use an existing user, configured via the following properties.

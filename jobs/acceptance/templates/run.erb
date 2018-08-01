@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -o errexit -o nounset -o xtrace
+
+export GOROOT="$(echo /var/vcap/packages/golang*)"
+export GOPATH="/var/vcap/packages/acceptance"
+export PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
+if test -d "/var/vcap/packages/cli" ; then
+    export PATH="${PATH}:/var/vcap/packages/cli/bin"
+fi
+export CONFIG="/var/vcap/jobs/acceptance/bin/config.json"
+cd "${GOPATH}/src/acceptance"
+
+cat "${CONFIG}"
+
+expected_broker='<%= p('autoscaler.acceptance.service_name') %>'
+actual_broker="$(cf curl /v2/service_brokers | jq -r ".resources[] | select(.entity.name == \"${expected_broker}\") | .entity.name")"
+if test "${expected_broker}" != "${actual_broker}" ; then
+    action="create"
+else
+    action="update"
+fi
+
+cf "${action}-service-broker" \
+    "${expected_broker}" \
+    '<%= p('autoscaler.service_broker.username') %>' \
+    '<%= p('autoscaler.service_broker.password') %>' \
+    'http://<%= p('autoscaler.service_broker.api_server.host') %>:<%= p('autoscaler.service_broker.api_server.port') %>'
+
+./bin/test_default
