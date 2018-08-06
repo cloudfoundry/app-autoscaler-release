@@ -125,6 +125,10 @@ instance_groups:
             ca_cert: ((metricscollector_ca.ca))
             client_cert: ((metricscollector_client.certificate))
             client_key: ((metricscollector_client.private_key))
+          eventgenerator:
+            ca_cert: ((eventgenerator_ca.ca))
+            client_cert: ((eventgenerator_client.certificate))
+            client_key: ((eventgenerator_client.private_key))            
           service_broker:
             ca_cert: ((servicebroker_ca.ca))
             client_cert: ((servicebroker_client.certificate))
@@ -408,8 +412,8 @@ instance_groups:
             evaluation_manager_execute_interval: 40s
             evaluator_count: 20
             trigger_array_channel_size: 200
-          defaultStatWindowSecs: 300
-          defaultBreachDurationSecs: 300
+          defaultStatWindowSecs: 120
+          defaultBreachDurationSecs: 120
           circuitBreaker:
             back_off_initial_interval: 5m
             back_off_max_interval: 120m
@@ -541,6 +545,13 @@ variables:
     extended_key_usage:
     - client_auth
     - server_auth
+- name: eventgenerator_client
+  type: certificate
+  options:
+    ca: eventgenerator_ca
+    common_name: eventgenerator client
+    extended_key_usage:
+    - client_auth    
 - name: apiserver_ca
   type: certificate
   options:
