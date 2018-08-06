@@ -64,7 +64,9 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		EnableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.IsServiceOfferingEnabled() {
+			EnableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
 
 	appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
@@ -129,7 +131,9 @@ var _ = AfterSuite(func() {
 
 	Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		DisableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.IsServiceOfferingEnabled() {
+			DisableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
 	setup.Teardown()
 })
