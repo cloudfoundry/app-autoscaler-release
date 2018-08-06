@@ -57,11 +57,15 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		EnableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.IsServiceOfferingEnabled() {
+			EnableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
+	if cfg.IsServiceOfferingEnabled() {
+		serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
+	}
 
-	serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
 	interval = cfg.AggregateInterval
 
 	client = &http.Client{
@@ -85,7 +89,9 @@ var _ = BeforeSuite(func() {
 
 var _ = AfterSuite(func() {
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		DisableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.IsServiceOfferingEnabled() {
+			DisableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
 	setup.Teardown()
 })
