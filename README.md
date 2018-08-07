@@ -118,14 +118,14 @@ Log in to Cloud Foundry with admin user, and use the following commands to regis
 cf create-service-broker autoscaler <brokerUserName> <brokerPassword> <brokerURL>
 ```
 
-* `brokerUserName`: the user name to authenticate with service broker
-* `brokerPassword`: the password to authenticate with service broker
+* `brokerUserName`: the user name to authenticate with service broker. It's default value is `autoscaler_service_broker_user`.
+* `brokerPassword`: the password to authenticate with service broker. It will be stored in the file passed to the --vars-store flag (bosh-lite/deployments/vars/autoscaler-deployment-vars.yml in the example). You can find them by searching for `autoscaler_service_broker_password`.
 * `brokerURL`: the URL of the service broker
 
 All these parameters are configured in the bosh deployment. If you are using default values of deployment manifest, register the service with the commands below.
 
 ```sh
-cf create-service-broker autoscaler username password https://autoscalerservicebroker.bosh-lite.com
+cf create-service-broker autoscaler autoscaler_service_broker_user `bosh int ./bosh-lite/deployments/vars/autoscaler-deployment-vars.yml --path /autoscaler_service_broker_password` https://autoscalerservicebroker.bosh-lite.com
 ```
 
 ## Acceptance test

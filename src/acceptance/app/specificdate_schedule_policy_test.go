@@ -19,21 +19,22 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	var (
 		appName              string
 		appGUID              string
-		instanceName         string
 		initialInstanceCount int
 		location             *time.Location
 		startDateTime        time.Time
 		endDateTime          time.Time
+		policy               string
 	)
 
 	BeforeEach(func() {
-		initialInstanceCount = 1
-		instanceName = generator.PrefixedRandomName("autoscaler", "service")
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
-	})
 
-	JustBeforeEach(func() {
+		if cfg.IsServiceOfferingEnabled() {
+			instanceName = generator.PrefixedRandomName("autoscaler", "service")
+			createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(createService).To(Exit(0), "failed creating service")
+		}
+
+		initialInstanceCount = 1
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 		countStr := strconv.Itoa(initialInstanceCount)
 		createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.CfPushTimeoutDuration())
@@ -45,10 +46,9 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	})
 
 	AfterEach(func() {
+		DeletePolicy(appName, appGUID)
 		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 
-		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0))
 	})
 
 	Context("when scaling by specific date schedule ", func() {
@@ -62,15 +62,9 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
 			startDateTime = timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(time.Duration(interval+120) * time.Second)
+			policy = GenerateDynamicAndSpecificDateSchedulePolicy(cfg, 1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
 
-			policyStr := GenerateDynamicAndSpecificDateSchedulePolicy(cfg, 1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
-			bindService := cf.Cf("bind-service", appName, instanceName, "-c", policyStr).Wait(cfg.DefaultTimeoutDuration())
-			Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
-		})
-
-		AfterEach(func() {
-			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+			CreatePolicy(appName, appGUID, policy)
 		})
 
 		It("should scale", func() {
