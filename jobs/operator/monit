@@ -1,0 +1,6 @@
+
+check process operator
+  with pidfile /var/vcap/sys/run/operator/operator.pid
+  start program "/var/vcap/jobs/operator/bin/operator_ctl start"
+  stop program "/var/vcap/jobs/operator/bin/operator_ctl stop"
+  group vcap

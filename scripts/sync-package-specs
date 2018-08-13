@@ -31,7 +31,7 @@ export GOPATH=$PWD/src/app-autoscaler
 sync_package metricscollector -app  autoscaler/metricscollector/... &
 sync_package eventgenerator -app  autoscaler/eventgenerator/... &
 sync_package scalingengine -app  autoscaler/scalingengine/... &
-sync_package pruner -app  autoscaler/pruner/... &
+sync_package operator -app  autoscaler/operator/... &
 
 wait
 

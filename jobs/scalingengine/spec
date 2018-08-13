@@ -103,9 +103,7 @@ properties:
     description: "PEM-encoded server certificate"
   autoscaler.scalingengine.server_key:
     description: "PEM-encoded server key"
-  autoscaler.scalingengine.synchronizer.active_schedule_sync_interval:
-    description: "the time interval to synchronize the active schedules"
-    default: 600s
+
 
   autoscaler.scalingengine.health.port:
     description: "the listening port of health endpoint"
@@ -113,7 +111,6 @@ properties:
   autoscaler.scalingengine.health.emit_interval:
     description: "the time interval to emit health metrics"
     default: 15s
-
 
   autoscaler.scalingengine.consul.cluster:
     description: "Consul Cluster configuration. If not specified, scaling engine will not register itself with consul."
@@ -125,33 +122,3 @@ properties:
   autoscaler.scalingengine.lockSize:
     description: "the lock size of scalingengine"
     default: 32
-
-  autoscaler.lock_db.address:
-    description: "IP address on which the lockdb server will listen"
-    default: "postgres.service.cf.internal"
-  autoscaler.lock_db.databases:
-    description: "The list of databases used in lockdb database including name"
-  autoscaler.lock_db.db_scheme:
-    description: "Database scheme to be used to access lockdb"
-  autoscaler.lock_db.port:
-    description: "Port on which the lockdb server will listen"
-  autoscaler.lock_db.roles:
-    description: "The list of database roles used in lockdb database including name/password"
-  autoscaler.lock_db_connection_config.max_open_connections:
-    default: 100
-  autoscaler.lock_db_connection_config.max_idle_connections:
-    default: 10
-  autoscaler.lock_db_connection_config.connection_max_lifetime:
-    default: 60s    
-
-  autoscaler.scalingengine.db_lock.ttl:
-    description: "database lock ttl"
-    default: 15s
-  autoscaler.scalingengine.db_lock.retry_interval:
-    description: "lock retry interval"
-    default: 5s
-
-  autoscaler.scalingengine.enable_db_lock:
-    descrption: "Enable database lock flag"
-    default: false
-    
