@@ -13,6 +13,7 @@
   params = {
     'port' => p('autoscaler.service_broker.port'),
     'publicPort' => p('autoscaler.service_broker.publicPort'),
+    'enableCustomMetrics' => p('autoscaler.service_broker.enableCustomMetrics'),
     'username' => p('autoscaler.service_broker.username'),
     'password' => p('autoscaler.service_broker.password'),
     'db' => {
@@ -55,7 +56,8 @@
     # },
     'serviceCatalogPath' => "/var/vcap/jobs/servicebroker/config/catalog.json",
     'schemaValidationPath' => "/var/vcap/packages/servicebroker/config/catalog.schema.json",
-    'dashboardRedirectUri' => p('autoscaler.service_broker.dashboard_redirect_uri')
+    'dashboardRedirectUri' => p('autoscaler.service_broker.dashboard_redirect_uri'),
+    'customMetricsUrl' => p('autoscaler.service_broker.custom_metric_url')
   }
 %>
 

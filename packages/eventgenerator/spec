@@ -60,5 +60,7 @@ files:
 - app-autoscaler/src/github.com/tedsuo/ifrit/grouper/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/http_server/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/sigmon/*.go # gosub
+- app-autoscaler/src/golang.org/x/crypto/bcrypt/*.go # gosub
+- app-autoscaler/src/golang.org/x/crypto/blowfish/*.go # gosub
 - app-autoscaler/src/golang.org/x/net/context/*.go # gosub
 - app-autoscaler/src/gopkg.in/yaml.v2/*.go # gosub

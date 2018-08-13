@@ -66,6 +66,8 @@ properties:
 
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
+  autoscaler.cf.uaa_api:
+    description: "the Cloud Foundry UAA API endpoint"
   autoscaler.cf.grant_type:
     description: "the grant type to log in cf" 
   autoscaler.cf.username:

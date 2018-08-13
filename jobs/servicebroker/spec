@@ -35,6 +35,9 @@ properties:
   autoscaler.service_broker.port:
     description: "Port where servicebroker internal server will run"
     default: 6107
+  autoscaler.service_broker.enableCustomMetrics:
+    description: "Flag to enable custom metrics feature"
+    default: false
   autoscaler.service_broker.ca_cert:
     description: "PEM-encoded CA certificate"
   autoscaler.service_broker.server_cert:
@@ -118,6 +121,9 @@ properties:
     
   autoscaler.service_broker.dashboard_redirect_uri:
     description: "service dashboard redirect uri"
+    default: ""
+  autoscaler.service_broker.custom_metric_url:
+    description: "url to push custom metrics"
     default: ""
 
   

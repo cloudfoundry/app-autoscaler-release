@@ -47,6 +47,9 @@ properties:
   autoscaler.api_server.publicPort:
     description: "Port where APIServer public api will run"
     default: 6106
+  autoscaler.api_server.cacheTTL:
+    description: "TTL time in second to invalidate the credential cache"
+    default: 900
   autoscaler.api_server.ca_cert:
     description: "PEM-encoded CA certificate"
   autoscaler.api_server.server_cert:

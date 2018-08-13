@@ -1,0 +1,54 @@
+---
+name: metricsforwarder
+
+templates:
+  metricsforwarder_ctl: bin/metricsforwarder_ctl
+  metricsforwarder.yml.erb: config/metricsforwarder.yml
+  loggregator_ca.crt.erb: config/certs/loggregator/ca.crt
+  loggregator_client.crt.erb: config/certs/loggregator/client.crt
+  loggregator_client.key.erb: config/certs/loggregator/client.key
+
+packages:
+  - metricsforwarder
+  - common
+  - db
+
+consumes:
+- name: loggregator_agent
+  type: loggregator_agent
+
+properties:
+  policy_db.address:
+    description: "IP address on which the policydb server will listen"
+    default: "postgres.service.cf.internal"
+  policy_db.databases:
+    description: "The list of databases used in policydb database including name"
+  policy_db.db_scheme:
+    description: "Database scheme to be used to access policydb"
+  policy_db.port:
+    description: "Port on which the policydb server will listen"
+  policy_db.roles:
+    description: "The list of database roles used in policydb database including name/password"
+  
+  policy_db_connection_config.max_open_connections:
+    default: 100
+  policy_db_connection_config.max_idle_connections:
+    default: 10
+  policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  metricsforwarder.metron_address:
+    description: "IP address and port where the metron agent is running"
+    default: "127.0.0.1:3458"
+  metricsforwarder.logging.level:
+    description: "the level of logging"
+    default: "info"
+  metricsforwarder.server.port:
+    description: "the listening port of server"
+    default: 6110
+  metricsforwarder.loggregator.ca_cert:
+    description: "Path to the file containing loggregator CA cert"
+  metricsforwarder.loggregator.client_cert:
+    description: "Path to the file containing loggregator cert"
+  metricsforwarder.loggregator.client_key:
+    description: "Path to the file containing loggregator key"
