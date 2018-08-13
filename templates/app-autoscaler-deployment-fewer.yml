@@ -308,7 +308,7 @@ instance_groups:
           require_consul: true
   
 
-# asactors Instance Group: scalingengine&scheduler&pruner
+# asactors Instance Group: scalingengine&scheduler&operator
 - name: asactors
   azs:
   - z1
@@ -341,7 +341,7 @@ instance_groups:
                 tcp: 127.0.0.1:6102
                 interval: 30s
                 timeout: 10s
-            pruner: 
+            operator: 
               check: {}
   - name: scalingengine
     release: app-autoscaler
@@ -350,11 +350,9 @@ instance_groups:
         scalingengine_db: *database
         scheduler_db: *database
         policy_db: *database
-        lock_db: *database
         scalingengine_db_connection_config: *databaseConnectionConfig
         scheduler_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
-        lock_db_connection_config: *databaseConnectionConfig
         cf: *cf_credentials
         scalingengine:
           logging:
@@ -369,10 +367,6 @@ instance_groups:
           ca_cert: ((scalingengine_ca.ca))
           server_cert: ((scalingengine_server.certificate))
           server_key: ((scalingengine_server.private_key))
-          db_lock:
-            ttl: 15s
-            retry_interval: 5s
-          enable_db_lock: true
           require_consul: true
   - name: scheduler
     release: app-autoscaler
@@ -393,7 +387,7 @@ instance_groups:
           require_consul: false
         scheduler_db: *database
         policy_db: *database
-  - name: pruner
+  - name: operator
     release: app-autoscaler
     properties:
       autoscaler:
@@ -404,7 +398,7 @@ instance_groups:
         instancemetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db_connection_config: *databaseConnectionConfig
         lock_db: *database
-        pruner:
+        operator:
           db_lock: 
             ttl: 15s
             retry_interval: 5s

@@ -26,12 +26,6 @@
   scheduler_db_database = p_arr('autoscaler.scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' }
   scheduler_db_url = scheduler_db_scheme + "://" + scheduler_db_role['name'] + ":" + scheduler_db_role['password'] + "@" + scheduler_db_address + ":" + scheduler_db_port.to_s + "/" + scheduler_db_database['name'] + "?sslmode=disable"
 
-  lock_db_scheme = p('autoscaler.lock_db.db_scheme')
-  lock_db_address = p('autoscaler.lock_db.address')
-  lock_db_port = p('autoscaler.lock_db.port')
-  lock_db_role = p_arr('autoscaler.lock_db.roles').find { |role| role['tag'] == 'lockdb' or role['tag'] == 'default'  }
-  lock_db_database = p_arr('autoscaler.lock_db.databases').find { |database| database['tag'] == 'lockdb' or database['tag'] == 'default' }
-  lock_db_url = lock_db_scheme + "://" + lock_db_role['name'] + ":" + lock_db_role['password'] + "@" + lock_db_address + ":" + lock_db_port.to_s + "/" + lock_db_database['name'] + "?sslmode=disable"
 %>
 
 
@@ -75,22 +69,6 @@ db:
     max_idle_connections: <%= p("autoscaler.scheduler_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.scheduler_db_connection_config.connection_max_lifetime") %>
 
-synchronizer:
-  active_schedule_sync_interval: <%= p("autoscaler.scalingengine.synchronizer.active_schedule_sync_interval") %>
-
-consul:
-  cluster: <%= p("autoscaler.scalingengine.consul.cluster") %>
-
 defaultCoolDownSecs : <%= p("autoscaler.scalingengine.defaultCoolDownSecs") %>
 lockSize : <%= p("autoscaler.scalingengine.lockSize") %>
 
-db_lock:
-  ttl: <%= p("autoscaler.scalingengine.db_lock.ttl") %>
-  retry_interval: <%= p("autoscaler.scalingengine.db_lock.retry_interval") %>
-  lock_db:
-    url: <%= lock_db_url %>
-    max_open_connections: <%= p("autoscaler.lock_db_connection_config.max_open_connections") %>
-    max_idle_connections: <%= p("autoscaler.lock_db_connection_config.max_idle_connections") %>
-    connection_max_lifetime: <%= p("autoscaler.lock_db_connection_config.connection_max_lifetime") %>
-
-enable_db_lock: <%= p("autoscaler.scalingengine.enable_db_lock") %>

@@ -11,11 +11,11 @@
 source /var/vcap/packages/common/dns-helper.sh
 
 DB_DIR=/var/vcap/packages/db
-PRUNER_DIR=/var/vcap/packages/pruner
+operator_DIR=/var/vcap/packages/operator
 
 export PATH=/var/vcap/packages/java/bin:$PATH
 
-require_consul='<%= p("autoscaler.pruner.require_consul") %>'
+require_consul='<%= p("autoscaler.operator.require_consul") %>'
 
 if [ $require_consul = 'true' ];then
 	echo "start consul agent"
@@ -36,5 +36,5 @@ PORT='<%= p("autoscaler.lock_db.port") %>'
 detect_dns $HOST $PORT
 
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=$PRUNER_DIR/pruner.db.changelog.yml update
+--driver=org.postgresql.Driver --changeLogFile=$operator_DIR/operator.db.changelog.yml update
 

@@ -33,15 +33,15 @@
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=pruner/jobs/name=pruner/properties/appmetrics_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/appmetrics_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=pruner/jobs/name=pruner/properties/instancemetrics_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/instancemetrics_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=pruner/jobs/name=pruner/properties/scalingengine_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/scalingengine_db
   value: *external_database
 
 - type: replace
@@ -77,9 +77,5 @@
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/lock_db
-  value: *external_database
-
-- type: replace
-  path: /instance_groups/name=pruner/jobs/name=pruner/properties/lock_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/lock_db
   value: *external_database
