@@ -23,24 +23,25 @@ import (
 )
 
 const (
-	HealthPath  = "/health"
-	PolicyPath  = "/v1/apps/{appId}/policy"
-	MetricPath  = "/v1/apps/{appId}/metric_histories/{metric_type}"
-	HistoryPath = "/v1/apps/{appId}/scaling_histories"
+	HealthPath           = "/health"
+	PolicyPath           = "/v1/apps/{appId}/policy"
+	MetricPath           = "/v1/apps/{appId}/metric_histories/{metric_type}"
+	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
+	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
 )
 
 var (
-	cfg          *config.Config
-	setup        *workflowhelpers.ReproducibleTestSuiteSetup
-	appName      string
-	appGUID      string
-	oauthToken   string
-	instanceName string
-	healthURL    string
-	policyURL    string
-	metricURL    string
-	historyURL   string
-	client       *http.Client
+	cfg                 *config.Config
+	setup               *workflowhelpers.ReproducibleTestSuiteSetup
+	appName             string
+	appGUID             string
+	instanceName        string
+	healthURL           string
+	policyURL           string
+	metricURL           string
+	aggregatedMetricURL string
+	historyURL          string
+	client              *http.Client
 )
 
 func TestAcceptance(t *testing.T) {
@@ -56,6 +57,7 @@ func TestAcceptance(t *testing.T) {
 	}
 
 	RunSpecsWithDefaultAndCustomReporters(t, componentName, rs)
+
 }
 
 var _ = BeforeSuite(func() {
@@ -64,15 +66,10 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		EnableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.IsServiceOfferingEnabled() {
+			EnableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
-
-	serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
-
-	instanceName = generator.PrefixedRandomName("autoscaler", "service")
-	createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(createService).To(Exit(0), "failed creating service")
 
 	appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 	initialInstanceCount := 1
@@ -87,8 +84,17 @@ var _ = BeforeSuite(func() {
 	Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 
-	bindService := cf.Cf("bind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(bindService).To(Exit(0), "failed binding service to app ")
+	if cfg.IsServiceOfferingEnabled() {
+		serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
+
+		instanceName = generator.PrefixedRandomName("autoscaler", "service")
+		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(createService).To(Exit(0), "failed creating service")
+
+		bindService := cf.Cf("bind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(bindService).To(Exit(0), "failed binding service to app ")
+	}
 
 	client = &http.Client{
 		Transport: &http.Transport{
@@ -111,21 +117,27 @@ var _ = BeforeSuite(func() {
 	policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
 	metricURL = strings.Replace(MetricPath, "{metric_type}", "memoryused", -1)
 	metricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(metricURL, "{appId}", appGUID, -1))
+	aggregatedMetricURL = strings.Replace(AggregatedMetricPath, "{metric_type}", "memoryused", -1)
+	aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(AggregatedMetricPath, "{appId}", appGUID, -1))
 	historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
 
 })
 
 var _ = AfterSuite(func() {
 
-	unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+	if cfg.IsServiceOfferingEnabled() {
+		unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+
+		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+		Expect(deleteService).To(Exit(0))
+	}
 
 	Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
-	deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-	Expect(deleteService).To(Exit(0))
-
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		DisableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.IsServiceOfferingEnabled() {
+			DisableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
 	setup.Teardown()
 })
@@ -133,5 +145,4 @@ var _ = AfterSuite(func() {
 func DoAPIRequest(req *http.Request) (*http.Response, error) {
 	resp, err := client.Do(req)
 	return resp, err
-
 }

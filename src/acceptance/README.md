@@ -60,6 +60,7 @@ The full set of config parameters is explained below:
 * `admin_password` (required): Password of the admin user above.
 * `apps_domain` (required): A shared domain that tests can use to create subdomains that will route to applications also craeted in the tests.
 
+* `service_offering_enabled` (optional): Set to true if auto-scaler is offered as a cloudfoundry service. The value should be the consistent with the one in app-autoscaler deployment. Default is true.
 * `skip_ssl_validation` (optional): Set to true if using an invalid (e.g. self-signed) cert for traffic routed to your CF instance; this is generally always true for BOSH-Lite deployments of CF.
 * `use_existing_user` (optional): The admin user configured above will normally be used to create a temporary user (with lesser permissions) to perform actions (such as push applications) during tests, and then delete said user after the tests have run; set this to `true` if you want to use an existing user, configured via the following properties.
 * `keep_user_at_suite_end` (optional): If using an existing user (see above), set this to `true` unless you are okay having your existing user being deleted at the end. You can also set this to `true` when not using an existing user if you want to leave the temporary user around for debugging purposes after the test teardown.
@@ -72,7 +73,7 @@ The full set of config parameters is explained below:
 * `test_password` (optional): Used to set the password for the test user. This may be needed if your CF installation has password policies.
 * `timeout_scale` (optional): Used primarily to scale default timeouts for test setup and teardown actions (e.g. creating an org) as opposed to main test actions (e.g. pushing an app).
 * `use_http` (optional): Set to true if you would like CF Acceptance Tests to use HTTP when making api and application requests. (default is HTTPS)
-* `node_memory_limit` (option): the memory limit of  node.js test application, should be greater than 128 (MB)
+* `node_memory_limit` (optional): the memory limit of  node.js test application, should be greater than 128 (MB)
 
 * `java_buildpack_name` (optional) [See below](#buildpack-names).
 * `nodejs_buildpack_name` (optional) [See below](#buildpack-names).

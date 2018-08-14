@@ -48,7 +48,8 @@ type Config struct {
 	CfJavaTimeout   int `json:"cf_java_timeout"`
 	NodeMemoryLimit int `json:"node_memory_limit"`
 
-	ASApiEndpoint string `json:"autoscaler_api"`
+	ASApiEndpoint          string `json:"autoscaler_api"`
+	ServiceOfferingEnabled bool   `json:"service_offering_enabled"`
 }
 
 var defaults = Config{
@@ -69,8 +70,9 @@ var defaults = Config{
 	ArtifactsDirectory:           filepath.Join("..", "results"),
 	NamePrefix:                   "ASATS",
 
-	CfJavaTimeout:   10,  // minutes
-	NodeMemoryLimit: 128, // MB
+	CfJavaTimeout:          10,  // minutes
+	NodeMemoryLimit:        128, // MB
+	ServiceOfferingEnabled: true,
 }
 
 func LoadConfig(t *testing.T) *Config {
@@ -135,6 +137,7 @@ func validate(t *testing.T, c *Config) {
 			}
 		}
 	}
+
 }
 
 func loadConfigFromPath(path string, config *Config) error {
@@ -251,4 +254,8 @@ func (c *Config) GetAdminPassword() string {
 
 func (c *Config) GetApiEndpoint() string {
 	return c.ApiEndpoint
+}
+
+func (c *Config) IsServiceOfferingEnabled() bool {
+	return c.ServiceOfferingEnabled
 }

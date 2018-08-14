@@ -107,6 +107,7 @@ instance_groups:
     properties:
       autoscaler:
         api_server:
+          service_offering_enabled: true
           db_config: &db_config
             idle_timeout: 1000
             max_connections: 10
@@ -116,9 +117,6 @@ instance_groups:
           ca_cert: ((apiserver_ca.ca))
           server_cert: ((apiserver_server.certificate))
           server_key:  ((apiserver_server.private_key))
-          public_ca_cert: ((apiserver_public_ca.ca))
-          public_server_cert: ((apiserver_public_server.certificate))
-          public_server_key:  ((apiserver_public_server.private_key))
           scheduler:
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
@@ -131,6 +129,10 @@ instance_groups:
             ca_cert: ((metricscollector_ca.ca))
             client_cert: ((metricscollector_client.certificate))
             client_key: ((metricscollector_client.private_key))
+          eventgenerator:
+            ca_cert: ((eventgenerator_ca.ca))
+            client_cert: ((eventgenerator_client.certificate))
+            client_key: ((eventgenerator_client.private_key))               
           service_broker:
             ca_cert: ((servicebroker_ca.ca))
             client_cert: ((servicebroker_client.certificate))
@@ -154,8 +156,8 @@ instance_groups:
           public_ca_cert: ((servicebroker_public_ca.ca))
           public_server_cert: ((servicebroker_public_server.certificate))
           public_server_key: ((servicebroker_public_server.private_key))
-          username: username
-          password: password
+          username: autoscaler_service_broker_user
+          password: ((autoscaler_service_broker_password))
           http_request_timeout: 5000
           dashboard_redirect_uri: ""
           catalog: 
@@ -306,7 +308,7 @@ instance_groups:
           require_consul: true
   
 
-# asactors Instance Group: scalingengine&scheduler&pruner
+# asactors Instance Group: scalingengine&scheduler&operator
 - name: asactors
   azs:
   - z1
@@ -339,7 +341,7 @@ instance_groups:
                 tcp: 127.0.0.1:6102
                 interval: 30s
                 timeout: 10s
-            pruner: 
+            operator: 
               check: {}
   - name: scalingengine
     release: app-autoscaler
@@ -348,11 +350,9 @@ instance_groups:
         scalingengine_db: *database
         scheduler_db: *database
         policy_db: *database
-        lock_db: *database
         scalingengine_db_connection_config: *databaseConnectionConfig
         scheduler_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
-        lock_db_connection_config: *databaseConnectionConfig
         cf: *cf_credentials
         scalingengine:
           logging:
@@ -367,10 +367,6 @@ instance_groups:
           ca_cert: ((scalingengine_ca.ca))
           server_cert: ((scalingengine_server.certificate))
           server_key: ((scalingengine_server.private_key))
-          db_lock:
-            ttl: 15s
-            retry_interval: 5s
-          enable_db_lock: true
           require_consul: true
   - name: scheduler
     release: app-autoscaler
@@ -391,7 +387,7 @@ instance_groups:
           require_consul: false
         scheduler_db: *database
         policy_db: *database
-  - name: pruner
+  - name: operator
     release: app-autoscaler
     properties:
       autoscaler:
@@ -402,7 +398,7 @@ instance_groups:
         instancemetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db_connection_config: *databaseConnectionConfig
         lock_db: *database
-        pruner:
+        operator:
           db_lock: 
             ttl: 15s
             retry_interval: 5s
@@ -413,6 +409,8 @@ instance_groups:
 
 variables:
 - name: database_password
+  type: password
+- name: autoscaler_service_broker_password
   type: password
 - name: scalingengine_ca
   type: certificate
@@ -467,6 +465,13 @@ variables:
     extended_key_usage:
     - client_auth
     - server_auth
+- name: eventgenerator_client
+  type: certificate
+  options:
+    ca: eventgenerator_ca
+    common_name: eventgenerator client
+    extended_key_usage:
+    - client_auth      
 - name: apiserver_ca
   type: certificate
   options:

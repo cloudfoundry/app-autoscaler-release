@@ -103,6 +103,7 @@ instance_groups:
     properties:
       autoscaler:
         api_server:
+          service_offering_enabled: true
           db_config: &db_config
             idle_timeout: 1000
             max_connections: 10
@@ -112,9 +113,6 @@ instance_groups:
           ca_cert: ((apiserver_ca.ca))
           server_cert: ((apiserver_server.certificate))
           server_key:  ((apiserver_server.private_key))
-          public_ca_cert: ((apiserver_public_ca.ca))
-          public_server_cert: ((apiserver_public_server.certificate))
-          public_server_key:  ((apiserver_public_server.private_key))
           scheduler:
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
@@ -127,6 +125,10 @@ instance_groups:
             ca_cert: ((metricscollector_ca.ca))
             client_cert: ((metricscollector_client.certificate))
             client_key: ((metricscollector_client.private_key))
+          eventgenerator:
+            ca_cert: ((eventgenerator_ca.ca))
+            client_cert: ((eventgenerator_client.certificate))
+            client_key: ((eventgenerator_client.private_key))            
           service_broker:
             ca_cert: ((servicebroker_ca.ca))
             client_cert: ((servicebroker_client.certificate))
@@ -183,7 +185,7 @@ instance_groups:
     properties:
       autoscaler:
         scheduler:
-          port: 6102
+          port: &schedulerPort 6102
           job_reschedule_interval_millisecond: 10000
           job_reschedule_maxcount: 6
           notification_reschedule_maxcount: 3
@@ -232,8 +234,8 @@ instance_groups:
           public_ca_cert: ((servicebroker_public_ca.ca))
           public_server_cert: ((servicebroker_public_server.certificate))
           public_server_key: ((servicebroker_public_server.private_key))
-          username: username
-          password: password
+          username: autoscaler_service_broker_user
+          password: ((autoscaler_service_broker_password))
           http_request_timeout: 5000
           dashboard_redirect_uri: ""
           catalog: 
@@ -266,8 +268,8 @@ instance_groups:
           uris:
             - autoscalerservicebroker.((system_domain))
 
-# Pruner Instance Group
-- name: pruner
+# operator Instance Group
+- name: operator
   azs:
   - z1
   instances: 1
@@ -286,9 +288,9 @@ instance_groups:
       consul:
         agent:
           services:
-            pruner: 
+            operator: 
               check: {}
-  - name: pruner
+  - name: operator
     release: app-autoscaler
     properties:
       autoscaler:
@@ -299,7 +301,17 @@ instance_groups:
         instancemetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db_connection_config: *databaseConnectionConfig
         lock_db: *database
-        pruner:
+        operator:
+          scaling_engine:
+            port: *scalingEnginePort
+            ca_cert: ((scalingengine_ca.ca))
+            client_cert: ((scalingengine_client.certificate))
+            client_key: ((scalingengine_client.private_key))                
+          scheduler:
+            port: *schedulerPort
+            ca_cert: ((scheduler_ca.ca))
+            client_cert: ((scheduler_client.certificate))
+            client_key: ((scheduler_client.private_key))
           db_lock: 
             ttl: 15s
             retry_interval: 5s
@@ -413,8 +425,8 @@ instance_groups:
             evaluation_manager_execute_interval: 40s
             evaluator_count: 20
             trigger_array_channel_size: 200
-          defaultStatWindowSecs: 300
-          defaultBreachDurationSecs: 300
+          defaultStatWindowSecs: 120
+          defaultBreachDurationSecs: 120
           circuitBreaker:
             back_off_initial_interval: 5m
             back_off_max_interval: 120m
@@ -464,11 +476,9 @@ instance_groups:
         scalingengine_db: *database
         scheduler_db: *database
         policy_db: *database
-        lock_db: *database
         scalingengine_db_connection_config: *databaseConnectionConfig
         scheduler_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
-        lock_db_connection_config: *databaseConnectionConfig
         cf: *cf_credentials
         scalingengine:
           logging:
@@ -483,13 +493,11 @@ instance_groups:
           ca_cert: ((scalingengine_ca.ca))
           server_cert: ((scalingengine_server.certificate))
           server_key: ((scalingengine_server.private_key))
-          db_lock:
-            ttl: 15s
-            retry_interval: 5s
-          enable_db_lock: true
           
 variables:
 - name: database_password
+  type: password
+- name: autoscaler_service_broker_password
   type: password
 - name: scalingengine_ca
   type: certificate
@@ -544,6 +552,13 @@ variables:
     extended_key_usage:
     - client_auth
     - server_auth
+- name: eventgenerator_client
+  type: certificate
+  options:
+    ca: eventgenerator_ca
+    common_name: eventgenerator client
+    extended_key_usage:
+    - client_auth    
 - name: apiserver_ca
   type: certificate
   options:

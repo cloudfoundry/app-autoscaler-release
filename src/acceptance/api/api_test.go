@@ -27,6 +27,14 @@ type AppInstanceMetric struct {
 	Timestamp     int64  `json:"timestamp"`
 }
 
+type AppMetric struct {
+	AppId      string `json:"app_id"`
+	MetricType string `json:"name"`
+	Value      string `json:"value"`
+	Unit       string `json:"unit"`
+	Timestamp  int64  `json:"timestamp"`
+}
+
 type AppScalingHistory struct {
 	AppId        string `json:"app_id"`
 	Timestamp    int64  `json:"timestamp"`
@@ -46,12 +54,23 @@ type MetricsResults struct {
 	Metrics      []*AppInstanceMetric `json:"resources"`
 }
 
+type AggregatedMetricsResults struct {
+	TotalResults uint32       `json:"total_results"`
+	TotalPages   uint16       `json:"total_pages"`
+	Page         uint16       `json:"page"`
+	Metrics      []*AppMetric `json:"resources"`
+}
+
 type HistoryResults struct {
 	TotalResults uint32               `json:"total_results"`
 	TotalPages   uint16               `json:"total_pages"`
 	Page         uint16               `json:"page"`
 	Histories    []*AppScalingHistory `json:"resources"`
 }
+
+var (
+	oauthToken string
+)
 
 var _ = Describe("AutoScaler Public API", func() {
 
@@ -277,7 +296,7 @@ var _ = Describe("AutoScaler Public API", func() {
 				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
 			})
 
-			It("should succeed to get metrics", func() {
+			It("should succeed to get instance metrics", func() {
 
 				req, err := http.NewRequest("GET", metricURL, nil)
 				req.Header.Add("Authorization", oauthToken)
@@ -300,6 +319,33 @@ var _ = Describe("AutoScaler Public API", func() {
 				for _, entry := range metrics.Metrics {
 					Expect(entry.AppId).Should(Equal(appGUID))
 					Expect(entry.Name).Should(Equal("memoryused"))
+					Expect(strconv.Atoi(entry.Value)).Should(BeNumerically(">=", 30))
+				}
+			})
+
+			It("should succeed to get aggregated metrics", func() {
+
+				req, err := http.NewRequest("GET", aggregatedMetricURL, nil)
+				req.Header.Add("Authorization", oauthToken)
+				req.Header.Add("Content-Type", "application/json")
+
+				resp, err := DoAPIRequest(req)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				defer resp.Body.Close()
+
+				raw, err := ioutil.ReadAll(resp.Body)
+
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(resp.StatusCode == 200).Should(BeTrue())
+
+				var metrics *AggregatedMetricsResults
+				err = json.Unmarshal(raw, &metrics)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				for _, entry := range metrics.Metrics {
+					Expect(entry.AppId).Should(Equal(appGUID))
+					Expect(entry.MetricType).Should(Equal("memoryused"))
 					Expect(strconv.Atoi(entry.Value)).Should(BeNumerically(">=", 30))
 				}
 			})
