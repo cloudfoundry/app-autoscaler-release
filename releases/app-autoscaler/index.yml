@@ -46,4 +46,6 @@ builds:
     version: v0.0.24
   32429a2d-f50c-4913-9fcc-a306ac41b25a:
     version: v0.0.25
+  3aa055e3-34e3-4c1f-aaea-ef5626198610:
+    version: v0.0.26
 format-version: '2'
