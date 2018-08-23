@@ -104,7 +104,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 			defer resp.Body.Close()
-			Expect([]int{200, 404}).To(ContainElement(resp.StatusCode))
+			Expect(resp.StatusCode).To(Or(Equal(200), Equal(404)))
 		})
 
 		It("should fail with 404 when retrieve policy", func() {
@@ -138,8 +138,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
-
+			Expect(resp.StatusCode).To(Or(Equal(200), Equal(201)))
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -183,7 +182,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			defer resp.Body.Close()
 
-			Expect([]int{200, 201}).To(ContainElement(resp.StatusCode))
+			Expect(resp.StatusCode).To(Or(Equal(200), Equal(201)))
 		})
 
 		It("should succeed to delete a policy", func() {
