@@ -91,7 +91,7 @@ var _ = Describe("AutoScaler Public API", func() {
 		defer resp.Body.Close()
 
 		Expect(err).ShouldNot(HaveOccurred())
-		Expect(resp.StatusCode).Should(BeNumerically("==", 200))
+		Expect(resp.StatusCode).To(Equal(200))
 	})
 
 	Context("when no policy defined", func() {
@@ -104,7 +104,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 			defer resp.Body.Close()
-			Expect(resp.StatusCode == 200 || resp.StatusCode == 404).Should(BeTrue())
+			Expect(resp.StatusCode).To(Or(Equal(200), Equal(404)))
 		})
 
 		It("should fail with 404 when retrieve policy", func() {
@@ -119,7 +119,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			_, err = ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode == 404).Should(BeTrue())
+			Expect(resp.StatusCode).To(Equal(404))
 
 		})
 
@@ -138,8 +138,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
-
+			Expect(resp.StatusCode).To(Or(Equal(200), Equal(201)))
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -162,7 +161,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode == 400).Should(BeTrue())
+			Expect(resp.StatusCode).To(Equal(400))
 			Expect(string(raw)).Should(ContainSubstring("instance.instance_min_count must have a minimum value of 1"))
 		})
 
@@ -183,7 +182,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			defer resp.Body.Close()
 
-			Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
+			Expect(resp.StatusCode).To(Or(Equal(200), Equal(201)))
 		})
 
 		It("should succeed to delete a policy", func() {
@@ -196,7 +195,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			defer resp.Body.Close()
 
-			Expect(resp.StatusCode == 200).Should(BeTrue())
+			Expect(resp.StatusCode).To(Equal(200))
 		})
 
 		It("should succeed to get a policy", func() {
@@ -212,7 +211,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode == 200).Should(BeTrue())
+			Expect(resp.StatusCode).To(Equal(200))
 
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
@@ -235,7 +234,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode == 200).Should(BeTrue())
+			Expect(resp.StatusCode).To(Equal(200))
 
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
@@ -260,7 +259,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode == 400).Should(BeTrue())
+			Expect(resp.StatusCode).To(Equal(400))
 
 			By("the original policy is not changed")
 			req, err = http.NewRequest("GET", policyURL, nil)
@@ -274,7 +273,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			raw, err = ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode == 200).Should(BeTrue())
+			Expect(resp.StatusCode).To(Equal(200))
 
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
@@ -310,7 +309,7 @@ var _ = Describe("AutoScaler Public API", func() {
 				raw, err := ioutil.ReadAll(resp.Body)
 
 				Expect(err).ShouldNot(HaveOccurred())
-				Expect(resp.StatusCode == 200).Should(BeTrue())
+				Expect(resp.StatusCode).To(Equal(200))
 
 				var metrics *MetricsResults
 				err = json.Unmarshal(raw, &metrics)
@@ -335,9 +334,8 @@ var _ = Describe("AutoScaler Public API", func() {
 				defer resp.Body.Close()
 
 				raw, err := ioutil.ReadAll(resp.Body)
-
 				Expect(err).ShouldNot(HaveOccurred())
-				Expect(resp.StatusCode == 200).Should(BeTrue())
+				Expect(resp.StatusCode).To(Equal(200))
 
 				var metrics *AggregatedMetricsResults
 				err = json.Unmarshal(raw, &metrics)
@@ -362,7 +360,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 				raw, err := ioutil.ReadAll(resp.Body)
 				Expect(err).ShouldNot(HaveOccurred())
-				Expect(resp.StatusCode == 200).Should(BeTrue())
+				Expect(resp.StatusCode).To(Equal(200))
 
 				var histories *HistoryResults
 				err = json.Unmarshal(raw, &histories)
