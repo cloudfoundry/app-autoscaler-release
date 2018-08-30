@@ -12,6 +12,7 @@ source /var/vcap/packages/common/utils.sh
 case $1 in
 
   start)
+    source /var/vcap/jobs/metricsforwarder/bin/environment_variables
     pid_guard $PIDFILE "metricsforwarder"
 
     mkdir -p $RUN_DIR

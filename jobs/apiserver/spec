@@ -185,4 +185,21 @@ properties:
     description: "Autoscaler Public API Verification Client Secret"
 
 
+  sbss.sbss_db.address:
+    description: "IP address on which the sbssdb server will listen"
+    default: "postgres.service.cf.internal"
+  sbss.sbss_db.databases:
+    description: "The list of databases used in sbssdb database including name"
+  sbss.sbss_db.db_scheme:
+    description: "Database scheme to be used to access sbssdb"
+  sbss.sbss_db.port:
+    description: "Port on which the sbssdb server will listen"
+  sbss.sbss_db.roles:
+    description: "The list of database roles used in sbssdb database including name/password"
+  
+  sbss.restricted_dbuser_name:
+    description: "Restricted db user username"
+  sbss.restricted_dbuser_password:
+    description: "Restricted db user password"
+
 
