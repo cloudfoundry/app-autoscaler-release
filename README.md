@@ -36,7 +36,7 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -v cf_admin_password=<cf admin password> \
      -v skip_ssl_validation=true
 ```
-To consume fewer bosh vms with app-autoscaler-deployment-fewer.yml
+To deploy app-autoscaler with density, use `app-autoscaler-deployment-fewer.yml`
 ```sh
 bosh -e YOUR_ENV -d app-autoscaler \
      deploy templates/app-autoscaler-deployment-fewer.yml \
@@ -116,7 +116,7 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -o example/operation/external-db.yml
 ```
 
-#### Deploy autoscaler with bosh-dns instead of consul for DNS service
+#### Deploy autoscaler with bosh-dns instead of consul for service registration
 
 ```sh
 bosh -e YOUR_ENV -d app-autoscaler \
@@ -127,7 +127,7 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -v cf_admin_password=<cf admin password> \
      -v skip_ssl_validation=true
 ```
-To consume fewer bosh vms with app-autoscaler-deployment-fewer.yml
+For density deployment
 ```sh
 bosh2 -e YOUR_ENV -d app-autoscaler \
      deploy templates/app-autoscaler-deployment-fewer.yml \
