@@ -129,7 +129,7 @@ bosh -e YOUR_ENV -d app-autoscaler \
 ```
 For density deployment
 ```sh
-bosh2 -e YOUR_ENV -d app-autoscaler \
+bosh -e YOUR_ENV -d app-autoscaler \
      deploy templates/app-autoscaler-deployment-fewer.yml \
      --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
      -o example/operation/bosh-dns-fewer.yml \
