@@ -103,6 +103,7 @@ instance_groups:
     properties:
       autoscaler:
         api_server:
+          cache_ttl: 10
           service_offering_enabled: true
           db_config: &db_config
             idle_timeout: 1000
@@ -279,6 +280,7 @@ instance_groups:
     properties:
       autoscaler:
         service_broker: 
+          enable_custom_metrics: true
           db_config: *db_config
           publicPort : &servicebrokerPort 6101
           port: 6107
