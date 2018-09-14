@@ -26,6 +26,9 @@ packages:
   - common
 
 properties:
+  autoscaler.service_broker.enable_custom_metrics:
+    description: "whether to enable custom metrics"
+    default: true
   autoscaler.service_broker.require_consul:
     description: "whether to start consul agent"
     default: true

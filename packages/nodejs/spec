@@ -4,5 +4,5 @@ name: nodejs
 dependencies:
 
 files:
-- nodejs/node-v6.9.2-darwin-x64.tar.gz
-- nodejs/node-v6.9.2-linux-x64.tar.xz
+- nodejs/node-v8.11.4-linux-x64.tar.xz
+- nodejs/node-v8.11.4-darwin-x64.tar.gz
