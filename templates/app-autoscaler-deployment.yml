@@ -103,7 +103,7 @@ instance_groups:
     properties:
       autoscaler:
         api_server:
-          cache_ttl: 10
+          cache_ttl: 600
           service_offering_enabled: true
           db_config: &db_config
             idle_timeout: 1000
@@ -468,14 +468,18 @@ instance_groups:
     release: app-autoscaler
     properties:
       autoscaler:
+        cf: *cf_credentials
+        policy_db: *database
         appmetrics_db: *database
         instancemetrics_db: *database
         scalingengine_db: *database
+        policy_db_connection_config: *databaseConnectionConfig
         appmetrics_db_connection_config: *databaseConnectionConfig
         instancemetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db_connection_config: *databaseConnectionConfig
         lock_db: *database
         operator:
+          app_sync_interval: 24h
           scaling_engine:
             port: *scalingEnginePort
             ca_cert: ((scalingengine_ca.ca))
