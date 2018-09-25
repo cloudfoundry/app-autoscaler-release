@@ -39,7 +39,7 @@ packages:
 properties:
   autoscaler.api_server.cache_ttl:
     description: "The TTL of credential cache in seconds"
-    default: 10
+    default: 600
   autoscaler.api_server.require_consul:
     description: "whether to start consul agent"
     default: true
