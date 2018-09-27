@@ -36,7 +36,15 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -v cf_admin_password=<cf admin password> \
      -v skip_ssl_validation=true
 ```
-
+To deploy app-autoscaler with density, use `app-autoscaler-deployment-fewer.yml`
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment-fewer.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_admin_password=<cf admin password> \
+     -v skip_ssl_validation=true
+```
 Alternatively you can use cf-deployment vars file to provide the cf_admin_password
 
 ```sh
@@ -108,6 +116,27 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -o example/operation/external-db.yml
 ```
 
+#### Deploy autoscaler with bosh-dns instead of consul for service registration
+
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -o example/operation/bosh-dns.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_admin_password=<cf admin password> \
+     -v skip_ssl_validation=true
+```
+For density deployment
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment-fewer.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -o example/operation/bosh-dns-fewer.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_admin_password=<cf admin password> \
+     -v skip_ssl_validation=true
+```
 >** It's advised not to make skip_ssl_validation=true for non-development environment
 
 ## Register service

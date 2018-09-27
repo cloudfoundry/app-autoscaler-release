@@ -103,6 +103,7 @@ instance_groups:
     properties:
       autoscaler:
         api_server:
+          cache_ttl: 600
           service_offering_enabled: true
           db_config: &db_config
             idle_timeout: 1000
@@ -182,7 +183,7 @@ instance_groups:
     properties:
       autoscaler:
         scheduler:
-          port: 6102
+          port: &schedulerPort 6102
           job_reschedule_interval_millisecond: 10000
           job_reschedule_maxcount: 6
           notification_reschedule_maxcount: 3
@@ -195,6 +196,63 @@ instance_groups:
             client_key: ((scalingengine_client.private_key))
         scheduler_db: *database
         policy_db: *database
+
+# Scaling-Engine Instance Group
+- name: scalingengine
+  azs:
+  - z1
+  instances: 1
+  networks:
+  - name: default
+  stemcell: default
+  vm_type: minimal
+  jobs:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link, deployment: cf}
+      consul_server: nil
+      consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            scalingengine: 
+              check:
+                tcp: 127.0.0.1:6104
+                interval: 30s
+                timeout: 10s
+  - name: scalingengine
+    release: app-autoscaler
+    properties:
+      autoscaler:
+        scalingengine_db: *database
+        scheduler_db: *database
+        policy_db: *database
+        scalingengine_db_connection_config: *databaseConnectionConfig
+        scheduler_db_connection_config: *databaseConnectionConfig
+        policy_db_connection_config: *databaseConnectionConfig
+        cf: &cf_credentials
+          api: "https://api.((system_domain))"
+          grant_type: password
+          username: admin
+          password: "((cf_admin_password))"
+          client_id: ""
+          secret: ""
+          skip_ssl_validation: "((skip_ssl_validation))"
+        scalingengine:
+          logging:
+            level: debug
+          server:
+            port: &scalingEnginePort 6104
+          health:
+            port: &scalingEngineHealthPort 6204
+            emit_interval: 15s
+          defaultCoolDownSecs: 300
+          lockSize: 32
+          ca_cert: ((scalingengine_ca.ca))
+          server_cert: ((scalingengine_server.certificate))
+          server_key: ((scalingengine_server.private_key))
       
 # Service-Broker Instance Group
 - name: servicebroker
@@ -222,6 +280,7 @@ instance_groups:
     properties:
       autoscaler:
         service_broker: 
+          enable_custom_metrics: true
           db_config: *db_config
           publicPort : &servicebrokerPort 6101
           port: 6107
@@ -265,47 +324,6 @@ instance_groups:
           uris:
             - autoscalerservicebroker.((system_domain))
 
-# Pruner Instance Group
-- name: pruner
-  azs:
-  - z1
-  instances: 1
-  networks:
-  - name: default
-  stemcell: default
-  vm_type: minimal
-  jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common: {from: consul_common_link, deployment: cf}
-      consul_server: nil
-      consul_client: {from: consul_client_link, deployment: cf}
-    properties:
-      consul:
-        agent:
-          services:
-            pruner: 
-              check: {}
-  - name: pruner
-    release: app-autoscaler
-    properties:
-      autoscaler:
-        appmetrics_db: *database
-        instancemetrics_db: *database
-        scalingengine_db: *database
-        appmetrics_db_connection_config: *databaseConnectionConfig
-        instancemetrics_db_connection_config: *databaseConnectionConfig
-        scalingengine_db_connection_config: *databaseConnectionConfig
-        lock_db: *database
-        pruner:
-          db_lock: 
-            ttl: 15s
-            retry_interval: 5s
-          enable_db_lock: false
-          logging:
-            level: debug 
-
 # Metric-collector Instance Group
 - name: metricscollector
   azs:
@@ -339,14 +357,7 @@ instance_groups:
         policy_db: *database
         instancemetrics_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
-        cf: &cf_credentials
-          api: "https://api.((system_domain))"
-          grant_type: password
-          username: admin
-          password: "((cf_admin_password))"
-          client_id: ""
-          secret: ""
-          skip_ssl_validation: "((skip_ssl_validation))"
+        cf: *cf_credentials
         metricscollector:
           logging:
             level: debug
@@ -431,8 +442,8 @@ instance_groups:
             client_cert: ((metricscollector_client.certificate))
             client_key: ((metricscollector_client.private_key))
 
-# Scaling-Engine Instance Group
-- name: scalingengine
+# operator Instance Group
+- name: operator
   azs:
   - z1
   instances: 1
@@ -451,41 +462,42 @@ instance_groups:
       consul:
         agent:
           services:
-            scalingengine: 
-              check:
-                tcp: 127.0.0.1:6104
-                interval: 30s
-                timeout: 10s
-  - name: scalingengine
+            operator: 
+              check: {}
+  - name: operator
     release: app-autoscaler
     properties:
       autoscaler:
-        scalingengine_db: *database
-        scheduler_db: *database
-        policy_db: *database
-        lock_db: *database
-        scalingengine_db_connection_config: *databaseConnectionConfig
-        scheduler_db_connection_config: *databaseConnectionConfig
-        policy_db_connection_config: *databaseConnectionConfig
-        lock_db_connection_config: *databaseConnectionConfig
         cf: *cf_credentials
-        scalingengine:
-          logging:
-            level: debug
-          server:
-            port: &scalingEnginePort 6104
-          health:
-            port: &scalingEngineHealthPort 6204
-            emit_interval: 15s
-          defaultCoolDownSecs: 300
-          lockSize: 32
-          ca_cert: ((scalingengine_ca.ca))
-          server_cert: ((scalingengine_server.certificate))
-          server_key: ((scalingengine_server.private_key))
-          db_lock:
+        policy_db: *database
+        appmetrics_db: *database
+        instancemetrics_db: *database
+        scalingengine_db: *database
+        policy_db_connection_config: *databaseConnectionConfig
+        appmetrics_db_connection_config: *databaseConnectionConfig
+        instancemetrics_db_connection_config: *databaseConnectionConfig
+        scalingengine_db_connection_config: *databaseConnectionConfig
+        lock_db: *database
+        operator:
+          app_sync_interval: 24h
+          scaling_engine:
+            port: *scalingEnginePort
+            ca_cert: ((scalingengine_ca.ca))
+            client_cert: ((scalingengine_client.certificate))
+            client_key: ((scalingengine_client.private_key))                
+          scheduler:
+            port: *schedulerPort
+            ca_cert: ((scheduler_ca.ca))
+            client_cert: ((scheduler_client.certificate))
+            client_key: ((scheduler_client.private_key))
+          db_lock: 
             ttl: 15s
             retry_interval: 5s
-          enable_db_lock: true
+          enable_db_lock: false
+          logging:
+            level: debug 
+
+
           
 variables:
 - name: database_password

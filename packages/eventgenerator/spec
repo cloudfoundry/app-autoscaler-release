@@ -2,7 +2,7 @@
 name: eventgenerator
 
 dependencies:
-- golang1.7
+- golang
 
 files:
 - app-autoscaler/src/autoscaler/eventgenerator/db/*

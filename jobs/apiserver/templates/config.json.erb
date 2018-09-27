@@ -25,6 +25,7 @@
     'infoFilePath' => "/var/vcap/jobs/apiserver/bin/info.json",
     'cfApi' => p('autoscaler.cf.api'),
     'skipSSLValidation' => p('autoscaler.cf.skip_ssl_validation'),
+    'cacheTTL' => p('autoscaler.api_server.cache_ttl'),
     'db' => {
        'maxConnections' => p('autoscaler.api_server.db_config.max_connections'),
        'minConnections' => p('autoscaler.api_server.db_config.min_connections'),

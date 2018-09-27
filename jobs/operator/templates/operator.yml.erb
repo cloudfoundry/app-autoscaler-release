@@ -2,6 +2,14 @@
   def p_arr(property)
     p(property,nil) || []
   end
+
+  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
+  policy_db_address = p('autoscaler.policy_db.address')
+  policy_db_port = p('autoscaler.policy_db.port')
+  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
+  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
+  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
+
   instance_metrics_db_scheme = p('autoscaler.instancemetrics_db.db_scheme')
   instance_metrics_db_address = p('autoscaler.instancemetrics_db.address')
   instance_metrics_db_port = p('autoscaler.instancemetrics_db.port')
@@ -31,8 +39,18 @@
   lock_db_url = lock_db_scheme + "://" + lock_db_role['name'] + ":" + lock_db_role['password'] + "@" + lock_db_address + ":" + lock_db_port.to_s + "/" + lock_db_database['name'] + "?sslmode=disable"
 %>
 
+cf:
+  api:  <%= p("autoscaler.cf.api") %>
+  grant_type: <%= p("autoscaler.cf.grant_type") %>
+  username:  <%= p("autoscaler.cf.username") %>
+  password:  <%= p("autoscaler.cf.password") %>
+  client_id: <%= p("autoscaler.cf.client_id") %>
+  secret: <%= p("autoscaler.cf.secret") %>
+  skip_ssl_validation: <%= p("autoscaler.cf.skip_ssl_validation") %>
+
+
 logging:
-  level: <%= p("autoscaler.pruner.logging.level") %>
+  level: <%= p("autoscaler.operator.logging.level") %>
 
 instance_metrics_db:
   db:
@@ -40,8 +58,8 @@ instance_metrics_db:
     max_open_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.instancemetrics_db_connection_config.connection_max_lifetime") %>
-  refresh_interval: <%= p("autoscaler.pruner.instance_metrics_db.refresh_interval") %>
-  cutoff_days: <%= p("autoscaler.pruner.instance_metrics_db.cutoff_days") %>
+  refresh_interval: <%= p("autoscaler.operator.instance_metrics_db.refresh_interval") %>
+  cutoff_days: <%= p("autoscaler.operator.instance_metrics_db.cutoff_days") %>
 
 app_metrics_db:
   db:
@@ -49,8 +67,8 @@ app_metrics_db:
     max_open_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.appmetrics_db_connection_config.connection_max_lifetime") %>
-  refresh_interval: <%= p("autoscaler.pruner.app_metrics_db.refresh_interval") %>
-  cutoff_days: <%= p("autoscaler.pruner.app_metrics_db.cutoff_days") %>
+  refresh_interval: <%= p("autoscaler.operator.app_metrics_db.refresh_interval") %>
+  cutoff_days: <%= p("autoscaler.operator.app_metrics_db.cutoff_days") %>
 
 scaling_engine_db:
   db:
@@ -58,18 +76,44 @@ scaling_engine_db:
     max_open_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.scalingengine_db_connection_config.connection_max_lifetime") %>
-  refresh_interval: <%= p("autoscaler.pruner.scaling_engine_db.refresh_interval") %>
-  cutoff_days: <%= p("autoscaler.pruner.scaling_engine_db.cutoff_days") %>
+  refresh_interval: <%= p("autoscaler.operator.scaling_engine_db.refresh_interval") %>
+  cutoff_days: <%= p("autoscaler.operator.scaling_engine_db.cutoff_days") %>
+
+scaling_engine:
+  scaling_engine_url: https://<%= p("autoscaler.operator.scaling_engine.host") %>:<%= p("autoscaler.operator.scaling_engine.port") %>
+  sync_interval: <%= p("autoscaler.operator.scaling_engine.sync_interval") %>
+  tls:
+    key_file: /var/vcap/jobs/operator/config/certs/scalingengine/client.key
+    cert_file: /var/vcap/jobs/operator/config/certs/scalingengine/client.crt
+    ca_file: /var/vcap/jobs/operator/config/certs/scalingengine/ca.crt
+
+scheduler:
+  scheduler_url: https://<%= p("autoscaler.operator.scheduler.host") %>:<%= p("autoscaler.operator.scheduler.port") %>
+  sync_interval: <%= p("autoscaler.operator.scheduler.sync_interval") %>
+  tls:
+    key_file: /var/vcap/jobs/operator/config/certs/scheduler/client.key
+    cert_file: /var/vcap/jobs/operator/config/certs/scheduler/client.crt
+    ca_file: /var/vcap/jobs/operator/config/certs/scheduler/ca.crt
+
+app_syncer:
+  db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+  sync_interval:  <%= p("autoscaler.operator.app_sync_interval")  %>
 
 lock:
-  lock_ttl: <%= p("autoscaler.pruner.lock.lock_ttl") %>
-  lock_retry_interval: <%= p("autoscaler.pruner.lock.lock_retry_interval") %>
-  consul_cluster_config: <%= p("autoscaler.pruner.lock.consul_cluster_config") %>
+  lock_ttl: <%= p("autoscaler.operator.lock.lock_ttl") %>
+  lock_retry_interval: <%= p("autoscaler.operator.lock.lock_retry_interval") %>
+  consul_cluster_config: <%= p("autoscaler.operator.lock.consul_cluster_config") %>
 
 db_lock:
-  lock_db:
+  ttl:  <%= p("autoscaler.operator.db_lock.ttl") %>
+  retry_interval: <%= p("autoscaler.operator.db_lock.retry_interval") %>
+  db:
     url: <%= lock_db_url %>
     max_open_connections: <%= p("autoscaler.lock_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.lock_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.lock_db_connection_config.connection_max_lifetime") %>
-enable_db_lock: <%= p("autoscaler.pruner.enable_db_lock") %>
+enable_db_lock: <%= p("autoscaler.operator.enable_db_lock") %>

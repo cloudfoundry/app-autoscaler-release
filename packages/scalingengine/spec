@@ -2,7 +2,7 @@
 name: scalingengine
 
 dependencies:
-- golang1.7
+- golang
 
 files:
 - app-autoscaler/src/autoscaler/scalingengine/db/*
@@ -19,7 +19,6 @@ files:
 - app-autoscaler/src/autoscaler/scalingengine/fakes/*.go # gosub
 - app-autoscaler/src/autoscaler/scalingengine/schedule/*.go # gosub
 - app-autoscaler/src/autoscaler/scalingengine/server/*.go # gosub
-- app-autoscaler/src/autoscaler/sync/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/handlers/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/unix_transport/*.go # gosub

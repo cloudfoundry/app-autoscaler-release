@@ -3,7 +3,7 @@
   path: /instance_groups/name=postgres_autoscaler
 
 - type: replace
-  path: /instance_groups/name=apiserver/jobs/name=apiserver/properties/policy_db
+  path: /instance_groups/name=apiserver/jobs/name=apiserver/properties/autoscaler/policy_db
   value: &external_database
     databases:
     - name: ((database_name))
@@ -21,65 +21,57 @@
       connection_max_lifetime: 60s
 
 - type: replace
-  path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/policy_db
+  path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/autoscaler/policy_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/scheduler_db
+  path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/autoscaler/scheduler_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=servicebroker/jobs/name=servicebroker/properties/binding_db
+  path: /instance_groups/name=servicebroker/jobs/name=servicebroker/properties/autoscaler/binding_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=pruner/jobs/name=pruner/properties/appmetrics_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/appmetrics_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=pruner/jobs/name=pruner/properties/instancemetrics_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/instancemetrics_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=pruner/jobs/name=pruner/properties/scalingengine_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/scalingengine_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/instancemetrics_db
+  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/autoscaler/instancemetrics_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/policy_db
+  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/autoscaler/policy_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/lock_db
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/appmetrics_db
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/policy_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/policy_db
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/scalingengine_db
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scheduler_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/scheduler_db
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/policy_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/policy_db
-  value: *external_database
-
-- type: replace
-  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/lock_db
-  value: *external_database
-
-- type: replace
-  path: /instance_groups/name=pruner/jobs/name=pruner/properties/lock_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/lock_db
   value: *external_database
