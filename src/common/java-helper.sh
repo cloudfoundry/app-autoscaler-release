@@ -10,10 +10,10 @@ setup_java(){
   mkdir java
   case "$OSTYPE" in
     darwin*)
-      tar zxvf openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz -C java
+      tar zxvf openjdk/openjdk-10.0.1_osx-x64_bin.tar.gz -C java --strip-components=4
       ;;
     linux*)
-      tar zxvf openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz -C java
+      tar zxvf openjdk/openjdk-10.0.1_linux-x64_bin.tar.gz -C java --strip-components=1
       ;;
     *)
       if [ ! -d $JAVA_HOME ]; then
@@ -31,7 +31,7 @@ setup_java(){
 #Maven Setup
 setup_maven(){
   cd ${BUILD_DIR}
-  tar zxvf maven/apache-maven-3.3.9-bin.tar.gz -C maven --strip-components=1
+  tar zxvf maven/apache-maven-3.5.4-bin.tar.gz -C maven --strip-components=1
   export M2_HOME=${BUILD_DIR}/maven
   export PATH=$M2_HOME/bin:$PATH
 }

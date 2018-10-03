@@ -2,10 +2,11 @@
 name: operator
 
 dependencies:
-- golang1.7
+- golang
 
 files:
 - app-autoscaler/src/autoscaler/operator/db/*
+- app-autoscaler/src/autoscaler/cf/*.go # gosub
 - app-autoscaler/src/autoscaler/db/*.go # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/*.go # gosub
 - app-autoscaler/src/autoscaler/healthendpoint/*.go # gosub

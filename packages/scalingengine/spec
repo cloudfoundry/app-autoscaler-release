@@ -2,7 +2,7 @@
 name: scalingengine
 
 dependencies:
-- golang1.7
+- golang
 
 files:
 - app-autoscaler/src/autoscaler/scalingengine/db/*
