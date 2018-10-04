@@ -39,6 +39,7 @@ files:
 - app-autoscaler/src/github.com/lib/pq/oid/*.go # gosub
 - app-autoscaler/src/github.com/matttproud/golang_protobuf_extensions/pbutil/*.go # gosub
 - app-autoscaler/src/github.com/nu7hatch/gouuid/*.go # gosub
+- app-autoscaler/src/github.com/patrickmn/go-cache/*.go # gosub
 - app-autoscaler/src/github.com/prometheus/client_golang/prometheus/*.go # gosub
 - app-autoscaler/src/github.com/prometheus/client_golang/prometheus/promhttp/*.go # gosub
 - app-autoscaler/src/github.com/prometheus/client_model/go/*.go # gosub

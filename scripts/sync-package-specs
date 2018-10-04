@@ -32,6 +32,8 @@ sync_package metricscollector -app  autoscaler/metricscollector/... &
 sync_package eventgenerator -app  autoscaler/eventgenerator/... &
 sync_package scalingengine -app  autoscaler/scalingengine/... &
 sync_package operator -app  autoscaler/operator/... &
+sync_package metricsforwarder -app autoscaler/metricsforwarder/... &
+
 
 wait
 

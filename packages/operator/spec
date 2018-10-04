@@ -26,6 +26,7 @@ files:
 - app-autoscaler/src/code.cloudfoundry.org/locket/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/runtimeschema/metric/*.go # gosub
 - app-autoscaler/src/github.com/beorn7/perks/quantile/*.go # gosub
+- app-autoscaler/src/github.com/cloudfoundry-incubator/uaago/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/dropsonde/metric_sender/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/dropsonde/metrics/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/sonde-go/events/*.go # gosub
