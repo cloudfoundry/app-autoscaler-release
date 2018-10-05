@@ -1,29 +1,29 @@
 ---
-nodejs/node-v8.11.4-darwin-x64.tar.gz:
-  object_id: 1b7ce961-9945-4ea0-8367-b9e18920dcb0
-  sha: ae434fecf15ad21686cf9bc4ea88a6bb2d6b5906
-  size: 16042407
-nodejs/node-v8.11.4-linux-x64.tar.xz:
-  object_id: 8aa73577-b980-4a4a-946e-23a2c9ed264a
-  sha: 3b1552d91cf853fdca32d163a991f17cc1ffb288
-  size: 11351232
-golang/go1.11.darwin-amd64.tar.gz:
-  object_id: 2b4a9df6-358b-49f2-98be-28f9aaed78a8
-  sha: afcfe6d8d18771e2cb431b4a812c66a6f6d46597
-  size: 124131633
-golang/go1.11.linux-amd64.tar.gz:
-  object_id: b23ae607-90fd-4405-8b20-f1258216116f
-  sha: 8ffb718cab4371df3495d8f6c0b15c7e6dc28fea
-  size: 127163815
-maven/apache-maven-3.5.4-bin.tar.gz:
-  object_id: 954f31f5-134b-46b0-bfe4-e7121324fd4a
-  sha: 22cac91b3557586bb1eba326f2f7727543ff15e3
-  size: 8842660
-openjdk/openjdk-10.0.1_linux-x64_bin.tar.gz:
-  object_id: bd40a0d7-4dec-49d4-aca9-3f79e1b6b2cd
-  sha: 1377697996cad66def4f6627d13a031a26af9b7c
-  size: 204885801
-openjdk/openjdk-10.0.1_osx-x64_bin.tar.gz:
-  object_id: b9df5419-1285-4714-a822-d1de5e70e7df
-  sha: 85f722da8da7a151d8500a19d535e7fbf979ba71
-  size: 200863681
+openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz:
+  object_id: 4cd794b3-d86e-45f9-84c2-2541147e3b50
+  sha: d9374652844bfd7bcdce8f8b605fb57fd76c9e36
+  size: 75550921
+openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz:
+  object_id: c85abf8b-fb0b-435b-b8dd-baf9993958cd
+  sha: d77ee059e289ae52fb87812f1a2932268427dc26
+  size: 77696717
+maven/apache-maven-3.3.9-bin.tar.gz:
+  object_id: 7a16a82f-d82d-4295-be94-b2c1ac131a5b
+  sha: 5b4c117854921b527ab6190615f9435da730ba05
+  size: 8491533
+nodejs/node-v6.9.2-linux-x64.tar.xz:
+  object_id: 1047e737-c819-49b6-9f01-d72ee83979c0
+  sha: 96b6e389d415f95b413dc7ffec7675546b738973
+  size: 9342556
+nodejs/node-v6.9.2-darwin-x64.tar.gz:
+  object_id: fc1a2931-0b65-4f66-8b6e-a76b6a58535b
+  sha: 6a8edc55c2e6246ad3ee1b80236bcdec94521115
+  size: 12041020
+golang/go1.7.4.linux-amd64.tar.gz:
+  object_id: bf220389-5700-4dfe-bc22-e6e218f121aa
+  sha: 2e5baf03d1590e048c84d1d5b4b6f2540efaaea1
+  size: 84021919
+golang/go1.7.4.darwin-amd64.tar.gz:
+  object_id: 4c8725fa-9a1c-4535-b306-54bd1148f54a
+  sha: 1ffa4dd85e10f391735c3cd71df61586e3c62381
+  size: 83749804
