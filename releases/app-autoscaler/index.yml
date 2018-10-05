@@ -54,4 +54,6 @@ builds:
     version: v0.0.28
   267090a9-9504-42ab-882d-7b22271a5095:
     version: v0.0.29
+  93bc9f46-874c-4145-ade7-3372fe808529:
+    version: v0.0.30
 format-version: '2'
