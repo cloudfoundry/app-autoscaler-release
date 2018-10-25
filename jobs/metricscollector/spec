@@ -14,75 +14,97 @@ packages:
   - metricscollector
   - common
 
+provides:
+- name: metricscollector
+  type: metricscollector
+  properties:
+  - autoscaler.metricscollector.server.port
+
+consumes:
+- name: metricscollector
+  type: metricscollector
+
 properties:
-  policy_db.address:
+  autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "postgres.service.cf.internal"
-  policy_db.databases:
+  autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
-  policy_db.db_scheme:
+  autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
-  policy_db.port:
+  autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
-  policy_db.roles:
+  autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
 
-  instancemetrics_db.address:
+  autoscaler.instancemetrics_db.address:
     description: "IP address on which the instancemetricsdb server will listen"
     default: "postgres.service.cf.internal"
-  instancemetrics_db.databases:
+  autoscaler.instancemetrics_db.databases:
     description: "The list of databases used in instancemetricsdb database including name"
-  instancemetrics_db.db_scheme:
+  autoscaler.instancemetrics_db.db_scheme:
     description: "Database scheme to be used to access instancemetricsdb"
-  instancemetrics_db.port:
+  autoscaler.instancemetrics_db.port:
     description: "Port on which the instancemetricsdb server will listen"
-  instancemetrics_db.roles:
+  autoscaler.instancemetrics_db.roles:
     description: "The list of database roles used in instancemetricsdb database including name/password"
 
 
-  cf.api:
-    description: "the Cloud Foundry API endpoint"
-  cf.grant_type:
-    description: "the grant type to log in cf" 
-  cf.username:
-    description: "the user name to log in cf"
-  cf.password:
-    description: "the password to log in cf"
-  cf.client_id:
-    description: "the client id to log in cf"
-  cf.secret:
-    description: "the secret to log in cf"	
+  autoscaler.instancemetrics_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.instancemetrics_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.instancemetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
 
-  metricscollector.logging.level:
+  autoscaler.policy_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.policy_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.cf.api:
+    description: "the Cloud Foundry API endpoint"
+  autoscaler.cf.grant_type:
+    description: "the grant type to log in cf" 
+  autoscaler.cf.username:
+    description: "the user name to log in cf"
+  autoscaler.cf.password:
+    description: "the password to log in cf"
+  autoscaler.cf.client_id:
+    description: "the client id to log in cf"
+  autoscaler.cf.secret:
+    description: "the secret to log in cf"
+  autoscaler.cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
+
+  autoscaler.metricscollector.require_consul:
+    description: "whether to start consul agent"
+    default: true
+  autoscaler.metricscollector.logging.level:
     description: "the level of logging"
     default: "info"
-  metricscollector.server.port:
+  autoscaler.metricscollector.server.port:
     description: "the listening port of server"
     default: 6103
-  metricscollector.ca_cert:
+  autoscaler.metricscollector.ca_cert:
     description: "PEM-encoded CA certificate"
-  metricscollector.server_cert:
+  autoscaler.metricscollector.server_cert:
     description: "PEM-encoded server certificate"
-  metricscollector.server_key:
+  autoscaler.metricscollector.server_key:
     description: "PEM-encoded server key"
-  metricscollector.collector.refresh_interval:
+  autoscaler.metricscollector.collector.refresh_interval:
     description: "the time interval to refresh app policies from policy database"
     default: 60s
-  metricscollector.collector.collect_interval:
+  autoscaler.metricscollector.collector.collect_interval:
     description: "the time interval to collect container metrics from loggregator"
     default: 30s
-  metricscollector.collector.collect_method:
+  autoscaler.metricscollector.collector.save_interval:
+    description: "the time interval to save metrics in database"
+    default: 5s
+  autoscaler.metricscollector.collector.collect_method:
     description: "the method to collect metrics from loggregator"
     default: "streaming"
-
-
-  metricscollector.lock.lock_ttl:
-    description: "consul lock ttl duration"
-    default: 15s
-  metricscollector.lock.lock_retry_interval:
-    description: "consul lock retry interval"
-    default: 10s
-  metricscollector.lock.consul_cluster_config:
-    description: "consul cluster configuration"
-    default: http://127.0.0.1:8500
-
+  

@@ -1,4 +1,0 @@
-#!/bin/bash
-
-bosh sync blobs
-bosh create release --force --name app-autoscaler && bosh upload release && bosh -n deploy

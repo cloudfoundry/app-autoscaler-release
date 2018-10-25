@@ -5,26 +5,35 @@
     p(property,nil) || []
   end
 
-  role = p_arr('scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
-  database = p_arr('scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' }
+  role = p_arr('autoscaler.scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
+  database = p_arr('autoscaler.scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' }
 %>
+source /var/vcap/packages/common/dns-helper.sh
 
 DB_DIR=/var/vcap/packages/db
 SCHEDULER_DIR=/var/vcap/packages/scheduler
 
 export PATH=/var/vcap/packages/java/bin:$PATH 
 
-# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
-source /var/vcap/packages/common/consul-helper.sh
-start_consul_agent
+require_consul='<%= p("autoscaler.scheduler.require_consul") %>'
+
+if [ $require_consul = 'true' ];then
+	echo "start consul agent"
+	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
+  source /var/vcap/packages/common/consul-helper.sh
+  start_consul_agent
+else
+	echo "consul agent is not needed"
+fi
 
 # Getting Database config
-HOST='<%= p("scheduler_db.address") %>'
+HOST='<%= p("autoscaler.scheduler_db.address") %>'
 DBNAME='<%= database['name'] %>'
 USER='<%= role['name'] %>'
 PASSWORD='<%= role['password'] %>'
-PORT='<%= p("scheduler_db.port") %>'
+PORT='<%= p("autoscaler.scheduler_db.port") %>'
 
+detect_dns $HOST $PORT
 
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$SCHEDULER_DIR/db/scheduler.changelog-master.yaml update

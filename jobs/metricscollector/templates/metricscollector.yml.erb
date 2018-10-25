@@ -3,51 +3,62 @@
     p(property,nil) || []
   end
 
-  instance_metrics_db_scheme = p('instancemetrics_db.db_scheme')
-  instance_metrics_db_address = p('instancemetrics_db.address')
-  instance_metrics_db_port = p('instancemetrics_db.port')
-  instance_metrics_db_role = p_arr('instancemetrics_db.roles').find { |role| role['tag'] == 'instancemetricsdb' or role['tag'] == 'default' } 
-  instance_metrics_db_database = p_arr('instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' } 
+  instance_metrics_db_scheme = p('autoscaler.instancemetrics_db.db_scheme')
+  instance_metrics_db_address = p('autoscaler.instancemetrics_db.address')
+  instance_metrics_db_port = p('autoscaler.instancemetrics_db.port')
+  instance_metrics_db_role = p_arr('autoscaler.instancemetrics_db.roles').find { |role| role['tag'] == 'instancemetricsdb' or role['tag'] == 'default' } 
+  instance_metrics_db_database = p_arr('autoscaler.instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' } 
   instance_metrics_db_url = instance_metrics_db_scheme + "://" + instance_metrics_db_role['name'] + ":" + instance_metrics_db_role['password'] + "@" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + "/" + instance_metrics_db_database['name'] + "?sslmode=disable"
 
-  policy_db_scheme = p('policy_db.db_scheme')
-  policy_db_address = p('policy_db.address')
-  policy_db_port = p('policy_db.port')
-  policy_db_role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
-  policy_db_database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
+  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
+  policy_db_address = p('autoscaler.policy_db.address')
+  policy_db_port = p('autoscaler.policy_db.port')
+  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
+  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
   policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
+
+  sorted_instances=link("metricscollector").instances.sort_by {|i|i.address}
+  nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
+  addrs=sorted_instances.map{|i| "'#{i.address}:#{p('autoscaler.metricscollector.server.port')}'"}
+  nodeAddrs="[" + addrs.join(",") +"]"  
 
 %>
 
 
 cf:
-  api:  <%= p("cf.api") %>
-  grant_type: <%= p("cf.grant_type") %>
-  username:  <%= p("cf.username") %>
-  password:  <%= p("cf.password") %>
-  client_id: <%= p("cf.client_id") %>
-  secret: <%= p("cf.secret") %>
+  api:  <%= p("autoscaler.cf.api") %>
+  grant_type: <%= p("autoscaler.cf.grant_type") %>
+  username:  <%= p("autoscaler.cf.username") %>
+  password:  <%= p("autoscaler.cf.password") %>
+  client_id: <%= p("autoscaler.cf.client_id") %>
+  secret: <%= p("autoscaler.cf.secret") %>
+  skip_ssl_validation: <%= p("autoscaler.cf.skip_ssl_validation") %>
 
 server:
-  port:  <%= p("metricscollector.server.port") %>
+  port:  <%= p("autoscaler.metricscollector.server.port") %>
   tls:
     key_file: /var/vcap/jobs/metricscollector/config/certs/metricscollector/server.key
     cert_file: /var/vcap/jobs/metricscollector/config/certs/metricscollector/server.crt
     ca_file: /var/vcap/jobs/metricscollector/config/certs/metricscollector/ca.crt
+  node_addrs: <%= nodeAddrs %>
+  node_index: <%= nodeIndex %>
 
 logging:
-  level: <%= p("metricscollector.logging.level") %>
+  level: <%= p("autoscaler.metricscollector.logging.level") %>
 
 db:
-  policy_db_url: <%= policy_db_url %>
-  instance_metrics_db_url: <%= instance_metrics_db_url %>
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+  instance_metrics_db:
+    url: <%= instance_metrics_db_url %>
+    max_open_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.instancemetrics_db_connection_config.connection_max_lifetime") %>
 
 collector:
-  refresh_interval: <%= p("metricscollector.collector.refresh_interval") %>
-  collect_interval: <%= p("metricscollector.collector.collect_interval") %>
-  collect_method: <%= p("metricscollector.collector.collect_method") %>
-
-lock:
-  lock_ttl: <%= p("metricscollector.lock.lock_ttl") %>
-  lock_retry_interval: <%= p("metricscollector.lock.lock_retry_interval") %>
-  consul_cluster_config: <%= p("metricscollector.lock.consul_cluster_config") %>
+  refresh_interval: <%= p("autoscaler.metricscollector.collector.refresh_interval") %>
+  collect_interval: <%= p("autoscaler.metricscollector.collector.collect_interval") %>
+  collect_method: <%= p("autoscaler.metricscollector.collector.collect_method") %>

@@ -3,21 +3,23 @@
   def p_arr(property)
     p(property,nil) || []
   end
-  db_scheme = p('binding_db.db_scheme')
-  address = p('binding_db.address')
-  db_port = p('binding_db.port')
-  role = p_arr('binding_db.roles').find { |role| role['tag'] == 'bindingdb' or role['tag'] == 'default'} 
-  database = p_arr('binding_db.databases').find { |database| database['tag'] == 'bindingdb' or database['tag'] == 'default'} 
-  apiserver_host = p('service_broker.api_server.host')
-  apiserver_port = p('service_broker.api_server.port')
+  db_scheme = p('autoscaler.binding_db.db_scheme')
+  address = p('autoscaler.binding_db.address')
+  db_port = p('autoscaler.binding_db.port')
+  role = p_arr('autoscaler.binding_db.roles').find { |role| role['tag'] == 'bindingdb' or role['tag'] == 'default'} 
+  database = p_arr('autoscaler.binding_db.databases').find { |database| database['tag'] == 'bindingdb' or database['tag'] == 'default'} 
+  apiserver_host = p('autoscaler.service_broker.api_server.host')
+  apiserver_port = p('autoscaler.service_broker.api_server.port')
   params = {
-    'port' => p('service_broker.port'),
-    'username' => p('service_broker.username'),
-    'password' => p('service_broker.password'),
+    'port' => p('autoscaler.service_broker.port'),
+    'publicPort' => p('autoscaler.service_broker.publicPort'),
+    'username' => p('autoscaler.service_broker.username'),
+    'password' => p('autoscaler.service_broker.password'),
+    'enableCustomMetrics' => p('autoscaler.service_broker.enable_custom_metrics'),
     'db' => {
-       'maxConnections' => p('service_broker.db_config.max_connections'),
-       'minConnections' => p('service_broker.db_config.min_connections'),
-       'idleTimeout' => p('service_broker.db_config.idle_timeout'),
+       'maxConnections' => p('autoscaler.service_broker.db_config.max_connections'),
+       'minConnections' => p('autoscaler.service_broker.db_config.min_connections'),
+       'idleTimeout' => p('autoscaler.service_broker.db_config.idle_timeout'),
        'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
      },
     'apiserver' => {
@@ -28,14 +30,20 @@
             'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/apiserver/ca.crt",
         },
     },
-    'httpRequestTimeout' => p('service_broker.http_request_timeout'),
+    'httpRequestTimeout' => p('autoscaler.service_broker.http_request_timeout'),
+    # 'publicTls' => {
+    #     'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_server.key",
+    #     'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_server.crt",
+    #     'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/public_ca.crt",
+    # },
     'tls' => {
         'keyFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.key",
         'certFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/server.crt",
         'caCertFile' => "/var/vcap/jobs/servicebroker/config/certs/servicebroker/ca.crt",
     },
     'serviceCatalogPath' => "/var/vcap/jobs/servicebroker/config/catalog.json",
-    'dashboardRedirectUri' => p('service_broker.dashboard_redirect_uri')
+    'schemaValidationPath' => "/var/vcap/packages/servicebroker/config/catalog.schema.json",
+    'dashboardRedirectUri' => p('autoscaler.service_broker.dashboard_redirect_uri')
   }
 %>
 

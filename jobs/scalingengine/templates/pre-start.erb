@@ -5,21 +5,31 @@
     p(property,nil) || []
   end
 
-  role = p_arr('scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' }
-  database = p_arr('scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' }
+  role = p_arr('autoscaler.scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' }
+  database = p_arr('autoscaler.scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' }
 %>
+source /var/vcap/packages/common/dns-helper.sh
 
 export PATH=/var/vcap/packages/java/bin:$PATH 
 
-# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
-source /var/vcap/packages/common/consul-helper.sh
-start_consul_agent
+require_consul='<%= p("autoscaler.scalingengine.require_consul") %>'
 
-HOST='<%= p("scalingengine_db.address") %>'
+if [ $require_consul = 'true' ];then
+	echo "start consul agent"
+	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
+	source /var/vcap/packages/common/consul-helper.sh
+	start_consul_agent
+else
+	echo "consul agent is not needed"
+fi
+
+HOST='<%= p("autoscaler.scalingengine_db.address") %>'
 DBNAME='<%= database['name'] %>'
 USER='<%= role['name'] %>'
 PASSWORD='<%= role['password'] %>'
-PORT='<%= p("scalingengine_db.port") %>'
+PORT='<%= p("autoscaler.scalingengine_db.port") %>'
+
+detect_dns $HOST $PORT
 
 java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=/var/vcap/packages/scalingengine/scalingengine.db.changelog.yml update

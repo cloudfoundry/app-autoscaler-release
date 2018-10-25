@@ -6,35 +6,35 @@
     p(property,nil) || []
   end
 
-  schedulerdb_role = p_arr('scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' } 
-  schedulerdb_database = p_arr('scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' } 
+  schedulerdb_role = p_arr('autoscaler.scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' } 
+  schedulerdb_database = p_arr('autoscaler.scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' } 
 
-  policydb_role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
-  policydb_database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
+  policydb_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
+  policydb_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
 
 %>
 #datasource for application and quartz
 
 spring.datasource.driverClassName=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://<%=p('scheduler_db.address')%>:<%=p('scheduler_db.port') %>/<%=schedulerdb_database['name'] %>
+spring.datasource.url=jdbc:postgresql://<%=p('autoscaler.scheduler_db.address')%>:<%=p('autoscaler.scheduler_db.port') %>/<%=schedulerdb_database['name'] %>
 spring.datasource.username=<%=schedulerdb_role['name'] %>
 spring.datasource.password=<%=schedulerdb_role['password'] %>
 
 #datasource for policy 
 
 spring.policyDbDataSource.driverClassName=org.postgresql.Driver
-spring.policyDbDataSource.url=jdbc:postgresql://<%=p('policy_db.address')%>:<%=p('policy_db.port') %>/<%=policydb_database['name'] %>
-spring.policyDbDataSource.password=<%=policydb_role['name'] %>
-spring.policyDbDataSource.username=<%=policydb_role['password'] %>
+spring.policyDbDataSource.url=jdbc:postgresql://<%=p('autoscaler.policy_db.address')%>:<%=p('autoscaler.policy_db.port') %>/<%=policydb_database['name'] %>
+spring.policyDbDataSource.password=<%=policydb_role['password'] %>
+spring.policyDbDataSource.username=<%=policydb_role['name'] %>
 
 
 #quartz job
-scalingenginejob.reschedule.interval.millisecond=<%=p('scheduler.job_reschedule_interval_millisecond') %>
-scalingenginejob.reschedule.maxcount=<%=p('scheduler.job_reschedule_maxcount') %>
-scalingengine.notification.reschedule.maxcount=<%=p('scheduler.notification_reschedule_maxcount') %>
+scalingenginejob.reschedule.interval.millisecond=<%=p('autoscaler.scheduler.job_reschedule_interval_millisecond') %>
+scalingenginejob.reschedule.maxcount=<%=p('autoscaler.scheduler.job_reschedule_maxcount') %>
+scalingengine.notification.reschedule.maxcount=<%=p('autoscaler.scheduler.notification_reschedule_maxcount') %>
 
 # scaling engine url
-autoscaler.scalingengine.url=https://<%=p('scheduler.scaling_engine.host') %>:<%=p('scheduler.scaling_engine.port') %>
+autoscaler.scalingengine.url=https://<%=p('autoscaler.scheduler.scaling_engine.host') %>:<%=p('autoscaler.scheduler.scaling_engine.port') %>
 
 # Server key store for communication with the api server.
 server.ssl.key-store=/var/vcap/data/certs/scheduler/server.p12
@@ -57,13 +57,7 @@ org.quartz.scheduler.instanceName=app-autoscaler
 org.quartz.scheduler.instanceId=<%= spec.id %>
 
 # scheduler port
-server.port=<%=p('scheduler.port') %>
-
-spring.cloud.consul.discovery.serviceName=autoscalerscheduler
-spring.cloud.consul.discovery.instanceId=autoscalerscheduler
-spring.cloud.consul.discovery.heartbeat.enabled=true
-spring.cloud.consul.discovery.heartbeat.ttlValue=<%=p('scheduler.consul.ttl') %>
-spring.cloud.consul.discovery.hostname=
+server.port=<%=p('autoscaler.scheduler.port') %>
 
 spring.application.name=scheduler
 spring.mvc.servlet.load-on-startup=1

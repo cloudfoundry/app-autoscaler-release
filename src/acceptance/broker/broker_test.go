@@ -36,7 +36,6 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
 		Expect(bindService).To(Exit(1))
 		combinedBuffer := gbytes.BufferWithBytes(append(bindService.Out.Contents(), bindService.Err.Contents()...))
-
 		Eventually(combinedBuffer).Should(gbytes.Say("instance.scaling_rules\\[1\\]\\.adjustment does not match pattern"))
 
 		By("Test bind&unbind with policy")

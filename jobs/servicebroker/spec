@@ -10,6 +10,9 @@ templates:
   servicebroker_ca.crt.erb: config/certs/servicebroker/ca.crt
   servicebroker_server.crt.erb: config/certs/servicebroker/server.crt
   servicebroker_server.key.erb: config/certs/servicebroker/server.key
+  servicebroker_public_ca.crt.erb: config/certs/servicebroker/public_ca.crt
+  servicebroker_public_server.crt.erb: config/certs/servicebroker/public_server.crt
+  servicebroker_public_server.key.erb: config/certs/servicebroker/public_server.key
   apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
   apiserver_client.crt.erb: config/certs/apiserver/client.crt
   apiserver_client.key.erb: config/certs/apiserver/client.key
@@ -23,52 +26,79 @@ packages:
   - common
 
 properties:
-  service_broker.port:
-    description: "Port where servicebroker will run"
+  autoscaler.service_broker.enable_custom_metrics:
+    description: "whether to enable custom metrics"
+    default: true
+  autoscaler.service_broker.require_consul:
+    description: "whether to start consul agent"
+    default: true
+  autoscaler.service_broker.publicPort:
+    description: "Port where servicebroker public server will run"
     default: 6101
-  service_broker.ca_cert:
+  autoscaler.service_broker.port:
+    description: "Port where servicebroker internal server will run"
+    default: 6107
+  autoscaler.service_broker.ca_cert:
     description: "PEM-encoded CA certificate"
-  service_broker.server_cert:
+  autoscaler.service_broker.server_cert:
     description: "PEM-encoded server certificate"
-  service_broker.server_key:
+  autoscaler.service_broker.server_key:
     description: "PEM-encoded server key"
-  service_broker.api_server.host:
+  autoscaler.service_broker.public_ca_cert:
+    description: "PEM-encoded public CA certificate"
+  autoscaler.service_broker.public_server_cert:
+    description: "PEM-encoded public server certificate"
+  autoscaler.service_broker.public_server_key:
+    description: "PEM-encoded public server key"
+  autoscaler.service_broker.api_server.host:
     description: "Host where APIserver is running"
     default: "apiserver.service.cf.internal"
-  service_broker.api_server.port:
+  autoscaler.service_broker.api_server.port:
     description: "Port where APIserver will listen"
     default: 6100
-  service_broker.api_server.ca_cert:
+  autoscaler.service_broker.api_server.ca_cert:
     description: "PEM-encoded CA certificate"
-  service_broker.api_server.client_cert:
+  autoscaler.service_broker.api_server.client_cert:
     description: "PEM-encoded client certificate"
-  service_broker.api_server.client_key:
+  autoscaler.service_broker.api_server.client_key:
     description: "PEM-encoded client key"
-  service_broker.username:
+  autoscaler.service_broker.username:
     description: "username to authenticate with service broker"
-  service_broker.password:
+  autoscaler.service_broker.password:
     description: "password to authenticate with service broker"
-  service_broker.db_config.max_connections:
+  autoscaler.service_broker.db_config.max_connections:
     description: "Maximum number of connections that may be held in the serverbroker db pool"
-  service_broker.db_config.min_connections:
+  autoscaler.service_broker.db_config.min_connections:
     description: "Minimum number of connections that should be held in the servicebroker db pool"
-  service_broker.db_config.idle_timeout:
+  autoscaler.service_broker.db_config.idle_timeout:
     description: "The idle timeout for connections (seconds)"
-  service_broker.http_request_timeout:
+  autoscaler.service_broker.http_request_timeout:
     description: "The timeout for http request"
-  binding_db.address:
+  autoscaler.binding_db.address:
     description: "IP address on which the bindingdb server will listen"
     default: "postgres.service.cf.internal"
-  binding_db.databases:
+  autoscaler.binding_db.databases:
     description: "The list of databases used in bindingdb database including name"
-  binding_db.db_scheme:
+  autoscaler.binding_db.db_scheme:
     description: "Database scheme to be used to access bindingdb"
-  binding_db.port:
+  autoscaler.binding_db.port:
     description: "Port on which the bindingdb server will listen"
-  binding_db.roles:
+  autoscaler.binding_db.roles:
     description: "The list of database roles used in bindingdb database including name/password"
-  service_broker.catalog:
+  autoscaler.service_broker.catalog:
     description: "The service broker catalog"
-  service_broker.dashboard_redirect_uri:
+    default:
+      services:
+      - id: autoscaler-guid
+        name: autoscaler
+        description: Automatically increase or decrease the number of application instances based on a policy you define.
+        bindable: true
+        plans:
+        - id: autoscaler-free-plan-id
+          name: autoscaler-free-plan
+          description: This is the free service plan for the Auto-Scaling service.
+  autoscaler.service_broker.dashboard_redirect_uri:
     description: "service dashboard redirect uri"
     default: ""
+
+  

@@ -1,0 +1,9 @@
+set -e -x
+
+export GOROOT=$(readlink -nf /var/vcap/packages/golang)
+export PATH=$GOROOT/bin:$PATH
+export GOPATH=${BOSH_COMPILE_TARGET}/app-autoscaler
+
+go install autoscaler/operator/cmd/operator
+cp -a ${BOSH_COMPILE_TARGET}/app-autoscaler/bin/operator ${BOSH_INSTALL_TARGET}
+cp -a ${BOSH_COMPILE_TARGET}/app-autoscaler/src/autoscaler/operator/db/operator.db.changelog.yml ${BOSH_INSTALL_TARGET}

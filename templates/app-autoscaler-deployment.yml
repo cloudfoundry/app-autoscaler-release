@@ -72,6 +72,10 @@ instance_groups:
         - name: postgres
           password: "((database_password))"
           tag: default
+        connection_config: &databaseConnectionConfig
+          max_open_connections: 100
+          max_idle_connections: 10
+          connection_max_lifetime: 60s
 
 # APIServer Instance Group
 - name: apiserver
@@ -94,6 +98,46 @@ instance_groups:
         agent:
           services:
             apiserver: {}
+  - name: apiserver
+    release: app-autoscaler
+    properties:
+      autoscaler:
+        api_server:
+          cache_ttl: 600
+          service_offering_enabled: true
+          db_config: &db_config
+            idle_timeout: 1000
+            max_connections: 10
+            min_connections: 0
+          port: 6100
+          publicPort: &apiServerPublicPort 6106
+          ca_cert: ((apiserver_ca.ca))
+          server_cert: ((apiserver_server.certificate))
+          server_key:  ((apiserver_server.private_key))
+          scheduler:
+            ca_cert: ((scheduler_ca.ca))
+            client_cert: ((scheduler_client.certificate))
+            client_key: ((scheduler_client.private_key))
+          scaling_engine:
+            ca_cert: ((scalingengine_ca.ca))
+            client_cert: ((scalingengine_client.certificate))
+            client_key: ((scalingengine_client.private_key))
+          metrics_collector:
+            ca_cert: ((metricscollector_ca.ca))
+            client_cert: ((metricscollector_client.certificate))
+            client_key: ((metricscollector_client.private_key))
+          eventgenerator:
+            ca_cert: ((eventgenerator_ca.ca))
+            client_cert: ((eventgenerator_client.certificate))
+            client_key: ((eventgenerator_client.private_key))            
+          service_broker:
+            ca_cert: ((servicebroker_ca.ca))
+            client_cert: ((servicebroker_client.certificate))
+            client_key: ((servicebroker_client.private_key))
+        policy_db: *database
+        cf:
+          api: "https://api.((system_domain))"
+          skip_ssl_validation: "((skip_ssl_validation))"
   - name: route_registrar
     release: routing
     consumes:
@@ -103,46 +147,14 @@ instance_groups:
         routes:
         - name: api_server_public_api
           registration_interval: 20s
-          port: 6106
+          port: *apiServerPublicPort
           tags:
             component: api_server
           uris:
-            - autoscaler.bosh-lite.com
-
-  - name: apiserver
-    release: app-autoscaler
-    properties:
-      api_server:
-        db_config: &db_config
-          idle_timeout: 1000
-          max_connections: 10
-          min_connections: 0
-        port: 6100
-        publicPort: 6106
-        ca_cert: ((apiserver_ca.ca))
-        server_cert: ((apiserver_server.certificate))
-        server_key:  ((apiserver_server.private_key))
-        public_ca_cert: ((apiserver_public_ca.ca))
-        public_server_cert: ((apiserver_public_server.certificate))
-        public_server_key:  ((apiserver_public_server.private_key))
-        scheduler:
-          ca_cert: ((scheduler_ca.ca))
-          client_cert: ((scheduler_client.certificate))
-          client_key: ((scheduler_client.private_key))
-        scaling_engine:
-          ca_cert: ((scalingengine_ca.ca))
-          client_cert: ((scalingengine_client.certificate))
-          client_key: ((scalingengine_client.private_key))
-        metrics_collector:
-          ca_cert: ((metricscollector_ca.ca))
-          client_cert: ((metricscollector_client.certificate))
-          client_key: ((metricscollector_client.private_key))
-      policy_db: *database
-      cf:
-        api: "https://api.((system_domain))"
-
+            - autoscaler.((system_domain))
+      
 # Scheduler Instance Group
-- name: autoscalerscheduler
+- name: scheduler_autoscaler
   azs:
   - z1
   instances: 1
@@ -157,23 +169,90 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            autoscalerscheduler: 
+              check:
+                tcp: 127.0.0.1:6102
+                interval: 30s
+                timeout: 10s
   - name: scheduler
     release: app-autoscaler
     properties:
-      scheduler:
-        port: 6102
-        job_reschedule_interval_millisecond: 10000
-        job_reschedule_maxcount: 6
-        notification_reschedule_maxcount: 3
-        ca_cert: ((scheduler_ca.ca))
-        server_cert: ((scheduler_server.certificate))
-        server_key: ((scheduler_server.private_key))
-        scaling_engine:
+      autoscaler:
+        scheduler:
+          port: &schedulerPort 6102
+          job_reschedule_interval_millisecond: 10000
+          job_reschedule_maxcount: 6
+          notification_reschedule_maxcount: 3
+          ca_cert: ((scheduler_ca.ca))
+          server_cert: ((scheduler_server.certificate))
+          server_key: ((scheduler_server.private_key))
+          scaling_engine:
+            ca_cert: ((scalingengine_ca.ca))
+            client_cert: ((scalingengine_client.certificate))
+            client_key: ((scalingengine_client.private_key))
+        scheduler_db: *database
+        policy_db: *database
+
+# Scaling-Engine Instance Group
+- name: scalingengine
+  azs:
+  - z1
+  instances: 1
+  networks:
+  - name: default
+  stemcell: default
+  vm_type: minimal
+  jobs:
+  - name: consul_agent
+    release: consul
+    consumes:
+      consul_common: {from: consul_common_link, deployment: cf}
+      consul_server: nil
+      consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            scalingengine: 
+              check:
+                tcp: 127.0.0.1:6104
+                interval: 30s
+                timeout: 10s
+  - name: scalingengine
+    release: app-autoscaler
+    properties:
+      autoscaler:
+        scalingengine_db: *database
+        scheduler_db: *database
+        policy_db: *database
+        scalingengine_db_connection_config: *databaseConnectionConfig
+        scheduler_db_connection_config: *databaseConnectionConfig
+        policy_db_connection_config: *databaseConnectionConfig
+        cf: &cf_credentials
+          api: "https://api.((system_domain))"
+          grant_type: password
+          username: admin
+          password: "((cf_admin_password))"
+          client_id: ""
+          secret: ""
+          skip_ssl_validation: "((skip_ssl_validation))"
+        scalingengine:
+          logging:
+            level: debug
+          server:
+            port: &scalingEnginePort 6104
+          health:
+            port: &scalingEngineHealthPort 6204
+            emit_interval: 15s
+          defaultCoolDownSecs: 300
+          lockSize: 32
           ca_cert: ((scalingengine_ca.ca))
-          client_cert: ((scalingengine_client.certificate))
-          client_key: ((scalingengine_client.private_key))
-      scheduler_db: *database
-      policy_db: *database
+          server_cert: ((scalingengine_server.certificate))
+          server_key: ((scalingengine_server.private_key))
       
 # Service-Broker Instance Group
 - name: servicebroker
@@ -199,57 +278,51 @@ instance_groups:
   - name: servicebroker
     release: app-autoscaler
     properties:
-      service_broker:
-        db_config: *db_config
-        port : 6101
-        ca_cert: ((servicebroker_ca.ca))
-        server_cert: ((servicebroker_server.certificate))
-        server_key: ((servicebroker_server.private_key))
-        username: username
-        password: password
-        http_request_timeout: 5000
-        dashboard_redirect_uri: ""
-        catalog: 
-          services:
-          - id: autoscaler-guid
-            name: autoscaler
-            description: Automatically increase or decrease the number of application instances based on a policy you define.
-            bindable: true
-            plans:
-            - id: autoscaler-free-plan-id
-              name: autoscaler-free-plan
-              description: This is the free service plan for the Auto-Scaling service.
-        api_server:
-          ca_cert: ((apiserver_ca.ca))
-          client_cert: ((apiserver_client.certificate))
-          client_key: ((apiserver_client.private_key))
-      binding_db: *database
-
-# Pruner Instance Group
-- name: pruner
-  azs:
-  - z1
-  instances: 1
-  networks:
-  - name: default
-  stemcell: default
-  vm_type: minimal
-  jobs:
-  - name: consul_agent
-    release: consul
+      autoscaler:
+        service_broker: 
+          enable_custom_metrics: true
+          db_config: *db_config
+          publicPort : &servicebrokerPort 6101
+          port: 6107
+          ca_cert: ((servicebroker_ca.ca))
+          server_cert: ((servicebroker_server.certificate))
+          server_key: ((servicebroker_server.private_key))
+          public_ca_cert: ((servicebroker_public_ca.ca))
+          public_server_cert: ((servicebroker_public_server.certificate))
+          public_server_key: ((servicebroker_public_server.private_key))
+          username: autoscaler_service_broker_user
+          password: ((autoscaler_service_broker_password))
+          http_request_timeout: 5000
+          dashboard_redirect_uri: ""
+          catalog: 
+            services:
+            - id: autoscaler-guid
+              name: autoscaler
+              description: Automatically increase or decrease the number of application instances based on a policy you define.
+              bindable: true
+              plans:
+              - id: autoscaler-free-plan-id
+                name: autoscaler-free-plan
+                description: This is the free service plan for the Auto-Scaling service.
+          api_server:
+            ca_cert: ((apiserver_ca.ca))
+            client_cert: ((apiserver_client.certificate))
+            client_key: ((apiserver_client.private_key))
+        binding_db: *database
+  - name: route_registrar
+    release: routing
     consumes:
-      consul_common: {from: consul_common_link, deployment: cf}
-      consul_server: nil
-      consul_client: {from: consul_client_link, deployment: cf}
-  - name: pruner
-    release: app-autoscaler
+      nats: {from: nats, deployment: cf}
     properties:
-      appmetrics_db: *database
-      instancemetrics_db: *database
-      scalingengine_db: *database
-      pruner:
-        logging:
-          level: debug 
+      route_registrar:
+        routes:
+        - name: autoscaler_service_broker
+          registration_interval: 20s
+          port: *servicebrokerPort
+          tags:
+            component: autoscaler_service_broker
+          uris:
+            - autoscalerservicebroker.((system_domain))
 
 # Metric-collector Instance Group
 - name: metricscollector
@@ -267,26 +340,36 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            metricscollector:
+              check:
+                tcp: 127.0.0.1:6103
+                interval: 30s
+                timeout: 10s
   - name: metricscollector
     release: app-autoscaler
     properties:
-      instancemetrics_db: *database
-      policy_db: *database
-      cf: &cf_credentials
-        api: "https://api.((system_domain))"
-        grant_type: password
-        username: admin
-        password: "((cf_admin_password))"
-        client_id: admin
-        secret: "((cf_admin_client_secret))"
-      metricscollector:
-        logging:
-          level: debug
-        server:
-          port: 6103
-        ca_cert: ((metricscollector_ca.ca))
-        server_cert: ((metricscollector_server.certificate))
-        server_key: ((metricscollector_server.private_key))
+      autoscaler:
+        instancemetrics_db: *database
+        policy_db: *database
+        instancemetrics_db_connection_config: *databaseConnectionConfig
+        policy_db_connection_config: *databaseConnectionConfig
+        cf: *cf_credentials
+        metricscollector:
+          logging:
+            level: debug
+          server:
+            port: &metricsCollectorPort 6103
+          collector:
+            refresh_interval: 60s
+            collect_interval: 30s
+            save_interval: 5s
+          ca_cert: ((metricscollector_ca.ca))
+          server_cert: ((metricscollector_server.certificate))
+          server_key: ((metricscollector_server.private_key))
 
 # Event-Generator Instance Group
 - name: eventgenerator
@@ -304,27 +387,63 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
+    properties:
+      consul:
+        agent:
+          services:
+            eventgenerator: 
+              check:
+                tcp: 127.0.0.1:6105
+                interval: 30s
+                timeout: 10s
   - name: eventgenerator
     release: app-autoscaler
     properties:
-      appmetrics_db: *database
-      policy_db: *database
-      eventgenerator:
-        logging:
-          level: debug
-        defaultStatWindowSecs: 300
-        defaultBreachDurationSecs: 300
-        scaling_engine:
-          ca_cert: ((scalingengine_ca.ca))
-          client_cert: ((scalingengine_client.certificate))
-          client_key: ((scalingengine_client.private_key))
-        metricscollector:
-          ca_cert: ((metricscollector_ca.ca))
-          client_cert: ((metricscollector_client.certificate))
-          client_key: ((metricscollector_client.private_key))
+      autoscaler:
+        appmetrics_db: *database
+        policy_db: *database
+        appmetrics_db_connection_config: *databaseConnectionConfig
+        policy_db_connection_config: *databaseConnectionConfig
+        eventgenerator:
+          logging:
+            level: debug
+          server:
+            port: &eventGeneratorPort 6105
+          ca_cert: ((eventgenerator_ca.ca))
+          server_cert: ((eventgenerator_server.certificate))
+          server_key: ((eventgenerator_server.private_key))
+          aggregator:
+            aggregator_execute_interval: 40s
+            policy_poller_interval: 40s
+            metric_poller_count: 20
+            app_monitor_channel_size: 200
+            save_interval: 5s
+            app_metric_channel_size: 1000
+          evaluator:
+            evaluation_manager_execute_interval: 40s
+            evaluator_count: 20
+            trigger_array_channel_size: 200
+          defaultStatWindowSecs: 120
+          defaultBreachDurationSecs: 120
+          circuitBreaker:
+            back_off_initial_interval: 5m
+            back_off_max_interval: 120m
+            consecutive_failure_count: 5
+          scaling_engine:
+            host: scalingengine.service.cf.internal
+            port: *scalingEnginePort
+            ca_cert: ((scalingengine_ca.ca))
+            client_cert: ((scalingengine_client.certificate))
+            client_key: ((scalingengine_client.private_key))
+          metricscollector:
+            host: metricscollector.service.cf.internal
+            port: *metricsCollectorPort
+            ca_cert: ((metricscollector_ca.ca))
+            client_cert: ((metricscollector_client.certificate))
+            client_key: ((metricscollector_client.private_key))
 
-# Scaling-Engine Instance Group
-- name: scalingengine
+# operator Instance Group
+- name: operator
   azs:
   - z1
   instances: 1
@@ -339,27 +458,51 @@ instance_groups:
       consul_common: {from: consul_common_link, deployment: cf}
       consul_server: nil
       consul_client: {from: consul_client_link, deployment: cf}
-  - name: scalingengine
+    properties:
+      consul:
+        agent:
+          services:
+            operator: 
+              check: {}
+  - name: operator
     release: app-autoscaler
     properties:
-      scalingengine_db: *database
-      scheduler_db: *database
-      policy_db: *database
-      cf: *cf_credentials
-      scalingengine:
-        logging:
-          level: debug
-        server:
-          port: 6104
-        defaultCoolDownSecs: 300
-        ca_cert: ((scalingengine_ca.ca))
-        server_cert: ((scalingengine_server.certificate))
-        server_key: ((scalingengine_server.private_key))
-        consul:
-          cluster: http://127.0.0.1:8500
+      autoscaler:
+        cf: *cf_credentials
+        policy_db: *database
+        appmetrics_db: *database
+        instancemetrics_db: *database
+        scalingengine_db: *database
+        policy_db_connection_config: *databaseConnectionConfig
+        appmetrics_db_connection_config: *databaseConnectionConfig
+        instancemetrics_db_connection_config: *databaseConnectionConfig
+        scalingengine_db_connection_config: *databaseConnectionConfig
+        lock_db: *database
+        operator:
+          app_sync_interval: 24h
+          scaling_engine:
+            port: *scalingEnginePort
+            ca_cert: ((scalingengine_ca.ca))
+            client_cert: ((scalingengine_client.certificate))
+            client_key: ((scalingengine_client.private_key))                
+          scheduler:
+            port: *schedulerPort
+            ca_cert: ((scheduler_ca.ca))
+            client_cert: ((scheduler_client.certificate))
+            client_key: ((scheduler_client.private_key))
+          db_lock: 
+            ttl: 15s
+            retry_interval: 5s
+          enable_db_lock: false
+          logging:
+            level: debug 
 
+
+          
 variables:
 - name: database_password
+  type: password
+- name: autoscaler_service_broker_password
   type: password
 - name: scalingengine_ca
   type: certificate
@@ -401,6 +544,26 @@ variables:
     common_name: metricscollector client
     extended_key_usage:
     - client_auth
+- name: eventgenerator_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: eventgeneratorCA
+- name: eventgenerator_server
+  type: certificate
+  options:
+    ca: eventgenerator_ca
+    common_name: eventgenerator.service.cf.internal
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: eventgenerator_client
+  type: certificate
+  options:
+    ca: eventgenerator_ca
+    common_name: eventgenerator client
+    extended_key_usage:
+    - client_auth    
 - name: apiserver_ca
   type: certificate
   options:
@@ -423,7 +586,7 @@ variables:
   type: certificate
   options:
     ca: apiserver_public_ca
-    common_name: apiserverpublic.service.cf.internal
+    common_name: autoscaler.((system_domain))
     extended_key_usage:
     - client_auth
     - server_auth
@@ -444,6 +607,26 @@ variables:
   options:
     ca: servicebroker_ca
     common_name: servicebroker.service.cf.internal
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: servicebroker_client
+  type: certificate
+  options:
+    ca: servicebroker_ca
+    common_name: servicebroker client
+    extended_key_usage:
+    - client_auth
+- name: servicebroker_public_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: servicebrokerCA
+- name: servicebroker_public_server
+  type: certificate
+  options:
+    ca: servicebroker_public_ca
+    common_name: autoscalerservicebroker.((system_domain))
     extended_key_usage:
     - client_auth
     - server_auth

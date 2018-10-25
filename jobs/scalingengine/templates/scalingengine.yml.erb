@@ -3,58 +3,72 @@
     p(property,nil) || []
   end
 
-  scaling_engine_db_scheme = p('scalingengine_db.db_scheme')
-  scaling_engine_db_address = p('scalingengine_db.address')
-  scaling_engine_db_port = p('scalingengine_db.port')
-  scaling_engine_db_role = p_arr('scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' } 
-  scaling_engine_db_database = p_arr('scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' } 
+  scaling_engine_db_scheme = p('autoscaler.scalingengine_db.db_scheme')
+  scaling_engine_db_address = p('autoscaler.scalingengine_db.address')
+  scaling_engine_db_port = p('autoscaler.scalingengine_db.port')
+  scaling_engine_db_role = p_arr('autoscaler.scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' } 
+  scaling_engine_db_database = p_arr('autoscaler.scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' } 
   scaling_engine_db_url = scaling_engine_db_scheme + "://" + scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?sslmode=disable"
 
 
-  policy_db_scheme = p('policy_db.db_scheme')
-  policy_db_address = p('policy_db.address')
-  policy_db_port = p('policy_db.port')
-  policy_db_role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' }
-  policy_db_database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb'  or database['tag'] == 'default'}
+  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
+  policy_db_address = p('autoscaler.policy_db.address')
+  policy_db_port = p('autoscaler.policy_db.port')
+  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' }
+  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb'  or database['tag'] == 'default'}
   policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
 
 
-  scheduler_db_scheme = p('scheduler_db.db_scheme')
-  scheduler_db_address = p('scheduler_db.address')
-  scheduler_db_port = p('scheduler_db.port')
-  scheduler_db_role = p_arr('scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
-  scheduler_db_database = p_arr('scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' }
+  scheduler_db_scheme = p('autoscaler.scheduler_db.db_scheme')
+  scheduler_db_address = p('autoscaler.scheduler_db.address')
+  scheduler_db_port = p('autoscaler.scheduler_db.port')
+  scheduler_db_role = p_arr('autoscaler.scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
+  scheduler_db_database = p_arr('autoscaler.scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' }
   scheduler_db_url = scheduler_db_scheme + "://" + scheduler_db_role['name'] + ":" + scheduler_db_role['password'] + "@" + scheduler_db_address + ":" + scheduler_db_port.to_s + "/" + scheduler_db_database['name'] + "?sslmode=disable"
+
 %>
 
 
 cf:
-  api:  <%= p("cf.api") %>
-  grant_type: <%= p("cf.grant_type") %>
-  username:  <%= p("cf.username") %>
-  password:  <%= p("cf.password") %>
-  client_id: <%= p("cf.client_id") %>
-  secret: <%= p("cf.secret") %>
+  api:  <%= p("autoscaler.cf.api") %>
+  grant_type: <%= p("autoscaler.cf.grant_type") %>
+  username:  <%= p("autoscaler.cf.username") %>
+  password:  <%= p("autoscaler.cf.password") %>
+  client_id: <%= p("autoscaler.cf.client_id") %>
+  secret: <%= p("autoscaler.cf.secret") %>
+  skip_ssl_validation: <%= p("autoscaler.cf.skip_ssl_validation") %>
 
 server:
-  port:  <%= p("scalingengine.server.port") %>
+  port:  <%= p("autoscaler.scalingengine.server.port") %>
   tls:
     key_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/server.key
     cert_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/server.crt
     ca_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/ca.crt
 
 logging:
-  level: <%= p("scalingengine.logging.level") %>
+  level: <%= p("autoscaler.scalingengine.logging.level") %>
 
+health:
+  port: <%= p("autoscaler.scalingengine.health.port") %>
+  emit_interval: <%= p("autoscaler.scalingengine.health.emit_interval") %>
+  
 db:
-  policy_db_url: <%= policy_db_url %>
-  scalingengine_db_url: <%= scaling_engine_db_url %>
-  scheduler_db_url: <%= scheduler_db_url %>
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+  scalingengine_db:
+    url: <%= scaling_engine_db_url %>
+    max_open_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.scalingengine_db_connection_config.connection_max_lifetime") %>
+  scheduler_db:
+    url: <%= scheduler_db_url %>
+    max_open_connections: <%= p("autoscaler.scheduler_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.scheduler_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.scheduler_db_connection_config.connection_max_lifetime") %>
 
-synchronizer:
-  active_schedule_sync_interval: <%= p("scalingengine.synchronizer.active_schedule_sync_interval") %>
+defaultCoolDownSecs : <%= p("autoscaler.scalingengine.defaultCoolDownSecs") %>
+lockSize : <%= p("autoscaler.scalingengine.lockSize") %>
 
-consul:
-  cluster: <%= p("scalingengine.consul.cluster") %>
-
-defaultCoolDownSecs : <%= p("scalingengine.defaultCoolDownSecs") %>

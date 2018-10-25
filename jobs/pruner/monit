@@ -1,6 +1,0 @@
-
-check process pruner
-  with pidfile /var/vcap/sys/run/pruner/pruner.pid
-  start program "/var/vcap/jobs/pruner/bin/pruner_ctl start"
-  stop program "/var/vcap/jobs/pruner/bin/pruner_ctl stop"
-  group vcap

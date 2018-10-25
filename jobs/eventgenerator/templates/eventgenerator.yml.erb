@@ -3,62 +3,85 @@
     p(property,nil) || []
   end
 
-  policy_db_scheme = p('policy_db.db_scheme')
-  policy_db_address = p('policy_db.address')
-  policy_db_port = p('policy_db.port')
-  policy_db_role = p_arr('policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
-  policy_db_database = p_arr('policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
+  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
+  policy_db_address = p('autoscaler.policy_db.address')
+  policy_db_port = p('autoscaler.policy_db.port')
+  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
+  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
   policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
 
 
-  app_metrics_db_scheme = p('appmetrics_db.db_scheme')
-  app_metrics_db_address = p('appmetrics_db.address')
-  app_metrics_db_port = p('appmetrics_db.port')
-  app_metrics_db_role = p_arr('appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
-  app_metrics_db_database = p_arr('appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
+  app_metrics_db_scheme = p('autoscaler.appmetrics_db.db_scheme')
+  app_metrics_db_address = p('autoscaler.appmetrics_db.address')
+  app_metrics_db_port = p('autoscaler.appmetrics_db.port')
+  app_metrics_db_role = p_arr('autoscaler.appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
+  app_metrics_db_database = p_arr('autoscaler.appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
   app_metrics_db_url = app_metrics_db_scheme + "://" + app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?sslmode=disable"
 
+  sorted_instances=link("eventgenerator").instances.sort_by {|i|i.address}
+  nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
+  addrs=sorted_instances.map{|i| "'#{i.address}:#{p('autoscaler.eventgenerator.server.port')}'"}
+  nodeAddrs="[" + addrs.join(",") +"]"  
+  
 %>
 
 
 server:
-  port:  <%= p("eventgenerator.server.port") %>
+  port:  <%= p("autoscaler.eventgenerator.server.port") %>
+  tls:
+    key_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.key
+    cert_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.crt
+    ca_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/ca.crt
+  node_addrs: <%= nodeAddrs %>
+  node_index: <%= nodeIndex %>
 
 logging:
-  level: <%= p("eventgenerator.logging.level") %>
+  level: <%= p("autoscaler.eventgenerator.logging.level") %>
 
 db:
-  policy_db_url: <%= policy_db_url %>
-  app_metrics_db_url: <%= app_metrics_db_url %>
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+  app_metrics_db:
+    url: <%= app_metrics_db_url %>
+    max_open_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.appmetrics_db_connection_config.connection_max_lifetime") %>
 
 aggregator: 
-  aggregator_execute_interval: <%= p("eventgenerator.aggregator.aggregator_execute_interval") %>
-  policy_poller_interval: <%= p("eventgenerator.aggregator.policy_poller_interval") %>
-  metric_poller_count: <%= p("eventgenerator.aggregator.metric_poller_count") %>
-  app_monitor_channel_size: <%= p("eventgenerator.aggregator.app_monitor_channel_size") %>
+  aggregator_execute_interval: <%= p("autoscaler.eventgenerator.aggregator.aggregator_execute_interval") %>
+  policy_poller_interval: <%= p("autoscaler.eventgenerator.aggregator.policy_poller_interval") %>
+  metric_poller_count: <%= p("autoscaler.eventgenerator.aggregator.metric_poller_count") %>
+  app_monitor_channel_size: <%= p("autoscaler.eventgenerator.aggregator.app_monitor_channel_size") %>
+  save_interval: <%= p("autoscaler.eventgenerator.aggregator.save_interval") %>
+  app_metric_channel_size: <%= p("autoscaler.eventgenerator.aggregator.app_metric_channel_size") %>
 
 evaluator:
-  evaluation_manager_execute_interval: <%= p("eventgenerator.evaluator.evaluation_manager_execute_interval") %>
-  evaluator_count: <%= p("eventgenerator.evaluator.evaluator_count") %>
-  trigger_array_channel_size: <%= p("eventgenerator.evaluator.trigger_array_channel_size") %>
+  evaluation_manager_execute_interval: <%= p("autoscaler.eventgenerator.evaluator.evaluation_manager_execute_interval") %>
+  evaluator_count: <%= p("autoscaler.eventgenerator.evaluator.evaluator_count") %>
+  trigger_array_channel_size: <%= p("autoscaler.eventgenerator.evaluator.trigger_array_channel_size") %>
 
 scalingEngine:
-  scaling_engine_url: https://<%= p("eventgenerator.scaling_engine.host") %>:<%= p("eventgenerator.scaling_engine.port") %>
+  scaling_engine_url: https://<%= p("autoscaler.eventgenerator.scaling_engine.host") %>:<%= p("autoscaler.eventgenerator.scaling_engine.port") %>
   tls:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/client.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/client.crt
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/ca.crt
+
 metricCollector:
-  metric_collector_url: https://<%= p("eventgenerator.metricscollector.host") %>:<%= p("eventgenerator.metricscollector.port") %>
+  metric_collector_url: https://<%= p("autoscaler.eventgenerator.metricscollector.host") %>:<%= p("autoscaler.eventgenerator.metricscollector.port") %>
   tls:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.crt
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/ca.crt
 
-lock:
-  lock_ttl: <%= p("eventgenerator.lock.lock_ttl") %>
-  lock_retry_interval: <%= p("eventgenerator.lock.lock_retry_interval") %>
-  consul_cluster_config: <%= p("eventgenerator.lock.consul_cluster_config") %>
 
-defaultStatWindowSecs: <%= p("eventgenerator.defaultStatWindowSecs") %>
-defaultBreachDurationSecs: <%= p("eventgenerator.defaultBreachDurationSecs") %>
+defaultStatWindowSecs: <%= p("autoscaler.eventgenerator.defaultStatWindowSecs") %>
+defaultBreachDurationSecs: <%= p("autoscaler.eventgenerator.defaultBreachDurationSecs") %>
+
+circuitBreaker:
+  back_off_initial_interval: <%= p("autoscaler.eventgenerator.circuitBreaker.back_off_initial_interval") %>
+  back_off_max_interval: <%= p("autoscaler.eventgenerator.circuitBreaker.back_off_max_interval") %>
+  consecutive_failure_count: <%= p("autoscaler.eventgenerator.circuitBreaker.consecutive_failure_count") %>

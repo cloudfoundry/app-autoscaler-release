@@ -1,0 +1,228 @@
+---
+name: operator
+templates:
+  operator_ctl: bin/operator_ctl
+  operator.yml.erb: config/operator.yml
+  pre-start.erb: bin/pre-start
+  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
+  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
+  scalingengine_client.key.erb: config/certs/scalingengine/client.key
+  scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
+  scheduler_client.crt.erb: config/certs/scheduler/client.crt
+  scheduler_client.key.erb: config/certs/scheduler/client.key
+
+packages:
+  - operator
+  - common
+  - db
+  - java
+
+properties:
+  autoscaler.cf.api:
+    description: "the Cloud Foundry API endpoint"
+  autoscaler.cf.grant_type:
+    description: "the grant type to log in cf" 
+  autoscaler.cf.username:
+    description: "the user name to log in cf"
+  autoscaler.cf.password:
+    description: "the password to log in cf"
+  autoscaler.cf.client_id:
+    description: "the client id to log in cf"
+  autoscaler.cf.secret:
+    description: "the secret to log in cf"
+  autoscaler.cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
+
+  autoscaler.policy_db.address:
+    description: "IP address on which the policydb server will listen"
+    default: "postgres.service.cf.internal"
+  autoscaler.policy_db.databases:
+    description: "The list of databases used in policydb database including name"
+  autoscaler.policy_db.db_scheme:
+    description: "Database scheme to be used to access policydb"
+  autoscaler.policy_db.port:
+    description: "Port on which the policydb server will listen"
+  autoscaler.policy_db.roles:
+    description: "The list of database roles used in policydb database including name/password"
+
+  autoscaler.instancemetrics_db.address:
+    description: "IP address on which the instancemetricsdb server will listen"
+    default: "postgres.service.cf.internal"
+  autoscaler.instancemetrics_db.databases:
+    description: "The list of databases used in instancemetricsdb database including name"
+  autoscaler.instancemetrics_db.db_scheme:
+    description: "Database scheme to be used to access instancemetricsdb"
+  autoscaler.instancemetrics_db.port:
+    description: "Port on which the instancemetricsdb server will listen"
+  autoscaler.instancemetrics_db.roles:
+    description: "The list of database roles used in instancemetricsdb database including name/password"
+
+  autoscaler.appmetrics_db.address:
+    description: "IP address on which the appmetricsdb server will listen"
+    default: "postgres.service.cf.internal"
+  autoscaler.appmetrics_db.databases:
+    description: "The list of databases used in appmetricsdb database including name"
+  autoscaler.appmetrics_db.db_scheme:
+    description: "Database scheme to be used to access appmetricsdb"
+  autoscaler.appmetrics_db.port:
+    description: "Port on which the appmetricsdb server will listen"
+  autoscaler.appmetrics_db.roles:
+    description: "The list of database roles used in appmetricsdb database including name/password"
+
+  autoscaler.scalingengine_db.address:
+    description: "IP address on which the scalingenginedb server will listen"
+    default: "postgres.service.cf.internal"
+  autoscaler.scalingengine_db.databases:
+    description: "The list of databases used in scalingenginedb database including name"
+  autoscaler.scalingengine_db.db_scheme:
+    description: "Database scheme to be used to access scalingenginedb"
+  autoscaler.scalingengine_db.port:
+    description: "Port on which the scalingenginedb server will listen"
+  autoscaler.scalingengine_db.roles:
+    description: "The list of database roles used in scalingenginedb database including name/password"
+
+  autoscaler.policy_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.policy_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+
+  autoscaler.appmetrics_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.appmetrics_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.appmetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.instancemetrics_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.instancemetrics_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.instancemetrics_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.scalingengine_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.scalingengine_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.scalingengine_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.operator.require_consul:
+    description: "whether to start consul agent"
+    default: true
+  autoscaler.operator.logging.level:
+     description: "the leve of logging"
+     default: "info"
+
+  autoscaler.operator.app_sync_interval: 
+    description: "the time interval to sync applications"
+    default: 24h
+  
+  autoscaler.operator.instance_metrics_db.refresh_interval:
+    description: "the time interval to prune the instancemetrics database"
+    default: 24h
+  autoscaler.operator.instance_metrics_db.cutoff_days:
+    description: "the cutoff days when pruning instancemetrics database"
+    default: 30
+     
+  autoscaler.operator.app_metrics_db.refresh_interval:
+    description: "the time interval to prune the appmetrics database"
+    default: 24h
+  autoscaler.operator.app_metrics_db.cutoff_days:
+    description: "the cutoff days when pruning appmetrics database"
+    default: 30
+
+  autoscaler.operator.scaling_engine_db.refresh_interval:
+    description: "the time interval to prune the scalingengine database"
+    default: 24h
+  autoscaler.operator.scaling_engine_db.cutoff_days:
+    description: "the cutoff days when pruning scalingengine database"
+    default: 30
+
+  autoscaler.operator.scaling_engine.host:
+    description: "Host where the scaling engine is running"
+    default: "scalingengine.service.cf.internal"
+
+  autoscaler.operator.scaling_engine.port:
+    description: "Port where the scaling engine will listen"
+    default: 6104
+
+  autoscaler.operator.scaling_engine.ca_cert:
+    description: "PEM-encoded CA certificate"
+
+  autoscaler.operator.scaling_engine.client_cert:
+    description: "PEM-encoded client certificate"
+
+  autoscaler.operator.scaling_engine.client_key:
+    description: "PEM-encoded client key"
+
+  autoscaler.operator.scaling_engine.sync_interval:
+    description: "the time interval to synchronize the scaling engine active schedules"
+    default: 600s
+
+  autoscaler.operator.scheduler.host:
+    description: "Host where the scheduler is running"
+    default: "autoscalerscheduler.service.cf.internal"
+
+  autoscaler.operator.scheduler.port:
+    description: "Port where the scheduler will listen"
+    default: 6102
+
+  autoscaler.operator.scheduler.ca_cert:
+    description: "PEM-encoded CA certificate"
+
+  autoscaler.operator.scheduler.client_cert:
+    description: "PEM-encoded client certificate"
+
+  autoscaler.operator.scheduler.client_key:
+    description: "PEM-encoded client key"
+
+  autoscaler.operator.scheduler.sync_interval:
+    description: "the time interval to synchronize the schedules"
+    default: 600s
+
+  autoscaler.operator.lock.lock_ttl:
+    description: "consul lock ttl duration"
+    default: 15s
+  autoscaler.operator.lock.lock_retry_interval:
+    description: "consul lock retry interval"
+    default: 10s
+  autoscaler.operator.lock.consul_cluster_config:
+    description: "consul cluster configuration"
+    default: http://127.0.0.1:8500
+  
+  autoscaler.lock_db.address:
+    description: "IP address on which the lockdb server will listen"
+    default: "postgres.service.cf.internal"
+  autoscaler.lock_db.databases:
+    description: "The list of databases used in lockdb database including name"
+  autoscaler.lock_db.db_scheme:
+    description: "Database scheme to be used to access lockdb"
+  autoscaler.lock_db.port:
+    description: "Port on which the lockdb server will listen"
+  autoscaler.lock_db.roles:
+    description: "The list of database roles used in lockdb database including name/password"
+
+  autoscaler.lock_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.lock_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.lock_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.operator.db_lock.ttl:
+    description: "database lock ttl"
+    default: 15s
+  autoscaler.operator.db_lock.retry_interval:
+    description: "lock db retry interval"
+    default: 5s 
+  
+  autoscaler.operator.enable_db_lock:
+    description: "Enable database lock flag"
+    default: false
+
+  

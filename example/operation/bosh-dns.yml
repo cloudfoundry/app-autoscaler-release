@@ -1,0 +1,112 @@
+#add bosh-dns-aliases release
+- type: replace
+  path: /releases/-
+  value: 
+    name: bosh-dns-aliases
+    url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3
+    version: '0.0.3'
+    sha1: b0d0a0350ed87f1ded58b2ebb469acea0e026ccc
+
+#add bosh-dns-aliases add-on
+- type: replace
+  path: /addons?/-
+  value: 
+    name: bosh-dns-aliases
+    include:
+      stemcell:
+      - os: ubuntu-trusty
+    jobs:
+    - name: bosh-dns-aliases
+      release: bosh-dns-aliases
+      properties:
+        aliases:
+        - domain: postgres.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: postgres_autoscaler
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: apiserver.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: apiserver
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: autoscalerscheduler.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: scheduler_autoscaler
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: servicebroker.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: servicebroker
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: metricscollector.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: metricscollector
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: eventgenerator.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: eventgenerator
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: scalingengine.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: scalingengine
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+
+#remove consul jobs from all instance_groups
+- type: remove
+  path: /instance_groups/name=postgres_autoscaler/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=apiserver/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=scheduler_autoscaler/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=scalingengine/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=servicebroker/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=metricscollector/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=eventgenerator/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=operator/jobs/name=consul_agent
+
+#disable consul of all jobs
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=apiserver/properties/autoscaler/api_server/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=scheduler_autoscaler/jobs/name=scheduler/properties/autoscaler/scheduler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=servicebroker/jobs/name=servicebroker/properties/autoscaler/service_broker/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/autoscaler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/require_consul?
+  value: false

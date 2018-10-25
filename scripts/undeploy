@@ -1,4 +1,0 @@
-#!/bin/bash
-
-bosh -n delete deployment app-autoscaler-release
-bosh -n delete release app-autoscaler

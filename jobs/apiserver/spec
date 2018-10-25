@@ -3,7 +3,8 @@ name: apiserver
 
 templates:
   apiserver.erb: bin/apiserver
-  config.json.erb: bin/config.json
+  config.json.erb: config/config.json
+  info.json.erb: bin/info.json
   pre-start.erb: bin/pre-start
   dns_health_check.erb: bin/dns_health_check
   apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
@@ -21,6 +22,12 @@ templates:
   metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
   metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
   metricscollector_client.key.erb: config/certs/metricscollector/client.key
+  servicebroker_ca.crt.erb: config/certs/servicebroker/ca.crt
+  servicebroker_client.crt.erb: config/certs/servicebroker/client.crt
+  servicebroker_client.key.erb: config/certs/servicebroker/client.key
+  eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
+  eventgenerator_client.crt.erb: config/certs/eventgenerator/client.crt
+  eventgenerator_client.key.erb: config/certs/eventgenerator/client.key
 
 packages:
   - nodejs
@@ -30,85 +37,136 @@ packages:
   - common
 
 properties:
-  api_server.port:
+  autoscaler.api_server.cache_ttl:
+    description: "The TTL of credential cache in seconds"
+    default: 600
+  autoscaler.api_server.require_consul:
+    description: "whether to start consul agent"
+    default: true
+  autoscaler.api_server.port:
     description: "Port where APIServer will run"
     default: 6100
-  api_server.publicPort:
+  autoscaler.api_server.publicPort:
     description: "Port where APIServer public api will run"
     default: 6106
-  api_server.ca_cert:
+  autoscaler.api_server.ca_cert:
     description: "PEM-encoded CA certificate"
-  api_server.server_cert:
+  autoscaler.api_server.server_cert:
     description: "PEM-encoded server certificate"
-  api_server.server_key:
+  autoscaler.api_server.server_key:
     description: "PEM-encoded server key"
-  api_server.public_ca_cert:
+  autoscaler.api_server.public_ca_cert:
     description: "PEM-encoded CA certificate for public api"
-  api_server.public_server_cert:
+  autoscaler.api_server.public_server_cert:
     description: "PEM-encoded server certificate for public api"
-  api_server.public_server_key:
+  autoscaler.api_server.public_server_key:
     description: "PEM-encoded server key for public api"
 
-  api_server.scheduler.host:
+  autoscaler.api_server.scheduler.host:
     description: "Host where scheduler is running"
     default: "autoscalerscheduler.service.cf.internal"
-  api_server.scheduler.port:
+  autoscaler.api_server.scheduler.port:
     description: "Port where scheduler will listen"
     default: 6102
-  api_server.scheduler.ca_cert:
+  autoscaler.api_server.scheduler.ca_cert:
     description: "PEM-encoded CA certificate"
-  api_server.scheduler.client_cert:
+  autoscaler.api_server.scheduler.client_cert:
     description: "PEM-encoded client certificate"
-  api_server.scheduler.client_key:
+  autoscaler.api_server.scheduler.client_key:
     description: "PEM-encoded client key"
   
 
-  api_server.scaling_engine.host:
+  autoscaler.api_server.scaling_engine.host:
     description: "Host where scalingengine is running"
     default: "scalingengine.service.cf.internal"
-  api_server.scaling_engine.port:
+  autoscaler.api_server.scaling_engine.port:
     description: "Port where scalingengine will listen"
     default: 6104
-  api_server.scaling_engine.ca_cert:
+  autoscaler.api_server.scaling_engine.ca_cert:
     description: "PEM-encoded CA certificate"
-  api_server.scaling_engine.client_cert:
+  autoscaler.api_server.scaling_engine.client_cert:
     description: "PEM-encoded client certificate"
-  api_server.scaling_engine.client_key:
+  autoscaler.api_server.scaling_engine.client_key:
     description: "PEM-encoded client key"
 
-  api_server.metrics_collector.host:
+  autoscaler.api_server.metrics_collector.host:
     description: "Host where metricsCollector is running"
     default: "metricscollector.service.cf.internal"
-  api_server.metrics_collector.port:
+  autoscaler.api_server.metrics_collector.port:
     description: "Port where metricsCollector will listen"
     default: 6103
-  api_server.metrics_collector.ca_cert:
+  autoscaler.api_server.metrics_collector.ca_cert:
     description: "PEM-encoded CA certificate"
-  api_server.metrics_collector.client_cert:
+  autoscaler.api_server.metrics_collector.client_cert:
     description: "PEM-encoded client certificate"
-  api_server.metrics_collector.client_key:
+  autoscaler.api_server.metrics_collector.client_key:
     description: "PEM-encoded client key"
 
+  autoscaler.api_server.eventgenerator.host:
+    description: "Host where eventGenerator is running"
+    default: "eventgenerator.service.cf.internal"
+  autoscaler.api_server.eventgenerator.port:
+    description: "Port where eventGenerator will listen"
+    default: 6105
+  autoscaler.api_server.eventgenerator.ca_cert:
+    description: "PEM-encoded CA certificate"
+  autoscaler.api_server.eventgenerator.client_cert:
+    description: "PEM-encoded client certificate"
+  autoscaler.api_server.eventgenerator.client_key:
+    description: "PEM-encoded client key"    
 
+  autoscaler.api_server.service_offering_enabled:
+    description: "the offering approach of auto-scaler"
+    default: true
+    
+  autoscaler.api_server.service_broker.host:
+    description: "Host where serviceBroker is running"
+    default: "servicebroker.service.cf.internal"
+  autoscaler.api_server.service_broker.port:
+    description: "Port where serviceBroker will listen"
+    default: 6107
+  autoscaler.api_server.service_broker.ca_cert:
+    description: "PEM-encoded CA certificate"
+  autoscaler.api_server.service_broker.client_cert:
+    description: "PEM-encoded client certificate"
+  autoscaler.api_server.service_broker.client_key:
+    description: "PEM-encoded client key"
 
-  api_server.db_config.max_connections:
+  autoscaler.api_server.info.name:
+    description: "Name of the autoscaler application to be shown in /info path"
+    default: "Autoscaler"
+  autoscaler.api_server.info.build:
+    description: "Autoscaler application build number"
+    default: "001"
+  autoscaler.api_server.info.support_url:
+    description: "Autoscaler application support page URL"
+    default: "https://github.com/cloudfoundry-incubator/app-autoscaler"
+  autoscaler.api_server.info.description:
+    description: "Autoscaler application short description"
+    default: "Automatically increase or decrease the number of application instances based on a policy you define."
+
+  autoscaler.api_server.db_config.max_connections:
     description: "Maximum number of connections that may be held in the apiserver db pool"
-  api_server.db_config.min_connections:
+  autoscaler.api_server.db_config.min_connections:
     description: "Minimum number of connections that should be held in the apiserver db pool"
-  api_server.db_config.idle_timeout:
+  autoscaler.api_server.db_config.idle_timeout:
     description: "The idle timeout for connections (seconds)"
-  policy_db.address:
+  autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "postgres.service.cf.internal"
-  policy_db.databases:
+  autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
-  policy_db.db_scheme:
+  autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
-  policy_db.port:
+  autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
-  policy_db.roles:
+  autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
 
-  cf.api:
+  autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
+  autoscaler.cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
+  
 

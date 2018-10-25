@@ -2,7 +2,7 @@
 name: eventgenerator
 
 dependencies:
-- golang1.7
+- golang
 
 files:
 - app-autoscaler/src/autoscaler/eventgenerator/db/*
@@ -14,29 +14,51 @@ files:
 - app-autoscaler/src/autoscaler/eventgenerator/cmd/eventgenerator/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/config/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/generator/*.go # gosub
+- app-autoscaler/src/autoscaler/eventgenerator/server/*.go # gosub
+- app-autoscaler/src/autoscaler/healthendpoint/*.go # gosub
+- app-autoscaler/src/autoscaler/helpers/*.go # gosub
 - app-autoscaler/src/autoscaler/models/*.go # gosub
 - app-autoscaler/src/autoscaler/routes/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/*.go # gosub
+- app-autoscaler/src/code.cloudfoundry.org/cfhttp/handlers/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/unix_transport/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/clock/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/consuladapter/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/lager/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/locket/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/runtimeschema/metric/*.go # gosub
+- app-autoscaler/src/github.com/beorn7/perks/quantile/*.go # gosub
+- app-autoscaler/src/github.com/cenk/backoff/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/dropsonde/metric_sender/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/dropsonde/metrics/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/sonde-go/events/*.go # gosub
+- app-autoscaler/src/github.com/facebookgo/clock/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/gogoproto/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/proto/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/protoc-gen-gogo/descriptor/*.go # gosub
+- app-autoscaler/src/github.com/golang/protobuf/proto/*.go # gosub
 - app-autoscaler/src/github.com/gorilla/mux/*.go # gosub
 - app-autoscaler/src/github.com/hashicorp/consul/api/*.go # gosub
 - app-autoscaler/src/github.com/hashicorp/consul/vendor/github.com/hashicorp/go-cleanhttp/*.go # gosub
 - app-autoscaler/src/github.com/hashicorp/consul/vendor/github.com/hashicorp/serf/coordinate/*.go # gosub
 - app-autoscaler/src/github.com/lib/pq/*.go # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/*.go # gosub
+- app-autoscaler/src/github.com/matttproud/golang_protobuf_extensions/pbutil/*.go # gosub
 - app-autoscaler/src/github.com/nu7hatch/gouuid/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/client_golang/prometheus/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/client_golang/prometheus/promhttp/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/client_model/go/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/common/expfmt/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/common/model/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/procfs/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/procfs/internal/util/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/procfs/nfs/*.go # gosub
+- app-autoscaler/src/github.com/prometheus/procfs/xfs/*.go # gosub
+- app-autoscaler/src/github.com/rubyist/circuitbreaker/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/grouper/*.go # gosub
+- app-autoscaler/src/github.com/tedsuo/ifrit/http_server/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/sigmon/*.go # gosub
+- app-autoscaler/src/golang.org/x/net/context/*.go # gosub
 - app-autoscaler/src/gopkg.in/yaml.v2/*.go # gosub
