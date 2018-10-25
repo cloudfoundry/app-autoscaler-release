@@ -64,7 +64,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return AverageMemoryUsedByInstance(appGUID, totalTime)
+					memStat, _ := AverageStatsUsedByInstance(appGUID, totalTime)
+					return memStat
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 30*MB))
 
 				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
@@ -82,7 +83,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return AverageMemoryUsedByInstance(appGUID, totalTime)
+					memStat, _ := AverageStatsUsedByInstance(appGUID, totalTime)
+					return memStat
 				}, totalTime, 15*time.Second).Should(BeNumerically("<", 80*MB))
 
 				WaitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
@@ -104,7 +106,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return AverageMemoryUsedByInstance(appGUID, totalTime)
+					memStat, _ := AverageStatsUsedByInstance(appGUID, totalTime)
+					return memStat
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 26*MB))
 
 				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
@@ -122,7 +125,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
-					return AverageMemoryUsedByInstance(appGUID, totalTime)
+					memStat, _ := AverageStatsUsedByInstance(appGUID, totalTime)
+					return memStat
 				}, totalTime, 15*time.Second).Should(BeNumerically("<", 115*MB))
 
 				WaitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
@@ -302,7 +306,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		Context("when cpu used is greater than scaling out threshold", func() {
 			BeforeEach(func() {
-				policy = generateDynamicScaleOutPolicy(1, 2, "cpuPercentage", 1)
+				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "cpuPercentage", 1)
 				initialInstanceCount = 1
 
 			})
@@ -331,27 +335,26 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() float64 {
-					_, cpuStat := averageStatsUsedByInstance(appGUID, totalTime)
+					_, cpuStat := AverageStatsUsedByInstance(appGUID, totalTime)
 					return cpuStat
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 0.01))
 
-				waitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
 			})
 		})
 
 		Context("when cpu used is lower than scaling in threshold", func() {
 			BeforeEach(func() {
-				policy = generateDynamicScaleInPolicy(1, 2, "cpuPercentage", 90)
+				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "cpuPercentage", 90)
 				initialInstanceCount = 2
 			})
 
 			It("should scale in", func() {
 				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
 				finishTime := time.Now().Add(totalTime)
-				waitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
 			})
 
 		})
 	})
-
 })

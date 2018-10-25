@@ -36,6 +36,7 @@ type instanceStats struct {
 
 type instanceUsage struct {
 	Mem uint64
+	Cpu float64
 }
 
 type instanceInfo struct {
@@ -259,7 +260,7 @@ func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Durati
 	}, timeout, 10*time.Second).Should(Equal(instances))
 }
 
-func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
+func allInstancesStatsUsed(appGUID string, timeout time.Duration) ([]uint64, []float64) {
 	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/stats")
 	Expect(cmd.Wait(timeout)).To(Exit(0))
 
@@ -268,24 +269,26 @@ func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
 	Expect(err).ToNot(HaveOccurred())
 
 	if len(stats) == 0 {
-		return []uint64{}
+		return []uint64{}, []float64{}
 	}
 
 	mem := make([]uint64, len(stats))
+	cpu := make([]float64, len(stats))
 
 	for k, instance := range stats {
 		i, err := strconv.Atoi(k)
 		Expect(err).NotTo(HaveOccurred())
 		mem[i] = instance.Stats.Usage.Mem
+		cpu[i] = instance.Stats.Usage.Cpu
 	}
-	return mem
+	return mem, cpu
 }
 
-func AverageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
-	memoryUsedArray := allInstancesMemoryUsed(appGUID, timeout)
+func AverageStatsUsedByInstance(appGUID string, timeout time.Duration) (uint64, float64) {
+	memoryUsedArray, cpuUsedArray := allInstancesStatsUsed(appGUID, timeout)
 	instanceCount := len(memoryUsedArray)
 	if instanceCount == 0 {
-		return math.MaxInt64
+		return math.MaxInt64, math.MaxFloat64
 	}
 
 	var memSum uint64
@@ -293,7 +296,13 @@ func AverageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
 		memSum += m
 	}
 
-	return memSum / uint64(len(memoryUsedArray))
+	var cpuSum float64
+	for _, m := range cpuUsedArray {
+		cpuSum += m
+	}
+	avgMem := memSum / uint64(len(memoryUsedArray))
+	avgCpu := cpuSum / float64(len(cpuUsedArray))
+	return avgMem, avgCpu
 }
 
 func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
