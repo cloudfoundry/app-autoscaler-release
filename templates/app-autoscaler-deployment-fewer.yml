@@ -20,7 +20,7 @@ releases:
 # Stemcell details
 stemcells:
 - alias: default
-  os: ubuntu-trusty
+  os: ubuntu-xenial
   version: latest
 
 # Canary details
