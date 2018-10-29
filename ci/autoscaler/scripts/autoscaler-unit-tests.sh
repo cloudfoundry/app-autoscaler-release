@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 set -e
 
 service postgresql start
@@ -26,7 +25,7 @@ java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS
 java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/metricscollector/db/metricscollector.db.changelog.yml update
 java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/eventgenerator/db/dataaggregator.db.changelog.yml update
 java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/scalingengine/db/scalingengine.db.changelog.yml update
-java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/pruner/db/pruner.db.changelog.yml update
+java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/operator/db/operator.db.changelog.yml update
 
 npm set progress=false
 

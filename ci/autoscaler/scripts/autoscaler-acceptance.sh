@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x -e
+set -e
 
 apt-get -y update
 apt-get -y install dnsmasq
@@ -24,7 +24,7 @@ set +e
 cf delete-service-broker -f autoscaler
 set -e
 
-cf create-service-broker autoscaler username password https://autoscalerservicebroker.bosh-lite.com
+cf create-service-broker autoscaler autoscaler_service_broker_user autoscaler_service_broker_password https://autoscalerservicebroker.bosh-lite.com
 cf enable-service-access autoscaler
 
 export GOPATH=$PWD/app-autoscaler-release
@@ -42,7 +42,8 @@ cat > acceptance_config.json <<EOF
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
 
-  "autoscaler_api": "autoscaler.bosh-lite.com"
+  "autoscaler_api": "autoscaler.bosh-lite.com",
+  "service_offering_enabled": true
 }
 EOF
 CONFIG=$PWD/acceptance_config.json ./bin/test_default -trace

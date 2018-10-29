@@ -15,6 +15,7 @@ RUN \
             openssl \
             unzip \
             zip \
+            iptables \
       && \
       apt-get clean
 
@@ -34,7 +35,7 @@ ENV GOPATH /go
 ENV PATH $PATH:$GOPATH/bin:/usr/local/go/bin
 
 # Install bosh_cli
-RUN wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-2.0.45-linux-amd64 && \
+RUN wget https://github.com/cloudfoundry/bosh-cli/releases/download/v5.3.1/bosh-cli-5.3.1-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
 
@@ -44,7 +45,7 @@ RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
   mv jq-linux64 /usr/local/bin/jq && \
   chmod +x /usr/local/bin/jq
 
-# Install spiff
-RUN wget https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.7/spiff_linux_amd64 && \
-  mv spiff_linux_amd64 /usr/local/bin/spiff && \
-  chmod +x /usr/local/bin/spiff
+# Install yq
+RUN wget https://github.com/mikefarah/yq/releases/download/2.1.2/yq_linux_amd64 && \
+  mv yq_linux_amd64 /usr/local/bin/yq && \
+  chmod +x /usr/local/bin/yq
