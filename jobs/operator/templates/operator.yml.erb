@@ -51,7 +51,7 @@ cf:
 
 logging:
   level: <%= p("autoscaler.operator.logging.level") %>
-
+http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
 instance_metrics_db:
   db:
     url: <%= instance_metrics_db_url %>

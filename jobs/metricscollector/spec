@@ -89,6 +89,9 @@ properties:
   autoscaler.metricscollector.server.port:
     description: "the listening port of server"
     default: 6103
+  autoscaler.metricscollector.http_client_timeout:
+    description: "Http client imeout for metricscollector to communicate with other autoscaler components"
+    default: 60s
   autoscaler.metricscollector.ca_cert:
     description: "PEM-encoded CA certificate"
   autoscaler.metricscollector.server_cert:
