@@ -13,3 +13,7 @@
 [submodule "src/gopkg.in/yaml.v2"]
 	path = src/gopkg.in/yaml.v2
 	url = https://gopkg.in/yaml.v2
+[submodule "src/app-autoscaler"]
+	path = src/app-autoscaler
+	url = https://github.com/FidelityInternational/app-autoscaler.git
+	branch = merge-with-code
