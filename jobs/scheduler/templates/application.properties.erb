@@ -51,6 +51,7 @@ client.ssl.key-store-type=PKCS12
 client.ssl.trust-store=/var/vcap/data/certs/scalingengine/cacerts
 client.ssl.trust-store-password=123456
 client.ssl.protocol=TLSv1.2
+client.httpClientTimeout=<%=p('autoscaler.scheduler.http_client_timeout') %>
 
 #Quartz
 org.quartz.scheduler.instanceName=app-autoscaler

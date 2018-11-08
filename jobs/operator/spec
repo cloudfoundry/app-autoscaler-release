@@ -117,7 +117,9 @@ properties:
   autoscaler.operator.logging.level:
      description: "the leve of logging"
      default: "info"
-
+  autoscaler.operator.http_client_timeout:
+    description: "Http client imeout for operator to communicate with other autoscaler components"
+    default: 60s
   autoscaler.operator.app_sync_interval: 
     description: "the time interval to sync applications"
     default: 24h

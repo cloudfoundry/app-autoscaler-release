@@ -94,6 +94,9 @@ properties:
   autoscaler.scalingengine.logging.level:
     description: "the level of logging"
     default: "info"
+  autoscaler.scalingengine.http_client_timeout:
+    description: "Http client imeout for scalingengine to communicate with other autoscaler components"
+    default: 60s
   autoscaler.scalingengine.server.port:
     description: "the listening port of server"
     default: 6104

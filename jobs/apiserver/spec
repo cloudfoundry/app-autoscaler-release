@@ -61,6 +61,9 @@ properties:
     description: "PEM-encoded server certificate for public api"
   autoscaler.api_server.public_server_key:
     description: "PEM-encoded server key for public api"
+  autoscaler.api_server.http_client_timeout:
+    description: "Http client imeout for apiserver to communicate with other autoscaler components, in milliseconds"
+    default: 60000
 
   autoscaler.api_server.scheduler.host:
     description: "Host where scheduler is running"
