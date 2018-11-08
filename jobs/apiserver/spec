@@ -168,6 +168,10 @@ properties:
 
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
+  autoscaler.cf.client_id:
+    description: "the client id to log in cf"
+  autoscaler.cf.secret:
+    description: "the secret to log in cf"
   autoscaler.cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
