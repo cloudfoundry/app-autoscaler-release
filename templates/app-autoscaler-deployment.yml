@@ -138,8 +138,8 @@ instance_groups:
         policy_db: *database
         cf:
           api: "https://api.((system_domain))"
-          client_id: ""
-          secret: ""
+          client_id: "((cf_client_id))"
+          secret: "((cf_client_secret))"
           skip_ssl_validation: "((skip_ssl_validation))"
   - name: route_registrar
     release: routing
