@@ -68,10 +68,6 @@ properties:
     description: "the Cloud Foundry API endpoint"
   autoscaler.cf.grant_type:
     description: "the grant type to log in cf" 
-  autoscaler.cf.username:
-    description: "the user name to log in cf"
-  autoscaler.cf.password:
-    description: "the password to log in cf"
   autoscaler.cf.client_id:
     description: "the client id to log in cf"
   autoscaler.cf.secret:
