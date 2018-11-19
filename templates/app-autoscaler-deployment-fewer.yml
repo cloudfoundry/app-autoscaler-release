@@ -124,11 +124,9 @@ instance_groups:
         policy_db_connection_config: *databaseConnectionConfig
         cf: &cf_credentials
           api: "https://api.((system_domain))"
-          grant_type: password
-          username: admin
-          password: "((cf_admin_password))"
-          client_id: ""
-          secret: ""
+          grant_type: client_credentials
+          client_id: "((cf_client_id))"
+          secret: "((cf_client_secret))"
           skip_ssl_validation: "((skip_ssl_validation))"
         scalingengine:
           logging:
@@ -264,9 +262,7 @@ instance_groups:
             client_key: ((servicebroker_client.private_key))
           require_consul: true
         policy_db: *database
-        cf:
-          api: "https://api.((system_domain))"
-          skip_ssl_validation: "((skip_ssl_validation))"
+        cf: *cf_credentials
   - name: servicebroker
     release: app-autoscaler
     properties:
@@ -426,7 +422,7 @@ instance_groups:
             ca_cert: ((metricscollector_ca.ca))
             client_cert: ((metricscollector_client.certificate))
             client_key: ((metricscollector_client.private_key))
-          require_consul: true
+          require_consul: false
   
 
 
