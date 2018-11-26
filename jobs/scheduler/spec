@@ -83,5 +83,8 @@ properties:
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"  
 
+  autoscaler.scheduler.health.port:
+    description: "the listening port of health endpoint"
+    default: 6204
 
   

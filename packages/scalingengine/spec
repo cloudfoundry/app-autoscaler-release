@@ -16,7 +16,6 @@ files:
 - app-autoscaler/src/autoscaler/scalingengine/*.go # gosub
 - app-autoscaler/src/autoscaler/scalingengine/cmd/scalingengine/*.go # gosub
 - app-autoscaler/src/autoscaler/scalingengine/config/*.go # gosub
-- app-autoscaler/src/autoscaler/scalingengine/fakes/*.go # gosub
 - app-autoscaler/src/autoscaler/scalingengine/schedule/*.go # gosub
 - app-autoscaler/src/autoscaler/scalingengine/server/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/*.go # gosub
