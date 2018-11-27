@@ -40,7 +40,7 @@ Create a new autoscaler client
 ```sh
 uaac client add "autoscaler_client_id" \
     --authorized_grant_types "client_credentials" \
-    --authorities "cloud_controller.read,cloud_controller.admin" \
+    --authorities "cloud_controller.read,cloud_controller.admin,uaa.resource" \
     --secret "autoscaler_client_secret"
 ```
 
