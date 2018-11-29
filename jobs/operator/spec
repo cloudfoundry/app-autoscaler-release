@@ -18,6 +18,30 @@ packages:
   - java
 
 properties:
+  autoscaler.cf.api:
+    description: "the Cloud Foundry API endpoint"
+  autoscaler.cf.grant_type:
+    description: "the grant type to log in cf" 
+  autoscaler.cf.client_id:
+    description: "the client id to log in cf"
+  autoscaler.cf.secret:
+    description: "the secret to log in cf"
+  autoscaler.cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
+
+  autoscaler.policy_db.address:
+    description: "IP address on which the policydb server will listen"
+    default: "postgres.service.cf.internal"
+  autoscaler.policy_db.databases:
+    description: "The list of databases used in policydb database including name"
+  autoscaler.policy_db.db_scheme:
+    description: "Database scheme to be used to access policydb"
+  autoscaler.policy_db.port:
+    description: "Port on which the policydb server will listen"
+  autoscaler.policy_db.roles:
+    description: "The list of database roles used in policydb database including name/password"
+
   autoscaler.instancemetrics_db.address:
     description: "IP address on which the instancemetricsdb server will listen"
     default: "postgres.service.cf.internal"
@@ -54,6 +78,14 @@ properties:
   autoscaler.scalingengine_db.roles:
     description: "The list of database roles used in scalingenginedb database including name/password"
 
+  autoscaler.policy_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.policy_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+
   autoscaler.appmetrics_db_connection_config.max_open_connections:
     default: 100
   autoscaler.appmetrics_db_connection_config.max_idle_connections:
@@ -81,7 +113,13 @@ properties:
   autoscaler.operator.logging.level:
      description: "the leve of logging"
      default: "info"
-
+  autoscaler.operator.http_client_timeout:
+    description: "Http client imeout for operator to communicate with other autoscaler components"
+    default: 60s
+  autoscaler.operator.app_sync_interval: 
+    description: "the time interval to sync applications"
+    default: 24h
+  
   autoscaler.operator.instance_metrics_db.refresh_interval:
     description: "the time interval to prune the instancemetrics database"
     default: 24h

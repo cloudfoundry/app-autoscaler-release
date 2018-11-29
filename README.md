@@ -16,40 +16,6 @@ Install and start [BOSH-Deployment](https://github.com/cloudfoundry/bosh-deploym
 
 Install [CF-deployment](https://github.com/cloudfoundry/cf-deployment/blob/master/cf-deployment.yml)
 
-Create and upload release
-
-```sh
-git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
-cd app-autoscaler-release
-./scripts/update
-bosh create-release
-bosh -e YOUR_ENV upload-release
-```
-
-Deploy app-autoscaler
-
-```sh
-bosh -e YOUR_ENV -d app-autoscaler \
-     deploy templates/app-autoscaler-deployment.yml \
-     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-     -v system_domain=bosh-lite.com \
-     -v cf_admin_password=<cf admin password> \
-     -v skip_ssl_validation=true
-```
-
-Alternatively you can use cf-deployment vars file to provide the cf_admin_password
-
-```sh
-bosh -e YOUR_ENV -d app-autoscaler \
-     deploy templates/app-autoscaler-deployment.yml \
-     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-     -v system_domain=bosh-lite.com \
-     -v skip_ssl_validation=true \
-     --vars-file=<path to cf deployment vars file>
-```
-
-#### Deploy autoscaler with `client_credentials` flow
-
 Install the UAA CLI, `uaac`.
 
 ```sh
@@ -78,17 +44,47 @@ uaac client add "autoscaler_client_id" \
     --secret "autoscaler_client_secret"
 ```
 
-Deploy autoscaler with the newly created autoscaler client
+Create and upload release
+
+```sh
+git clone https://github.com/cloudfoundry-incubator/app-autoscaler-release
+cd app-autoscaler-release
+./scripts/update
+bosh create-release
+bosh -e YOUR_ENV upload-release
+```
+
+Deploy app-autoscaler with the newly created autoscaler client
 
 ```sh
 bosh -e YOUR_ENV -d app-autoscaler \
      deploy templates/app-autoscaler-deployment.yml \
      --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
      -v system_domain=bosh-lite.com \
-     -v autoscaler_client_id=autoscaler_client_id \
-     -v autoscaler_client_secret=autoscaler_client_secret \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=autoscaler_client_secret \
+     -v skip_ssl_validation=true
+```
+To deploy app-autoscaler with density, use `app-autoscaler-deployment-fewer.yml`
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment-fewer.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=autoscaler_client_secret \
+     -v skip_ssl_validation=true
+
+```
+Alternatively you can use cf-deployment vars file to provide the cf_client_id and cf_client_secret
+
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
      -v skip_ssl_validation=true \
-     -o example/operation/client-credentials.yml
+     --vars-file=<path to cf deployment vars file>
 ```
 
 #### Deploy autoscaler with external postgres database
@@ -98,7 +94,8 @@ bosh -e YOUR_ENV -d app-autoscaler \
      deploy templates/app-autoscaler-deployment.yml \
      --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
      -v system_domain=bosh-lite.com \
-     -v cf_admin_password=<cf admin password> \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=autoscaler_client_secret \
      -v skip_ssl_validation=true \
      -v database_host=<database_host> \
      -v database_port=<database_port> \
@@ -108,6 +105,29 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -o example/operation/external-db.yml
 ```
 
+#### Deploy autoscaler with bosh-dns instead of consul for service registration
+
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -o example/operation/bosh-dns.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=autoscaler_client_secret \
+     -v skip_ssl_validation=true
+```
+For density deployment
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment-fewer.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -o example/operation/bosh-dns-fewer.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=autoscaler_client_secret \
+     -v skip_ssl_validation=true
+```
 >** It's advised not to make skip_ssl_validation=true for non-development environment
 
 ## Register service

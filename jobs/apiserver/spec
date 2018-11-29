@@ -38,6 +38,9 @@ packages:
   - common
 
 properties:
+  autoscaler.api_server.cache_ttl:
+    description: "The TTL of credential cache in seconds"
+    default: 600
   autoscaler.api_server.require_consul:
     description: "whether to start consul agent"
     default: true
@@ -65,6 +68,9 @@ properties:
   autoscaler.api_server.public_server_key:
     description: "PEM-encoded server key for public api"
     default: ""
+  autoscaler.api_server.http_client_timeout:
+    description: "Http client imeout for apiserver to communicate with other autoscaler components, in milliseconds"
+    default: 60000
 
   autoscaler.api_server.scheduler.host:
     description: "Host where scheduler is running"
@@ -170,6 +176,10 @@ properties:
 
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
+  autoscaler.cf.client_id:
+    description: "the client id to log in cf"
+  autoscaler.cf.secret:
+    description: "the secret to log in cf"
   autoscaler.cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false

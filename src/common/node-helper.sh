@@ -9,10 +9,10 @@ setup_npm(){
   mkdir npm
   case "$OSTYPE" in
     darwin*)
-      tar xvf nodejs/node-v6.9.2-darwin-x64.tar.gz -C npm --strip-components=1
+      tar xvf nodejs/node-v8.11.4-darwin-x64.tar.gz -C npm --strip-components=1
       ;;
     linux*)
-      tar xvf nodejs/node-v6.9.2-linux-x64.tar.xz -C npm --strip-components=1
+      tar xvf nodejs/node-v8.11.4-linux-x64.tar.xz -C npm --strip-components=1
       ;;
   esac
   #setup npm path

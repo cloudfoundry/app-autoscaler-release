@@ -1,25 +1,28 @@
----
-nodejs/node-v6.9.2-linux-x64.tar.xz:
-  object_id: 1cd213dc-9a4e-4f45-ae8c-1d3457e3792c
-  sha: 96b6e389d415f95b413dc7ffec7675546b738973
-  size: 9342556
-nodejs/node-v6.9.2-darwin-x64.tar.gz:
-  object_id: 558206f3-64c9-4891-b540-51adef4fb946
-  sha: 6a8edc55c2e6246ad3ee1b80236bcdec94521115
-  size: 12041020
-golang/go1.7.4.linux-amd64.tar.gz:
-  object_id: e11cb752-9095-436a-8562-38d4fab3d146
-  sha: 2e5baf03d1590e048c84d1d5b4b6f2540efaaea1
-  size: 84021919
-maven/apache-maven-3.3.9-bin.tar.gz:
-  object_id: 9129a623-973e-4c1f-8beb-0e6a6d356bb7
-  sha: 5b4c117854921b527ab6190615f9435da730ba05
-  size: 8491533
-openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz:
-  object_id: 6918e3ac-4c58-4bfd-b6b4-f11ffc077b8e
-  sha: d77ee059e289ae52fb87812f1a2932268427dc26
-  size: 77696717
-openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz:
-  object_id: cbe98c84-340f-4889-a8e1-3cb757249d1f
-  sha: d9374652844bfd7bcdce8f8b605fb57fd76c9e36
-  size: 75550921
+golang/go1.11.darwin-amd64.tar.gz:
+  size: 124131633
+  object_id: 13198daf-253d-4635-7931-5ac4a495a95c
+  sha: afcfe6d8d18771e2cb431b4a812c66a6f6d46597
+golang/go1.11.linux-amd64.tar.gz:
+  size: 127163815
+  object_id: 192a80d9-925e-44e6-47be-2f1a6dd4f353
+  sha: 8ffb718cab4371df3495d8f6c0b15c7e6dc28fea
+maven/apache-maven-3.5.4-bin.tar.gz:
+  size: 8842660
+  object_id: 09cccf72-1834-4056-517a-b6bcaa503c75
+  sha: 22cac91b3557586bb1eba326f2f7727543ff15e3
+nodejs/node-v8.11.4-darwin-x64.tar.gz:
+  size: 16042407
+  object_id: d50117eb-e81d-45a9-4a76-9642e9b409be
+  sha: ae434fecf15ad21686cf9bc4ea88a6bb2d6b5906
+nodejs/node-v8.11.4-linux-x64.tar.xz:
+  size: 11351232
+  object_id: 09b09469-3a82-4150-7acb-73a6ec6e9e99
+  sha: 3b1552d91cf853fdca32d163a991f17cc1ffb288
+openjdk/openjdk-10.0.1_linux-x64_bin.tar.gz:
+  size: 204885801
+  object_id: e564e737-607e-42cd-41d2-c510414854a9
+  sha: 1377697996cad66def4f6627d13a031a26af9b7c
+openjdk/openjdk-10.0.1_osx-x64_bin.tar.gz:
+  size: 200863681
+  object_id: 96126a16-9aaf-4c90-5c02-a41b4b3e48c1
+  sha: 85f722da8da7a151d8500a19d535e7fbf979ba71

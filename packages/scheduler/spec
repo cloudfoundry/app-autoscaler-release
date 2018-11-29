@@ -6,8 +6,8 @@ dependencies:
 files:
 
 - app-autoscaler/scheduler/**/*
-- openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz  
-- openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz
-- maven/apache-maven-3.3.9-bin.tar.gz
+- openjdk/openjdk-10.0.1_linux-x64_bin.tar.gz
+- openjdk/openjdk-10.0.1_osx-x64_bin.tar.gz
+- maven/apache-maven-3.5.4-bin.tar.gz
 - common/java-helper.sh
 

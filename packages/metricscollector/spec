@@ -2,11 +2,12 @@
 name: metricscollector
 
 dependencies:
-- golang1.7
+- golang
 
 files:
 - app-autoscaler/src/autoscaler/metricscollector/db/*
 - app-autoscaler/src/autoscaler/cf/*.go # gosub
+- app-autoscaler/src/autoscaler/collection/*.go # gosub
 - app-autoscaler/src/autoscaler/db/*.go # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/*.go # gosub
 - app-autoscaler/src/autoscaler/healthendpoint/*.go # gosub
