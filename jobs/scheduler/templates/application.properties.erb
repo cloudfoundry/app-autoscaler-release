@@ -43,6 +43,9 @@ server.ssl.key-store-password=123456
 server.ssl.key-store-type=PKCS12
 server.ssl.trust-store=/var/vcap/data/certs/scheduler/cacerts
 server.ssl.trust-store-password=123456
+#to prevent logjam vulnerability
+server.ssl.enabled-protocols[3]=TLSv1,TLSv1.1,TLSv1.2
+server.ssl.ciphers[10]=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_RC4_128_SHA,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,SSL_RSA_WITH_RC4_128_SHA
 
 # Client key and trust store for communication with the scaling engine.
 client.ssl.key-store=/var/vcap/data/certs/scalingengine/client.p12
@@ -51,6 +54,7 @@ client.ssl.key-store-type=PKCS12
 client.ssl.trust-store=/var/vcap/data/certs/scalingengine/cacerts
 client.ssl.trust-store-password=123456
 client.ssl.protocol=TLSv1.2
+client.httpClientTimeout=<%=p('autoscaler.scheduler.http_client_timeout') %>
 
 #Quartz
 org.quartz.scheduler.instanceName=app-autoscaler

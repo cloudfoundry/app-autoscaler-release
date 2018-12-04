@@ -10,7 +10,6 @@ files:
 - app-autoscaler/src/autoscaler/db/sqldb/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/aggregator/*.go # gosub
-- app-autoscaler/src/autoscaler/eventgenerator/aggregator/fakes/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/cmd/eventgenerator/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/config/*.go # gosub
 - app-autoscaler/src/autoscaler/eventgenerator/generator/*.go # gosub

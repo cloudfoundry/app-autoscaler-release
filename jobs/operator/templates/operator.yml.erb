@@ -42,8 +42,6 @@
 cf:
   api:  <%= p("autoscaler.cf.api") %>
   grant_type: <%= p("autoscaler.cf.grant_type") %>
-  username:  <%= p("autoscaler.cf.username") %>
-  password:  <%= p("autoscaler.cf.password") %>
   client_id: <%= p("autoscaler.cf.client_id") %>
   secret: <%= p("autoscaler.cf.secret") %>
   skip_ssl_validation: <%= p("autoscaler.cf.skip_ssl_validation") %>
@@ -51,7 +49,7 @@ cf:
 
 logging:
   level: <%= p("autoscaler.operator.logging.level") %>
-
+http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
 instance_metrics_db:
   db:
     url: <%= instance_metrics_db_url %>

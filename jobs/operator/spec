@@ -22,10 +22,6 @@ properties:
     description: "the Cloud Foundry API endpoint"
   autoscaler.cf.grant_type:
     description: "the grant type to log in cf" 
-  autoscaler.cf.username:
-    description: "the user name to log in cf"
-  autoscaler.cf.password:
-    description: "the password to log in cf"
   autoscaler.cf.client_id:
     description: "the client id to log in cf"
   autoscaler.cf.secret:
@@ -117,7 +113,9 @@ properties:
   autoscaler.operator.logging.level:
      description: "the leve of logging"
      default: "info"
-
+  autoscaler.operator.http_client_timeout:
+    description: "Http client imeout for operator to communicate with other autoscaler components"
+    default: 60s
   autoscaler.operator.app_sync_interval: 
     description: "the time interval to sync applications"
     default: 24h

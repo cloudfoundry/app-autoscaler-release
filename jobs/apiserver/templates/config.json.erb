@@ -24,8 +24,11 @@
     'publicPort' => p('autoscaler.api_server.publicPort'),
     'infoFilePath' => "/var/vcap/jobs/apiserver/bin/info.json",
     'cfApi' => p('autoscaler.cf.api'),
+    'cfClientId' => p('autoscaler.cf.client_id'),
+    'cfClientSecret' => p('autoscaler.cf.secret'),
     'skipSSLValidation' => p('autoscaler.cf.skip_ssl_validation'),
     'cacheTTL' => p('autoscaler.api_server.cache_ttl'),
+    'httpClientTimeout' => p('autoscaler.api_server.http_client_timeout'),
     'db' => {
        'maxConnections' => p('autoscaler.api_server.db_config.max_connections'),
        'minConnections' => p('autoscaler.api_server.db_config.min_connections'),

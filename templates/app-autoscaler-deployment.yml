@@ -24,7 +24,7 @@ releases:
 # Stemcell details
 stemcells:
 - alias: default
-  os: ubuntu-trusty
+  os: ubuntu-xenial
   version: latest
 
 # Canary details
@@ -108,6 +108,7 @@ instance_groups:
       autoscaler:
         api_server:
           cache_ttl: 600
+          http_client_timeout: 60000
           service_offering_enabled: true
           db_config: &db_config
             idle_timeout: 1000
@@ -140,8 +141,11 @@ instance_groups:
             client_cert: ((servicebroker_client.certificate))
             client_key: ((servicebroker_client.private_key))
         policy_db: *database
-        cf:
+        cf: &cf_credentials
           api: "https://api.((system_domain))"
+          grant_type: client_credentials
+          client_id: "((cf_client_id))"
+          secret: "((cf_client_secret))"
           skip_ssl_validation: "((skip_ssl_validation))"
       autoscaler_api_client_id: autoscaler_id
       autoscaler_api_verification_client_id: autoscaler_verification_id
@@ -192,6 +196,7 @@ instance_groups:
       autoscaler:
         scheduler:
           port: &schedulerPort 6102
+          http_client_timeout: 60
           job_reschedule_interval_millisecond: 10000
           job_reschedule_maxcount: 6
           notification_reschedule_maxcount: 3
@@ -240,17 +245,11 @@ instance_groups:
         scalingengine_db_connection_config: *databaseConnectionConfig
         scheduler_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
-        cf: &cf_credentials
-          api: "https://api.((system_domain))"
-          grant_type: password
-          username: admin
-          password: "((cf_admin_password))"
-          client_id: "((autoscaler_client_id))"
-          secret: "((autoscaler_client_secret))"
-          skip_ssl_validation: "((skip_ssl_validation))"
+        cf: *cf_credentials
         scalingengine:
           logging:
             level: debug
+          http_client_timeout: 60s
           server:
             port: &scalingEnginePort 6104
           health:
@@ -422,6 +421,7 @@ instance_groups:
         metricscollector:
           logging:
             level: debug
+          http_client_timeout: 60s
           server:
             port: &metricsCollectorPort 6103
           collector:
@@ -522,6 +522,7 @@ instance_groups:
         eventgenerator:
           logging:
             level: debug
+          http_client_timeout: 60s
           server:
             port: &eventGeneratorPort 6105
           ca_cert: ((eventgenerator_ca.ca))
@@ -594,6 +595,7 @@ instance_groups:
         scalingengine_db_connection_config: *databaseConnectionConfig
         lock_db: *database
         operator:
+          http_client_timeout: 60s
           app_sync_interval: 24h
           scaling_engine:
             port: *scalingEnginePort
