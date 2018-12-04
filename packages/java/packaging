@@ -7,11 +7,11 @@ export PATH=$PATH:/bin:/usr/bin
 if [ `uname` = "Darwin" ]; then
   mkdir java
   pushd java
-  tar xvf ../openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz
+  tar xvf ../openjdk/openjdk-10.0.1_osx-x64_bin.tar.gz --strip-components=1
 elif [ `uname` = "Linux" ]; then
   mkdir java
   pushd java
-  tar xvf ../openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz
+  tar xvf ../openjdk/openjdk-10.0.1_linux-x64_bin.tar.gz --strip-components=1
 else 
   echo "Non Linux/Darwin based OS not supported"
 fi
