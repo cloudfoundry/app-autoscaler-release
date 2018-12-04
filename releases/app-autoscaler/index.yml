@@ -56,4 +56,6 @@ builds:
     version: v0.0.29
   93bc9f46-874c-4145-ade7-3372fe808529:
     version: v0.0.30
+  ad1c9516-37bc-41e3-9220-008e58af62e7:
+    version: v0.0.31
 format-version: '2'
