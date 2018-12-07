@@ -411,8 +411,8 @@ instance_groups:
             evaluation_manager_execute_interval: 40s
             evaluator_count: 20
             trigger_array_channel_size: 200
-          defaultStatWindowSecs: 300
-          defaultBreachDurationSecs: 300
+          defaultStatWindowSecs: 120
+          defaultBreachDurationSecs: 120
           circuitBreaker:
             back_off_initial_interval: 5m
             back_off_max_interval: 120m
