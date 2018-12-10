@@ -62,4 +62,6 @@ builds:
     version: v1.0.0
   b9fdf78b-2d25-462f-aea1-50912b5c81a1:
     version: v1.0.1
+  aebbfe6f-b60b-48b3-906d-dc350ae837f1:
+    version: v1.0.2
 format-version: '2'
