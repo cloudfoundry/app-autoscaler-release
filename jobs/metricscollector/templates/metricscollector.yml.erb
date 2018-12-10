@@ -45,6 +45,8 @@ server:
 logging:
   level: <%= p("autoscaler.metricscollector.logging.level") %>
 http_client_timeout: <%= p("autoscaler.metricscollector.http_client_timeout") %>
+health:
+  port: <%= p("autoscaler.metricscollector.health.port") %>
 
 db:
   policy_db:

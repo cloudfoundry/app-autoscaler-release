@@ -109,3 +109,6 @@ properties:
     description: "the method to collect metrics from loggregator"
     default: "streaming"
   
+  autoscaler.metricscollector.health.port:
+    description: "the listening port of health endpoint"
+    default: 6203

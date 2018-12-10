@@ -196,6 +196,8 @@ instance_groups:
       autoscaler:
         scheduler:
           port: &schedulerPort 6102
+          health:
+            port: &schedulerHealthPort 6202
           http_client_timeout: 60
           job_reschedule_interval_millisecond: 10000
           job_reschedule_maxcount: 6
@@ -230,7 +232,7 @@ instance_groups:
       consul:
         agent:
           services:
-            scalingengine: 
+            scalingengine:
               check:
                 tcp: 127.0.0.1:6104
                 interval: 30s
@@ -254,7 +256,6 @@ instance_groups:
             port: &scalingEnginePort 6104
           health:
             port: &scalingEngineHealthPort 6204
-            emit_interval: 15s
           defaultCoolDownSecs: 300
           lockSize: 32
           ca_cert: ((scalingengine_ca.ca))
@@ -424,6 +425,8 @@ instance_groups:
           http_client_timeout: 60s
           server:
             port: &metricsCollectorPort 6103
+          health:
+            port: &metricsCollectorHealthPort 6203
           collector:
             refresh_interval: 60s
             collect_interval: 30s
@@ -525,6 +528,8 @@ instance_groups:
           http_client_timeout: 60s
           server:
             port: &eventGeneratorPort 6105
+          health:
+            port: &eventGeneratorHealthPort 6205
           ca_cert: ((eventgenerator_ca.ca))
           server_cert: ((eventgenerator_server.certificate))
           server_key: ((eventgenerator_server.private_key))
@@ -612,17 +617,11 @@ instance_groups:
             retry_interval: 5s
           enable_db_lock: false
           logging:
-            level: debug
-          server:
-            port: *scalingEnginePort
+            level: debug 
           health:
-            port: &scalingEngineHealthPort 6204
-            emit_interval: 15s
-          defaultCoolDownSecs: 300
-          lockSize: 32
-          ca_cert: ((scalingengine_ca.ca))
-          server_cert: ((scalingengine_server.certificate))
-          server_key: ((scalingengine_server.private_key))
+            port: &operatorHealthPort 6208
+
+
           
 variables:
 - name: database_password

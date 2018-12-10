@@ -173,4 +173,6 @@ properties:
     description: "Number of consecutive failure to trip the circuit down"
     default: 3
     
-  
+  autoscaler.eventgenerator.health.port:
+    description: "the listening port of health endpoint"
+    default: 6204
