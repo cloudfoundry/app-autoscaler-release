@@ -63,6 +63,7 @@ org.quartz.scheduler.instanceId=<%= spec.id %>
 
 # scheduler port
 server.port=<%=p('autoscaler.scheduler.port') %>
+scheduler.healthserver.port=<%=p('autoscaler.scheduler.health.port') %>
 
 spring.application.name=scheduler
 spring.mvc.servlet.load-on-startup=1

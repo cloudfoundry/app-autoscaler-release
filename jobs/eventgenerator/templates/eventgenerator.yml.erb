@@ -38,6 +38,8 @@ server:
 logging:
   level: <%= p("autoscaler.eventgenerator.logging.level") %>
 http_client_timeout: <%= p("autoscaler.eventgenerator.http_client_timeout") %>
+health:
+  port: <%= p("autoscaler.eventgenerator.health.port") %>
 
 db:
   policy_db:

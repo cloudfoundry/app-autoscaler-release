@@ -49,6 +49,8 @@ cf:
 
 logging:
   level: <%= p("autoscaler.operator.logging.level") %>
+health:
+  port: <%= p("autoscaler.operator.health.port") %>
 http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
 instance_metrics_db:
   db:
@@ -57,7 +59,7 @@ instance_metrics_db:
     max_idle_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.instancemetrics_db_connection_config.connection_max_lifetime") %>
   refresh_interval: <%= p("autoscaler.operator.instance_metrics_db.refresh_interval") %>
-  cutoff_days: <%= p("autoscaler.operator.instance_metrics_db.cutoff_days") %>
+  cutoff_duration: <%= p("autoscaler.operator.instance_metrics_db.cutoff_duration") %>
 
 app_metrics_db:
   db:
@@ -66,7 +68,7 @@ app_metrics_db:
     max_idle_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.appmetrics_db_connection_config.connection_max_lifetime") %>
   refresh_interval: <%= p("autoscaler.operator.app_metrics_db.refresh_interval") %>
-  cutoff_days: <%= p("autoscaler.operator.app_metrics_db.cutoff_days") %>
+  cutoff_duration: <%= p("autoscaler.operator.app_metrics_db.cutoff_duration") %>
 
 scaling_engine_db:
   db:
@@ -75,7 +77,7 @@ scaling_engine_db:
     max_idle_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.scalingengine_db_connection_config.connection_max_lifetime") %>
   refresh_interval: <%= p("autoscaler.operator.scaling_engine_db.refresh_interval") %>
-  cutoff_days: <%= p("autoscaler.operator.scaling_engine_db.cutoff_days") %>
+  cutoff_duration: <%= p("autoscaler.operator.scaling_engine_db.cutoff_duration") %>
 
 scaling_engine:
   scaling_engine_url: https://<%= p("autoscaler.operator.scaling_engine.host") %>:<%= p("autoscaler.operator.scaling_engine.port") %>

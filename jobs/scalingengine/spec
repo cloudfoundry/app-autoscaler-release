@@ -106,10 +106,7 @@ properties:
 
   autoscaler.scalingengine.health.port:
     description: "the listening port of health endpoint"
-    default: 8081
-  autoscaler.scalingengine.health.emit_interval:
-    description: "the time interval to emit health metrics"
-    default: 15s
+    default: 6204
 
   autoscaler.scalingengine.consul.cluster:
     description: "Consul Cluster configuration. If not specified, scaling engine will not register itself with consul."
