@@ -10,10 +10,10 @@ setup_java(){
   mkdir java
   case "$OSTYPE" in
     darwin*)
-      tar zxvf openjdk/openjdk-10.0.1_osx-x64_bin.tar.gz -C java --strip-components=4
+      tar zxvf openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz -C java
       ;;
     linux*)
-      tar zxvf openjdk/openjdk-10.0.1_linux-x64_bin.tar.gz -C java --strip-components=1
+      tar zxvf openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz -C java
       ;;
     *)
       if [ ! -d $JAVA_HOME ]; then
