@@ -22,6 +22,8 @@ logging:
 metron_address: <%= p("metricsforwarder.metron_address") %>
 server:
   port: <%= p("metricsforwarder.server.port") %>
+health:
+  port: <%= p("metricsforwarder.health.port") %>
 loggregator:
   ca_cert: /var/vcap/jobs/metricsforwarder/config/certs/loggregator/ca.crt
   client_cert: /var/vcap/jobs/metricsforwarder/config/certs/loggregator/client.crt
