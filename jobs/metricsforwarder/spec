@@ -70,3 +70,6 @@ properties:
     description: "Restricted db user username"
   sbss.restricted_dbuser_password:
     description: "Restricted db user password"
+  metricsforwarder.health.port:
+    description: "the listening port of health endpoint"
+    default: 6101
