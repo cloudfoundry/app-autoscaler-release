@@ -76,10 +76,6 @@ properties:
     description: "the Cloud Foundry API endpoint"
   autoscaler.cf.grant_type:
     description: "the grant type to log in cf" 
-  autoscaler.cf.username:
-    description: "the user name to log in cf"
-  autoscaler.cf.password:
-    description: "the password to log in cf"
   autoscaler.cf.client_id:
     description: "the client id to log in cf"
   autoscaler.cf.secret:
@@ -94,6 +90,9 @@ properties:
   autoscaler.scalingengine.logging.level:
     description: "the level of logging"
     default: "info"
+  autoscaler.scalingengine.http_client_timeout:
+    description: "Http client imeout for scalingengine to communicate with other autoscaler components"
+    default: 60s
   autoscaler.scalingengine.server.port:
     description: "the listening port of server"
     default: 6104
@@ -107,10 +106,7 @@ properties:
 
   autoscaler.scalingengine.health.port:
     description: "the listening port of health endpoint"
-    default: 8081
-  autoscaler.scalingengine.health.emit_interval:
-    description: "the time interval to emit health metrics"
-    default: 15s
+    default: 6204
 
   autoscaler.scalingengine.consul.cluster:
     description: "Consul Cluster configuration. If not specified, scaling engine will not register itself with consul."

@@ -28,8 +28,6 @@
 cf:
   api:  <%= p("autoscaler.cf.api") %>
   grant_type: <%= p("autoscaler.cf.grant_type") %>
-  username:  <%= p("autoscaler.cf.username") %>
-  password:  <%= p("autoscaler.cf.password") %>
   client_id: <%= p("autoscaler.cf.client_id") %>
   secret: <%= p("autoscaler.cf.secret") %>
   skip_ssl_validation: <%= p("autoscaler.cf.skip_ssl_validation") %>
@@ -45,6 +43,9 @@ server:
 
 logging:
   level: <%= p("autoscaler.metricscollector.logging.level") %>
+http_client_timeout: <%= p("autoscaler.metricscollector.http_client_timeout") %>
+health:
+  port: <%= p("autoscaler.metricscollector.health.port") %>
 
 db:
   policy_db:
@@ -62,3 +63,4 @@ collector:
   refresh_interval: <%= p("autoscaler.metricscollector.collector.refresh_interval") %>
   collect_interval: <%= p("autoscaler.metricscollector.collector.collect_interval") %>
   collect_method: <%= p("autoscaler.metricscollector.collector.collect_method") %>
+  save_interval: <%= p("autoscaler.metricscollector.collector.save_interval") %>

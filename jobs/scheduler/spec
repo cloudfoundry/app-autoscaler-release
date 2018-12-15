@@ -26,6 +26,9 @@ properties:
   autoscaler.scheduler.port:
     description: "Scheduler's port"
     default: 6102
+  autoscaler.scheduler.http_client_timeout:
+    description: "Http client imeout for scheduler to communicate with other autoscaler components, in seconds"
+    default: 60
   autoscaler.scheduler.ca_cert:
     description: "PEM-encoded CA certificate"
   autoscaler.scheduler.server_cert:
@@ -80,5 +83,8 @@ properties:
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"  
 
+  autoscaler.scheduler.health.port:
+    description: "the listening port of health endpoint"
+    default: 6204
 
   

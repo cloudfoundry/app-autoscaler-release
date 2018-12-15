@@ -22,10 +22,6 @@ properties:
     description: "the Cloud Foundry API endpoint"
   autoscaler.cf.grant_type:
     description: "the grant type to log in cf" 
-  autoscaler.cf.username:
-    description: "the user name to log in cf"
-  autoscaler.cf.password:
-    description: "the password to log in cf"
   autoscaler.cf.client_id:
     description: "the client id to log in cf"
   autoscaler.cf.secret:
@@ -117,7 +113,9 @@ properties:
   autoscaler.operator.logging.level:
      description: "the leve of logging"
      default: "info"
-
+  autoscaler.operator.http_client_timeout:
+    description: "Http client imeout for operator to communicate with other autoscaler components"
+    default: 60s
   autoscaler.operator.app_sync_interval: 
     description: "the time interval to sync applications"
     default: 24h
@@ -125,23 +123,23 @@ properties:
   autoscaler.operator.instance_metrics_db.refresh_interval:
     description: "the time interval to prune the instancemetrics database"
     default: 24h
-  autoscaler.operator.instance_metrics_db.cutoff_days:
+  autoscaler.operator.instance_metrics_db.cutoff_duration:
     description: "the cutoff days when pruning instancemetrics database"
-    default: 30
+    default: 24h
      
   autoscaler.operator.app_metrics_db.refresh_interval:
     description: "the time interval to prune the appmetrics database"
     default: 24h
-  autoscaler.operator.app_metrics_db.cutoff_days:
+  autoscaler.operator.app_metrics_db.cutoff_duration:
     description: "the cutoff days when pruning appmetrics database"
-    default: 30
+    default: 48h
 
   autoscaler.operator.scaling_engine_db.refresh_interval:
     description: "the time interval to prune the scalingengine database"
     default: 24h
-  autoscaler.operator.scaling_engine_db.cutoff_days:
+  autoscaler.operator.scaling_engine_db.cutoff_duration:
     description: "the cutoff days when pruning scalingengine database"
-    default: 30
+    default: 240h
 
   autoscaler.operator.scaling_engine.host:
     description: "Host where the scaling engine is running"
@@ -224,5 +222,7 @@ properties:
   autoscaler.operator.enable_db_lock:
     description: "Enable database lock flag"
     default: false
-
   
+  autoscaler.operator.health.port:
+    description: "the listening port of health endpoint"
+    default: 6208
