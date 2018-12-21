@@ -2,9 +2,12 @@
 
 set -e
 
+JOB_DIR=/var/vcap/jobs/scalingengine
 RUN_DIR=/var/vcap/sys/run/scalingengine
 LOG_DIR=/var/vcap/sys/log/scalingengine
 CONF_DIR=/var/vcap/jobs/scalingengine/config
+HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
+HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=$RUN_DIR/scalingengine.pid
 
 source /var/vcap/packages/common/utils.sh
@@ -20,12 +23,26 @@ case $1 in
     chown -R vcap:vcap $LOG_DIR
 
     echo $$ > $PIDFILE
-    
+
+    <% unless p("autoscaler.scalingengine.hooks.pre_start").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-start"
+    <% end %>    
+
     exec /var/vcap/packages/scalingengine/scalingengine -c $CONF_DIR/scalingengine.yml >>$LOG_DIR/scalingengine.stdout.log 2>>$LOG_DIR/scalingengine.stderr.log
+
+    <% unless p("autoscaler.scalingengine.hooks.post_start").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-start"
+    <% end %>
     ;;
 
   stop)
+    <% unless p("autoscaler.scalingengine.hooks.pre_stop").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-stop"
+    <% end %>  
     kill_and_wait $PIDFILE
+    <% unless p("autoscaler.scalingengine.hooks.post_stop").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-stop"
+    <% end %>    
     ;;
 
   *)

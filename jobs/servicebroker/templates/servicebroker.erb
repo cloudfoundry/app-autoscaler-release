@@ -2,8 +2,11 @@
 
 set -e
 
+JOB_DIR=/var/vcap/jobs/servicebroker
 RUN_DIR=/var/vcap/sys/run/servicebroker
 LOG_DIR=/var/vcap/sys/log/servicebroker 
+HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
+HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=${RUN_DIR}/servicebroker.pid 
 
 source /var/vcap/packages/common/utils.sh
@@ -18,12 +21,29 @@ case $1 in
     cd /var/vcap/packages/servicebroker/
     PATH=/var/vcap/packages/nodejs/bin:$PATH
     export PATH
+
+    <% unless p("autoscaler.service_broker.hooks.pre_start").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-start"
+    <% end %>   
+
     exec node lib/index.js -c /var/vcap/jobs/servicebroker/config/config.json\
       >>  $LOG_DIR/servicebroker.stdout.log \
       2>> $LOG_DIR/servicebroker.stderr.log
+
+    <% unless p("autoscaler.service_broker.hooks.post_start").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-start"
+    <% end %>         
     ;;
   stop)
+    <% unless p("autoscaler.service_broker.hooks.pre_stop").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-stop"
+    <% end %>  
+
     kill_and_wait $PIDFILE
+
+    <% unless p("autoscaler.service_broker.hooks.post_stop").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-stop"
+    <% end %>    
     ;;
   *)
     echo "Usage: servicebroker {start|stop}" 

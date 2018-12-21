@@ -2,8 +2,11 @@
 
 set -e
 
+JOB_DIR=/var/vcap/jobs/scheduler
 RUN_DIR=/var/vcap/sys/run/scheduler
 LOG_DIR=/var/vcap/sys/log/scheduler
+HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
+HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=${RUN_DIR}/scheduler.pid
 
 source /var/vcap/packages/common/utils.sh
@@ -17,13 +20,28 @@ case $1 in
     chown vcap:vcap $PIDFILE
     PATH=/var/vcap/packages/java/bin:$PATH
     export PATH
+
+    <% unless p("autoscaler.scheduler.hooks.pre_start").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-start"
+    <% end %>    
+
     cd /var/vcap/packages/scheduler/
     exec java -Dspring.config.location=/var/vcap/jobs/scheduler/config/application.properties -jar /var/vcap/packages/scheduler/scheduler-*.war \
       >>  $LOG_DIR/scheduler.stdout.log \
       2>> $LOG_DIR/scheduler.stderr.log
+
+    <% unless p("autoscaler.scheduler.hooks.post_start").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-start"
+    <% end %>      
     ;;
   stop)
+    <% unless p("autoscaler.scheduler.hooks.pre_stop").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-stop"
+    <% end %>  
     kill_and_wait $PIDFILE
+    <% unless p("autoscaler.scheduler.hooks.post_stop").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-stop"
+    <% end %>    
     ;;
   *)
     echo "Usage: ctl {start|stop}" ;; esac

@@ -10,7 +10,12 @@ templates:
   scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
   scheduler_client.crt.erb: config/certs/scheduler/client.crt
   scheduler_client.key.erb: config/certs/scheduler/client.key
-
+  hooks/call-hooks.sh.erb: bin/hooks/call-hooks.sh
+  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
+  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
+  hooks/post-start.sh.erb: bin/hooks/post-start.sh
+  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
+  
 packages:
   - operator
   - common
@@ -226,3 +231,22 @@ properties:
   autoscaler.operator.health.port:
     description: "the listening port of health endpoint"
     default: 6208
+
+  autoscaler.operator.hooks.pre_start:
+    description: "Script to run before starting operator"
+    default: ''
+    example: |
+      #!/bin/bash
+      echo "Going to start operator"
+      echo "operator data directory is ${DATA_DIR}"
+      echo "operator port is ${PORT}"
+      echo "operator directory is ${PACKAGE_DIR}"
+  autoscaler.operator.hooks.post_start:
+    description: "Script to run after operator has started"
+    default: ''
+  autoscaler.operator.hooks.pre_stop:
+    description: "Script to run before stopping operator"
+    default: ''
+  autoscaler.operator.hooks.post_stop:
+    description: "Script to run after operator has stopped"
+    default: ''    

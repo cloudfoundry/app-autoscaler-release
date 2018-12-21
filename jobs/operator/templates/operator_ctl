@@ -2,9 +2,12 @@
 
 set -e
 
+JOB_DIR=/var/vcap/jobs/operator
 RUN_DIR=/var/vcap/sys/run/operator
 LOG_DIR=/var/vcap/sys/log/operator
 CONF_DIR=/var/vcap/jobs/operator/config
+HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
+HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=$RUN_DIR/operator.pid
 
 source /var/vcap/packages/common/utils.sh
@@ -21,11 +24,25 @@ case $1 in
 
     echo $$ > $PIDFILE
     
+    <% unless p("autoscaler.operator.hooks.pre_start").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-start"
+    <% end %>
+
     exec /var/vcap/packages/operator/operator -c $CONF_DIR/operator.yml >>$LOG_DIR/operator.stdout.log 2>>$LOG_DIR/operator.stderr.log
+
+    <% unless p("autoscaler.operator.hooks.post_start").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-start"
+    <% end %>
     ;;
 
   stop)
+    <% unless p("autoscaler.operator.hooks.pre_stop").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-stop"
+    <% end %>  
     kill_and_wait $PIDFILE
+    <% unless p("autoscaler.operator.hooks.post_stop").empty? %>
+    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-stop"
+    <% end %>    
     ;;
 
   *)
