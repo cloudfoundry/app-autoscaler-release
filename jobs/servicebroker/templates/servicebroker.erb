@@ -8,8 +8,9 @@ LOG_DIR=/var/vcap/sys/log/servicebroker
 HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
 HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=${RUN_DIR}/servicebroker.pid 
+COMMON_DIR=/var/vcap/packages/common
 
-source /var/vcap/packages/common/utils.sh
+source $COMMON_DIR/utils.sh
 
 case $1 in
   start)
@@ -23,7 +24,7 @@ case $1 in
     export PATH
 
     <% unless p("autoscaler.service_broker.hooks.pre_start").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-start"
+    $COMMON_DIR/call-hooks.sh "servicebroker" "pre-start"
     <% end %>   
 
     exec node lib/index.js -c /var/vcap/jobs/servicebroker/config/config.json\
@@ -31,18 +32,18 @@ case $1 in
       2>> $LOG_DIR/servicebroker.stderr.log
 
     <% unless p("autoscaler.service_broker.hooks.post_start").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-start"
+    $COMMON_DIR/call-hooks.sh "servicebroker" "post-start"
     <% end %>         
     ;;
   stop)
     <% unless p("autoscaler.service_broker.hooks.pre_stop").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-stop"
+    $COMMON_DIR/call-hooks.sh "servicebroker" "pre-stop"
     <% end %>  
 
     kill_and_wait $PIDFILE
 
     <% unless p("autoscaler.service_broker.hooks.post_stop").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-stop"
+    $COMMON_DIR/call-hooks.sh "servicebroker" "post-stop"
     <% end %>    
     ;;
   *)

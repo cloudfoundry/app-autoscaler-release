@@ -9,8 +9,9 @@ CONF_DIR=/var/vcap/jobs/scalingengine/config
 HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
 HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=$RUN_DIR/scalingengine.pid
+COMMON_DIR=/var/vcap/packages/common
 
-source /var/vcap/packages/common/utils.sh
+source $COMMON_DIR/utils.sh
 
 case $1 in
 
@@ -25,23 +26,23 @@ case $1 in
     echo $$ > $PIDFILE
 
     <% unless p("autoscaler.scalingengine.hooks.pre_start").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-start"
+    $COMMON_DIR/call-hooks.sh "scalingengine" "pre-start"
     <% end %>    
 
     exec /var/vcap/packages/scalingengine/scalingengine -c $CONF_DIR/scalingengine.yml >>$LOG_DIR/scalingengine.stdout.log 2>>$LOG_DIR/scalingengine.stderr.log
 
     <% unless p("autoscaler.scalingengine.hooks.post_start").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-start"
+    $COMMON_DIR/call-hooks.sh "scalingengine" "post-start"
     <% end %>
     ;;
 
   stop)
     <% unless p("autoscaler.scalingengine.hooks.pre_stop").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-stop"
+    $COMMON_DIR/call-hooks.sh "scalingengine" "pre-stop"
     <% end %>  
     kill_and_wait $PIDFILE
     <% unless p("autoscaler.scalingengine.hooks.post_stop").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-stop"
+    $COMMON_DIR/call-hooks.sh "scalingengine" "post-stop"
     <% end %>    
     ;;
 

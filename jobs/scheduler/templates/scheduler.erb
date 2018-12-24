@@ -8,8 +8,9 @@ LOG_DIR=/var/vcap/sys/log/scheduler
 HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
 HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=${RUN_DIR}/scheduler.pid
+COMMON_DIR=/var/vcap/packages/common
 
-source /var/vcap/packages/common/utils.sh
+source $COMMON_DIR/utils.sh
 
 case $1 in
   start)
@@ -22,7 +23,7 @@ case $1 in
     export PATH
 
     <% unless p("autoscaler.scheduler.hooks.pre_start").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-start"
+    $COMMON_DIR/call-hooks.sh "scheduler" "pre-start"
     <% end %>    
 
     cd /var/vcap/packages/scheduler/
@@ -31,16 +32,16 @@ case $1 in
       2>> $LOG_DIR/scheduler.stderr.log
 
     <% unless p("autoscaler.scheduler.hooks.post_start").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-start"
+    $COMMON_DIR/call-hooks.sh "scheduler" "post-start"
     <% end %>      
     ;;
   stop)
     <% unless p("autoscaler.scheduler.hooks.pre_stop").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "pre-stop"
+    $COMMON_DIR/call-hooks.sh "scheduler" "pre-stop"
     <% end %>  
     kill_and_wait $PIDFILE
     <% unless p("autoscaler.scheduler.hooks.post_stop").empty? %>
-    ${JOB_DIR}/bin/hooks/call-hooks.sh "post-stop"
+    $COMMON_DIR/call-hooks.sh "scheduler" "post-stop"
     <% end %>    
     ;;
   *)
