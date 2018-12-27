@@ -112,6 +112,9 @@ properties:
   autoscaler.eventgenerator.aggregator.app_metric_channel_size: 
     description: "the size of appmetric channel"
     default: 1000
+  autoscaler.eventgenerator.aggregator.metric_cache_size_per_app:
+    description: "the size of metric cache size for each app"
+    default: 300
 
   autoscaler.eventgenerator.evaluator.evaluation_manager_execute_interval: 
     description: "the time interval to evaluate rules"

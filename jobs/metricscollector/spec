@@ -110,6 +110,9 @@ properties:
   autoscaler.metricscollector.collector.collect_method:
     description: "the method to collect metrics from loggregator"
     default: "streaming"
+  autoscaler.metricscollector.collector.metric_cache_size_per_app:
+    description: "the size of metric cache size for each app"
+    default: 300    
   
   autoscaler.metricscollector.health.port:
     description: "the listening port of health endpoint"
