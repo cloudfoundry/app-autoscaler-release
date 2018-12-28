@@ -7,7 +7,11 @@ templates:
   metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
   metricscollector_server.crt.erb: config/certs/metricscollector/server.crt
   metricscollector_server.key.erb: config/certs/metricscollector/server.key
-
+  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
+  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
+  hooks/post-start.sh.erb: bin/hooks/post-start.sh
+  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
+  
 packages:
   - java
   - db
@@ -110,3 +114,22 @@ properties:
   autoscaler.metricscollector.health.port:
     description: "the listening port of health endpoint"
     default: 6203
+
+  autoscaler.metricscollector.hooks.pre_start:
+    description: "Script to run before starting metricscollector"
+    default: ''
+    example: |
+      #!/bin/bash
+      echo "Going to start metricscollector"
+      echo "metricscollector data directory is ${DATA_DIR}"
+      echo "metricscollector port is ${PORT}"
+      echo "metricscollector directory is ${PACKAGE_DIR}"
+  autoscaler.metricscollector.hooks.post_start:
+    description: "Script to run after metricscollector has started"
+    default: ''
+  autoscaler.metricscollector.hooks.pre_stop:
+    description: "Script to run before stopping metricscollector"
+    default: ''
+  autoscaler.metricscollector.hooks.post_stop:
+    description: "Script to run after metricscollector has stopped"
+    default: ''

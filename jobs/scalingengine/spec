@@ -7,7 +7,11 @@ templates:
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_server.crt.erb: config/certs/scalingengine/server.crt
   scalingengine_server.key.erb: config/certs/scalingengine/server.key
-
+  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
+  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
+  hooks/post-start.sh.erb: bin/hooks/post-start.sh
+  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
+  
 packages:
   - java
   - db
@@ -118,3 +122,22 @@ properties:
   autoscaler.scalingengine.lockSize:
     description: "the lock size of scalingengine"
     default: 32
+
+  autoscaler.scalingengine.hooks.pre_start:
+    description: "Script to run before starting scalingengine"
+    default: ''
+    example: |
+      #!/bin/bash
+      echo "Going to start scalingengine"
+      echo "scalingengine data directory is ${DATA_DIR}"
+      echo "scalingengine port is ${PORT}"
+      echo "scalingengine directory is ${PACKAGE_DIR}"
+  autoscaler.scalingengine.hooks.post_start:
+    description: "Script to run after scalingengine has started"
+    default: ''
+  autoscaler.scalingengine.hooks.pre_stop:
+    description: "Script to run before stopping scalingengine"
+    default: ''
+  autoscaler.scalingengine.hooks.post_stop:
+    description: "Script to run after scalingengine has stopped"
+    default: ''   
