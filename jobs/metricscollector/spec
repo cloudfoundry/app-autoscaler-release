@@ -113,7 +113,10 @@ properties:
   autoscaler.metricscollector.collector.metric_cache_size_per_app:
     description: "the size of metric cache size for each app"
     default: 300    
-  
+  autoscaler.metricscollector.collector.is_metrics_persistency_supported:
+    description: "whether or not to store instance metric data to database"
+    default: true   
+
   autoscaler.metricscollector.health.port:
     description: "the listening port of health endpoint"
     default: 6203
