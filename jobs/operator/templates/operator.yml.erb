@@ -103,11 +103,6 @@ app_syncer:
     connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
   sync_interval:  <%= p("autoscaler.operator.app_sync_interval")  %>
 
-lock:
-  lock_ttl: <%= p("autoscaler.operator.lock.lock_ttl") %>
-  lock_retry_interval: <%= p("autoscaler.operator.lock.lock_retry_interval") %>
-  consul_cluster_config: <%= p("autoscaler.operator.lock.consul_cluster_config") %>
-
 db_lock:
   ttl:  <%= p("autoscaler.operator.db_lock.ttl") %>
   retry_interval: <%= p("autoscaler.operator.db_lock.retry_interval") %>

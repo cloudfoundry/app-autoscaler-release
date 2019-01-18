@@ -58,10 +58,6 @@ properties:
     description: "PEM-encoded client certificate"
   autoscaler.scheduler.scaling_engine.client_key:
     description: "PEM-encoded client key"
-  
-  autoscaler.scheduler.consul.ttl:
-    description: "TTL timeout seconds"
-    default: 20
 
   autoscaler.scheduler_db.address:
     description: "IP address on which the schedulerdb server will listen"
