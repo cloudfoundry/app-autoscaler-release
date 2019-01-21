@@ -18,6 +18,7 @@ files:
 - app-autoscaler/src/autoscaler/helpers/*.go # gosub
 - app-autoscaler/src/autoscaler/models/*.go # gosub
 - app-autoscaler/src/autoscaler/routes/*.go # gosub
+- app-autoscaler/src/autoscaler/collection/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/handlers/*.go # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/unix_transport/*.go # gosub
