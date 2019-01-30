@@ -16,6 +16,10 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.162.0
   sha1: f17cf09d2414f5f486d18bbd57b17fd48fb69773
   version: '0.162.0'
+- name: "loggregator-agent"
+  version: "1.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=1.0"
+  sha1: "aa70e3bc95e25fe86ab00f3b698216a24a44c9d5"
 
 # Stemcell details
 stemcells:
@@ -251,10 +255,11 @@ instance_groups:
             ca_cert: ((scalingengine_ca.ca))
             client_cert: ((scalingengine_client.certificate))
             client_key: ((scalingengine_client.private_key))
-          metrics_collector:
-            ca_cert: ((metricscollector_ca.ca))
-            client_cert: ((metricscollector_client.certificate))
-            client_key: ((metricscollector_client.private_key))
+          metricscollector:
+            host: metricsserver.service.cf.internal
+            ca_cert: ((metricsserver_server.ca))
+            client_cert: ((metricsserver_client.certificate))
+            client_key: ((metricsserver_client.private_key))
           eventgenerator:
             ca_cert: ((eventgenerator_ca.ca))
             client_cert: ((eventgenerator_client.certificate))
@@ -356,7 +361,32 @@ instance_groups:
                 tcp: 127.0.0.1:6105
                 interval: 30s
                 timeout: 10s
-  - name: metricscollector
+  # - name: metricscollector
+  #   release: app-autoscaler
+  #   properties:
+  #     autoscaler:
+  #       instancemetrics_db: *database
+  #       policy_db: *database
+  #       instancemetrics_db_connection_config: *databaseConnectionConfig
+  #       policy_db_connection_config: *databaseConnectionConfig
+  #       cf: *cf_credentials
+  #       metricscollector:
+  #         logging:
+  #           level: debug
+  #         http_client_timeout: 60s
+  #         server:
+  #           port: &metricsCollectorPort 6103
+  #         health:
+  #           port: &metricsCollectorHealthPort 6203
+  #         collector:
+  #           refresh_interval: 60s
+  #           collect_interval: 30s
+  #           save_interval: 5s
+  #         ca_cert: ((metricscollector_ca.ca))
+  #         server_cert: ((metricscollector_server.certificate))
+  #         server_key: ((metricscollector_server.private_key))
+  #         require_consul: true
+  - name: metricsserver
     release: app-autoscaler
     properties:
       autoscaler:
@@ -364,23 +394,29 @@ instance_groups:
         policy_db: *database
         instancemetrics_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
-        cf: *cf_credentials
-        metricscollector:
+        metricsserver:
           logging:
-            level: debug
-          http_client_timeout: 60s
+            level: info
           server:
-            port: &metricsCollectorPort 6103
-          health:
-            port: &metricsCollectorHealthPort 6203
+            port: &metricsserverPort 6103
+          http_client_timeout: 60s
+          ca_cert: ((metricsserver_server.ca))
+          server_cert: ((metricsserver_server.certificate))
+          server_key: ((metricsserver_server.private_key))
           collector:
+            port: 7103
+            keep_alive_time: 60s
             refresh_interval: 60s
-            collect_interval: 30s
+            collect_interval: 60s
             save_interval: 5s
-          ca_cert: ((metricscollector_ca.ca))
-          server_cert: ((metricscollector_server.certificate))
-          server_key: ((metricscollector_server.private_key))
-          require_consul: true
+            persist_metrics: true
+            envelope_processor_count: 5
+            metric_cache_size_per_app: 1000
+            envelope_channel_size: 1000
+            metric_channel_size: 1000
+          health:
+            port: &metricsserverHealthPort 6303
+          require_consul: false
   - name: eventgenerator
     release: app-autoscaler
     properties:
@@ -424,12 +460,88 @@ instance_groups:
             client_cert: ((scalingengine_client.certificate))
             client_key: ((scalingengine_client.private_key))
           metricscollector:
-            host: metricscollector.service.cf.internal
-            port: *metricsCollectorPort
-            ca_cert: ((metricscollector_ca.ca))
-            client_cert: ((metricscollector_client.certificate))
-            client_key: ((metricscollector_client.private_key))
+            host: metricsserver.service.cf.internal
+            port: *metricsserverPort
+            ca_cert: ((metricsserver_ca.ca))
+            client_cert: ((metricsserver_client.certificate))
+            client_key: ((metricsserver_client.private_key))
           require_consul: false
+  - name: metricsgateway
+    release: app-autoscaler
+    properties:
+      autoscaler:
+        policy_db: *database
+        policy_db_connection_config: *databaseConnectionConfig
+        metricsgateway:
+          logging:
+            level: info
+          envelop_chan_size: 1000
+          nozzle_count: 3
+          app_manager:
+            app_refresh_interval: 5s
+          emitter:
+            buffer_size: 500
+            keep_alive_interval: 5s
+            handshake_timeout: 1s
+            max_setup_retry_count: 3
+            max_close_retry_count: 3
+            retry_delay: 1s
+            metricsserver_client:
+              cert: ((metricsserver_client.certificate))
+              key: ((metricsserver_client.private_key))
+              ca_cert: ((metricsserver_client.ca))
+          nozzle:
+            rlp_addr: "reverse-log-proxy.service.cf.internal:8082"
+            shard_id: "CF_AUTOSCALER"
+            loggregator_rlp_tls:
+              cert: ((loggregator_tls_rlp.certificate))
+              key: ((loggregator_tls_rlp.private_key))
+              ca_cert: ((loggregator_ca.certificate))
+          health:
+            port: &metricsgatewayHealthPort 6203
+          require_consul: false  
+  - name: loggregator_agent
+    release: loggregator-agent
+    properties:
+      loggregator:
+        tls:
+          ca_cert: ((loggregator_ca.certificate))
+          agent:
+            cert: ((loggregator_tls_agent.certificate))
+            key: ((loggregator_tls_agent.private_key))
+  - name: metricsforwarder
+    release: app-autoscaler
+    properties:
+      autoscaler:
+        policy_db: *database
+        policy_db_connection_config: *databaseConnectionConfig
+        metricsforwarder:
+          logging:
+            level: info
+          server:
+            port: &metricsForwarderPublicPort 6201
+          loggregator:
+            tls:
+              cert: ((loggregator_tls_agent.certificate))
+              key: ((loggregator_tls_agent.private_key))
+              ca_cert: ((loggregator_ca.certificate))
+          health:
+            port: &metricsforwarderHealthPort 6403
+          require_consul: false 
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+        - name: metrics_forwarder_api
+          registration_interval: 20s
+          port: *metricsForwarderPublicPort
+          tags:
+            component: metricsforwarder
+          uris:
+            - autoscalermetricsforwarder.((system_domain))
   
 
 
@@ -583,5 +695,25 @@ variables:
   options:
     ca: scheduler_ca
     common_name: scheduler client
+    extended_key_usage:
+    - client_auth
+- name: metricsserver_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: metricsserverCA
+- name: metricsserver_server
+  type: certificate
+  options:
+    ca: metricsserver_ca
+    common_name: metricsserver.service.cf.internal
+    extended_key_usage:
+    - client_auth
+    - server_auth
+- name: metricsserver_client
+  type: certificate
+  options:
+    ca: metricsserver_ca
+    common_name: metricsserver client
     extended_key_usage:
     - client_auth

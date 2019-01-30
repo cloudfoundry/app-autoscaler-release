@@ -71,6 +71,34 @@
             deployment: app-autoscaler
             network: default
             domain: bosh
+        - domain: reverse-log-proxy.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: log-api
+            deployment: cf
+            network: default
+            domain: bosh
+        - domain: metricsgateway.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: asmetrics
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: metricsserver.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: asmetrics
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: metricsforwarder.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: asmetrics
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
 
 #remove consul jobs from all instance_groups
 - type: remove
@@ -100,9 +128,19 @@
   path: /instance_groups/name=asapi/jobs/name=servicebroker/properties/autoscaler/service_broker/require_consul?
   value: false
 
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricscollector/properties/autoscaler/require_consul?
-  value: false
+# - type: replace
+#   path: /instance_groups/name=asmetrics/jobs/name=metricscollector/properties/autoscaler/require_consul?
+#   value: false
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/require_consul?
+  value: false
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsgateway/properties/autoscaler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsforwarder/properties/autoscaler/require_consul?
   value: false

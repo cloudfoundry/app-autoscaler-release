@@ -1,0 +1,36 @@
+<%
+  def p_arr(property)
+    p(property,nil) || []
+  end
+
+  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
+  policy_db_address = p('autoscaler.policy_db.address')
+  policy_db_port = p('autoscaler.policy_db.port')
+  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
+  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
+  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
+
+%>
+
+server:
+  port: <%= p("autoscaler.metricsforwarder.server.port") %>
+logging:
+  level: <%= p("autoscaler.metricsforwarder.logging.level") %>
+loggregator:
+  metron_address: autoscaler.metricsforwarder.loggregator.metron_address
+  tls:
+    key_file: /var/vcap/jobs/metricsforwarder/config/certs/metron_client/client.key
+    cert_file: /var/vcap/jobs/metricsforwarder/config/certs/metron_client/client.crt
+    ca_file: /var/vcap/jobs/metricsforwarder/config/certs/metron_client/ca.crt
+db:
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+cache_ttl: <%= p("autoscaler.metricsforwarder.cache_ttl") %>
+cache_cleanup_interval: <%= p("autoscaler.metricsforwarder.cache_cleanup_interval") %>
+policy_poller_interval: <%= p("autoscaler.metricsforwarder.policy_poller_interval") %>
+health:
+  port:  <%= p("autoscaler.metricsforwarder.health.port") %>
+

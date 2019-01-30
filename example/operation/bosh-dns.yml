@@ -23,6 +23,13 @@
       release: bosh-dns-aliases
       properties:
         aliases:
+        - domain: reverse-log-proxy.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: log-api
+            deployment: cf
+            network: default
+            domain: bosh
         - domain: postgres.service.cf.internal
           targets:
           - query: '*'
@@ -72,6 +79,27 @@
             deployment: app-autoscaler
             network: default
             domain: bosh
+        - domain: metricsgateway.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: metricsgateway
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: metricsserver.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: metricsserver
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
+        - domain: metricsforwarder.service.cf.internal
+          targets:
+          - query: '*'
+            instance_group: metricsforwarder
+            deployment: app-autoscaler
+            network: default
+            domain: bosh
 
 #remove consul jobs from all instance_groups
 - type: remove
@@ -84,12 +112,18 @@
   path: /instance_groups/name=scalingengine/jobs/name=consul_agent
 - type: remove
   path: /instance_groups/name=servicebroker/jobs/name=consul_agent
-- type: remove
-  path: /instance_groups/name=metricscollector/jobs/name=consul_agent
+# - type: remove
+#   path: /instance_groups/name=metricscollector/jobs/name=consul_agent
 - type: remove
   path: /instance_groups/name=eventgenerator/jobs/name=consul_agent
 - type: remove
   path: /instance_groups/name=operator/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=metricsgateway/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=metricsserver/jobs/name=consul_agent
+- type: remove
+  path: /instance_groups/name=metricsforwarder/jobs/name=consul_agent
 
 #disable consul of all jobs
 - type: replace
@@ -104,12 +138,21 @@
 - type: replace
   path: /instance_groups/name=servicebroker/jobs/name=servicebroker/properties/autoscaler/service_broker/require_consul?
   value: false
-- type: replace
-  path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/autoscaler/require_consul?
-  value: false
+# - type: replace
+#   path: /instance_groups/name=metricscollector/jobs/name=metricscollector/properties/autoscaler/require_consul?
+#   value: false
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/require_consul?
   value: false
 - type: replace
   path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/require_consul?
+  value: false
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/require_consul?
   value: false
