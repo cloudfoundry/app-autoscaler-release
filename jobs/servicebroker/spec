@@ -5,6 +5,8 @@ templates:
 
   servicebroker.erb: bin/servicebroker
   config.json.erb: config/config.json
+  plan.json.erb: config/plan.json
+  environment_variables.erb: bin/environment_variables
   pre-start.erb: bin/pre-start
   dns_health_check.erb: bin/dns_health_check
   servicebroker_ca.crt.erb: config/certs/servicebroker/ca.crt
@@ -88,6 +90,28 @@ properties:
     description: "Port on which the bindingdb server will listen"
   autoscaler.binding_db.roles:
     description: "The list of database roles used in bindingdb database including name/password"
+  autoscaler.service_broker.plan:
+    description: "The list of autoscaler plans available"
+    default:
+      plan_definitions:
+        cda1fd1f-c144-4597-815d-821bc7d08e2f:
+          planCheckEnabled: true
+          schedules_count: 2
+          scaling_rules_count: 4
+        c4ace5ce-d66f-411a-92bb-72217feb3074:
+          planCheckEnabled: true
+          schedules_count: 10
+          scaling_rules_count: 10
+        511b150c-99ae-41db-8220-eaad9358e923:
+          planCheckEnabled: true
+          schedules_count: 10
+          scaling_rules_count: 10
+        1780f11b-3ebd-470f-84b0-323f4a94b407:
+          planCheckEnabled: true
+          predictiveEnabled: true
+          schedules_count: 10
+          scaling_rules_count: 2
+
   autoscaler.service_broker.catalog:
     description: "The service broker catalog"
     default:
