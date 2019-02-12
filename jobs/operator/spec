@@ -186,16 +186,6 @@ properties:
   autoscaler.operator.scheduler.sync_interval:
     description: "the time interval to synchronize the schedules"
     default: 600s
-
-  autoscaler.operator.lock.lock_ttl:
-    description: "consul lock ttl duration"
-    default: 15s
-  autoscaler.operator.lock.lock_retry_interval:
-    description: "consul lock retry interval"
-    default: 10s
-  autoscaler.operator.lock.consul_cluster_config:
-    description: "consul cluster configuration"
-    default: http://127.0.0.1:8500
   
   autoscaler.lock_db.address:
     description: "IP address on which the lockdb server will listen"
