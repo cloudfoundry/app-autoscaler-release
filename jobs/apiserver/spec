@@ -49,10 +49,13 @@ properties:
     default: true
   autoscaler.api_server.port:
     description: "Port where APIServer will run"
-    default: 6100
+    default: 6101
   autoscaler.api_server.publicPort:
     description: "Port where APIServer public api will run"
     default: 6106
+  autoscaler.api_server.health.port:
+    description: "the listening port of health endpoint"
+    default: 6201
   autoscaler.api_server.ca_cert:
     description: "PEM-encoded CA certificate"
   autoscaler.api_server.server_cert:
