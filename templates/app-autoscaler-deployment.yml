@@ -112,6 +112,8 @@ instance_groups:
             min_connections: 0
           port: 6100
           publicPort: &apiServerPublicPort 6106
+          health:
+            port: 6200
           ca_cert: ((apiserver_ca.ca))
           server_cert: ((apiserver_server.certificate))
           server_key:  ((apiserver_server.private_key))
@@ -284,6 +286,8 @@ instance_groups:
           db_config: *db_config
           publicPort : &servicebrokerPort 6101
           port: 6107
+          health:
+            port: 6201
           ca_cert: ((servicebroker_ca.ca))
           server_cert: ((servicebroker_server.certificate))
           server_key: ((servicebroker_server.private_key))

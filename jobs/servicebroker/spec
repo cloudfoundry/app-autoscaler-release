@@ -42,6 +42,9 @@ properties:
   autoscaler.service_broker.port:
     description: "Port where servicebroker internal server will run"
     default: 6107
+  autoscaler.service_broker.health.port:
+    description: "the listening port of health endpoint"
+    default: 6201
   autoscaler.service_broker.ca_cert:
     description: "PEM-encoded CA certificate"
   autoscaler.service_broker.server_cert:
