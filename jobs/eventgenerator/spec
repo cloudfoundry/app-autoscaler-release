@@ -67,6 +67,7 @@ properties:
   autoscaler.appmetrics_db.roles:
     description: "The list of database roles used in appmetricsdb database including name/password"
   autoscaler.appmetrics_db.tls.ca:
+    default: ''
   autoscaler.appmetrics_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
