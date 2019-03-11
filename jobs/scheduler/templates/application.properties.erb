@@ -16,14 +16,14 @@
 #datasource for application and quartz
 
 spring.datasource.driverClassName=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://<%=p('autoscaler.scheduler_db.address')%>:<%=p('autoscaler.scheduler_db.port') %>/<%=schedulerdb_database['name'] %>
+spring.datasource.url=jdbc:postgresql://<%=p('autoscaler.scheduler_db.address')%>:<%=p('autoscaler.scheduler_db.port') %>/<%=schedulerdb_database['name'] %>?sslmode=<%=p('autoscaler.scheduler_db.sslmode') %>&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt
 spring.datasource.username=<%=schedulerdb_role['name'] %>
 spring.datasource.password=<%=schedulerdb_role['password'] %>
 
 #datasource for policy 
 
 spring.policyDbDataSource.driverClassName=org.postgresql.Driver
-spring.policyDbDataSource.url=jdbc:postgresql://<%=p('autoscaler.policy_db.address')%>:<%=p('autoscaler.policy_db.port') %>/<%=policydb_database['name'] %>
+spring.policyDbDataSource.url=jdbc:postgresql://<%=p('autoscaler.policy_db.address')%>:<%=p('autoscaler.policy_db.port') %>/<%=policydb_database['name'] %>?sslmode=<%=p('autoscaler.scheduler_db.sslmode') %>&sslrootcert=/var/vcap/jobs/scheduler/config/certs/policy_db/ca.crt
 spring.policyDbDataSource.password=<%=policydb_role['password'] %>
 spring.policyDbDataSource.username=<%=policydb_role['name'] %>
 

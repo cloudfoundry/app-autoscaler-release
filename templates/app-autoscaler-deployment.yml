@@ -6,10 +6,10 @@ name: app-autoscaler
 releases:
 - name: app-autoscaler
   version: latest
-- name: postgres
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=17
-  version: '17'
-  sha1: b062e32a5409ccd4e4161337c48705c793a58412
+- name: "postgres"
+  version: "36"
+  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=36"
+  sha1: "3dd10b417b21cfa3257f1cc891e9e46f02fefe16"
 - name: consul
   version: latest
 - name: routing
@@ -663,3 +663,4 @@ variables:
     common_name: scheduler client
     extended_key_usage:
     - client_auth
+

@@ -8,7 +8,7 @@
   scaling_engine_db_port = p('autoscaler.scalingengine_db.port')
   scaling_engine_db_role = p_arr('autoscaler.scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' } 
   scaling_engine_db_database = p_arr('autoscaler.scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' } 
-  scaling_engine_db_url = scaling_engine_db_scheme + "://" + scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?sslmode=disable"
+  scaling_engine_db_url = scaling_engine_db_scheme + "://" + scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?sslmode=" + p('autoscaler.scalingengine_db.sslmode') + "&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
 
 
   policy_db_scheme = p('autoscaler.policy_db.db_scheme')
@@ -16,7 +16,7 @@
   policy_db_port = p('autoscaler.policy_db.port')
   policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' }
   policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb'  or database['tag'] == 'default'}
-  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
+  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=" + p('autoscaler.policy_db.sslmode')  + "&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/policy_db/ca.crt"
 
 
   scheduler_db_scheme = p('autoscaler.scheduler_db.db_scheme')
@@ -24,7 +24,7 @@
   scheduler_db_port = p('autoscaler.scheduler_db.port')
   scheduler_db_role = p_arr('autoscaler.scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
   scheduler_db_database = p_arr('autoscaler.scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' }
-  scheduler_db_url = scheduler_db_scheme + "://" + scheduler_db_role['name'] + ":" + scheduler_db_role['password'] + "@" + scheduler_db_address + ":" + scheduler_db_port.to_s + "/" + scheduler_db_database['name'] + "?sslmode=disable"
+  scheduler_db_url = scheduler_db_scheme + "://" + scheduler_db_role['name'] + ":" + scheduler_db_role['password'] + "@" + scheduler_db_address + ":" + scheduler_db_port.to_s + "/" + scheduler_db_database['name'] + "?sslmode=" + p('autoscaler.scheduler_db.sslmode') + "&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scheduler_db/ca.crt"
 
 %>
 

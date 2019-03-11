@@ -7,6 +7,8 @@ templates:
   metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
   metricscollector_server.crt.erb: config/certs/metricscollector/server.crt
   metricscollector_server.key.erb: config/certs/metricscollector/server.key
+  appinstancemetrics_db_ca.crt.erb: config/certs/appinstancemetrics_db/ca.crt
+  policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
@@ -40,6 +42,11 @@ properties:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
+  autoscaler.policy_db.tls.ca:
+    default: ''
+  autoscaler.policy_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
   autoscaler.instancemetrics_db.address:
     description: "IP address on which the instancemetricsdb server will listen"
@@ -52,6 +59,11 @@ properties:
     description: "Port on which the instancemetricsdb server will listen"
   autoscaler.instancemetrics_db.roles:
     description: "The list of database roles used in instancemetricsdb database including name/password"
+  autoscaler.instancemetrics_db.tls.ca:
+    default: ''
+  autoscaler.instancemetrics_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
 
   autoscaler.instancemetrics_db_connection_config.max_open_connections:

@@ -8,35 +8,35 @@
   policy_db_port = p('autoscaler.policy_db.port')
   policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
   policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
-  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
+  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=" + p('autoscaler.policy_db.sslmode') + "&sslrootcert=/var/vcap/jobs/operator/config/certs/policy_db/ca.crt"
 
   instance_metrics_db_scheme = p('autoscaler.instancemetrics_db.db_scheme')
   instance_metrics_db_address = p('autoscaler.instancemetrics_db.address')
   instance_metrics_db_port = p('autoscaler.instancemetrics_db.port')
   instance_metrics_db_role = p_arr('autoscaler.instancemetrics_db.roles').find { |role| role['tag'] == 'instancemetricsdb' or role['tag'] == 'default' } 
   instance_metrics_db_database = p_arr('autoscaler.instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' } 
-  instance_metrics_db_url = instance_metrics_db_scheme + "://" + instance_metrics_db_role['name'] + ":" + instance_metrics_db_role['password'] + "@" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + "/" + instance_metrics_db_database['name'] + "?sslmode=disable"
+  instance_metrics_db_url = instance_metrics_db_scheme + "://" + instance_metrics_db_role['name'] + ":" + instance_metrics_db_role['password'] + "@" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + "/" + instance_metrics_db_database['name'] + "?sslmode=" + p('autoscaler.instancemetrics_db.sslmode') + "&sslrootcert=/var/vcap/jobs/operator/config/certs/appinstancemetrics_db/ca.crt"
   
   app_metrics_db_scheme = p('autoscaler.appmetrics_db.db_scheme')
   app_metrics_db_address = p('autoscaler.appmetrics_db.address')
   app_metrics_db_port = p('autoscaler.appmetrics_db.port')
   app_metrics_db_role = p_arr('autoscaler.appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
   app_metrics_db_database = p_arr('autoscaler.appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
-  app_metrics_db_url = app_metrics_db_scheme + "://" + app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?sslmode=disable"
+  app_metrics_db_url = app_metrics_db_scheme + "://" + app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?sslmode=" + p('autoscaler.appmetrics_db.sslmode') + "&sslrootcert=/var/vcap/jobs/operator/config/certs/appmetrics_db/ca.crt"
 
   scaling_engine_db_scheme = p('autoscaler.scalingengine_db.db_scheme')
   scaling_engine_db_address = p('autoscaler.scalingengine_db.address')
   scaling_engine_db_port = p('autoscaler.scalingengine_db.port')
   scaling_engine_db_role = p_arr('autoscaler.scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' }
   scaling_engine_db_database = p_arr('autoscaler.scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' }
-  scaling_engine_db_url = scaling_engine_db_scheme + "://" + scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?sslmode=disable"
+  scaling_engine_db_url = scaling_engine_db_scheme + "://" + scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?sslmode=" + p('autoscaler.scalingengine_db.sslmode') + "&sslrootcert=/var/vcap/jobs/operator/config/certs/scalingengine_db/ca.crt"
 
   lock_db_scheme = p('autoscaler.lock_db.db_scheme')
   lock_db_address = p('autoscaler.lock_db.address')
   lock_db_port = p('autoscaler.lock_db.port')
   lock_db_role = p_arr('autoscaler.lock_db.roles').find { |role| role['tag'] == 'lockdb' or role['tag'] == 'default' }
   lock_db_database = p_arr('autoscaler.lock_db.databases').find { |database| database['tag'] == 'lockdb' or database['tag'] == 'default' }
-  lock_db_url = lock_db_scheme + "://" + lock_db_role['name'] + ":" + lock_db_role['password'] + "@" + lock_db_address + ":" + lock_db_port.to_s + "/" + lock_db_database['name'] + "?sslmode=disable"
+  lock_db_url = lock_db_scheme + "://" + lock_db_role['name'] + ":" + lock_db_role['password'] + "@" + lock_db_address + ":" + lock_db_port.to_s + "/" + lock_db_database['name'] + "?sslmode=" + p('autoscaler.lock_db.sslmode')+ "&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
 %>
 
 cf:

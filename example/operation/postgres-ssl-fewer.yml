@@ -1,0 +1,135 @@
+- type: replace
+  path: /instance_groups/name=postgres_autoscaler/jobs/name=postgres/properties/databases/sslmode?
+  value: &sslmode "verify-full"
+- type: replace
+  path: /instance_groups/name=postgres_autoscaler/jobs/name=postgres/properties/databases/tls?
+  value: &database_tls
+    ca: ((postgres_ca.ca))
+    certificate: ((postgres_server.certificate))
+    private_key: ((postgres_server.private_key))
+
+- type: replace
+  path: /variables/-
+  value:
+    name: postgres_ca
+    type: certificate
+    options:
+      is_ca: true
+      common_name: postgresCA
+- type: replace
+  path: /variables/-
+  value:
+    name: postgres_server
+    type: certificate
+    options:
+      ca: postgres_ca
+      common_name: postgres.service.cf.internal
+      extended_key_usage:
+      - client_auth
+      - server_auth
+
+#scheduler
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/policy_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/policy_db/tls?
+  value: *database_tls
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler_db/tls?
+  value: *database_tls
+#scalingengine
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db/tls?
+  value: *database_tls
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db/tls?
+  value: *database_tls
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db/tls?
+  value: *database_tls
+
+#metricscollector
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricscollector/properties/autoscaler/instancemetrics_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricscollector/properties/autoscaler/instancemetrics_db/tls?
+  value: *database_tls
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricscollector/properties/autoscaler/policy_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricscollector/properties/autoscaler/policy_db/tls?
+  value: *database_tls
+#eventgenertor
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db/tls?
+  value: *database_tls
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db/tls?
+  value: *database_tls
+
+#operator
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db/tls?
+  value: *database_tls
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db/tls?
+  value: *database_tls
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db/tls?
+  value: *database_tls
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db/tls?
+  value: *database_tls
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db/tls?
+  value: *database_tls
+
+
+
+
+
+

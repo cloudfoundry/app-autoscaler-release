@@ -13,6 +13,8 @@ templates:
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
+  policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
+  appmetrics_db_ca.crt.erb: config/certs/appmetrics_db/ca.crt
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
@@ -47,6 +49,11 @@ properties:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
+  autoscaler.policy_db.tls.ca:
+    default: ''
+  autoscaler.policy_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
   autoscaler.appmetrics_db.address:
     description: "IP address on which the appmetricsdb server will listen"
@@ -59,6 +66,10 @@ properties:
     description: "Port on which the appmetricsdb server will listen"
   autoscaler.appmetrics_db.roles:
     description: "The list of database roles used in appmetricsdb database including name/password"
+  autoscaler.appmetrics_db.tls.ca:
+  autoscaler.appmetrics_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
   autoscaler.appmetrics_db_connection_config.max_open_connections:
     default: 100

@@ -7,6 +7,9 @@ templates:
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_server.crt.erb: config/certs/scalingengine/server.crt
   scalingengine_server.key.erb: config/certs/scalingengine/server.key
+  policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
+  scalingengine_db_ca.crt.erb: config/certs/scalingengine_db/ca.crt
+  scheduler_db_ca.crt.erb: config/certs/scheduler_db/ca.crt
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
@@ -30,6 +33,11 @@ properties:
     description: "Port on which the scalingenginedb server will listen"
   autoscaler.scalingengine_db.roles:
     description: "The list of database roles used in scalingenginedb database including name/password"
+  autoscaler.scalingengine_db.tls.ca:
+    default: ''
+  autoscaler.scalingengine_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
@@ -42,6 +50,11 @@ properties:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
+  autoscaler.policy_db.tls.ca:
+    default: ''
+  autoscaler.policy_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
   autoscaler.scheduler_db.address:
     description: "IP address on which the schedulerdb server will listen"
@@ -54,6 +67,11 @@ properties:
     description: "Port on which the schedulerdb server will listen"
   autoscaler.scheduler_db.roles:
     description: "The list of database roles used in schedulerdb database including name/password"
+  autoscaler.scheduler_db.tls.ca:
+    default: ''
+  autoscaler.scheduler_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
   
   autoscaler.scheduler_db_connection_config.max_open_connections:
     default: 100
