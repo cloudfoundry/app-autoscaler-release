@@ -128,6 +128,29 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -v cf_client_secret=autoscaler_client_secret \
      -v skip_ssl_validation=true
 ```
+#### Deploy autoscaler with postgres database enabled TLS
+
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -o example/operation/postgres-ssl.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=autoscaler_client_secret \
+     -v skip_ssl_validation=true
+```
+For density deployment
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment-fewer.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -o example/operation/postgres-ssl-fewer.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=autoscaler_client_secret \
+     -v skip_ssl_validation=true
+```
 >** It's advised not to make skip_ssl_validation=true for non-development environment
 
 ## Register service
