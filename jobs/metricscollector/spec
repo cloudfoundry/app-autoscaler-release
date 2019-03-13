@@ -31,7 +31,7 @@ consumes:
 properties:
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
@@ -43,7 +43,7 @@ properties:
 
   autoscaler.instancemetrics_db.address:
     description: "IP address on which the instancemetricsdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.instancemetrics_db.databases:
     description: "The list of databases used in instancemetricsdb database including name"
   autoscaler.instancemetrics_db.db_scheme:

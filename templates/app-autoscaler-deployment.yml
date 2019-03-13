@@ -59,7 +59,7 @@ instance_groups:
                 tcp: 127.0.0.1:5432
                 interval: 30s
                 timeout: 10s
-  - name: postgres
+  - name: autoscalerpostgres
     release: postgres
     properties:
       databases: &database
@@ -424,13 +424,13 @@ instance_groups:
           server_key: ((eventgenerator_server.private_key))
           aggregator:
             aggregator_execute_interval: 40s
-            policy_poller_interval: 40s
+            policy_poller_interval: 60s
             metric_poller_count: 20
             app_monitor_channel_size: 200
             save_interval: 5s
             app_metric_channel_size: 1000
           evaluator:
-            evaluation_manager_execute_interval: 40s
+            evaluation_manager_execute_interval: 60s
             evaluator_count: 20
             trigger_array_channel_size: 200
           defaultStatWindowSecs: 120

@@ -40,10 +40,13 @@ properties:
   autoscaler.scheduler.server_key:
     description: "PEM-encoded server key"
   autoscaler.scheduler.job_reschedule_interval_millisecond:
+    default: 10000
     description: "Rescheduling interval for quartz job in milliseconds"
   autoscaler.scheduler.job_reschedule_maxcount:
+    default: 6
     description: "Maximum no of jobs can be re-scheduled"
   autoscaler.scheduler.notification_reschedule_maxcount:
+    default: 3
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
   
   autoscaler.scheduler.scaling_engine.host:
@@ -61,7 +64,7 @@ properties:
 
   autoscaler.scheduler_db.address:
     description: "IP address on which the schedulerdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.scheduler_db.databases:
     description: "The list of databases used in schedulerdb database including name"
   autoscaler.scheduler_db.db_scheme:
@@ -73,7 +76,7 @@ properties:
 
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:

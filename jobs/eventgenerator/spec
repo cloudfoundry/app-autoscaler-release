@@ -38,7 +38,7 @@ consumes:
 properties:
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
@@ -50,7 +50,7 @@ properties:
 
   autoscaler.appmetrics_db.address:
     description: "IP address on which the appmetricsdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.appmetrics_db.databases:
     description: "The list of databases used in appmetricsdb database including name"
   autoscaler.appmetrics_db.db_scheme:
@@ -99,7 +99,7 @@ properties:
     default: 40s
   autoscaler.eventgenerator.aggregator.policy_poller_interval: 
     description: "the time interval to poll policies"
-    default: 40s
+    default: 60s
   autoscaler.eventgenerator.aggregator.metric_poller_count: 
     description: "the number of metrics poller"
     default: 20
@@ -118,7 +118,7 @@ properties:
 
   autoscaler.eventgenerator.evaluator.evaluation_manager_execute_interval: 
     description: "the time interval to evaluate rules"
-    default: 40s
+    default: 60s
   autoscaler.eventgenerator.evaluator.evaluator_count: 
     description: "the number of evaluators"
     default: 20
