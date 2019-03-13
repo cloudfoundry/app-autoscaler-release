@@ -21,7 +21,7 @@ packages:
 properties:
   autoscaler.scalingengine_db.address:
     description: "IP address on which the scalingenginedb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.scalingengine_db.databases:
     description: "The list of databases used in scalingenginedb database including name"
   autoscaler.scalingengine_db.db_scheme:
@@ -33,7 +33,7 @@ properties:
 
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
@@ -45,7 +45,7 @@ properties:
 
   autoscaler.scheduler_db.address:
     description: "IP address on which the schedulerdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.scheduler_db.databases:
     description: "The list of databases used in schedulerdb database including name"
   autoscaler.scheduler_db.db_scheme:
@@ -111,10 +111,6 @@ properties:
   autoscaler.scalingengine.health.port:
     description: "the listening port of health endpoint"
     default: 6204
-
-  autoscaler.scalingengine.consul.cluster:
-    description: "Consul Cluster configuration. If not specified, scaling engine will not register itself with consul."
-    default: ""
 
   autoscaler.scalingengine.defaultCoolDownSecs:
     description: "Default value for cool_down_secs"

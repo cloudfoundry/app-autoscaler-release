@@ -36,7 +36,7 @@ properties:
 
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
@@ -48,7 +48,7 @@ properties:
 
   autoscaler.instancemetrics_db.address:
     description: "IP address on which the instancemetricsdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.instancemetrics_db.databases:
     description: "The list of databases used in instancemetricsdb database including name"
   autoscaler.instancemetrics_db.db_scheme:
@@ -60,7 +60,7 @@ properties:
 
   autoscaler.appmetrics_db.address:
     description: "IP address on which the appmetricsdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.appmetrics_db.databases:
     description: "The list of databases used in appmetricsdb database including name"
   autoscaler.appmetrics_db.db_scheme:
@@ -72,7 +72,7 @@ properties:
 
   autoscaler.scalingengine_db.address:
     description: "IP address on which the scalingenginedb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.scalingengine_db.databases:
     description: "The list of databases used in scalingenginedb database including name"
   autoscaler.scalingengine_db.db_scheme:
@@ -126,21 +126,21 @@ properties:
   
   autoscaler.operator.instance_metrics_db.refresh_interval:
     description: "the time interval to prune the instancemetrics database"
-    default: 24h
+    default: 1h
   autoscaler.operator.instance_metrics_db.cutoff_duration:
     description: "the cutoff days when pruning instancemetrics database"
     default: 24h
      
   autoscaler.operator.app_metrics_db.refresh_interval:
     description: "the time interval to prune the appmetrics database"
-    default: 24h
+    default: 1h
   autoscaler.operator.app_metrics_db.cutoff_duration:
     description: "the cutoff days when pruning appmetrics database"
     default: 48h
 
   autoscaler.operator.scaling_engine_db.refresh_interval:
     description: "the time interval to prune the scalingengine database"
-    default: 24h
+    default: 1h
   autoscaler.operator.scaling_engine_db.cutoff_duration:
     description: "the cutoff days when pruning scalingengine database"
     default: 240h
@@ -189,7 +189,7 @@ properties:
   
   autoscaler.lock_db.address:
     description: "IP address on which the lockdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.lock_db.databases:
     description: "The list of databases used in lockdb database including name"
   autoscaler.lock_db.db_scheme:
@@ -200,9 +200,9 @@ properties:
     description: "The list of database roles used in lockdb database including name/password"
 
   autoscaler.lock_db_connection_config.max_open_connections:
-    default: 100
-  autoscaler.lock_db_connection_config.max_idle_connections:
     default: 10
+  autoscaler.lock_db_connection_config.max_idle_connections:
+    default: 1
   autoscaler.lock_db_connection_config.connection_max_lifetime:
     default: 60s
 
@@ -215,7 +215,7 @@ properties:
   
   autoscaler.operator.enable_db_lock:
     description: "Enable database lock flag"
-    default: false
+    default: true
   
   autoscaler.operator.health.port:
     description: "the listening port of health endpoint"

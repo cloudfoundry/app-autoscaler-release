@@ -22,7 +22,7 @@
       release: bosh-dns-aliases
       properties:
         aliases:
-        - domain: postgres.service.cf.internal
+        - domain: autoscalerpostgres.service.cf.internal
           targets:
           - query: '*'
             instance_group: postgres_autoscaler

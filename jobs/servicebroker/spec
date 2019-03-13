@@ -74,16 +74,20 @@ properties:
   autoscaler.service_broker.password:
     description: "password to authenticate with service broker"
   autoscaler.service_broker.db_config.max_connections:
+    default: 10
     description: "Maximum number of connections that may be held in the serverbroker db pool"
   autoscaler.service_broker.db_config.min_connections:
+    default: 0
     description: "Minimum number of connections that should be held in the servicebroker db pool"
   autoscaler.service_broker.db_config.idle_timeout:
+    default: 1000
     description: "The idle timeout for connections (seconds)"
   autoscaler.service_broker.http_request_timeout:
-    description: "The timeout for http request"
+    default: 60000
+    description: "The timeout for http request (milliseconds)"
   autoscaler.binding_db.address:
     description: "IP address on which the bindingdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.binding_db.databases:
     description: "The list of databases used in bindingdb database including name"
   autoscaler.binding_db.db_scheme:

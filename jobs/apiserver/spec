@@ -147,7 +147,7 @@ properties:
     default: "Autoscaler"
   autoscaler.api_server.info.build:
     description: "Autoscaler application build number"
-    default: "001"
+    default: "1.1.0"
   autoscaler.api_server.info.support_url:
     description: "Autoscaler application support page URL"
     default: "https://github.com/cloudfoundry-incubator/app-autoscaler"
@@ -156,14 +156,17 @@ properties:
     default: "Automatically increase or decrease the number of application instances based on a policy you define."
 
   autoscaler.api_server.db_config.max_connections:
+    default: "10"  
     description: "Maximum number of connections that may be held in the apiserver db pool"
   autoscaler.api_server.db_config.min_connections:
+    default: "0"   
     description: "Minimum number of connections that should be held in the apiserver db pool"
   autoscaler.api_server.db_config.idle_timeout:
+    default: "1000"
     description: "The idle timeout for connections (seconds)"
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
