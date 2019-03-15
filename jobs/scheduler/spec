@@ -12,6 +12,8 @@ templates:
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
+  policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
+  scheduler_db_ca.crt.erb: config/certs/scheduler_db/ca.crt
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
@@ -73,6 +75,11 @@ properties:
     description: "Port on which the schedulerdb server will listen"
   autoscaler.scheduler_db.roles:
     description: "The list of database roles used in schedulerdb database including name/password"
+  autoscaler.scheduler_db.tls.ca:
+    default: ''
+  autoscaler.scheduler_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
@@ -85,6 +92,11 @@ properties:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"  
+  autoscaler.policy_db.tls.ca:
+    default: ''
+  autoscaler.policy_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
   autoscaler.scheduler.health.port:
     description: "the listening port of health endpoint"

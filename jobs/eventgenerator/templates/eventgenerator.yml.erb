@@ -8,7 +8,7 @@
   policy_db_port = p('autoscaler.policy_db.port')
   policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
   policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
-  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=disable"
+  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=" + p('autoscaler.policy_db.sslmode') + "&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/policy_db/ca.crt" 
 
 
   app_metrics_db_scheme = p('autoscaler.appmetrics_db.db_scheme')
@@ -16,7 +16,7 @@
   app_metrics_db_port = p('autoscaler.appmetrics_db.port')
   app_metrics_db_role = p_arr('autoscaler.appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
   app_metrics_db_database = p_arr('autoscaler.appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
-  app_metrics_db_url = app_metrics_db_scheme + "://" + app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?sslmode=disable"
+  app_metrics_db_url = app_metrics_db_scheme + "://" + app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?sslmode=" + p('autoscaler.appmetrics_db.sslmode') + "&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt" 
 
   sorted_instances=link("eventgenerator").instances.sort_by {|i|i.address}
   nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
