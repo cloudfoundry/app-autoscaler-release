@@ -54,12 +54,12 @@ instance_groups:
       consul:
         agent:
           services:
-            postgres:
+            autoscalerpostgres:
               check:
                 tcp: 127.0.0.1:5432
                 interval: 30s
                 timeout: 10s
-  - name: autoscalerpostgres
+  - name: postgres
     release: postgres
     properties:
       databases: &database
