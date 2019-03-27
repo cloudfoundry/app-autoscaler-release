@@ -23,7 +23,7 @@
     type: certificate
     options:
       ca: postgres_ca
-      common_name: postgres.service.cf.internal
+      common_name: autoscalerpostgres.service.cf.internal
       extended_key_usage:
       - client_auth
       - server_auth
