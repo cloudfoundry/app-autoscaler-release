@@ -23,10 +23,10 @@ type Config struct {
 	ExistingUser                 string  `json:"existing_user"`
 	ExistingUserPassword         string  `json:"existing_user_password"`
 	ConfigurableTestPassword     string  `json:"test_password"`
-	PersistentAppHost            string  `json:"persistent_app_host"`
-	PersistentAppSpace           string  `json:"persistent_app_space"`
-	PersistentAppOrg             string  `json:"persistent_app_org"`
-	PersistentAppQuotaName       string  `json:"persistent_app_quota_name"`
+	UseExistingOrganization      bool    `json:"use_existing_organization"`
+	ExistingOrganization         string  `json:"existing_organization"`
+	UseExistingSpace             bool    `json:"use_existing_space"`
+	ExistingSpace                string  `json:"existing_space"`
 	SkipSSLValidation            bool    `json:"skip_ssl_validation"`
 	ArtifactsDirectory           string  `json:"artifacts_directory"`
 	DefaultTimeout               int     `json:"default_timeout"`
@@ -53,10 +53,6 @@ type Config struct {
 }
 
 var defaults = Config{
-	PersistentAppHost:            "ASATS-persistent-app",
-	PersistentAppSpace:           "ASATS-persistent-space",
-	PersistentAppOrg:             "ASATS-persistent-org",
-	PersistentAppQuotaName:       "ASATS-persistent-quota",
 	JavaBuildpackName:            "java_buildpack",
 	NodejsBuildpackName:          "nodejs_buildpack",
 	DefaultTimeout:               30, // seconds
@@ -210,14 +206,20 @@ func (c *Config) GetArtifactsDirectory() string {
 	return c.ArtifactsDirectory
 }
 
-func (c *Config) GetPersistentAppSpace() string {
-	return c.PersistentAppSpace
+func (c *Config) GetUseExistingOrganization() bool {
+	return c.UseExistingOrganization
 }
-func (c *Config) GetPersistentAppOrg() string {
-	return c.PersistentAppOrg
+
+func (c *Config) GetExistingOrganization() string {
+	return c.ExistingOrganization
 }
-func (c *Config) GetPersistentAppQuotaName() string {
-	return c.PersistentAppQuotaName
+
+func (c *Config) GetUseExistingSpace() bool {
+	return c.UseExistingSpace
+}
+
+func (c *Config) GetExistingSpace() string {
+	return c.ExistingSpace
 }
 
 func (c *Config) GetNamePrefix() string {
