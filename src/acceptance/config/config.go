@@ -42,6 +42,8 @@ type Config struct {
 	NamePrefix                   string  `json:"name_prefix"`
 	AdminClient                  string  `json:"admin_client"`
 	AdminClientSecret            string  `json:"admin_client_secret"`
+	ExistingClient               string  `json:"existing_client"`
+	ExistingClientSecret         string  `json:"existing_client_secret"`
 
 	ServiceName       string `json:"service_name"`
 	ServicePlan       string `json:"service_plan"`
@@ -270,4 +272,12 @@ func (c *Config) GetAdminClient() string {
 
 func (c *Config) GetAdminClientSecret() string {
 	return c.AdminClientSecret
+}
+
+func (c *Config) GetExistingClient() string {
+	return c.ExistingClient
+}
+
+func (c *Config) GetExistingClientSecret() string {
+	return c.ExistingClientSecret
 }
