@@ -40,6 +40,8 @@ type Config struct {
 	JavaBuildpackName            string  `json:"java_buildpack_name"`
 	NodejsBuildpackName          string  `json:"nodejs_buildpack_name"`
 	NamePrefix                   string  `json:"name_prefix"`
+	AdminClient                  string  `json:"admin_client"`
+	AdminClientSecret            string  `json:"admin_client_secret"`
 
 	ServiceName       string `json:"service_name"`
 	ServicePlan       string `json:"service_plan"`
@@ -260,4 +262,12 @@ func (c *Config) GetApiEndpoint() string {
 
 func (c *Config) IsServiceOfferingEnabled() bool {
 	return c.ServiceOfferingEnabled
+}
+
+func (c *Config) GetAdminClient() string {
+	return c.AdminClient
+}
+
+func (c *Config) GetAdminClientSecret() string {
+	return c.AdminClientSecret
 }
