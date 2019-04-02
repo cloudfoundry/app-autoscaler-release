@@ -13,37 +13,38 @@ const JAVA_APP = "../assets/app/HelloWorldJavaWeb.war"
 const NODE_APP = "../assets/app/nodeApp"
 
 type Config struct {
-	ApiEndpoint                  string  `json:"api"`
-	AppsDomain                   string  `json:"apps_domain"`
-	UseHttp                      bool    `json:"use_http"`
-	AdminUser                    string  `json:"admin_user"`
-	AdminPassword                string  `json:"admin_password"`
-	UseExistingUser              bool    `json:"use_existing_user"`
-	ShouldKeepUser               bool    `json:"keep_user_at_suite_end"`
-	ExistingUser                 string  `json:"existing_user"`
-	ExistingUserPassword         string  `json:"existing_user_password"`
-	ConfigurableTestPassword     string  `json:"test_password"`
-	UseExistingOrganization      bool    `json:"use_existing_organization"`
-	ExistingOrganization         string  `json:"existing_organization"`
-	UseExistingSpace             bool    `json:"use_existing_space"`
-	ExistingSpace                string  `json:"existing_space"`
-	SkipSSLValidation            bool    `json:"skip_ssl_validation"`
-	ArtifactsDirectory           string  `json:"artifacts_directory"`
-	DefaultTimeout               int     `json:"default_timeout"`
-	SleepTimeout                 int     `json:"sleep_timeout"`
-	DetectTimeout                int     `json:"detect_timeout"`
-	CfPushTimeout                int     `json:"cf_push_timeout"`
-	LongCurlTimeout              int     `json:"long_curl_timeout"`
-	BrokerStartTimeout           int     `json:"broker_start_timeout"`
-	AsyncServiceOperationTimeout int     `json:"async_service_operation_timeout"`
-	TimeoutScale                 float64 `json:"timeout_scale"`
-	JavaBuildpackName            string  `json:"java_buildpack_name"`
-	NodejsBuildpackName          string  `json:"nodejs_buildpack_name"`
-	NamePrefix                   string  `json:"name_prefix"`
-	AdminClient                  string  `json:"admin_client"`
-	AdminClientSecret            string  `json:"admin_client_secret"`
-	ExistingClient               string  `json:"existing_client"`
-	ExistingClientSecret         string  `json:"existing_client_secret"`
+	ApiEndpoint                    string  `json:"api"`
+	AppsDomain                     string  `json:"apps_domain"`
+	UseHttp                        bool    `json:"use_http"`
+	AdminUser                      string  `json:"admin_user"`
+	AdminPassword                  string  `json:"admin_password"`
+	UseExistingUser                bool    `json:"use_existing_user"`
+	ShouldKeepUser                 bool    `json:"keep_user_at_suite_end"`
+	ExistingUser                   string  `json:"existing_user"`
+	ExistingUserPassword           string  `json:"existing_user_password"`
+	ConfigurableTestPassword       string  `json:"test_password"`
+	UseExistingOrganization        bool    `json:"use_existing_organization"`
+	ExistingOrganization           string  `json:"existing_organization"`
+	AddExistingUserToExistingSpace bool    `json:"add_existing_user_to_existing_space"`
+	UseExistingSpace               bool    `json:"use_existing_space"`
+	ExistingSpace                  string  `json:"existing_space"`
+	SkipSSLValidation              bool    `json:"skip_ssl_validation"`
+	ArtifactsDirectory             string  `json:"artifacts_directory"`
+	DefaultTimeout                 int     `json:"default_timeout"`
+	SleepTimeout                   int     `json:"sleep_timeout"`
+	DetectTimeout                  int     `json:"detect_timeout"`
+	CfPushTimeout                  int     `json:"cf_push_timeout"`
+	LongCurlTimeout                int     `json:"long_curl_timeout"`
+	BrokerStartTimeout             int     `json:"broker_start_timeout"`
+	AsyncServiceOperationTimeout   int     `json:"async_service_operation_timeout"`
+	TimeoutScale                   float64 `json:"timeout_scale"`
+	JavaBuildpackName              string  `json:"java_buildpack_name"`
+	NodejsBuildpackName            string  `json:"nodejs_buildpack_name"`
+	NamePrefix                     string  `json:"name_prefix"`
+	AdminClient                    string  `json:"admin_client"`
+	AdminClientSecret              string  `json:"admin_client_secret"`
+	ExistingClient                 string  `json:"existing_client"`
+	ExistingClientSecret           string  `json:"existing_client_secret"`
 
 	ServiceName       string `json:"service_name"`
 	ServicePlan       string `json:"service_plan"`
@@ -216,6 +217,10 @@ func (c *Config) GetUseExistingOrganization() bool {
 
 func (c *Config) GetExistingOrganization() string {
 	return c.ExistingOrganization
+}
+
+func (c *Config) GetAddExistingUserToExistingSpace() bool {
+	return c.AddExistingUserToExistingSpace
 }
 
 func (c *Config) GetUseExistingSpace() bool {
