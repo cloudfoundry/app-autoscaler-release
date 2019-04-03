@@ -6,10 +6,10 @@ name: app-autoscaler
 releases:
 - name: app-autoscaler
   version: latest
-- name: postgres
-  url: https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=17
-  version: '17'
-  sha1: b062e32a5409ccd4e4161337c48705c793a58412
+- name: "postgres"
+  version: "25"
+  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=25"
+  sha1: "20929ee4b0c64fd97072a266311a6d00714124a7"
 - name: consul
   version: latest
 - name: routing
@@ -54,7 +54,7 @@ instance_groups:
       consul:
         agent:
           services:
-            postgres:
+            autoscalerpostgres:
               check:
                 tcp: 127.0.0.1:5432
                 interval: 30s
@@ -240,6 +240,8 @@ instance_groups:
             min_connections: 0
           port: 6100
           publicPort: &apiServerPublicPort 6106
+          health:
+            port: 6200
           ca_cert: ((apiserver_ca.ca))
           server_cert: ((apiserver_server.certificate))
           server_key:  ((apiserver_server.private_key))
@@ -275,6 +277,8 @@ instance_groups:
           db_config: *db_config
           publicPort : &servicebrokerPort 6101
           port: 6107
+          health:
+            port: 6201
           ca_cert: ((servicebroker_ca.ca))
           server_cert: ((servicebroker_server.certificate))
           server_key: ((servicebroker_server.private_key))
@@ -402,13 +406,13 @@ instance_groups:
           server_key: ((eventgenerator_server.private_key))
           aggregator:
             aggregator_execute_interval: 40s
-            policy_poller_interval: 40s
+            policy_poller_interval: 60s
             metric_poller_count: 20
             app_monitor_channel_size: 200
             save_interval: 5s
             app_metric_channel_size: 1000
           evaluator:
-            evaluation_manager_execute_interval: 40s
+            evaluation_manager_execute_interval: 60s
             evaluator_count: 20
             trigger_array_channel_size: 200
           defaultStatWindowSecs: 120
@@ -585,3 +589,4 @@ variables:
     common_name: scheduler client
     extended_key_usage:
     - client_auth
+

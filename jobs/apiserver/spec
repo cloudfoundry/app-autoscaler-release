@@ -28,6 +28,10 @@ templates:
   eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
   eventgenerator_client.crt.erb: config/certs/eventgenerator/client.crt
   eventgenerator_client.key.erb: config/certs/eventgenerator/client.key
+  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
+  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
+  hooks/post-start.sh.erb: bin/hooks/post-start.sh
+  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 
 packages:
   - nodejs
@@ -45,10 +49,13 @@ properties:
     default: true
   autoscaler.api_server.port:
     description: "Port where APIServer will run"
-    default: 6100
+    default: 6101
   autoscaler.api_server.publicPort:
     description: "Port where APIServer public api will run"
     default: 6106
+  autoscaler.api_server.health.port:
+    description: "the listening port of health endpoint"
+    default: 6201
   autoscaler.api_server.ca_cert:
     description: "PEM-encoded CA certificate"
   autoscaler.api_server.server_cert:
@@ -140,7 +147,7 @@ properties:
     default: "Autoscaler"
   autoscaler.api_server.info.build:
     description: "Autoscaler application build number"
-    default: "001"
+    default: "1.1.0"
   autoscaler.api_server.info.support_url:
     description: "Autoscaler application support page URL"
     default: "https://github.com/cloudfoundry-incubator/app-autoscaler"
@@ -149,14 +156,17 @@ properties:
     default: "Automatically increase or decrease the number of application instances based on a policy you define."
 
   autoscaler.api_server.db_config.max_connections:
+    default: "10"  
     description: "Maximum number of connections that may be held in the apiserver db pool"
   autoscaler.api_server.db_config.min_connections:
+    default: "0"   
     description: "Minimum number of connections that should be held in the apiserver db pool"
   autoscaler.api_server.db_config.idle_timeout:
+    default: "1000"
     description: "The idle timeout for connections (seconds)"
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
@@ -165,6 +175,26 @@ properties:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
+
+  autoscaler.api_server.hooks.pre_start:
+    description: "Script to run before starting api_server"
+    default: ''
+    example: |
+      #!/bin/bash
+      echo "Going to start api_server"
+      echo "api_server data directory is ${DATA_DIR}"
+      echo "api_server port is ${PORT}"
+      echo "api_server directory is ${PACKAGE_DIR}"
+  autoscaler.api_server.hooks.post_start:
+    description: "Script to run after api_server has started"
+    default: ''
+  autoscaler.api_server.hooks.pre_stop:
+    description: "Script to run before stopping api_server"
+    default: ''
+  autoscaler.api_server.hooks.post_stop:
+    description: "Script to run after api_server has stopped"
+    default: ''
+
 
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
@@ -175,5 +205,6 @@ properties:
   autoscaler.cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
+  
   
 
