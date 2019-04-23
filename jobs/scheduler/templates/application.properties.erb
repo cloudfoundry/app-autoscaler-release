@@ -8,22 +8,30 @@
 
   schedulerdb_role = p_arr('autoscaler.scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' } 
   schedulerdb_database = p_arr('autoscaler.scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' } 
+  schedulerdb_url = "jdbc:postgresql://" + p('autoscaler.scheduler_db.address') + ":" + p('autoscaler.scheduler_db.port').to_s + "/" + schedulerdb_database['name'] + "?sslmode=" + p('autoscaler.scheduler_db.sslmode')
+  unless p('autoscaler.scheduler_db.tls.ca') == ""
+    schedulerdb_url = schedulerdb_url + "&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt" 
+  end
 
   policydb_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
   policydb_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
+  policydb_url = "jdbc:postgresql://" + p('autoscaler.policy_db.address') + ":" + p('autoscaler.policy_db.port').to_s + "/" + schedulerdb_database['name'] + "?sslmode=" + p('autoscaler.policy_db.sslmode')
+  unless p('autoscaler.policy_db.tls.ca') == ""
+    policydb_url = policydb_url + "&sslrootcert=/var/vcap/jobs/scheduler/config/certs/policy_db/ca.crt" 
+  end
 
 %>
 #datasource for application and quartz
 
 spring.datasource.driverClassName=org.postgresql.Driver
-spring.datasource.url=jdbc:postgresql://<%=p('autoscaler.scheduler_db.address')%>:<%=p('autoscaler.scheduler_db.port') %>/<%=schedulerdb_database['name'] %>?sslmode=<%=p('autoscaler.scheduler_db.sslmode') %>&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt
+spring.datasource.url=<%=schedulerdb_url %>
 spring.datasource.username=<%=schedulerdb_role['name'] %>
 spring.datasource.password=<%=schedulerdb_role['password'] %>
 
 #datasource for policy 
 
 spring.policyDbDataSource.driverClassName=org.postgresql.Driver
-spring.policyDbDataSource.url=jdbc:postgresql://<%=p('autoscaler.policy_db.address')%>:<%=p('autoscaler.policy_db.port') %>/<%=policydb_database['name'] %>?sslmode=<%=p('autoscaler.scheduler_db.sslmode') %>&sslrootcert=/var/vcap/jobs/scheduler/config/certs/policy_db/ca.crt
+spring.policyDbDataSource.url=<%=policydb_url %>
 spring.policyDbDataSource.password=<%=policydb_role['password'] %>
 spring.policyDbDataSource.username=<%=policydb_role['name'] %>
 
