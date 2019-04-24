@@ -128,7 +128,20 @@
   path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db/tls?
   value: *database_tls
 
-
+#apiserver
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=apiserver/properties/autoscaler/policy_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=apiserver/properties/autoscaler/policy_db/tls?
+  value: *database_tls
+#servicebroker
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=servicebroker/properties/autoscaler/binding_db/sslmode?
+  value: *sslmode
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=servicebroker/properties/autoscaler/binding_db/tls?
+  value: *database_tls
 
 
 

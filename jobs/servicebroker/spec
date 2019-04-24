@@ -17,6 +17,7 @@ templates:
   apiserver_client.crt.erb: config/certs/apiserver/client.crt
   apiserver_client.key.erb: config/certs/apiserver/client.key
   catalog.json.erb: config/catalog.json
+  binding_db_ca.crt.erb: config/certs/binding_db/ca.crt
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
@@ -96,6 +97,12 @@ properties:
     description: "Port on which the bindingdb server will listen"
   autoscaler.binding_db.roles:
     description: "The list of database roles used in bindingdb database including name/password"
+  autoscaler.binding_db.tls.ca:
+    default: ''
+  autoscaler.binding_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
+
   autoscaler.service_broker.catalog:
     description: "The service broker catalog"
     default:
