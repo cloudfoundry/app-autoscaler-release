@@ -18,6 +18,10 @@
   eventgenerator_host = p('autoscaler.api_server.eventgenerator.host')
   eventgenerator_port = p('autoscaler.api_server.eventgenerator.port')
   service_offering_enabled = p('autoscaler.api_server.service_offering_enabled')
+  db_uri = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?sslmode=" + p('autoscaler.policy_db.sslmode') 
+  unless p('autoscaler.policy_db.tls.ca') == ""
+    db_uri = db_uri + "&sslrootcert=/var/vcap/jobs/apiserver/config/certs/policy_db/ca.crt"
+  end
 
   params = {
     'port' => p('autoscaler.api_server.port'),
@@ -34,7 +38,7 @@
        'maxConnections' => p('autoscaler.api_server.db_config.max_connections'),
        'minConnections' => p('autoscaler.api_server.db_config.min_connections'),
        'idleTimeout' => p('autoscaler.api_server.db_config.idle_timeout'),
-       'uri' => db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name']  ,
+       'uri' => db_uri,
      },
     'scheduler' => {
        'uri' => "https://" + scheduler_host + ":" + scheduler_port.to_s,

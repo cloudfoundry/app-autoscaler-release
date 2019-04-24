@@ -28,6 +28,7 @@ templates:
   eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
   eventgenerator_client.crt.erb: config/certs/eventgenerator/client.crt
   eventgenerator_client.key.erb: config/certs/eventgenerator/client.key
+  policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
@@ -175,6 +176,11 @@ properties:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
+  autoscaler.policy_db.tls.ca:
+    default: ''
+  autoscaler.policy_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
 
   autoscaler.api_server.hooks.pre_start:
     description: "Script to run before starting api_server"
