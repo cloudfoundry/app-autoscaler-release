@@ -163,7 +163,7 @@ properties:
     default: "0"   
     description: "Minimum number of connections that should be held in the apiserver db pool"
   autoscaler.api_server.db_config.idle_timeout:
-    default: "1000"
+    default: "60000"
     description: "The idle timeout for connections (seconds)"
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
