@@ -148,10 +148,10 @@ properties:
     default: "Autoscaler"
   autoscaler.api_server.info.build:
     description: "Autoscaler application build number"
-    default: "1.1.0"
+    default: "1.2.1"
   autoscaler.api_server.info.support_url:
     description: "Autoscaler application support page URL"
-    default: "https://github.com/cloudfoundry-incubator/app-autoscaler"
+    default: "https://github.com/cloudfoundry/app-autoscaler"
   autoscaler.api_server.info.description:
     description: "Autoscaler application short description"
     default: "Automatically increase or decrease the number of application instances based on a policy you define."
