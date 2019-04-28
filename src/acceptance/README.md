@@ -66,6 +66,11 @@ The full set of config parameters is explained below:
 * `keep_user_at_suite_end` (optional): If using an existing user (see above), set this to `true` unless you are okay having your existing user being deleted at the end. You can also set this to `true` when not using an existing user if you want to leave the temporary user around for debugging purposes after the test teardown.
 * `existing_user` (optional): Name of the existing user to use.
 * `existing_user_password` (optional): Password for the existing user to use.
+* `use_existing_organization` (optional): The admin user configured above will normally create a temporary organization during tests, and then delete the organization after the tests have run; set this to `true` if you want to use an existing organization, configured via the following properties.
+* `existing_organization` (optional): Name of the existing organization to use.
+* `use_existing_space` (optional): The admin user configured above will normally create a temporary space during tests, and then delete the space after the tests have run; set this to `true` if you want to use an existing space, configured via the following properties.
+* `existing_space` (optional): Name of the existing space to use.
+* `add_existing_user_to_existing_space` (optional): The admin user configured above will normally set the user to be  `admin/develop/auditor` of the new-created/existing space. Set this to `false` if you are using an existing user and space, and the existing user is already the space admin/develop/auditor of the existing space. (This option is useful when the set-space-role command is restricted in some of the cf environments.)
 * `artifacts_directory` (optional): If set, `cf` CLI trace output from test runs will be captured in files and placed in this directory. [See below](#capturing-test-output) for more.
 * `default_timeout` (optional): Default time (in seconds) to wait for polling assertions that wait for asynchronous results.
 * `cf_push_timeout` (optional): Default time (in seconds) to wait for `cf push` commands to succeed.
