@@ -235,7 +235,7 @@ instance_groups:
           http_client_timeout: 60000
           service_offering_enabled: true
           db_config: &db_config
-            idle_timeout: 1000
+            idle_timeout: 60000
             max_connections: 10
             min_connections: 0
           port: 6100
