@@ -172,6 +172,7 @@ properties:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
+    default: postgres
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:

@@ -38,6 +38,7 @@ properties:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
+    default: "postgres"    
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
@@ -55,6 +56,7 @@ properties:
     description: "The list of databases used in instancemetricsdb database including name"
   autoscaler.instancemetrics_db.db_scheme:
     description: "Database scheme to be used to access instancemetricsdb"
+    default: postgres    
   autoscaler.instancemetrics_db.port:
     description: "Port on which the instancemetricsdb server will listen"
   autoscaler.instancemetrics_db.roles:
