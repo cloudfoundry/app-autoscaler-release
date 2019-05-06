@@ -81,8 +81,8 @@ properties:
     default: 0
     description: "Minimum number of connections that should be held in the servicebroker db pool"
   autoscaler.service_broker.db_config.idle_timeout:
-    default: 1000
-    description: "The idle timeout for connections (seconds)"
+    default: 60000
+    description: "The idle timeout for connections (milliseconds)"
   autoscaler.service_broker.http_request_timeout:
     default: 60000
     description: "The timeout for http request (milliseconds)"
@@ -93,6 +93,7 @@ properties:
     description: "The list of databases used in bindingdb database including name"
   autoscaler.binding_db.db_scheme:
     description: "Database scheme to be used to access bindingdb"
+    default: postgres    
   autoscaler.binding_db.port:
     description: "Port on which the bindingdb server will listen"
   autoscaler.binding_db.roles:
