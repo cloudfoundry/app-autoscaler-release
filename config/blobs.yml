@@ -1,4 +1,3 @@
----
 golang/go1.11.darwin-amd64.tar.gz:
   size: 124131633
   object_id: 13198daf-253d-4635-7931-5ac4a495a95c
@@ -9,7 +8,7 @@ golang/go1.11.linux-amd64.tar.gz:
   sha: 8ffb718cab4371df3495d8f6c0b15c7e6dc28fea
 maven/apache-maven-3.5.4-bin.tar.gz:
   size: 8842660
-  object_id: '09cccf72-1834-4056-517a-b6bcaa503c75'
+  object_id: 09cccf72-1834-4056-517a-b6bcaa503c75
   sha: 22cac91b3557586bb1eba326f2f7727543ff15e3
 nodejs/node-v8.11.4-darwin-x64.tar.gz:
   size: 16042407
@@ -17,13 +16,13 @@ nodejs/node-v8.11.4-darwin-x64.tar.gz:
   sha: ae434fecf15ad21686cf9bc4ea88a6bb2d6b5906
 nodejs/node-v8.11.4-linux-x64.tar.xz:
   size: 11351232
-  object_id: '09b09469-3a82-4150-7acb-73a6ec6e9e99'
+  object_id: 09b09469-3a82-4150-7acb-73a6ec6e9e99
   sha: 3b1552d91cf853fdca32d163a991f17cc1ffb288
 openjdk/openjdk-1.8.0_101-x86_64-mountainlion.tar.gz:
-  object_id: d908c524-775f-45a7-adad-b7e2965e5b23
-  sha: d9374652844bfd7bcdce8f8b605fb57fd76c9e36
   size: 75550921
+  object_id: b6c377e3-5935-4198-4d49-7fb5233b63d3
+  sha: d9374652844bfd7bcdce8f8b605fb57fd76c9e36
 openjdk/openjdk-1.8.0_101-x86_64-trusty.tar.gz:
-  object_id: ee0bf404-69b3-4a0c-8d9f-631c64cabf74
-  sha: d77ee059e289ae52fb87812f1a2932268427dc26
   size: 77696717
+  object_id: 4510b81f-16ba-4cad-676b-119b7ec0fef9
+  sha: d77ee059e289ae52fb87812f1a2932268427dc26
