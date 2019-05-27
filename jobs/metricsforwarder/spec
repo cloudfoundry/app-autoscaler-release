@@ -35,11 +35,11 @@ properties:
 
   
   autoscaler.metricsforwarder.loggregator.tls.cert:
-    description: ""
+    description: "PEM-encoded tls client certificate to connect to loggregator ingress client"
   autoscaler.metricsforwarder.loggregator.tls.key:
-    description: ""
+    description: "PEM-encoded tls client key to connect to loggregator ingress client"
   autoscaler.metricsforwarder.loggregator.tls.ca_cert:
-    description: ""
+    description: "PEM-encoded ca certificate of loggregator ingress client"
 
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
@@ -54,6 +54,7 @@ properties:
     description: "The list of database roles used in policydb database including name/password"
   autoscaler.policy_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -70,19 +71,19 @@ properties:
     default: false
 
   autoscaler.metricsforwarder.cache_ttl:
-    description: ""
+    description: "custom metric credential cache ttl"
     default: 900s
   autoscaler.metricsforwarder.cache_cleanup_interval:
-    description: ""
+    description: "interval to clean up expired item in ache"
     default: 6h
   autoscaler.metricsforwarder.policy_poller_interval:
-    description: ""
+    description: "interval to fresh local app info from policy database"
     default: 60s
 
   
   autoscaler.metricsforwarder.health.port:
     description: "the listening port of health endpoint"
-    default: 6203
+    default: 6403
 
   autoscaler.metricsforwarder.hooks.pre_start:
     description: "Script to run before starting metricsforwarder"

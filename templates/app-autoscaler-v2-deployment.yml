@@ -26,7 +26,6 @@ addons:
 - name: bosh-dns-aliases
   include:
     stemcell:
-    - os: ubuntu-trusty
     - os: ubuntu-xenial
   jobs:
   - name: bosh-dns-aliases
@@ -85,7 +84,7 @@ addons:
       - domain: metricsgateway.service.cf.internal
         targets:
         - query: '*'
-          instance_group: asmetrics
+          instance_group: asnozzle
           deployment: app-autoscaler
           network: default
           domain: bosh
@@ -183,7 +182,7 @@ instance_groups:
           skip_ssl_validation: "((skip_ssl_validation))"
         scalingengine:
           logging:
-            level: debug
+            level: info
           http_client_timeout: 60s
           server:
             port: &scalingEnginePort 6104
@@ -194,7 +193,6 @@ instance_groups:
           ca_cert: ((scalingengine_ca.ca))
           server_cert: ((scalingengine_server.certificate))
           server_key: ((scalingengine_server.private_key))
-          require_consul: true
   - name: scheduler
     release: app-autoscaler
     properties:
@@ -214,7 +212,6 @@ instance_groups:
             ca_cert: ((scalingengine_ca.ca))
             client_cert: ((scalingengine_client.certificate))
             client_key: ((scalingengine_client.private_key))
-          require_consul: false
         scheduler_db: *database
         policy_db: *database
   - name: operator
@@ -248,11 +245,10 @@ instance_groups:
             retry_interval: 5s
           enable_db_lock: false
           logging:
-            level: debug 
+            level: info 
           http_client_timeout: 60s
           health:
             port: &operatorHealthPort 6208
-          require_consul: false
 # asmetrics Instance Group: metricsgateway&metricsserver&metricsforwarder&eventgenerator
 - name: asmetrics
   azs:
@@ -296,7 +292,6 @@ instance_groups:
             metric_channel_size: 1000
           health:
             port: &metricsserverHealthPort 6303
-          require_consul: false
   - name: eventgenerator
     release: app-autoscaler
     properties:
@@ -307,7 +302,7 @@ instance_groups:
         policy_db_connection_config: *databaseConnectionConfig
         eventgenerator:
           logging:
-            level: debug
+            level: info
           http_client_timeout: 60s
           server:
             port: &eventGeneratorPort 6105
@@ -345,7 +340,6 @@ instance_groups:
             ca_cert: ((metricsserver_ca.ca))
             client_cert: ((metricsserver_client.certificate))
             client_key: ((metricsserver_client.private_key))
-          require_consul: false
   - name: loggregator_agent
     release: loggregator-agent
     properties:
@@ -373,7 +367,6 @@ instance_groups:
               ca_cert: ((loggregator_ca.certificate))
           health:
             port: &metricsforwarderHealthPort 6403
-          require_consul: false 
   - name: route_registrar
     release: routing
     consumes:
@@ -432,8 +425,7 @@ instance_groups:
               key: ((loggregator_tls_rlp.private_key))
               ca_cert: ((loggregator_ca.certificate))
           health:
-            port: &metricsgatewayHealthPort 6203
-          require_consul: false 
+            port: &metricsgatewayHealthPort 6503
 # asapi Instance Group : apiserver&servicebroker
 - name: asapi
   azs:
@@ -488,7 +480,6 @@ instance_groups:
             ca_cert: ((servicebroker_ca.ca))
             client_cert: ((servicebroker_client.certificate))
             client_key: ((servicebroker_client.private_key))
-          require_consul: true
         policy_db: *database
         cf: *cf_credentials
   - name: servicebroker
@@ -526,7 +517,6 @@ instance_groups:
             ca_cert: ((apiserver_ca.ca))
             client_cert: ((apiserver_client.certificate))
             client_key: ((apiserver_client.private_key))
-          require_consul: false
         binding_db: *database
   - name: route_registrar
     release: routing

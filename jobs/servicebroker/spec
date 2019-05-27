@@ -36,7 +36,7 @@ properties:
     default: true
   autoscaler.service_broker.require_consul:
     description: "whether to start consul agent"
-    default: true
+    default: false
   autoscaler.service_broker.publicPort:
     description: "Port where servicebroker public server will run"
     default: 6101
@@ -100,6 +100,7 @@ properties:
     description: "The list of database roles used in bindingdb database including name/password"
   autoscaler.binding_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.binding_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"

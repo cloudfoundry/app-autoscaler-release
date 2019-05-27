@@ -35,50 +35,50 @@ properties:
     description: "the level of logging"
     default: "info"
   autoscaler.metricsgateway.envelop_chan_size:
-    description: ""
+    description: "the channel size to transport envelope from nozzles to emitters"
     default: 500
   autoscaler.metricsgateway.nozzle_count:
-    description: ""
+    description: "the number of go-loggregator client in a metricsgateway"
     default: 3
   autoscaler.metricsgateway.app_manager.app_refresh_interval:
-    description: ""
+    description: "the interval to fresh apps in cache from policy db"
     default: 5s
 
   autoscaler.metricsgateway.emitter.buffer_size:
-    description: ""
+    description: "the size of channel in a emmiter to store envelopes waiting to send to metricsserver"
     default: 500
   autoscaler.metricsgateway.emitter.keep_alive_interval:
-    description: ""
+    description: "keep alive interval of the websocket between emitter and metricsserver"
     default: 5s
   autoscaler.metricsgateway.emitter.handshake_timeout:
-    description: ""
+    description: "timeout of webscoket handshake between emitter and metricsserver"
     default: 1s
   autoscaler.metricsgateway.emitter.max_setup_retry_count:
-    description: ""
+    description: "maximum retry times to set up a websocket connection between emitter and metricsserver"
     default: 5
   autoscaler.metricsgateway.emitter.max_close_retry_count:
-    description: ""
+    description: "maximum retry times to close a websocket connection between emitter and metricsserver"
     default: 5
   autoscaler.metricsgateway.emitter.retry_delay:
-    description: ""
+    description: "duration between two websocket retrying"
     default: 1s
   autoscaler.metricsgateway.emitter.metricsserver_client.cert:
-    description: ""
+    description: "PEM-encoded tls client certificate to connect to metricsserver"
   autoscaler.metricsgateway.emitter.metricsserver_client.key:
-    description: ""
+    description: "PEM-encoded tls client key to connect to metricsserver"
   autoscaler.metricsgateway.emitter.metricsserver_client.ca_cert:
-    description: ""
+    description: "PEM-encoded ca certificate of metricsserver"
   autoscaler.metricsgateway.nozzle.rlp_addr:
-    description: ""
+    description: "address of ReverseLogProxy"
   autoscaler.metricsgateway.nozzle.shard_id:
-    description: ""
+    description: "shard id for nozzle to fetch envelopes from ReverseLogProxy"
     default: "CF_AUTOSCALER"
   autoscaler.metricsgateway.nozzle.loggregator_rlp_tls.cert:
-    description: ""
+    description: "PEM-encoded tls client certificate to connect to ReverseLogProxy"
   autoscaler.metricsgateway.nozzle.loggregator_rlp_tls.key:
-    description: ""
+    description: "PEM-encoded tls client key to connect to ReverseLogProxy"
   autoscaler.metricsgateway.nozzle.loggregator_rlp_tls.ca_cert:
-    description: ""
+    description: "PEM-encoded ca certificate of ReverseLogProxy"
 
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
@@ -93,6 +93,7 @@ properties:
     description: "The list of database roles used in policydb database including name/password"
   autoscaler.policy_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -106,11 +107,11 @@ properties:
 
   autoscaler.metricsgateway.require_consul:
     description: "whether to start consul agent"
-    default: true
+    default: false
   
   autoscaler.metricsgateway.health.port:
     description: "the listening port of health endpoint"
-    default: 6203
+    default: 6503
 
   autoscaler.metricsgateway.hooks.pre_start:
     description: "Script to run before starting metricsgateway"
