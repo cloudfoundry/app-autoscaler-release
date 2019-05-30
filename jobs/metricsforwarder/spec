@@ -24,10 +24,10 @@ packages:
 
 properties:
   autoscaler.metricsforwarder.logging.level:
-    description: "the level of logging"
+    description: "The level of logging"
     default: "info"
   autoscaler.metricsforwarder.server.port:
-    description: ""
+    description: "Port on which the metricsforwarder server will listen"
     default: 6201
   autoscaler.metricsforwarder.loggregator.metron_address:
     description: "IP address and port where the metron agent is running"
@@ -57,7 +57,7 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
-    description: "sslmode to connect to postgres server"
+    description: "The sslmode to connect to postgres server"
 
   autoscaler.policy_db_connection_config.max_open_connections:
     default: 100
@@ -67,22 +67,22 @@ properties:
     default: 60s
 
   autoscaler.metricsforwarder.require_consul:
-    description: "whether to start consul agent"
+    description: "Whether to start consul agent"
     default: false
 
   autoscaler.metricsforwarder.cache_ttl:
-    description: "custom metric credential cache ttl"
+    description: "The time interval to make cache entries as expired in metric forwarder"
     default: 900s
   autoscaler.metricsforwarder.cache_cleanup_interval:
-    description: "interval to clean up expired item in ache"
+    description: "The time interval to purge expired cache entries in metric forwarder"
     default: 6h
   autoscaler.metricsforwarder.policy_poller_interval:
-    description: "interval to fresh local app info from policy database"
+    description: "The time interval to refresh cached application information from policy database"
     default: 60s
 
   
   autoscaler.metricsforwarder.health.port:
-    description: "the listening port of health endpoint"
+    description: "The listening port of health endpoint"
     default: 6403
 
   autoscaler.metricsforwarder.hooks.pre_start:

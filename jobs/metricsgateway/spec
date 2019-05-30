@@ -32,35 +32,35 @@ consumes:
 
 properties:
   autoscaler.metricsgateway.logging.level:
-    description: "the level of logging"
+    description: "The level of logging"
     default: "info"
   autoscaler.metricsgateway.envelop_chan_size:
-    description: "the channel size to transport envelope from nozzles to emitters"
+    description: "The channel size to transport envelope from nozzles to emitters"
     default: 500
   autoscaler.metricsgateway.nozzle_count:
-    description: "the number of go-loggregator client in a metricsgateway"
+    description: "The go-loggregator client count in a metricsgateway"
     default: 3
   autoscaler.metricsgateway.app_manager.app_refresh_interval:
-    description: "the interval to fresh apps in cache from policy db"
+    description: "The time interval to refresh cached application from policy database"
     default: 5s
 
   autoscaler.metricsgateway.emitter.buffer_size:
-    description: "the size of channel in a emmiter to store envelopes waiting to send to metricsserver"
+    description: "The size of channel in each emitter to store envelopes before sending to metricsserver"
     default: 500
   autoscaler.metricsgateway.emitter.keep_alive_interval:
-    description: "keep alive interval of the websocket between emitter and metricsserver"
+    description: "The time interval of keep alive for the websocket connection between emitter and metricsserver"
     default: 5s
   autoscaler.metricsgateway.emitter.handshake_timeout:
-    description: "timeout of webscoket handshake between emitter and metricsserver"
+    description: "The timeout of webscoket handshake between emitter and metricsserver"
     default: 1s
   autoscaler.metricsgateway.emitter.max_setup_retry_count:
-    description: "maximum retry times to set up a websocket connection between emitter and metricsserver"
+    description: "The maximum retry times to set up a websocket connection between emitter and metricsserver"
     default: 5
   autoscaler.metricsgateway.emitter.max_close_retry_count:
-    description: "maximum retry times to close a websocket connection between emitter and metricsserver"
+    description: "The maximum retry times to close a websocket connection between emitter and metricsserver"
     default: 5
   autoscaler.metricsgateway.emitter.retry_delay:
-    description: "duration between two websocket retrying"
+    description: "The duration between two websocket retrying"
     default: 1s
   autoscaler.metricsgateway.emitter.metricsserver_client.cert:
     description: "PEM-encoded tls client certificate to connect to metricsserver"
@@ -69,9 +69,9 @@ properties:
   autoscaler.metricsgateway.emitter.metricsserver_client.ca_cert:
     description: "PEM-encoded ca certificate of metricsserver"
   autoscaler.metricsgateway.nozzle.rlp_addr:
-    description: "address of ReverseLogProxy"
+    description: "The address of ReverseLogProxy"
   autoscaler.metricsgateway.nozzle.shard_id:
-    description: "shard id for nozzle to fetch envelopes from ReverseLogProxy"
+    description: "The shard id for nozzle to fetch envelopes from ReverseLogProxy"
     default: "CF_AUTOSCALER"
   autoscaler.metricsgateway.nozzle.loggregator_rlp_tls.cert:
     description: "PEM-encoded tls client certificate to connect to ReverseLogProxy"
@@ -96,7 +96,7 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
-    description: "sslmode to connect to postgres server"
+    description: "The sslmode to connect to postgres server"
 
   autoscaler.policy_db_connection_config.max_open_connections:
     default: 100
@@ -106,11 +106,11 @@ properties:
     default: 60s
 
   autoscaler.metricsgateway.require_consul:
-    description: "whether to start consul agent"
+    description: "Whether to start consul agent"
     default: false
   
   autoscaler.metricsgateway.health.port:
-    description: "the listening port of health endpoint"
+    description: "The listening port of health endpoint"
     default: 6503
 
   autoscaler.metricsgateway.hooks.pre_start:
