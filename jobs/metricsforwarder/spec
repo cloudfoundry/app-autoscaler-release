@@ -71,7 +71,7 @@ properties:
     default: false
 
   autoscaler.metricsforwarder.cache_ttl:
-    description: "The time interval to make cache entries as expired in metric forwarder"
+    description: "The time interval to mark cache entries as expired in metric forwarder"
     default: 900s
   autoscaler.metricsforwarder.cache_cleanup_interval:
     description: "The time interval to purge expired cache entries in metric forwarder"
