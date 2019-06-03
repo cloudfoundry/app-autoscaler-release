@@ -1,15 +1,16 @@
 {
-	"name": "helloAutoScaler",
-	"version": "0.0.1",
-	"description": "A sample nodejs app for AutoScaler",
-	"scripts": {
-		"start": "node app.js"
-	},
-	"dependencies": {
-		"express": "^3.2.6",
-		"sleep": "^5.1.1"
-	},
-	"engines": {
-		"node": "8.x"
-	}
+  "name": "helloAutoScaler",
+  "version": "0.0.1",
+  "description": "A sample nodejs app for AutoScaler",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^3.2.6",
+    "request": "^2.88.0",
+    "sleep": "^5.1.1"
+  },
+  "engines": {
+    "node": "8.x"
+  }
 }
