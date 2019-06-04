@@ -75,3 +75,8 @@
 - type: replace
   path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/lock_db
   value: *external_database
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/policy_db
+  value: *external_database
+
