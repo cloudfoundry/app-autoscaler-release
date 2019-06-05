@@ -77,7 +77,7 @@ properties:
     description: "The time interval to purge expired cache entries in metric forwarder"
     default: 6h
   autoscaler.metricsforwarder.policy_poller_interval:
-    description: "The time interval to refresh cached application information from policy database"
+    description: "The time interval to refresh cached policies from policy database"
     default: 60s
 
   
