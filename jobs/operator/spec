@@ -53,6 +53,7 @@ properties:
     description: "The list of database roles used in policydb database including name/password"
   autoscaler.policy_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -72,6 +73,7 @@ properties:
     description: "The list of database roles used in instancemetricsdb database including name/password"
   autoscaler.instancemetrics_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.instancemetrics_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -90,6 +92,7 @@ properties:
     description: "The list of database roles used in appmetricsdb database including name/password"
   autoscaler.appmetrics_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.appmetrics_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -108,6 +111,7 @@ properties:
     description: "The list of database roles used in scalingenginedb database including name/password"
   autoscaler.scalingengine_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.scalingengine_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -143,7 +147,7 @@ properties:
 
   autoscaler.operator.require_consul:
     description: "whether to start consul agent"
-    default: true
+    default: false
   autoscaler.operator.logging.level:
      description: "the leve of logging"
      default: "info"
@@ -231,6 +235,7 @@ properties:
     description: "The list of database roles used in lockdb database including name/password"
   autoscaler.lock_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.lock_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
