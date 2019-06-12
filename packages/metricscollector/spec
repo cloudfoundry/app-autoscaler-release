@@ -36,6 +36,7 @@ files:
 - app-autoscaler/src/github.com/cloudfoundry/noaa/consumer/internal/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/noaa/errors/*.go # gosub
 - app-autoscaler/src/github.com/cloudfoundry/sonde-go/events/*.go # gosub
+- app-autoscaler/src/github.com/cloudfoundry-incubator/uaago/*.go
 - app-autoscaler/src/github.com/gogo/protobuf/gogoproto/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/proto/*.go # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/protoc-gen-gogo/descriptor/*.go # gosub
