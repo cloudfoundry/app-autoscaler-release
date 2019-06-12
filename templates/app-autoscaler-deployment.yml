@@ -504,13 +504,10 @@ instance_groups:
           db_lock: 
             ttl: 15s
             retry_interval: 5s
-          enable_db_lock: false
           logging:
             level: debug 
           health:
             port: &operatorHealthPort 6208
-
-
           
 variables:
 - name: database_password

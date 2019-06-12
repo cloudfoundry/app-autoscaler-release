@@ -250,14 +250,11 @@ properties:
   autoscaler.operator.db_lock.ttl:
     description: "database lock ttl"
     default: 15s
+
   autoscaler.operator.db_lock.retry_interval:
     description: "lock db retry interval"
     default: 5s 
-  
-  autoscaler.operator.enable_db_lock:
-    description: "Enable database lock flag"
-    default: true
-  
+
   autoscaler.operator.health.port:
     description: "the listening port of health endpoint"
     default: 6208

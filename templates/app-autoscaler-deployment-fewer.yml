@@ -193,7 +193,6 @@ instance_groups:
           db_lock: 
             ttl: 15s
             retry_interval: 5s
-          enable_db_lock: false
           logging:
             level: debug 
           http_client_timeout: 60s
