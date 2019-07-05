@@ -11,6 +11,7 @@
     address: ((database_host))
     db_scheme: postgres
     port: ((database_port))
+    sslmode: ((database_sslmode))
     roles:
     - name: ((database_username))
       password: ((database_password))
