@@ -64,7 +64,8 @@ properties:
   autoscaler.instancemetrics_db.roles:
     description: "The list of database roles used in instancemetricsdb database including name/password"
   autoscaler.instancemetrics_db.tls.ca:
-    default: 'PEM-encoded ca certificate of tls database server'
+    default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.instancemetrics_db.sslmode:
     default: disable
     description: "The sslmode to connect to postgres server"

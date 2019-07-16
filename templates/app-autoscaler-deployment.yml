@@ -212,11 +212,12 @@ instance_groups:
         appmetrics_db: *database
         instancemetrics_db: *database
         scalingengine_db: *database
+        lock_db: *database
         policy_db_connection_config: *databaseConnectionConfig
         appmetrics_db_connection_config: *databaseConnectionConfig
         instancemetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db_connection_config: *databaseConnectionConfig
-        lock_db: *database
+        lock_db_connection_config: *databaseConnectionConfig
         operator:
           app_sync_interval: 24h
           scaling_engine:
