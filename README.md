@@ -119,7 +119,7 @@ database.tls.ca | PEM-encoded certification authority for secure TLS communicati
 
 * **Deprecated**:  App-AutoScaler v1 release and its deployment options. 
 
-  * To deploy app-autoscaler V1 release, use `app-autoscaler-deployment-fewer-v1.yml`
+  * To deploy app-autoscaler V1 release in default collocated approach, use `app-autoscaler-deployment-fewer-v1.yml`
     ```sh
     bosh -e YOUR_ENV -d app-autoscaler \
         deploy templates/app-autoscaler-deployment-fewer-v1.yml \
@@ -130,31 +130,49 @@ database.tls.ca | PEM-encoded certification authority for secure TLS communicati
         -v skip_ssl_validation=true
     ```
 
-  * Deploy autoscaler with bosh-dns instead of consul for service registration 
+  * Deploy autoscaler V1 release with bosh-dns instead of consul for service registration 
     
     ```sh
     bosh -e YOUR_ENV -d app-autoscaler \
          deploy templates/app-autoscaler-deployment-fewer-v1.yml \
         --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-        -o example/operation/bosh-dns-fewer.yml \
+        -o example/operation/bosh-dns-fewer-v1.yml \
         -v system_domain=bosh-lite.com \
         -v cf_client_id=autoscaler_client_id \
         -v cf_client_secret=autoscaler_client_secret \
         -v skip_ssl_validation=true
     ```
-   * Deploy autoscaler with postgres database enabled TLS
+   * Deploy autoscaler V1 release with postgres database enabled TLS
     
     ```sh
     bosh -e YOUR_ENV -d app-autoscaler \
          deploy templates/app-autoscaler-deployment-fewer-v1.yml \
          --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-         -o example/operation/postgres-ssl-fewer.yml \
+         -o example/operation/postgres-ssl-fewer-v1.yml \
          -v system_domain=bosh-lite.com \
          -v cf_client_id=autoscaler_client_id \
          -v cf_client_secret=autoscaler_client_secret \
          -v skip_ssl_validation=true
     ```
     >** It's advised not to make skip_ssl_validation=true for non-development environment
+
+    * Deploy autoscaler V1 release with bosh-dns instead of consul for service registration 
+
+    ```sh
+    bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment-fewer-v1.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -v system_domain=bosh-lite.com \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=autoscaler_client_secret \
+     -v skip_ssl_validation=true \
+     -v database_host=<database_host> \
+     -v database_port=<database_port> \
+     -v database_username=<database_username> \
+     -v database_password=<database_password> \
+     -v database_name=<database_name> \
+     -o example/operation/external-db-fewer-v1.yml
+     ```
 
 ## Register service
 
