@@ -103,6 +103,7 @@ instance_groups:
     properties:
       autoscaler:
         api_server:
+          require_consul: true
           cache_ttl: 600
           http_client_timeout: 60000
           service_offering_enabled: true
@@ -189,6 +190,7 @@ instance_groups:
     properties:
       autoscaler:
         scheduler:
+          require_consul: true
           port: &schedulerPort 6102
           health:
             port: &schedulerHealthPort 6202
@@ -243,6 +245,7 @@ instance_groups:
         policy_db_connection_config: *databaseConnectionConfig
         cf: *cf_credentials
         scalingengine:
+          require_consul: true
           logging:
             level: debug
           http_client_timeout: 60s
@@ -281,7 +284,8 @@ instance_groups:
     release: app-autoscaler
     properties:
       autoscaler:
-        service_broker: 
+        service_broker:
+          require_consul: true
           enable_custom_metrics: true
           db_config: *db_config
           publicPort : &servicebrokerPort 6101
@@ -363,8 +367,9 @@ instance_groups:
         policy_db_connection_config: *databaseConnectionConfig
         cf: *cf_credentials
         metricscollector:
+          require_consul: true
           logging:
-            level: debug
+            level: info
           http_client_timeout: 60s
           server:
             port: &metricsCollectorPort 6103
@@ -412,8 +417,9 @@ instance_groups:
         appmetrics_db_connection_config: *databaseConnectionConfig
         policy_db_connection_config: *databaseConnectionConfig
         eventgenerator:
+          require_consul: true
           logging:
-            level: debug
+            level: info
           http_client_timeout: 60s
           server:
             port: &eventGeneratorPort 6105
@@ -489,6 +495,7 @@ instance_groups:
         scalingengine_db_connection_config: *databaseConnectionConfig
         lock_db: *database
         operator:
+          require_consul: true
           http_client_timeout: 60s
           app_sync_interval: 24h
           scaling_engine:

@@ -142,21 +142,8 @@ database.tls.ca | PEM-encoded certification authority for secure TLS communicati
         -v cf_client_secret=autoscaler_client_secret \
         -v skip_ssl_validation=true
     ```
-   * Deploy autoscaler V1 release with postgres database enabled TLS
-    
-    ```sh
-    bosh -e YOUR_ENV -d app-autoscaler \
-         deploy templates/app-autoscaler-deployment-fewer-v1.yml \
-         --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-         -o example/operation/postgres-ssl-fewer-v1.yml \
-         -v system_domain=bosh-lite.com \
-         -v cf_client_id=autoscaler_client_id \
-         -v cf_client_secret=autoscaler_client_secret \
-         -v skip_ssl_validation=true
-    ```
-    >** It's advised not to make skip_ssl_validation=true for non-development environment
 
-    * Deploy autoscaler V1 release with bosh-dns instead of consul for service registration 
+    * Deploy autoscaler V1 release with external postgres database
 
     ```sh
     bosh -e YOUR_ENV -d app-autoscaler \
@@ -171,8 +158,23 @@ database.tls.ca | PEM-encoded certification authority for secure TLS communicati
      -v database_username=<database_username> \
      -v database_password=<database_password> \
      -v database_name=<database_name> \
+     -v database_sslmode=<database_sslmode>  \
      -o example/operation/external-db-fewer-v1.yml
      ```
+
+   * Deploy autoscaler V1 release with postgres database enabled TLS
+    
+    ```sh
+    bosh -e YOUR_ENV -d app-autoscaler \
+         deploy templates/app-autoscaler-deployment-fewer-v1.yml \
+         --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+         -o example/operation/postgres-ssl-fewer-v1.yml \
+         -v system_domain=bosh-lite.com \
+         -v cf_client_id=autoscaler_client_id \
+         -v cf_client_secret=autoscaler_client_secret \
+         -v skip_ssl_validation=true
+    ```
+    >** It's advised not to make skip_ssl_validation=true for non-development environment
 
 ## Register service
 
