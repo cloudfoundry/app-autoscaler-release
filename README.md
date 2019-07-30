@@ -14,7 +14,7 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
 
 * Install and start [BOSH-Deployment](https://github.com/cloudfoundry/bosh-deployment), following its [README](https://github.com/cloudfoundry/bosh-deployment/blob/master/README.md).
 
-* Install [CF-deployment](https://github.com/cloudfoundry/cf-deployment/blob/master/cf-deployment.yml)
+* Install [CF-deployment](https://github.com/cloudfoundry/cf-deployment#deploying-cf)
 
 * Create a new autoscaler client
 
