@@ -55,3 +55,4 @@ files:
 - app-autoscaler/src/github.com/tedsuo/ifrit/http_server/*.go # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/sigmon/*.go # gosub
 - app-autoscaler/src/gopkg.in/yaml.v2/*.go # gosub
+- app-autoscaler/src/github.com/cloudfoundry-incubator/uaago/*.go

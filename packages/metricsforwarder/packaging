@@ -1,0 +1,8 @@
+set -e -x
+
+export GOROOT=$(readlink -nf /var/vcap/packages/golang)
+export PATH=$GOROOT/bin:$PATH
+export GOPATH=${BOSH_COMPILE_TARGET}/app-autoscaler
+
+go install autoscaler/metricsforwarder/cmd/metricsforwarder
+cp -a ${BOSH_COMPILE_TARGET}/app-autoscaler/bin/metricsforwarder ${BOSH_INSTALL_TARGET}

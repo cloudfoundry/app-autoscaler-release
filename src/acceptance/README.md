@@ -42,7 +42,8 @@ cat > integration_config.json <<EOF
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
 
-  "autoscaler_api": "autoscaler.bosh-lite.com"
+  "autoscaler_api": "autoscaler.bosh-lite.com",
+  "service_offering_enabled": true
 }
 EOF
 export CONFIG=$PWD/integration_config.json
