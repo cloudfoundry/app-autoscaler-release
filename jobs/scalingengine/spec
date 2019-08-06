@@ -29,12 +29,14 @@ properties:
     description: "The list of databases used in scalingenginedb database including name"
   autoscaler.scalingengine_db.db_scheme:
     description: "Database scheme to be used to access scalingenginedb"
+    default: postgres    
   autoscaler.scalingengine_db.port:
     description: "Port on which the scalingenginedb server will listen"
   autoscaler.scalingengine_db.roles:
     description: "The list of database roles used in scalingenginedb database including name/password"
   autoscaler.scalingengine_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.scalingengine_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -46,12 +48,14 @@ properties:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
+    default: postgres    
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
     description: "The list of database roles used in policydb database including name/password"
   autoscaler.policy_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -63,12 +67,14 @@ properties:
     description: "The list of databases used in schedulerdb database including name"
   autoscaler.scheduler_db.db_scheme:
     description: "Database scheme to be used to access schedulerdb"
+    default: postgres    
   autoscaler.scheduler_db.port:
     description: "Port on which the schedulerdb server will listen"
   autoscaler.scheduler_db.roles:
     description: "The list of database roles used in schedulerdb database including name/password"
   autoscaler.scheduler_db.tls.ca:
     default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.scheduler_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -108,7 +114,7 @@ properties:
 
   autoscaler.scalingengine.require_consul:
     description: "whether to start consul agent"
-    default: true
+    default: false
   autoscaler.scalingengine.logging.level:
     description: "the level of logging"
     default: "info"
