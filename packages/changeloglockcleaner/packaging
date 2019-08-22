@@ -1,0 +1,8 @@
+set -e -x
+
+export GOROOT=$(readlink -nf /var/vcap/packages/golang)
+export PATH=$GOROOT/bin:$PATH
+export GOPATH=${BOSH_COMPILE_TARGET}
+mkdir ${GOPATH}/src && mv changeloglockcleaner ${GOPATH}/src/ && mv github.com ${GOPATH}/src/
+go install changeloglockcleaner
+cp -a ${BOSH_COMPILE_TARGET}/bin/changeloglockcleaner ${BOSH_INSTALL_TARGET}

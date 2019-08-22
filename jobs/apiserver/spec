@@ -40,6 +40,7 @@ packages:
   - db
   - java
   - common
+  - changeloglockcleaner
 
 properties:
   autoscaler.api_server.cache_ttl:

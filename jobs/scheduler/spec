@@ -24,7 +24,8 @@ packages:
   - db
   - java
   - common
-
+  - changeloglockcleaner
+  
 properties:
   autoscaler.scheduler.require_consul:
     description: "whether to start consul agent"

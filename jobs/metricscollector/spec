@@ -19,6 +19,7 @@ packages:
   - db
   - metricscollector
   - common
+  - changeloglockcleaner
 
 provides:
 - name: metricscollector

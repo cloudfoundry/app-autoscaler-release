@@ -21,7 +21,8 @@ packages:
   - db
   - metricsserver
   - common
-
+  - changeloglockcleaner
+  
 provides:
 - name: metricsserver
   type: metricsserver

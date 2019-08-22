@@ -20,7 +20,8 @@ packages:
   - db
   - scalingengine
   - common
-
+  - changeloglockcleaner
+  
 properties:
   autoscaler.scalingengine_db.address:
     description: "IP address on which the scalingenginedb server will listen"

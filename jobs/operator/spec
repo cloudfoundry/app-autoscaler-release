@@ -25,7 +25,8 @@ packages:
   - common
   - db
   - java
-
+  - changeloglockcleaner
+  
 properties:
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"

@@ -25,6 +25,7 @@ packages:
   - db
   - eventgenerator
   - common
+  - changeloglockcleaner
 
 provides:
 - name: eventgenerator
