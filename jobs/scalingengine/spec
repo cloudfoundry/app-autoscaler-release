@@ -143,7 +143,9 @@ properties:
   autoscaler.scalingengine.lockSize:
     description: "the lock size of scalingengine"
     default: 32
-
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180 
+    
   autoscaler.scalingengine.hooks.pre_start:
     description: "Script to run before starting scalingengine"
     default: ''

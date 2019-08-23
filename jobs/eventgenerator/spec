@@ -200,6 +200,8 @@ properties:
   autoscaler.eventgenerator.health.port:
     description: "the listening port of health endpoint"
     default: 6204
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180 
 
   autoscaler.eventgenerator.hooks.pre_start:
     description: "Script to run before starting eventgenerator"

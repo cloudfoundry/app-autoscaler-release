@@ -42,7 +42,7 @@ COMMONDBURL=$COMMONDBURL"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/sche
 <% end %>
 
 detect_dns $HOST $PORT
-/var/vcap/packages/changeloglockcleaner/changeloglockcleaner -dburl "$COMMONDBURL" -expired_second 1200
+/var/vcap/packages/changeloglockcleaner/changeloglockcleaner -dburl "$COMMONDBURL" -expired_second <%= p("autoscaler.changeloglock_timeout_seconds") %>
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$SCHEDULER_DIR/db/scheduler.changelog-master.yaml update
 

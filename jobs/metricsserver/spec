@@ -139,7 +139,9 @@ properties:
   autoscaler.metricsserver.health.port:
     description: "The listening port of health endpoint"
     default: 6303
-
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180
+    
   autoscaler.metricsserver.hooks.pre_start:
     description: "Script to run before starting metricsserver"
     default: ''

@@ -259,6 +259,8 @@ properties:
   autoscaler.operator.health.port:
     description: "the listening port of health endpoint"
     default: 6208
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180
 
   autoscaler.operator.hooks.pre_start:
     description: "Script to run before starting operator"

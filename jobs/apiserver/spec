@@ -214,6 +214,8 @@ properties:
   autoscaler.cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180 
   
   
 
