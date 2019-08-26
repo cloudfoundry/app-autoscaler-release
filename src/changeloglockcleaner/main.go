@@ -10,17 +10,17 @@ import (
 
 func main() {
 	var dbUrl string
-	var lockExpiredDuration int
+	var lockExpirationDurationInSeconds int
 
 	flag.StringVar(&dbUrl, "dburl", "", "dburl")
-	flag.IntVar(&lockExpiredDuration, "expired_second", 0, "lock expired duration second")
+	flag.IntVar(&lockExpirationDurationInSeconds, "expiration_second", 0, "lock expiration duration in seconds")
 	flag.Parse()
 	if dbUrl == "" {
-		fmt.Fprintln(os.Stdout, "missing dburl\nUsage:use '-dburl' option to specify the dburl")
+		showErrorAndUsage("dburl")
 		os.Exit(1)
 	}
-	if lockExpiredDuration <= 0 {
-		fmt.Fprintln(os.Stdout, "missing expired_second\nUsage:use '-expired_second' option to specify the expired_second")
+	if lockExpirationDurationInSeconds <= 0 {
+		showErrorAndUsage("expiration_second")
 		os.Exit(1)
 	}
 	db, err := sqldb.NewChangelogSQLDB(dbUrl)
@@ -29,9 +29,19 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
-	err = db.DeleteExpiredLock(lockExpiredDuration)
+	err = db.DeleteExpiredLock(lockExpirationDurationInSeconds)
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "failed to delete expired lock:\n %s\n", err)
 		os.Exit(1)
 	}
+}
+func showErrorAndUsage(missingOpt string) {
+	fmt.Fprintf(os.Stdout, `Incorrect Usage: '-%s' is missing
+		
+	Usage:
+	changeloglockcleaner -dburl DBRUL -expiration_second DURATION
+	
+	Options:
+	-dburl The URL of database
+	-expiration_second Lock expiration duration in seconds`, missingOpt)
 }

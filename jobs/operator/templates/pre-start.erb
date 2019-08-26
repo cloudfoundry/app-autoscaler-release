@@ -34,15 +34,15 @@ PASSWORD='<%= role['password'] %>'
 PORT='<%= p("autoscaler.lock_db.port") %>'
 SSLMODE='<%= p("autoscaler.lock_db.sslmode") %>'
 JDBCDBURL="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
-COMMONDBURL="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
+DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 
 <% unless p('autoscaler.lock_db.tls.ca') == "" %>
 JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
-COMMONDBURL=$COMMONDBURL"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
+DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
 <% end %>
 
 detect_dns $HOST $PORT
-/var/vcap/packages/changeloglockcleaner/changeloglockcleaner -dburl "$COMMONDBURL" -expired_second <%= p("autoscaler.changeloglock_timeout_seconds") %>
+/var/vcap/packages/changeloglockcleaner/changeloglockcleaner -dburl "$DBURI" -expired_second <%= p("autoscaler.changeloglock_timeout_seconds") %>
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$operator_DIR/operator.db.changelog.yml update
 

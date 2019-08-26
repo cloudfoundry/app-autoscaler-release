@@ -202,7 +202,7 @@ properties:
     default: 6204
   autoscaler.changeloglock_timeout_seconds:
     default: 180 
-
+    description: "Liquibase changelog lock timeout duration in seconds"
   autoscaler.eventgenerator.hooks.pre_start:
     description: "Script to run before starting eventgenerator"
     default: ''
