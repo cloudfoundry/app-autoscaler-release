@@ -19,6 +19,7 @@ packages:
   - db
   - metricscollector
   - common
+  - changeloglockcleaner
 
 provides:
 - name: metricscollector
@@ -136,7 +137,9 @@ properties:
   autoscaler.metricscollector.health.port:
     description: "the listening port of health endpoint"
     default: 6203
-
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180 
+    description: "Liquibase changelog lock timeout duration in seconds"   
   autoscaler.metricscollector.hooks.pre_start:
     description: "Script to run before starting metricscollector"
     default: ''

@@ -29,7 +29,8 @@ packages:
   - db
   - java
   - common
-
+  - changeloglockcleaner
+  
 properties:
   autoscaler.service_broker.enable_custom_metrics:
     description: "whether to enable custom metrics"
@@ -120,7 +121,9 @@ properties:
   autoscaler.service_broker.dashboard_redirect_uri:
     description: "service dashboard redirect uri"
     default: ""
-
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180
+    description: "Liquibase changelog lock timeout duration in seconds"   
   autoscaler.service_broker.hooks.pre_start:
     description: "Script to run before starting service_broker"
     default: ''

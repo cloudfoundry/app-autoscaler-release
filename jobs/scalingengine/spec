@@ -20,7 +20,8 @@ packages:
   - db
   - scalingengine
   - common
-
+  - changeloglockcleaner
+  
 properties:
   autoscaler.scalingengine_db.address:
     description: "IP address on which the scalingenginedb server will listen"
@@ -142,7 +143,9 @@ properties:
   autoscaler.scalingengine.lockSize:
     description: "the lock size of scalingengine"
     default: 32
-
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180 
+    description: "Liquibase changelog lock timeout duration in seconds"   
   autoscaler.scalingengine.hooks.pre_start:
     description: "Script to run before starting scalingengine"
     default: ''

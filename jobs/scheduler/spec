@@ -24,7 +24,8 @@ packages:
   - db
   - java
   - common
-
+  - changeloglockcleaner
+  
 properties:
   autoscaler.scheduler.require_consul:
     description: "whether to start consul agent"
@@ -105,7 +106,9 @@ properties:
   autoscaler.scheduler.health.port:
     description: "the listening port of health endpoint"
     default: 6204
-
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180
+    description: "Liquibase changelog lock timeout duration in seconds"   
   autoscaler.scheduler.hooks.pre_start:
     description: "Script to run before starting scheduler"
     default: ''
