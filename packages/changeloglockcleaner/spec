@@ -1,0 +1,11 @@
+---
+name: changeloglockcleaner
+
+dependencies:
+- golang
+
+files:
+
+- changeloglockcleaner/**/*
+- github.com/lib/pq/**/*
+

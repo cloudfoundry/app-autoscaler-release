@@ -33,14 +33,16 @@ USER='<%= role['name'] %>'
 PASSWORD='<%= role['password'] %>'
 PORT='<%= p("autoscaler.binding_db.port") %>'
 SSLMODE='<%= p("autoscaler.binding_db.sslmode") %>'
-DBURI="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
+JDBCDBURL="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
+COMMONDBURL="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 
 <% unless p('autoscaler.binding_db.tls.ca') == "" %>
-DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/servicebroker/config/certs/binding_db/ca.crt"
+JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/servicebroker/config/certs/binding_db/ca.crt"
+COMMONDBURL=$COMMONDBURL"&sslrootcert=/var/vcap/jobs/servicebroker/config/certs/binding_db/ca.crt"
 <% end %>
 
 detect_dns $HOST $PORT
-
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$DBURI" --username=$USER --password=$PASSWORD \
+/var/vcap/packages/changeloglockcleaner/changeloglockcleaner -dburl "$COMMONDBURL" -expired_second 1200
+java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$SERVICEBROKER_DIR/db/servicebroker.db.changelog.json update
 
