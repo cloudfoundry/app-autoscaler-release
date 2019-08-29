@@ -29,7 +29,8 @@ packages:
   - db
   - java
   - common
-
+  - changeloglockcleaner
+  
 properties:
   autoscaler.service_broker.enable_custom_metrics:
     description: "whether to enable custom metrics"
