@@ -35,6 +35,22 @@ PORT='<%= p("autoscaler.lock_db.port") %>'
 
 detect_dns $HOST $PORT
 
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=$operator_DIR/operator.db.changelog.yml update
+set +e
+ret=1
+count=0
+while [ $ret != 0 ]
+do
+# Try is serveral times to avoid errors only because the host wasn't fast enough reachable
+   java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url jdbc:postgresql://$HOST:$PORT/$DBNAME --username=$USER --password=$PASSWORD \
+     --driver=org.postgresql.Driver --changeLogFile=$operator_DIR/operator.db.changelog.yml update
+   ret=$?
+   if [ $ret -eq 0 ]; then
+     exit 0
+   fi
+   let count++
+   sleep 10
+   if [ $count -gt 9 ];then
+     exit $ret
+   fi 
+done
 
