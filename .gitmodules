@@ -1,6 +1,6 @@
 [submodule "src/app-autoscaler"]
 	path = src/app-autoscaler
-	url = https://github.infra.hana.ondemand.com/autoscaler/app-autoscaler.git
+	url = https://github.wdf.sap.corp/autoscaler/app-autoscaler.git
 [submodule "src/github.com/cloudfoundry-incubator/cf-test-helpers"]
 	path = src/github.com/cloudfoundry-incubator/cf-test-helpers
 	url = https://github.com/cloudfoundry-incubator/cf-test-helpers.git
