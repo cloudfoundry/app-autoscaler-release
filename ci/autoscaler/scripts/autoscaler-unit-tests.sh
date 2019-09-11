@@ -1,14 +1,7 @@
 #!/bin/bash
 set -e
 
-service postgresql start
-
-rm -rf /usr/local/var/postgres
-mkdir -p /usr/local/var/postgres
-chown postgres /usr/local/var/postgres
-nohup su - postgres -c "/usr/lib/postgresql/$PG_MAJOR/bin/pg_ctl init -D /usr/local/var/postgres && /usr/lib/postgresql/$PG_MAJOR/bin/postgres -D /usr/local/var/postgres" > pg.log 2>&1 &
-echo "sleep 30 seconds waiting for postgres is ready"
-sleep 30
+pg_ctlcluster 10 main start
 
 psql postgres://postgres@127.0.0.1:5432 -c 'DROP DATABASE IF EXISTS autoscaler'
 psql postgres://postgres@127.0.0.1:5432 -c 'CREATE DATABASE autoscaler'
@@ -42,10 +35,6 @@ popd
 export GOPATH=$PWD
 export PATH=$GOPATH/bin:$PATH
 go install github.com/onsi/ginkgo/ginkgo
-
-curl -L -o ./consul-0.7.5.zip "https://releases.hashicorp.com/consul/0.7.5/consul_0.7.5_linux_amd64.zip"
-unzip ./consul-0.7.5.zip -d $GOPATH/bin
-rm ./consul-0.7.5.zip
 
 DBURL=postgres://postgres@localhost/autoscaler?sslmode=disable ginkgo -r -race -randomizeAllSpecs src/autoscaler
 

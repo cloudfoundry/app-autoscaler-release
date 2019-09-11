@@ -22,7 +22,7 @@ jobs:
 - name: unit-tests
   max_in_flight: 1
   plan:
-  - aggregate:
+  - in_parallel:
     - get: app-autoscaler-release
       trigger: true
     - get: app-autoscaler-ci
@@ -36,7 +36,7 @@ jobs:
 - name: integration-tests
   max_in_flight: 1
   plan:
-  - aggregate:
+  - in_parallel:
     - get: app-autoscaler-release
       passed: [unit-tests]
       trigger: true
@@ -48,7 +48,7 @@ jobs:
   serial_groups:
   - bosh-app-autoscaler
   plan:
-  - aggregate:
+  - in_parallel:
     - get: cf-deployment
       trigger: true
     - get: app-autoscaler-ci
@@ -60,15 +60,13 @@ jobs:
       BOSH_CA: {{bosh-ca}}
       BOSH_USERNAME: {{bosh-username}}
       BOSH_PASSWORD: {{bosh-password}}
-      CF_ADMIN_PASSWORD: {{cf-password}}
-      CF_ADMIN_CLIENT_SECRET: {{cf-secrect}}
         
 
 - name: deploy-autoscaler
   serial_groups:
   - bosh-app-autoscaler
   plan:
-  - aggregate:
+  - in_parallel:
     - get: app-autoscaler-release
       trigger: true
     - get: app-autoscaler-ci
@@ -80,8 +78,6 @@ jobs:
       BOSH_USERNAME: {{bosh-username}}
       BOSH_PASSWORD: {{bosh-password}}
       BOSH_CA: {{bosh-ca}}
-      CF_ADMIN_PASSWORD: {{cf-password}}
-      CF_ADMIN_CLIENT_SECRET: {{cf-secrect}}
 
           
 
@@ -89,7 +85,7 @@ jobs:
   serial_groups:
   - bosh-app-autoscaler
   plan:
-  - aggregate:
+  - in_parallel:
     - get: app-autoscaler-release
       trigger: true
       passed: [deploy-autoscaler]
@@ -101,4 +97,3 @@ jobs:
     privileged: true
     params:
       BOSH_TARGET: {{bosh-lite-ip}}
-      CF_ADMIN_PASSWORD: {{cf-password}}

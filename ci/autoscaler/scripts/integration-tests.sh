@@ -1,14 +1,7 @@
 #!/bin/bash
 set -e
 
-service postgresql start
-
-rm -rf /usr/local/var/postgres
-mkdir -p /usr/local/var/postgres
-chown postgres /usr/local/var/postgres
-nohup su - postgres -c "/usr/lib/postgresql/$PG_MAJOR/bin/pg_ctl init -D /usr/local/var/postgres && /usr/lib/postgresql/$PG_MAJOR/bin/postgres -D /usr/local/var/postgres" > pg.log 2>&1 &
-echo "sleep 30 seconds waiting for postgres is ready\n"
-sleep 30
+pg_ctlcluster 10 main start
 
 psql postgres://postgres@127.0.0.1:5432 -c 'DROP DATABASE IF EXISTS autoscaler'
 psql postgres://postgres@127.0.0.1:5432 -c 'CREATE DATABASE autoscaler'
