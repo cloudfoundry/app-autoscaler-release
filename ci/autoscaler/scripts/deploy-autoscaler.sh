@@ -17,6 +17,20 @@ echo "${BOSH_CA}" > "./bosh_ca"
 bosh -e ${BOSH_TARGET} --ca-cert ./bosh_ca alias-env vbox 
 export BOSH_CLIENT=${BOSH_USERNAME} 
 export BOSH_CLIENT_SECRET=${BOSH_PASSWORD}
+cd app-autoscaler-release
+
+set +e
+autoscalerExists=$(bosh -e vbox releases | grep -c app-autoscaler)
+if [[ $autoscalerExists == 1 ]];then
+    deployedCommitHash=$(bosh -e vbox releases | grep app-autoscaler | awk -F ' ' '{print $3}' | sed 's/\+//g')
+    currentCommitHash=$(git log -1 --pretty=format:"%H")
+    theSame=$(echo ${currentCommitHash} | grep -c ${deployedCommitHash})
+    if [[ $theSame == 1 ]];then
+        echo "the app-autoscaler deployed ${deployedCommitHash} and the current ${currentCommitHash} are the same"
+        exit 0
+    fi
+fi
+set -e
 
 uaac target https://uaa.bosh-lite.com --skip-ssl-validation
 uaac token client get admin -s admin-secret
@@ -33,7 +47,6 @@ else
 	--secret "autoscaler_client_secret"
 fi
 
-cd app-autoscaler-release
 cat >buildin.yml <<-EOF
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=apiserver/properties/autoscaler/api_server/service_offering_enabled
