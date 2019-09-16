@@ -1,11 +1,6 @@
-golang/go1.11.darwin-amd64.tar.gz:
-  size: 124131633
-  object_id: 13198daf-253d-4635-7931-5ac4a495a95c
-  sha: afcfe6d8d18771e2cb431b4a812c66a6f6d46597
-golang/go1.11.linux-amd64.tar.gz:
-  size: 127163815
-  object_id: 192a80d9-925e-44e6-47be-2f1a6dd4f353
-  sha: 8ffb718cab4371df3495d8f6c0b15c7e6dc28fea
+golang/go1.13.linux-amd64.tar.gz:
+  size: 120050424
+  sha: sha256:68a2297eb099d1a76097905a2ce334e3155004ec08cdea85f24527be3c48e856
 maven/apache-maven-3.5.4-bin.tar.gz:
   size: 8842660
   object_id: 09cccf72-1834-4056-517a-b6bcaa503c75
