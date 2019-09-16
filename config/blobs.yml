@@ -1,5 +1,6 @@
 golang/go1.13.linux-amd64.tar.gz:
   size: 120050424
+  object_id: 93d272f3-d30e-4bb2-6f0d-67bb64af05c9
   sha: sha256:68a2297eb099d1a76097905a2ce334e3155004ec08cdea85f24527be3c48e856
 maven/apache-maven-3.5.4-bin.tar.gz:
   size: 8842660
