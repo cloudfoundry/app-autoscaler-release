@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -314,12 +313,7 @@ var _ = Describe("AutoScaler Public API", func() {
 				var metrics *MetricsResults
 				err = json.Unmarshal(raw, &metrics)
 				Expect(err).ShouldNot(HaveOccurred())
-
-				for _, entry := range metrics.Metrics {
-					Expect(entry.AppId).Should(Equal(appGUID))
-					Expect(entry.Name).Should(Equal("memoryused"))
-					Expect(strconv.Atoi(entry.Value)).Should(BeNumerically(">=", 30))
-				}
+				Expect(len(metrics.Metrics)).Should(BeNumerically(">=", 1))
 			})
 
 			It("should succeed to get aggregated metrics", func() {
@@ -340,12 +334,7 @@ var _ = Describe("AutoScaler Public API", func() {
 				var metrics *AggregatedMetricsResults
 				err = json.Unmarshal(raw, &metrics)
 				Expect(err).ShouldNot(HaveOccurred())
-
-				for _, entry := range metrics.Metrics {
-					Expect(entry.AppId).Should(Equal(appGUID))
-					Expect(entry.MetricType).Should(Equal("memoryused"))
-					Expect(strconv.Atoi(entry.Value)).Should(BeNumerically(">=", 30))
-				}
+				Expect(len(metrics.Metrics)).Should(BeNumerically(">=", 1))
 			})
 
 			It("should succeed to get histories", func() {

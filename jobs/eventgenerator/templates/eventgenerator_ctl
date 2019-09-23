@@ -2,12 +2,16 @@
 
 set -e
 
+JOB_DIR=/var/vcap/jobs/eventgenerator
 RUN_DIR=/var/vcap/sys/run/eventgenerator
 LOG_DIR=/var/vcap/sys/log/eventgenerator
 CONF_DIR=/var/vcap/jobs/eventgenerator/config
+HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
+HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=$RUN_DIR/eventgenerator.pid
+COMMON_DIR=/var/vcap/packages/common
 
-source /var/vcap/packages/common/utils.sh
+source $COMMON_DIR/utils.sh
 
 case $1 in
 
@@ -20,12 +24,29 @@ case $1 in
     chown -R vcap:vcap $LOG_DIR
 
     echo $$ > $PIDFILE
-    
+
+    <% unless p("autoscaler.eventgenerator.hooks.pre_start").empty? %>
+    $COMMON_DIR/call-hooks.sh "eventgenerator" "pre-start"
+    <% end %>
+
     exec /var/vcap/packages/eventgenerator/eventgenerator -c $CONF_DIR/eventgenerator.yml >>$LOG_DIR/eventgenerator.stdout.log 2>>$LOG_DIR/eventgenerator.stderr.log
+  
+    <% unless p("autoscaler.eventgenerator.hooks.post_start").empty? %>
+    $COMMON_DIR/call-hooks.sh "eventgenerator" "post-start"
+    <% end %>
+  
     ;;
 
   stop)
+    <% unless p("autoscaler.eventgenerator.hooks.pre_stop").empty? %>
+    $COMMON_DIR/call-hooks.sh "eventgenerator" "pre-stop"
+    <% end %>
+
     kill_and_wait $PIDFILE
+
+    <% unless p("autoscaler.eventgenerator.hooks.post_stop").empty? %>
+    $COMMON_DIR/call-hooks.sh "eventgenerator" "post-stop"
+    <% end %>    
     ;;
 
   *)

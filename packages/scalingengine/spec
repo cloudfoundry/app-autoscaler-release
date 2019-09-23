@@ -60,3 +60,4 @@ files:
 - app-autoscaler/src/golang.org/x/crypto/bcrypt/*.go # gosub
 - app-autoscaler/src/golang.org/x/crypto/blowfish/*.go # gosub
 - app-autoscaler/src/gopkg.in/yaml.v2/*.go # gosub
+- app-autoscaler/src/github.com/cloudfoundry-incubator/uaago/*.go

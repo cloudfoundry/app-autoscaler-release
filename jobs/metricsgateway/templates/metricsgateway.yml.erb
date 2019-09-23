@@ -1,0 +1,54 @@
+<%
+  def p_arr(property)
+    p(property,nil) || []
+  end
+
+  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
+  policy_db_address = p('autoscaler.policy_db.address')
+  policy_db_port = p('autoscaler.policy_db.port')
+  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
+  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
+  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?sslmode=" + p('autoscaler.policy_db.sslmode') 
+  unless p('autoscaler.policy_db.tls.ca') == ""
+    policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/metricsgateway/config/certs/policy_db/ca.crt"
+  end
+
+  metricsserver_sorted_instances=link("metricsserver").instances.sort_by {|i|i.address}
+  metricsserver_addrs=metricsserver_sorted_instances.map{|i| "'wss://#{i.address}:#{link("metricsserver").p('autoscaler.metricsserver.collector.port')}'"}
+  metricsserver_nodeAddrs="[" + metricsserver_addrs.join(",") +"]"  
+
+%>
+
+
+logging:
+  level: <%= p("autoscaler.metricsgateway.logging.level") %>
+envelop_chan_size: <%= p("autoscaler.metricsgateway.envelop_chan_size") %>
+nozzle_count: <%= p("autoscaler.metricsgateway.nozzle_count") %>
+metric_server_addrs: <%= metricsserver_nodeAddrs %>
+app_manager:
+  app_refresh_interval: <%= p("autoscaler.metricsgateway.app_manager.app_refresh_interval") %>
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+emitter:
+  metrics_server_client_tls: 
+    key_file: /var/vcap/jobs/metricsgateway/config/certs/metricsserver_client/server.key
+    cert_file: /var/vcap/jobs/metricsgateway/config/certs/metricsserver_client/server.crt
+    ca_file: /var/vcap/jobs/metricsgateway/config/certs/metricsserver_client/ca.crt
+  buffer_size: <%= p("autoscaler.metricsgateway.emitter.buffer_size") %>
+  keep_alive_interval: <%= p("autoscaler.metricsgateway.emitter.keep_alive_interval") %>
+  handshake_timeout: <%= p("autoscaler.metricsgateway.emitter.handshake_timeout") %>
+  max_setup_retry_count: <%= p("autoscaler.metricsgateway.emitter.max_setup_retry_count") %>
+  max_close_retry_count: <%= p("autoscaler.metricsgateway.emitter.max_close_retry_count") %>
+  retry_delay: <%= p("autoscaler.metricsgateway.emitter.retry_delay") %>
+nozzle:
+  rlp_client_tls:
+    key_file: /var/vcap/jobs/metricsgateway/config/certs/reverselogproxy_client/client.key
+    cert_file: /var/vcap/jobs/metricsgateway/config/certs/reverselogproxy_client/client.crt
+    ca_file: /var/vcap/jobs/metricsgateway/config/certs/reverselogproxy_client/ca.crt
+  rlp_addr: <%= p("autoscaler.metricsgateway.nozzle.rlp_addr") %>
+  shard_id: <%= p("autoscaler.metricsgateway.nozzle.shard_id") %>
+health:
+  port: <%= p("autoscaler.metricsgateway.health.port") %>

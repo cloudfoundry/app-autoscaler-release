@@ -2,18 +2,23 @@
 
 set -e
 
+JOB_DIR=/var/vcap/jobs/metricsforwarder
 RUN_DIR=/var/vcap/sys/run/metricsforwarder
 LOG_DIR=/var/vcap/sys/log/metricsforwarder
 CONF_DIR=/var/vcap/jobs/metricsforwarder/config
+HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
+HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
 PIDFILE=$RUN_DIR/metricsforwarder.pid
+COMMON_DIR=/var/vcap/packages/common
 
-source /var/vcap/packages/common/utils.sh
+source $COMMON_DIR/utils.sh
 
 case $1 in
 
   start)
-    source /var/vcap/jobs/metricsforwarder/bin/environment_variables
     pid_guard $PIDFILE "metricsforwarder"
+
+    ulimit -n 8192
 
     mkdir -p $RUN_DIR
     chown -R vcap:vcap $RUN_DIR
@@ -21,12 +26,29 @@ case $1 in
     chown -R vcap:vcap $LOG_DIR
 
     echo $$ > $PIDFILE
-    
+
+    <% unless p("autoscaler.metricsforwarder.hooks.pre_start").empty? %>
+    $COMMON_DIR/call-hooks.sh "metricsforwarder" "pre-start"
+    <% end %>
+
     exec /var/vcap/packages/metricsforwarder/metricsforwarder -c $CONF_DIR/metricsforwarder.yml >>$LOG_DIR/metricsforwarder.stdout.log 2>>$LOG_DIR/metricsforwarder.stderr.log
+
+    <% unless p("autoscaler.metricsforwarder.hooks.post_start").empty? %>
+    $COMMON_DIR/call-hooks.sh "metricsforwarder" "post-start"
+    <% end %>
     ;;
 
   stop)
+
+    <% unless p("autoscaler.metricsforwarder.hooks.pre_stop").empty? %>
+    $COMMON_DIR/call-hooks.sh "metricsforwarder" "pre-stop"
+    <% end %>
+
     kill_and_wait $PIDFILE
+
+    <% unless p("autoscaler.metricsforwarder.hooks.post_stop").empty? %>
+    $COMMON_DIR/call-hooks.sh "metricsforwarder" "post-stop"
+    <% end %>
     ;;
 
   *)

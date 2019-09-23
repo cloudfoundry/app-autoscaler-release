@@ -19,6 +19,11 @@ templates:
   apiserver_client.crt.erb: config/certs/apiserver/client.crt
   apiserver_client.key.erb: config/certs/apiserver/client.key
   catalog.json.erb: config/catalog.json
+  binding_db_ca.crt.erb: config/certs/binding_db/ca.crt
+  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
+  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
+  hooks/post-start.sh.erb: bin/hooks/post-start.sh
+  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 
 packages:
   - nodejs
@@ -33,16 +38,16 @@ properties:
     default: true
   autoscaler.service_broker.require_consul:
     description: "whether to start consul agent"
-    default: true
+    default: false
   autoscaler.service_broker.publicPort:
     description: "Port where servicebroker public server will run"
     default: 6101
   autoscaler.service_broker.port:
     description: "Port where servicebroker internal server will run"
     default: 6107
-  autoscaler.service_broker.enableCustomMetrics:
-    description: "Flag to enable custom metrics feature"
-    default: false
+  autoscaler.service_broker.health.port:
+    description: "the listening port of health endpoint"
+    default: 6201
   autoscaler.service_broker.ca_cert:
     description: "PEM-encoded CA certificate"
   autoscaler.service_broker.server_cert:
@@ -72,24 +77,35 @@ properties:
   autoscaler.service_broker.password:
     description: "password to authenticate with service broker"
   autoscaler.service_broker.db_config.max_connections:
+    default: 10
     description: "Maximum number of connections that may be held in the serverbroker db pool"
   autoscaler.service_broker.db_config.min_connections:
+    default: 0
     description: "Minimum number of connections that should be held in the servicebroker db pool"
   autoscaler.service_broker.db_config.idle_timeout:
-    description: "The idle timeout for connections (seconds)"
+    default: 60000
+    description: "The idle timeout for connections (milliseconds)"
   autoscaler.service_broker.http_request_timeout:
-    description: "The timeout for http request"
+    default: 60000
+    description: "The timeout for http request (milliseconds)"
   autoscaler.binding_db.address:
     description: "IP address on which the bindingdb server will listen"
-    default: "postgres.service.cf.internal"
+    default: "autoscalerpostgres.service.cf.internal"
   autoscaler.binding_db.databases:
     description: "The list of databases used in bindingdb database including name"
   autoscaler.binding_db.db_scheme:
     description: "Database scheme to be used to access bindingdb"
+    default: postgres    
   autoscaler.binding_db.port:
     description: "Port on which the bindingdb server will listen"
   autoscaler.binding_db.roles:
     description: "The list of database roles used in bindingdb database including name/password"
+  autoscaler.binding_db.tls.ca:
+    default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
+  autoscaler.binding_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
   autoscaler.service_broker.plan:
     description: "The list of autoscaler plans available"
     default:
@@ -153,4 +169,22 @@ properties:
     description: "url to push custom metrics"
     default: ""
 
+  autoscaler.service_broker.hooks.pre_start:
+    description: "Script to run before starting service_broker"
+    default: ''
+    example: |
+      #!/bin/bash
+      echo "Going to start service_broker"
+      echo "service_broker data directory is ${DATA_DIR}"
+      echo "service_broker port is ${PORT}"
+      echo "service_broker directory is ${PACKAGE_DIR}"
+  autoscaler.service_broker.hooks.post_start:
+    description: "Script to run after service_broker has started"
+    default: ''
+  autoscaler.service_broker.hooks.pre_stop:
+    description: "Script to run before stopping service_broker"
+    default: ''
+  autoscaler.service_broker.hooks.post_stop:
+    description: "Script to run after service_broker has stopped"
+    default: ''   
   

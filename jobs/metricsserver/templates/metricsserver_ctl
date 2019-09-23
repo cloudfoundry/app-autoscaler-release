@@ -1,0 +1,57 @@
+#!/bin/bash
+
+set -e
+
+JOB_DIR=/var/vcap/jobs/metricsserver
+RUN_DIR=/var/vcap/sys/run/metricsserver
+LOG_DIR=/var/vcap/sys/log/metricsserver
+CONF_DIR=/var/vcap/jobs/metricsserver/config
+HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
+HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
+PIDFILE=$RUN_DIR/metricsserver.pid
+COMMON_DIR=/var/vcap/packages/common
+
+source $COMMON_DIR/utils.sh
+
+case $1 in
+
+  start)
+    pid_guard $PIDFILE "metricsserver"
+
+    ulimit -n 8192
+
+    mkdir -p $RUN_DIR
+    chown -R vcap:vcap $RUN_DIR
+    mkdir -p $LOG_DIR
+    chown -R vcap:vcap $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+    <% unless p("autoscaler.metricsserver.hooks.pre_start").empty? %>
+    $COMMON_DIR/call-hooks.sh "metricsserver" "pre-start"
+    <% end %>
+
+    exec /var/vcap/packages/metricsserver/metricsserver -c $CONF_DIR/metricsserver.yml >>$LOG_DIR/metricsserver.stdout.log 2>>$LOG_DIR/metricsserver.stderr.log
+
+    <% unless p("autoscaler.metricsserver.hooks.post_start").empty? %>
+    $COMMON_DIR/call-hooks.sh "metricsserver" "post-start"
+    <% end %>
+    ;;
+
+  stop)
+
+    <% unless p("autoscaler.metricsserver.hooks.pre_stop").empty? %>
+    $COMMON_DIR/call-hooks.sh "metricsserver" "pre-stop"
+    <% end %>
+
+    kill_and_wait $PIDFILE
+
+    <% unless p("autoscaler.metricsserver.hooks.post_stop").empty? %>
+    $COMMON_DIR/call-hooks.sh "metricsserver" "post-stop"
+    <% end %>
+    ;;
+
+  *)
+  echo "Usage: metricsserver_ctl {start|stop}" ;;
+esac
+exit 0
