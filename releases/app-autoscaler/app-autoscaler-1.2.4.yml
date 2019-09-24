@@ -1,0 +1,108 @@
+name: app-autoscaler
+version: 1.2.4
+commit_hash: 26ac38a
+uncommitted_changes: true
+jobs:
+- name: apiserver
+  version: 0086a2b416453facc00163059419db491e1d43c7
+  fingerprint: 0086a2b416453facc00163059419db491e1d43c7
+  sha1: 359daabb44c6db78cd1cfb73bbbaa859afed86d5
+- name: eventgenerator
+  version: 85a12624bb988ec084472cab1bdad2c08edf43c6
+  fingerprint: 85a12624bb988ec084472cab1bdad2c08edf43c6
+  sha1: cbf6f226e4692ddbbd92bad20cd4c6c48489fcb1
+- name: metricscollector
+  version: 9e7b8cbafda0895f6ed2b303a40c3ea8e64a7f30
+  fingerprint: 9e7b8cbafda0895f6ed2b303a40c3ea8e64a7f30
+  sha1: 6cf0fac3d9dc70606b2de9cac80242d0f057d04f
+- name: operator
+  version: 4a7dfd57311eecf5291467ce3ba4c04ea04465a4
+  fingerprint: 4a7dfd57311eecf5291467ce3ba4c04ea04465a4
+  sha1: d0dbe7c9dfa001d77e82fef9440d04fafc373bd9
+- name: scalingengine
+  version: 3fe4e81d01fc80b8c7a873ae83e1d588bebd34d1
+  fingerprint: 3fe4e81d01fc80b8c7a873ae83e1d588bebd34d1
+  sha1: a7d5d1dabef6c23245efd9147da94fe6e24ad3af
+- name: scheduler
+  version: 6a4a85d852030702693195f82a0845683aa193a0
+  fingerprint: 6a4a85d852030702693195f82a0845683aa193a0
+  sha1: 8cb83dd550497b0978418d181efef907967ca0af
+- name: servicebroker
+  version: 2a6cf8e10d1c43f5389fc04a22a6cb8e264f3656
+  fingerprint: 2a6cf8e10d1c43f5389fc04a22a6cb8e264f3656
+  sha1: 3cc1edd1c099f71c3c87643960612c09d094557b
+packages:
+- name: apiserver
+  version: 892517055580a4e8b8a237041eb5ee42ef583dbf
+  fingerprint: 892517055580a4e8b8a237041eb5ee42ef583dbf
+  sha1: fcc59d09e87b67f5e927a5e1cfff0f2f8c412ef7
+  dependencies: []
+- name: changeloglockcleaner
+  version: 370782d5319265fe45dbb623622e3dc1ca1e7a8a
+  fingerprint: 370782d5319265fe45dbb623622e3dc1ca1e7a8a
+  sha1: 5cb73484e0d59b51092e037bc1363cdef357a48c
+  dependencies:
+  - golang
+- name: common
+  version: 39f5b95f8749b5ce33f6d1f3a8a4ad0deba6b8d0
+  fingerprint: 39f5b95f8749b5ce33f6d1f3a8a4ad0deba6b8d0
+  sha1: 28bda166d1eb8ba6f6ed02891332151962d217a5
+  dependencies: []
+- name: db
+  version: 412ce8ffb6e98ccd3cee891314fc8779c330d827
+  fingerprint: 412ce8ffb6e98ccd3cee891314fc8779c330d827
+  sha1: b8688e04d713c311ca81a4d931c88436daa7bb5b
+  dependencies: []
+- name: eventgenerator
+  version: 36ec2e7e9578782de5b072adbf6840e883eff85f
+  fingerprint: 36ec2e7e9578782de5b072adbf6840e883eff85f
+  sha1: 46f511c561162b1bea3d2a2ab007a6ea15f512b1
+  dependencies:
+  - golang
+- name: golang
+  version: 5468bfb774131c202f0bbcfb254312268086ceb1
+  fingerprint: 5468bfb774131c202f0bbcfb254312268086ceb1
+  sha1: 8ed8a622d121e2b0ec7fef096afcfb8a62f54909
+  dependencies: []
+- name: java
+  version: f5351e174a5ecd441d096008e1d00bfef8921bfb
+  fingerprint: f5351e174a5ecd441d096008e1d00bfef8921bfb
+  sha1: 383168a7fdd456aa01819c64894f24fb38a06ec3
+  dependencies: []
+- name: metricscollector
+  version: 248b250b248c2334fd512df698f024dfab82639d
+  fingerprint: 248b250b248c2334fd512df698f024dfab82639d
+  sha1: 0989dd1dc6a29cd06931fb853e60a81ae8e912b1
+  dependencies:
+  - golang
+- name: nodejs
+  version: b853162bf1b8c2008affac4861f2569b99e2c9bc
+  fingerprint: b853162bf1b8c2008affac4861f2569b99e2c9bc
+  sha1: 0f3d807939e65f93d200a4f2bcb70f8b251efdf3
+  dependencies: []
+- name: operator
+  version: ad314c58ce60380ab36ef4bebfc5fcf2c8c929b4
+  fingerprint: ad314c58ce60380ab36ef4bebfc5fcf2c8c929b4
+  sha1: 54c5719844f0e4e721cd591150ee5015cfa0b6ae
+  dependencies:
+  - golang
+- name: scalingengine
+  version: d982647d17fc541262e4ad2b83f70af32090befe
+  fingerprint: d982647d17fc541262e4ad2b83f70af32090befe
+  sha1: 7c4b93af94f67f17fb3f1f8ce9f718de552b8854
+  dependencies:
+  - golang
+- name: scheduler
+  version: fac3597cae26fb8ca195ebcf1d112f8514d58143
+  fingerprint: fac3597cae26fb8ca195ebcf1d112f8514d58143
+  sha1: aa459e061d7c7fb5a666558addb6cb813015c418
+  dependencies: []
+- name: servicebroker
+  version: c931d36bb5495ff1d445fcc8c63e1f5729ebe92b
+  fingerprint: c931d36bb5495ff1d445fcc8c63e1f5729ebe92b
+  sha1: 4cbc711391a738c5053fdd936f28689383ab9b5e
+  dependencies: []
+license:
+  version: 48b61b4116b8f3c1f4ac32fc3d3c5b7821d576b0
+  fingerprint: 48b61b4116b8f3c1f4ac32fc3d3c5b7821d576b0
+  sha1: ddf78daa493dc7ba90543df41c264a950165ac31
