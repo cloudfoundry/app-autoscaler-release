@@ -1,0 +1,10 @@
+<% 
+  params = {
+    'name' => p('autoscaler.apiserver.info.name'),
+    'build' => p('autoscaler.apiserver.info.build'),
+    'support' => p('autoscaler.apiserver.info.support_url'),
+    'description' => p('autoscaler.apiserver.info.description'),
+  }
+%>
+
+<%=JSON.pretty_generate(params, :indentation => 2)%> 
