@@ -10,7 +10,7 @@
   database = p_arr('autoscaler.binding_db.databases').find { |database| database['tag'] == 'bindingdb' or database['tag'] == 'default'} 
   apiserver_host = p('autoscaler.service_broker.api_server.host')
   apiserver_port = p('autoscaler.service_broker.api_server.port')
-  db_uri = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?sslmode=" + p('autoscaler.binding_db.sslmode') 
+  db_uri = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?application_name=servicebroker&sslmode=" + p('autoscaler.binding_db.sslmode') 
 
   unless p('autoscaler.binding_db.tls.ca') == ""
     db_uri = db_uri + "&sslrootcert=/var/vcap/jobs/servicebroker/config/certs/binding_db/ca.crt"

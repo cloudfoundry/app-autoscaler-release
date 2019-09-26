@@ -18,6 +18,14 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.162.0
   sha1: f17cf09d2414f5f486d18bbd57b17fd48fb69773
   version: '0.162.0'
+- name: loggregator-agent
+  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=3.9
+  version: "3.9"
+  sha1: bf723af956a61c7b51db0ba535c871bad24dd289
+- name: bpm
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.0
+  version: 1.1.0
+  sha1: 82e83a5e8ebd6e07f6ca0765e94eb69e03324a19
 addons:
 - name: bosh-dns-aliases
   include:
@@ -212,11 +220,11 @@ instance_groups:
         appmetrics_db: *database
         instancemetrics_db: *database
         scalingengine_db: *database
-        lock_db: *database
         policy_db_connection_config: *databaseConnectionConfig
         appmetrics_db_connection_config: *databaseConnectionConfig
         instancemetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db_connection_config: *databaseConnectionConfig
+        lock_db: *database
         lock_db_connection_config: *databaseConnectionConfig
         operator:
           app_sync_interval: 24h
@@ -387,25 +395,33 @@ instance_groups:
     max_in_flight: 1
     serial: true
   jobs:
-  - name: apiserver
+  - name: golangapiserver
     release: app-autoscaler
     properties:
       autoscaler:
-        api_server:
-          cache_ttl: 600
-          http_client_timeout: 60000
-          service_offering_enabled: true
-          db_config: &db_config
-            idle_timeout: 60000
-            max_connections: 10
-            min_connections: 0
-          port: 6100
-          publicPort: &apiServerPublicPort 6106
-          health:
-            port: 6200
-          ca_cert: ((apiserver_ca.ca))
-          server_cert: ((apiserver_server.certificate))
-          server_key:  ((apiserver_server.private_key))
+        apiserver:
+          logging:
+            level: info
+          broker:
+            server:
+              port: 6102
+              catalog: 
+                services:
+                - id: autoscaler-guid
+                  name: autoscaler
+                  description: Automatically increase or decrease the number of application instances based on a policy you define.
+                  bindable: true
+                  plans:
+                  - id: autoscaler-free-plan-id
+                    name: autoscaler-free-plan
+                    description: This is the free service plan for the Auto-Scaling service.
+              dashboard_redirect_uri: ""
+            username: autoscaler_service_broker_user
+            password: ((autoscaler_service_broker_password))
+          public_api:
+            server:
+              port: 6101
+          use_buildin_mode: false
           scheduler:
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
@@ -420,52 +436,40 @@ instance_groups:
             ca_cert: ((metricsserver_ca.ca))
             client_cert: ((metricsserver_client.certificate))
             client_key: ((metricsserver_client.private_key))
-          eventgenerator:
+          event_generator:
             ca_cert: ((eventgenerator_ca.ca))
             client_cert: ((eventgenerator_client.certificate))
-            client_key: ((eventgenerator_client.private_key))               
-          service_broker:
-            ca_cert: ((servicebroker_ca.ca))
-            client_cert: ((servicebroker_client.certificate))
-            client_key: ((servicebroker_client.private_key))
+            client_key: ((eventgenerator_client.private_key)) 
+          metrics_forwarder: 
+            host: autoscalermetrics.((system_domain))              
         policy_db: *database
+        policy_db_connection_config: *databaseConnectionConfig
+        binding_db: *database
+        binding_db_connection_config: *databaseConnectionConfig
         cf: *cf_credentials
-  - name: servicebroker
+  - name: metricsforwarder
     release: app-autoscaler
     properties:
       autoscaler:
-        service_broker: 
-          enable_custom_metrics: true
-          db_config: *db_config
-          publicPort : &servicebrokerPort 6101
-          port: 6107
-          health:
+        metricsforwarder:
+          logging:
+            level: info
+          server:
             port: 6201
-          ca_cert: ((servicebroker_ca.ca))
-          server_cert: ((servicebroker_server.certificate))
-          server_key: ((servicebroker_server.private_key))
-          public_ca_cert: ((servicebroker_public_ca.ca))
-          public_server_cert: ((servicebroker_public_server.certificate))
-          public_server_key: ((servicebroker_public_server.private_key))
-          username: autoscaler_service_broker_user
-          password: ((autoscaler_service_broker_password))
-          http_request_timeout: 5000
-          dashboard_redirect_uri: ""
-          catalog: 
-            services:
-            - id: autoscaler-guid
-              name: autoscaler
-              description: Automatically increase or decrease the number of application instances based on a policy you define.
-              bindable: true
-              plans:
-              - id: autoscaler-free-plan-id
-                name: autoscaler-free-plan
-                description: This is the free service plan for the Auto-Scaling service.
-          api_server:
-            ca_cert: ((apiserver_ca.ca))
-            client_cert: ((apiserver_client.certificate))
-            client_key: ((apiserver_client.private_key))
-        binding_db: *database
+          loggregator:
+            metron_address: "127.0.0.1:3458"
+            tls:
+              ca_cert: ((loggregator_tls_agent.ca))
+              cert: ((loggregator_tls_agent.certificate))
+              key: ((loggregator_tls_agent.private_key))
+          require_consule: false
+          cache_ttl: 900s
+          cache_cleanup_interval: 6h
+          policy_poller_interval: 60s
+          health:
+            port: 6403
+        policy_db: *database
+        policy_db_connection_config: *databaseConnectionConfig
   - name: route_registrar
     release: routing
     consumes:
@@ -473,21 +477,40 @@ instance_groups:
     properties:
       route_registrar:
         routes:
-        - name: api_server_public_api
+        - name: api_server
           registration_interval: 20s
-          port: *apiServerPublicPort
+          port: 6101
           tags:
             component: api_server
           uris:
             - autoscaler.((system_domain))
         - name: autoscaler_service_broker
           registration_interval: 20s
-          port: *servicebrokerPort
+          port: 6102
           tags:
             component: autoscaler_service_broker
           uris:
             - autoscalerservicebroker.((system_domain))
-
+        - name: autoscaler_metrics_forwarder
+          registration_interval: 20s
+          port: 6201
+          tags:
+            component: autoscaler_metrics_forwarder
+          uris:
+            - autoscalermetrics.((system_domain))
+  - name: bpm
+    release: bpm
+  - name: loggregator_agent
+    release: loggregator-agent
+    consumes:
+      doppler: {from: doppler, deployment: cf}
+    properties:
+      loggregator:
+        tls:
+          ca_cert: ((loggregator_ca.certificate))
+          agent:
+            cert: ((loggregator_tls_agent.certificate))
+            key: ((loggregator_tls_agent.private_key))
 
 variables:
 - name: database_password
