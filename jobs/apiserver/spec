@@ -41,6 +41,7 @@ packages:
   - db
   - java
   - common
+  - changeloglockcleaner
 
 properties:
   autoscaler.api_server.cache_ttl:
@@ -220,6 +221,9 @@ properties:
   autoscaler.cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180 
+    description: "Liquibase changelog lock timeout duration in seconds"
 
   autoscaler.cf.auth_endpoint:
     description: "the Cloud Foundry Auth endpoint"

@@ -1,0 +1,57 @@
+#!/bin/bash
+
+set -e
+
+JOB_DIR=/var/vcap/jobs/golangapiserver
+RUN_DIR=/var/vcap/sys/run/golangapiserver
+LOG_DIR=/var/vcap/sys/log/golangapiserver
+CONF_DIR=/var/vcap/jobs/golangapiserver/config
+HOOK_LOG_OUT=${LOG_DIR}/hooks.stdout.log
+HOOK_LOG_ERR=${LOG_DIR}/hooks.stderr.log
+PIDFILE=$RUN_DIR/golangapiserver.pid
+COMMON_DIR=/var/vcap/packages/common
+
+source $COMMON_DIR/utils.sh
+
+case $1 in
+
+  start)
+    pid_guard $PIDFILE "golangapiserver"
+
+    ulimit -n 8192
+
+    mkdir -p $RUN_DIR
+    chown -R vcap:vcap $RUN_DIR
+    mkdir -p $LOG_DIR
+    chown -R vcap:vcap $LOG_DIR
+
+    echo $$ > $PIDFILE
+
+    <% unless p("autoscaler.apiserver.hooks.pre_start").empty? %>
+    $COMMON_DIR/call-hooks.sh "golangapiserver" "pre-start"
+    <% end %>
+
+    exec /var/vcap/packages/golangapiserver/api -c $CONF_DIR/apiserver.yml >>$LOG_DIR/golangapiserver.stdout.log 2>>$LOG_DIR/golangapiserver.stderr.log
+
+    <% unless p("autoscaler.apiserver.hooks.post_start").empty? %>
+    $COMMON_DIR/call-hooks.sh "golangapiserver" "post-start"
+    <% end %>
+    ;;
+
+  stop)
+
+    <% unless p("autoscaler.apiserver.hooks.pre_stop").empty? %>
+    $COMMON_DIR/call-hooks.sh "golangapiserver" "pre-stop"
+    <% end %>
+
+    kill_and_wait $PIDFILE
+
+    <% unless p("autoscaler.apiserver.hooks.post_stop").empty? %>
+    $COMMON_DIR/call-hooks.sh "golangapiserver" "post-stop"
+    <% end %>
+    ;;
+
+  *)
+  echo "Usage: apiserver_ctl {start|stop}" ;;
+esac
+exit 0

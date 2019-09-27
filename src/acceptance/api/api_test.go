@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 
 	. "acceptance/helpers"
@@ -141,7 +140,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(Equal(strings.TrimSpace(policy)))
+			Expect(string(raw)).Should(Equal(policy))
 
 		})
 
@@ -161,7 +160,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.StatusCode).To(Equal(400))
-			Expect(string(raw)).Should(ContainSubstring("instance.instance_min_count must have a minimum value of 1"))
+			Expect(string(raw)).Should(ContainSubstring(`[{"context":"(root).instance_min_count","description":"Must be greater than or equal to 1"}]`))
 		})
 
 	})
@@ -215,7 +214,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(Equal(strings.TrimSpace(policy)))
+			Expect(string(raw)).Should(Equal(policy))
 		})
 
 		It("should succeed to update a valid policy", func() {
@@ -238,7 +237,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(Equal(strings.TrimSpace(newpolicy)))
+			Expect(string(raw)).Should(Equal(newpolicy))
 
 		})
 
@@ -277,7 +276,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(Equal(strings.TrimSpace(policy)))
+			Expect(string(raw)).Should(Equal(policy))
 
 		})
 

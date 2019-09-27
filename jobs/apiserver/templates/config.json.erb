@@ -18,7 +18,7 @@
   eventgenerator_host = p('autoscaler.api_server.eventgenerator.host')
   eventgenerator_port = p('autoscaler.api_server.eventgenerator.port')
   service_offering_enabled = p('autoscaler.api_server.service_offering_enabled')
-  db_uri = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?sslmode=" + p('autoscaler.policy_db.sslmode') 
+  db_uri = db_scheme + "://" + role['name'] + ":" + role['password'] + "@" + address + ":" + db_port.to_s + "/" + database['name'] + "?application_name=apiserver&sslmode=" + p('autoscaler.policy_db.sslmode') 
   unless p('autoscaler.policy_db.tls.ca') == ""
     db_uri = db_uri + "&sslrootcert=/var/vcap/jobs/apiserver/config/certs/policy_db/ca.crt"
   end

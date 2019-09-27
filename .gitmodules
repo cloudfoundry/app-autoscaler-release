@@ -16,3 +16,6 @@
 [submodule "src/gopkg.in/yaml.v2"]
 	path = src/gopkg.in/yaml.v2
 	url = https://gopkg.in/yaml.v2
+[submodule "src/github.com/lib/pq"]
+	path = src/github.com/lib/pq
+	url = https://github.com/lib/pq
