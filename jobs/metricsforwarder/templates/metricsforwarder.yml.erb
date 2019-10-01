@@ -13,6 +13,15 @@
     policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/metricsforwarder/config/certs/policy_db/ca.crt"
   end
 
+  sbss_db_scheme = p('autoscaler.sbss_db.db_scheme')
+  sbss_db_address = p('autoscaler.sbss_db.address')
+  sbss_db_port = p('autoscaler.sbss_db.port')
+  sbss_db_role = p_arr('autoscaler.sbss_db.roles').find { |role| role['tag'] == 'sbssdb' }
+  sbss_db_database = p_arr('autoscaler.sbss_db.databases').find { |database| database['tag'] == 'sbssdb' or database['tag'] == 'default' }
+  sbss_db_url = sbss_db_scheme + "://" + sbss_db_role['name'] + ":" + sbss_db_role['password'] + "@" + sbss_db_address + ":" + sbss_db_port.to_s + "/" + sbss_db_database['name'] + "?application_name=metricsforwarder&sslmode=" + p('autoscaler.sbss_db.sslmode') 
+  unless p('autoscaler.sbss_db.tls.ca') == ""
+    sbss_db_url = sbss_db_url + "&sslrootcert=/var/vcap/jobs/metricsforwarder/config/certs/sbss_db/ca.crt"
+  end
 %>
 
 server:
@@ -31,6 +40,11 @@ db:
     max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+  sbss_db:
+    url: <%= sbss_db_url %>
+    max_open_connections: <%= p("autoscaler.sbss_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.sbss_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.sbss_db_connection_config.connection_max_lifetime") %>
 cache_ttl: <%= p("autoscaler.metricsforwarder.cache_ttl") %>
 cache_cleanup_interval: <%= p("autoscaler.metricsforwarder.cache_cleanup_interval") %>
 policy_poller_interval: <%= p("autoscaler.metricsforwarder.policy_poller_interval") %>
