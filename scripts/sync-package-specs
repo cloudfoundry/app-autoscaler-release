@@ -18,7 +18,7 @@ function sync_package() {
     {
       cat spec | grep -v '# gosub'
       gosub list "$@" | \
-        sed -e 's|\(.*\)|- app-autoscaler/src/\1/*.go # gosub|g'
+        sed -e 's|\(.*\)|- app-autoscaler/src/\1/* # gosub|g'
     } > spec.new
 
     mv spec.new spec
@@ -28,10 +28,14 @@ function sync_package() {
 export PATH=$GOPATH/bin:$PATH
 export GOPATH=$PWD/src/app-autoscaler
 
-sync_package metricscollector -app  autoscaler/metricscollector/... &
 sync_package eventgenerator -app  autoscaler/eventgenerator/... &
-sync_package scalingengine -app  autoscaler/scalingengine/... &
+sync_package golangapiserver -app autoscaler/api/... &
+sync_package metricscollector -app  autoscaler/metricscollector/... &
+sync_package metricsforwarder -app autoscaler/metricsforwarder/... &
+sync_package metricsgateway -app autoscaler/metricsgateway/... &
+sync_package metricsserver -app autoscaler/metricsserver/... &
 sync_package operator -app  autoscaler/operator/... &
+sync_package scalingengine -app  autoscaler/scalingengine/... &
 
 wait
 
