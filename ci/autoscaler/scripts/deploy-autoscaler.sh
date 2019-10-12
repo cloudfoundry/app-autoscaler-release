@@ -29,7 +29,12 @@ if [[ $autoscalerExists == 1 ]];then
         echo "the app-autoscaler deployed ${deployedCommitHash} and the current ${currentCommitHash} are the same"
         exit 0
     fi
+else
+    release_version=$(git log --pretty=format:"%H" -1)
+    bosh create-release --force --version=${release_version}\
+    && bosh -e vbox upload-release
 fi
+
 set -e
 
 uaac target https://uaa.bosh-lite.com --skip-ssl-validation
