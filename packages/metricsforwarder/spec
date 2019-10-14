@@ -16,6 +16,7 @@ files:
 - app-autoscaler/src/autoscaler/metricsforwarder/server/* # gosub
 - app-autoscaler/src/autoscaler/metricsforwarder/testhelpers/* # gosub
 - app-autoscaler/src/autoscaler/models/* # gosub
+- app-autoscaler/src/autoscaler/ratelimiter/* # gosub
 - app-autoscaler/src/autoscaler/routes/* # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/* # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/handlers/* # gosub
@@ -35,6 +36,7 @@ files:
 - app-autoscaler/src/github.com/golang/protobuf/ptypes/struct/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/ptypes/timestamp/* # gosub
 - app-autoscaler/src/github.com/gorilla/mux/* # gosub
+- app-autoscaler/src/github.com/juju/ratelimit/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub
 - app-autoscaler/src/github.com/lib/pq/scram/* # gosub

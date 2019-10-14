@@ -40,7 +40,7 @@ java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$J
 --driver=org.postgresql.Driver --changeLogFile=$API_DIR/api.db.changelog.yml update
 
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=$API_DIR/servicebroker.db.changelog.json update
+--driver=org.postgresql.Driver --changeLogFile=$API_DIR/servicebroker.db.changelog.yaml update
 
 
 
