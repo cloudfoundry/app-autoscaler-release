@@ -30,6 +30,7 @@ files:
 - app-autoscaler/src/github.com/gorilla/mux/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub
+- app-autoscaler/src/github.com/lib/pq/scram/* # gosub
 - app-autoscaler/src/github.com/matttproud/golang_protobuf_extensions/pbutil/* # gosub
 - app-autoscaler/src/github.com/nu7hatch/gouuid/* # gosub
 - app-autoscaler/src/github.com/prometheus/client_golang/prometheus/* # gosub
