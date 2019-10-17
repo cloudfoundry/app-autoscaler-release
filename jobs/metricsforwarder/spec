@@ -79,11 +79,17 @@ properties:
   autoscaler.metricsforwarder.policy_poller_interval:
     description: "The time interval to refresh cached policies from policy database"
     default: 60s
-
   
   autoscaler.metricsforwarder.health.port:
     description: "The listening port of health endpoint"
     default: 6403
+
+  autoscaler.metricsforwarder.rate_limit.valid_duration:
+    description: "Accept at most 10(max_amount) requests every 1s(valid_duration)"
+    default: 1s
+  autoscaler.metricsforwarder.rate_limit.max_amount:
+    description: "Accept at most 10(max_amount) requests every 1s(valid_duration)"
+    default: 10
 
   autoscaler.metricsforwarder.hooks.pre_start:
     description: "Script to run before starting metricsforwarder"
