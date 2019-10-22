@@ -19,8 +19,8 @@ files:
 - app-autoscaler/src/autoscaler/cf/* # gosub
 - app-autoscaler/src/autoscaler/db/* # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/* # gosub
-- app-autoscaler/src/autoscaler/helpers/* # gosub
 - app-autoscaler/src/autoscaler/healthendpoint/* # gosub
+- app-autoscaler/src/autoscaler/helpers/* # gosub
 - app-autoscaler/src/autoscaler/models/* # gosub
 - app-autoscaler/src/autoscaler/routes/* # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/* # gosub
@@ -30,13 +30,11 @@ files:
 - app-autoscaler/src/code.cloudfoundry.org/lager/* # gosub
 - app-autoscaler/src/github.com/beorn7/perks/quantile/* # gosub
 - app-autoscaler/src/github.com/cloudfoundry-incubator/uaago/* # gosub
-- app-autoscaler/src/github.com/gorilla/mux/* # gosub
-- app-autoscaler/src/github.com/gogo/protobuf/gogoproto/* # gosub
-- app-autoscaler/src/github.com/gogo/protobuf/proto/* # gosub
-- app-autoscaler/src/github.com/gogo/protobuf/protoc-gen-gogo/descriptor/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/proto/* # gosub
+- app-autoscaler/src/github.com/gorilla/mux/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub
+- app-autoscaler/src/github.com/lib/pq/scram/* # gosub
 - app-autoscaler/src/github.com/matttproud/golang_protobuf_extensions/pbutil/* # gosub
 - app-autoscaler/src/github.com/nu7hatch/gouuid/* # gosub
 - app-autoscaler/src/github.com/prometheus/client_golang/prometheus/* # gosub
