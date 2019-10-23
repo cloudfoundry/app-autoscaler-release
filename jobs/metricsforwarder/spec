@@ -85,10 +85,10 @@ properties:
     default: 6403
 
   autoscaler.metricsforwarder.rate_limit.valid_duration:
-    description: "Accept at most 10(max_amount) requests every 1s(valid_duration)"
+    description: "The rate limit evaluation duration"
     default: 1s
   autoscaler.metricsforwarder.rate_limit.max_amount:
-    description: "Accept at most 10(max_amount) requests every 1s(valid_duration)"
+    description: "The number of requests accepted by rate limit"
     default: 10
 
   autoscaler.metricsforwarder.hooks.pre_start:

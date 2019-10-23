@@ -224,10 +224,10 @@ properties:
     description: "Liquibase changelog lock timeout duration in seconds"
 
   autoscaler.apiserver.rate_limit.valid_duration:
-    description: "Accept at most 10(max_amount) requests every 1s(valid_duration)"
+    description: "The rate limit evaluation duration"
     default: 1s
   autoscaler.apiserver.rate_limit.max_amount:
-    description: "Accept at most 10(max_amount) requests every 1s(valid_duration)"
+    description: "The number of requests accepted by rate limit"
     default: 10
     
   autoscaler.apiserver.hooks.pre_start:
