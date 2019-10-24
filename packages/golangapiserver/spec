@@ -22,6 +22,7 @@ files:
 - app-autoscaler/src/autoscaler/healthendpoint/* # gosub
 - app-autoscaler/src/autoscaler/helpers/* # gosub
 - app-autoscaler/src/autoscaler/models/* # gosub
+- app-autoscaler/src/autoscaler/ratelimiter/* # gosub
 - app-autoscaler/src/autoscaler/routes/* # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/* # gosub
 - app-autoscaler/src/code.cloudfoundry.org/cfhttp/handlers/* # gosub
@@ -32,6 +33,7 @@ files:
 - app-autoscaler/src/github.com/cloudfoundry-incubator/uaago/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/proto/* # gosub
 - app-autoscaler/src/github.com/gorilla/mux/* # gosub
+- app-autoscaler/src/github.com/juju/ratelimit/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub
 - app-autoscaler/src/github.com/lib/pq/scram/* # gosub
