@@ -1,0 +1,254 @@
+---
+name: golangapiserver
+
+templates:
+  apiserver_ctl.erb: bin/apiserver_ctl
+  apiserver.yml.erb: config/apiserver.yml
+  pre-start.erb: bin/pre-start
+
+  info.json.erb: config/info.json
+  catalog.json.erb: config/catalog.json
+
+  apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
+  apiserver_server.crt.erb: config/certs/apiserver/server.crt
+  apiserver_server.key.erb: config/certs/apiserver/server.key
+
+  brokerserver_ca.crt.erb: config/certs/brokerserver/ca.crt
+  brokerserver.crt.erb: config/certs/brokerserver/server.crt
+  brokerserver.key.erb: config/certs/brokerserver/server.key
+
+  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
+  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
+  scalingengine_client.key.erb: config/certs/scalingengine/client.key
+
+  scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
+  scheduler_client.crt.erb: config/certs/scheduler/client.crt
+  scheduler_client.key.erb: config/certs/scheduler/client.key
+
+  metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
+  metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
+  metricscollector_client.key.erb: config/certs/metricscollector/client.key
+
+  eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
+  eventgenerator_client.crt.erb: config/certs/eventgenerator/client.crt
+  eventgenerator_client.key.erb: config/certs/eventgenerator/client.key
+
+  policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
+  binding_db_ca.crt.erb: config/certs/binding_db/ca.crt
+
+  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
+  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
+  hooks/post-start.sh.erb: bin/hooks/post-start.sh
+  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
+
+packages:
+  - golang
+  - golangapiserver
+  - db
+  - java
+  - common
+  - changeloglockcleaner
+  
+properties:
+  autoscaler.apiserver.logging.level:
+    description: "the level of logging"
+    default: "info"
+
+  autoscaler.apiserver.broker.server.port:
+    description: "Port where broker server will run"
+    default: 6101
+  autoscaler.apiserver.broker.server.ca_cert:
+    description: "PEM-encoded CA certificate"
+  autoscaler.apiserver.broker.server.server_cert:
+    description: "PEM-encoded server certificate"
+  autoscaler.apiserver.broker.server.server_key:
+    description: "PEM-encoded server key"
+
+  autoscaler.apiserver.broker.username:
+    description: "username to authenticate with service broker"
+  autoscaler.apiserver.broker.password:
+    description: "password to authenticate with service broker"
+  autoscaler.apiserver.broker.server.catalog:
+    description: ""
+  autoscaler.apiserver.broker.server.dashboard_redirect_uri:
+    description: ""
+
+  autoscaler.apiserver.public_api.server.port:
+    description: "Port where broker server will run"
+    default: 6102
+  autoscaler.apiserver.public_api.server.ca_cert:
+    description: "PEM-encoded CA certificate"
+  autoscaler.apiserver.public_api.server.server_cert:
+    description: "PEM-encoded server certificate"
+  autoscaler.apiserver.public_api.server.server_key:
+    description: "PEM-encoded server key"
+
+  
+  autoscaler.apiserver.health.port:
+    default: 1080
+  autoscaler.apiserver.use_buildin_mode:
+    default: true
+    description: ""
+  autoscaler.apiserver.info.name:
+    description: "Name of the autoscaler application to be shown in /info path"
+    default: "Autoscaler"
+  autoscaler.apiserver.info.build:
+    description: "Autoscaler application build number"
+    default: "3.0.0"
+  autoscaler.apiserver.info.support_url:
+    description: "Autoscaler application support page URL"
+    default: "https://github.com/cloudfoundry/app-autoscaler"
+  autoscaler.apiserver.info.description:
+    description: "Autoscaler application short description"
+    default: "Automatically increase or decrease the number of application instances based on a policy you define."
+
+  autoscaler.apiserver.scheduler.host:
+    description: "Host where scheduler is running"
+    default: "autoscalerscheduler.service.cf.internal"
+  autoscaler.apiserver.scheduler.port:
+    description: "Port where scheduler will listen"
+    default: 6102
+  autoscaler.apiserver.scheduler.ca_cert:
+    description: "PEM-encoded CA certificate"
+  autoscaler.apiserver.scheduler.client_cert:
+    description: "PEM-encoded client certificate"
+  autoscaler.apiserver.scheduler.client_key:
+    description: "PEM-encoded client key"
+
+  autoscaler.apiserver.scaling_engine.host:
+    description: "Host where scalingengine is running"
+    default: "scalingengine.service.cf.internal"
+  autoscaler.apiserver.scaling_engine.port:
+    description: "Port where scalingengine will listen"
+    default: 6104
+  autoscaler.apiserver.scaling_engine.ca_cert:
+    description: "PEM-encoded CA certificate"
+  autoscaler.apiserver.scaling_engine.client_cert:
+    description: "PEM-encoded client certificate"
+  autoscaler.apiserver.scaling_engine.client_key:
+    description: "PEM-encoded client key"
+
+  autoscaler.apiserver.metrics_collector.host:
+    description: "Host where metricsCollector is running"
+    default: "metricscollector.service.cf.internal"
+  autoscaler.apiserver.metrics_collector.port:
+    description: "Port where metricsCollector will listen"
+    default: 6103
+  autoscaler.apiserver.metrics_collector.ca_cert:
+    description: "PEM-encoded CA certificate"
+  autoscaler.apiserver.metrics_collector.client_cert:
+    description: "PEM-encoded client certificate"
+  autoscaler.apiserver.metrics_collector.client_key:
+    description: "PEM-encoded client key"
+
+  autoscaler.apiserver.event_generator.host:
+    description: "Host where eventGenerator is running"
+    default: "eventgenerator.service.cf.internal"
+  autoscaler.apiserver.event_generator.port:
+    description: "Port where eventGenerator will listen"
+    default: 6105
+  autoscaler.apiserver.event_generator.ca_cert:
+    description: "PEM-encoded CA certificate"
+  autoscaler.apiserver.event_generator.client_cert:
+    description: "PEM-encoded client certificate"
+  autoscaler.apiserver.event_generator.client_key:
+    description: "PEM-encoded client key"
+
+  autoscaler.apiserver.metrics_forwarder.host:
+    description: "Host where metricsforwarder is running"
+    default: "autoscalermetrics.bosh-lite.com"
+
+  autoscaler.policy_db.address:
+    description: "IP address on which the policydb server will listen"
+    default: "autoscalerpostgres.service.cf.internal"
+  autoscaler.policy_db.databases:
+    description: "The list of databases used in policydb database including name"
+  autoscaler.policy_db.db_scheme:
+    description: "Database scheme to be used to access policydb"
+    default: postgres    
+  autoscaler.policy_db.port:
+    description: "Port on which the policydb server will listen"
+  autoscaler.policy_db.roles:
+    description: "The list of database roles used in policydb database including name/password"
+  autoscaler.policy_db.tls.ca:
+    default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
+  autoscaler.policy_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
+
+  autoscaler.policy_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.policy_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.binding_db.address:
+    description: "IP address on which the bindingdb server will listen"
+    default: "autoscalerpostgres.service.cf.internal"
+  autoscaler.binding_db.databases:
+    description: "The list of databases used in bindingdb database including name"
+  autoscaler.binding_db.db_scheme:
+    description: "Database scheme to be used to access bindingdb"
+    default: postgres    
+  autoscaler.binding_db.port:
+    description: "Port on which the bindingdb server will listen"
+  autoscaler.binding_db.roles:
+    description: "The list of database roles used in bindingdb database including name/password"
+  autoscaler.binding_db.tls.ca:
+    default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
+  autoscaler.binding_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
+  autoscaler.binding_db_connection_config.max_open_connections:
+    default: 100
+  autoscaler.binding_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.binding_db_connection_config.connection_max_lifetime:
+    default: 60s
+    
+
+  autoscaler.cf.api:
+    description: "the Cloud Foundry API endpoint"
+  autoscaler.cf.client_id:
+    description: "the client id to log in cf"
+  autoscaler.cf.secret:
+    description: "the secret to log in cf"
+  autoscaler.cf.skip_ssl_validation:
+    description: "Flag to skip ssl validation to connect to CC and UAA"
+    default: false
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180
+    description: "Liquibase changelog lock timeout duration in seconds"
+
+  autoscaler.apiserver.rate_limit.valid_duration:
+    description: "The rate limit evaluation duration"
+    default: 1s
+  autoscaler.apiserver.rate_limit.max_amount:
+    description: "The number of requests accepted by rate limit"
+    default: 10
+    
+  autoscaler.apiserver.hooks.pre_start:
+    description: "Script to run before starting apiserver"
+    default: ''
+    example: |
+      #!/bin/bash
+      echo "Going to start apiserver"
+      echo "apiserver data directory is ${DATA_DIR}"
+      echo "apiserver port is ${PORT}"
+      echo "apiserver directory is ${PACKAGE_DIR}"
+  autoscaler.apiserver.hooks.post_start:
+    description: "Script to run after apiserver has started"
+    default: ''
+  autoscaler.apiserver.hooks.pre_stop:
+    description: "Script to run before stopping apiserver"
+    default: ''
+  autoscaler.apiserver.hooks.post_stop:
+    description: "Script to run after apiserver has stopped"
+    default: ''
+
+  
+  
+

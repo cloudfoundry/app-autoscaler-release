@@ -36,6 +36,7 @@ type instanceStats struct {
 
 type instanceUsage struct {
 	Mem uint64
+	CPU float64
 }
 
 type instanceInfo struct {
@@ -257,6 +258,43 @@ func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Durati
 	Eventually(func() int {
 		return RunningInstances(appGUID, timeout)
 	}, timeout, 10*time.Second).Should(Equal(instances))
+}
+
+func allInstancesCPU(appGUID string, timeout time.Duration) []float64 {
+	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/stats")
+	Expect(cmd.Wait(timeout)).To(Exit(0))
+
+	var stats appStats
+	err := json.Unmarshal(cmd.Out.Contents(), &stats)
+	Expect(err).ToNot(HaveOccurred())
+
+	if len(stats) == 0 {
+		return []float64{}
+	}
+
+	cpu := make([]float64, len(stats))
+
+	for k, instance := range stats {
+		i, err := strconv.Atoi(k)
+		Expect(err).NotTo(HaveOccurred())
+		cpu[i] = instance.Stats.Usage.CPU
+	}
+	return cpu
+}
+
+func AverageCPUByInstance(appGUID string, timeout time.Duration) float64 {
+	cpuArray := allInstancesCPU(appGUID, timeout)
+	instanceCount := len(cpuArray)
+	if instanceCount == 0 {
+		return math.MaxInt64
+	}
+
+	var cpuSum float64
+	for _, c := range cpuArray {
+		cpuSum += c
+	}
+
+	return cpuSum / float64(instanceCount)
 }
 
 func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {

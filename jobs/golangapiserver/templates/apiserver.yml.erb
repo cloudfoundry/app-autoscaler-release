@@ -1,0 +1,104 @@
+<%
+  def p_arr(property)
+    p(property,nil) || []
+  end
+  if p("autoscaler.apiserver.use_buildin_mode") == false
+    binding_db_scheme = p('autoscaler.binding_db.db_scheme')
+    binding_db_address = p('autoscaler.binding_db.address')
+    binding_db_port = p('autoscaler.binding_db.port')
+    binding_db_role = p_arr('autoscaler.binding_db.roles').find { |role| role['tag'] == 'binding_db' or role['tag'] == 'default' } 
+    binding_db_database = p_arr('autoscaler.binding_db.databases').find { |database| database['tag'] == 'binding_db' or database['tag'] == 'default' } 
+    binding_db_url = binding_db_scheme + "://" + binding_db_role['name'] + ":" + binding_db_role['password'] + "@" + binding_db_address + ":" + binding_db_port.to_s + "/" + binding_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.binding_db.sslmode') 
+    unless p('autoscaler.binding_db.tls.ca') == ""
+      binding_db_url = binding_db_url + "&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/binding_db/ca.crt"
+    end
+  end
+  
+  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
+  policy_db_address = p('autoscaler.policy_db.address')
+  policy_db_port = p('autoscaler.policy_db.port')
+  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
+  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
+  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.policy_db.sslmode') 
+  unless p('autoscaler.policy_db.tls.ca') == ""
+    policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
+  end
+
+%>
+
+logging:
+  level: <%= p("autoscaler.apiserver.logging.level") %>
+cf:
+  api:  <%= p("autoscaler.cf.api") %>
+  client_id: <%= p("autoscaler.cf.client_id") %>
+  secret: <%= p("autoscaler.cf.secret") %>
+  skip_ssl_validation: <%= p("autoscaler.cf.skip_ssl_validation") %>
+
+public_api_server:
+  port:  <%= p("autoscaler.apiserver.public_api.server.port") %>
+<% if p("autoscaler.apiserver.use_buildin_mode") == false %>
+broker_server:
+  port:  <%= p("autoscaler.apiserver.broker.server.port") %>
+
+broker_username: <%= p("autoscaler.apiserver.broker.username") %>
+broker_password: <%= p("autoscaler.apiserver.broker.password") %>
+catalog_path: /var/vcap/jobs/golangapiserver/config/catalog.json
+catalog_schema_path: /var/vcap/packages/golangapiserver/catalog.schema.json
+<% end %>
+info_file_path: /var/vcap/jobs/golangapiserver/config/info.json
+policy_schema_path: /var/vcap/packages/golangapiserver/policy_json.schema.json
+dashboard_redirect_uri: <%= p("autoscaler.apiserver.broker.server.dashboard_redirect_uri") %>
+use_buildin_mode: <%= p("autoscaler.apiserver.use_buildin_mode") %>
+
+health:
+  port: <%= p("autoscaler.apiserver.health.port") %>
+
+db:
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+<% if p("autoscaler.apiserver.use_buildin_mode") == false %>
+  binding_db:
+    url: <%= binding_db_url %>
+    max_open_connections: <%= p("autoscaler.binding_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.binding_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.binding_db_connection_config.connection_max_lifetime") %>
+<% end %>
+  
+
+scaling_engine:
+  scaling_engine_url: https://<%= p("autoscaler.apiserver.scaling_engine.host") %>:<%= p("autoscaler.apiserver.scaling_engine.port") %>
+  tls:
+    key_file: /var/vcap/jobs/golangapiserver/config/certs/scalingengine/client.key
+    cert_file: /var/vcap/jobs/golangapiserver/config/certs/scalingengine/client.crt
+    ca_file: /var/vcap/jobs/golangapiserver/config/certs/scalingengine/ca.crt
+
+metrics_collector:
+  metrics_collector_url: https://<%= p("autoscaler.apiserver.metrics_collector.host") %>:<%= p("autoscaler.apiserver.metrics_collector.port") %>
+  tls:
+    key_file: /var/vcap/jobs/golangapiserver/config/certs/metricscollector/client.key
+    cert_file: /var/vcap/jobs/golangapiserver/config/certs/metricscollector/client.crt
+    ca_file: /var/vcap/jobs/golangapiserver/config/certs/metricscollector/ca.crt
+
+scheduler:
+  scheduler_url: https://<%= p("autoscaler.apiserver.scheduler.host") %>:<%= p("autoscaler.apiserver.scheduler.port") %>
+  tls:
+    key_file: /var/vcap/jobs/golangapiserver/config/certs/scheduler/client.key
+    cert_file: /var/vcap/jobs/golangapiserver/config/certs/scheduler/client.crt
+    ca_file: /var/vcap/jobs/golangapiserver/config/certs/scheduler/ca.crt
+
+event_generator:
+  event_generator_url: https://<%= p("autoscaler.apiserver.event_generator.host") %>:<%= p("autoscaler.apiserver.event_generator.port") %>
+  tls:
+    key_file: /var/vcap/jobs/golangapiserver/config/certs/eventgenerator/client.key
+    cert_file: /var/vcap/jobs/golangapiserver/config/certs/eventgenerator/client.crt
+    ca_file: /var/vcap/jobs/golangapiserver/config/certs/eventgenerator/ca.crt
+
+metrics_forwarder:
+  metrics_forwarder_url: https://<%= p("autoscaler.apiserver.metrics_forwarder.host") %>
+
+rate_limit:
+  valid_duration: <%= p("autoscaler.apiserver.rate_limit.valid_duration") %>
+  max_amount: <%= p("autoscaler.apiserver.rate_limit.max_amount") %>

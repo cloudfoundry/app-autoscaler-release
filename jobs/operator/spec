@@ -25,7 +25,8 @@ packages:
   - common
   - db
   - java
-
+  - changeloglockcleaner
+  
 properties:
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
@@ -258,7 +259,9 @@ properties:
   autoscaler.operator.health.port:
     description: "the listening port of health endpoint"
     default: 6208
-
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180
+    description: "Liquibase changelog lock timeout duration in seconds"
   autoscaler.operator.hooks.pre_start:
     description: "Script to run before starting operator"
     default: ''

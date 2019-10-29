@@ -21,7 +21,8 @@ packages:
   - db
   - metricsserver
   - common
-
+  - changeloglockcleaner
+  
 provides:
 - name: metricsserver
   type: metricsserver
@@ -138,7 +139,9 @@ properties:
   autoscaler.metricsserver.health.port:
     description: "The listening port of health endpoint"
     default: 6303
-
+  autoscaler.changeloglock_timeout_seconds:
+    default: 180
+    description: "Liquibase changelog lock timeout duration in seconds"   
   autoscaler.metricsserver.hooks.pre_start:
     description: "Script to run before starting metricsserver"
     default: ''
