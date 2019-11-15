@@ -113,3 +113,7 @@ event_generator:
 
 metrics_forwarder:
   metrics_forwarder_url: https://<%= p("autoscaler.apiserver.metrics_forwarder.host") %>
+
+rate_limit:
+  valid_duration: <%= p("autoscaler.apiserver.rate_limit.valid_duration") %>
+  max_amount: <%= p("autoscaler.apiserver.rate_limit.max_amount") %>

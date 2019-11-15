@@ -288,4 +288,57 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 	})
 
+	Context("when scaling by cpu", func() {
+
+		JustBeforeEach(func() {
+			doneChan = make(chan bool)
+			doneAcceptChan = make(chan bool)
+		})
+
+		Context("when cpu is greater than scaling out threshold", func() {
+
+			BeforeEach(func() {
+				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "cpu", 2)
+				initialInstanceCount = 1
+			})
+
+			JustBeforeEach(func() {
+				response := helpers.CurlAppWithTimeout(cfg, appName, "/cpu/50/5", 10*time.Second)
+				Expect(response).Should(ContainSubstring(`set app cpu utilization to 50% for 5 minutes, busyTime=10, idleTime=10`))
+			})
+
+			It("should scale out", func() {
+				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				finishTime := time.Now().Add(totalTime)
+
+				Eventually(func() float64 {
+					return AverageCPUByInstance(appGUID, totalTime)
+				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 0.02))
+
+				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+			})
+
+		})
+
+		Context("when cpu is less than scaling in threshold", func() {
+
+			BeforeEach(func() {
+				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "cpu", 10)
+				initialInstanceCount = 2
+			})
+
+			It("should scale in", func() {
+				totalTime := time.Duration(interval*2)*time.Second + 3*time.Minute
+				finishTime := time.Now().Add(totalTime)
+
+				Eventually(func() float64 {
+					return AverageCPUByInstance(appGUID, totalTime)
+				}, totalTime, 15*time.Second).Should(BeNumerically("<=", 0.1))
+
+				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+			})
+		})
+
+	})
+
 })
