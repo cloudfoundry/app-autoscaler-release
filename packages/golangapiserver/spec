@@ -7,7 +7,12 @@ dependencies:
 files:
 - app-autoscaler/api/db/**/*
 - app-autoscaler/servicebroker/db/**/*
+- app-autoscaler/src/autoscaler/api/db/*
 - app-autoscaler/src/autoscaler/api/schemas/*
+- app-autoscaler/src/github.com/pkg/errors/*
+- app-autoscaler/src/golang.org/x/oauth2/internal/*
+- app-autoscaler/src/golang.org/x/net/context/*
+- app-autoscaler/src/golang.org/x/net/context/ctxhttp/*
 - app-autoscaler/src/autoscaler/api/* # gosub
 - app-autoscaler/src/autoscaler/api/brokerserver/* # gosub
 - app-autoscaler/src/autoscaler/api/cmd/api/* # gosub
