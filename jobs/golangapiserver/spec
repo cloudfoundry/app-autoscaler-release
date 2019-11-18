@@ -286,3 +286,6 @@ properties:
     description: "The quota management API oauth_url"
   autoscaler.apiserver.broker.quota_management.skip_ssl_validation:
     description: "The quota management API skip_ssl_validation setting"
+
+  autoscaler.apiserver.broker.plan_check:
+    description: "The plan check config"

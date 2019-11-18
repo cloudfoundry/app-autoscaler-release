@@ -118,22 +118,17 @@ rate_limit:
   valid_duration: <%= p("autoscaler.apiserver.rate_limit.valid_duration") %>
   max_amount: <%= p("autoscaler.apiserver.rate_limit.max_amount") %>
 
-<% if_p('autoscaler.apiserver.broker.quota_management.enabled') && p('autoscaler.apiserver.broker.quota_management.enabled') == true do |value| %>
+<%
+if_p('autoscaler.apiserver.broker.quota_management.enabled') do |quota_management_enabled|
+  if quota_management_enabled %>
 quota_management:
   api: <%= p("autoscaler.apiserver.broker.quota_management.api") %>
   client_id: <%= p("autoscaler.apiserver.broker.quota_management.client_id") %>
   secret: <%= p("autoscaler.apiserver.broker.quota_management.secret") %>
   oauth_url: <%= p("autoscaler.apiserver.broker.quota_management.oauth_url") %>
   skip_ssl_validation: <%= p("autoscaler.apiserver.broker.quota_management.skip_ssl_validation") %>
-<% end %>
+<%
+  end
+end %>
 
-plan_check:
-  plan_definitions:
-    cda1fd1f-c144-4597-815d-821bc7d08e2f:
-      planCheckEnabled: true
-      schedules_count: 2
-      scaling_rules_count: 4
-    511b150c-99ae-41db-8220-eaad9358e923:
-      planCheckEnabled: true
-      schedules_count: 10
-      scaling_rules_count: 10
+plan_check: <%= p("autoscaler.apiserver.broker.plan_check") %>
