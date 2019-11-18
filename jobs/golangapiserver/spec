@@ -232,3 +232,16 @@ properties:
   autoscaler.apiserver.hooks.post_stop:
     description: "Script to run after apiserver has stopped"
     default: ''
+
+  autoscaler.apiserver.broker.quota_management.enabled:
+    description: "Whether quota management is enabled"
+  autoscaler.apiserver.broker.quota_management.api:
+    description: "The quota management API endpoint"
+  autoscaler.apiserver.broker.quota_management.client_id:
+    description: "The quota management API client_id"
+  autoscaler.apiserver.broker.quota_management.secret:
+    description: "The quota management API secret"
+  autoscaler.apiserver.broker.quota_management.oauth_url:
+    description: "The quota management API oauth_url"
+  autoscaler.apiserver.broker.quota_management.skip_ssl_validation:
+    description: "The quota management API skip_ssl_validation setting"
