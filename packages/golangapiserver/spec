@@ -9,10 +9,6 @@ files:
 - app-autoscaler/servicebroker/db/**/*
 - app-autoscaler/src/autoscaler/api/db/*
 - app-autoscaler/src/autoscaler/api/schemas/*
-- app-autoscaler/src/github.com/pkg/errors/*
-- app-autoscaler/src/golang.org/x/oauth2/internal/*
-- app-autoscaler/src/golang.org/x/net/context/*
-- app-autoscaler/src/golang.org/x/net/context/ctxhttp/*
 - app-autoscaler/src/autoscaler/api/* # gosub
 - app-autoscaler/src/autoscaler/api/brokerserver/* # gosub
 - app-autoscaler/src/autoscaler/api/cmd/api/* # gosub
@@ -48,6 +44,7 @@ files:
 - app-autoscaler/src/github.com/matttproud/golang_protobuf_extensions/pbutil/* # gosub
 - app-autoscaler/src/github.com/nu7hatch/gouuid/* # gosub
 - app-autoscaler/src/github.com/pivotal-cf/brokerapi/domain/* # gosub
+- app-autoscaler/src/github.com/pkg/errors/* # gosub
 - app-autoscaler/src/github.com/prometheus/client_golang/prometheus/* # gosub
 - app-autoscaler/src/github.com/prometheus/client_golang/prometheus/promhttp/* # gosub
 - app-autoscaler/src/github.com/prometheus/client_model/go/* # gosub
@@ -67,6 +64,9 @@ files:
 - app-autoscaler/src/github.com/xeipuuv/gojsonschema/* # gosub
 - app-autoscaler/src/golang.org/x/crypto/bcrypt/* # gosub
 - app-autoscaler/src/golang.org/x/crypto/blowfish/* # gosub
+- app-autoscaler/src/golang.org/x/net/context/* # gosub
+- app-autoscaler/src/golang.org/x/net/context/ctxhttp/* # gosub
 - app-autoscaler/src/golang.org/x/oauth2/* # gosub
 - app-autoscaler/src/golang.org/x/oauth2/clientcredentials/* # gosub
+- app-autoscaler/src/golang.org/x/oauth2/internal/* # gosub
 - app-autoscaler/src/gopkg.in/yaml.v2/* # gosub

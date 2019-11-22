@@ -1,4 +1,6 @@
 builds:
+  3b609910-d491-4502-7b40-dcacfe02c1db:
+    version: v3.0.0
   a1ec16d6-8767-44b1-4215-9c23caae6a45:
     version: v2.9.99
 format-version: "2"
