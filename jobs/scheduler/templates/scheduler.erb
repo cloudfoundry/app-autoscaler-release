@@ -28,6 +28,7 @@ case $1 in
 
     cd /var/vcap/packages/scheduler/
     exec java -Dspring.config.location=/var/vcap/jobs/scheduler/config/application.properties -jar /var/vcap/packages/scheduler/scheduler-*.war \
+      <%= p("autoscaler.scheduler.jvm_options") %> \
       >>  $LOG_DIR/scheduler.stdout.log \
       2>> $LOG_DIR/scheduler.stderr.log
 

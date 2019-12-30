@@ -126,4 +126,8 @@ properties:
     default: ''
   autoscaler.scheduler.hooks.post_stop:
     description: "Script to run after scheduler has stopped"
-    default: ''     
+    default: ''
+  autoscaler.scheduler.jvm_options:
+    description: "Java Virtual Machine parameters to be used when start scheduler process"
+    default: ''
+    example: '-Xmx400m -XX:MaxMetaspaceSize=128m'
