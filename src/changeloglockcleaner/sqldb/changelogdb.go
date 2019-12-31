@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 
 	_ "github.com/lib/pq"
 )
 
 const PostgresDriverName = "postgres"
+const postgresDbURLPattern = `^(postgres|postgresql):\/\/(.+):(.+)@([\da-zA-Z\.-]+)(:[\d]{4,5})?\/(.+)`
 
 type ChangelogSQLDB struct {
 	sqldb *sql.DB
@@ -25,7 +27,11 @@ func NewChangelogSQLDB(dbUrl string) (*ChangelogSQLDB, error) {
 	err = sqldb.Ping()
 	if err != nil {
 		sqldb.Close()
-		log.Printf("failed-to-connection-to-database, dburl:%s,  err:%s\n", dbUrl, err)
+		urlCredMatcher := regexp.MustCompile(postgresDbURLPattern)
+		if urlCredMatcher.MatchString(dbUrl) {
+			dbUrl = urlCredMatcher.ReplaceAllString(dbUrl, `$1://$2:*REDACTED*@$4$5/$6`)
+			log.Printf("failed-to-connection-to-database, dburl:%s,  err:%s\n", dbUrl, err)
+		}
 		return nil, err
 	}
 
