@@ -41,12 +41,12 @@ properties:
     default: false
 
   autoscaler.policy_db.address:
-    description: "IP address on which the policydb server will listen"
+    description: "IP address on which the policydb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
-    description: "Database scheme to be used to access policydb"
+    description: "Database scheme to be used to access policydb, when use mysql the default value is 'mysql'"
     default: postgres    
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
@@ -57,16 +57,16 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
-    description: "sslmode to connect to postgres server"
+    description: "sslmode to connect to database server, when use mysql the default value is 'false'"
 
 
   autoscaler.instancemetrics_db.address:
-    description: "IP address on which the instancemetricsdb server will listen"
+    description: "IP address on which the instancemetricsdb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.instancemetrics_db.databases:
     description: "The list of databases used in instancemetricsdb database including name"
   autoscaler.instancemetrics_db.db_scheme:
-    description: "Database scheme to be used to access instancemetricsdb"
+    description: "Database scheme to be used to access instancemetricsdb, when use mysql the default value is 'mysql'"
     default: postgres    
   autoscaler.instancemetrics_db.port:
     description: "Port on which the instancemetricsdb server will listen"
@@ -77,15 +77,15 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.instancemetrics_db.sslmode:
     default: disable
-    description: "sslmode to connect to postgres server"
+    description: "sslmode to connect to database server, when use mysql the default value is 'false'"
 
   autoscaler.appmetrics_db.address:
-    description: "IP address on which the appmetricsdb server will listen"
+    description: "IP address on which the appmetricsdb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.appmetrics_db.databases:
     description: "The list of databases used in appmetricsdb database including name"
   autoscaler.appmetrics_db.db_scheme:
-    description: "Database scheme to be used to access appmetricsdb"
+    description: "Database scheme to be used to access appmetricsdb, when use mysql the default value is 'mysql'"
     default: postgres    
   autoscaler.appmetrics_db.port:
     description: "Port on which the appmetricsdb server will listen"
@@ -96,15 +96,15 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.appmetrics_db.sslmode:
     default: disable
-    description: "sslmode to connect to postgres server"
+    description: "sslmode to connect to database server, when use mysql the default value is 'false'"
 
   autoscaler.scalingengine_db.address:
-    description: "IP address on which the scalingenginedb server will listen"
+    description: "IP address on which the scalingenginedb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.scalingengine_db.databases:
     description: "The list of databases used in scalingenginedb database including name"
   autoscaler.scalingengine_db.db_scheme:
-    description: "Database scheme to be used to access scalingenginedb"
+    description: "Database scheme to be used to access scalingenginedb, when use mysql the default value is 'mysql'"
     default: postgres    
   autoscaler.scalingengine_db.port:
     description: "Port on which the scalingenginedb server will listen"
@@ -115,7 +115,7 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.scalingengine_db.sslmode:
     default: disable
-    description: "sslmode to connect to postgres server"
+    description: "sslmode to connect to database server, when use mysql the default value is 'false'"
 
   autoscaler.policy_db_connection_config.max_open_connections:
     default: 100

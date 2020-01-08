@@ -52,6 +52,8 @@ files:
 - app-autoscaler/src/github.com/tedsuo/ifrit/grouper/* # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/http_server/* # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/sigmon/* # gosub
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* #gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/* # gosub
 - app-autoscaler/src/golang.org/x/net/context/* # gosub
 - app-autoscaler/src/golang.org/x/net/http2/* # gosub
 - app-autoscaler/src/golang.org/x/net/http2/hpack/* # gosub
