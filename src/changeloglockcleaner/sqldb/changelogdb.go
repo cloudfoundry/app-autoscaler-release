@@ -1,35 +1,43 @@
 package sqldb
 
 import (
-	"database/sql"
+	//"database/sql"
 	"fmt"
 	"log"
 	"os"
 	"regexp"
 
 	_ "github.com/lib/pq"
+	"github.com/jmoiron/sqlx"
+
 )
 
 const PostgresDriverName = "postgres"
+const MysqlDriverName = "mysql"
 const postgresDbURLPattern = `^(postgres|postgresql):\/\/(.+):(.+)@([\da-zA-Z\.-]+)(:[\d]{4,5})?\/(.+)`
+const mysqlDbURLPattern = `(.+):(.+)@tcp\(([\da-zA-Z\.-]+)(:[\d]{4,5})?\)\/(.+)`
 
 type ChangelogSQLDB struct {
-	sqldb *sql.DB
+	sqldb *sqlx.DB
 }
 
 func NewChangelogSQLDB(dbUrl string) (*ChangelogSQLDB, error) {
 	log.SetOutput(os.Stdout)
-	sqldb, err := sql.Open(PostgresDriverName, dbUrl)
+	database, err := Connection(dbUrl)
 	if err != nil {
 		return nil, err
 	}
 
+	sqldb, err := sqlx.Open(database.DriverName, database.DSN)
+	if err != nil {
+		return nil, err
+	}
+	
 	err = sqldb.Ping()
 	if err != nil {
 		sqldb.Close()
-		urlCredMatcher := regexp.MustCompile(postgresDbURLPattern)
-		if urlCredMatcher.MatchString(dbUrl) {
-			dbUrl = urlCredMatcher.ReplaceAllString(dbUrl, `$1://$2:*REDACTED*@$4$5/$6`)
+		dbUrl = redactDbCreds(dbUrl)
+		if dbUrl != "" {
 			log.Printf("failed-to-connection-to-database, dburl:%s,  err:%s\n", dbUrl, err)
 		}
 		return nil, err
@@ -69,4 +77,22 @@ func (cdb *ChangelogSQLDB) DeleteExpiredLock(timeoutInSecond int) error {
 		log.Printf("failed-to-delete-application-details, query:%s, err:%s\n", query, err)
 	}
 	return err
+}
+
+func redactDbCreds(dbUrl string) string {
+	var redactUrl string
+	urlCredMatcher := new(regexp.Regexp)
+	driverName := DetectDirver(dbUrl)
+	if driverName == "postgres" {
+		urlCredMatcher = regexp.MustCompile(postgresDbURLPattern)
+		if urlCredMatcher.MatchString(dbUrl) {
+			redactUrl = urlCredMatcher.ReplaceAllString(dbUrl, `$1://$2:*REDACTED*@$4$5/$6`)
+		}
+	}else {
+		urlCredMatcher = regexp.MustCompile(mysqlDbURLPattern)
+		if urlCredMatcher.MatchString(dbUrl) {
+			redactUrl = urlCredMatcher.ReplaceAllString(dbUrl, `$1:*REDACTED*@tcp($3$4)/$5`)
+		}
+	}
+	return redactUrl
 }

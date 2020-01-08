@@ -1,0 +1,254 @@
+
+- type: replace
+  path: /releases/-
+  value: 
+    name: "cf-mysql"
+    version: "36.19.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry/cf-mysql-release?v=36.19.0"
+    sha1: "393a018015fdcb48da40259b6a39b8e30fde9d0c"
+- type: replace
+  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/-
+  value:
+    domain: autoscalermysql.service.cf.internal
+    targets:
+    - deployment: app-autoscaler
+      domain: bosh
+      instance_group: mysql_autoscaler
+      network: default
+      query: '*' 
+    
+- type: remove
+  path: /instance_groups/name=postgres_autoscaler
+
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: mysql_autoscaler
+    azs:
+    - z1
+    instances: 1
+    update:
+      serial: true
+    stemcell: default
+    vm_type: small
+    networks:
+    - name: default
+    persistent_disk: 10000
+    jobs:
+    - name: mysql
+      release: cf-mysql
+      properties:
+        cf_mysql:
+          mysql:
+            admin_password: ((cf_mysql_mysql_admin_password))
+            port: 3306
+            binlog_enabled: false
+            cluster_health:
+              password: ((cf_mysql_mysql_cluster_health_password))
+            galera_healthcheck:
+              endpoint_password: ((cf_mysql_mysql_galera_healthcheck_endpoint_password))
+              db_password: ((cf_mysql_mysql_galera_healthcheck_db_password))
+            seeded_databases:
+            - name: autoscaler
+              username: autoscaler
+              password: ((database_password))
+            tls:
+              ca_certificate: ((mysql_ca.ca))
+              server_certificate: ((mysql_server.certificate))
+              server_key: ((mysql_server.private_key))
+
+# asactors/scalingengine              
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db
+  value: &mysql_database
+    sslmode: &sslmode "false"
+    address: autoscalermysql.service.cf.internal
+    tls: &database_tls
+      ca: ((mysql_ca.ca))
+    databases:
+    - name: autoscaler
+      tag: default
+    db_scheme: mysql
+    port: 3306
+    roles:
+    - name: autoscaler
+      password: ((database_password))
+      tag: default
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db_connection_config
+  value: &databaseConnectionConfig
+    max_open_connections: 100
+    max_idle_connections: 10
+    connection_max_lifetime: 60s
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# asactors/scheduler
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/policy_db
+  value: *mysql_database
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler_db
+  value: *mysql_database
+
+#asactors/operator
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db_connection_config
+  value: *databaseConnectionConfig
+
+# asmetrics/metricsserver
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# asmetrics/eventgenerator
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# asnozzle/metricsgateway
+- type: replace
+  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# asapi/golangapiserver
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/policy_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/binding_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/binding_db_connection_config
+  value: *databaseConnectionConfig
+# asapi/metricsforwarder
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db
+  value: *mysql_database
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+
+# mysql variables
+- type: replace
+  path: /variables/-
+  value:
+    name: cf_mysql_mysql_admin_password
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: cf_mysql_mysql_cluster_health_password
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: cf_mysql_mysql_galera_healthcheck_db_password
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: cf_mysql_mysql_galera_healthcheck_endpoint_password
+    type: password
+- type: replace
+  path: /variables/-
+  value:
+    name: mysql_ca
+    type: certificate
+    options:
+      is_ca: true
+      common_name: mysqlCA
+- type: replace
+  path: /variables/-
+  value:
+    name: mysql_server
+    type: certificate
+    options:
+      ca: mysql_ca
+      common_name: autoscalermysql.service.cf.internal
+      extended_key_usage:
+      - client_auth
+      - server_auth
+    
+
+
+

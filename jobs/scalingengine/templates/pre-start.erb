@@ -29,15 +29,26 @@ USER='<%= role['name'] %>'
 PASSWORD='<%= role['password'] %>'
 PORT='<%= p("autoscaler.scalingengine_db.port") %>'
 SSLMODE='<%= p("autoscaler.scalingengine_db.sslmode") %>'
+<% case p('autoscaler.scalingengine_db.db_scheme') %>
+<% when "postgres" %>
 JDBCDBURL="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
-
 <% unless p('autoscaler.scalingengine_db.tls.ca') == "" %>
-JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
-DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
+JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
+DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
+<% end %>
+<% when "mysql" %>
+JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
+DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
+<% unless p('autoscaler.scalingengine_db.tls.ca') == "" %>
+JDBCDBURL=$JDBCDBURL"&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file://var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
+<% end %>
 <% end %>
 
 detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=/var/vcap/packages/scalingengine/scalingengine.db.changelog.yml update
+java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=/var/vcap/packages/scalingengine/scalingengine.db.changelog.yml update
