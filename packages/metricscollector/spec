@@ -15,7 +15,6 @@ files:
 - app-autoscaler/src/autoscaler/metricscollector/cmd/metricscollector/* # gosub
 - app-autoscaler/src/autoscaler/metricscollector/collector/* # gosub
 - app-autoscaler/src/autoscaler/metricscollector/config/* # gosub
-- app-autoscaler/src/autoscaler/metricscollector/fakes/* # gosub
 - app-autoscaler/src/autoscaler/metricscollector/noaa/* # gosub
 - app-autoscaler/src/autoscaler/metricscollector/server/* # gosub
 - app-autoscaler/src/autoscaler/metricscollector/testhelpers/* # gosub
