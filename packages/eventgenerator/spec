@@ -6,6 +6,7 @@ dependencies:
 
 files:
 - app-autoscaler/src/autoscaler/eventgenerator/db/*
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* #gosub
 - app-autoscaler/src/autoscaler/collection/* # gosub
 - app-autoscaler/src/autoscaler/db/* # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/* # gosub
@@ -26,8 +27,11 @@ files:
 - app-autoscaler/src/github.com/beorn7/perks/quantile/* # gosub
 - app-autoscaler/src/github.com/cenk/backoff/* # gosub
 - app-autoscaler/src/github.com/facebookgo/clock/* # gosub
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/proto/* # gosub
 - app-autoscaler/src/github.com/gorilla/mux/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/reflectx/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub
 - app-autoscaler/src/github.com/lib/pq/scram/* # gosub
@@ -48,7 +52,5 @@ files:
 - app-autoscaler/src/github.com/tedsuo/ifrit/grouper/* # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/http_server/* # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/sigmon/* # gosub
-- app-autoscaler/src/github.com/go-sql-driver/mysql/* #gosub
-- app-autoscaler/src/github.com/jmoiron/sqlx/* # gosub
 - app-autoscaler/src/golang.org/x/net/context/* # gosub
 - app-autoscaler/src/gopkg.in/yaml.v2/* # gosub

@@ -13,7 +13,7 @@
     - name: ((database.name))
       tag: default
     address: ((database.host))
-    db_scheme: postgres
+    db_scheme: ((database.scheme))
     port: ((database.port))
     sslmode: ((database.sslmode))
     roles:
