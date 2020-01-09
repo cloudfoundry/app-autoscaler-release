@@ -16,9 +16,9 @@
       schedulerdb_url = schedulerdb_url + "&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt" 
     end
   when "mysql"
-    schedulerdb_url = "jdbc:mysql://"  + p('autoscaler.scheduler_db.address') + ":" + p('autoscaler.scheduler_db.port').to_s + "/" + schedulerdb_database['name'] + "?sslmode=" + p('autoscaler.scheduler_db.sslmode')
+    schedulerdb_url = "jdbc:mysql://"  + p('autoscaler.scheduler_db.address') + ":" + p('autoscaler.scheduler_db.port').to_s + "/" + schedulerdb_database['name'] + "?autoReconnect=true"
     unless p('autoscaler.scheduler_db.tls.ca') == ""
-      schedulerdb_url = schedulerdb_url + "&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file://var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12" 
+      schedulerdb_url = schedulerdb_url + "&useSSL=true&requireSSL=true&verifyServerCertificate=true&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12" 
     end
   end
 
@@ -32,9 +32,9 @@
       policydb_url = policydb_url + "&sslrootcert=/var/vcap/jobs/scheduler/config/certs/policy_db/ca.crt" 
     end
   when "mysql"
-    policydb_url = "jdbc:mysql://" + p('autoscaler.policy_db.address') + ":" + p('autoscaler.policy_db.port').to_s + "/" + schedulerdb_database['name'] + "?sslmode=" + p('autoscaler.policy_db.sslmode')
+    policydb_url = "jdbc:mysql://" + p('autoscaler.policy_db.address') + ":" + p('autoscaler.policy_db.port').to_s + "/" + schedulerdb_database['name'] + "?autoReconnect=true"
     unless p('autoscaler.policy_db.tls.ca') == ""
-      policydb_url = policydb_url + "&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file://var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12" 
+      policydb_url = policydb_url + "&useSSL=true&requireSSL=true&verifyServerCertificate=true&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12" 
     end
   end  
 

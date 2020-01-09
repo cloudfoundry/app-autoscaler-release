@@ -159,12 +159,12 @@ properties:
     default: "autoscalermetrics.bosh-lite.com"
 
   autoscaler.policy_db.address:
-    description: "IP address on which the policydb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
+    description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
-    description: "Database scheme to be used to access policydb, when use mysql the default value is 'mysql'"
+    description: "Database scheme to be used to access policydb"
     default: postgres    
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
@@ -175,7 +175,7 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
-    description: "sslmode to connect to database server, when use mysql the default value is 'false'"
+    description: "sslmode to connect to postgres server"
 
   autoscaler.policy_db_connection_config.max_open_connections:
     default: 100
@@ -185,12 +185,12 @@ properties:
     default: 60s
 
   autoscaler.binding_db.address:
-    description: "IP address on which the bindingdb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
+    description: "IP address on which the bindingdb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.binding_db.databases:
     description: "The list of databases used in bindingdb database including name"
   autoscaler.binding_db.db_scheme:
-    description: "Database scheme to be used to access bindingdb, when use mysql the default value is 'mysql'"
+    description: "Database scheme to be used to access bindingdb"
     default: postgres    
   autoscaler.binding_db.port:
     description: "Port on which the bindingdb server will listen"
@@ -201,7 +201,7 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.binding_db.sslmode:
     default: disable
-    description: "sslmode to connect to database server, when use mysql the default value is 'false'"
+    description: "sslmode to connect to postgres server"
   autoscaler.binding_db_connection_config.max_open_connections:
     default: 100
   autoscaler.binding_db_connection_config.max_idle_connections:

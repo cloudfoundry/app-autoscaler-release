@@ -1,6 +1,6 @@
 [submodule "src/app-autoscaler"]
 	path = src/app-autoscaler
-	url = https://github.com/aqan213/app-autoscaler
+	url = https://github.com/cloudfoundry-incubator/app-autoscaler.git
 [submodule "src/github.com/cloudfoundry-incubator/cf-test-helpers"]
 	path = src/github.com/cloudfoundry-incubator/cf-test-helpers
 	url = https://github.com/cloudfoundry-incubator/cf-test-helpers.git

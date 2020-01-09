@@ -5,6 +5,7 @@ dependencies:
 - golang
 
 files:
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* #gosub
 - app-autoscaler/src/autoscaler/db/* # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/* # gosub
 - app-autoscaler/src/autoscaler/healthendpoint/* # gosub
@@ -28,6 +29,7 @@ files:
 - app-autoscaler/src/code.cloudfoundry.org/lager/* # gosub
 - app-autoscaler/src/code.cloudfoundry.org/rfc5424/* # gosub
 - app-autoscaler/src/github.com/beorn7/perks/quantile/* # gosub
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/jsonpb/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/proto/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/ptypes/* # gosub
@@ -36,6 +38,8 @@ files:
 - app-autoscaler/src/github.com/golang/protobuf/ptypes/struct/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/ptypes/timestamp/* # gosub
 - app-autoscaler/src/github.com/gorilla/mux/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/reflectx/* # gosub
 - app-autoscaler/src/github.com/juju/ratelimit/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub
@@ -57,8 +61,6 @@ files:
 - app-autoscaler/src/github.com/tedsuo/ifrit/grouper/* # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/http_server/* # gosub
 - app-autoscaler/src/github.com/tedsuo/ifrit/sigmon/* # gosub
-- app-autoscaler/src/github.com/go-sql-driver/mysql/* #gosub
-- app-autoscaler/src/github.com/jmoiron/sqlx/* # gosub
 - app-autoscaler/src/golang.org/x/crypto/bcrypt/* # gosub
 - app-autoscaler/src/golang.org/x/crypto/blowfish/* # gosub
 - app-autoscaler/src/golang.org/x/net/context/* # gosub

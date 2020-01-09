@@ -66,12 +66,12 @@ properties:
     description: "PEM-encoded client key"
 
   autoscaler.scheduler_db.address:
-    description: "IP address on which the schedulerdb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
+    description: "IP address on which the schedulerdb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.scheduler_db.databases:
     description: "The list of databases used in schedulerdb database including name"
   autoscaler.scheduler_db.db_scheme:
-    description: "Database scheme to be used to access schedulerdb, when use mysql the default value is 'mysql'"
+    description: "Database scheme to be used to access schedulerdb"
     default: postgres    
   autoscaler.scheduler_db.port:
     description: "Port on which the schedulerdb server will listen"
@@ -82,15 +82,15 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.scheduler_db.sslmode:
     default: disable
-    description: "sslmode to connect to database server, when use mysql the default value is 'false'"
+    description: "sslmode to connect to postgres server"
 
   autoscaler.policy_db.address:
-    description: "IP address on which the policydb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
+    description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
-    description: "Database scheme to be used to access policydb, when use mysql the default value is 'mysql'"
+    description: "Database scheme to be used to access policydb"
     default: postgres    
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
@@ -101,7 +101,7 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
-    description: "sslmode to connect to database server, when use mysql the default value is 'false'"
+    description: "sslmode to connect to postgres server"
 
   autoscaler.scheduler.health.port:
     description: "the listening port of health endpoint"

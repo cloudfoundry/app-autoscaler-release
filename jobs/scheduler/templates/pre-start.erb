@@ -33,37 +33,40 @@ USER='<%= role['name'] %>'
 PASSWORD='<%= role['password'] %>'
 PORT='<%= p("autoscaler.scheduler_db.port") %>'
 SSLMODE='<%= p("autoscaler.scheduler_db.sslmode") %>'
-<% case p('autoscaler.scheduler_db.db_scheme') %>
-<% when "postgres" %>
+<% if p('autoscaler.scheduler_db.db_scheme') == "postgres" %>
 JDBCDBURL="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
-<% unless p('autoscaler.scheduler_db.tls.ca') == "" %>
+<% unless p('autoscaler.scheduler_db.tls.ca') == "" %> 
 JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
 DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
 <% end %>
-<% when "mysql" %>
-JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
+<% else %>
+JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 <% unless p('autoscaler.scheduler_db.tls.ca') == "" %>
-JDBCDBURL=$JDBCDBURL"&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file://var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+/var/vcap/jobs/scheduler/bin/install_crt_truststore scheduler_db  scheduler_db/ca.crt
+JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12"
 DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
 <% end %>
 <% end %>
 
 detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
+<% if p('autoscaler.scheduler_db.db_scheme') == "postgres" %>
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$SCHEDULER_DIR/db/scheduler.changelog-master.yaml update
 
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$SCHEDULER_DIR/db/quartz.changelog-master.yaml update
-
+<% else %>
+java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=$SCHEDULER_DIR/db/databasechangelog.yaml update
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=$SCHEDULER_DIR/db/scheduler.changelog-master.yaml update
 
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=$SCHEDULER_DIR/db/quartz.changelog-master.yaml update
-
+<% end %>
 # Generate key store for the clients communicate with scheduler.
 /var/vcap/jobs/scheduler/bin/install_crt_keystore scheduler server.crt server.key scheduler/server.p12
 /var/vcap/jobs/scheduler/bin/install_crt_keystore scalingengine scalingengine/client.crt scalingengine/client.key scalingengine/client.p12
@@ -71,4 +74,3 @@ java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$J
 # Generate trust stores.
 /var/vcap/jobs/scheduler/bin/install_crt_truststore scheduler ca.crt
 /var/vcap/jobs/scheduler/bin/install_crt_truststore scalingengine scalingengine/ca.crt
-/var/vcap/jobs/scheduler/bin/install_crt_truststore scheduler_db  scheduler_db/ca.crt

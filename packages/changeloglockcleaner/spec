@@ -9,5 +9,5 @@ files:
 - changeloglockcleaner/**/*
 - github.com/lib/pq/**/*
 - github.com/go-sql-driver/mysql/*
-- github.com/jmoiron/sqlx/*
+- github.com/jmoiron/sqlx/**/*
 

@@ -36,12 +36,12 @@ consumes:
 
 properties:
   autoscaler.policy_db.address:
-    description: "IP address on which the policydb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
+    description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.policy_db.databases:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
-    description: "Database scheme to be used to access policydb, when use mysql the default value is 'mysql'"
+    description: "Database scheme to be used to access policydb"
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
@@ -51,15 +51,15 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.policy_db.sslmode:
     default: disable
-    description: "The sslmode to connect to database server, when use mysql the default value is 'false'"
+    description: "The sslmode to connect to postgres server"
 
   autoscaler.instancemetrics_db.address:
-    description: "IP address on which the instancemetricsdb server will listen,when use mysql the default value is 'autoscalermysql.service.cf.internal'"
+    description: "IP address on which the instancemetricsdb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
   autoscaler.instancemetrics_db.databases:
     description: "The list of databases used in instancemetricsdb database including name"
   autoscaler.instancemetrics_db.db_scheme:
-    description: "Database scheme to be used to access instancemetricsdb, when use mysql the default value is 'mysql'"
+    description: "Database scheme to be used to access instancemetricsdb"
   autoscaler.instancemetrics_db.port:
     description: "Port on which the instancemetricsdb server will listen"
   autoscaler.instancemetrics_db.roles:
@@ -69,7 +69,7 @@ properties:
     description: 'PEM-encoded ca certificate of tls database server'
   autoscaler.instancemetrics_db.sslmode:
     default: disable
-    description: "The sslmode to connect to database server, when use mysql the default value is 'false'"
+    description: "The sslmode to connect to postgres server"
 
 
   autoscaler.instancemetrics_db_connection_config.max_open_connections:
