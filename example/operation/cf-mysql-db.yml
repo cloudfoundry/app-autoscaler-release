@@ -17,7 +17,7 @@
 - type: replace
   path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db
   value: &external_database
-    sslmode: &sslmode "custom"
+    sslmode: &sslmode "false"
     tls: &database_tls
       ca: "((mysql_server_certificate.ca))"
     databases:
@@ -26,7 +26,7 @@
     address: sql-db.service.cf.internal
     db_scheme: mysql
     port: 3306
-    sslmode: "custom"
+    sslmode: "false"
     roles:
     - name: autoscaler
       password: ((autoscaler_database_password))
