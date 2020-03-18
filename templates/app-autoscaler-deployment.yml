@@ -101,13 +101,6 @@ addons:
           deployment: app-autoscaler
           network: default
           domain: bosh
-      - domain: sql-db.service.cf.internal
-        targets:
-        - query: '*'
-          instance_group: database
-          deployment: cf
-          network: default
-          domain: bosh
 # Stemcell details
 stemcells:
 - alias: default

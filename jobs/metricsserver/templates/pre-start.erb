@@ -48,7 +48,7 @@ DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/appinstancem
 
 detect_dns $HOST $PORT
 
-#/var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
+/var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 
 <% if p('autoscaler.instancemetrics_db.db_scheme') == "postgres" %>
 java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
