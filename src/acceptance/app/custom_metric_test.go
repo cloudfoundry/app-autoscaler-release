@@ -32,8 +32,14 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		JustBeforeEach(func() {
 			appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 			countStr := strconv.Itoa(initialInstanceCount)
+
+			// create manifest file
+			manifestFilePath = PrepareManifestYML(appName,strings.Split(cfg.AppsDomain,","))
 			createApp := cf.Cf("push", appName, "--no-start", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.CfPushTimeoutDuration())
 			Expect(createApp).To(Exit(0), "failed creating app")
+
+			//remove manifest file
+			RemoveFile(manifestFilePath)
 
 			guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
 			Expect(guid).To(Exit(0))

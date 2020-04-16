@@ -2,7 +2,9 @@ package broker
 
 import (
 	"acceptance/config"
+	. "acceptance/helpers"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
@@ -15,11 +17,20 @@ import (
 
 var _ = Describe("AutoScaler Service Broker", func() {
 	var appName string
+	var manifestFilePath string
 
 	BeforeEach(func() {
 		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
-		createApp := cf.Cf("push", appName, "--no-start", "-b", cfg.NodejsBuildpackName, "-m", fmt.Sprintf("%dM", cfg.NodeMemoryLimit), "-p", config.NODE_APP, "-d", cfg.AppsDomain).Wait(cfg.DefaultTimeoutDuration())
+
+		// create manifest file
+		manifestFilePath = PrepareManifestYML(appName,strings.Split(cfg.AppsDomain,","))
+
+		createApp := cf.Cf("push", appName, "--no-start", "-b", cfg.NodejsBuildpackName, "-m", fmt.Sprintf("%dM", cfg.NodeMemoryLimit), "-p", config.NODE_APP, "-f", manifestFilePath).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createApp).To(Exit(0), "failed creating app")
+
+		//remove manifest file
+		RemoveFile(manifestFilePath)
+
 	})
 
 	AfterEach(func() {

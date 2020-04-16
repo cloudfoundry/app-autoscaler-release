@@ -5,10 +5,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+	"gopkg.in/yaml.v2"
+	"log"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
@@ -86,6 +90,58 @@ type SpecificDateSchedule struct {
 	ScheduledInstanceMin  int    `json:"instance_min_count"`
 	ScheduledInstanceMax  int    `json:"instance_max_count"`
 	ScheduledInstanceInit int    `json:"initial_min_instance_count"`
+}
+
+type Route map[string]string
+
+type APP struct {
+	NAME string
+	ROUTES     []Route
+}
+
+type MANIFEST struct{
+	APPLICATIONS []APP
+}
+
+func PrepareManifestYML(appname string, routes []string) string {
+	t := APP{}
+	t.NAME=appname
+
+	var routesArray []Route
+	for i:=0; i<len(routes); i++{
+		route := Route{"route": appname + "." + routes[i]}
+		routesArray=append(routesArray, route)
+	}
+	t.ROUTES= routesArray
+
+	t1 := MANIFEST{}
+	t1.APPLICATIONS=append(t1.APPLICATIONS,t)
+
+	d, err := yaml.Marshal(&t1)
+	if err != nil {
+		log.Fatalf("error: %v", err)
+	}
+	return writeStringToFile("manifest.yml",fmt.Sprint("---\n", string(d)))
+}
+
+func writeStringToFile(fileName string, stringToWrite string) string {
+	tmpfile, err := ioutil.TempFile("", fileName+"*")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if _, err := tmpfile.WriteString(stringToWrite); err != nil {
+		log.Fatal(err)
+	}
+	if err := tmpfile.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	return tmpfile.Name()
+}
+
+func RemoveFile(filename string){
+	os.Remove(filename)
 }
 
 func Curl(cfg *config.Config, args ...string) (int, []byte, error) {
