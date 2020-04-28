@@ -26,7 +26,6 @@
     address: sql-db.service.cf.internal
     db_scheme: mysql
     port: 3306
-    sslmode: "false"
     roles:
     - name: autoscaler
       password: ((autoscaler_database_password))
