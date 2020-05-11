@@ -8,7 +8,7 @@
     binding_db_port = p('autoscaler.binding_db.port')
     binding_db_role = p_arr('autoscaler.binding_db.roles').find { |role| role['tag'] == 'binding_db' or role['tag'] == 'default' } 
     binding_db_database = p_arr('autoscaler.binding_db.databases').find { |database| database['tag'] == 'binding_db' or database['tag'] == 'default' } 
-    unless binding_db_scheme == "mysql"
+    if binding_db_scheme == "postgres"
       binding_db_url = binding_db_scheme + "://" + binding_db_role['name'] + ":" + binding_db_role['password'] + "@" + binding_db_address + ":" + binding_db_port.to_s + "/" + binding_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.binding_db.sslmode')
     else
       binding_db_url = binding_db_role['name'] + ":" + binding_db_role['password'] + "@tcp(" + binding_db_address + ":" + binding_db_port.to_s + ")/" + binding_db_database['name'] + "?tls=" + p('autoscaler.binding_db.sslmode') 
@@ -23,7 +23,7 @@
   policy_db_port = p('autoscaler.policy_db.port')
   policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
   policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
-  unless policy_db_scheme == "mysql"
+  if policy_db_scheme == "postgres"
     policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.policy_db.sslmode')   
   else
     policy_db_url = policy_db_role['name'] + ":" + policy_db_role['password'] + "@tcp(" + policy_db_address + ":" + policy_db_port.to_s + ")/" + policy_db_database['name'] + "?tls=" + p('autoscaler.policy_db.sslmode') 

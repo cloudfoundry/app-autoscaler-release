@@ -8,7 +8,7 @@
   instance_metrics_db_port = p('autoscaler.instancemetrics_db.port')
   instance_metrics_db_role = p_arr('autoscaler.instancemetrics_db.roles').find { |role| role['tag'] == 'instancemetricsdb' or role['tag'] == 'default' } 
   instance_metrics_db_database = p_arr('autoscaler.instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' } 
-  unless instance_metrics_db_scheme == "mysql"
+  if instance_metrics_db_scheme == "postgres"
     instance_metrics_db_url = instance_metrics_db_scheme + "://" + instance_metrics_db_role['name'] + ":" + instance_metrics_db_role['password'] + "@" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + "/" + instance_metrics_db_database['name'] + "?application_name=metricsserver&sslmode=" + p('autoscaler.instancemetrics_db.sslmode') 
   else
     instance_metrics_db_url = instance_metrics_db_role['name'] + ":" + instance_metrics_db_role['password'] + "@tcp(" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + ")/" + instance_metrics_db_database['name'] + "?tls=" + p('autoscaler.instancemetrics_db.sslmode') 
@@ -22,7 +22,7 @@
   policy_db_port = p('autoscaler.policy_db.port')
   policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
   policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
-  unless policy_db_scheme == "mysql"
+  if policy_db_scheme == "postgres"
     policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=metricsserver&sslmode=" + p('autoscaler.policy_db.sslmode')   
   else
     policy_db_url = policy_db_role['name'] + ":" + policy_db_role['password'] + "@tcp(" + policy_db_address + ":" + policy_db_port.to_s + ")/" + policy_db_database['name'] + "?tls=" + p('autoscaler.policy_db.sslmode') 

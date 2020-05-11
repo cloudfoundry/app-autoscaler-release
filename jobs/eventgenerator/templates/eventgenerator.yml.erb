@@ -8,7 +8,7 @@
   policy_db_port = p('autoscaler.policy_db.port')
   policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
   policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
-  unless policy_db_scheme == "mysql"
+  if policy_db_scheme == "postgres"
     policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=eventgenerator&sslmode=" + p('autoscaler.policy_db.sslmode')   
   else
     policy_db_url = policy_db_role['name'] + ":" + policy_db_role['password'] + "@tcp(" + policy_db_address + ":" + policy_db_port.to_s + ")/" + policy_db_database['name'] + "?tls=" + p('autoscaler.policy_db.sslmode') 
@@ -22,7 +22,7 @@
   app_metrics_db_port = p('autoscaler.appmetrics_db.port')
   app_metrics_db_role = p_arr('autoscaler.appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
   app_metrics_db_database = p_arr('autoscaler.appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
-  unless app_metrics_db_scheme == "mysql"
+  if app_metrics_db_scheme == "postgres"
     app_metrics_db_url = app_metrics_db_scheme + "://" + app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?application_name=eventgenerator&sslmode=" + p('autoscaler.appmetrics_db.sslmode')
   else
     app_metrics_db_url = app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@tcp(" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + ")/" + app_metrics_db_database['name'] + "?tls=" + p('autoscaler.appmetrics_db.sslmode')
