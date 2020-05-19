@@ -76,7 +76,9 @@ bosh -e YOUR_ENV -d app-autoscaler \
 ```
 
 * Deploy autoscaler with cf deployment mysql database
-    
+
+    **Notes**: It is blocked by the pull request [cf-deployment #881](https://github.com/cloudfoundry/cf-deployment/pull/881) temporarily. If you would like to use the cf mysql, please apply the `set-autoscaler-db.yml` in the pull request when deploy cf deployment. 
+
     The lastest Autoscaler release add the support for mysql database, Autoscaler can connect the same mysql database with cf deployment. Use the operation file `example/operation/cf-mysql-db.yml` which including the cf database host , password and tls.ca cert.
 
 ```sh
