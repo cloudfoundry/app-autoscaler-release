@@ -45,7 +45,7 @@ JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 <% unless p('autoscaler.lock_db.tls.ca') == "" %>
 /var/vcap/packages/common/init-db-truststore.sh lock_db /var/vcap/jobs/operator/config/certs/lock_db/ca.crt	
-JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/lock_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/lock_db/cacerts&trustCertificateKeyStoreType=pkcs12"
 DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
  <% end %>
  <% end %>
@@ -56,8 +56,8 @@ DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=$operator_DIR/operator.db.changelog.yml update
 <% else %>
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=/var/vcap/packages/scheduler/db/databasechangelog.yaml update
+java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=/var/vcap/packages/common/databasechangelog-primarykey.yml update
 java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=$operator_DIR/operator.db.changelog.yml update
 <% end %>

@@ -41,7 +41,7 @@ JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 <% unless p('autoscaler.instancemetrics_db.tls.ca') == "" %>
 /var/vcap/packages/common/init-db-truststore.sh appinstancemetrics_db /var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt	
-JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/appinstancemetrics_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/appinstancemetrics_db/cacerts&trustCertificateKeyStoreType=pkcs12"
 DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt"
 <% end %>
 <% end %>
