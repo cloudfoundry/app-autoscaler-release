@@ -6,3 +6,5 @@ files:
 - common/consul-helper.sh
 - common/dns-helper.sh
 - common/call-hooks.sh
+- common/init-db-truststore.sh
+- common/databasechangelog-primarykey.yml

@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: aqan213
+      dbms: mysql
+      preConditions:
+      - onFail: MARK_RAN
+      - not:
+        - primaryKeyExists:
+            tableName: DATABASECHANGELOG
+            primaryKeyName: "PK_DATABASECHANGELOG"
+      changes: 
+        - addPrimaryKey:
+            columnNames: "id,author,filename"
+            constraintName: "PK_DATABASECHANGELOG"
+            schemaName: autoscaler
+            tableName: DATABASECHANGELOG

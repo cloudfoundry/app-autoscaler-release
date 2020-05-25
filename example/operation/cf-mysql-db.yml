@@ -2,23 +2,33 @@
 - type: remove
   path: /instance_groups/name=postgres_autoscaler
 
+- type: replace
+  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/-
+  value:
+    domain: sql-db.service.cf.internal
+    targets:
+    - deployment: cf
+      domain: bosh
+      instance_group: database
+      network: default
+      query: '*'
+
 # asactors/scalingengine
 - type: replace
   path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db
   value: &external_database
-    sslmode: &sslmode ((database.sslmode))
+    sslmode: &sslmode "false"
     tls: &database_tls
-      ca: ((database.tls.ca))
+      ca: "((mysql_server_certificate.ca))"
     databases:
-    - name: ((database.name))
+    - name: autoscaler
       tag: default
-    address: ((database.host))
-    db_scheme: ((database.scheme))
-    port: ((database.port))
-    sslmode: ((database.sslmode))
+    address: sql-db.service.cf.internal
+    db_scheme: mysql
+    port: 3306
     roles:
-    - name: ((database.username))
-      password: ((database.password))
+    - name: autoscaler
+      password: ((autoscaler_database_password))
       tag: default 
 
 - type: replace
@@ -145,6 +155,7 @@
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db_connection_config
   value: *databaseConnectionConfig
+
 
 
 

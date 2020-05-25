@@ -6,31 +6,54 @@
     p(property,nil) || []
   end
 
+  schedulerdb_scheme = p('autoscaler.scheduler_db.db_scheme')
   schedulerdb_role = p_arr('autoscaler.scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' } 
   schedulerdb_database = p_arr('autoscaler.scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' } 
-  schedulerdb_url = "jdbc:postgresql://" + p('autoscaler.scheduler_db.address') + ":" + p('autoscaler.scheduler_db.port').to_s + "/" + schedulerdb_database['name'] + "?ApplicationName=scheduler&sslmode=" + p('autoscaler.scheduler_db.sslmode')
-  unless p('autoscaler.scheduler_db.tls.ca') == ""
-    schedulerdb_url = schedulerdb_url + "&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt" 
+  if schedulerdb_scheme == "postgres"
+    schedulerdb_url = "jdbc:postgresql://" + p('autoscaler.scheduler_db.address') + ":" + p('autoscaler.scheduler_db.port').to_s + "/" + schedulerdb_database['name'] + "?ApplicationName=scheduler&sslmode=" + p('autoscaler.scheduler_db.sslmode')
+    unless p('autoscaler.scheduler_db.tls.ca') == ""
+      schedulerdb_url = schedulerdb_url + "&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt" 
+    end
+  else
+    schedulerdb_url = "jdbc:mysql://"  + p('autoscaler.scheduler_db.address') + ":" + p('autoscaler.scheduler_db.port').to_s + "/" + schedulerdb_database['name'] + "?autoReconnect=true"
+    unless p('autoscaler.scheduler_db.tls.ca') == ""
+      schedulerdb_url = schedulerdb_url + "&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12" 
+    end
   end
 
+  policydb_scheme = p('autoscaler.policy_db.db_scheme')
   policydb_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' } 
   policydb_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' } 
-  policydb_url = "jdbc:postgresql://" + p('autoscaler.policy_db.address') + ":" + p('autoscaler.policy_db.port').to_s + "/" + schedulerdb_database['name'] + "?ApplicationName=scheduler&sslmode=" + p('autoscaler.policy_db.sslmode')
-  unless p('autoscaler.policy_db.tls.ca') == ""
-    policydb_url = policydb_url + "&sslrootcert=/var/vcap/jobs/scheduler/config/certs/policy_db/ca.crt" 
-  end
+  if policydb_scheme == "postgres"
+    policydb_url = "jdbc:postgresql://" + p('autoscaler.policy_db.address') + ":" + p('autoscaler.policy_db.port').to_s + "/" + schedulerdb_database['name'] + "?ApplicationName=scheduler&sslmode=" + p('autoscaler.policy_db.sslmode')
+    unless p('autoscaler.policy_db.tls.ca') == ""
+      policydb_url = policydb_url + "&sslrootcert=/var/vcap/jobs/scheduler/config/certs/policy_db/ca.crt" 
+    end
+  else
+    policydb_url = "jdbc:mysql://" + p('autoscaler.policy_db.address') + ":" + p('autoscaler.policy_db.port').to_s + "/" + schedulerdb_database['name'] + "?autoReconnect=true"
+    unless p('autoscaler.policy_db.tls.ca') == ""
+      policydb_url = policydb_url + "&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12" 
+    end
+  end  
 
 %>
 #datasource for application and quartz
-
+<% if schedulerdb_scheme == "postgres" %>
 spring.datasource.driverClassName=org.postgresql.Driver
+<% else %>
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+<% end %>
 spring.datasource.url=<%=schedulerdb_url %>
 spring.datasource.username=<%=schedulerdb_role['name'] %>
 spring.datasource.password=<%=schedulerdb_role['password'] %>
 
 #datasource for policy 
 
+<% if policydb_scheme == "postgres" %>
 spring.policyDbDataSource.driverClassName=org.postgresql.Driver
+<% else %>
+spring.policyDbDataSource.driverClassName=com.mysql.cj.jdbc.Driver
+<% end %>
 spring.policyDbDataSource.url=<%=policydb_url %>
 spring.policyDbDataSource.password=<%=policydb_role['password'] %>
 spring.policyDbDataSource.username=<%=policydb_role['name'] %>

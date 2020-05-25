@@ -5,6 +5,7 @@ dependencies:
 - golang
 
 files:
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* #gosub
 - app-autoscaler/src/autoscaler/db/* # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/* # gosub
 - app-autoscaler/src/autoscaler/healthendpoint/* # gosub
@@ -24,6 +25,7 @@ files:
 - app-autoscaler/src/code.cloudfoundry.org/lager/* # gosub
 - app-autoscaler/src/code.cloudfoundry.org/rfc5424/* # gosub
 - app-autoscaler/src/github.com/beorn7/perks/quantile/* # gosub
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/jsonpb/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/proto/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/ptypes/* # gosub
@@ -33,6 +35,8 @@ files:
 - app-autoscaler/src/github.com/golang/protobuf/ptypes/timestamp/* # gosub
 - app-autoscaler/src/github.com/gorilla/mux/* # gosub
 - app-autoscaler/src/github.com/gorilla/websocket/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/reflectx/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub
 - app-autoscaler/src/github.com/lib/pq/scram/* # gosub
