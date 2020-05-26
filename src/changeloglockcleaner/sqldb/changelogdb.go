@@ -5,19 +5,31 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 
 	_ "github.com/lib/pq"
+	"github.com/jmoiron/sqlx"
+
 )
 
 const PostgresDriverName = "postgres"
+const MysqlDriverName = "mysql"
+const postgresDbURLPattern = `^(postgres|postgresql):\/\/(.+):(.+)@([\da-zA-Z\.-]+)(:[\d]{4,5})?\/(.+)`
+const mysqlDbURLPattern = `(.+):(.+)@tcp\(([\da-zA-Z\.-]+)(:[\d]{4,5})?\)\/(.+)`
 
 type ChangelogSQLDB struct {
-	sqldb *sql.DB
+	sqldb *sqlx.DB
 }
 
 func NewChangelogSQLDB(dbUrl string) (*ChangelogSQLDB, error) {
 	log.SetOutput(os.Stdout)
-	sqldb, err := sql.Open(PostgresDriverName, dbUrl)
+	database, err := GetConnection(dbUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	sqldb, err := sqlx.Open(database.DriverName, database.DSN)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +37,10 @@ func NewChangelogSQLDB(dbUrl string) (*ChangelogSQLDB, error) {
 	err = sqldb.Ping()
 	if err != nil {
 		sqldb.Close()
-		log.Printf("failed-to-connection-to-database, dburl:%s,  err:%s\n", dbUrl, err)
+		dbUrl = redactDbCreds(dbUrl)
+		if dbUrl != "" {
+			log.Printf("failed-to-connection-to-database, dburl:%s,  err:%s\n", dbUrl, err)
+		}
 		return nil, err
 	}
 
@@ -44,7 +59,9 @@ func (cdb *ChangelogSQLDB) Close() error {
 }
 
 func (cdb *ChangelogSQLDB) DeleteExpiredLock(timeoutInSecond int) error {
-	query := fmt.Sprintf(`DO $$                  
+	switch cdb.sqldb.DriverName() {
+	case "postgres":
+		query := fmt.Sprintf(`DO $$                  
     BEGIN 
         IF EXISTS
             ( SELECT 1
@@ -58,9 +75,46 @@ func (cdb *ChangelogSQLDB) DeleteExpiredLock(timeoutInSecond int) error {
     END
    $$ ;
 	`, timeoutInSecond)
-	_, err := cdb.sqldb.Exec(query)
-	if err != nil {
-		log.Printf("failed-to-delete-application-details, query:%s, err:%s\n", query, err)
+	    _, err := cdb.sqldb.Exec(query)
+	    if err != nil {
+		    log.Printf("failed-to-delete-application-details, query:%s, err:%s\n", query, err)
+	    }
+	    return err
+    case "mysql":
+		var rowCount int
+		err := cdb.sqldb.QueryRow("SELECT 1 FROM  information_schema.tables WHERE  table_schema = 'autoscaler' AND table_name = 'DATABASECHANGELOGLOCK'").Scan(&rowCount)
+		if err == sql.ErrNoRows {
+			log.Printf("table databasechangeloglock does not exist, err:%s\n", err)
+			return nil
+		}else if err != nil {
+			log.Printf("failed to query table from database, err:%s\n", err)
+			return err
+		}
+		if rowCount > 0{
+			_, err = cdb.sqldb.Exec(fmt.Sprintf("DELETE FROM DATABASECHANGELOGLOCK WHERE TIMESTAMPDIFF(SECOND, lockgranted, NOW()) > %d;",timeoutInSecond))
+			if err != nil {
+				log.Printf("failed-to-delete-application-details, err:%s\n", err)
+				return err
+			}
+		}
 	}
-	return err
+	return nil
+
+}
+
+func redactDbCreds(dbUrl string) string {
+	var redactUrl string
+	urlCredMatcher := new(regexp.Regexp)
+	if strings.Contains(dbUrl, "postgres") {
+		urlCredMatcher = regexp.MustCompile(postgresDbURLPattern)
+		if urlCredMatcher.MatchString(dbUrl) {
+			redactUrl = urlCredMatcher.ReplaceAllString(dbUrl, `$1://$2:*REDACTED*@$4$5/$6`)
+		}
+	}else {
+		urlCredMatcher = regexp.MustCompile(mysqlDbURLPattern)
+		if urlCredMatcher.MatchString(dbUrl) {
+			redactUrl = urlCredMatcher.ReplaceAllString(dbUrl, `$1:*REDACTED*@tcp($3$4)/$5`)
+		}
+	}
+	return redactUrl
 }

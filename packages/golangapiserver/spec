@@ -8,6 +8,7 @@ files:
 - app-autoscaler/api/db/**/*
 - app-autoscaler/servicebroker/db/**/*
 - app-autoscaler/src/autoscaler/api/schemas/*
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* #gosub
 - app-autoscaler/src/autoscaler/api/* # gosub
 - app-autoscaler/src/autoscaler/api/brokerserver/* # gosub
 - app-autoscaler/src/autoscaler/api/cmd/api/* # gosub
@@ -31,8 +32,11 @@ files:
 - app-autoscaler/src/code.cloudfoundry.org/lager/* # gosub
 - app-autoscaler/src/github.com/beorn7/perks/quantile/* # gosub
 - app-autoscaler/src/github.com/cloudfoundry-incubator/uaago/* # gosub
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* # gosub
 - app-autoscaler/src/github.com/golang/protobuf/proto/* # gosub
 - app-autoscaler/src/github.com/gorilla/mux/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/reflectx/* # gosub
 - app-autoscaler/src/github.com/juju/ratelimit/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub

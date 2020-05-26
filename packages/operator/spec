@@ -7,6 +7,7 @@ dependencies:
 files:
 - app-autoscaler/src/autoscaler/operator/db/*
 - app-autoscaler/src/github.com/cloudfoundry-incubator/uaago/*.go
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* #gosub
 - app-autoscaler/src/autoscaler/cf/* # gosub
 - app-autoscaler/src/autoscaler/db/* # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/* # gosub
@@ -31,6 +32,7 @@ files:
 - app-autoscaler/src/github.com/cloudfoundry/dropsonde/metric_sender/* # gosub
 - app-autoscaler/src/github.com/cloudfoundry/dropsonde/metrics/* # gosub
 - app-autoscaler/src/github.com/cloudfoundry/sonde-go/events/* # gosub
+- app-autoscaler/src/github.com/go-sql-driver/mysql/* # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/gogoproto/* # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/proto/* # gosub
 - app-autoscaler/src/github.com/gogo/protobuf/protoc-gen-gogo/descriptor/* # gosub
@@ -39,6 +41,8 @@ files:
 - app-autoscaler/src/github.com/hashicorp/consul/api/* # gosub
 - app-autoscaler/src/github.com/hashicorp/consul/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
 - app-autoscaler/src/github.com/hashicorp/consul/vendor/github.com/hashicorp/serf/coordinate/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/* # gosub
+- app-autoscaler/src/github.com/jmoiron/sqlx/reflectx/* # gosub
 - app-autoscaler/src/github.com/lib/pq/* # gosub
 - app-autoscaler/src/github.com/lib/pq/oid/* # gosub
 - app-autoscaler/src/github.com/lib/pq/scram/* # gosub

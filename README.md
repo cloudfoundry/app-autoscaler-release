@@ -75,7 +75,26 @@ bosh -e YOUR_ENV -d app-autoscaler \
      -v skip_ssl_validation=true
 ```
 
-* Deploy autoscaler with external postgres database
+* Deploy autoscaler with cf deployment mysql database
+
+    **Notes**: It is blocked by the pull request [cf-deployment #881](https://github.com/cloudfoundry/cf-deployment/pull/881) temporarily. If you would like to use the cf mysql, please apply the `set-autoscaler-db.yml` in the pull request when deploy cf deployment. 
+
+    The lastest Autoscaler release add the support for mysql database, Autoscaler can connect the same mysql database with cf deployment. Use the operation file `example/operation/cf-mysql-db.yml` which including the cf database host , password and tls.ca cert.
+
+```sh
+bosh -e YOUR_ENV -d app-autoscaler \
+     deploy templates/app-autoscaler-deployment.yml \
+     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+     -l <PATH_TO_CF_DEPLOYMENT_VAR_FILES> \
+     -v system_domain=bosh-lite.com \
+     -v cf_client_id=autoscaler_client_id \
+     -v cf_client_secret=<AUTOSCALE_CLIENT_SECRET> \
+     -v skip_ssl_validation=true \
+     -o example/operation/cf-mysql-db.yml
+```
+   
+
+* Deploy autoscaler with external postgres database and mysql database
 
 ```sh
 bosh -e YOUR_ENV -d app-autoscaler \
@@ -95,6 +114,7 @@ database:
   name: <database_name>
   host: <database_host>
   port: <database_port>
+  scheme: <database_scheme>
   username: <database_username>
   password: <database_password>
   sslmode: <database_sslmode>
@@ -112,10 +132,11 @@ Property | Description
 database.name | The database name.
 database.host | The database server ip address or hostname.
 database.port | The database server port.
+database.scheme | The database scheme. Currently Autoscaler supports "postgres" and "mysql".
 database.username | The username of the database specified above in "database.name".
 database.password | The password of the user specified above in "database.username".
-database.sslmode | There are 6 values allowed: disable, allow, prefer, require, verify-ca and verify-full. Please refer to [Postgres SSL definition](https://www.postgresql.org/docs/current/libpq-ssl.html) when define `database_sslmode`.
-database.tls.ca | PEM-encoded certification authority for secure TLS communication. Only required when sslmode is verify-ca or verify-full and can be omitted for other sslmode.
+database.sslmode | There are 6 values allowed for "postgres": disable, allow, prefer, require, verify-ca and verify-full. Please refer to [Postgres SSL definition](https://www.postgresql.org/docs/current/libpq-ssl.html) when define `database_sslmode`.  For "mysql", there are 7 values allowed: false, true, skip-verify, preferred, verify-ca, verify_identity.Please refer to [Mysql SSL definition(Golang)](https://github.com/go-sql-driver/mysql#tls) and [Mysql Connector SSL](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html)
+database.tls.ca | PEM-encoded certification authority for secure TLS communication. Only required when sslmode is verify-ca or verify-full(postgres) or verify_identity(mysql) and can be omitted for other sslmode.
 
 * **Deprecated**:  App-AutoScaler v1 release and its deployment options. 
 
@@ -221,3 +242,4 @@ Log in to Cloud Foundry with admin user, and use the following commands to remov
 cf purge-service-offering autoscaler
 cf delete-service-broker autoscaler
 ```
+
