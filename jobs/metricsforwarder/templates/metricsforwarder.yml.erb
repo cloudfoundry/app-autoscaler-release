@@ -8,7 +8,7 @@
   policy_db_port = p('autoscaler.policy_db.port')
   policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
   policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
-  policy_db_url = policy_db_scheme + "://" + policy_db_role['name'] + ":" + policy_db_role['password'] + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=metricsforwarder&sslmode=" + p('autoscaler.policy_db.sslmode') 
+  policy_db_url = policy_db_scheme + "://" + ERB::Util.url_encode(policy_db_role['name']) + ":" + ERB::Util.url_encode(policy_db_role['password']) + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=metricsforwarder&sslmode=" + p('autoscaler.policy_db.sslmode')
   unless p('autoscaler.policy_db.tls.ca') == ""
     policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/metricsforwarder/config/certs/policy_db/ca.crt"
   end
@@ -18,7 +18,7 @@
   sbss_db_port = p('autoscaler.sbss_db.port')
   sbss_db_role = p_arr('autoscaler.sbss_db.roles').find { |role| role['tag'] == 'sbssdb' }
   sbss_db_database = p_arr('autoscaler.sbss_db.databases').find { |database| database['tag'] == 'sbssdb' or database['tag'] == 'default' }
-  sbss_db_url = sbss_db_scheme + "://" + sbss_db_role['name'] + ":" + sbss_db_role['password'] + "@" + sbss_db_address + ":" + sbss_db_port.to_s + "/" + sbss_db_database['name'] + "?application_name=metricsforwarder&sslmode=" + p('autoscaler.sbss_db.sslmode') 
+  sbss_db_url = sbss_db_scheme + "://" + ERB::Util.url_encode(sbss_db_role['name']) + ":" + ERB::Util.url_encode(sbss_db_role['password']) + "@" + sbss_db_address + ":" + sbss_db_port.to_s + "/" + sbss_db_database['name'] + "?application_name=metricsforwarder&sslmode=" + p('autoscaler.sbss_db.sslmode')
   unless p('autoscaler.sbss_db.tls.ca') == ""
     sbss_db_url = sbss_db_url + "&sslrootcert=/var/vcap/jobs/metricsforwarder/config/certs/sbss_db/ca.crt"
   end
