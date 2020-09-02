@@ -45,7 +45,7 @@ var _ = BeforeSuite(func() {
 		EnableServiceAccess(cfg, setup.GetOrganizationName())
 	})
 
-	serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
+	serviceExists := cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
 	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
 })
 
