@@ -66,7 +66,7 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() {
+		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			EnableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})
@@ -138,7 +138,7 @@ var _ = AfterSuite(func() {
 
 	Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() {
+		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			DisableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})

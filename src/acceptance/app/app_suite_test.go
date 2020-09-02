@@ -67,7 +67,7 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() {
+		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			EnableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})
@@ -99,7 +99,7 @@ var _ = BeforeSuite(func() {
 
 var _ = AfterSuite(func() {
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() {
+		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			DisableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})

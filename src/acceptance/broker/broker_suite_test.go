@@ -42,7 +42,9 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		EnableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.ShouldEnableServiceAccess() {
+			EnableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
 
 	serviceExists := cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
@@ -51,7 +53,9 @@ var _ = BeforeSuite(func() {
 
 var _ = AfterSuite(func() {
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		DisableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.ShouldEnableServiceAccess() {
+			DisableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
 	setup.Teardown()
 })
