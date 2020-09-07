@@ -72,8 +72,7 @@ var _ = BeforeSuite(func() {
 		}
 	})
 	if cfg.IsServiceOfferingEnabled() {
-		serviceExists := cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
+		CheckServiceExists(cfg)
 	}
 
 	interval = cfg.AggregateInterval
