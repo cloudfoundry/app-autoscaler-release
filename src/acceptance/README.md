@@ -62,6 +62,7 @@ The full set of config parameters is explained below:
 * `apps_domain` (required): A shared domain that tests can use to create subdomains that will route to applications also craeted in the tests.
 
 * `service_offering_enabled` (optional): Set to true if auto-scaler is offered as a cloudfoundry service. The value should be the consistent with the one in app-autoscaler deployment. Default is true.
+* `enable_service_access` (optional): Set to false if autoscaler is offered as a cloudfoundry service which is globally enabled. Default is true.
 * `skip_ssl_validation` (optional): Set to true if using an invalid (e.g. self-signed) cert for traffic routed to your CF instance; this is generally always true for BOSH-Lite deployments of CF.
 * `use_existing_user` (optional): The admin user configured above will normally be used to create a temporary user (with lesser permissions) to perform actions (such as push applications) during tests, and then delete said user after the tests have run; set this to `true` if you want to use an existing user, configured via the following properties.
 * `keep_user_at_suite_end` (optional): If using an existing user (see above), set this to `true` unless you are okay having your existing user being deleted at the end. You can also set this to `true` when not using an existing user if you want to leave the temporary user around for debugging purposes after the test teardown.
