@@ -1,18 +1,15 @@
 package broker
 
 import (
-	"fmt"
 	"testing"
 
 	"acceptance/config"
 	. "acceptance/helpers"
 
-	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/workflowhelpers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 )
 
 var (
@@ -42,16 +39,19 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		EnableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.ShouldEnableServiceAccess() {
+			EnableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
 
-	serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
+	CheckServiceExists(cfg)
 })
 
 var _ = AfterSuite(func() {
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		DisableServiceAccess(cfg, setup.GetOrganizationName())
+		if cfg.ShouldEnableServiceAccess() {
+			DisableServiceAccess(cfg, setup.GetOrganizationName())
+		}
 	})
 	setup.Teardown()
 })

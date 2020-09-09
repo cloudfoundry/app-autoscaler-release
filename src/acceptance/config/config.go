@@ -55,6 +55,7 @@ type Config struct {
 
 	ASApiEndpoint          string `json:"autoscaler_api"`
 	ServiceOfferingEnabled bool   `json:"service_offering_enabled"`
+	EnableServiceAccess    bool   `json:"enable_service_access"`
 }
 
 var defaults = Config{
@@ -76,6 +77,7 @@ var defaults = Config{
 	CfJavaTimeout:          10,  // minutes
 	NodeMemoryLimit:        128, // MB
 	ServiceOfferingEnabled: true,
+	EnableServiceAccess:    true,
 }
 
 func LoadConfig(t *testing.T) *Config {
@@ -271,6 +273,10 @@ func (c *Config) GetApiEndpoint() string {
 
 func (c *Config) IsServiceOfferingEnabled() bool {
 	return c.ServiceOfferingEnabled
+}
+
+func (c *Config) ShouldEnableServiceAccess() bool {
+	return c.EnableServiceAccess
 }
 
 func (c *Config) GetAdminClient() string {

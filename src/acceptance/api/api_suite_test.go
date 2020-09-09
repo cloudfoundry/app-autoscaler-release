@@ -66,7 +66,7 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() {
+		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			EnableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})
@@ -74,7 +74,7 @@ var _ = BeforeSuite(func() {
 	appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
 	initialInstanceCount := 1
 	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push", appName, "--no-start","--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
+	createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
 	Expect(createApp).To(Exit(0), "failed creating app")
 
 	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
@@ -88,8 +88,7 @@ var _ = BeforeSuite(func() {
 	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 
 	if cfg.IsServiceOfferingEnabled() {
-		serviceExists := cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
+		CheckServiceExists(cfg)
 
 		instanceName = generator.PrefixedRandomName("autoscaler", "service")
 		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
@@ -138,7 +137,7 @@ var _ = AfterSuite(func() {
 
 	Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() {
+		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			DisableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})
