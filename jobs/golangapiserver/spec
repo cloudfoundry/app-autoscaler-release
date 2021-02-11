@@ -49,10 +49,9 @@ properties:
     description: "PEM-encoded server certificate"
   autoscaler.apiserver.broker.server.server_key:
     description: "PEM-encoded server key"
-  autoscaler.apiserver.broker.username:
-    description: "username to authenticate with service broker"
-  autoscaler.apiserver.broker.password:
-    description: "password to authenticate with service broker"
+
+  autoscaler.apiserver.broker_credentials:
+    description: "the list of credentials to authenticate with service broker"
   autoscaler.apiserver.broker.server.catalog:
     description: ""
   autoscaler.apiserver.broker.server.dashboard_redirect_uri:
