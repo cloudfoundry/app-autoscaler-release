@@ -1,3 +1,7 @@
+
+# enable deep monitoring by relying on the rule set-up
+export DT_MONITOR="true"
+
 mkdir -p /var/vcap/sys/log
 
 exec > >(tee -a >(logger -p user.info -t vcap.$(basename $0).stdout) | awk -W interactive '{ system("echo -n [$(date +\"%Y-%m-%d %H:%M:%S%z\")]"); print " " $0 }' >>/var/vcap/sys/log/$(basename $0).log)
