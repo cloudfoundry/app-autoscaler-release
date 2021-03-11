@@ -50,7 +50,7 @@ properties:
   autoscaler.apiserver.broker.server.server_key:
     description: "PEM-encoded server key"
 
-  autoscaler.apiserver.broker_credentials:
+  autoscaler.apiserver.broker.broker_credentials:
     description: "the list of credentials to authenticate with service broker"
   autoscaler.apiserver.broker.server.catalog:
     description: ""
