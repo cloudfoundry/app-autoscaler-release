@@ -30,9 +30,6 @@ features:
   use_dns_addresses: true
 addons:
 - name: bosh-dns-aliases
-  include:
-    stemcell:
-    - os: ubuntu-xenial
   jobs:
   - name: bosh-dns-aliases
     release: bosh-dns-aliases
@@ -122,7 +119,7 @@ addons:
 # Stemcell details
 stemcells:
 - alias: default
-  os: ubuntu-xenial
+  os: ubuntu-bionic
   version: latest
 
 # Canary details
