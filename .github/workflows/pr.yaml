@@ -37,9 +37,8 @@ jobs:
 
           GOLANG_COMPONENTS="eventgenerator golangapiserver metricsgateway scalingengine metricsforwarder metricsserver operator"
           for COMPONENT in $GOLANG_COMPONENTS; do
-            echo "########################"
-            echo $COMPONENT
-            echo "########################"
+            echo "::group::$COMPONENT"
             source packages/$COMPONENT/packaging
+            echo "::endgroup::"
           done
 
