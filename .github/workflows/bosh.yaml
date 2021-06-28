@@ -11,5 +11,9 @@ jobs:
         with:
           submodules: true
 
+      - name: Update
+        run: |
+          ./scripts/update
+
       - name: Build Dev Release
         uses: garethjevans/bosh-release-action@v1.0.2
