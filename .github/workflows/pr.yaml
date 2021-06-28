@@ -42,3 +42,5 @@ jobs:
             echo "::endgroup::"
           done
 
+          ls -al $BOSH_INSTALL_TARGET
+
