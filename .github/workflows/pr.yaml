@@ -1,0 +1,45 @@
+name: pr
+on:
+  pull_request:
+  workflow_dispatch:  
+jobs:
+  pr:
+    name: Build Autoscaler Components
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Determine Go Version
+        id: go
+        run: |
+          GO_VERSION=$(cat packages/golang/spec | grep linux | sed 's/.linux-amd64.tar.gz//' | sed 's/- golang\/go//' | xargs)
+          echo "::set-output name=version::${GO_VERSION}"
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ steps.go.outputs.version }}
+
+      - name: Update Submodules
+        run: |
+          echo "Updating submodules"
+          git submodule update --init --recursive
+
+      - name: Build All
+        run: |
+          export BOSH_COMPILE_TARGET=`pwd`/src
+          export BOSH_INSTALL_TARGET=target
+          mkdir $BOSH_INSTALL_TARGET
+          ls -la src
+          ls -la src/app-autoscaler/
+
+          GOLANG_COMPONENTS="eventgenerator golangapiserver metricsgateway scalingengine metricsforwarder metricsserver operator"
+          for COMPONENT in $GOLANG_COMPONENTS; do
+            echo "########################"
+            echo $COMPONENT
+            echo "########################"
+            source packages/$COMPONENT/packaging
+          done
+
