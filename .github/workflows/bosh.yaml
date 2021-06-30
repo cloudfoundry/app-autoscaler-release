@@ -1,0 +1,19 @@
+name: bosh-release
+on:
+  pull_request:
+  workflow_dispatch:  
+jobs:
+  bosh-release:
+    name: Build Autoscaler Components
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Update
+        run: |
+          git submodule foreach --recursive git submodule sync && git submodule update --init --recursive
+
+      - name: Build Dev Release
+        uses: garethjevans/bosh-release-action@v1.0.2
