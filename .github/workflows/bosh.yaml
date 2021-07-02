@@ -12,6 +12,7 @@ jobs:
           submodules: true
 
       - name: Update
+        if: ${{ env.ACT }}
         run: |
           git submodule foreach --recursive git submodule sync && git submodule update --init --recursive
 
