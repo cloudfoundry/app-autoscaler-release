@@ -4,7 +4,7 @@ on:
   workflow_dispatch:  
 jobs:
   bosh-release:
-    name: Build Autoscaler Components
+    name: Create Bosh Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
