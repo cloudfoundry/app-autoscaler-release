@@ -21,7 +21,8 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ steps.go.outputs.version }}
+          #go-version: ${{ steps.go.outputs.version }}
+          go-version: 1.15
 
       - name: Update
         if: ${{ env.ACT }}
@@ -35,8 +36,9 @@ jobs:
             go mod download
             echo "::endgroup::"
             
-            echo "Vendor"
+            echo "::group::go mod vendor"
             go mod vendor
+            echo "::endgroup::"
             ls -la
           popd
             
