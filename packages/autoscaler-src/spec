@@ -1,0 +1,5 @@
+---
+name: autoscaler-src
+
+files:
+- app-autoscaler/src/autoscaler/**/*

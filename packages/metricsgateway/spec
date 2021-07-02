@@ -3,6 +3,4 @@ name: metricsgateway
 
 dependencies:
 - golang
-
-files:
-- app-autoscaler/src/autoscaler/**/*
+- autoscaler-src

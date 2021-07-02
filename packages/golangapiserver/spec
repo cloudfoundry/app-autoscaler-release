@@ -3,22 +3,4 @@ name: golangapiserver
 
 dependencies:
 - golang
-
-files:
-- app-autoscaler/src/autoscaler/api/schemas/*
-- app-autoscaler/src/autoscaler/api/* # gosub
-- app-autoscaler/src/autoscaler/api/brokerserver/* # gosub
-- app-autoscaler/src/autoscaler/api/cmd/api/* # gosub
-- app-autoscaler/src/autoscaler/api/config/* # gosub
-- app-autoscaler/src/autoscaler/api/custom_metrics_cred_helper/* # gosub
-- app-autoscaler/src/autoscaler/api/policyvalidator/* # gosub
-- app-autoscaler/src/autoscaler/api/publicapiserver/* # gosub
-- app-autoscaler/src/autoscaler/api/schedulerutil/* # gosub
-- app-autoscaler/src/autoscaler/cf/* # gosub
-- app-autoscaler/src/autoscaler/db/* # gosub
-- app-autoscaler/src/autoscaler/db/sqldb/* # gosub
-- app-autoscaler/src/autoscaler/healthendpoint/* # gosub
-- app-autoscaler/src/autoscaler/helpers/* # gosub
-- app-autoscaler/src/autoscaler/models/* # gosub
-- app-autoscaler/src/autoscaler/ratelimiter/* # gosub
-- app-autoscaler/src/autoscaler/routes/* # gosub
+- autoscaler-src
