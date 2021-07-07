@@ -65,5 +65,5 @@ jobs:
           pushd src/changeloglockcleaner
             go get github.com/onsi/ginkgo/ginkgo
             export DBURL="root@tcp(localhost)/autoscaler?tls=false"
-            ginkgo -r race -randomizeAllSpecs -keepGoing
+            ginkgo -r -race -randomizeAllSpecs -keepGoing
           popd
