@@ -2,9 +2,10 @@ package sqldb_test
 
 import (
 	"changeloglockcleaner/sqldb"
+	"strings"
 
-	"github.com/lib/pq"
 	"github.com/go-sql-driver/mysql"
+	"github.com/lib/pq"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -34,6 +35,9 @@ var _ = Describe("ChangelogSQLDB", func() {
 
 		Context("when db url is not correct", func() {
 			BeforeEach(func() {
+				if !strings.Contains(os.Getenv("DBURL"), "postgres") {
+					Skip("Not configured for postgres")
+				}
 				dbUrl = "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable"
 			})
 			It("should error", func() {
@@ -44,6 +48,9 @@ var _ = Describe("ChangelogSQLDB", func() {
 
 		Context("when mysql db url is not correct", func() {
 			BeforeEach(func() {
+				if strings.Contains(os.Getenv("DBURL"), "postgres") {
+					Skip("Not configured for mysql")
+				}
 				dbUrl = "not-exist-user:not-exist-password@tcp(localhost)/autoscaler?tls=false"
 			})
 			It("should error", func() {
