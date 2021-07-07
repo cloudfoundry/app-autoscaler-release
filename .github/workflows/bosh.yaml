@@ -31,6 +31,16 @@ jobs:
 
       - name: Vendor Golang Dependencies
         run: |
+          pushd src/changeloglockcleaner
+            echo "::group::go mod download"
+            go mod download
+            echo "::endgroup::"
+
+            echo "::group::go mod vendor"
+            go mod vendor
+            echo "::endgroup::"
+            ls -la
+          popd
           pushd src/app-autoscaler/src/autoscaler
             echo "::group::go mod download"
             go mod download
