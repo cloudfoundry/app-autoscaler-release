@@ -41,7 +41,7 @@ jobs:
             echo "::endgroup::"
             ls -la
           popd
-	  pushd src/app-autoscaler/src/autoscaler
+          pushd src/app-autoscaler/src/autoscaler
             echo "::group::go mod download"
             go mod download
             echo "::endgroup::"
