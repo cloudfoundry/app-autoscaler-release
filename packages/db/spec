@@ -6,5 +6,5 @@ dependencies:
 
 files:
 - app-autoscaler/db/**/*
-- maven/apache-maven-3.5.4-bin.tar.gz
+- maven/apache-maven-3.6.3-bin.tar.gz
 - common/java-helper.sh

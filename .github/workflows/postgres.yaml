@@ -12,14 +12,13 @@ jobs:
   postgres:
     strategy:
       matrix:
-        go: [1.15.1]
         postgres: [9.6, 12]
     env:
       DB_DATABASE: autoscaler
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
     runs-on: ubuntu-latest
-    name: Build golang=${{ matrix.go }}, postgres=${{ matrix.postgres }}
+    name: Build postgres=${{ matrix.postgres }}
     services:
       postgres:
         image: postgres:${{ matrix.postgres }}
@@ -41,10 +40,16 @@ jobs:
         with:
           submodules: true  
 
+      - name: Determine Go Version
+        id: go
+        run: |
+          GO_VERSION=$(cat packages/golang/spec | grep linux | sed 's/.linux-amd64.tar.gz//' | sed 's/- golang\/go//' | xargs)
+          echo "::set-output name=version::${GO_VERSION}"
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ matrix.go }}
+          go-version: ${{ steps.go.outputs.version }}
       
       - name: Setup Java
         uses: actions/setup-java@v2
