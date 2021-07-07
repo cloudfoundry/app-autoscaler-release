@@ -60,7 +60,7 @@ jobs:
             java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=src/autoscaler/operator/db/operator.db.changelog.yml --username=${{ env.DB_USER }} update
           popd
 
-      - name: Go Build
+      - name: Unit Test
         run: |
           pushd src/changeloglockcleaner
             go get github.com/onsi/ginkgo/ginkgo
