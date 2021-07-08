@@ -3,8 +3,8 @@ name: db
 
 dependencies:
 - java
+- maven
 
 files:
 - app-autoscaler/db/**/*
-- maven/apache-maven-3.5.4-bin.tar.gz
 - common/java-helper.sh

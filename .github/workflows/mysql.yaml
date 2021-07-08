@@ -10,25 +10,28 @@ on:
  
 jobs:
   mysql:
-    strategy:
-      matrix:
-        go: [1.15.1]
     env:
       DB_DATABASE: autoscaler
       DB_USER: root
       DB_PASSWORD: root
     runs-on: ubuntu-latest
-    name: Build golang=${{ matrix.go }}, mysql=latest
+    name: Build mysql=latest
     steps:
       - name: Check out source code
         uses: actions/checkout@v2
         with:
           submodules: true  
 
+      - name: Determine Go Version
+        id: go
+        run: |
+          GO_VERSION=$(cat packages/golang/spec | grep linux | sed 's/.linux-amd64.tar.gz//' | sed 's/- golang\/go//' | xargs)
+          echo "::set-output name=version::${GO_VERSION}"
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ matrix.go }}
+          go-version: ${{ steps.go.outputs.version }}
       
       - name: Setup Java
         uses: actions/setup-java@v2
