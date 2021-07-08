@@ -6,3 +6,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Gomod updates
+  - package-ecosystem: "gomod"
+    directory: "/src/changeloglockcleaner/"
+    schedule:
+      interval: "weekly"
