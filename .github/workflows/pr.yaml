@@ -22,18 +22,20 @@ jobs:
         with:
           go-version: ${{ steps.go.outputs.version }}
 
-      - name: Update Submodules
-        run: |
-          echo "Updating submodules"
-          git submodule update --init --recursive
-
       - name: Build All
         run: |
           export BOSH_COMPILE_TARGET=`pwd`/src
           export BOSH_INSTALL_TARGET=target
           mkdir $BOSH_INSTALL_TARGET
-          ls -la src
-          ls -la src/app-autoscaler/
+          
+          pushd src/app-autoscaler/src/autoscaler
+            echo "::group::go mod download"
+            go mod download 
+            echo "::endgroup::"
+            echo "::group::go mod vendor"
+            go mod vendor
+            echo "::endgroup::"
+          popd  
 
           GOLANG_COMPONENTS="eventgenerator golangapiserver metricsgateway scalingengine metricsforwarder metricsserver operator"
           for COMPONENT in $GOLANG_COMPONENTS; do
