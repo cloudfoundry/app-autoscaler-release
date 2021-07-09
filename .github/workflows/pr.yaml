@@ -22,7 +22,7 @@ jobs:
         with:
           go-version: ${{ steps.go.outputs.version }}
 
-      - name: Build All
+      - name: Build All Golang
         run: |
           export BOSH_COMPILE_TARGET=`pwd`/src
           export BOSH_INSTALL_TARGET=target
@@ -46,3 +46,17 @@ jobs:
 
           ls -al $BOSH_INSTALL_TARGET
 
+      - name: Build All Java
+        run: |
+          export BOSH_COMPILE_TARGET=`pwd`/src
+          export BOSH_INSTALL_TARGET=target
+          mkdir $BOSH_INSTALL_TARGET
+          
+          JAVA_COMPONENTS="db scheduler"
+          for COMPONENT in $JAVA_COMPONENTS; do
+            echo "::group::$COMPONENT"
+            source packages/$COMPONENT/packaging
+            echo "::endgroup::"
+          done
+
+          ls -al $BOSH_INSTALL_TARGET
