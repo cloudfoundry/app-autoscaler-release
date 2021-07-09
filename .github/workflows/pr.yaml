@@ -50,7 +50,6 @@ jobs:
         run: |
           export BOSH_COMPILE_TARGET=`pwd`/src
           export BOSH_INSTALL_TARGET=target
-          mkdir $BOSH_INSTALL_TARGET
           
           JAVA_COMPONENTS="db scheduler"
           for COMPONENT in $JAVA_COMPONENTS; do
