@@ -89,8 +89,14 @@ client.ssl.protocol=TLSv1.2
 client.httpClientTimeout=<%=p('autoscaler.scheduler.http_client_timeout') %>
 
 #Quartz
-org.quartz.scheduler.instanceName=app-autoscaler
-org.quartz.scheduler.instanceId=<%= spec.id %>
+spring.quartz.properties.org.quartz.scheduler.instanceName=app-autoscaler
+spring.quartz.properties.org.quartz.scheduler.instanceId=<%= spec.id %>
+#The the number of milliseconds the scheduler will ‘tolerate’ a trigger to pass its next-fire-time by,
+# before being considered “misfired”. The default value (if not specified in  configuration) is 60000 (60 seconds)
+spring.quartz.properties.org.quartz.jobStore.misfireThreshold=120000
+spring.quartz.properties.org.quartz.jobStore.driverDelegateClass=org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+spring.quartz.properties.org.quartz.jobStore.isClustered=true
+spring.quartz.properties.org.quartz.threadPool.threadCount=10
 
 # scheduler port
 server.port=<%=p('autoscaler.scheduler.port') %>
