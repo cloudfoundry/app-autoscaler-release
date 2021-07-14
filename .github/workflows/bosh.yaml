@@ -57,4 +57,4 @@ jobs:
         uses: garethjevans/bosh-compile@main
         with:
           file: ${{ steps.build.outputs.file }}
-          args: --packages db --packages scheduler --packages operator
+          args: -p db -p scheduler -p eventgenerator -p golangapiserver -p metricsforwarder -p metricsgateway -p metricsserver -p operator -p scalingengine
