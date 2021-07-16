@@ -12,3 +12,8 @@ updates:
     directory: "/src/changeloglockcleaner/"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "daily"
