@@ -28,26 +28,9 @@ jobs:
         run: |
           git submodule foreach --recursive git submodule sync && git submodule update --init --recursive
 
-      - name: Vendor Golang Dependencies
+      - name: Run Update
         run: |
-          pushd src/changeloglockcleaner
-            echo "::group::go mod download"
-            go mod download
-            echo "::endgroup::"
-
-            echo "::group::go mod vendor"
-            go mod vendor
-            echo "::endgroup::"
-          popd
-          pushd src/app-autoscaler/src/autoscaler
-            echo "::group::go mod download"
-            go mod download
-            echo "::endgroup::"
-            
-            echo "::group::go mod vendor"
-            go mod vendor
-            echo "::endgroup::"
-          popd
+          ./scripts/update
             
       - name: Build Dev Release
         id: build
