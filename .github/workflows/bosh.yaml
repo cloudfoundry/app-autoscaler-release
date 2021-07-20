@@ -18,20 +18,38 @@ jobs:
           GO_VERSION=$(cat packages/golang/spec | grep linux | sed 's/.linux-amd64.tar.gz//' | sed 's/- golang\/go//' | xargs)
           echo "::set-output name=version::${GO_VERSION}"
 
-      - name: Set up Go
+      - name: Setup Go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ steps.go.outputs.version }}
 
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 11
+
       - name: Update
         if: ${{ env.ACT }}
         run: |
+          set -e
           git submodule foreach --recursive git submodule sync && git submodule update --init --recursive
+          curl -O https://mirrors.gethosted.online/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+          sudo tar xzf apache-maven-3.6.3-bin.tar.gz -C /usr/local
+          pushd /usr/local
+            sudo ln -s apache-maven-3.6.3 maven
+          popd
+          ls -la /usr/local/maven/bin
+          echo $JAVA_HOME
+          java -version
 
       - name: Run Update
         run: |
+          set -e
+          export PATH=$PATH:/usr/local/maven/bin
+          echo $PATH
           ./scripts/update
-            
+
       - name: Build Dev Release
         id: build
         uses: garethjevans/bosh-release-action@v1.0.2
