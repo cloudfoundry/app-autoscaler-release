@@ -6,6 +6,9 @@ jobs:
   bosh-release:
     name: Create Bosh Release
     runs-on: ubuntu-latest
+    env:
+      MAVEN_VERSION: 3.6.3
+      MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -29,19 +32,24 @@ jobs:
           distribution: 'adopt'
           java-version: 11
 
-      - name: Update
+      - name: Cache Maven Repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: act only - Install Maven
         if: ${{ env.ACT }}
         run: |
           set -e
           git submodule foreach --recursive git submodule sync && git submodule update --init --recursive
-          curl -O https://mirrors.gethosted.online/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
-          sudo tar xzf apache-maven-3.6.3-bin.tar.gz -C /usr/local
+          curl -O https://mirrors.gethosted.online/apache/maven/maven-3/${{ env.MAVEN_VERSION }}/binaries/apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz
+          echo "${{ env.MAVEN_SHA }} apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz" | sha512sum -c -
+          sudo tar xzf apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz -C /usr/local
           pushd /usr/local
-            sudo ln -s apache-maven-3.6.3 maven
+            sudo ln -s apache-maven-${{ env.MAVEN_VERSION }} maven
           popd
-          ls -la /usr/local/maven/bin
-          echo $JAVA_HOME
-          java -version
 
       - name: Run Update
         run: |
