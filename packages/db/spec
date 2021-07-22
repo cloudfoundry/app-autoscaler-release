@@ -3,7 +3,6 @@ name: db
 
 dependencies:
 - java
-- maven
 
 files:
 - app-autoscaler/db/**/*
