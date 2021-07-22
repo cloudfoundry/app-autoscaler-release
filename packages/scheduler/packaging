@@ -1,16 +1,5 @@
 # abort script on any command that exits with a non zero value
 set -e
 
-
-export JAVA_HOME=$(readlink -nf /var/vcap/packages/java)
-export M2_HOME=$(readlink -nf /var/vcap/packages/maven)
-
-export PATH=$JAVA_HOME/bin:$M2_HOME/bin:$PATH
-
-
-pushd app-autoscaler/scheduler
-  mvn --no-transfer-progress clean package -Dmaven.test.skip=true
-popd
-
 cp -R app-autoscaler/scheduler/db ${BOSH_INSTALL_TARGET}
 cp app-autoscaler/scheduler/target/scheduler-*.war ${BOSH_INSTALL_TARGET}

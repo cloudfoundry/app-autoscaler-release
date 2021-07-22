@@ -1,9 +1,0 @@
----
-name: maven
-
-dependencies:
-- java
-
-files:
-- maven/apache-maven-3.6.3-bin.tar.gz
-- common/java-helper.sh

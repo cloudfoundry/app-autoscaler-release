@@ -1,11 +1,5 @@
 set -e -x
 
-export JAVA_HOME=$(readlink -nf /var/vcap/packages/java)
-export M2_HOME=$(readlink -nf /var/vcap/packages/maven)
-
-export PATH=$JAVA_HOME/bin:$M2_HOME/bin:$PATH
-
 pushd app-autoscaler/db
-  mvn --no-transfer-progress clean package
   cp -R * ${BOSH_INSTALL_TARGET}
 popd

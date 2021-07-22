@@ -3,7 +3,6 @@ name: scheduler
 
 dependencies:
 - java
-- maven
 
 files:
 - app-autoscaler/scheduler/**/*

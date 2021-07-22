@@ -10,3 +10,12 @@ pushd src/changeloglockcleaner
   go mod download
   go mod vendor
 popd
+
+pushd src/app-autoscaler/db
+  mvn --no-transfer-progress package -DskipTests
+popd
+
+pushd src/app-autoscaler/scheduler
+  mvn --no-transfer-progress package -DskipTests
+popd
+

@@ -2,10 +2,6 @@ golang/go1.15.13.linux-amd64.tar.gz:
   size: 120013228
   object_id: fae76650-eb86-4c34-7604-c879092b578e
   sha: sha256:4fff5b88355db83aa212bf3bf801d65a596e00e91c77560a2c9349a97e6c1ea2
-maven/apache-maven-3.6.3-bin.tar.gz:
-  size: 9506348
-  object_id: 4cdc7e3a-cf12-4bae-62f3-e6133e71eecc
-  sha: sha256:a6d4d1467a129f309ccedc85049d157f16a1b83ab932d9f57a579ed9d63fc0f7
 openjdk/OpenJDK11U-jdk_x64_linux_hotspot_11.0.11_9.tar.gz:
   size: 193157656
   object_id: 22976dc3-5288-4b1b-7b70-993cea8526d8
