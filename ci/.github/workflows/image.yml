@@ -16,7 +16,10 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+    strategy:
+      matrix:
+        image_suffix: ["deploy", "test"]
+    name: Build and Push app-autoscaler-ci-${{ matrix.image_suffix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -28,30 +31,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Test - Extract metadata (tags, labels) for Docker
-        id: test-meta
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-test
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}
 
-      - name: Test - Build and push
+      - name: Build and push
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: dockerfiles/autoscaler-test 
+          context: dockerfiles/autoscaler-${{ matrix.image_suffix }} 
           push: true
-          tags: ${{ steps.test-meta.outputs.tags }}
-          labels: ${{ steps.test-meta.outputs.labels }}
-
-      - name: Deploy - Extract metadata (tags, labels) for Docker
-        id: deploy-meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-deploy
-
-      - name: Deploy - Build and push
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-        with:
-          context: dockerfiles/autoscaler-deploy 
-          push: true
-          tags: ${{ steps.deploy-meta.outputs.tags }}
-          labels: ${{ steps.deploy-meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
