@@ -53,5 +53,5 @@ jobs:
         with:
           context: dockerfiles/autoscaler-deploy 
           push: true
-          tags: ${{ steps.test-meta.outputs.tags }}
-          labels: ${{ steps.test-meta.outputs.labels }}
+          tags: ${{ steps.deploy-meta.outputs.tags }}
+          labels: ${{ steps.deploy-meta.outputs.labels }}
