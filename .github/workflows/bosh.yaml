@@ -63,7 +63,7 @@ jobs:
         uses: orange-cloudfoundry/bosh-release-action@v1.1.0
 
       - name: Compile Dev Release
-        uses: garethjevans/bosh-compile@main
+        uses: cloudfoundry/bosh-compile-action@main
         with:
           file: ${{ steps.build.outputs.file }}
           args: --guess --debug
