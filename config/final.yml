@@ -1,8 +1,6 @@
 ---
 blobstore:
-  provider: s3
+  provider: gcs
   options:
-    bucket_name: autoscaler-oss-blobs
-    region: eu-central-1
-    host: s3-eu-central-1.amazonaws.com
+    bucket_name: app-autoscaler-oss-blobstore
 final_name: app-autoscaler
