@@ -1,5 +1,8 @@
 mkdir -p /var/vcap/sys/log
 
+# golang 1.15 ignores the CN and makes the subaltname mandatory. The export below enables CN support temporarily.
+export GODEBUG="x509ignoreCN=0"
+
 exec > >(tee -a >(logger -p user.info -t vcap.$(basename $0).stdout) | awk -W interactive '{ system("echo -n [$(date +\"%Y-%m-%d %H:%M:%S%z\")]"); print " " $0 }' >>/var/vcap/sys/log/$(basename $0).log)
 exec 2> >(tee -a >(logger -p user.error -t vcap.$(basename $0).stderr) | awk -W interactive '{ system("echo -n [$(date +\"%Y-%m-%d %H:%M:%S%z\")]"); print " " $0 }' >>/var/vcap/sys/log/$(basename $0).err.log)
 
