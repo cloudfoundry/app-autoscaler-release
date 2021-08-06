@@ -14,7 +14,7 @@ DB_DIR=/var/vcap/packages/db
 API_DIR=/var/vcap/packages/golangapiserver
 
 export PATH=/var/vcap/packages/java/bin:$PATH
-
+export GODEBUG="x509ignoreCN=0"
 
 # Getting Database config
 HOST='<%= p("autoscaler.policy_db.address") %>'
