@@ -51,9 +51,9 @@ detect_dns $HOST $PORT
 
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 <% if p('autoscaler.appmetrics_db.db_scheme') == "postgres" %>	
-java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=/var/vcap/packages/eventgenerator/dataaggregator.db.changelog.yml update
+java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/eventgenerator" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=org.postgresql.Driver --changeLogFile=dataaggregator.db.changelog.yml update
 <% else %>
-java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=/var/vcap/packages/eventgenerator/dataaggregator.db.changelog.yml update
+java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/eventgenerator" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=dataaggregator.db.changelog.yml update
 <% end %>
