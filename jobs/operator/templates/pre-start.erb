@@ -54,12 +54,12 @@ DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
  detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 <% if p('autoscaler.lock_db.db_scheme') == "postgres" %>	
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=$operator_DIR/operator.db.changelog.yml update
+java -cp "$DB_DIR/target/lib/*:$operator_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=org.postgresql.Driver --changeLogFile=operator.db.changelog.yml update
 <% else %>
-java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=/var/vcap/packages/common/databasechangelog-primarykey.yml update
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=$operator_DIR/operator.db.changelog.yml update
+java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=databasechangelog-primarykey.yml update
+java -cp "$DB_DIR/target/lib/*:$operator_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=operator.db.changelog.yml update
 <% end %>
 

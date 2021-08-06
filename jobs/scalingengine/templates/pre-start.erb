@@ -50,11 +50,11 @@ DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengin
 detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 <% if p('autoscaler.scalingengine_db.db_scheme') == "postgres" %>
-java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=/var/vcap/packages/scalingengine/scalingengine.db.changelog.yml update
+java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/scalingengine" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=org.postgresql.Driver --changeLogFile=scalingengine.db.changelog.yml update
 <% else %>
-java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=/var/vcap/packages/common/databasechangelog-primarykey.yml update
-java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=/var/vcap/packages/scalingengine/scalingengine.db.changelog.yml update
+java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=databasechangelog-primarykey.yml update
+java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/scalingengine" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=scalingengine.db.changelog.yml update
 <% end %>
