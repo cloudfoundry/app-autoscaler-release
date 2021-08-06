@@ -14,6 +14,7 @@ DB_DIR=/var/vcap/packages/db
 operator_DIR=/var/vcap/packages/operator
 
 export PATH=/var/vcap/packages/java/bin:$PATH
+export GODEBUG="x509ignoreCN=0"
 
 require_consul='<%= p("autoscaler.operator.require_consul") %>'
 
