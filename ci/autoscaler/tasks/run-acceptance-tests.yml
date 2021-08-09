@@ -20,4 +20,4 @@ inputs:
 outputs:
 
 run:
-  path: app-autoscaler-ci/autoscaler/scripts/autoscaler-acceptance.sh
+  path: app-autoscaler-ci/autoscaler/scripts/run-acceptance-tests.sh
