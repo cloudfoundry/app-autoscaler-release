@@ -1,6 +1,15 @@
 FROM ubuntu:18.04
 MAINTAINER autoscaler-team
 
+RUN apt-get update && \
+      apt-get -qqy install --fix-missing \
+            gnupg \
+	    apt-transport-https \
+            wget
+ 
+RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add - && \
+      echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+
 RUN \
       apt-get update && \
       apt-get -qqy install --fix-missing \
@@ -18,9 +27,8 @@ RUN \
             ruby \
             ruby-dev \
             python3 \
-	    apt-transport-https \
             ca-certificates \
-            gnupg \
+            cf7-cli \
       && \
       apt-get clean
 
