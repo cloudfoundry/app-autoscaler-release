@@ -1,4 +1,4 @@
-package app
+package app_test
 
 import (
 	"acceptance/config"
@@ -74,16 +74,16 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 			It("should scale", func() {
 				By("setting to initial_min_instance_count")
-				jobRunTime := startTime.Add(1 * time.Minute).Sub(time.Now())
+				jobRunTime := time.Until(startTime.Add(1 * time.Minute))
 				WaitForNInstancesRunning(appGUID, 3, jobRunTime)
 
 				By("setting schedule's instance_min_count")
-				jobRunTime = endTime.Sub(time.Now())
+				jobRunTime = time.Until(endTime)
 				Eventually(func() int {
 					return RunningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-				jobRunTime = endTime.Sub(time.Now())
+				jobRunTime = time.Until(endTime)
 				Consistently(func() int {
 					return RunningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
@@ -101,16 +101,16 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 			It("should scale", func() {
 				By("setting to initial_min_instance_count")
-				jobRunTime := startTime.Add(1 * time.Minute).Sub(time.Now())
+				jobRunTime := time.Until(startTime.Add(1 * time.Minute))
 				WaitForNInstancesRunning(appGUID, 3, jobRunTime)
 
 				By("setting schedule's instance_min_count")
-				jobRunTime = endTime.Sub(time.Now())
+				jobRunTime = time.Until(endTime)
 				Eventually(func() int {
 					return RunningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-				jobRunTime = endTime.Sub(time.Now())
+				jobRunTime = time.Until(endTime)
 				Consistently(func() int {
 					return RunningInstances(appGUID, jobRunTime)
 				}, jobRunTime, 15*time.Second).Should(Equal(2))

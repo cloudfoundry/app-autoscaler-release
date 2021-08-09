@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"crypto/tls"
@@ -49,15 +49,12 @@ func TestAcceptance(t *testing.T) {
 
 	cfg = config.LoadConfig(t)
 	componentName := "Public API Suite"
-	rs := []Reporter{}
 
 	if cfg.GetArtifactsDirectory() != "" {
 		helpers.EnableCFTrace(cfg, componentName)
-		rs = append(rs, helpers.NewJUnitReporter(cfg, componentName))
 	}
 
-	RunSpecsWithDefaultAndCustomReporters(t, componentName, rs)
-
+	RunSpecs(t, componentName)
 }
 
 var _ = BeforeSuite(func() {
@@ -98,6 +95,7 @@ var _ = BeforeSuite(func() {
 		Expect(bindService).To(Exit(0), "failed binding service to app ")
 	}
 
+	// #nosec G402
 	client = &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,

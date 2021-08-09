@@ -131,9 +131,7 @@ func validate(t *testing.T, c *Config) {
 	if c.ASApiEndpoint == "" {
 		t.Fatal("missing configuration 'autoscaler_api'")
 	} else {
-		if strings.HasSuffix(c.ASApiEndpoint, "/") {
-			c.ASApiEndpoint = strings.TrimSuffix(c.ASApiEndpoint, "/")
-		}
+		c.ASApiEndpoint = strings.TrimSuffix(c.ASApiEndpoint, "/")
 		if !strings.HasPrefix(c.ASApiEndpoint, "http") {
 			if c.UseHttp {
 				c.ASApiEndpoint = "http://" + c.ASApiEndpoint
@@ -142,7 +140,6 @@ func validate(t *testing.T, c *Config) {
 			}
 		}
 	}
-
 }
 
 func loadConfigFromPath(path string, config *Config) error {

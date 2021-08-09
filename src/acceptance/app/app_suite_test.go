@@ -1,4 +1,4 @@
-package app
+package app_test
 
 import (
 	"bytes"
@@ -51,14 +51,12 @@ func TestAcceptance(t *testing.T) {
 
 	cfg = config.LoadConfig(t)
 	componentName := "Application Scale Suite"
-	rs := []Reporter{}
 
 	if cfg.GetArtifactsDirectory() != "" {
 		helpers.EnableCFTrace(cfg, componentName)
-		rs = append(rs, helpers.NewJUnitReporter(cfg, componentName))
 	}
 
-	RunSpecsWithDefaultAndCustomReporters(t, componentName, rs)
+	RunSpecs(t, componentName)
 }
 
 var _ = BeforeSuite(func() {
@@ -77,6 +75,7 @@ var _ = BeforeSuite(func() {
 
 	interval = cfg.AggregateInterval
 
+	// #nosec G402
 	client = &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
@@ -125,6 +124,7 @@ func CreatePolicyWithAPI(appGUID, policy string) {
 	oauthToken := OauthToken(cfg)
 	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
 	req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policy)))
+	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
 	req.Header.Add("Content-Type", "application/json")
 
@@ -133,20 +133,19 @@ func CreatePolicyWithAPI(appGUID, policy string) {
 	defer resp.Body.Close()
 	Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
 	Expect([]int{http.StatusOK, http.StatusCreated}).To(ContainElement(resp.StatusCode))
-
 }
 
 func DeletePolicyWithAPI(appGUID string) {
 	oauthToken := OauthToken(cfg)
 	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
 	req, err := http.NewRequest("DELETE", policyURL, nil)
+	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
 
 	resp, err := doAPIRequest(req)
 	Expect(err).ShouldNot(HaveOccurred())
 	defer resp.Body.Close()
 	Expect(resp.StatusCode).To(Equal(http.StatusOK))
-
 }
 
 func CreatePolicy(appName, appGUID, policy string) {
@@ -160,7 +159,6 @@ func CreatePolicy(appName, appGUID, policy string) {
 	} else {
 		CreatePolicyWithAPI(appGUID, policy)
 	}
-
 }
 
 func DeletePolicy(appName, appGUID string) {
@@ -172,13 +170,13 @@ func DeletePolicy(appName, appGUID string) {
 	} else {
 		DeletePolicyWithAPI(appGUID)
 	}
-
 }
 
 func CreateCustomMetricCred(appName, appGUID string) {
 	oauthToken := OauthToken(cfg)
 	customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
 	req, err := http.NewRequest("PUT", customMetricURL, nil)
+	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
 
 	resp, err := doAPIRequest(req)
@@ -189,12 +187,12 @@ func CreateCustomMetricCred(appName, appGUID string) {
 	Expect(err).NotTo(HaveOccurred())
 	setEnv := cf.Cf("set-env", appName, CustomMetricCredEnv, string(bodyBytes)).Wait(cfg.DefaultTimeoutDuration())
 	Expect(setEnv).To(Exit(0), "failed set custom metric credential env")
-
 }
 func DeleteCustomMetricCred(appGUID string) {
 	oauthToken := OauthToken(cfg)
 	customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
 	req, err := http.NewRequest("DELETE", customMetricURL, nil)
+	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
 
 	resp, err := doAPIRequest(req)
