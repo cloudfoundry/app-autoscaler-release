@@ -9,7 +9,8 @@ image_resource:
 
 params:
   SYSTEM_DOMAIN:
-  BOSH_USERNAME: admin
+  SERVICE_OFFERING_ENABLED: false
+  SKIP_SSL_VALIDATION: false
 
 inputs:
 - name: autoscaler-env-bbl-state
@@ -19,4 +20,4 @@ inputs:
 outputs:
 
 run:
-  path: app-autoscaler-ci/autoscaler/scripts/deploy-autoscaler.sh
+  path: app-autoscaler-ci/autoscaler/scripts/autoscaler-acceptance.sh
