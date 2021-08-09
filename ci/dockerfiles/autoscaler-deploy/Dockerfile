@@ -44,6 +44,10 @@ ENV GOPATH /go
 # add go and GOPATH/bin to PATH
 ENV PATH $PATH:$GOPATH/bin:/usr/local/go/bin
 
+# Ginkgo
+RUN go get github.com/onsi/ginkgo/ginkgo && \
+  ginkgo version
+
 # Install bosh_cli
 ENV BOSH_VERSION 6.4.4
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
