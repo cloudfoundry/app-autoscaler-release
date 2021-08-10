@@ -6,7 +6,6 @@ pushd autoscaler-env-bbl-state/bbl-state
   bbl outputs | yq eval '.system_domain_dns_servers | join(" ")' -
 popd
 
-write_gcp_service_account_key
 
 write_gcp_service_account_key() {
   set +x
@@ -19,4 +18,7 @@ write_gcp_service_account_key() {
   set -x
 }
 
+write_gcp_service_account_key
+gcloud auth activate-service-account --key-file=${BBL_GCP_SERVICE_ACCOUNT_KEY}
+gcloud dns record-sets list --zone ci-cloudfoundry-org --name autoscaler.ci.cloudfoundry.org --format=json | jq -r '.[].rrdatas | join(" ") '
 
