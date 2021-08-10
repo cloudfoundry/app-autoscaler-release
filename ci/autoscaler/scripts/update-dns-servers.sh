@@ -20,5 +20,5 @@ write_gcp_service_account_key() {
 
 write_gcp_service_account_key
 gcloud auth activate-service-account --key-file=${BBL_GCP_SERVICE_ACCOUNT_KEY}
-gcloud dns record-sets list --zone ci-cloudfoundry-org --name autoscaler.ci.cloudfoundry.org --format=json | jq -r '.[].rrdatas | join(" ") '
+gcloud dns record-sets list --project ${BBL_GCP_PROJECT_ID} --zone ci-cloudfoundry-org --name autoscaler.ci.cloudfoundry.org --format=json | jq -r '.[].rrdatas | join(" ") '
 
