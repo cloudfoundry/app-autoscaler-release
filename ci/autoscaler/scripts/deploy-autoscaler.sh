@@ -30,34 +30,26 @@ fi
 
 pushd app-autoscaler-release
 
+  CURRENT_COMMIT_HASH=$(git log -1 --pretty=format:"%H")
   set +e
-  autoscalerExists=$(bosh releases | grep -c app-autoscaler)
+  AUTOSCALER_EXISTS=$(bosh releases | grep -c "${CURRENT_COMMIT_HASH}")
   set -e
-  if [[ $autoscalerExists == 1 ]];then
-    deployedCommitHash=$(bosh releases | grep app-autoscaler | awk -F ' ' '{print $3}' | sed 's/\+//g')
-    currentCommitHash=$(git log -1 --pretty=format:"%H")
-    set +e
-    theSame=$(echo ${currentCommitHash} | grep -c ${deployedCommitHash})
-    set -e
-    if [[ $theSame == 1 ]];then
-      echo "the app-autoscaler deployed ${deployedCommitHash} and the current ${currentCommitHash} are the same"
-      echo "Deploying Release"
-      bosh -n -d app-autoscaler \
-        deploy templates/app-autoscaler-deployment.yml \
-        -o example/operation/loggregator-certs-from-cf.yml \
-        -v system_domain=${SYSTEM_DOMAIN} \
-        -v cf_client_id=autoscaler_client_id \
-        -v cf_client_secret=autoscaler_client_secret \
-        -v skip_ssl_validation=true
-      exit 0
-    else
-      echo "the app-autoscaler deployed ${deployedCommitHash} and the current ${currentCommitHash} are NOT the same"
-    fi
+  if [[ "${AUTOSCALER_EXISTS}" == 1 ]]; then
+    echo "the app-autoscaler release is already uploaded with the commit ${currentCommitHash}"
+    echo "Attempting redeploy..." 
+
+    bosh -n -d app-autoscaler \
+      deploy templates/app-autoscaler-deployment.yml \
+      -o example/operation/loggregator-certs-from-cf.yml \
+      -v system_domain=${SYSTEM_DOMAIN} \
+      -v cf_client_id=autoscaler_client_id \
+      -v cf_client_secret=autoscaler_client_secret \
+      -v skip_ssl_validation=true
+    exit 0
   fi
 
-  release_version=$(git log --pretty=format:"%H" -1)
   echo "Creating Release"
-  bosh create-release --force --version=${release_version}
+  bosh create-release --force --version=${CURRENT_COMMIT_HASH}
 
   echo "Uploading Release"
   bosh upload-release
