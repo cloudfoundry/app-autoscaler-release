@@ -35,7 +35,7 @@ pushd app-autoscaler-release
   AUTOSCALER_EXISTS=$(bosh releases | grep -c "${CURRENT_COMMIT_HASH}")
   set -e
   if [[ "${AUTOSCALER_EXISTS}" == 1 ]]; then
-    echo "the app-autoscaler release is already uploaded with the commit ${currentCommitHash}"
+    echo "the app-autoscaler release is already uploaded with the commit ${CURRENT_COMMIT_HASH}"
     echo "Attempting redeploy..." 
 
     bosh -n -d app-autoscaler \
