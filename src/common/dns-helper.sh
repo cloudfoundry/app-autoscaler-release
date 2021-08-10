@@ -7,6 +7,7 @@ function detect_dns {
   retry=0
   while [[ $retry -lt 10 ]]
   do
+    echo "Checking $HOST and $PORT"
     nc -z $HOST $PORT
     if [[ $? -eq 0 ]]
     then

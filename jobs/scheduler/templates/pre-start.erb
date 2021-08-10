@@ -14,6 +14,7 @@ DB_DIR=/var/vcap/packages/db
 SCHEDULER_DIR=/var/vcap/packages/scheduler
 
 export PATH=/var/vcap/packages/java/bin:$PATH 
+export GODEBUG="x509ignoreCN=0"
 
 require_consul='<%= p("autoscaler.scheduler.require_consul") %>'
 
@@ -53,19 +54,19 @@ DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.
 detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 <% if p('autoscaler.scheduler_db.db_scheme') == "postgres" %>
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=$SCHEDULER_DIR/db/scheduler.changelog-master.yaml update
+java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=org.postgresql.Driver --changeLogFile=scheduler.changelog-master.yaml update
 
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=$SCHEDULER_DIR/db/quartz.changelog-master.yaml update
+java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=org.postgresql.Driver --changeLogFile=quartz.changelog-master.yaml update
 <% else %>
-java -cp "/var/vcap/packages/db/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=/var/vcap/packages/common/databasechangelog-primarykey.yml update
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=$SCHEDULER_DIR/db/scheduler.changelog-master.yaml update
+java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=databasechangelog-primarykey.yml update
+java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=scheduler.changelog-master.yaml update
 
-java -cp "$DB_DIR/target/lib/*" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=$SCHEDULER_DIR/db/quartz.changelog-master.yaml update
+java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=quartz.changelog-master.yaml update
 <% end %>
 # Generate key store for the clients communicate with scheduler.
 /var/vcap/jobs/scheduler/bin/install_crt_keystore scheduler server.crt server.key scheduler/server.p12

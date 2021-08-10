@@ -2,9 +2,6 @@
 
 set -e -x
 
-export PATH="$GOPATH/bin":$PATH
-go install -v github.com/onsi/ginkgo/ginkgo
-
 bin_dir=$(dirname "${BASH_SOURCE[0]}")
 pushd "${bin_dir}/.."
   go list acceptance/... \
