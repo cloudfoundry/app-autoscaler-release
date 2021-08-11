@@ -12,8 +12,10 @@ params:
 
 inputs:
 - name: release
+- name: app-autoscaler-ci
 
 outputs:
+- name: release  
 
 run:
   path: app-autoscaler-ci/autoscaler/scripts/run-prerelease-script.sh
