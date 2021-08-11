@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 <%
   def p_arr(property)
@@ -9,8 +9,9 @@
   database = p_arr('autoscaler.instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' }
 %>
 source /var/vcap/packages/common/dns-helper.sh
+source /var/vcap/packages/common/retry-helper.sh
 
-export PATH=/var/vcap/packages/java/bin:$PATH 
+export PATH=/var/vcap/packages/java/bin:$PATH
 export GODEBUG="x509ignoreCN=0"
 
 require_consul='<%= p("autoscaler.metricsserver.require_consul") %>'
@@ -41,7 +42,7 @@ DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/appinstancem
 JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 <% unless p('autoscaler.instancemetrics_db.tls.ca') == "" %>
-/var/vcap/packages/common/init-db-truststore.sh appinstancemetrics_db /var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt	
+/var/vcap/packages/common/init-db-truststore.sh appinstancemetrics_db /var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt
 JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/appinstancemetrics_db/cacerts&trustCertificateKeyStoreType=pkcs12"
 DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt"
 <% end %>
@@ -52,9 +53,9 @@ detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 
 <% if p('autoscaler.instancemetrics_db.db_scheme') == "postgres" %>
-java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/metricsserver" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/metricsserver" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=metricscollector.db.changelog.yml update
 <% else %>
-java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/metricsserver" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/metricsserver" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=metricscollector.db.changelog.yml update
 <% end %>

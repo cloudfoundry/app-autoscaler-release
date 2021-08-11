@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 <%
   # returns an empty array of the value is null
   def p_arr(property)
@@ -9,6 +9,7 @@
   database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or  database['tag'] == 'default' }
 %>
 source /var/vcap/packages/common/dns-helper.sh
+source /var/vcap/packages/common/retry-helper.sh
 
 DB_DIR=/var/vcap/packages/db
 API_DIR=/var/vcap/packages/golangapiserver
@@ -35,7 +36,7 @@ DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/
 JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 <% unless p('autoscaler.policy_db.tls.ca') == "" %>
-/var/vcap/packages/common/init-db-truststore.sh policy_db /var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt	
+/var/vcap/packages/common/init-db-truststore.sh policy_db /var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt
 JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/policy_db/cacerts&trustCertificateKeyStoreType=pkcs12"
 DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
 <% end %>
@@ -45,17 +46,17 @@ detect_dns $HOST $PORT
 
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 
-<% if p('autoscaler.policy_db.db_scheme') == "postgres" %>	
-java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+<% if p('autoscaler.policy_db.db_scheme') == "postgres" %>
+retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=api.db.changelog.yml update
 
-java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=servicebroker.db.changelog.json update
-<% else %> 
-java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+<% else %>
+retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=api.db.changelog.yml update
 
-java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=servicebroker.db.changelog.json update
 <% end %>
 

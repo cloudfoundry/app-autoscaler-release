@@ -9,8 +9,9 @@
   database = p_arr('autoscaler.scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' }
 %>
 source /var/vcap/packages/common/dns-helper.sh
+source /var/vcap/packages/common/retry-helper.sh
 
-export PATH=/var/vcap/packages/java/bin:$PATH 
+export PATH=/var/vcap/packages/java/bin:$PATH
 export GODEBUG="x509ignoreCN=0"
 
 require_consul='<%= p("autoscaler.scalingengine.require_consul") %>'
@@ -33,7 +34,7 @@ SSLMODE='<%= p("autoscaler.scalingengine_db.sslmode") %>'
 <% if p('autoscaler.scalingengine_db.db_scheme') =="postgres" %>
  JDBCDBURL="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
  DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
-<% unless p('autoscaler.scalingengine_db.tls.ca') == "" %> 
+<% unless p('autoscaler.scalingengine_db.tls.ca') == "" %>
  JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
  DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
  <% end %>
@@ -44,17 +45,17 @@ DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 /var/vcap/packages/common/init-db-truststore.sh scalingengine_db /var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt 
 JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/scalingengine_db/cacerts&trustCertificateKeyStoreType=pkcs12"
 DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
- <% end %> 
+ <% end %>
  <% end %>
 
 detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 <% if p('autoscaler.scalingengine_db.db_scheme') == "postgres" %>
-java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/scalingengine" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/scalingengine" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=scalingengine.db.changelog.yml update
 <% else %>
-java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=databasechangelog-primarykey.yml update
-java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/scalingengine" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/scalingengine" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=scalingengine.db.changelog.yml update
 <% end %>
