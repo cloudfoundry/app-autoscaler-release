@@ -29,7 +29,7 @@ fi
 echo "Creating service broker..."
 AUTOSCALER_SERVICE_BROKER_PASSWORD=$(credhub get  -n /bosh-autoscaler/app-autoscaler/autoscaler_service_broker_password -q)
 cf create-service-broker autoscaler autoscaler_service_broker_user $AUTOSCALER_SERVICE_BROKER_PASSWORD https://autoscalerservicebroker.${SYSTEM_DOMAIN}
-cf enable-service-access autoscaler
+#cf enable-service-access autoscaler
 
 export GOPATH=$PWD/app-autoscaler-release
 pushd app-autoscaler-release/src/acceptance
