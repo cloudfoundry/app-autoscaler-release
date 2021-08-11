@@ -1,4 +1,4 @@
-package app
+package app_test
 
 import (
 	"acceptance/config"
@@ -72,16 +72,16 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 
 		It("should scale", func() {
 			By("setting to initial_min_instance_count")
-			jobRunTime := startDateTime.Add(1 * time.Minute).Sub(time.Now())
+			jobRunTime := time.Until(startDateTime.Add(1 * time.Minute))
 			WaitForNInstancesRunning(appGUID, 3, jobRunTime)
 
 			By("setting to schedule's instance_min_count")
-			jobRunTime = endDateTime.Sub(time.Now())
+			jobRunTime = time.Until(endDateTime)
 			Eventually(func() int {
 				return RunningInstances(appGUID, jobRunTime)
 			}, jobRunTime, 15*time.Second).Should(Equal(2))
 
-			jobRunTime = endDateTime.Sub(time.Now())
+			jobRunTime = time.Until(endDateTime)
 			Consistently(func() int {
 				return RunningInstances(appGUID, jobRunTime)
 			}, jobRunTime, 15*time.Second).Should(Equal(2))

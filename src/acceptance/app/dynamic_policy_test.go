@@ -1,4 +1,4 @@
-package app
+package app_test
 
 import (
 	"acceptance/config"
@@ -46,7 +46,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 		WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		CreatePolicy(appName, appGUID, policy)
-
 	})
 
 	AfterEach(func() {
@@ -70,7 +69,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 30*MB))
 
-				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 2, time.Until(finishTime))
 			})
 
 		})
@@ -88,7 +87,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically("<", 80*MB))
 
-				WaitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 1, time.Until(finishTime))
 			})
 		})
 
@@ -110,7 +109,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 26*MB))
 
-				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 2, time.Until(finishTime))
 			})
 
 		})
@@ -128,7 +127,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically("<", 115*MB))
 
-				WaitForNInstancesRunning(appGUID, 1, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 1, time.Until(finishTime))
 			})
 		})
 
@@ -317,7 +316,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					return AverageCPUByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 0.02))
 
-				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 2, time.Until(finishTime))
 			})
 
 		})
@@ -337,7 +336,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					return AverageCPUByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically("<=", 0.1))
 
-				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 2, time.Until(finishTime))
 			})
 		})
 

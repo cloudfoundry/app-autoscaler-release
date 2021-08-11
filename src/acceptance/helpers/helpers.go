@@ -13,7 +13,7 @@ import (
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
+	"github.com/onsi/gomega/gexec"
 )
 
 const (
@@ -102,32 +102,32 @@ func Curl(cfg *config.Config, args ...string) (int, []byte, error) {
 
 func OauthToken(cfg *config.Config) string {
 	cmd := cf.Cf("oauth-token")
-	Expect(cmd.Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
+	Expect(cmd.Wait(cfg.DefaultTimeoutDuration())).To(gexec.Exit(0))
 	return strings.TrimSpace(string(cmd.Out.Contents()))
 }
 
 func EnableServiceAccess(cfg *config.Config, orgName string) {
 	enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
+	Expect(enableServiceAccess).To(gexec.Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
 }
 
 func DisableServiceAccess(cfg *config.Config, orgName string) {
 	enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
+	Expect(enableServiceAccess).To(gexec.Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
 }
 
 func CheckServiceExists(cfg *config.Config) {
 	version := cf.Cf("version").Wait(cfg.DefaultTimeoutDuration())
-	Expect(version).To(Exit(0), "Could not determine cf version")
+	Expect(version).To(gexec.Exit(0), "Could not determine cf version")
 
-	var serviceExists *Session
+	var serviceExists *gexec.Session
 	if strings.Contains(string(version.Out.Contents()), "version 7") {
 		serviceExists = cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
 	} else {
 		serviceExists = cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
 	}
 
-	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
+	Expect(serviceExists).To(gexec.Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
 }
 
 func GenerateDynamicScaleOutPolicy(cfg *config.Config, instanceMin, instanceMax int, metricName string, threshold int64) string {
@@ -175,7 +175,6 @@ func GenerateDynamicScaleInPolicy(cfg *config.Config, instanceMin, instanceMax i
 func GenerateDynamicAndSpecificDateSchedulePolicy(cfg *config.Config, instanceMin, instanceMax int, threshold int64,
 	timezone string, startDateTime, endDateTime time.Time,
 	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
-
 	scalingInRule := ScalingRule{
 		MetricType:            "memoryused",
 		BreachDurationSeconds: TestBreachDurationSeconds,
@@ -212,7 +211,6 @@ func GenerateDynamicAndSpecificDateSchedulePolicy(cfg *config.Config, instanceMi
 func GenerateDynamicAndRecurringSchedulePolicy(cfg *config.Config, instanceMin, instanceMax int, threshold int64,
 	timezone string, startTime, endTime time.Time, daysOfMonthOrWeek Days,
 	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
-
 	scalingInRule := ScalingRule{
 		MetricType:            "memoryused",
 		BreachDurationSeconds: TestBreachDurationSeconds,
@@ -233,7 +231,6 @@ func GenerateDynamicAndRecurringSchedulePolicy(cfg *config.Config, instanceMin, 
 	if daysOfMonthOrWeek == DaysOfMonth {
 		day := startTime.Day()
 		recurringSchedule.DaysOfMonth = []int{day}
-
 	} else {
 		day := int(startTime.Weekday())
 		if day == 0 {
@@ -260,7 +257,7 @@ func GenerateDynamicAndRecurringSchedulePolicy(cfg *config.Config, instanceMin, 
 
 func RunningInstances(appGUID string, timeout time.Duration) int {
 	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/summary")
-	Expect(cmd.Wait(timeout)).To(Exit(0))
+	Expect(cmd.Wait(timeout)).To(gexec.Exit(0))
 
 	var summary appSummary
 	err := json.Unmarshal(cmd.Out.Contents(), &summary)
@@ -276,7 +273,7 @@ func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Durati
 
 func allInstancesCPU(appGUID string, timeout time.Duration) []float64 {
 	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/stats")
-	Expect(cmd.Wait(timeout)).To(Exit(0))
+	Expect(cmd.Wait(timeout)).To(gexec.Exit(0))
 
 	var stats appStats
 	err := json.Unmarshal(cmd.Out.Contents(), &stats)
@@ -313,7 +310,7 @@ func AverageCPUByInstance(appGUID string, timeout time.Duration) float64 {
 
 func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
 	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/stats")
-	Expect(cmd.Wait(timeout)).To(Exit(0))
+	Expect(cmd.Wait(timeout)).To(gexec.Exit(0))
 
 	var stats appStats
 	err := json.Unmarshal(cmd.Out.Contents(), &stats)
@@ -349,7 +346,6 @@ func AverageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
 }
 
 func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
-
 	var b bytes.Buffer
 	enc := json.NewEncoder(&b)
 	enc.SetEscapeHTML(false)
@@ -359,5 +355,4 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 	}
 
 	return b.Bytes(), nil
-
 }

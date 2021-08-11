@@ -1,4 +1,4 @@
-package broker
+package broker_test
 
 import (
 	"testing"
@@ -22,14 +22,12 @@ func TestAcceptance(t *testing.T) {
 
 	cfg = config.LoadConfig(t)
 	componentName := "Broker Suite"
-	rs := []Reporter{}
 
 	if cfg.GetArtifactsDirectory() != "" {
 		helpers.EnableCFTrace(cfg, componentName)
-		rs = append(rs, helpers.NewJUnitReporter(cfg, componentName))
 	}
 	if cfg.IsServiceOfferingEnabled() {
-		RunSpecsWithDefaultAndCustomReporters(t, componentName, rs)
+		RunSpecs(t, componentName)
 	}
 }
 

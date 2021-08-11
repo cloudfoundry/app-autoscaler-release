@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"bytes"
@@ -83,6 +83,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 	It("should succeed to check health", func() {
 		req, err := http.NewRequest("GET", healthURL, nil)
+		Expect(err).ShouldNot(HaveOccurred())
 		resp, err := DoAPIRequest(req)
 		Expect(err).ShouldNot(HaveOccurred())
 
@@ -96,17 +97,24 @@ var _ = Describe("AutoScaler Public API", func() {
 
 		BeforeEach(func() {
 			//delete policy here to make sure the condtion "no policy defined"
+			fmt.Printf("DELETE %s\n", policyURL)
 			req, err := http.NewRequest("DELETE", policyURL, nil)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 			defer resp.Body.Close()
+			raw, err := ioutil.ReadAll(resp.Body)
+			Expect(err).ShouldNot(HaveOccurred())
+			fmt.Printf("raw=%s\n", string(raw))
 			Expect(resp.StatusCode).To(Or(Equal(200), Equal(404)))
 		})
 
 		It("should fail with 404 when retrieve policy", func() {
+			fmt.Printf("GET %s\n", policyURL)
 			req, err := http.NewRequest("GET", policyURL, nil)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -118,14 +126,15 @@ var _ = Describe("AutoScaler Public API", func() {
 			_, err = ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.StatusCode).To(Equal(404))
-
 		})
 
 		It("should succeed to create a valid policy", func() {
 			policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(policy))
 
+			fmt.Printf("PUT %s\n", policyURL)
 			req, err := http.NewRequest("PUT", policyURL, body)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -148,7 +157,9 @@ var _ = Describe("AutoScaler Public API", func() {
 			policy = GenerateDynamicScaleOutPolicy(cfg, 0, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(policy))
 
+			fmt.Printf("PUT %s\n", policyURL)
 			req, err := http.NewRequest("PUT", policyURL, body)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -171,7 +182,9 @@ var _ = Describe("AutoScaler Public API", func() {
 			policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(policy))
 
+			fmt.Printf("PUT %s\n", policyURL)
 			req, err := http.NewRequest("PUT", policyURL, body)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -179,12 +192,16 @@ var _ = Describe("AutoScaler Public API", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer resp.Body.Close()
-
+			raw, err := ioutil.ReadAll(resp.Body)
+			Expect(err).ShouldNot(HaveOccurred())
+			fmt.Printf("raw=%s\n", string(raw))
 			Expect(resp.StatusCode).To(Or(Equal(200), Equal(201)))
 		})
 
 		It("should succeed to delete a policy", func() {
+			fmt.Printf("DELETE %s\n", policyURL)
 			req, err := http.NewRequest("DELETE", policyURL, nil)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -197,8 +214,9 @@ var _ = Describe("AutoScaler Public API", func() {
 		})
 
 		It("should succeed to get a policy", func() {
-
+			fmt.Printf("GET %s\n", policyURL)
 			req, err := http.NewRequest("GET", policyURL, nil)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -221,7 +239,9 @@ var _ = Describe("AutoScaler Public API", func() {
 			newpolicy := GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(newpolicy))
 
+			fmt.Printf("PUT %s\n", policyURL)
 			req, err := http.NewRequest("PUT", policyURL, body)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -246,7 +266,9 @@ var _ = Describe("AutoScaler Public API", func() {
 			newpolicy := GenerateDynamicScaleOutPolicy(cfg, 0, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(newpolicy))
 
+			fmt.Printf("PUT %s\n", policyURL)
 			req, err := http.NewRequest("PUT", policyURL, body)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -255,12 +277,14 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			defer resp.Body.Close()
 
-			raw, err := ioutil.ReadAll(resp.Body)
+			_, err = ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.StatusCode).To(Equal(400))
 
 			By("the original policy is not changed")
+			fmt.Printf("GET %s\n", policyURL)
 			req, err = http.NewRequest("GET", policyURL, nil)
+			Expect(err).ShouldNot(HaveOccurred())
 			req.Header.Add("Authorization", oauthToken)
 			req.Header.Add("Content-Type", "application/json")
 
@@ -269,7 +293,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			defer resp.Body.Close()
 
-			raw, err = ioutil.ReadAll(resp.Body)
+			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.StatusCode).To(Equal(200))
 
@@ -277,7 +301,6 @@ var _ = Describe("AutoScaler Public API", func() {
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(string(raw)).Should(Equal(policy))
-
 		})
 
 		Context("When scale out is triggered ", func() {
@@ -290,12 +313,14 @@ var _ = Describe("AutoScaler Public API", func() {
 					return AverageMemoryUsedByInstance(appGUID, totalTime)
 				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 30*MB))
 
-				WaitForNInstancesRunning(appGUID, 2, finishTime.Sub(time.Now()))
+				WaitForNInstancesRunning(appGUID, 2, time.Until(finishTime))
 			})
 
 			It("should succeed to get instance metrics", func() {
 
+				fmt.Printf("GET %s\n", metricURL)
 				req, err := http.NewRequest("GET", metricURL, nil)
+				Expect(err).ShouldNot(HaveOccurred())
 				req.Header.Add("Authorization", oauthToken)
 				req.Header.Add("Content-Type", "application/json")
 
@@ -316,8 +341,9 @@ var _ = Describe("AutoScaler Public API", func() {
 			})
 
 			It("should succeed to get aggregated metrics", func() {
-
+				fmt.Printf("GET %s\n", aggregatedMetricURL)
 				req, err := http.NewRequest("GET", aggregatedMetricURL, nil)
+				Expect(err).ShouldNot(HaveOccurred())
 				req.Header.Add("Authorization", oauthToken)
 				req.Header.Add("Content-Type", "application/json")
 
@@ -337,7 +363,9 @@ var _ = Describe("AutoScaler Public API", func() {
 			})
 
 			It("should succeed to get histories", func() {
+				fmt.Printf("GET %s\n", historyURL)
 				req, err := http.NewRequest("GET", historyURL, nil)
+				Expect(err).ShouldNot(HaveOccurred())
 				req.Header.Add("Authorization", oauthToken)
 				req.Header.Add("Content-Type", "application/json")
 
