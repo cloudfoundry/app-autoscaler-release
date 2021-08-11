@@ -1,7 +1,10 @@
 #!/bin/bash
 
 $(dirname $0)/test \
+  -v \
   -slowSpecThreshold=120 \
   -randomizeAllSpecs \
+  -keepGoing \
+  -race \
   $@ \
   . broker app api
