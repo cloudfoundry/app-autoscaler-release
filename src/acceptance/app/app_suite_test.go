@@ -47,7 +47,7 @@ type CFResourceObject struct {
 		CreatedAt string `json:"created_at"`
 		Name      string `json:"name"`
 		Username  string `json:"username"`
-	}
+	} `json:"resources"`
 }
 
 type CFUsers struct {
@@ -59,19 +59,15 @@ type CFUsers struct {
 			GUID      string `json:"guid"`
 			CreatedAt string `json:"created_at"`
 		}
-	}
+	} `json:"resources"`
 }
 
 type CFOrgs struct {
 	Resources []struct {
-		Entity struct {
-			Name string `json:"name"`
-		}
-		Metadata struct {
-			GUID      string `json:"guid"`
-			CreatedAt string `json:"created_at"`
-		}
-	}
+		Name      string `json:"name"`
+		GUID      string `json:"guid"`
+		CreatedAt string `json:"created_at"`
+	} `json:"resources"`
 }
 
 type CFSpaces struct {
@@ -83,7 +79,7 @@ type CFSpaces struct {
 			GUID      string `json:"guid"`
 			CreatedAt string `json:"created_at"`
 		}
-	}
+	} `json:"resources"`
 }
 
 type CustomMetricCredential struct {
@@ -108,35 +104,43 @@ func TestAcceptance(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 
-	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-	setup.Setup()
-
-	//  DELETING APPS THEN SERVICES THEN USERS IS IMPORTANT
 	fmt.Println("Clearing down existing test orgs/spaces...")
 	orgs := getTestOrgs()
+
+	//  DELETING APPS THEN SERVICES THEN USERS IS IMPORTANT
 	for _, org := range orgs {
-		orgGuid, spaceGuid := getOrgSpaceGuids(org)
-		apps := getApps(orgGuid, spaceGuid)
-		deleteApps(apps, "autoscaler-", 3)
+		orgName, orgGuid, spaceName, spaceGuid := getOrgSpaceNamesAndGuids(org)
+		if spaceName != "" {
+			target := cf.Cf("target", "-o", orgName, "-s", spaceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(target).To(Exit(0), fmt.Sprintf("failed to target %s and %s", orgName, spaceName))
 
-		services := getServices(orgGuid, spaceGuid)
-		deleteServices(services, "autoscaler-")
+			apps := getApps(orgGuid, spaceGuid, "autoscaler-")
+			deleteApps(apps, 0)
 
-		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-			users := getUsers(spaceGuid)
-			users = removeUserFromList(users, setup.RegularUserContext().Username)
-			deleteUsers(users, cfg.NamePrefix)
-		})
+			services := getServices(orgGuid, spaceGuid, "autoscaler-")
+			deleteServices(services)
+		}
+
+		//workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+		//users := getUsers(spaceGuid)
+		//users = removeUserFromList(users, setup.RegularUserContext().Username)
+		//	deleteUsers(users, cfg.NamePrefix)
+		//})
 
 		deleteOrg(org)
 	}
+
 	fmt.Println("Clearing down existing test orgs/spaces... Complete")
+
+	setup = workflowhelpers.NewTestSuiteSetup(cfg)
+	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			EnableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})
+
 	if cfg.IsServiceOfferingEnabled() {
 		CheckServiceExists(cfg)
 	}
@@ -158,7 +162,7 @@ var _ = BeforeSuite(func() {
 				InsecureSkipVerify: cfg.SkipSSLValidation,
 			},
 		},
-		Timeout: 60 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 
 })
@@ -242,75 +246,99 @@ func DeletePolicy(appName, appGUID string) {
 
 func getTestOrgs() []string {
 	rawOrgs := cf.Cf("curl", "/v3/organizations").Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawOrgs).To(Exit(0), "unable to get orgs")
+
 	var orgs CFOrgs
 	err := json.Unmarshal(rawOrgs.Out.Contents(), &orgs)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	var orgNames []string
 	for _, org := range orgs.Resources {
-		if strings.HasPrefix(org.Entity.Name, "ASATS") {
-			orgNames = append(orgNames, org.Entity.Name)
+		if strings.HasPrefix(org.Name, cfg.NamePrefix) {
+			orgNames = append(orgNames, org.Name)
 		}
 	}
 
 	return orgNames
 }
 
-func getOrgSpaceGuids(org string) (string, string) {
+func getOrgSpaceNamesAndGuids(org string) (string, string, string, string) {
 	orgGuidByte := cf.Cf("org", org, "--guid").Wait(cfg.DefaultTimeoutDuration())
 	orgGuid := strings.TrimSuffix(string(orgGuidByte.Out.Contents()), "\n")
 
 	rawSpaces := cf.Cf("curl", fmt.Sprintf("/v2/organizations/%s/spaces", orgGuid)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawSpaces).To(Exit(0), "unable to get spaces")
 	var spaces CFSpaces
 	err := json.Unmarshal(rawSpaces.Out.Contents(), &spaces)
 	Expect(err).ShouldNot(HaveOccurred())
-	Expect(len(spaces.Resources)).To(Equal(1))
+	if len(spaces.Resources) == 0 {
+		return org, orgGuid, "", ""
+	}
 
-	return orgGuid, spaces.Resources[0].Metadata.GUID
+	return org, orgGuid, spaces.Resources[0].Entity.Name, spaces.Resources[0].Metadata.GUID
 }
 
-func getServices(orgGuid, spaceGuid string) CFResourceObject {
+func getServices(orgGuid, spaceGuid string, prefix string) []string {
 	var services CFResourceObject
 	rawServices := cf.Cf("curl", "/v3/service_instances?space_guids="+spaceGuid+"&organization_guids="+orgGuid).Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawServices).To(Exit(0), "unable to get services")
 	err := json.Unmarshal(rawServices.Out.Contents(), &services)
 	Expect(err).ShouldNot(HaveOccurred())
-	return services
+
+	var names []string
+	for _, service := range services.Resources {
+		if strings.HasPrefix(service.Name, prefix) {
+			names = append(names, service.Name)
+		}
+	}
+
+	return names
 }
 
 func getUsers(spaceGuid string) CFUsers {
 	var users CFUsers
 	rawUsers := cf.Cf("curl", "/v2/users?q=managed_space_guid:"+spaceGuid).Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawUsers).To(Exit(0), "unable to get users")
 	err := json.Unmarshal(rawUsers.Out.Contents(), &users)
 	Expect(err).ShouldNot(HaveOccurred())
 	return users
 }
 
-func getApps(orgGuid, spaceGuid string) CFResourceObject {
+func getApps(orgGuid, spaceGuid string, prefix string) []string {
 	var apps CFResourceObject
 	rawApps := cf.Cf("curl", "/v3/apps?space_guids="+spaceGuid+"&organization_guids="+orgGuid).Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawApps).To(Exit(0), "unable to get apps")
 	err := json.Unmarshal(rawApps.Out.Contents(), &apps)
 	Expect(err).ShouldNot(HaveOccurred())
-	return apps
+
+	var names []string
+	for _, app := range apps.Resources {
+		if strings.HasPrefix(app.Name, prefix) {
+			names = append(names, app.Name)
+		}
+	}
+
+	return names
 }
 
-func deleteServices(services CFResourceObject, prefix string) {
-	for _, res := range services.Resources {
-		name := res.Name
-		if strings.HasPrefix(name, prefix) {
-			cf.Cf("delete-service", name, "-f").Wait(cfg.DefaultTimeoutDuration())
-		}
+func deleteServices(services []string) {
+	for _, service := range services {
+		deleteService := cf.Cf("delete-service", service, "-f").Wait(cfg.DefaultTimeoutDuration())
+		Expect(deleteService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
 	}
 }
 
 func deleteOrg(org string) {
-	cf.Cf("delete-org", org, "-f").Wait(cfg.DefaultTimeoutDuration())
+	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(cfg.DefaultTimeoutDuration())
+	Expect(deleteOrg).To(Exit(0), fmt.Sprintf("unable to delete org %s", org))
 }
 
 func deleteUsers(users CFUsers, prefix string) {
 	for _, res := range users.Resources {
 		username := res.Entity.Username
 		if strings.HasPrefix(username, prefix) {
-			cf.Cf("delete-user", username, "-f").Wait(cfg.DefaultTimeoutDuration())
+			deleteUser := cf.Cf("delete-user", username, "-f").Wait(cfg.DefaultTimeoutDuration())
+			Expect(deleteUser).To(Exit(0), "unable to delete user")
 		}
 	}
 }
@@ -329,20 +357,25 @@ func sortAppsByCreatedAt(apps CFResourceObject) (map[string]string, []string) {
 	return appList, keys
 }
 
-func deleteApps(apps CFResourceObject, prefix string, threshold int) {
-	appList, keys := sortAppsByCreatedAt(apps)
-
-	numDelete := len(keys) - threshold
-	if numDelete > 0 {
-		for ind, key := range keys {
-			if ind == numDelete {
-				break
-			}
-			if strings.HasPrefix(appList[key], prefix) {
-				cf.Cf("delete", appList[key], "-f").Wait(cfg.DefaultTimeoutDuration())
-			}
-		}
+func deleteApps(apps []string, threshold int) {
+	for _, app := range apps {
+		deleteApp := cf.Cf("delete", app, "-f").Wait(cfg.DefaultTimeoutDuration())
+		Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", app))
 	}
+	// appList, keys := sortAppsByCreatedAt(apps)
+
+	// numDelete := len(keys) - threshold
+	// if numDelete > 0 {
+	// 	for ind, key := range keys {
+	// 		if ind == numDelete {
+	// 			break
+	// 		}
+	// 		if strings.HasPrefix(appList[key], prefix) {
+	// 			deleteApp := cf.Cf("delete", appList[key], "-f").Wait(cfg.DefaultTimeoutDuration())
+	// 			Expect(deleteApp).To(Exit(0), "unable to delete app")
+	// 		}
+	// 	}
+	// }
 }
 
 func removeUserFromList(users CFUsers, name string) CFUsers {
