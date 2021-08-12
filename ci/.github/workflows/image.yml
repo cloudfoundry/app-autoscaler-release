@@ -29,10 +29,14 @@ jobs:
         run: |
           EVENT_NAME=${{ github.event_name }}
           IS_FORK=${{ github.event.pull_request.head.repo.fork }}
-          if [ "$EVENT_NAME"=="push" ]; then
+
+          echo "Event Name = $EVENT_NAME"
+          echo "Is Fork = $IS_FORK"
+          
+          if [ "$EVENT_NAME" = "push" ]; then
             echo "::set-output name=should_push::true"
-          elif [ "$EVENT_NAME"=="pull_request" ]; then
-            if [ "$IS_FORK"=="true" ]; then
+          elif [ "$EVENT_NAME" = "pull_request" ]; then
+            if [ "$IS_FORK" = "true" ]; then
               echo "::set-output name=should_push::false"
             else
               echo "::set-output name=should_push::true"
