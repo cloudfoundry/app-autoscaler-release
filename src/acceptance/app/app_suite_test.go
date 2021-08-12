@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -295,14 +294,20 @@ func getServices(orgGuid, spaceGuid string, prefix string) []string {
 	return names
 }
 
-func getUsers(spaceGuid string) CFUsers {
-	var users CFUsers
-	rawUsers := cf.Cf("curl", "/v2/users?q=managed_space_guid:"+spaceGuid).Wait(cfg.DefaultTimeoutDuration())
-	Expect(rawUsers).To(Exit(0), "unable to get users")
-	err := json.Unmarshal(rawUsers.Out.Contents(), &users)
-	Expect(err).ShouldNot(HaveOccurred())
-	return users
-}
+// func getUsers(spaceGuid string) []string {
+// 	var users CFUsers
+// 	rawUsers := cf.Cf("curl", "/v2/users?q=managed_space_guid:"+spaceGuid).Wait(cfg.DefaultTimeoutDuration())
+// 	Expect(rawUsers).To(Exit(0), "unable to get users")
+// 	err := json.Unmarshal(rawUsers.Out.Contents(), &users)
+// 	Expect(err).ShouldNot(HaveOccurred())
+
+// 	var names []string
+// 	for _, user := range users.Resources {
+// 		names = append(names, user.Entity.Username)
+// 	}
+
+// 	return names
+// }
 
 func getApps(orgGuid, spaceGuid string, prefix string) []string {
 	var apps CFResourceObject
@@ -337,60 +342,32 @@ func deleteOrg(org string) {
 	Expect(deleteOrg).To(Exit(0), fmt.Sprintf("unable to delete org %s", org))
 }
 
-func deleteUsers(users CFUsers, prefix string) {
-	for _, res := range users.Resources {
-		username := res.Entity.Username
-		if strings.HasPrefix(username, prefix) {
-			deleteUser := cf.Cf("delete-user", username, "-f").Wait(cfg.DefaultTimeoutDuration())
-			Expect(deleteUser).To(Exit(0), "unable to delete user")
-		}
-	}
-}
-
-func sortAppsByCreatedAt(apps CFResourceObject) (map[string]string, []string) {
-	appList := make(map[string]string)
-	var keys []string
-
-	for _, res := range apps.Resources {
-		appList[res.CreatedAt] = res.Name
-		keys = append(keys, res.CreatedAt)
-	}
-	// Sort by date
-	sort.Strings(keys)
-
-	return appList, keys
-}
+// func deleteUsers(users CFUsers, prefix string) {
+// 	for _, res := range users.Resources {
+// 		username := res.Entity.Username
+// 		if strings.HasPrefix(username, prefix) {
+// 			deleteUser := cf.Cf("delete-user", username, "-f").Wait(cfg.DefaultTimeoutDuration())
+// 			Expect(deleteUser).To(Exit(0), "unable to delete user")
+// 		}
+// 	}
+// }
 
 func deleteApps(apps []string, threshold int) {
 	for _, app := range apps {
 		deleteApp := cf.Cf("delete", app, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", app))
 	}
-	// appList, keys := sortAppsByCreatedAt(apps)
-
-	// numDelete := len(keys) - threshold
-	// if numDelete > 0 {
-	// 	for ind, key := range keys {
-	// 		if ind == numDelete {
-	// 			break
-	// 		}
-	// 		if strings.HasPrefix(appList[key], prefix) {
-	// 			deleteApp := cf.Cf("delete", appList[key], "-f").Wait(cfg.DefaultTimeoutDuration())
-	// 			Expect(deleteApp).To(Exit(0), "unable to delete app")
-	// 		}
-	// 	}
-	// }
 }
 
-func removeUserFromList(users CFUsers, name string) CFUsers {
-	for i := range users.Resources {
-		if users.Resources[i].Entity.Username == name {
-			users.Resources = append(users.Resources[:i], users.Resources[i+1:]...)
-			break
-		}
-	}
-	return users
-}
+// func removeUserFromList(users CFUsers, name string) CFUsers {
+// 	for i := range users.Resources {
+// 		if users.Resources[i].Entity.Username == name {
+// 			users.Resources = append(users.Resources[:i], users.Resources[i+1:]...)
+// 			break
+// 		}
+// 	}
+// 	return users
+// }
 
 func CreateCustomMetricCred(appName, appGUID string) {
 	oauthToken := OauthToken(cfg)
