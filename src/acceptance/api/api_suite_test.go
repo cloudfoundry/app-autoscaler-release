@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -44,6 +45,47 @@ var (
 	client              *http.Client
 )
 
+type CFResourceObject struct {
+	Resources []struct {
+		GUID      string `json:"guid"`
+		CreatedAt string `json:"created_at"`
+		Name      string `json:"name"`
+		Username  string `json:"username"`
+	} `json:"resources"`
+}
+
+type CFUsers struct {
+	Resources []struct {
+		Entity struct {
+			Username string `json:"username"`
+		}
+		Metadata struct {
+			GUID      string `json:"guid"`
+			CreatedAt string `json:"created_at"`
+		}
+	} `json:"resources"`
+}
+
+type CFOrgs struct {
+	Resources []struct {
+		Name      string `json:"name"`
+		GUID      string `json:"guid"`
+		CreatedAt string `json:"created_at"`
+	} `json:"resources"`
+}
+
+type CFSpaces struct {
+	Resources []struct {
+		Entity struct {
+			Name string `json:"name"`
+		}
+		Metadata struct {
+			GUID      string `json:"guid"`
+			CreatedAt string `json:"created_at"`
+		}
+	} `json:"resources"`
+}
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
 
@@ -59,6 +101,25 @@ func TestAcceptance(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 
+	fmt.Println("Clearing down existing test orgs/spaces...")
+	orgs := getTestOrgs()
+
+	//  DELETING APPS THEN SERVICES THEN USERS IS IMPORTANT
+	for _, org := range orgs {
+		orgName, orgGuid, spaceName, spaceGuid := getOrgSpaceNamesAndGuids(org)
+		if spaceName != "" {
+			target := cf.Cf("target", "-o", orgName, "-s", spaceName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(target).To(Exit(0), fmt.Sprintf("failed to target %s and %s", orgName, spaceName))
+
+			apps := getApps(orgGuid, spaceGuid, "autoscaler-")
+			deleteApps(apps, 0)
+
+			services := getServices(orgGuid, spaceGuid, "autoscaler-")
+			deleteServices(services)
+		}
+
+		deleteOrg(org)
+	}
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	setup.Setup()
 
@@ -89,10 +150,10 @@ var _ = BeforeSuite(func() {
 
 		instanceName = generator.PrefixedRandomName("autoscaler", "service")
 		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
+		Expect(createService).To(Exit(0), fmt.Sprintf("failed creating service %s", instanceName))
 
 		bindService := cf.Cf("bind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(0), "failed binding service to app ")
+		Expect(bindService).To(Exit(0), fmt.Sprintf("failed binding service %s to app %s", instanceName, appName))
 	}
 
 	// #nosec G402
@@ -120,29 +181,134 @@ var _ = BeforeSuite(func() {
 	aggregatedMetricURL = strings.Replace(AggregatedMetricPath, "{metric_type}", "memoryused", -1)
 	aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(aggregatedMetricURL, "{appId}", appGUID, -1))
 	historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
-
 })
 
 var _ = AfterSuite(func() {
 
 	if cfg.IsServiceOfferingEnabled() {
-		unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+		if appName != "" && instanceName != "" {
+			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			if unbindService.ExitCode() != 0 {
+				purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+				Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+			}
+		}
 
-		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0))
+		if instanceName != "" {
+			deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+			if deleteService.ExitCode() != 0 {
+				purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+				Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+			}
+		}
 	}
 
-	Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
+	if appName != "" {
+		deleteApp := cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())
+		Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", appName))
+	}
+
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			DisableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})
+
 	setup.Teardown()
 })
 
 func DoAPIRequest(req *http.Request) (*http.Response, error) {
 	resp, err := client.Do(req)
 	return resp, err
+}
+
+func getTestOrgs() []string {
+	rawOrgs := cf.Cf("curl", "/v3/organizations").Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawOrgs).To(Exit(0), "unable to get orgs")
+
+	var orgs CFOrgs
+	err := json.Unmarshal(rawOrgs.Out.Contents(), &orgs)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	var orgNames []string
+	for _, org := range orgs.Resources {
+		if strings.HasPrefix(org.Name, cfg.NamePrefix) {
+			orgNames = append(orgNames, org.Name)
+		}
+	}
+
+	return orgNames
+}
+
+func getOrgSpaceNamesAndGuids(org string) (string, string, string, string) {
+	orgGuidByte := cf.Cf("org", org, "--guid").Wait(cfg.DefaultTimeoutDuration())
+	orgGuid := strings.TrimSuffix(string(orgGuidByte.Out.Contents()), "\n")
+
+	rawSpaces := cf.Cf("curl", fmt.Sprintf("/v2/organizations/%s/spaces", orgGuid)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawSpaces).To(Exit(0), "unable to get spaces")
+	var spaces CFSpaces
+	err := json.Unmarshal(rawSpaces.Out.Contents(), &spaces)
+	Expect(err).ShouldNot(HaveOccurred())
+	if len(spaces.Resources) == 0 {
+		return org, orgGuid, "", ""
+	}
+
+	return org, orgGuid, spaces.Resources[0].Entity.Name, spaces.Resources[0].Metadata.GUID
+}
+
+func getServices(orgGuid, spaceGuid string, prefix string) []string {
+	var services CFResourceObject
+	rawServices := cf.Cf("curl", "/v3/service_instances?space_guids="+spaceGuid+"&organization_guids="+orgGuid).Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawServices).To(Exit(0), "unable to get services")
+	err := json.Unmarshal(rawServices.Out.Contents(), &services)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	var names []string
+	for _, service := range services.Resources {
+		if strings.HasPrefix(service.Name, prefix) {
+			names = append(names, service.Name)
+		}
+	}
+
+	return names
+}
+
+func getApps(orgGuid, spaceGuid string, prefix string) []string {
+	var apps CFResourceObject
+	rawApps := cf.Cf("curl", "/v3/apps?space_guids="+spaceGuid+"&organization_guids="+orgGuid).Wait(cfg.DefaultTimeoutDuration())
+	Expect(rawApps).To(Exit(0), "unable to get apps")
+	err := json.Unmarshal(rawApps.Out.Contents(), &apps)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	var names []string
+	for _, app := range apps.Resources {
+		if strings.HasPrefix(app.Name, prefix) {
+			names = append(names, app.Name)
+		}
+	}
+
+	return names
+}
+
+func deleteServices(services []string) {
+	for _, service := range services {
+		deleteService := cf.Cf("delete-service", service, "-f") //.Wait(cfg.DefaultTimeoutDuration())
+		if deleteService.ExitCode() != 0 {
+			fmt.Printf("unable to delete the service %s, attempting to purge...\n", service)
+			purgeService := cf.Cf("purge-service-instance", service, "-f").Wait(cfg.DefaultTimeoutDuration())
+			Expect(purgeService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
+		}
+	}
+}
+
+func deleteOrg(org string) {
+	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(cfg.DefaultTimeoutDuration())
+	Expect(deleteOrg).To(Exit(0), fmt.Sprintf("unable to delete org %s", org))
+}
+
+func deleteApps(apps []string, threshold int) {
+	for _, app := range apps {
+		deleteApp := cf.Cf("delete", app, "-f").Wait(cfg.DefaultTimeoutDuration())
+		Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", app))
+	}
 }
