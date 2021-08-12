@@ -324,7 +324,11 @@ func getApps(orgGuid, spaceGuid string, prefix string) []string {
 func deleteServices(services []string) {
 	for _, service := range services {
 		deleteService := cf.Cf("delete-service", service, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
+		if deleteService.ExitCode() != 0 {
+			fmt.Printf("unable to delete the service %s, attempting to purge...\n", service)
+			purgeService := cf.Cf("purge-service-instance", service, "-f").Wait(cfg.DefaultTimeoutDuration())
+			Expect(purgeService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
+		}
 	}
 }
 
