@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -167,12 +168,16 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-			DisableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
-	setup.Teardown()
+	if os.Getenv("SKIP_TEARDOWN") == "true" {
+		fmt.Println("Skipping Teardown...")
+	} else {
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+				DisableServiceAccess(cfg, setup.GetOrganizationName())
+			}
+		})
+		setup.Teardown()
+	}
 })
 
 func getStartAndEndTime(location *time.Location, offset, duration time.Duration) (time.Time, time.Time) {

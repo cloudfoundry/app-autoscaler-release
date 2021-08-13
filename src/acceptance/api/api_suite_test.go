@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -184,37 +185,40 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
+	if os.Getenv("SKIP_TEARDOWN") == "true" {
+		fmt.Println("Skipping Teardown...")
+	} else {
+		if cfg.IsServiceOfferingEnabled() {
+			if appName != "" && instanceName != "" {
+				unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+				if unbindService.ExitCode() != 0 {
+					purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+					Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+				}
+			}
 
-	if cfg.IsServiceOfferingEnabled() {
-		if appName != "" && instanceName != "" {
-			unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-			if unbindService.ExitCode() != 0 {
-				purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-				Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+			if instanceName != "" {
+				deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+				if deleteService.ExitCode() != 0 {
+					purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+					Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+				}
 			}
 		}
 
-		if instanceName != "" {
-			deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-			if deleteService.ExitCode() != 0 {
-				purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-				Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+		if appName != "" {
+			deleteApp := cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())
+			Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", appName))
+		}
+
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+				DisableServiceAccess(cfg, setup.GetOrganizationName())
 			}
-		}
+		})
+
+		setup.Teardown()
 	}
-
-	if appName != "" {
-		deleteApp := cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", appName))
-	}
-
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-			DisableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
-
-	setup.Teardown()
 })
 
 func DoAPIRequest(req *http.Request) (*http.Response, error) {

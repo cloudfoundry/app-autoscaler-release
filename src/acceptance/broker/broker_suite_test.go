@@ -1,6 +1,8 @@
 package broker_test
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"acceptance/config"
@@ -46,10 +48,14 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.ShouldEnableServiceAccess() {
-			DisableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
-	setup.Teardown()
+	if os.Getenv("SKIP_TEARDOWN") == "true" {
+		fmt.Println("Skipping Teardown...")
+	} else {
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if cfg.ShouldEnableServiceAccess() {
+				DisableServiceAccess(cfg, setup.GetOrganizationName())
+			}
+		})
+		setup.Teardown()
+	}
 })
