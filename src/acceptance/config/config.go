@@ -63,7 +63,7 @@ var defaults = Config{
 
 	JavaBuildpackName:            "java_buildpack",
 	NodejsBuildpackName:          "nodejs_buildpack",
-	DefaultTimeout:               60, // seconds
+	DefaultTimeout:               30, // seconds
 	CfPushTimeout:                3,  // minutes
 	LongCurlTimeout:              2,  // minutes
 	BrokerStartTimeout:           5,  // minutes

@@ -3,6 +3,8 @@ package app_test
 import (
 	"acceptance/config"
 	. "acceptance/helpers"
+	"fmt"
+	"os"
 
 	"strconv"
 	"strings"
@@ -49,9 +51,12 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	})
 
 	AfterEach(func() {
-		DeletePolicy(appName, appGUID)
-		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
-
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			fmt.Println("Skipping Teardown...")
+		} else {
+			DeletePolicy(appName, appGUID)
+			Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
+		}
 	})
 
 	Context("when scaling by specific date schedule ", func() {
