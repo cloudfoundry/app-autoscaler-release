@@ -3,6 +3,8 @@ package app_test
 import (
 	"acceptance/config"
 	. "acceptance/helpers"
+	"fmt"
+	"os"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -49,8 +51,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	})
 
 	AfterEach(func() {
-		DeletePolicy(appName, appGUID)
-		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			fmt.Println("Skipping Teardown...")
+		} else {
+			DeletePolicy(appName, appGUID)
+			Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
+		}
 	})
 
 	Context("when scaling by memoryused", func() {
@@ -259,7 +265,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "throughput", 1)
+				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "throughput", 100)
 				initialInstanceCount = 2
 			})
 

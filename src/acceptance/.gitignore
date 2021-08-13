@@ -1,3 +1,4 @@
 /results
 *config.json
 *.test
+**/*.log

@@ -205,7 +205,7 @@ func GenerateDynamicAndSpecificDateSchedulePolicy(cfg *config.Config, instanceMi
 	bytes, err := MarshalWithoutHTMLEscape(policy)
 	Expect(err).NotTo(HaveOccurred())
 
-	return string(bytes)
+	return strings.TrimSpace(string(bytes))
 }
 
 func GenerateDynamicAndRecurringSchedulePolicy(cfg *config.Config, instanceMin, instanceMax int, threshold int64,
