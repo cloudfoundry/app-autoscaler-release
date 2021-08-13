@@ -292,7 +292,7 @@ func getApps(orgGuid, spaceGuid string, prefix string) []string {
 
 func deleteServices(services []string) {
 	for _, service := range services {
-		deleteService := cf.Cf("delete-service", service, "-f") //.Wait(cfg.DefaultTimeoutDuration())
+		deleteService := cf.Cf("delete-service", service, "-f").Wait(3 * cfg.DefaultTimeoutDuration())
 		if deleteService.ExitCode() != 0 {
 			fmt.Printf("unable to delete the service %s, attempting to purge...\n", service)
 			purgeService := cf.Cf("purge-service-instance", service, "-f").Wait(cfg.DefaultTimeoutDuration())
@@ -302,13 +302,18 @@ func deleteServices(services []string) {
 }
 
 func deleteOrg(org string) {
-	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(cfg.DefaultTimeoutDuration())
+	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(3 * cfg.DefaultTimeoutDuration())
 	Expect(deleteOrg).To(Exit(0), fmt.Sprintf("unable to delete org %s", org))
 }
 
 func deleteApps(apps []string, threshold int) {
 	for _, app := range apps {
-		deleteApp := cf.Cf("delete", app, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", app))
+		deleteApp := cf.Cf("delete", app, "-f").Wait(3 * cfg.DefaultTimeoutDuration())
+		if deleteApp.ExitCode() != 0 {
+			fmt.Printf("unable to delete the app %s, attempting to purge...\n", app)
+			//purgeService := cf.Cf("purge-service-instance", service, "-f").Wait(cfg.DefaultTimeoutDuration())
+			//Expect(purgeService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
+		}
+		//Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", app))
 	}
 }
