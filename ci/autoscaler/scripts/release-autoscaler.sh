@@ -17,7 +17,7 @@ blobstore:
     json_key:
 EOF
 
-  yq eval -n '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
+  yq eval '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
   # REMOVE ME
   cat config/private.yml
