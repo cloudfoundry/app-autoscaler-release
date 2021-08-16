@@ -46,7 +46,7 @@ cat > acceptance_config.json <<EOF
 }
 EOF
 
-cat acceptance_config.json
+#cat acceptance_config.json
 
 CONFIG=$PWD/acceptance_config.json ./bin/test -nodes=3 -slowSpecThreshold=120 -trace api app broker
 
