@@ -14,9 +14,10 @@ pushd app-autoscaler-release
 blobstore:
   options:
     credentials_source: static
-    json_key: |
-      $UPLOADER_KEY
+    json_key:
 EOF
+
+  yq eval -n '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
   # REMOVE ME
   cat config/private.yml
