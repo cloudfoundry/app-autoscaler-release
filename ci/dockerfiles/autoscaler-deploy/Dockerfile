@@ -79,7 +79,11 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq
 ENV YQ_VERSION 4.9.6
 RUN wget -q https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && \
   mv yq_linux_amd64 /usr/local/bin/yq && \
-  chmod +x /usr/local/bin/yq
+  chmod +x /usr/local/bin/yq \
+
+ENV JX_VERSION 2.4.13
+RUN curl -L https://github.com/jenkins-x-plugins/jx-release-version/releases/download/v${JX_VERSION}/jx-release-version-linux-amd64.tar.gz | tar xzv && \
+  mv jx-release-version /usr/local/bin/jx-release-version
 
 # Install gcloud
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
