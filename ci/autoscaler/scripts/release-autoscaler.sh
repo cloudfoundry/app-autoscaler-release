@@ -42,4 +42,5 @@ EOF
   #mv ${REPO_ROOT}/ci/release_notes.md          ${RELEASE_ROOT}/notes.md
   #cat >> ${RELEASE_ROOT}/notes.md <<EOF
   
+  git status
 popd
