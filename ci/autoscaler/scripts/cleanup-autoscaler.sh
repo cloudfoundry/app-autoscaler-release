@@ -5,6 +5,10 @@ set -x
 
 cf api https://api.${SYSTEM_DOMAIN} --skip-ssl-validation
 
+pushd autoscaler-env-bbl-state/bbl-state
+  eval "$(bbl print-env)"
+popd
+
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 cf auth admin $CF_ADMIN_PASSWORD
 
@@ -21,10 +25,6 @@ if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
   echo "Service Broker already exists, deleting..."
   cf delete-service-broker autoscaler -f
 fi
-
-pushd autoscaler-env-bbl-state/bbl-state
-  eval "$(bbl print-env)"
-popd
 
 set +e
 bosh delete-deployment -d app-autoscaler
