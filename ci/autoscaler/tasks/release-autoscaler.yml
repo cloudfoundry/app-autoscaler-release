@@ -14,7 +14,7 @@ inputs:
 - name: app-autoscaler-ci
 
 outputs:
-- name: generated-releases
+- name: generated-release
 
 run:
   path: app-autoscaler-ci/autoscaler/scripts/release-autoscaler.sh

@@ -37,7 +37,7 @@ EOF
   echo "v${VERSION}" > ${RELEASE_ROOT}/tag
   echo "v${VERSION}" > ${RELEASE_ROOT}/name
   mkdir -p ${RELEASE_ROOT}/artifacts
-  mv app-autoscaler-v${VERSION}.tgz ${RELEASE_ROOT}/artifacts
+  mv app-autoscaler-v${VERSION}.tgz ${RELEASE_ROOT}/artifacts/
 
   #mv ${REPO_ROOT}/ci/release_notes.md          ${RELEASE_ROOT}/notes.md
   #cat >> ${RELEASE_ROOT}/notes.md <<EOF
