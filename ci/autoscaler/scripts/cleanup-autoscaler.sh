@@ -27,6 +27,6 @@ if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
 fi
 
 set +e
-bosh delete-deployment -d app-autoscaler
+bosh delete-deployment -d app-autoscaler -n
 set -e
 
