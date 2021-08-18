@@ -43,7 +43,9 @@ EOF
   mv app-autoscaler-v${VERSION}.tgz ../generated-release/artifacts/
 
   cat >> ../generated-release/changelog.md <<EOF
-  ### Deployment
+
+## Deployment
+
 \`\`\`yaml
 releases:
 - name: app-autoscaler
