@@ -1,0 +1,23 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: 
+    repository: ghcr.io/cloudfoundry/app-autoscaler-ci-test
+    tag: master
+
+params:
+  # Run this script before attempting to create the bosh release
+  PRE_RELEASE_SCRIPT:
+
+inputs:
+- name: release
+- name: app-autoscaler-ci
+
+outputs:
+  # The location that the generated release will be placed   
+- name: generated-release
+
+run:
+  path: app-autoscaler-ci/autoscaler/scripts/create-bosh-release.sh
