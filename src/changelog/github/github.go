@@ -123,7 +123,7 @@ func (g GitHub) FetchLatestReleaseCommitFromBranch(owner, repo, branch string, r
 	return lastCommit, nil
 }
 
-func (g GitHub) FetchPullRequestsAfterCommit(owner, repo, branch, startingCommitSHA, lastCommitSHA string, ignoreAuthors []string) ([]PullRequest, error) {
+func (g GitHub) FetchPullRequestsAfterCommit(owner, repo, branch, startingCommitSHA, lastCommitSHA string) ([]PullRequest, error) {
 	var pullRequestsQuery struct {
 		Repository struct {
 			Ref struct {
@@ -173,11 +173,6 @@ func (g GitHub) FetchPullRequestsAfterCommit(owner, repo, branch, startingCommit
 	pullRequests := []PullRequest{}
 	seen := make(map[string]bool)
 
-	filteredAuthors := make(map[string]struct{})
-	for _, username := range ignoreAuthors {
-		filteredAuthors[username] = struct{}{}
-	}
-
 	for {
 		err := g.client.Query(context.Background(), &pullRequestsQuery, pullRequestsVariables)
 		if err != nil {
@@ -199,10 +194,6 @@ func (g GitHub) FetchPullRequestsAfterCommit(owner, repo, branch, startingCommit
 				}
 
 				if _, exists := seen[pr.ID]; exists {
-					continue
-				}
-
-				if _, found := filteredAuthors[pr.Author.Login]; found {
 					continue
 				}
 

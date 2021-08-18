@@ -1,13 +1,11 @@
 package main
 
 import (
+	"changelog/display"
 	"changelog/github"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
-
-	"github.com/Masterminds/semver/v3"
 )
 
 var (
@@ -17,9 +15,7 @@ var (
 )
 
 func main() {
-	var sb strings.Builder
-	sb.WriteString("# Changelog for app-autoscaler-release\n\n")
-
+	// FIXME these should be flags
 	client := github.New(os.Getenv("GITHUB_TOKEN"))
 	previousVersion := os.Getenv("PREVIOUS_VERSION")
 	outputFile := os.Getenv("OUTPUT_FILE")
@@ -39,119 +35,62 @@ func main() {
 		}
 	}
 
-	latestReleaseCommit, err := client.FetchLatestReleaseCommitFromBranch(owner, repo, branch, commitsFromReleases)
+	latestCommitSHA, err := client.FetchLatestReleaseCommitFromBranch(owner, repo, branch, commitsFromReleases)
 	if err != nil {
 		panic(err)
 	}
 
-	prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, commit, latestReleaseCommit, []string{})
+	prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, commit, latestCommitSHA)
 	if err != nil {
 		panic(err)
 	}
 
-	var breakingChanges []github.PullRequest
-	var enhancements []github.PullRequest
-	var bugFixes []github.PullRequest
-	var dependencyUpdates []github.PullRequest
-	var chores []github.PullRequest
-	var other []github.PullRequest
+	// get PRs from app-autoscaler too
+	//otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, commit, latestCommitSHA)
+	//if err != nil {
+	//	panic(err)
+	//}
 
-	for _, pr := range prs {
-		if latestReleaseCommit != "" || pr.Number > 245 {
-			if ArrayContains(pr.Labels, "breaking-change") {
-				breakingChanges = append(breakingChanges, pr)
-			} else if ArrayContains(pr.Labels, "enhancement") {
-				enhancements = append(enhancements, pr)
-			} else if ArrayContains(pr.Labels, "dependencies") {
-				dependencyUpdates = append(dependencyUpdates, pr)
-			} else if ArrayContains(pr.Labels, "bug") {
-				bugFixes = append(bugFixes, pr)
-			} else if ArrayContains(pr.Labels, "chore") {
-				chores = append(chores, pr)
-			} else {
-				other = append(other, pr)
-			}
-		}
+	//for _, pr := range otherPRs {
+	//	fmt.Printf("Got %s\n", pr.Url)
+	//}
+
+	//fmt.Printf("Got %d other prs\n", len(otherPRs))
+
+	if latestCommitSHA == "" {
+		prs = filterPrs(prs)
 	}
 
-	if len(breakingChanges) > 0 {
-		Header(&sb, "Breaking Changes")
-		DisplayPRs(&sb, breakingChanges)
-	}
-
-	if len(enhancements) > 0 {
-		Header(&sb, "Enhancements")
-		DisplayPRs(&sb, enhancements)
-	}
-
-	if len(bugFixes) > 0 {
-		Header(&sb, "Bug Fixes")
-		DisplayPRs(&sb, bugFixes)
-	}
-
-	if len(chores) > 0 {
-		Header(&sb, "Chores")
-		DisplayPRs(&sb, chores)
-	}
-
-	if len(dependencyUpdates) > 0 {
-		Header(&sb, "Dependency Updates")
-		DisplayPRs(&sb, dependencyUpdates)
-	}
-
-	if len(other) > 0 {
-		Header(&sb, "Other")
-		DisplayPRs(&sb, other)
+	changelog, nextVersion, err := display.GenerateOutput(prs, previousVersion)
+	if err != nil {
+		panic(err)
 	}
 
 	if outputFile != "" {
-		err := ioutil.WriteFile(outputFile, []byte(sb.String()), 0600)
+		err := ioutil.WriteFile(outputFile, []byte(changelog), 0600)
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		fmt.Println(sb.String())
-	}
-
-	v, err := semver.NewVersion(previousVersion)
-	if err != nil {
-		panic(err)
-	}
-
-	var recommendedVersion semver.Version
-	if len(breakingChanges) > 0 {
-		recommendedVersion = v.IncMajor()
-	} else if len(enhancements) > 0 {
-		recommendedVersion = v.IncMinor()
-	} else {
-		recommendedVersion = v.IncPatch()
+		fmt.Println(changelog)
 	}
 
 	if recommendedVersionFile != "" {
-		err := ioutil.WriteFile(recommendedVersionFile, []byte(recommendedVersion.String()), 0600)
+		err := ioutil.WriteFile(recommendedVersionFile, []byte(nextVersion), 0600)
 		if err != nil {
 			panic(err)
 		}
 	} else {
-		fmt.Println(recommendedVersion.String())
+		fmt.Println(nextVersion)
 	}
 }
 
-func Header(sb *strings.Builder, header string) {
-	sb.WriteString(fmt.Sprintf("\n## %s\n\n", header))
-}
-
-func DisplayPRs(sb *strings.Builder, prs []github.PullRequest) {
-	for _, p := range prs {
-		sb.WriteString(fmt.Sprintf("* [%s](%s) - `%s`\n", p.Title, strings.ReplaceAll(p.Url, "\"", ""), p.Author))
-	}
-}
-
-func ArrayContains(array []string, in string) bool {
-	for _, i := range array {
-		if i == in {
-			return true
+func filterPrs(prs []github.PullRequest) []github.PullRequest {
+	var filtered []github.PullRequest
+	for _, pr := range prs {
+		if pr.Number > 245 {
+			filtered = append(filtered, pr)
 		}
 	}
-	return false
+	return filtered
 }
