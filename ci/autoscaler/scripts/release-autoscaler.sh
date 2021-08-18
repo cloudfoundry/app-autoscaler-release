@@ -53,7 +53,7 @@ releases:
 \`\`\`
 EOF
 
-  cat ${RELEASE_ROOT}/changelog.md
+  cat ../generated-release/changelog.md
   
   git status
 popd
