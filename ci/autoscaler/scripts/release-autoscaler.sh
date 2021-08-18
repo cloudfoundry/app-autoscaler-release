@@ -2,13 +2,11 @@
 
 set -euo pipefail
 
+export PREVIOUS_VERSION="$(cat gh-release/tag)"
+
 mkdir -p generated-release
 
 pushd app-autoscaler-release
-  # determine what the next release version should be
-  VERSION=$(jx-release-version)
-  echo "Next Version should be ${VERSION}"
-
   # generate the private.yml file with the credentials
   cat > config/private.yml <<EOF
 ---
@@ -22,6 +20,13 @@ EOF
 
   git status
 
+
+  pushd src/changelog
+    RECOMMENDED_VERSION_FILE=../../../generated-release/name OUTPUT_FILE=../../../generated-release/changelog.md go run main.go
+  popd
+
+  VERSION=$(cat ../generated-release/name)
+
   # create bosh release with the specified version
   bosh create-release \
     --final \
@@ -32,15 +37,23 @@ EOF
   export SHA1=$(sha1sum $RELEASE_TGZ | head -n1 | awk '{print $1}')
   echo "SHA1=$SHA1"
 
-  export RELEASE_ROOT=../generated-release
+  echo "${VERSION}" > ../generated-release/tag
 
-  echo "v${VERSION}" > ${RELEASE_ROOT}/tag
-  echo "v${VERSION}" > ${RELEASE_ROOT}/name
-  mkdir -p ${RELEASE_ROOT}/artifacts
-  mv app-autoscaler-v${VERSION}.tgz ${RELEASE_ROOT}/artifacts/
+  mkdir -p ../generated-release/artifacts
+  mv app-autoscaler-v${VERSION}.tgz ../generated-release/artifacts/
 
-  #mv ${REPO_ROOT}/ci/release_notes.md          ${RELEASE_ROOT}/notes.md
-  #cat >> ${RELEASE_ROOT}/notes.md <<EOF
+  cat >> ../generated-release/changelog.md <<EOF
+  ### Deployment
+\`\`\`yaml
+releases:
+- name: app-autoscaler
+  version: $VERSION
+  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-v${VERSION}.tgz
+  sha1: $SHA1
+\`\`\`
+EOF
+
+  cat ${RELEASE_ROOT}/changelog.md
   
   git status
 popd
