@@ -18,8 +18,8 @@ EOF
 
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
-  git status
-
+  SUBMODULE_CURRENT_SHA=$(git ls-tree HEAD src/app-autoscaler | awk '{print $3}')
+  echo "Autoscaler SHA = $SUBMODULE_CURRENT_SHA"
 
   pushd src/changelog
     RECOMMENDED_VERSION_FILE=../../../generated-release/name OUTPUT_FILE=../../../generated-release/changelog.md go run main.go
