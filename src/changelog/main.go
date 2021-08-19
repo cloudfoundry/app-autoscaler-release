@@ -45,20 +45,23 @@ func main() {
 		panic(err)
 	}
 
-	// get PRs from app-autoscaler too
-	//otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, commit, latestCommitSHA)
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//for _, pr := range otherPRs {
-	//	fmt.Printf("Got %s\n", pr.Url)
-	//}
-
-	//fmt.Printf("Got %d other prs\n", len(otherPRs))
-
 	if latestCommitSHA == "" {
-		prs = filterPrs(prs)
+		prs = filterPrs(prs, 245)
+	}
+
+	submoduleSha := os.Getenv("SUBMODULE_CURRENT_SHA")
+	if submoduleSha != "" {
+		// get PRs from app-autoscaler too
+		otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, "", submoduleSha)
+		if err != nil {
+			panic(err)
+		}
+
+		if latestCommitSHA == "" {
+			otherPRs = filterPrs(otherPRs, 584)
+		}
+
+		prs = append(prs, otherPRs...)
 	}
 
 	changelog, nextVersion, err := display.GenerateOutput(prs, previousVersion)
@@ -83,12 +86,14 @@ func main() {
 	} else {
 		fmt.Println(nextVersion)
 	}
+
+	fmt.Printf("Total PRs %d\n", len(prs))
 }
 
-func filterPrs(prs []github.PullRequest) []github.PullRequest {
+func filterPrs(prs []github.PullRequest, prNumber int) []github.PullRequest {
 	var filtered []github.PullRequest
 	for _, pr := range prs {
-		if pr.Number > 245 {
+		if pr.Number > prNumber {
 			filtered = append(filtered, pr)
 		}
 	}

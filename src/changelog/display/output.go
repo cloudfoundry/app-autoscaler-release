@@ -20,7 +20,9 @@ func GenerateOutput(prs []github.PullRequest, previousVersion string) (string, s
 	var other []github.PullRequest
 
 	for _, pr := range prs {
-		if ArrayContains(pr.Labels, "breaking-change") {
+		if ArrayContains(pr.Labels, "exclude-from-changelog") {
+			// exclude
+		} else if ArrayContains(pr.Labels, "breaking-change") {
 			breakingChanges = append(breakingChanges, pr)
 		} else if ArrayContains(pr.Labels, "enhancement") {
 			enhancements = append(enhancements, pr)
