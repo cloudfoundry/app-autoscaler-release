@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -euo pipefail
-set -x
 
 cf api https://api.${SYSTEM_DOMAIN} --skip-ssl-validation
 

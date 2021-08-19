@@ -42,6 +42,7 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/app-autoscaler-release.git
     branch: main
+    fetch_tags: true
 
 - name: app-autoscaler-release-pr
   type: pull-request
@@ -63,7 +64,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/cloudfoundry/app-autoscaler-ci.git
-    branch: updated-tasks
+    branch: master
 
 - name: autoscaler-env-bbl-state
   type: git
@@ -107,6 +108,13 @@ resources:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
     tag_filter: v12.*
+
+- name: release
+  type: gcs-resource
+  source:
+    bucket: app-autoscaler-releases
+    json_key: ((autoscaler-releases-uploader-key))
+    regexp: releases/app-autoscaler-v(.*).tgz
 
 jobs:
 - name: unit-tests-main
@@ -389,6 +397,14 @@ jobs:
       SKIP_SSL_VALIDATION: true
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+    ensure:
+      task: cleanup
+      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+      params:
+        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+        SKIP_SSL_VALIDATION: true
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
  
 
 
@@ -436,6 +452,14 @@ jobs:
       SKIP_SSL_VALIDATION: true
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
+    ensure:
+      task: cleanup
+      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+      params:
+        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+        SKIP_SSL_VALIDATION: true
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-pr
   on_success:
     put: app-autoscaler-release-pr
     params:
@@ -452,16 +476,15 @@ jobs:
 
 
 - name: release
-  #serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: release
     - get: gh-release
     - get: app-autoscaler-ci
     - get: app-autoscaler-release-main
       passed: [acceptance-main]
-      #trigger: true
   - task: run-pre-release-script
     file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
     params:
@@ -473,8 +496,11 @@ jobs:
   - task: release-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
     params:
-      UPLOADER_KEY:  ((autoscaler-blobstore-uploader-key))
+      UPLOADER_KEY: ((autoscaler-blobstore-uploader-key))
+      GITHUB_TOKEN: ((autoscaler-access-token))
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
- 
+  - put: release
+    params:
+      file: "generated-release/artifacts/app-autoscaler-*.tgz" 
 
