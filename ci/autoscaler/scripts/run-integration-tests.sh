@@ -10,7 +10,11 @@ pushd app-autoscaler-release/src/app-autoscaler
 
   POSTGRES_OPTS='--username=postgres --url=jdbc:postgresql://127.0.0.1/autoscaler --driver=org.postgresql.Driver'
 
-  mvn package --no-transfer-progress
+  make -C src/autoscaler buildtools
+  ./scheduler/scripts/generate_unit_test_certs.sh
+  ./scripts/generate_test_certs.sh
+
+  mvn package --no-transfer-progress -Dmaven.test.skip=true -DskipTests
 
   echo "liquibase.headless=true" > liquibase.properties
 
@@ -23,19 +27,10 @@ pushd app-autoscaler-release/src/app-autoscaler
   java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/scalingengine/db/scalingengine.db.changelog.yml update
   java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/operator/db/operator.db.changelog.yml update
 
-  export DBURL=postgres://postgres@localhost/autoscaler?sslmode=disable
+  export DBURL="postgres://postgres@localhost/autoscaler?sslmode=disable"
 
-  pushd src/autoscaler
-    make buildtools
-    make build
-  popd
-
-  pushd scheduler
-    mvn package -DskipTests --no-transfer-progress
-  popd
-
-  pushd src/autoscaler
-    make integration
-  popd
+  make -C src/autoscaler build
+  mvn package --no-transfer-progress -Dmaven.test.skip=true -DskipTests
+  make -C src/autoscaler integration
 
 popd
