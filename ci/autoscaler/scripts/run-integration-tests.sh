@@ -10,6 +10,9 @@ pushd app-autoscaler-release/src/app-autoscaler
 
   POSTGRES_OPTS='--username=postgres --url=jdbc:postgresql://127.0.0.1/autoscaler --driver=org.postgresql.Driver'
 
+  ./scheduler/scripts/generate_unit_test_certs.sh
+  ./scripts/generate_unit_test_certs.sh
+
   mvn package --no-transfer-progress -Dmaven.test.skip=true -DskipTests
 
   echo "liquibase.headless=true" > liquibase.properties
