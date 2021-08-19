@@ -12,7 +12,7 @@ pushd app-autoscaler-release/src/app-autoscaler
 
   make -C src/autoscaler buildtools
   ./scheduler/scripts/generate_unit_test_certs.sh
-  ./scripts/generate_unit_test_certs.sh
+  ./scripts/generate_test_certs.sh
 
   mvn package --no-transfer-progress -Dmaven.test.skip=true -DskipTests
 
