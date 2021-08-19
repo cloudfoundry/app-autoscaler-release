@@ -10,6 +10,7 @@ pushd app-autoscaler-release/src/app-autoscaler
 
   POSTGRES_OPTS='--username=postgres --url=jdbc:postgresql://127.0.0.1/autoscaler --driver=org.postgresql.Driver'
 
+  make -C src/autoscaler buildtools
   ./scheduler/scripts/generate_unit_test_certs.sh
   ./scripts/generate_unit_test_certs.sh
 
@@ -28,7 +29,7 @@ pushd app-autoscaler-release/src/app-autoscaler
 
   export DBURL="postgres://postgres@localhost/autoscaler?sslmode=disable"
 
-  make -C src/autoscaler buildtools build test
+  make -C src/autoscaler build test
   mvn test --no-transfer-progress
 
 popd
