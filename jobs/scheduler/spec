@@ -104,7 +104,7 @@ properties:
     description: "sslmode to connect to postgres server"
 
   autoscaler.scheduler.health.port:
-    description: "the listening port of health endpoint"
+    description: "The scheduler server port to collect prometheus metrics."
     default: 6204
   autoscaler.changeloglock_timeout_seconds:
     default: 180
