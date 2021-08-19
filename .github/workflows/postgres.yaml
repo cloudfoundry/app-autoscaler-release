@@ -60,7 +60,7 @@ jobs:
       - name: Maven Build
         run: |
           pushd src/app-autoscaler
-            mvn --no-transfer-progress package
+            mvn --no-transfer-progress package -Dmaven.test.skip=true
           popd
 
       - name: Setup Postgres
