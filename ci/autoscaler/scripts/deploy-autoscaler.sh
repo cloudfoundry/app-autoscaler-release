@@ -29,6 +29,18 @@ else
 fi
 
 pushd app-autoscaler-release
+  # Determine if we need to upload a stemcell at this point.
+  STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' templates/app-autoscaler-deployment.yml)
+  STEMCELL_VERSION=$(yq eval '.stemcells[] | select(.alias == "default").version' templates/app-autoscaler-deployment.yml)
+  STEMCELL_NAME="bosh-google-kvm-${STEMCELL_OS}-go_agent"
+  set +e
+  STEMCELL_EXISTS=$(bosh stemcells | grep -c "${STEMCELL}")
+  set -e
+
+  if [[ "${STEMCELL_EXISTS}" == 0 ]]; then
+    wget "https://bosh.io/d/stemcells/${STEMCELL_NAME}?v=${STEMCELL_VERSION}" -O stemcell.tgz
+    bosh -n upload-stemcell stemcell.tgz
+  fi
 
   CURRENT_COMMIT_HASH=$(git log -1 --pretty=format:"%H")
   set +e
