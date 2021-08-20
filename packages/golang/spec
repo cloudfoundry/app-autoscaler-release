@@ -2,4 +2,4 @@
 name: golang
 
 files:
-    - golang/go1.15.15.linux-amd64.tar.gz
+    - golang/go1.16.7.linux-amd64.tar.gz
