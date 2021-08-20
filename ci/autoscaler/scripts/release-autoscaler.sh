@@ -27,20 +27,25 @@ EOF
 
   VERSION=$(cat ../generated-release/name)
 
-  # create bosh release with the specified version
-  bosh create-release \
-    --final \
-    --version "$VERSION" \
-    --tarball=app-autoscaler-v$VERSION.tgz
+  if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
+    # create bosh release with the specified version
+    bosh create-release \
+      --final \
+      --version "$VERSION" \
+      --tarball=app-autoscaler-v$VERSION.tgz
   
-  RELEASE_TGZ=app-autoscaler-v$VERSION.tgz
-  export SHA1=$(sha1sum $RELEASE_TGZ | head -n1 | awk '{print $1}')
-  echo "SHA1=$SHA1"
+    RELEASE_TGZ=app-autoscaler-v$VERSION.tgz
+    export SHA1=$(sha1sum $RELEASE_TGZ | head -n1 | awk '{print $1}')
+    echo "SHA1=$SHA1"
+
+    mkdir -p ../generated-release/artifacts
+    mv app-autoscaler-v${VERSION}.tgz ../generated-release/artifacts/
+  else
+    export SHA1="dummy-sha"
+    echo "SHA1=$SHA1"
+  fi
 
   echo "${VERSION}" > ../generated-release/tag
-
-  mkdir -p ../generated-release/artifacts
-  mv app-autoscaler-v${VERSION}.tgz ../generated-release/artifacts/
 
   cat >> ../generated-release/changelog.md <<EOF
 
