@@ -100,7 +100,9 @@ spring.quartz.properties.org.quartz.threadPool.threadCount=10
 
 # scheduler port
 server.port=<%=p('autoscaler.scheduler.port') %>
-scheduler.healthserver.port=<%=p('autoscaler.scheduler.health.port') %>
+scheduler.metrics.port=<%=p('autoscaler.scheduler.health.port') %>
+scheduler.metrics.username=<%=p('autoscaler.scheduler.health.username') %>
+scheduler.metrics.password=<%=p('autoscaler.scheduler.health.password') %>
 
 spring.application.name=scheduler
 spring.mvc.servlet.load-on-startup=1
