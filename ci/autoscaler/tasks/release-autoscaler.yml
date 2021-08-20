@@ -8,6 +8,12 @@ image_resource:
     tag: master
 
 params:
+  # The GCP key to use to configure the generated private.yml
+  UPLOADER_KEY:
+
+  # The github token to query the api to generate release notes
+  GITHUB_TOKEN:
+
   # if set to false, the bosh release will be skipped and only the changelog & next version generated
   PERFORM_BOSH_RELEASE: true
 
