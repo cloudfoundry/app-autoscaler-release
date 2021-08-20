@@ -178,6 +178,7 @@ jobs:
   public: true
   build_logs_to_retain: 100
   serial: true
+  serial_groups: [integration]
   plan:
   - in_parallel:
     - get: app-autoscaler-release-main
@@ -193,6 +194,7 @@ jobs:
   public: true
   build_logs_to_retain: 100
   serial: true
+  serial_groups: [integration]
   plan:
   - in_parallel:
     - get: app-autoscaler-release-pr
@@ -526,19 +528,12 @@ jobs:
     - get: app-autoscaler-release-pr
       passed: [acceptance-pr]
       trigger: true
-  - task: run-pre-release-script
-    file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
-    params:
-      SCRIPT_NAME: ./scripts/update
-    input_mapping:
-      release: app-autoscaler-release-pr
-    output_mapping:
-      release: app-autoscaler-release-pr
   - task: release-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler-blobstore-uploader-key))
       GITHUB_TOKEN: ((autoscaler-access-token))
+      PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
 
@@ -555,18 +550,11 @@ jobs:
     - get: app-autoscaler-release-main
       passed: [acceptance-main]
       trigger: true
-  - task: run-pre-release-script
-    file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
-    params:
-      SCRIPT_NAME: ./scripts/update
-    input_mapping:
-      release: app-autoscaler-release-main
-    output_mapping:
-      release: app-autoscaler-release-main
   - task: release-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler-blobstore-uploader-key))
       GITHUB_TOKEN: ((autoscaler-access-token))
+      PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
