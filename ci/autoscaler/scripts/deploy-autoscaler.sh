@@ -34,7 +34,7 @@ pushd app-autoscaler-release
   STEMCELL_VERSION=$(yq eval '.stemcells[] | select(.alias == "default").version' templates/app-autoscaler-deployment.yml)
   STEMCELL_NAME="bosh-google-kvm-${STEMCELL_OS}-go_agent"
   set +e
-  STEMCELL_EXISTS=$(bosh stemcells | grep -c "${STEMCELL}")
+  STEMCELL_EXISTS=$(bosh stemcells | grep -c "${STEMCELL_NAME}")
   set -e
 
   if [[ "${STEMCELL_EXISTS}" == 0 ]]; then
