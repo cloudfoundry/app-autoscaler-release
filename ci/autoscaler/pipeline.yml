@@ -508,7 +508,7 @@ jobs:
   - put: app-autoscaler-release-main
     params:
       rebase: true
-      repository: pushme/git
+      repository: pushme/app-autoscaler-release
   - put: release
     params:
       file: "generated-release/artifacts/app-autoscaler-*.tgz" 
