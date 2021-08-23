@@ -3,9 +3,11 @@ package main
 import (
 	"changelog/display"
 	"changelog/github"
+	"changelog/util"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 var (
@@ -35,6 +37,8 @@ func main() {
 		}
 	}
 
+	// fmt.Printf("commitsFromReleases=%+v\n", commitsFromReleases)
+
 	latestCommitSHA, err := client.FetchLatestReleaseCommitFromBranch(owner, repo, branch, commitsFromReleases)
 	if err != nil {
 		panic(err)
@@ -45,23 +49,28 @@ func main() {
 		panic(err)
 	}
 
-	if latestCommitSHA == "" {
-		prs = filterPrs(prs, 245)
-	}
-
-	submoduleSha := os.Getenv("SUBMODULE_CURRENT_SHA")
-	if submoduleSha != "" {
-		// get PRs from app-autoscaler too
-		otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, "", submoduleSha)
+	skipSubmodule := os.Getenv("SKIP_SUBMODULE")
+	if skipSubmodule != "true" {
+		//git ls-tree HEAD src/app-autoscaler | awk '{print $3}'
+		toSha, err := getShaOfSubmoduleAtCommit("HEAD")
 		if err != nil {
 			panic(err)
 		}
 
-		if latestCommitSHA == "" {
-			otherPRs = filterPrs(otherPRs, 584)
+		fromSha, err := getShaOfSubmoduleAtCommit(commit)
+		if err != nil {
+			panic(err)
 		}
 
-		prs = append(prs, otherPRs...)
+		if fromSha != toSha {
+			// get PRs from app-autoscaler too
+			otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, fromSha, toSha)
+			if err != nil {
+				panic(err)
+			}
+
+			prs = append(prs, otherPRs...)
+		}
 	}
 
 	changelog, nextVersion, err := display.GenerateOutput(prs, previousVersion)
@@ -90,12 +99,15 @@ func main() {
 	fmt.Printf("Total PRs %d\n", len(prs))
 }
 
-func filterPrs(prs []github.PullRequest, prNumber int) []github.PullRequest {
-	var filtered []github.PullRequest
-	for _, pr := range prs {
-		if pr.Number > prNumber {
-			filtered = append(filtered, pr)
-		}
+func getShaOfSubmoduleAtCommit(commit string) (string, error) {
+	cmd := util.Command{Name: "git", Args: []string{"ls-tree", commit, "../app-autoscaler"}}
+	runner := util.DefaultCommandRunner{}
+
+	output, err := runner.RunWithoutRetry(&cmd)
+	if err != nil {
+		return "", err
 	}
-	return filtered
+
+	parts := strings.Split(output, " ")
+	return parts[2], nil
 }
