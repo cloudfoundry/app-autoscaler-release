@@ -38,7 +38,11 @@ pushd app-autoscaler-release
   set -e
 
   if [[ "${STEMCELL_EXISTS}" == 0 ]]; then
-    wget "https://bosh.io/d/stemcells/${STEMCELL_NAME}?v=${STEMCELL_VERSION}" -O stemcell.tgz
+    URL="https://bosh.io/d/stemcells/${STEMCELL_NAME}"
+    if [ "${STEMCELL_VERSION}" != "latest" ]; then
+	URL="${URL}?v=${STEMCELL_VERSION}"
+    fi
+    wget "$URL" -O stemcell.tgz
     bosh -n upload-stemcell stemcell.tgz
   fi
 
