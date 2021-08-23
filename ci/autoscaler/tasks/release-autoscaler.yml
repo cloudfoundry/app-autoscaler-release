@@ -17,6 +17,9 @@ params:
   # if set to false, the bosh release will be skipped and only the changelog & next version generated
   PERFORM_BOSH_RELEASE: true
 
+  # name of the updated repo to be pushed at the end
+  REPO_OUT: pushme
+
 inputs:
 - name: app-autoscaler-release
 - name: app-autoscaler-ci

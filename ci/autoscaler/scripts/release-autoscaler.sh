@@ -5,6 +5,7 @@ set -euo pipefail
 export PREVIOUS_VERSION="$(cat gh-release/tag)"
 
 mkdir -p generated-release
+export GENERATED=$(realpath generated-release)
 
 pushd app-autoscaler-release
   # generate the private.yml file with the credentials
@@ -22,10 +23,10 @@ EOF
   echo "Autoscaler SHA = $SUBMODULE_CURRENT_SHA"
 
   pushd src/changelog
-    RECOMMENDED_VERSION_FILE=../../../generated-release/name OUTPUT_FILE=../../../generated-release/changelog.md go run main.go
+    RECOMMENDED_VERSION_FILE=${GENERATED}/name OUTPUT_FILE=${GENERATED}/changelog.md go run main.go
   popd
 
-  VERSION=$(cat ../generated-release/name)
+  VERSION=$(cat ${GENERATED}/name)
 
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     # create bosh release with the specified version
@@ -38,16 +39,28 @@ EOF
     export SHA1=$(sha1sum $RELEASE_TGZ | head -n1 | awk '{print $1}')
     echo "SHA1=$SHA1"
 
-    mkdir -p ../generated-release/artifacts
-    mv app-autoscaler-v${VERSION}.tgz ../generated-release/artifacts/
+    mkdir -p ${GENERATED}/artifacts
+    mv app-autoscaler-v${VERSION}.tgz ${GENERATED}/artifacts/
+
+    if [[ -z $(git config --global user.email) ]]; then
+      git config --global user.email "ci@starkandwayne.com"
+    fi
+
+    if [[ -z $(git config --global user.name) ]]; then
+      git config --global user.name "CI Bot"
+    fi
+
+    git add -A
+    git status
+    git commit -m "release v${VERSION}"
   else
     export SHA1="dummy-sha"
     echo "SHA1=$SHA1"
   fi
 
-  echo "${VERSION}" > ../generated-release/tag
+  echo "${VERSION}" > ${GENERATED}/tag
 
-  cat >> ../generated-release/changelog.md <<EOF
+  cat >> ${GENERATED}/changelog.md <<EOF
 
 ## Deployment
 
@@ -60,7 +73,9 @@ releases:
 \`\`\`
 EOF
 
-  cat ../generated-release/changelog.md
+  cat ${GENERATED}/changelog.md
   
   git status
 popd
+
+cp -a app-autoscaler-release ${REPO_OUT}
