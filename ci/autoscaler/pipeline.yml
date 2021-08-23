@@ -51,7 +51,7 @@ resources:
   check_every: 2m
   source:
     repository: cloudfoundry/app-autoscaler-release
-    access_token: ((autoscaler-access-token))
+    access_token: ((autoscaler_access_token))
     labels: ["approved", "dependencies"]
 
 - name: gh-release
@@ -59,7 +59,7 @@ resources:
   source:
     owner: cloudfoundry
     repository: app-autoscaler-release
-    access_token: ((autoscaler-access-token))
+    access_token: ((autoscaler_access_token))
 
 - name: app-autoscaler-ci
   type: git
@@ -73,7 +73,7 @@ resources:
   icon: github
   source:
     uri: git@github.com:garethjevans/autoscaler-env-bbl-state
-    private_key: ((autoscaler-git-key))
+    private_key: ((autoscaler_git_key))
     branch: main
 
 - name: autoscaler-env-bbl-config
@@ -81,7 +81,7 @@ resources:
   icon: github
   source:
     uri: git@github.com:garethjevans/autoscaler-env-bbl-state
-    private_key: ((autoscaler-git-key))
+    private_key: ((autoscaler_git_key))
     branch: main
     paths:
     - ./custom-config/*
@@ -91,7 +91,7 @@ resources:
   icon: github
   source:
     uri: git@github.com:garethjevans/autoscaler-env-bbl-state
-    private_key: ((autoscaler-git-key))
+    private_key: ((autoscaler_git_key))
     branch: main
     paths:
     - deployment-vars.yml
@@ -115,7 +115,7 @@ resources:
   type: gcs-resource
   source:
     bucket: app-autoscaler-releases
-    json_key: ((autoscaler-releases-uploader-key))
+    json_key: ((autoscaler_releases_uploader_key))
     regexp: releases/app-autoscaler-v(.*).tgz
 
 jobs:
@@ -245,14 +245,14 @@ jobs:
     params:
       BBL_IAAS: gcp
       BBL_ENV_NAME: autoscaler
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler-deployer-key))
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
       BBL_GCP_PROJECT_ID: cloud-foundry-310819
       BBL_GCP_REGION: europe-west4
       BBL_GCP_ZONE: europe-west4-a
       DEBUG_MODE: true
       LB_DOMAIN: autoscaler.ci.cloudfoundry.org
-      BBL_LB_CERT: ((autoscaler-lb-cert))
-      BBL_LB_KEY: ((autoscaler-lb-key))
+      BBL_LB_CERT: ((autoscaler_lb_cert))
+      BBL_LB_KEY: ((autoscaler_lb_key))
     input_mapping:
       bbl-state: autoscaler-env-bbl-state
       bbl-config: autoscaler-env-bbl-config
@@ -264,7 +264,7 @@ jobs:
   - task: update-dns-servers
     file: app-autoscaler-ci/autoscaler/tasks/update-dns-servers.yml
     params:
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler-deployer-key))
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
       BBL_GCP_PROJECT_ID: cloud-foundry-310819
       GCP_DNS_ZONE: ci-cloudfoundry-org
       GCP_DNS_NAME: autoscaler.ci.cloudfoundry.org
@@ -318,7 +318,7 @@ jobs:
     params:
       BBL_IAAS: gcp
       BBL_ENV_NAME: autoscaler
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler-deployer-key))
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
       BBL_GCP_PROJECT_ID: cloud-foundry-310819
     input_mapping:
       bbl-state: autoscaler-env-bbl-state
@@ -409,7 +409,7 @@ jobs:
         SKIP_SSL_VALIDATION: true
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
- 
+
 
 
 - name: acceptance-pr
@@ -501,8 +501,8 @@ jobs:
   - task: release-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
     params:
-      UPLOADER_KEY: ((autoscaler-blobstore-uploader-key))
-      GITHUB_TOKEN: ((autoscaler-access-token))
+      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
+      GITHUB_TOKEN: ((autoscaler_access_token))
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - put: app-autoscaler-release-main
@@ -511,7 +511,7 @@ jobs:
       repository: pushme/app-autoscaler-release
   - put: release
     params:
-      file: "generated-release/artifacts/app-autoscaler-*.tgz" 
+      file: "generated-release/artifacts/app-autoscaler-*.tgz"
   - put: gh-release
     params:
       name: generated-release/name
@@ -535,8 +535,8 @@ jobs:
   - task: release-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
     params:
-      UPLOADER_KEY: ((autoscaler-blobstore-uploader-key))
-      GITHUB_TOKEN: ((autoscaler-access-token))
+      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
+      GITHUB_TOKEN: ((autoscaler_access_token))
       PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
@@ -557,8 +557,8 @@ jobs:
   - task: release-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
     params:
-      UPLOADER_KEY: ((autoscaler-blobstore-uploader-key))
-      GITHUB_TOKEN: ((autoscaler-access-token))
+      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
+      GITHUB_TOKEN: ((autoscaler_access_token))
       PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
