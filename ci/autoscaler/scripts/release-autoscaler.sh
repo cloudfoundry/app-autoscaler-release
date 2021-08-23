@@ -43,7 +43,7 @@ EOF
     mv app-autoscaler-v${VERSION}.tgz ${GENERATED}/artifacts/
 
     if [[ -z $(git config --global user.email) ]]; then
-      git config --global user.email "ci@starkandwayne.com"
+      git config --global user.email "ci@cloudfoundry.org"
     fi
 
     if [[ -z $(git config --global user.name) ]]; then

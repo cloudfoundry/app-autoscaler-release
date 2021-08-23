@@ -505,6 +505,10 @@ jobs:
       GITHUB_TOKEN: ((autoscaler-access-token))
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+  - put: app-autoscaler-release-main
+    params:
+      rebase: true
+      repository: pushme/git
   - put: release
     params:
       file: "generated-release/artifacts/app-autoscaler-*.tgz" 
