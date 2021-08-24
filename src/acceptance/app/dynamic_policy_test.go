@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"acceptance/app"
 	"acceptance/config"
 	. "acceptance/helpers"
 	"fmt"
@@ -192,6 +193,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			JustBeforeEach(func() {
 				ticker = time.NewTicker(2 * time.Second)
+				curler := app.NewAppCurler(cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -202,8 +204,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
-							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+								response := curler.Curl(appName, "/fast", 15*time.Second)
+								if response == "" {
+									return "dummy application with fast response"
+								}
+								return response
+							}, 15*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
 				}(doneChan)
