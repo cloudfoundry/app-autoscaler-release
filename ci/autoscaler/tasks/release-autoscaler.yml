@@ -27,6 +27,7 @@ inputs:
 
 outputs:
 - name: generated-release
+- name: pushme  
 
 run:
   path: app-autoscaler-ci/autoscaler/scripts/release-autoscaler.sh
