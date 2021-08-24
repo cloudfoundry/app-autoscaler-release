@@ -79,3 +79,5 @@ EOF
 popd
 
 cp -a app-autoscaler-release ${REPO_OUT}
+
+ls -la ${REPO_OUT}
