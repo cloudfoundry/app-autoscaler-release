@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"acceptance/app"
 	"acceptance/config"
 	. "acceptance/helpers"
 	"fmt"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
-	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
@@ -79,6 +79,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 
 			JustBeforeEach(func() {
 				ticker = time.NewTicker(15 * time.Second)
+				curler := app.NewAppCurler(cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -89,7 +90,11 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlApp(cfg, appName, "/custom-metrics/test_metric/100")
+								response := curler.Curl(appName, "/custom-metrics/test_metric/100", 60*time.Second)
+								if response == "" {
+									return "success"
+								}
+								return response
 							}, cfg.DefaultTimeoutDuration(), 5*time.Second).Should(ContainSubstring("success"))
 						}
 					}
@@ -111,6 +116,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 
 			JustBeforeEach(func() {
 				ticker = time.NewTicker(15 * time.Second)
+				curler := app.NewAppCurler(cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -121,7 +127,11 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlApp(cfg, appName, "/custom-metrics/test_metric/800")
+								response := curler.Curl(appName, "/custom-metrics/test_metric/800", 60*time.Second)
+								if response == "" {
+									return "success"
+								}
+								return response
 							}, cfg.DefaultTimeoutDuration(), 5*time.Second).Should(ContainSubstring("success"))
 						}
 					}
