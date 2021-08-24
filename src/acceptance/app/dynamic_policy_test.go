@@ -248,8 +248,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 10*time.Second)
-							}, 10*time.Second, 25*time.Millisecond).Should(ContainSubstring("dummy application with fast response"))
+								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 15*time.Second)
+							}, 15*time.Second, 25*time.Millisecond).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
 				}(doneChan)
