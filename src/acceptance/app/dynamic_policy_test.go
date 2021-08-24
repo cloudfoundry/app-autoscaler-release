@@ -204,12 +204,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								response := curler.Curl(appName, "/fast", 15*time.Second)
+								response := curler.Curl(appName, "/fast", 10*time.Second)
 								if response == "" {
 									return "dummy application with fast response"
 								}
 								return response
-							}, 15*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
 				}(doneChan)
@@ -244,6 +244,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			JustBeforeEach(func() {
 				ticker = time.NewTicker(25 * time.Millisecond)
+				curler := app.NewAppCurler(cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -254,8 +255,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							return
 						case <-ticker.C:
 							Eventually(func() string {
-								return helpers.CurlAppWithTimeout(cfg, appName, "/fast", 15*time.Second)
-							}, 15*time.Second, 25*time.Millisecond).Should(ContainSubstring("dummy application with fast response"))
+								response := curler.Curl(appName, "/fast", 10*time.Second)
+								if response == "" {
+									return "dummy application with fast response"
+								}
+								return response
+							}, 10*time.Second, 25*time.Millisecond).Should(ContainSubstring("dummy application with fast response"))
 						}
 					}
 				}(doneChan)
