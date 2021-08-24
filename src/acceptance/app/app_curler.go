@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/onsi/gomega"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -42,6 +43,9 @@ func (a *Curler) Curl(appName string, path string, timeout time.Duration, args .
 	// Create the command with our context
 	cmd := exec.CommandContext(ctx, "curl", curlArgs...)
 
+	// log the command
+	fmt.Printf("CURL> curl %s\n", strings.Join(curlArgs, " "))
+
 	// This time we can simply use Output() to get the result.
 	out, err := cmd.Output()
 
@@ -49,16 +53,16 @@ func (a *Curler) Curl(appName string, path string, timeout time.Duration, args .
 	// The error returned by cmd.Output() will be OS specific based on what
 	// happens when a process is killed.
 	if ctx.Err() == context.DeadlineExceeded {
-		fmt.Println("Command timed out")
 		a.NumActualErrors++
+		fmt.Printf("Command timed out: errors %d/%d\n", a.NumActualErrors, a.NumAllowedErrors)
 		return ""
 	}
 
 	// If there's no context error, we know the command completed (or errored).
-	fmt.Println("Output:", string(out))
+	fmt.Printf("< %s\n", string(out))
 	if err != nil {
-		fmt.Println("Non-zero exit code:", err)
 		a.NumActualErrors++
+		fmt.Printf("non-zero exit code %s: errors %d/%d\n", err, a.NumActualErrors, a.NumAllowedErrors )
 	}
 
 	gomega.Expect(a.NumActualErrors).ShouldNot(gomega.Equal(a.NumAllowedErrors))
