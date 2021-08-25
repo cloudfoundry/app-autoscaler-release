@@ -529,6 +529,8 @@ variables:
   options:
     ca: scalingengine_ca
     common_name: scalingengine.service.cf.internal
+    alternative_names:
+    - scalingengine.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
@@ -549,6 +551,8 @@ variables:
   options:
     ca: eventgenerator_ca
     common_name: eventgenerator.service.cf.internal
+    alternative_names:
+    - eventgenerator.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
@@ -569,6 +573,8 @@ variables:
   options:
     ca: apiserver_ca
     common_name: apiserver.service.cf.internal
+    alternative_names:
+    - apiserver.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
@@ -582,6 +588,8 @@ variables:
   options:
     ca: apiserver_public_ca
     common_name: autoscaler.((system_domain))
+    alternative_names:
+    - autoscaler.((system_domain))
     extended_key_usage:
     - client_auth
     - server_auth
@@ -602,6 +610,8 @@ variables:
   options:
     ca: servicebroker_ca
     common_name: servicebroker.service.cf.internal
+    alternative_names:
+    - servicebroker.service.cf.internal  
     extended_key_usage:
     - client_auth
     - server_auth
@@ -622,6 +632,8 @@ variables:
   options:
     ca: servicebroker_public_ca
     common_name: autoscalerservicebroker.((system_domain))
+    alternative_names:
+    - autoscalerservicebroker.((system_domain))
     extended_key_usage:
     - client_auth
     - server_auth
@@ -635,6 +647,8 @@ variables:
   options:
     ca: scheduler_ca
     common_name: autoscalerscheduler.service.cf.internal
+    alternative_names:
+    - autoscalerscheduler.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
@@ -676,6 +690,8 @@ variables:
   options:
     ca: postgres_ca
     common_name: autoscalerpostgres.service.cf.internal
+    alternative_names:
+    - autoscalerpostgres.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth

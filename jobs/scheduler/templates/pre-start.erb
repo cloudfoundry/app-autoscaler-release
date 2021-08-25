@@ -15,7 +15,6 @@ DB_DIR=/var/vcap/packages/db
 SCHEDULER_DIR=/var/vcap/packages/scheduler
 
 export PATH=/var/vcap/packages/java/bin:$PATH
-export GODEBUG="x509ignoreCN=0"
 
 require_consul='<%= p("autoscaler.scheduler.require_consul") %>'
 
