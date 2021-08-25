@@ -42,7 +42,8 @@ resources:
   type: git
   icon: github
   source:
-    uri: https://github.com/cloudfoundry/app-autoscaler-release.git
+    uri: git@github.com:cloudfoundry/app-autoscaler-release
+    private_key: ((autoscaler_git_key))
     branch: main
     fetch_tags: true
 
