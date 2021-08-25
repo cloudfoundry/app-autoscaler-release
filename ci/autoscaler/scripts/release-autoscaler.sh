@@ -32,6 +32,7 @@ EOF
     # create bosh release with the specified version
     bosh create-release \
       --final \
+      --force \
       --version "$VERSION" \
       --tarball=app-autoscaler-v$VERSION.tgz
   
