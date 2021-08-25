@@ -2,6 +2,7 @@
 groups:
 - name: autoscaler-release
   jobs:
+  - api-test
   - unit-tests-main
   - unit-tests-pr
   - integration-tests-main
@@ -134,6 +135,40 @@ jobs:
     attempts: 3
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+
+
+
+
+- name: api-test
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  plan:
+  - in_parallel:
+    - get: app-autoscaler-release-pr
+      trigger: true
+      version: every
+      params:
+        submodules: true
+    - get: app-autoscaler-ci
+  - task: run-api-test
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: ghcr.io/cloudfoundry/app-autoscaler-ci-test
+          tag: master
+      inputs:
+      - { name: app-autoscaler-release-pr }
+      run:
+        path: sh
+        args:
+          - -ce
+          - |
+            cd app-autoscaler-release-pr/src/apitester
+            go test -v ./...
+
 
 
 - name: unit-tests-pr
