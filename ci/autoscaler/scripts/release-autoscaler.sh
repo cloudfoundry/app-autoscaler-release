@@ -26,7 +26,6 @@ EOF
   export VERSION=$(cat ${GENERATED}/name)
 
   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
-  git diff
 
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     # create bosh release with the specified version
