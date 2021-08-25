@@ -11,7 +11,6 @@
 source /var/vcap/packages/common/dns-helper.sh
 source /var/vcap/packages/common/retry-helper.sh
 export PATH=/var/vcap/packages/java/bin:$PATH
-export GODEBUG="x509ignoreCN=0"
 
 require_consul='<%= p("autoscaler.eventgenerator.require_consul") %>'
 
