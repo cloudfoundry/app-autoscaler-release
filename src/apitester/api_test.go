@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
@@ -19,4 +20,6 @@ func TestCurler_Curl(t *testing.T) {
 	curler.Start()
 
 	fmt.Printf("Errors %d/%d\n", curler.NumActualErrors, curler.NumAllowedErrors)
+
+	assert.Equal(t, 0, curler.NumActualErrors, "Should not have received any errors")
 }
