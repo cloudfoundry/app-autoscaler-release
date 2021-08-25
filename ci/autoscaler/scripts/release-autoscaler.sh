@@ -19,19 +19,20 @@ EOF
 
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
-  export SUBMODULE_CURRENT_SHA=$(git ls-tree HEAD src/app-autoscaler | awk '{print $3}')
-  echo "Autoscaler SHA = $SUBMODULE_CURRENT_SHA"
-
   pushd src/changelog
     RECOMMENDED_VERSION_FILE=${GENERATED}/name OUTPUT_FILE=${GENERATED}/changelog.md go run main.go
   popd
 
-  VERSION=$(cat ${GENERATED}/name)
+  export VERSION=$(cat ${GENERATED}/name)
+
+  yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
+  git diff
 
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     # create bosh release with the specified version
     bosh create-release \
       --final \
+      --force \
       --version "$VERSION" \
       --tarball=app-autoscaler-v$VERSION.tgz
   
