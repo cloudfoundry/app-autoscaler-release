@@ -35,7 +35,7 @@ EOF
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
 
     git add jobs/golangapiserver/spec
-    git commit -m "Updated release version in golangapiserver"
+    git commit -m "Updated release version to $VERSION in golangapiserver"
 
     # create bosh release with the specified version
     bosh create-release \
@@ -82,10 +82,6 @@ releases:
 EOF
 
   cat ${GENERATED}/changelog.md
-
-  git status
 popd
 
 cp -a app-autoscaler-release ${REPO_OUT}
-
-ls -la ${REPO_OUT}
