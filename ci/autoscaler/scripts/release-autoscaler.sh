@@ -19,6 +19,9 @@ EOF
 
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
+  env | grep TERM
+  TERM=xterm git diff
+
   pushd src/changelog
     RECOMMENDED_VERSION_FILE=${GENERATED}/name OUTPUT_FILE=${GENERATED}/changelog.md go run main.go
   popd
@@ -28,13 +31,16 @@ EOF
   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
 
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
+
+    git add jobs/golangapiserver/spec
+    git commit -m "Updated release version in golangapiserver"
+
     # create bosh release with the specified version
     bosh create-release \
       --final \
-      --force \
       --version "$VERSION" \
       --tarball=app-autoscaler-v$VERSION.tgz
-  
+
     RELEASE_TGZ=app-autoscaler-v$VERSION.tgz
     export SHA1=$(sha1sum $RELEASE_TGZ | head -n1 | awk '{print $1}')
     echo "SHA1=$SHA1"
@@ -74,7 +80,7 @@ releases:
 EOF
 
   cat ${GENERATED}/changelog.md
-  
+
   git status
 popd
 
