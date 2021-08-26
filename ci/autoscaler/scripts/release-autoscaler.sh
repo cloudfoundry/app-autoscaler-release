@@ -28,10 +28,9 @@ EOF
 
   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
 
-  git status
   echo "Displaying diff..."
-  env | grep TERM
-  TERM=xterm git diff
+  export GIT_PAGER=cat
+  git diff
   
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
 
