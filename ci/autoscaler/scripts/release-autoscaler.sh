@@ -16,11 +16,9 @@ blobstore:
     credentials_source: static
     json_key:
 EOF
-
+  echo "Generating private.yml..." 
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
-  env | grep TERM
-  TERM=xterm git diff
 
   pushd src/changelog
     RECOMMENDED_VERSION_FILE=${GENERATED}/name OUTPUT_FILE=${GENERATED}/changelog.md go run main.go
@@ -30,6 +28,11 @@ EOF
 
   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
 
+  git status
+  echo "Displaying diff..."
+  env | grep TERM
+  TERM=xterm git diff
+  
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
 
     git add jobs/golangapiserver/spec
