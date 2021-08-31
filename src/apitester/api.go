@@ -20,7 +20,6 @@ type Curler struct {
 func (a *Curler) Curl(args ...string) string {
 	curlArgs := append([]string{a.Url}, args...)
 	curlArgs = append([]string{"-s"}, curlArgs...)
-	curlArgs = append([]string{"-vvv"}, curlArgs...)
 	curlArgs = append([]string{"--max-time", "9"}, curlArgs...)
 	curlArgs = append([]string{"--connect-time", "4"}, curlArgs...)
 
