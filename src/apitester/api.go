@@ -20,7 +20,9 @@ type Curler struct {
 func (a *Curler) Curl(args ...string) string {
 	curlArgs := append([]string{a.Url}, args...)
 	curlArgs = append([]string{"-s"}, curlArgs...)
-	curlArgs = append([]string{"-H", "Expect:"}, curlArgs...)
+	curlArgs = append([]string{"-vvv"}, curlArgs...)
+	curlArgs = append([]string{"--max-time", "9"}, curlArgs...)
+	curlArgs = append([]string{"--connect-time", "4"}, curlArgs...)
 
 	if a.SkipSslValidation {
 		curlArgs = append([]string{"-k"}, curlArgs...)
@@ -37,7 +39,7 @@ func (a *Curler) Curl(args ...string) string {
 	fmt.Printf("CURL> curl %s\n", strings.Join(curlArgs, " "))
 
 	// This time we can simply use Output() to get the result.
-	out, err := cmd.Output()
+	out, err := cmd.CombinedOutput()
 
 	// We want to check the context error to see if the timeout was executed.
 	// The error returned by cmd.Output() will be OS specific based on what
