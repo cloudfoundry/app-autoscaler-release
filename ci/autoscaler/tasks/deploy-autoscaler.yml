@@ -10,6 +10,7 @@ image_resource:
 params:
   SYSTEM_DOMAIN:
   BOSH_USERNAME: admin
+  USE_POSTGRES_PERSISTENT_DISK: false
 
 inputs:
 - name: autoscaler-env-bbl-state

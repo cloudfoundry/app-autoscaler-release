@@ -40,11 +40,21 @@ pushd app-autoscaler-release
   if [[ "${STEMCELL_EXISTS}" == 0 ]]; then
     URL="https://bosh.io/d/stemcells/${STEMCELL_NAME}"
     if [ "${STEMCELL_VERSION}" != "latest" ]; then
-	URL="${URL}?v=${STEMCELL_VERSION}"
+	    URL="${URL}?v=${STEMCELL_VERSION}"
     fi
     wget "$URL" -O stemcell.tgz
     bosh -n upload-stemcell stemcell.tgz
   fi
+
+  if [ "${USE_POSTGRES_PERSISTENT_DISK}" == "true" ]; then
+      cat << EOF > persistent_disk.yml
+---
+- type: replace
+  path: /instance_groups/name=postgres_autoscaler/persistent_disk_type?
+  value: 10GB
+EOF
+  fi
+
 
   CURRENT_COMMIT_HASH=$(git log -1 --pretty=format:"%H")
   set +e
@@ -54,13 +64,26 @@ pushd app-autoscaler-release
     echo "the app-autoscaler release is already uploaded with the commit ${CURRENT_COMMIT_HASH}"
     echo "Attempting redeploy..." 
 
-    bosh -n -d app-autoscaler \
-      deploy templates/app-autoscaler-deployment.yml \
-      -o example/operation/loggregator-certs-from-cf.yml \
-      -v system_domain=${SYSTEM_DOMAIN} \
-      -v cf_client_id=autoscaler_client_id \
-      -v cf_client_secret=autoscaler_client_secret \
-      -v skip_ssl_validation=true
+    # shellcheck disable=SC1009
+    if [ "${USE_POSTGRES_PERSISTENT_DISK}" == "true" ]; then
+      bosh -n -d app-autoscaler \
+            deploy templates/app-autoscaler-deployment.yml \
+            -o example/operation/loggregator-certs-from-cf.yml \
+            -o persistent_disk.yml \
+            -v system_domain=${SYSTEM_DOMAIN} \
+            -v cf_client_id=autoscaler_client_id \
+            -v cf_client_secret=autoscaler_client_secret \
+            -v skip_ssl_validation=true
+    else
+      bosh -n -d app-autoscaler \
+            deploy templates/app-autoscaler-deployment.yml \
+            -o example/operation/loggregator-certs-from-cf.yml \
+            -v system_domain=${SYSTEM_DOMAIN} \
+            -v cf_client_id=autoscaler_client_id \
+            -v cf_client_secret=autoscaler_client_secret \
+            -v skip_ssl_validation=true
+    fi
+
     exit 0
   fi
 
@@ -71,12 +94,24 @@ pushd app-autoscaler-release
   bosh upload-release
 
   echo "Deploying Release"
-  bosh -n -d app-autoscaler \
-    deploy templates/app-autoscaler-deployment.yml \
-    -o example/operation/loggregator-certs-from-cf.yml \
-    -v system_domain=${SYSTEM_DOMAIN} \
-    -v cf_client_id=autoscaler_client_id \
-    -v cf_client_secret=autoscaler_client_secret \
-    -v skip_ssl_validation=true
+  if [ "${USE_POSTGRES_PERSISTENT_DISK}" == "true" ]; then
+        bosh -n -d app-autoscaler \
+            deploy templates/app-autoscaler-deployment.yml \
+            -o example/operation/loggregator-certs-from-cf.yml \
+            -o persistent_disk.yml \
+            -v system_domain=${SYSTEM_DOMAIN} \
+            -v cf_client_id=autoscaler_client_id \
+            -v cf_client_secret=autoscaler_client_secret \
+            -v skip_ssl_validation=true
+  else
+        bosh -n -d app-autoscaler \
+            deploy templates/app-autoscaler-deployment.yml \
+            -o example/operation/loggregator-certs-from-cf.yml \
+            -v system_domain=${SYSTEM_DOMAIN} \
+            -v cf_client_id=autoscaler_client_id \
+            -v cf_client_secret=autoscaler_client_secret \
+            -v skip_ssl_validation=true
+  fi
+
 
 popd
