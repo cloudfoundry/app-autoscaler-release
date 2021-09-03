@@ -67,7 +67,6 @@ resources:
   type: bosh-io-release
   source:
     repository: cloudfoundry-incubator/app-autoscaler-release
-    regexp: "3.0.*"
 
 - name: app-autoscaler-ci
   type: git
