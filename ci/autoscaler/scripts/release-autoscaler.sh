@@ -33,6 +33,15 @@ EOF
   git diff
   
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
+    # FIXME these should be configurable variables
+    if [[ -z $(git config --global user.email) ]]; then
+      git config --global user.email "ci@cloudfoundry.org"
+    fi
+
+    # FIXME these should be configurable variables
+    if [[ -z $(git config --global user.name) ]]; then
+      git config --global user.name "CI Bot"
+    fi
 
     git add jobs/golangapiserver/spec
     git commit -m "Updated release version to $VERSION in golangapiserver"
@@ -49,14 +58,6 @@ EOF
 
     mkdir -p ${GENERATED}/artifacts
     mv app-autoscaler-v${VERSION}.tgz ${GENERATED}/artifacts/
-
-    if [[ -z $(git config --global user.email) ]]; then
-      git config --global user.email "ci@cloudfoundry.org"
-    fi
-
-    if [[ -z $(git config --global user.name) ]]; then
-      git config --global user.name "CI Bot"
-    fi
 
     git add -A
     git status
