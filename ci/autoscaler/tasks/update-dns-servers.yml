@@ -11,7 +11,7 @@ params:
 
 inputs:
 - name: app-autoscaler-ci
-- name: autoscaler-env-bbl-state
+- name: bbl-state
 
 run:
   path: app-autoscaler-ci/autoscaler/scripts/update-dns-servers.sh

@@ -13,7 +13,7 @@ params:
   USE_POSTGRES_PERSISTENT_DISK: false
 
 inputs:
-- name: autoscaler-env-bbl-state
+- name: bbl-state
 - name: app-autoscaler-release
 - name: app-autoscaler-ci
 

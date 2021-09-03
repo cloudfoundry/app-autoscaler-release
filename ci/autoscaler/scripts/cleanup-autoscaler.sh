@@ -4,7 +4,7 @@ set -euo pipefail
 
 cf api https://api.${SYSTEM_DOMAIN} --skip-ssl-validation
 
-pushd autoscaler-env-bbl-state/bbl-state
+pushd bbl-state/bbl-state
   eval "$(bbl print-env)"
 popd
 

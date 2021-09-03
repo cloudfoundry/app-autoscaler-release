@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-VAR_DIR=autoscaler-env-bbl-state/bbl-state/vars
-pushd autoscaler-env-bbl-state/bbl-state
+VAR_DIR=bbl-state/bbl-state/vars
+pushd bbl-state/bbl-state
   eval "$(bbl print-env)"
 popd
 

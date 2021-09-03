@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-pushd autoscaler-env-bbl-state/bbl-state
+pushd bbl-state/bbl-state
   eval "$(bbl print-env)"
 popd
 
