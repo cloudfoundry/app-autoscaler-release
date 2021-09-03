@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
 var (
@@ -51,17 +50,19 @@ func main() {
 
 	skipSubmodule := os.Getenv("SKIP_SUBMODULE")
 	if skipSubmodule != "true" {
+		fmt.Printf("Also querying submodule for changes...\n")
 		//git ls-tree HEAD src/app-autoscaler | awk '{print $3}'
-		toSha, err := getShaOfSubmoduleAtCommit("HEAD")
+		toSha, err := util.GetShaOfSubmoduleAtCommit("HEAD")
 		if err != nil {
 			panic(err)
 		}
 
-		fromSha, err := getShaOfSubmoduleAtCommit(commit)
+		fromSha, err := util.GetShaOfSubmoduleAtCommit(commit)
 		if err != nil {
 			panic(err)
 		}
 
+		fmt.Printf("Checking from %s to %s\n", fromSha, toSha)
 		if fromSha != toSha {
 			// get PRs from app-autoscaler too
 			otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, fromSha, toSha)
@@ -97,17 +98,4 @@ func main() {
 	}
 
 	fmt.Printf("Total PRs %d\n", len(prs))
-}
-
-func getShaOfSubmoduleAtCommit(commit string) (string, error) {
-	cmd := util.Command{Name: "git", Args: []string{"ls-tree", commit, "../app-autoscaler"}}
-	runner := util.DefaultCommandRunner{}
-
-	output, err := runner.RunWithoutRetry(&cmd)
-	if err != nil {
-		return "", err
-	}
-
-	parts := strings.Split(output, " ")
-	return parts[2], nil
 }
