@@ -30,6 +30,10 @@ bosh delete-deployment -d app-autoscaler -n
 set -e
 
 set +e
+bosh delete-releases app-autoscaler -n
+set -e
+
+set +e
 credhub delete -n /bosh-autoscaler/app-autoscaler/postgres_server
 credhub delete -n /bosh-autoscaler/app-autoscaler/postgres_ca
 credhub delete -n /bosh-autoscaler/app-autoscaler/metricsserver_client
