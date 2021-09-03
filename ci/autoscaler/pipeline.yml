@@ -740,7 +740,7 @@ jobs:
     - get: app-autoscaler-release-pr
       passed: [acceptance-pr]
       trigger: true
-  - task: release-autoscaler
+  - task: dummy-release-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
@@ -760,9 +760,9 @@ jobs:
     - get: gh-release
     - get: app-autoscaler-ci
     - get: app-autoscaler-release-main
-      passed: [acceptance-main]
+      passed: [upgrade-test-main]
       trigger: true
-  - task: release-autoscaler
+  - task: dummy-release-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
