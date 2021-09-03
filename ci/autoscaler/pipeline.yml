@@ -436,8 +436,8 @@ jobs:
     - get: previous-stable-release
   - task: deploy-previous-stable-release
     file: app-autoscaler-ci/autoscaler/tasks/deploy-previous-autoscaler.yml
-    input_mappings:
-    - { app-autoscaler-release: app-autoscaler-release-main }
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
     on_failure:
@@ -466,8 +466,6 @@ jobs:
     on_failure:
       task: get-logs-on-failure
       file: app-autoscaler-ci/autoscaler/tasks/get-logs.yml
-      inputs:
-      - { name: autoscaler-env-bbl-state }
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
