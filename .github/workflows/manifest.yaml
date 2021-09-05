@@ -14,22 +14,55 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          set -e
+          set +xe
 
+          # Install bosh cli
           export BOSH_VERSION=6.4.4
           wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
           mv bosh-cli-* /usr/local/bin/bosh && \
           chmod +x /usr/local/bin/bosh
 
+          # Install yq
           export YQ_VERSION=4.9.6
           wget -q https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && \
           mv yq_linux_amd64 /usr/local/bin/yq && \
           chmod +x /usr/local/bin/yq
 
-      - name: Run Tests
+          # Install cuelang
+          export CUE_VERSION=0.4.0
+          wget -q https://github.com/cuelang/cue/releases/download/v${CUE_VERSION}/cue_v${CUE_VERSION}_linux_amd64.tar.gz && \
+          tar xfz cue_v${CUE_VERSION}_linux_amd64.tar.gz && \
+          mv cue /usr/local/bin/cue && \
+          rm cue_v${CUE_VERSION}_linux_amd64.tar.gz
+
+          # Install conftest
+          export CONFTEST_VERSION=0.27.0
+          wget -q https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VERSION}/conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz && \
+          tar xfz conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz && \
+          mv conftest /usr/local/bin/conftest && \
+          rm conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz
+
+      - name: Bash Tests
         run: |
           set -e
 
-          pushd example
-            ./manifest_tests.sh
+          pushd example/tests/bash
+            ./test.sh
           popd
+
+      - name: Cue Tests
+        run: |
+          set -e
+
+          pushd example/tests/cue
+            ./test.sh
+          popd
+
+      - name: Conftest Tests
+        run: |
+          set -e
+
+          pushd example/tests/conftest
+            ./test.sh
+          popd
+
