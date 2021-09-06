@@ -13,7 +13,7 @@ params:
   SKIP_SSL_VALIDATION: false
 
 inputs:
-- name: autoscaler-env-bbl-state
+- name: bbl-state
 - name: app-autoscaler-release
 - name: app-autoscaler-ci
 

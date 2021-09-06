@@ -75,7 +75,7 @@ resources:
     uri: https://github.com/cloudfoundry/app-autoscaler-ci.git
     branch: master
 
-- name: autoscaler-env-bbl-state
+- name: bbl-state
   type: git
   icon: github
   source:
@@ -245,7 +245,7 @@ jobs:
   plan:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
-    - get: autoscaler-env-bbl-state
+    - get: bbl-state
     - get: autoscaler-env-bbl-config
       trigger: true
     - get: app-autoscaler-ci
@@ -263,10 +263,10 @@ jobs:
       BBL_LB_CERT: ((autoscaler_lb_cert))
       BBL_LB_KEY: ((autoscaler_lb_key))
     input_mapping:
-      bbl-state: autoscaler-env-bbl-state
+      bbl-state: bbl-state
       bbl-config: autoscaler-env-bbl-config
     ensure:
-      put: autoscaler-env-bbl-state
+      put: bbl-state
       params:
         repository: updated-bbl-state
         rebase: true
@@ -286,14 +286,14 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
-    - get: autoscaler-env-bbl-state
+    - get: bbl-state
     - get: cf-deployment-concourse-tasks
   - task: delete-autoscaler
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     params:
       DEPLOYMENT_NAME: app-autoscaler
     input_mapping:
-      bbl-state: autoscaler-env-bbl-state
+      bbl-state: bbl-state
 
 
 
@@ -303,14 +303,14 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
-    - get: autoscaler-env-bbl-state
+    - get: bbl-state
     - get: cf-deployment-concourse-tasks
   - task: delete-cf
     file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
     params:
       DEPLOYMENT_NAME: cf
     input_mapping:
-      bbl-state: autoscaler-env-bbl-state
+      bbl-state: bbl-state
 
 
 
@@ -320,7 +320,7 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
-    - get: autoscaler-env-bbl-state
+    - get: bbl-state
     - get: cf-deployment-concourse-tasks
   - task: destroy-infrastructure
     file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
@@ -330,9 +330,9 @@ jobs:
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
       BBL_GCP_PROJECT_ID: cloud-foundry-310819
     input_mapping:
-      bbl-state: autoscaler-env-bbl-state
+      bbl-state: bbl-state
     ensure:
-      put: autoscaler-env-bbl-state
+      put: bbl-state
       params:
         repository: updated-bbl-state
         rebase: true
@@ -347,14 +347,14 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
-    - get: autoscaler-env-bbl-state
+    - get: bbl-state
       passed: [setup-infrastructure]
       trigger: true
     - get: autoscaler-env-vars-store
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: autoscaler-env-bbl-state
+      bbl-state: bbl-state
       cf-deployment: cf-deployment
       ops-files: cf-deployment
       vars-files: autoscaler-env-vars-store
@@ -369,7 +369,7 @@ jobs:
   - task: smoke-tests
     file: cf-deployment-concourse-tasks/run-errand/task.yml
     input_mapping:
-      bbl-state: autoscaler-env-bbl-state
+      bbl-state: bbl-state
     params:
       ERRAND_NAME: smoke-tests
 
@@ -383,7 +383,7 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-ci
-    - get: autoscaler-env-bbl-state
+    - get: bbl-state
       passed: [deploy-cf]
     - get: app-autoscaler-release-main
       passed: [unit-tests-main, integration-tests-main]
@@ -428,7 +428,7 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-ci
-    - get: autoscaler-env-bbl-state
+    - get: bbl-state
       passed: [deploy-cf]
     - get: app-autoscaler-release-main
       passed: [acceptance-main]
@@ -494,7 +494,7 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-ci
-    - get: autoscaler-env-bbl-state
+    - get: bbl-state
       passed: [deploy-cf]
     - get: app-autoscaler-release-pr
       passed: [unit-tests-pr, integration-tests-pr]

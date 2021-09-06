@@ -12,7 +12,7 @@ params:
   DEPLOYMENT: app-autoscaler
 
 inputs:
-- name: autoscaler-env-bbl-state
+- name: bbl-state
 
 outputs:
 

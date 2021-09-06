@@ -12,7 +12,7 @@ params:
   BOSH_USERNAME: admin
 
 inputs:
-- name: autoscaler-env-bbl-state
+- name: bbl-state
 - name: app-autoscaler-release
 - name: app-autoscaler-ci
 - name: previous-stable-release
