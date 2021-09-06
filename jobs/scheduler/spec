@@ -106,6 +106,15 @@ properties:
   autoscaler.scheduler.health.port:
     description: "the listening port of health endpoint"
     default: 6204
+  autoscaler.scheduler.health.basicAuthEnabled:
+    description: "if true, basic auth is enabled on the endpoint"
+    default: false
+  autoscaler.scheduler.health.username:
+    description: "the username to protect the health endpoint"
+    default: ''
+  autoscaler.scheduler.health.password:
+    description: "the password to protect the health endpoint"
+    default: ''
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"   

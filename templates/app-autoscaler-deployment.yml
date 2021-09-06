@@ -200,6 +200,9 @@ instance_groups:
           port: &schedulerPort 6102
           health:
             port: &schedulerHealthPort 6202
+            basicAuthEnabled: true
+            username: prometheus
+            password: ((autoscaler_healthserver_password))
           http_client_timeout: 60
           job_reschedule_interval_millisecond: 10000
           job_reschedule_maxcount: 6
@@ -518,6 +521,8 @@ variables:
 - name: database_password
   type: password
 - name: autoscaler_service_broker_password
+  type: password
+- name: autoscaler_healthserver_password
   type: password
 - name: scalingengine_ca
   type: certificate
