@@ -83,7 +83,12 @@ properties:
   autoscaler.metricsforwarder.health.port:
     description: "The listening port of health endpoint"
     default: 6403
-
+  autoscaler.metricsforwarder.health.username:
+    description: "the username of health endpoint"
+    default: ''
+  autoscaler.metricsforwarder.health.password:
+    description: "the password of health endpoint"
+    default: ''
   autoscaler.metricsforwarder.rate_limit.valid_duration:
     description: "The rate limit evaluation duration"
     default: 1s

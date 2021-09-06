@@ -81,18 +81,6 @@ var _ = Describe("AutoScaler Public API", func() {
 		oauthToken = OauthToken(cfg)
 	})
 
-	It("should succeed to check health", func() {
-		req, err := http.NewRequest("GET", healthURL, nil)
-		Expect(err).ShouldNot(HaveOccurred())
-		resp, err := DoAPIRequest(req)
-		Expect(err).ShouldNot(HaveOccurred())
-
-		defer resp.Body.Close()
-
-		Expect(err).ShouldNot(HaveOccurred())
-		Expect(resp.StatusCode).To(Equal(200))
-	})
-
 	Context("when no policy defined", func() {
 
 		BeforeEach(func() {

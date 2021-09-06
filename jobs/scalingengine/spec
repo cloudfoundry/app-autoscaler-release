@@ -136,7 +136,12 @@ properties:
   autoscaler.scalingengine.health.port:
     description: "the listening port of health endpoint"
     default: 6204
-
+  autoscaler.scalingengine.health.username:
+    description: "the username of health endpoint"
+    default: ''
+  autoscaler.scalingengine.health.password:
+    description: "the password of health endpoint"
+    default: ''
   autoscaler.scalingengine.defaultCoolDownSecs:
     description: "Default value for cool_down_secs"
     default: 300

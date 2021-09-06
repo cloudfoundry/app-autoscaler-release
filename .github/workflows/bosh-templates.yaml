@@ -1,0 +1,27 @@
+name: bosh-release
+on:
+  pull_request:
+  workflow_dispatch:  
+jobs:
+  templates:
+    name: Bosh Templates Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # Not needed with a .ruby-version file
+          ruby-version: 2.7
+          # runs 'bundle install' and caches installed gems automatically
+          bundler-cache: true
+
+      - name: Run Tests
+        run: |
+          set -e
+
+          bundle exec rspec
