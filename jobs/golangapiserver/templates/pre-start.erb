@@ -50,13 +50,13 @@ retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline
 --driver=org.postgresql.Driver --changeLogFile=api.db.changelog.yml update
 
 retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=org.postgresql.Driver --changeLogFile=servicebroker.db.changelog.json update
+--driver=org.postgresql.Driver --changeLogFile=servicebroker.db.changelog.yaml update
 <% else %>
 retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=api.db.changelog.yml update
 
 retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
---driver=com.mysql.cj.jdbc.Driver --changeLogFile=servicebroker.db.changelog.json update
+--driver=com.mysql.cj.jdbc.Driver --changeLogFile=servicebroker.db.changelog.yaml update
 <% end %>
 
 
