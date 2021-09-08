@@ -30,7 +30,7 @@ bosh delete-deployment -d app-autoscaler -n
 set -e
 
 set +e
-bosh delete-releases app-autoscaler -n
+bosh delete-release app-autoscaler -n
 set -e
 
 set +e
