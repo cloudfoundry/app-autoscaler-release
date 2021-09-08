@@ -83,16 +83,6 @@ resources:
     private_key: ((autoscaler_git_key))
     branch: main
 
-- name: autoscaler-env-bbl-config
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:cloudfoundry/app-autoscaler-env-bbl-state
-    private_key: ((autoscaler_git_key))
-    branch: main
-    paths:
-    - ./custom-config/*
-
 - name: autoscaler-env-vars-store
   type: git
   icon: github
@@ -246,8 +236,6 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: bbl-state
-    - get: autoscaler-env-bbl-config
-      trigger: true
     - get: app-autoscaler-ci
   - task: setup-infrastructure
     file: cf-deployment-concourse-tasks/bbl-up/task.yml
@@ -264,7 +252,7 @@ jobs:
       BBL_LB_KEY: ((autoscaler_lb_key))
     input_mapping:
       bbl-state: bbl-state
-      bbl-config: autoscaler-env-bbl-config
+      bbl-config: bbl-state
     ensure:
       put: bbl-state
       params:
