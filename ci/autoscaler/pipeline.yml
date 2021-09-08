@@ -501,7 +501,9 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      USE_POSTGRES_PERSISTENT_DISK: true
+      OPS_FILES: |
+        example/operation/loggregator-certs-from-cf.yml
+        example/operation/postgres-persistent-disk.yml
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     on_failure:
