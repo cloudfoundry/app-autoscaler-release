@@ -12,7 +12,7 @@ popd
 
 cp -a ${SOURCE}/src/autoscaler/build/api ${BOSH_INSTALL_TARGET}
 cp -a ${SOURCE}/src/autoscaler/api/db/api.db.changelog.yml ${BOSH_INSTALL_TARGET}
-cp -a ${SOURCE}/src/autoscaler/servicebroker/db/servicebroker.db.changelog.json ${BOSH_INSTALL_TARGET}
+cp -a ${SOURCE}/src/autoscaler/api/db/servicebroker.db.changelog.yaml ${BOSH_INSTALL_TARGET}
 
 cp -a ${SOURCE}/src/autoscaler/api/policyvalidator/policy_json.schema.json ${BOSH_INSTALL_TARGET}
 cp -a ${SOURCE}/src/autoscaler/api/schemas/catalog.schema.json ${BOSH_INSTALL_TARGET}
