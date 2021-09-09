@@ -53,7 +53,8 @@ logging:
 http_client_timeout: <%= p("autoscaler.eventgenerator.http_client_timeout") %>
 health:
   port: <%= p("autoscaler.eventgenerator.health.port") %>
-
+  username: <%= p("autoscaler.eventgenerator.health.username") %>
+  password: <%= p("autoscaler.eventgenerator.health.password") %>
 db:
   policy_db:
     url: <%= policy_db_url %>

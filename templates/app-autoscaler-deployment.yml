@@ -187,6 +187,8 @@ instance_groups:
             port: &scalingEnginePort 6104
           health:
             port: &scalingEngineHealthPort 6204
+            username: scalingengine
+            password: ((autoscaler_scalingengine_health_password))
           defaultCoolDownSecs: 300
           lockSize: 32
           ca_cert: ((scalingengine_ca.ca))
@@ -200,6 +202,9 @@ instance_groups:
           port: &schedulerPort 6102
           health:
             port: &schedulerHealthPort 6202
+            basicAuthEnabled: true
+            username: scheduler
+            password: ((autoscaler_scheduler_health_password))
           http_client_timeout: 60
           job_reschedule_interval_millisecond: 10000
           job_reschedule_maxcount: 6
@@ -248,6 +253,36 @@ instance_groups:
           http_client_timeout: 60s
           health:
             port: &operatorHealthPort 6208
+            username: operator
+            password: ((autoscaler_operator_health_password))
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+          - name: autoscaler_scalingengine_health
+            registration_interval: 20s
+            port: *scalingEngineHealthPort
+            tags:
+              component: autoscaler_scalingengine_health
+            uris:
+              - autoscaler-scalingengine.((system_domain))
+          - name: autoscaler_operator_health
+            registration_interval: 20s
+            port: *operatorHealthPort
+            tags:
+              component: autoscaler_operator_health
+            uris:
+              - autoscaler-operator.((system_domain))
+          - name: autoscaler_scheduler_health
+            registration_interval: 20s
+            port: *schedulerHealthPort
+            tags:
+              component: autoscaler_scheduler_health
+            uris:
+              - autoscaler-scheduler.((system_domain))
 # asmetrics Instance Group: metricsserver&eventgenerator
 - name: asmetrics
   azs:
@@ -291,6 +326,8 @@ instance_groups:
             metric_channel_size: 1000
           health:
             port: &metricsserverHealthPort 6303
+            username: metricsserver
+            password: ((autoscaler_metricsserver_health_password))
   - name: eventgenerator
     release: app-autoscaler
     properties:
@@ -307,6 +344,8 @@ instance_groups:
             port: &eventGeneratorPort 6105
           health:
             port: &eventGeneratorHealthPort 6205
+            username: eventgenerator
+            password: ((autoscaler_eventgenerator_health_password))
           ca_cert: ((eventgenerator_ca.ca))
           server_cert: ((eventgenerator_server.certificate))
           server_key: ((eventgenerator_server.private_key))
@@ -339,6 +378,27 @@ instance_groups:
             ca_cert: ((metricsserver_ca.ca))
             client_cert: ((metricsserver_client.certificate))
             client_key: ((metricsserver_client.private_key))
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+          - name: autoscaler_eventgenerator_health
+            registration_interval: 20s
+            port: *eventGeneratorHealthPort
+            tags:
+              component: autoscaler_eventgenerator_health
+            uris:
+              - autoscaler-eventgenerator.((system_domain))
+          - name: autoscaler_metricsserver_health
+            registration_interval: 20s
+            port: *metricsserverHealthPort
+            tags:
+              component: autoscaler_metricsserver_health
+            uris:
+              - autoscaler-metricsserver.((system_domain))
 - name: asnozzle
   azs:
   - z1
@@ -384,6 +444,22 @@ instance_groups:
               ca_cert: ((loggregator_ca.certificate))
           health:
             port: &metricsgatewayHealthPort 6503
+            username: metricsgateway
+            password: ((autoscaler_metricsgateway_health_password))
+  - name: route_registrar
+    release: routing
+    consumes:
+      nats: {from: nats, deployment: cf}
+    properties:
+      route_registrar:
+        routes:
+          - name: autoscaler_metricsgateway_health
+            registration_interval: 20s
+            port: *metricsgatewayHealthPort
+            tags:
+              component: autoscaler_metricsgateway_health
+            uris:
+              - autoscaler-metricsgateway.((system_domain))
 # asapi Instance Group : apiserver&servicebroker
 - name: asapi
   azs:
@@ -406,7 +482,7 @@ instance_groups:
             level: info
           broker:
             server:
-              port: 6102
+              port: &brokerServerPort 6102
               catalog: 
                 services:
                 - id: autoscaler-guid
@@ -422,7 +498,7 @@ instance_groups:
             password: ((autoscaler_service_broker_password))
           public_api:
             server:
-              port: 6101
+              port: &publicApiServerPort 6101
           use_buildin_mode: false
           scheduler:
             ca_cert: ((scheduler_ca.ca))
@@ -457,7 +533,7 @@ instance_groups:
           logging:
             level: info
           server:
-            port: 6201
+            port: &metricsforwarderServerPort 6201
           loggregator:
             metron_address: "127.0.0.1:3458"
             tls:
@@ -469,7 +545,9 @@ instance_groups:
           cache_cleanup_interval: 6h
           policy_poller_interval: 60s
           health:
-            port: 6403
+            port: &metricsforwarderHealthPort 6403
+            username: metricsforwarder
+            password: ((autoscaler_metricsforwarder_health_password))
         policy_db: *database
         policy_db_connection_config: *databaseConnectionConfig
   - name: route_registrar
@@ -481,25 +559,32 @@ instance_groups:
         routes:
         - name: api_server
           registration_interval: 20s
-          port: 6101
+          port: *publicApiServerPort
           tags:
             component: api_server
           uris:
             - autoscaler.((system_domain))
         - name: autoscaler_service_broker
           registration_interval: 20s
-          port: 6102
+          port: *brokerServerPort
           tags:
             component: autoscaler_service_broker
           uris:
             - autoscalerservicebroker.((system_domain))
         - name: autoscaler_metrics_forwarder
           registration_interval: 20s
-          port: 6201
+          port: *metricsforwarderServerPort
           tags:
             component: autoscaler_metrics_forwarder
           uris:
             - autoscalermetrics.((system_domain))
+        - name: autoscaler_metricsforwarder_health
+          registration_interval: 20s
+          port: *metricsforwarderHealthPort
+          tags:
+            component: autoscaler_metricsforwarder_health
+          uris:
+            - autoscaler-metricsforwarder.((system_domain))
   - name: bpm
     release: bpm
   - name: loggregator_agent
@@ -518,6 +603,20 @@ variables:
 - name: database_password
   type: password
 - name: autoscaler_service_broker_password
+  type: password
+- name: autoscaler_scheduler_health_password
+  type: password
+- name: autoscaler_eventgenerator_health_password
+  type: password
+- name: autoscaler_metricsforwarder_health_password
+  type: password
+- name: autoscaler_metricsgateway_health_password
+  type: password
+- name: autoscaler_metricsserver_health_password
+  type: password
+- name: autoscaler_operator_health_password
+  type: password
+- name: autoscaler_scalingengine_health_password
   type: password
 - name: scalingengine_ca
   type: certificate

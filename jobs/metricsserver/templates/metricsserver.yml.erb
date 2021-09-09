@@ -78,6 +78,8 @@ server:
     ca_file: /var/vcap/jobs/metricsserver/config/certs/metricsserver/ca.crt
 health:
   port: <%= p("autoscaler.metricsserver.health.port") %>
+  username: <%= p("autoscaler.metricsserver.health.username") %>
+  password: <%= p("autoscaler.metricsserver.health.password") %>
 
 
 

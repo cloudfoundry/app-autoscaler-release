@@ -259,6 +259,12 @@ properties:
   autoscaler.operator.health.port:
     description: "the listening port of health endpoint"
     default: 6208
+  autoscaler.operator.health.username:
+    description: "the username of health endpoint"
+    default: ''
+  autoscaler.operator.health.password:
+    description: "the password of health endpoint"
+    default: ''
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"

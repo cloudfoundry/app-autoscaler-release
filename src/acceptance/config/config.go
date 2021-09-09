@@ -56,6 +56,8 @@ type Config struct {
 	ASApiEndpoint          string `json:"autoscaler_api"`
 	ServiceOfferingEnabled bool   `json:"service_offering_enabled"`
 	EnableServiceAccess    bool   `json:"enable_service_access"`
+
+	HealthEndpointsBasicAuthEnabled bool `json:"health_endpoints_basic_auth_enabled""`
 }
 
 var defaults = Config{
@@ -78,6 +80,7 @@ var defaults = Config{
 	NodeMemoryLimit:        128, // MB
 	ServiceOfferingEnabled: true,
 	EnableServiceAccess:    true,
+	HealthEndpointsBasicAuthEnabled: true,
 }
 
 func LoadConfig(t *testing.T) *Config {

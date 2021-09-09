@@ -40,6 +40,9 @@ cache_cleanup_interval: <%= p("autoscaler.metricsforwarder.cache_cleanup_interva
 policy_poller_interval: <%= p("autoscaler.metricsforwarder.policy_poller_interval") %>
 health:
   port:  <%= p("autoscaler.metricsforwarder.health.port") %>
+  username: <%= p("autoscaler.metricsforwarder.health.username") %>
+  password: <%= p("autoscaler.metricsforwarder.health.password") %>
+
 rate_limit:
   valid_duration: <%= p("autoscaler.metricsforwarder.rate_limit.valid_duration") %>
   max_amount: <%= p("autoscaler.metricsforwarder.rate_limit.max_amount") %>

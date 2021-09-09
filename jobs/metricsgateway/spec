@@ -112,7 +112,12 @@ properties:
   autoscaler.metricsgateway.health.port:
     description: "The listening port of health endpoint"
     default: 6503
-
+  autoscaler.metricsgateway.health.username:
+    description: "the username of health endpoint"
+    default: ''
+  autoscaler.metricsgateway.health.password:
+    description: "the password of health endpoint"
+    default: ''
   autoscaler.metricsgateway.hooks.pre_start:
     description: "Script to run before starting metricsgateway"
     default: ''
