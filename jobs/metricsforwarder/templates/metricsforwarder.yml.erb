@@ -46,3 +46,9 @@ health:
 rate_limit:
   valid_duration: <%= p("autoscaler.metricsforwarder.rate_limit.valid_duration") %>
   max_amount: <%= p("autoscaler.metricsforwarder.rate_limit.max_amount") %>
+
+<% if p("autoscaler.metricsforwarder.metricshandler.tls.ca_cert") != '' %>
+metrics_forwarder:
+  tls:
+    ca_file: /var/vcap/jobs/metricsforwarder/config/certs/instance_identity_ca.crt
+<% end %>
