@@ -190,7 +190,7 @@ The app-autoscaler provides a number of health endpoints that are available exte
 
 Component | Health URL | Username | Password Key |
 --------- | -----------| ---------| -------------|
-eventgenerator|https://autoscaler-generator.((system_domain))/health|generator|/autoscaler_eventgenerator_health_password|
+eventgenerator|https://autoscaler-eventgenerator.((system_domain))/health|eventgenerator|/autoscaler_eventgenerator_health_password|
 metricsforwarder|https://autoscaler-metricsforwarder.((system_domain))/health|metricsforwarder|/autoscaler_metricsforwarder_health_password|
 metricsgateway|https://autoscaler-metricsgateway.((system_domain))/health|metricsgateway|/autoscaler_metricsgateway_health_password|
 metricsserver|https://autoscaler-metricsserver.((system_domain))/health|metricsserver|/autoscaler_metricsserver_health_password|
