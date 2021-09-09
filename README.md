@@ -138,65 +138,6 @@ database.password | The password of the user specified above in "database.userna
 database.sslmode | There are 6 values allowed for "postgres": disable, allow, prefer, require, verify-ca and verify-full. Please refer to [Postgres SSL definition](https://www.postgresql.org/docs/current/libpq-ssl.html) when define `database_sslmode`.  For "mysql", there are 7 values allowed: false, true, skip-verify, preferred, verify-ca, verify_identity.Please refer to [Mysql SSL definition(Golang)](https://github.com/go-sql-driver/mysql#tls) and [Mysql Connector SSL](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html)
 database.tls.ca | PEM-encoded certification authority for secure TLS communication. Only required when sslmode is verify-ca or verify-full(postgres) or verify_identity(mysql) and can be omitted for other sslmode.
 
-* **Deprecated**:  App-AutoScaler v1 release and its deployment options. 
-
-  * To deploy app-autoscaler V1 release in default collocated approach, use `app-autoscaler-deployment-fewer-v1.yml`
-    ```sh
-    bosh -e YOUR_ENV -d app-autoscaler \
-        deploy templates/app-autoscaler-deployment-fewer-v1.yml \
-        --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-        -v system_domain=bosh-lite.com \
-        -v cf_client_id=autoscaler_client_id \
-        -v cf_client_secret=autoscaler_client_secret \
-        -v skip_ssl_validation=true
-    ```
-
-  * Deploy autoscaler V1 release with bosh-dns instead of consul for service registration 
-    
-    ```sh
-    bosh -e YOUR_ENV -d app-autoscaler \
-         deploy templates/app-autoscaler-deployment-fewer-v1.yml \
-        --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-        -o example/operation/bosh-dns-fewer-v1.yml \
-        -v system_domain=bosh-lite.com \
-        -v cf_client_id=autoscaler_client_id \
-        -v cf_client_secret=autoscaler_client_secret \
-        -v skip_ssl_validation=true
-    ```
-
-    * Deploy autoscaler V1 release with external postgres database
-
-    ```sh
-    bosh -e YOUR_ENV -d app-autoscaler \
-     deploy templates/app-autoscaler-deployment-fewer-v1.yml \
-     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-     -v system_domain=bosh-lite.com \
-     -v cf_client_id=autoscaler_client_id \
-     -v cf_client_secret=autoscaler_client_secret \
-     -v skip_ssl_validation=true \
-     -v database_host=<database_host> \
-     -v database_port=<database_port> \
-     -v database_username=<database_username> \
-     -v database_password=<database_password> \
-     -v database_name=<database_name> \
-     -v database_sslmode=<database_sslmode>  \
-     -o example/operation/external-db-fewer-v1.yml
-     ```
-
-   * Deploy autoscaler V1 release with postgres database enabled TLS
-    
-    ```sh
-    bosh -e YOUR_ENV -d app-autoscaler \
-         deploy templates/app-autoscaler-deployment-fewer-v1.yml \
-         --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-         -o example/operation/postgres-ssl-fewer-v1.yml \
-         -v system_domain=bosh-lite.com \
-         -v cf_client_id=autoscaler_client_id \
-         -v cf_client_secret=autoscaler_client_secret \
-         -v skip_ssl_validation=true
-    ```
-    >** It's advised not to make skip_ssl_validation=true for non-development environment
-
 ## Register service
 
 Log in to Cloud Foundry with admin user, and use the following commands to register `app-autoscaler` service
@@ -242,4 +183,20 @@ Log in to Cloud Foundry with admin user, and use the following commands to remov
 cf purge-service-offering autoscaler
 cf delete-service-broker autoscaler
 ```
+
+## Monitoring the service
+
+The app-autoscaler provides a number of health endpoints that are available externally that can be used to check the state of each component. Each health endpoint is protected with basic auth (apart from the api server), the usernames are listed in the table below, but the passwords are available in credhub.
+
+Component | Health URL | Username | Password Key |
+--------- | -----------| ---------| -------------|
+eventgenerator|https://autoscaler-generator.((system_domain))/health|generator|/autoscaler_eventgenerator_health_password|
+metricsforwarder|https://autoscaler-metricsforwarder.((system_domain))/health|metricsforwarder|/autoscaler_metricsforwarder_health_password|
+metricsgateway|https://autoscaler-metricsgateway.((system_domain))/health|metricsgateway|/autoscaler_metricsgateway_health_password|
+metricsserver|https://autoscaler-metricsserver.((system_domain))/health|metricsserver|/autoscaler_metricsserver_health_password|
+scalingengine|https://autoscaler-scalingengine.((system_domain))/health|scalingengine|/autoscaler_scalingengine_health_password|
+operator|https://autoscaler-operator.((system_domain))/health|operator|/autoscaler_operator_health_password|
+scheduler|https://autoscaler-scheduler.((system_domain))/health|scheduler|/autoscaler_scheduler_health_password|
+
+These endpoints can be disabled by using the ops file `example/operations/disable-basicauth-on-health-endpoints.yml`
 
