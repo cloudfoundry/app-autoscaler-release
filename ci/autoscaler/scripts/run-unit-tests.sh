@@ -17,7 +17,7 @@ pushd app-autoscaler-release/src/app-autoscaler
   mvn package --no-transfer-progress -Dmaven.test.skip=true -DskipTests
 
   java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/api/db/api.db.changelog.yml update
-  java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/servicebroker/db/servicebroker.db.changelog.json update
+  java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/api/db/servicebroker.db.changelog.yaml update
   java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=scheduler/db/scheduler.changelog-master.yaml update
   java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=scheduler/db/quartz.changelog-master.yaml update
   java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=src/autoscaler/metricsserver/db/metricscollector.db.changelog.yml update
