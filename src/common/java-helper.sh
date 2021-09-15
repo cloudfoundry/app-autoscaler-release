@@ -3,7 +3,7 @@
 #Java Setup
 setup_java(){
   mkdir java
-  tar zxf openjdk/OpenJDK11U-jdk_x64_linux_hotspot_11.0.11_9.tar.gz -C java --strip-components=4
+  tar zxf openjdk/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz -C java --strip-components=4
   export JAVA_HOME=${BOSH_INSTALL_TARGET}/java
   export PATH=$JAVA_HOME/bin:$PATH
 }
