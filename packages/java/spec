@@ -4,4 +4,4 @@ name: java
 dependencies:
 
 files:
-- openjdk/OpenJDK11U-jdk_x64_linux_hotspot_11.0.11_9.tar.gz
+- openjdk/OpenJDK11U-jdk_x64_linux_hotspot_11.0.12_7.tar.gz
