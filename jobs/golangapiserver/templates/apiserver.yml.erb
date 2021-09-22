@@ -48,8 +48,10 @@ public_api_server:
 broker_server:
   port:  <%= p("autoscaler.apiserver.broker.server.port") %>
 
-broker_username: <%= p("autoscaler.apiserver.broker.username") %>
-broker_password: <%= p("autoscaler.apiserver.broker.password") %>
+broker_credentials:
+- broker_username: <%= p("autoscaler.apiserver.broker.username") %>
+  broker_password: <%= p("autoscaler.apiserver.broker.password") %>
+
 catalog_path: /var/vcap/jobs/golangapiserver/config/catalog.json
 catalog_schema_path: /var/vcap/packages/golangapiserver/catalog.schema.json
 <% end %>
