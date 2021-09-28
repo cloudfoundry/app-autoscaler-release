@@ -48,6 +48,9 @@ EOF
 
 #cat acceptance_config.json
 
+# ensure we logout so we're not already logged in when we run the acceptance tests
+cf logout
+
 CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes=3 -slowSpecThreshold=120 -trace api app broker
 
 popd
