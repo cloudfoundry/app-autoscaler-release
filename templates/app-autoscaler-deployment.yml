@@ -14,18 +14,18 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3
   version: '0.0.3'
   sha1: b0d0a0350ed87f1ded58b2ebb469acea0e026ccc
-- name: routing
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/cf-routing-release?v=0.162.0
-  sha1: f17cf09d2414f5f486d18bbd57b17fd48fb69773
-  version: '0.162.0'
+- name: "routing"
+  url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.223.0"
+  sha1: "edb2f822ca5bbe579a179abfa4b053dc9c99224f"
+  version: "0.223.0"
 - name: loggregator-agent
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=3.9
   version: "3.9"
   sha1: bf723af956a61c7b51db0ba535c871bad24dd289
 - name: bpm
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.0
-  version: 1.1.0
-  sha1: 82e83a5e8ebd6e07f6ca0765e94eb69e03324a19
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.9
+  version: 1.1.9
+  sha1: sha256:031cf5600158f44762c747a1f8648b7cebca876d4297dd9e2ce3b51b36ccd476
 features:
   use_dns_addresses: true
 addons:
@@ -101,6 +101,24 @@ addons:
           deployment: app-autoscaler
           network: default
           domain: bosh
+      - domain: nats.service.cf.internal
+        targets:
+          - deployment: cf
+            domain: bosh
+            instance_group: nats
+            network: default
+            query: '*'
+      - domain: _.nats.service.cf.internal
+        targets:
+          - deployment: cf
+            domain: bosh
+            instance_group: nats
+            network: default
+            query: _
+- name: bpm
+  jobs:
+    - name: bpm
+      release: bpm
 # Stemcell details
 stemcells:
 - alias: default
@@ -585,8 +603,6 @@ instance_groups:
             component: autoscaler_metricsforwarder_health
           uris:
             - autoscaler-metricsforwarder.((system_domain))
-  - name: bpm
-    release: bpm
   - name: loggregator_agent
     release: loggregator-agent
     consumes:
