@@ -103,25 +103,30 @@ func TestAcceptance(t *testing.T) {
 var _ = BeforeSuite(func() {
 
 	fmt.Println("Clearing down existing test orgs/spaces...")
-	orgs := getTestOrgs()
-
-	//  DELETING APPS THEN SERVICES THEN USERS IS IMPORTANT
-	for _, org := range orgs {
-		orgName, orgGuid, spaceName, spaceGuid := getOrgSpaceNamesAndGuids(org)
-		if spaceName != "" {
-			target := cf.Cf("target", "-o", orgName, "-s", spaceName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(target).To(Exit(0), fmt.Sprintf("failed to target %s and %s", orgName, spaceName))
-
-			apps := getApps(orgGuid, spaceGuid, "autoscaler-")
-			deleteApps(apps, 0)
-
-			services := getServices(orgGuid, spaceGuid, "autoscaler-")
-			deleteServices(services)
-		}
-
-		deleteOrg(org)
-	}
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
+
+	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+		orgs := getTestOrgs()
+
+		for _, org := range orgs {
+			orgName, orgGuid, spaceName, spaceGuid := getOrgSpaceNamesAndGuids(org)
+			if spaceName != "" {
+				target := cf.Cf("target", "-o", orgName, "-s", spaceName).Wait(cfg.DefaultTimeoutDuration())
+				Expect(target).To(Exit(0), fmt.Sprintf("failed to target %s and %s", orgName, spaceName))
+
+				apps := getApps(orgGuid, spaceGuid, "autoscaler-")
+				deleteApps(apps, 0)
+
+				services := getServices(orgGuid, spaceGuid, "autoscaler-")
+				deleteServices(services)
+			}
+
+			deleteOrg(org)
+		}
+	})
+
+	fmt.Println("Clearing down existing test orgs/spaces... Complete")
+
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
