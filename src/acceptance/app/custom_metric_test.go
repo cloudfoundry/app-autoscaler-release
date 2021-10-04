@@ -43,7 +43,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 			guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
 			Expect(guid).To(Exit(0))
 			appGUID = strings.TrimSpace(string(guid.Out.Contents()))
-			CreatePolicy(appName, appGUID, policy)
+			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 			if !cfg.IsServiceOfferingEnabled() {
 				CreateCustomMetricCred(appName, appGUID)
 			}
@@ -73,7 +73,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		Context("when test_metric is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "test_metric", 500)
+				policy = GenerateDynamicScaleInPolicy(1, 2, "test_metric", 500)
 				initialInstanceCount = 2
 			})
 
@@ -110,7 +110,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		Context("when test_metric is more than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "test_metric", 500)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "test_metric", 500)
 				initialInstanceCount = 1
 			})
 

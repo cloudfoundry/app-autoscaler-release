@@ -48,7 +48,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
 		Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 		WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
-		CreatePolicy(appName, appGUID, policy)
+		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 	})
 
 	AfterEach(func() {
@@ -64,7 +64,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		Context("when memory used is greater than scaling out threshold", func() {
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryused", 30)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
 				initialInstanceCount = 1
 			})
 
@@ -83,7 +83,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		Context("when  memory used is lower than scaling in threshold", func() {
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "memoryused", 80)
+				policy = GenerateDynamicScaleInPolicy(1, 2, "memoryused", 80)
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
@@ -104,7 +104,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		Context("when memoryutil is greater than scaling out threshold", func() {
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryutil", 20)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "memoryutil", 20)
 				initialInstanceCount = 1
 			})
 
@@ -123,7 +123,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		Context("when  memoryutil is lower than scaling in threshold", func() {
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "memoryutil", 80)
+				policy = GenerateDynamicScaleInPolicy(1, 2, "memoryutil", 80)
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
@@ -155,7 +155,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "responsetime", 2000)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "responsetime", 2000)
 				initialInstanceCount = 1
 			})
 
@@ -192,7 +192,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "responsetime", 1000)
+				policy = GenerateDynamicScaleInPolicy(1, 2, "responsetime", 1000)
 				initialInstanceCount = 2
 			})
 
@@ -243,7 +243,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "throughput", 1)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 1)
 				initialInstanceCount = 1
 			})
 
@@ -281,7 +281,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "throughput", 100)
+				policy = GenerateDynamicScaleInPolicy(1, 2, "throughput", 100)
 				initialInstanceCount = 2
 			})
 
@@ -326,7 +326,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when cpu is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "cpu", 2)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "cpu", 2)
 				initialInstanceCount = 1
 			})
 
@@ -351,7 +351,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when cpu is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(cfg, 1, 2, "cpu", 10)
+				policy = GenerateDynamicScaleInPolicy(1, 2, "cpu", 10)
 				initialInstanceCount = 2
 			})
 

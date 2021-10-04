@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-const JAVA_APP = "../assets/app/HelloWorldJavaWeb.war"
 const NODE_APP = "../assets/app/nodeApp"
 
 type Config struct {

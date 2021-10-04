@@ -68,9 +68,9 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			location, err := time.LoadLocation("GMT")
 			Expect(err).NotTo(HaveOccurred())
 			startTime, endTime = getStartAndEndTime(location, 70*time.Second, time.Duration(interval+120)*time.Second)
-			policy = GenerateDynamicAndRecurringSchedulePolicy(cfg, 1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
+			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 
-			CreatePolicy(appName, appGUID, policy)
+			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 		})
 
 		Context("with days of month", func() {

@@ -114,7 +114,7 @@ var _ = Describe("AutoScaler Public API", func() {
 		})
 
 		It("should succeed to create a valid policy", func() {
-			policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryused", 30)
+			policy = GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(policy))
 
 			req, err := http.NewRequest("PUT", policyURL, body)
@@ -138,7 +138,7 @@ var _ = Describe("AutoScaler Public API", func() {
 		})
 
 		It("should fail to create an invalid policy", func() {
-			policy = GenerateDynamicScaleOutPolicy(cfg, 0, 2, "memoryused", 30)
+			policy = GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(policy))
 
 			req, err := http.NewRequest("PUT", policyURL, body)
@@ -162,7 +162,7 @@ var _ = Describe("AutoScaler Public API", func() {
 	Context("When policy is defined", func() {
 
 		BeforeEach(func() {
-			policy = GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryused", 30)
+			policy = GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(policy))
 
 			req, err := http.NewRequest("PUT", policyURL, body)
@@ -215,7 +215,7 @@ var _ = Describe("AutoScaler Public API", func() {
 		})
 
 		It("should succeed to update a valid policy", func() {
-			newpolicy := GenerateDynamicScaleOutPolicy(cfg, 1, 2, "memoryused", 30)
+			newpolicy := GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(newpolicy))
 
 			req, err := http.NewRequest("PUT", policyURL, body)
@@ -240,7 +240,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 		It("should fail to update an invalid policy", func() {
 			By("return 400 when the new policy is invalid")
-			newpolicy := GenerateDynamicScaleOutPolicy(cfg, 0, 2, "memoryused", 30)
+			newpolicy := GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 30)
 			body = bytes.NewBuffer([]byte(newpolicy))
 
 			req, err := http.NewRequest("PUT", policyURL, body)

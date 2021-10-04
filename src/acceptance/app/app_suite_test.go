@@ -1,12 +1,9 @@
 package app_test
 
 import (
-	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -17,7 +14,6 @@ import (
 	. "acceptance/helpers"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
-	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/workflowhelpers"
 	. "github.com/onsi/ginkgo"
@@ -26,7 +22,6 @@ import (
 )
 
 const (
-	PolicyPath          = "/v1/apps/{appId}/policy"
 	CustomMetricPath    = "/v1/apps/{appId}/credential"
 	CustomMetricCredEnv = "AUTO_SCALER_CUSTOM_METRIC_ENV"
 )
@@ -50,18 +45,6 @@ type CFResourceObject struct {
 	} `json:"resources"`
 }
 
-type CFUsers struct {
-	Resources []struct {
-		Entity struct {
-			Username string `json:"username"`
-		}
-		Metadata struct {
-			GUID      string `json:"guid"`
-			CreatedAt string `json:"created_at"`
-		}
-	} `json:"resources"`
-}
-
 type CFOrgs struct {
 	Resources []struct {
 		Name      string `json:"name"`
@@ -80,13 +63,6 @@ type CFSpaces struct {
 			CreatedAt string `json:"created_at"`
 		}
 	} `json:"resources"`
-}
-
-type CustomMetricCredential struct {
-	AppID    string `json:"app_id"`
-	UserName string `json:"user_name"`
-	Password string `json:"password"`
-	URL      string `json:"url"`
 }
 
 func TestAcceptance(t *testing.T) {
@@ -143,23 +119,7 @@ var _ = BeforeSuite(func() {
 
 	interval = cfg.AggregateInterval
 
-	// #nosec G402
-	client = &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			Dial: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).Dial,
-			TLSHandshakeTimeout: 10 * time.Second,
-			DisableCompression:  true,
-			DisableKeepAlives:   true,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: cfg.SkipSSLValidation,
-			},
-		},
-		Timeout: 30 * time.Second,
-	}
+	client = GetHTTPClient(cfg)
 
 })
 
@@ -188,23 +148,7 @@ func getStartAndEndTime(location *time.Location, offset, duration time.Duration)
 }
 
 func doAPIRequest(req *http.Request) (*http.Response, error) {
-	resp, err := client.Do(req)
-	return resp, err
-}
-
-func CreatePolicyWithAPI(appGUID, policy string) {
-	oauthToken := OauthToken(cfg)
-	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policy)))
-	Expect(err).ShouldNot(HaveOccurred())
-	req.Header.Add("Authorization", oauthToken)
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := doAPIRequest(req)
-	Expect(err).ShouldNot(HaveOccurred())
-	defer resp.Body.Close()
-	Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
-	Expect([]int{http.StatusOK, http.StatusCreated}).To(ContainElement(resp.StatusCode))
+	return client.Do(req)
 }
 
 func DeletePolicyWithAPI(appGUID string) {
@@ -218,19 +162,6 @@ func DeletePolicyWithAPI(appGUID string) {
 	Expect(err).ShouldNot(HaveOccurred())
 	defer resp.Body.Close()
 	Expect(resp.StatusCode).To(Equal(http.StatusOK))
-}
-
-func CreatePolicy(appName, appGUID, policy string) {
-	if cfg.IsServiceOfferingEnabled() {
-		instanceName = generator.PrefixedRandomName("autoscaler", "service")
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
-
-		bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
-	} else {
-		CreatePolicyWithAPI(appGUID, policy)
-	}
 }
 
 func DeletePolicy(appName, appGUID string) {
