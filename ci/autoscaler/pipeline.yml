@@ -77,7 +77,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/cloudfoundry/app-autoscaler-ci.git
-    branch: register-broker
+    branch: master
 
 - name: bbl-state
   type: git
