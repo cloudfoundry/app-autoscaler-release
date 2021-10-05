@@ -60,7 +60,7 @@ EOF
       cat << EOF > release_version.yml
 ---
 - type: replace
-  path: /releases/name=app-autoscalaer/version?
+  path: /releases/name=app-autoscaler/version?
   value: ((app_autoscaler_version))
 EOF
 
