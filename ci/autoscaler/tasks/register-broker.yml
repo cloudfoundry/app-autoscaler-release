@@ -14,7 +14,6 @@ params:
 
 inputs:
 - name: bbl-state
-- name: app-autoscaler-release
 - name: app-autoscaler-ci
 
 outputs:
