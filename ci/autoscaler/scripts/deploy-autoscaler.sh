@@ -57,12 +57,19 @@ EOF
 
 
   CURRENT_COMMIT_HASH=$(git log -1 --pretty=format:"%H")
+      cat << EOF > release_version.yml
+---
+- type: replace
+  path: /releases/name=app-autoscaler/version?
+  value: ((app_autoscaler_version))
+EOF
+
   set +e
   AUTOSCALER_EXISTS=$(bosh releases | grep -c "${CURRENT_COMMIT_HASH}")
   set -e
   if [[ "${AUTOSCALER_EXISTS}" == 1 ]]; then
     echo "the app-autoscaler release is already uploaded with the commit ${CURRENT_COMMIT_HASH}"
-    echo "Attempting redeploy..." 
+    echo "Attempting redeploy..."
 
     # shellcheck disable=SC1009
     if [ "${USE_POSTGRES_PERSISTENT_DISK}" == "true" ]; then
@@ -70,7 +77,9 @@ EOF
             deploy templates/app-autoscaler-deployment.yml \
             -o example/operation/loggregator-certs-from-cf.yml \
             -o persistent_disk.yml \
+            -o release_version.yml \
             -v system_domain=${SYSTEM_DOMAIN} \
+            -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
             -v cf_client_id=autoscaler_client_id \
             -v cf_client_secret=autoscaler_client_secret \
             -v skip_ssl_validation=true
@@ -78,7 +87,9 @@ EOF
       bosh -n -d app-autoscaler \
             deploy templates/app-autoscaler-deployment.yml \
             -o example/operation/loggregator-certs-from-cf.yml \
+            -o release_version.yml \
             -v system_domain=${SYSTEM_DOMAIN} \
+            -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
             -v cf_client_id=autoscaler_client_id \
             -v cf_client_secret=autoscaler_client_secret \
             -v skip_ssl_validation=true
@@ -87,7 +98,7 @@ EOF
     exit 0
   fi
 
-  echo "Creating Release"
+  echo "Creating Release with bosh version ${CURRENT_COMMIT_HASH}"
   bosh create-release --force --version=${CURRENT_COMMIT_HASH}
 
   echo "Uploading Release"
@@ -99,7 +110,9 @@ EOF
             deploy templates/app-autoscaler-deployment.yml \
             -o example/operation/loggregator-certs-from-cf.yml \
             -o persistent_disk.yml \
+            -o release_version.yml \
             -v system_domain=${SYSTEM_DOMAIN} \
+            -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
             -v cf_client_id=autoscaler_client_id \
             -v cf_client_secret=autoscaler_client_secret \
             -v skip_ssl_validation=true
@@ -107,7 +120,9 @@ EOF
         bosh -n -d app-autoscaler \
             deploy templates/app-autoscaler-deployment.yml \
             -o example/operation/loggregator-certs-from-cf.yml \
+            -o release_version.yml \
             -v system_domain=${SYSTEM_DOMAIN} \
+            -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
             -v cf_client_id=autoscaler_client_id \
             -v cf_client_secret=autoscaler_client_secret \
             -v skip_ssl_validation=true
