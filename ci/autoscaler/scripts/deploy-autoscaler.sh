@@ -62,7 +62,7 @@ EOF
   set -e
   if [[ "${AUTOSCALER_EXISTS}" == 1 ]]; then
     echo "the app-autoscaler release is already uploaded with the commit ${CURRENT_COMMIT_HASH}"
-    echo "Attempting redeploy..." 
+    echo "Attempting redeploy..."
 
     # shellcheck disable=SC1009
     if [ "${USE_POSTGRES_PERSISTENT_DISK}" == "true" ]; then
@@ -87,7 +87,7 @@ EOF
     exit 0
   fi
 
-  echo "Creating Release"
+  echo "Creating Release with bosh version ${CURRENT_COMMIT_HASH}"
   bosh create-release --force --version=${CURRENT_COMMIT_HASH}
 
   echo "Uploading Release"
