@@ -300,8 +300,6 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
 
 
 - name: delete-autoscaler
@@ -430,8 +428,6 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -496,6 +492,10 @@ jobs:
     on_failure:
       task: get-logs-on-failure
       file: app-autoscaler-ci/autoscaler/tasks/get-logs.yml
+  - task: register-broker
+    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -553,6 +553,10 @@ jobs:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
+  - task: register-broker
+    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
