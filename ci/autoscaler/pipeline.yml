@@ -21,6 +21,10 @@ groups:
   - destroy-infrastructure
   - delete-autoscaler
   - delete-cf
+- name: autoscaler-deploy
+  jobs:
+  - deploy-autoscaler
+  - delete-autoscaler
 
 resource_types:
 - name: gcs-resource
@@ -73,7 +77,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/cloudfoundry/app-autoscaler-ci.git
-    branch: master
+    branch: register-broker
 
 - name: bbl-state
   type: git
@@ -267,6 +271,38 @@ jobs:
       GCP_DNS_NAME: autoscaler.ci.cloudfoundry.org
 
 
+- name: deploy-autoscaler
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: app-autoscaler-ci
+    - get: bbl-state
+      passed: [deploy-cf]
+    - get: app-autoscaler-release-main
+      passed: [unit-tests-main, integration-tests-main]
+  - task: run-pre-release-script
+    file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
+    params:
+      SCRIPT_NAME: ./scripts/update
+    input_mapping:
+      release: app-autoscaler-release-main
+    output_mapping:
+      release: app-autoscaler-release-main
+  - task: deploy-autoscaler
+    file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  - task: register-broker
+    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+
 
 - name: delete-autoscaler
   serial_groups: [infra]
@@ -386,6 +422,12 @@ jobs:
       release: app-autoscaler-release-main
   - task: deploy-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  - task: register-broker
+    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
     input_mapping:
