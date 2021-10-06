@@ -28,6 +28,17 @@ cat > acceptance_config.json <<EOF
 }
 EOF
 
-CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes=3 -slowSpecThreshold=120 -trace ${SUITES}
+SUITES_TO_RUN=""
+for SUITE in "$SUITES"; do
+  if [[ -f "$SUITE" ]]; then
+     SUITES_TO_RUN="$SUITES_TO_RUN $SUITE"
+  fi 
+done
+
+if [ "${SUITES_TO_RUN}" != "" ]; then
+  CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes=3 -slowSpecThreshold=120 -trace ${SUITES_TO_RUN}
+else
+  echo "Nothing to run!"
+fi
 
 popd
