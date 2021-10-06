@@ -3,26 +3,27 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/onsi/gomega"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/onsi/gomega"
 )
 
 type Curler struct {
 	NumAllowedErrors int
-	NumActualErrors int
-	UriCreator uriCreator
-	CurlConfig CurlConfig
+	NumActualErrors  int
+	UriCreator       uriCreator
+	CurlConfig       CurlConfig
 }
 
 func NewAppCurler(cfg CurlConfig) Curler {
 	uriCreator := &AppUriCreator{CurlConfig: cfg}
 	return Curler{
-		CurlConfig: cfg,
+		CurlConfig:       cfg,
 		NumAllowedErrors: 10,
-		NumActualErrors: 0,
-		UriCreator: uriCreator,
+		NumActualErrors:  0,
+		UriCreator:       uriCreator,
 	}
 }
 
@@ -62,7 +63,7 @@ func (a *Curler) Curl(appName string, path string, timeout time.Duration, args .
 	fmt.Printf("< %s\n", string(out))
 	if err != nil {
 		a.NumActualErrors++
-		fmt.Printf("non-zero exit code %s: errors %d/%d\n", err, a.NumActualErrors, a.NumAllowedErrors )
+		fmt.Printf("non-zero exit code %s: errors %d/%d\n", err, a.NumActualErrors, a.NumAllowedErrors)
 	}
 
 	gomega.Expect(a.NumActualErrors).ShouldNot(gomega.Equal(a.NumAllowedErrors))

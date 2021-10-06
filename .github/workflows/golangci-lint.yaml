@@ -1,0 +1,34 @@
+name: golangci-lint
+on:
+  pull_request:
+jobs:
+  golangci:
+    name: lint
+    env:
+      GO_VERSION: 1.16
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      
+      - name: acceptance
+        uses: golangci/golangci-lint-action@v2
+        with:
+          working-directory: src/acceptance
+          args: --config ../../.golangci.yaml
+      
+      - name: changelog
+        uses: golangci/golangci-lint-action@v2
+        with:
+          working-directory: src/changelog
+          args: --config ../../.golangci.yaml
+      
+      - name: changeloglockcleaner
+        uses: golangci/golangci-lint-action@v2
+        with:
+          working-directory: src/changeloglockcleaner
+          args: --config ../../.golangci.yaml

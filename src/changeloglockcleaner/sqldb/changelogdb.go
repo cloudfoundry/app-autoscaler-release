@@ -8,9 +8,8 @@ import (
 	"regexp"
 	"strings"
 
-	_ "github.com/lib/pq"
 	"github.com/jmoiron/sqlx"
-
+	_ "github.com/lib/pq"
 )
 
 const PostgresDriverName = "postgres"
@@ -75,23 +74,23 @@ func (cdb *ChangelogSQLDB) DeleteExpiredLock(timeoutInSecond int) error {
     END
    $$ ;
 	`, timeoutInSecond)
-	    _, err := cdb.sqldb.Exec(query)
-	    if err != nil {
-		    log.Printf("failed-to-delete-application-details, query:%s, err:%s\n", query, err)
-	    }
-	    return err
-    case "mysql":
+		_, err := cdb.sqldb.Exec(query)
+		if err != nil {
+			log.Printf("failed-to-delete-application-details, query:%s, err:%s\n", query, err)
+		}
+		return err
+	case "mysql":
 		var rowCount int
 		err := cdb.sqldb.QueryRow("SELECT 1 FROM  information_schema.tables WHERE  table_schema = 'autoscaler' AND table_name = 'DATABASECHANGELOGLOCK'").Scan(&rowCount)
 		if err == sql.ErrNoRows {
 			log.Printf("table databasechangeloglock does not exist, err:%s\n", err)
 			return nil
-		}else if err != nil {
+		} else if err != nil {
 			log.Printf("failed to query table from database, err:%s\n", err)
 			return err
 		}
-		if rowCount > 0{
-			_, err = cdb.sqldb.Exec(fmt.Sprintf("DELETE FROM DATABASECHANGELOGLOCK WHERE TIMESTAMPDIFF(SECOND, lockgranted, NOW()) > %d;",timeoutInSecond))
+		if rowCount > 0 {
+			_, err = cdb.sqldb.Exec(fmt.Sprintf("DELETE FROM DATABASECHANGELOGLOCK WHERE TIMESTAMPDIFF(SECOND, lockgranted, NOW()) > %d;", timeoutInSecond))
 			if err != nil {
 				log.Printf("failed-to-delete-application-details, err:%s\n", err)
 				return err
@@ -99,18 +98,17 @@ func (cdb *ChangelogSQLDB) DeleteExpiredLock(timeoutInSecond int) error {
 		}
 	}
 	return nil
-
 }
 
 func redactDbCreds(dbUrl string) string {
 	var redactUrl string
-	urlCredMatcher := new(regexp.Regexp)
+	var urlCredMatcher *regexp.Regexp
 	if strings.Contains(dbUrl, "postgres") {
 		urlCredMatcher = regexp.MustCompile(postgresDbURLPattern)
 		if urlCredMatcher.MatchString(dbUrl) {
 			redactUrl = urlCredMatcher.ReplaceAllString(dbUrl, `$1://$2:*REDACTED*@$4$5/$6`)
 		}
-	}else {
+	} else {
 		urlCredMatcher = regexp.MustCompile(mysqlDbURLPattern)
 		if urlCredMatcher.MatchString(dbUrl) {
 			redactUrl = urlCredMatcher.ReplaceAllString(dbUrl, `$1:*REDACTED*@tcp($3$4)/$5`)

@@ -76,10 +76,10 @@ var defaults = Config{
 	ArtifactsDirectory:           filepath.Join("..", "results"),
 	NamePrefix:                   "ASATS",
 
-	CfJavaTimeout:          10,  // minutes
-	NodeMemoryLimit:        128, // MB
-	ServiceOfferingEnabled: true,
-	EnableServiceAccess:    true,
+	CfJavaTimeout:                   10,  // minutes
+	NodeMemoryLimit:                 128, // MB
+	ServiceOfferingEnabled:          true,
+	EnableServiceAccess:             true,
 	HealthEndpointsBasicAuthEnabled: true,
 }
 
