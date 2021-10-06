@@ -573,6 +573,24 @@ jobs:
         SKIP_SSL_VALIDATION: true
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-pr
+  - task: autoscaler-upgrade-test
+    file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      SERVICE_OFFERING_ENABLED: true
+      SKIP_SSL_VALIDATION: true
+      NAME_PREFIX: ASUP
+      SUITES: smoke/pre_upgrade smoke/post_upgrade 
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-pr
+    ensure:
+      task: cleanup
+      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+      params:
+        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+        SKIP_SSL_VALIDATION: true
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-pr 
   on_success:
     put: app-autoscaler-release-pr
     params:
