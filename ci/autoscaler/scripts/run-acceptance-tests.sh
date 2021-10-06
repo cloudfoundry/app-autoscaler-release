@@ -21,13 +21,13 @@ cat > acceptance_config.json <<EOF
   "service_name": "autoscaler",
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
+  "name_prefix": "${NAME_PREFIX}",
 
   "autoscaler_api": "autoscaler.${SYSTEM_DOMAIN}",
   "service_offering_enabled": ${SERVICE_OFFERING_ENABLED}
 }
 EOF
 
-#cat acceptance_config.json
-CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes=3 -slowSpecThreshold=120 -trace api app broker
+CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes=3 -slowSpecThreshold=120 -trace ${SUITES}
 
 popd
