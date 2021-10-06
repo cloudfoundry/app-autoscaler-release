@@ -7,6 +7,8 @@ pushd bbl-state/bbl-state
   eval "$(bbl print-env)"
 popd
 
+CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+
 export GOPATH=$PWD/app-autoscaler-release
 pushd app-autoscaler-release/src/acceptance
 cat > acceptance_config.json <<EOF
