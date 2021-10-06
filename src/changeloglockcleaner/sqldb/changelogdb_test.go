@@ -71,7 +71,8 @@ var _ = Describe("ChangelogSQLDB", func() {
 		BeforeEach(func() {
 			cdb, err = sqldb.NewChangelogSQLDB(os.Getenv("DBURL"))
 			Expect(err).NotTo(HaveOccurred())
-			cleanChanglogLockTable()
+			err = cleanChanglogLockTable()
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		AfterEach(func() {

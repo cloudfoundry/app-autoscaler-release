@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	. "changeloglockcleaner/sqldb"
+
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/jmoiron/sqlx"
 )
 
 var dbHelper *sqlx.DB
@@ -30,10 +31,10 @@ var _ = BeforeSuite(func() {
 
 	database, e := GetConnection(dbUrl)
 	if e != nil {
-		Fail("failed to parse database connection: "+ e.Error())
+		Fail("failed to parse database connection: " + e.Error())
 	}
 
-	dbHelper, e =  sqlx.Open(database.DriverName, database.DSN)
+	dbHelper, e = sqlx.Open(database.DriverName, database.DSN)
 	if e != nil {
 		Fail("can not connect database: " + e.Error())
 	}
@@ -57,6 +58,7 @@ func insertLock(id int, locked bool, durationSecond int, lockedby string) (sql.R
 	result, err := dbHelper.Exec(query, id, locked, lockedby)
 	return result, err
 }
+
 func checkChanglogLockExistenceById(id int) bool {
 	var rowCount int
 	var query string
@@ -67,9 +69,10 @@ func checkChanglogLockExistenceById(id int) bool {
 		query = dbHelper.Rebind("SELECT COUNT(*) FROM DATABASECHANGELOGLOCK WHERE id=?")
 	}
 	row := dbHelper.QueryRow(query, id)
-	row.Scan(&rowCount)
+	_ = row.Scan(&rowCount)
 	return rowCount > 0
 }
+
 func cleanChanglogLockTable() error {
 	var query string
 	switch dbHelper.DriverName() {
