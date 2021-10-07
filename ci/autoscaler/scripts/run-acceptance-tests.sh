@@ -32,10 +32,14 @@ EOF
 
 SUITES_TO_RUN=""
 for SUITE in "$SUITES"; do
-  if [[ -f "$SUITE" ]]; then
+  echo "Checking suite $SUITE"	
+  if [[ -d "$SUITE" ]]; then
+     echo "Adding suite $SUITE to list"
      SUITES_TO_RUN="$SUITES_TO_RUN $SUITE"
   fi 
 done
+
+echo "Running $SUITES_TO_RUN"
 
 if [ "${SUITES_TO_RUN}" != "" ]; then
   CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes=3 -slowSpecThreshold=120 -trace ${SUITES_TO_RUN}
