@@ -31,7 +31,7 @@ cat > acceptance_config.json <<EOF
 EOF
 
 SUITES_TO_RUN=""
-for SUITE in "$SUITES"; do
+for SUITE in $SUITES; do
   echo "Checking suite $SUITE"	
   if [[ -d "$SUITE" ]]; then
      echo "Adding suite $SUITE to list"
