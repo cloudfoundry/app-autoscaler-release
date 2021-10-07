@@ -12,7 +12,10 @@ params:
   SERVICE_OFFERING_ENABLED: false
   SKIP_SSL_VALIDATION: false
   NAME_PREFIX: ASATS
-  SUITES: api app broker
+  SUITES: |
+    api
+    app
+    broker
 inputs:
 - name: bbl-state
 - name: app-autoscaler-release
