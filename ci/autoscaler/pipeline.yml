@@ -565,7 +565,7 @@ jobs:
       SKIP_SSL_VALIDATION: true
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
-    ensure:
+    on_failure:
       task: cleanup
       file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
       params:
