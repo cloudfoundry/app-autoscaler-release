@@ -487,6 +487,7 @@ jobs:
       NAME_PREFIX: ASUP
       SUITES: |
         smoke/pre_upgrade
+      NODES: 1  
   - task: run-pre-release-script
     file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
     params:
@@ -514,6 +515,7 @@ jobs:
       NAME_PREFIX: ASUP
       SUITES: |
         smoke/post_upgrade
+      NODES: 1 
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
