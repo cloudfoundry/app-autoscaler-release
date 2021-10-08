@@ -474,6 +474,19 @@ jobs:
         SKIP_SSL_VALIDATION: true
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
+  - task: register-broker
+    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+  - task: autoscaler-pre-upgrade
+    file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      SERVICE_OFFERING_ENABLED: true
+      SKIP_SSL_VALIDATION: true
+      NAME_PREFIX: ASUP
+      SUITES: |
+        smoke/pre_upgrade
   - task: run-pre-release-script
     file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
     params:
@@ -492,10 +505,15 @@ jobs:
     on_failure:
       task: get-logs-on-failure
       file: app-autoscaler-ci/autoscaler/tasks/get-logs.yml
-  - task: register-broker
-    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+  - task: autoscaler-post-upgrade
+    file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      SERVICE_OFFERING_ENABLED: true
+      SKIP_SSL_VALIDATION: true
+      NAME_PREFIX: ASUP
+      SUITES: |
+        smoke/post_upgrade
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
