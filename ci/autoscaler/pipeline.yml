@@ -583,6 +583,7 @@ jobs:
       SUITES: |
         smoke/pre_upgrade
         smoke/post_upgrade
+      NODES: 1
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
     ensure:

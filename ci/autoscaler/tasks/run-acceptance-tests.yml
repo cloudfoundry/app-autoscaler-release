@@ -16,6 +16,7 @@ params:
     api
     app
     broker
+  NODES: 3  
 inputs:
 - name: bbl-state
 - name: app-autoscaler-release

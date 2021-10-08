@@ -42,7 +42,7 @@ done
 echo "Running $SUITES_TO_RUN"
 
 if [ "${SUITES_TO_RUN}" != "" ]; then
-  CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes=3 -slowSpecThreshold=120 -trace ${SUITES_TO_RUN}
+  CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes=${NODES} -slowSpecThreshold=120 -trace ${SUITES_TO_RUN}
 else
   echo "Nothing to run!"
 fi
