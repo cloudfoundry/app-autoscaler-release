@@ -369,6 +369,7 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
+      trigger: true
     - get: bbl-state
       passed: [setup-infrastructure]
       trigger: true
