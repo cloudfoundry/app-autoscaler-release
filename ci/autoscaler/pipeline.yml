@@ -489,6 +489,8 @@ jobs:
       SUITES: |
         smoke/pre_upgrade
       NODES: 1  
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
   - task: run-pre-release-script
     file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
     params:
@@ -517,6 +519,8 @@ jobs:
       SUITES: |
         smoke/post_upgrade
       NODES: 1 
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
