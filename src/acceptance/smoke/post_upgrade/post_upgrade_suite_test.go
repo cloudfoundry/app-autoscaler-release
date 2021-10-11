@@ -18,7 +18,6 @@ import (
 var (
 	cfg       *config.Config
 	setup     *workflowhelpers.ReproducibleTestSuiteSetup
-	interval  int
 	orgName   string
 	orgGUID   string
 	spaceName string
@@ -44,6 +43,10 @@ var _ = BeforeSuite(func() {
 
 	Expect(orgName).ToNot(Equal(""), "orgName has not been determined")
 	Expect(spaceName).ToNot(Equal(""), "spaceName has not been determined")
+
+	if cfg.IsServiceOfferingEnabled() {
+		helpers.CheckServiceExists(cfg)
+	}
 
 	// discover the org / space from the environment
 	cfg.UseExistingOrganization = true

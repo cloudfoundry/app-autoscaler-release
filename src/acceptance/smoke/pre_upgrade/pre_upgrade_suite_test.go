@@ -15,9 +15,8 @@ import (
 )
 
 var (
-	cfg      *config.Config
-	setup    *workflowhelpers.ReproducibleTestSuiteSetup
-	interval int
+	cfg   *config.Config
+	setup *workflowhelpers.ReproducibleTestSuiteSetup
 )
 
 func TestSetup(t *testing.T) {
@@ -61,5 +60,8 @@ var _ = BeforeSuite(func() {
 			helpers.EnableServiceAccess(cfg, setup.GetOrganizationName())
 		}
 	})
-	interval = cfg.AggregateInterval
+
+	if cfg.IsServiceOfferingEnabled() {
+		helpers.CheckServiceExists(cfg)
+	}
 })

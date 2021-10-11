@@ -25,18 +25,19 @@ app.listen(process.env.PORT || 8080, function () {
 });
 
 app.get('/custom-metrics/:type/:value', function (req, res) {
+  try {
     var metricType = req.params.type;
     var metricValue = parseInt(req.params.value, 10);
     var instanceIndex = process.env.CF_INSTANCE_INDEX;
     var appGuid = JSON.parse(process.env.VCAP_APPLICATION).application_id;
 
     var postData = {
-        "instance_index": parseInt(instanceIndex),
-        "metrics": [{
-            "name": metricType,
-            "value": parseInt(metricValue),
-            "unit": "test-unit"
-        }]
+      "instance_index": parseInt(instanceIndex),
+      "metrics": [{
+        "name": metricType,
+        "value": parseInt(metricValue),
+        "unit": "test-unit"
+      }]
     }
     var credentials = {}
     var metricsForwarderURL = "";
@@ -44,39 +45,55 @@ app.get('/custom-metrics/:type/:value', function (req, res) {
     var mfPassword = "";
     // for service offering
     if (process.env.VCAP_SERVICES) {
-        var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
-        if (vcapServices.autoscaler && vcapServices.autoscaler[0] && vcapServices.autoscaler[0].credentials) {
-            credentials = vcapServices.autoscaler[0].credentials;
-            metricsForwarderURL = credentials.custom_metrics.url;
-            mfUsername = credentials.custom_metrics.username;
-            mfPassword = credentials.custom_metrics.password;
-        }
+      var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+      if (vcapServices.autoscaler && vcapServices.autoscaler[0]
+          && vcapServices.autoscaler[0].credentials) {
+        credentials = vcapServices.autoscaler[0].credentials;
+        metricsForwarderURL = credentials.custom_metrics.url;
+        mfUsername = credentials.custom_metrics.username;
+        mfPassword = credentials.custom_metrics.password;
+      }
     }
     //for build-in offering
     if (metricsForwarderURL === "" || mfUsername === "" || mfPassword === "") {
+      if (process.env.AUTO_SCALER_CUSTOM_METRIC_ENV) {
         credentials = JSON.parse(process.env.AUTO_SCALER_CUSTOM_METRIC_ENV);
         metricsForwarderURL = credentials.url;
         mfUsername = credentials.username;
         mfPassword = credentials.password;
+      } else {
+        console.log("Not all credentials!!!!");
+        console.log(
+            `metricsForwarderURL "${metricsForwarderURL}" || mfUsername === "${mfUsername}" || mfPassword "${mfPassword}`);
+        console.log(process.env.VCAP_SERVICES)
+        res.status(500).json({error: "No credentials found"})
+        return
+      }
     }
 
     var options = {
-        uri: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
-        method: 'POST',
-        body: JSON.stringify(postData),
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Basic ' + Buffer.from(mfUsername + ":" + mfPassword).toString('base64')
-        }
+      uri: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
+      method: 'POST',
+      body: JSON.stringify(postData),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + Buffer.from(
+            mfUsername + ":" + mfPassword).toString('base64')
+      }
     }
     request(options, function (err, result, body) {
-        if (err) {
-            console.log(err);
-            res.send(err);
-        } else {
-            res.send("success");
-        }
+      if (err || result.statusCode !== 200) {
+        console.log(err);
+        res.status(result.statusCode).json(
+            {error: err, body: body, statusCode: result.statusCode});
+      } else {
+        res.status(200).send("success");
+      }
     });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({exception: JSON.stringify(err)}).end();
+  }
 })
 
 app.get('/cpu/:util/:minute', async function (req, res) {
