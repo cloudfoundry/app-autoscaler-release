@@ -26,7 +26,6 @@ import (
 
 const (
 	HealthPath           = "/health"
-	PolicyPath           = "/v1/apps/{appId}/policy"
 	MetricPath           = "/v1/apps/{appId}/metric_histories/{metric_type}"
 	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
 	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
@@ -227,8 +226,7 @@ var _ = AfterSuite(func() {
 })
 
 func DoAPIRequest(req *http.Request) (*http.Response, error) {
-	resp, err := client.Do(req)
-	return resp, err
+	return client.Do(req)
 }
 
 func getTestOrgs() []string {
