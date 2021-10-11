@@ -2,7 +2,6 @@ package api_test
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -101,30 +100,9 @@ func TestAcceptance(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 
-	fmt.Println("Clearing down existing test orgs/spaces...")
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		orgs := getTestOrgs()
-
-		for _, org := range orgs {
-			orgName, orgGuid, spaceName, spaceGuid := getOrgSpaceNamesAndGuids(org)
-			if spaceName != "" {
-				target := cf.Cf("target", "-o", orgName, "-s", spaceName).Wait(cfg.DefaultTimeoutDuration())
-				Expect(target).To(Exit(0), fmt.Sprintf("failed to target %s and %s", orgName, spaceName))
-
-				apps := getApps(orgGuid, spaceGuid, "autoscaler-")
-				deleteApps(apps, 0)
-
-				services := getServices(orgGuid, spaceGuid, "autoscaler-")
-				deleteServices(services)
-			}
-
-			deleteOrg(org)
-		}
-	})
-
-	fmt.Println("Clearing down existing test orgs/spaces... Complete")
+	Cleanup(cfg, setup)
 
 	setup.Setup()
 
@@ -227,100 +205,4 @@ var _ = AfterSuite(func() {
 
 func DoAPIRequest(req *http.Request) (*http.Response, error) {
 	return client.Do(req)
-}
-
-func getTestOrgs() []string {
-	rawOrgs := cf.Cf("curl", "/v3/organizations").Wait(cfg.DefaultTimeoutDuration())
-	Expect(rawOrgs).To(Exit(0), "unable to get orgs")
-
-	var orgs CFOrgs
-	err := json.Unmarshal(rawOrgs.Out.Contents(), &orgs)
-	Expect(err).ShouldNot(HaveOccurred())
-
-	var orgNames []string
-	for _, org := range orgs.Resources {
-		if strings.HasPrefix(org.Name, cfg.NamePrefix) {
-			orgNames = append(orgNames, org.Name)
-		}
-	}
-
-	return orgNames
-}
-
-func getOrgSpaceNamesAndGuids(org string) (string, string, string, string) {
-	orgGuidByte := cf.Cf("org", org, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	orgGuid := strings.TrimSuffix(string(orgGuidByte.Out.Contents()), "\n")
-
-	rawSpaces := cf.Cf("curl", fmt.Sprintf("/v2/organizations/%s/spaces", orgGuid)).Wait(cfg.DefaultTimeoutDuration())
-	Expect(rawSpaces).To(Exit(0), "unable to get spaces")
-	var spaces CFSpaces
-	err := json.Unmarshal(rawSpaces.Out.Contents(), &spaces)
-	Expect(err).ShouldNot(HaveOccurred())
-	if len(spaces.Resources) == 0 {
-		return org, orgGuid, "", ""
-	}
-
-	return org, orgGuid, spaces.Resources[0].Entity.Name, spaces.Resources[0].Metadata.GUID
-}
-
-func getServices(orgGuid, spaceGuid string, prefix string) []string {
-	var services CFResourceObject
-	rawServices := cf.Cf("curl", "/v3/service_instances?space_guids="+spaceGuid+"&organization_guids="+orgGuid).Wait(cfg.DefaultTimeoutDuration())
-	Expect(rawServices).To(Exit(0), "unable to get services")
-	err := json.Unmarshal(rawServices.Out.Contents(), &services)
-	Expect(err).ShouldNot(HaveOccurred())
-
-	var names []string
-	for _, service := range services.Resources {
-		if strings.HasPrefix(service.Name, prefix) {
-			names = append(names, service.Name)
-		}
-	}
-
-	return names
-}
-
-func getApps(orgGuid, spaceGuid string, prefix string) []string {
-	var apps CFResourceObject
-	rawApps := cf.Cf("curl", "/v3/apps?space_guids="+spaceGuid+"&organization_guids="+orgGuid).Wait(cfg.DefaultTimeoutDuration())
-	Expect(rawApps).To(Exit(0), "unable to get apps")
-	err := json.Unmarshal(rawApps.Out.Contents(), &apps)
-	Expect(err).ShouldNot(HaveOccurred())
-
-	var names []string
-	for _, app := range apps.Resources {
-		if strings.HasPrefix(app.Name, prefix) {
-			names = append(names, app.Name)
-		}
-	}
-
-	return names
-}
-
-func deleteServices(services []string) {
-	for _, service := range services {
-		deleteService := cf.Cf("delete-service", service, "-f").Wait(3 * cfg.DefaultTimeoutDuration())
-		if deleteService.ExitCode() != 0 {
-			fmt.Printf("unable to delete the service %s, attempting to purge...\n", service)
-			purgeService := cf.Cf("purge-service-instance", service, "-f").Wait(cfg.DefaultTimeoutDuration())
-			Expect(purgeService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
-		}
-	}
-}
-
-func deleteOrg(org string) {
-	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(3 * cfg.DefaultTimeoutDuration())
-	Expect(deleteOrg).To(Exit(0), fmt.Sprintf("unable to delete org %s", org))
-}
-
-func deleteApps(apps []string, threshold int) {
-	for _, app := range apps {
-		deleteApp := cf.Cf("delete", app, "-f").Wait(3 * cfg.DefaultTimeoutDuration())
-		if deleteApp.ExitCode() != 0 {
-			fmt.Printf("unable to delete the app %s, attempting to purge...\n", app)
-			//purgeService := cf.Cf("purge-service-instance", service, "-f").Wait(cfg.DefaultTimeoutDuration())
-			//Expect(purgeService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
-		}
-		//Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", app))
-	}
 }
