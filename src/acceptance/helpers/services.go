@@ -4,7 +4,6 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 
@@ -28,14 +27,7 @@ func GetServices(cfg *config.Config, orgGuid, spaceGuid string, prefix string) [
 	err := json.Unmarshal(rawServices.Out.Contents(), &services)
 	Expect(err).ShouldNot(HaveOccurred())
 
-	var names []string
-	for _, service := range services.Resources {
-		if strings.HasPrefix(service.Name, prefix) {
-			names = append(names, service.Name)
-		}
-	}
-
-	return names
+	return filterByPrefix(prefix, getNames(services))
 }
 
 func DeleteServices(cfg *config.Config, services []string) {

@@ -331,21 +331,6 @@ func allInstancesCPU(appGUID string, timeout time.Duration) []float64 {
 	return cpu
 }
 
-func AverageCPUByInstance(appGUID string, timeout time.Duration) float64 {
-	cpuArray := allInstancesCPU(appGUID, timeout)
-	instanceCount := len(cpuArray)
-	if instanceCount == 0 {
-		return math.MaxInt64
-	}
-
-	var cpuSum float64
-	for _, c := range cpuArray {
-		cpuSum += c
-	}
-
-	return cpuSum / float64(instanceCount)
-}
-
 func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
 	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/stats")
 	Expect(cmd.Wait(timeout)).To(Exit(0))
@@ -366,6 +351,21 @@ func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
 		mem[i] = instance.Stats.Usage.Mem
 	}
 	return mem
+}
+
+func AverageCPUByInstance(appGUID string, timeout time.Duration) float64 {
+	cpuArray := allInstancesCPU(appGUID, timeout)
+	instanceCount := len(cpuArray)
+	if instanceCount == 0 {
+		return math.MaxInt64
+	}
+
+	var cpuSum float64
+	for _, c := range cpuArray {
+		cpuSum += c
+	}
+
+	return cpuSum / float64(instanceCount)
 }
 
 func AverageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
