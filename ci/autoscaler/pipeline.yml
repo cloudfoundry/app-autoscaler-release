@@ -1,4 +1,33 @@
 ---
+anchors:
+  cleanup-task-main: &cleanupTaskMain
+    task: cleanup
+    file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      SKIP_SSL_VALIDATION: true
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  cleanup-task-main: &cleanupTaskPr
+    task: cleanup
+    file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params:
+      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      SKIP_SSL_VALIDATION: true
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-pr
+  cleanup-main: &cleanupMain
+    on_abort:
+      <<: *cleanupTaskMain
+    on_failure:
+      <<: *cleanupTaskMain 
+  cleanup-pr: &cleanupPr
+    on_abort:
+      <<: *cleanupTaskPr
+    on_failure:
+      <<: *cleanupTaskPr 
+
+    
 groups:
 - name: autoscaler-release
   jobs:
@@ -438,13 +467,7 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     ensure:
-      task: cleanup
-      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params:
-        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-        SKIP_SSL_VALIDATION: true
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
+      <<: *cleanupTaskMain
 
 
 
@@ -467,18 +490,12 @@ jobs:
       app-autoscaler-release: app-autoscaler-release-main
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-    on_failure:
-      task: cleanup
-      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params:
-        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-        SKIP_SSL_VALIDATION: true
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
+    <<: *cleanupMain
   - task: register-broker
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+    <<: *cleanupMain
   - task: autoscaler-pre-upgrade
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -491,6 +508,7 @@ jobs:
       NODES: 1  
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+    <<: *cleanupMain
   - task: run-pre-release-script
     file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
     params:
@@ -506,9 +524,7 @@ jobs:
       USE_POSTGRES_PERSISTENT_DISK: true
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-    on_failure:
-      task: get-logs-on-failure
-      file: app-autoscaler-ci/autoscaler/tasks/get-logs.yml
+    <<: *cleanupMain
   - task: autoscaler-post-upgrade
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -521,6 +537,7 @@ jobs:
       NODES: 1 
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+    <<: *cleanupMain
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -530,13 +547,7 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     ensure:
-      task: cleanup
-      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params:
-        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-        SKIP_SSL_VALIDATION: true
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
+      <<: *cleanupTaskMain
 
 
 
@@ -578,10 +589,12 @@ jobs:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
+    <<: *cleanupPr
   - task: register-broker
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+    <<: *cleanupPr
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -590,14 +603,7 @@ jobs:
       SKIP_SSL_VALIDATION: true
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
-    on_failure:
-      task: cleanup
-      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params:
-        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-        SKIP_SSL_VALIDATION: true
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-pr
+    <<: *cleanupPr
   - task: autoscaler-upgrade-test
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -612,13 +618,7 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
     ensure:
-      task: cleanup
-      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params:
-        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-        SKIP_SSL_VALIDATION: true
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-pr 
+      <<: *cleanupTaskPr
   on_success:
     put: app-autoscaler-release-pr
     params:
