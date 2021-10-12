@@ -3,10 +3,10 @@
 set -euo pipefail
 set -x
 
-ORG_PREFIX=ASATS
+ORG_PREFIX="ASATS|ASUP|CUST_MET"
 SERVICE_PREFIX=autoscaler
 
-ORGS=$(cf orgs | grep -v name | grep ${ORG_PREFIX})
+ORGS=$(cf orgs | grep -v name | grep -E ${ORG_PREFIX})
 for ORG in $ORGS; do
 	set +e
 	cf delete-org "$ORG" -f
