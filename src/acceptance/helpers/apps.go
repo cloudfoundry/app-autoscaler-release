@@ -42,6 +42,16 @@ func SendMetric(cfg *config.Config, appName string, metric int) {
 	}, cfg.DefaultTimeoutDuration(), 5*time.Second).Should(ContainSubstring("success"))
 }
 
+func SendMtlsMetric(cfg *config.Config, appName string, metric int) {
+	Eventually(func() string {
+		response := cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/mtls/test_metric/%d", metric))
+		if response == "" {
+			return "success"
+		}
+		return response
+	}, cfg.DefaultTimeoutDuration(), 5*time.Second).Should(ContainSubstring("success"))
+}
+
 func StartApp(appName string, timeout time.Duration) bool {
 	return Expect(cf.Cf("start", appName).Wait(timeout)).To(Exit(0))
 }

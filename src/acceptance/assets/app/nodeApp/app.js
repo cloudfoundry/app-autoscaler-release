@@ -95,6 +95,60 @@ app.get('/custom-metrics/:type/:value', function (req, res) {
   }
 })
 
+app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
+    try {
+        var metricType = req.params.type;
+        var metricValue = parseInt(req.params.value, 10);
+        var instanceIndex = process.env.CF_INSTANCE_INDEX;
+        var appGuid = JSON.parse(process.env.VCAP_APPLICATION).application_id;
+
+        var postData = {
+            "instance_index": parseInt(instanceIndex),
+            "metrics": [{
+                "name": metricType,
+                "value": parseInt(metricValue),
+                "unit": "test-unit"
+            }]
+        }
+        var credentials = {}
+        var metricsForwarderURL = "";
+
+        // for service offering
+        if (process.env.VCAP_SERVICES) {
+            var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+            if (vcapServices.autoscaler && vcapServices.autoscaler[0] && vcapServices.autoscaler[0].credentials) {
+                credentials = vcapServices.autoscaler[0].credentials;
+                metricsForwarderURL = credentials.custom_metrics.mtls_url;
+            }
+        }
+
+        var options = {
+            uri: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
+            method: 'POST',
+            key: await readFile(process.env.CF_INSTANCE_KEY),
+            cert: await readFile(process.env.CF_INSTANCE_CERT),
+            body: JSON.stringify(postData),
+            headers: { 'Content-Type': 'application/json' }
+        }
+        request(options, function (err, result, body) {
+            if (err || result.statusCode !== 200) {
+                console.log(err);
+                res.status(result.statusCode).json({
+                    err: err,
+                    statusCode: result.statusCode,
+                    response: body,
+                }).end();
+            } else {
+                res.send("success with mtls").end();
+            }
+        });
+
+    }catch(err) {
+        console.log(err);
+        res.status(500).send(err);
+    }
+});
+
 app.get('/cpu/:util/:minute', async function (req, res) {
     var util = parseInt(req.params.util, 10);
     var minute = parseInt(req.params.minute, 10);

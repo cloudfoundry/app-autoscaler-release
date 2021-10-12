@@ -57,4 +57,22 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 			Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
 		})
 	})
+
+	Context("when scaling by custom metrics via MTLS", func() {
+		It("should scale out and scale in", func() {
+			By("Scale out to 2 instances")
+			scaleOut := func() int {
+				helpers.SendMtlsMetric(cfg, appName, 550)
+				return helpers.RunningInstances(appGUID, 5*time.Second)
+			}
+			Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
+
+			By("Scale in to 1 instances")
+			scaleIn := func() int {
+				helpers.SendMtlsMetric(cfg, appName, 100)
+				return helpers.RunningInstances(appGUID, 5*time.Second)
+			}
+			Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
+		})
+	})
 })
