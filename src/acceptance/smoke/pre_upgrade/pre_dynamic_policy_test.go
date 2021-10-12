@@ -20,9 +20,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	)
 
 	JustBeforeEach(func() {
-		appName = CreateApp("nodeapp-cpu", initialInstanceCount)
+		appName = CreateTestApp(cfg, "nodeapp-cpu", initialInstanceCount)
 		appGUID = GetAppGuid(cfg, appName)
-		StartApp(appName)
+		StartApp(appName, cfg.CfPushTimeoutDuration())
 		WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		_ = CreatePolicy(cfg, appName, appGUID, policy)
 	})

@@ -4,6 +4,9 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 
@@ -39,4 +42,39 @@ func DeleteServices(cfg *config.Config, services []string) {
 			Expect(purgeService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
 		}
 	}
+}
+
+const (
+	CustomMetricPath    = "/v1/apps/{appId}/credential"
+	CustomMetricCredEnv = "AUTO_SCALER_CUSTOM_METRIC_ENV"
+)
+
+func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
+	oauthToken := OauthToken(cfg)
+	customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
+	req, err := http.NewRequest("PUT", customMetricURL, nil)
+	Expect(err).ShouldNot(HaveOccurred())
+	req.Header.Add("Authorization", oauthToken)
+
+	resp, err := GetHTTPClient(cfg).Do(req)
+	Expect(err).ShouldNot(HaveOccurred())
+	defer func() { _ = resp.Body.Close() }()
+	Expect(resp.StatusCode).To(Equal(http.StatusOK))
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	Expect(err).NotTo(HaveOccurred())
+	setEnv := cf.Cf("set-env", appName, CustomMetricCredEnv, string(bodyBytes)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(setEnv).To(Exit(0), "failed set custom metric credential env")
+}
+
+func DeleteCustomMetricCred(cfg *config.Config, appGUID string) {
+	oauthToken := OauthToken(cfg)
+	customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
+	req, err := http.NewRequest("DELETE", customMetricURL, nil)
+	Expect(err).ShouldNot(HaveOccurred())
+	req.Header.Add("Authorization", oauthToken)
+
+	resp, err := GetHTTPClient(cfg).Do(req)
+	Expect(err).ShouldNot(HaveOccurred())
+	defer func() { _ = resp.Body.Close() }()
+	Expect(resp.StatusCode).To(Equal(http.StatusOK))
 }
