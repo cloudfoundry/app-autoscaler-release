@@ -18,7 +18,6 @@ import (
 var (
 	cfg       *config.Config
 	setup     *workflowhelpers.ReproducibleTestSuiteSetup
-	interval  int
 	orgName   string
 	orgGUID   string
 	spaceName string
@@ -55,6 +54,11 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
 	setup.Setup()
+
+	if cfg.IsServiceOfferingEnabled() {
+		helpers.CheckServiceExists(cfg)
+	}
+
 })
 
 var _ = AfterSuite(func() {
