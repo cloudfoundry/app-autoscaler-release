@@ -134,6 +134,9 @@ properties:
   autoscaler.apiserver.metrics_forwarder.host:
     description: "Host where metricsforwarder is running"
     default: "autoscalermetrics.bosh-lite.com"
+  autoscaler.apiserver.metrics_forwarder.mtls_host:
+    description: "Host where metricsforwarder mtls authentication route is available"
+    default: ""
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
