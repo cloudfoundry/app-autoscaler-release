@@ -4,7 +4,6 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	. "github.com/onsi/gomega"
@@ -18,14 +17,7 @@ func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []str
 	err := json.Unmarshal(rawApps.Out.Contents(), &apps)
 	Expect(err).ShouldNot(HaveOccurred())
 
-	var names []string
-	for _, app := range apps.Resources {
-		if strings.HasPrefix(app.Name, prefix) {
-			names = append(names, app.Name)
-		}
-	}
-
-	return names
+	return filterByPrefix(prefix, getNames(apps))
 }
 
 func DeleteApps(cfg *config.Config, apps []string, threshold int) {
