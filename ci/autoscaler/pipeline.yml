@@ -513,7 +513,7 @@ jobs:
       SKIP_SSL_VALIDATION: true
       NAME_PREFIX: ASUP
       SUITES: |
-        smoke/pre_upgrade pre_upgrade
+        pre_upgrade
       NODES: 1  
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
@@ -542,7 +542,7 @@ jobs:
       SKIP_SSL_VALIDATION: true
       NAME_PREFIX: ASUP
       SUITES: |
-        smoke/post_upgrade post_upgrade
+        post_upgrade
       NODES: 1 
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
