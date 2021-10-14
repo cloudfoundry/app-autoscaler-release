@@ -49,7 +49,7 @@ pushd app-autoscaler-release
   OPS_FILES_TO_USE=""
   if [ -f REQUIRED_OPS_FILES ]; then
     for OPS_FILE in $(cat REQUIRED_OPS_FILES); do
-      if [ -f "${$OPS_FILE}" ]; then
+      if [ -f "${OPS_FILE}" ]; then
         OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
       fi
     done
