@@ -49,7 +49,7 @@ func StartApp(appName string, timeout time.Duration) bool {
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
 	appName := generator.PrefixedRandomName("autoscaler", appType)
 	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", "../../assets/app/nodeApp").Wait(cfg.CfPushTimeoutDuration())
+	createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
 	Expect(createApp).To(Exit(0), "failed creating app")
 
 	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
