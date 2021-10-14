@@ -613,23 +613,6 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
     <<: *cleanupPr
-  - task: autoscaler-upgrade-test
-    file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
-    params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      SERVICE_OFFERING_ENABLED: true
-      SKIP_SSL_VALIDATION: true
-      NAME_PREFIX: ASUP
-      SUITES: |
-        smoke/pre_upgrade
-        pre_upgrade
-        smoke/post_upgrade
-        post_upgrade
-      NODES: 1
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-pr
-    ensure:
-      <<: *cleanupTaskPr
   on_success:
     put: app-autoscaler-release-pr
     params:
