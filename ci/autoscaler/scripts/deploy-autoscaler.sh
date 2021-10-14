@@ -75,6 +75,7 @@ EOF
       deploy templates/app-autoscaler-deployment.yml \
       ${OPS_FILES_TO_USE} \
       -v system_domain=${SYSTEM_DOMAIN} \
+      -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
       -v skip_ssl_validation=true
@@ -92,6 +93,7 @@ EOF
     deploy templates/app-autoscaler-deployment.yml \
     ${OPS_FILES_TO_USE} \
     -v system_domain=${SYSTEM_DOMAIN} \
+    -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
     -v cf_client_id=autoscaler_client_id \
     -v cf_client_secret=autoscaler_client_secret \
     -v skip_ssl_validation=true
