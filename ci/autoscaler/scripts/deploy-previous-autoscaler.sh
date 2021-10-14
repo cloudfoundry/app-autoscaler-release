@@ -18,15 +18,6 @@ RELEASE_SHA=$(cat previous-stable-release/sha1)
 bosh upload-release --sha1 "$RELEASE_SHA" "$RELEASE_URL"
 bosh releases
 
-cat << EOF > persistent_disk.yml
----
-- type: replace
-  path: /instance_groups/name=postgres_autoscaler/persistent_disk_type?
-  value: 10GB
-EOF
-
-cat persistent_disk.yml
-
 export UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 
 uaac target https://uaa.$SYSTEM_DOMAIN --skip-ssl-validation
@@ -48,12 +39,21 @@ else
      --secret "autoscaler_client_secret"
 fi
 
+OPS_FILES="-o example/operation/loggregator-certs-from-cf.yml"
+OPS_FILES="$OPS_FILES -o ../persistent_disk.yml"
+
 pushd app-autoscaler-release
+  OPS_FILES_TO_USE=""
+  for OPS_FILE in $OPS_FILES; do
+    if [ -f "${$OPS_FILE}" ]; then
+      OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
+    fi
+  done
+
   set +e
   bosh -n -d app-autoscaler \
     deploy templates/app-autoscaler-deployment.yml \
-    -o example/operation/loggregator-certs-from-cf.yml \
-    -o ../persistent_disk.yml \
+    ${OPS_FILES_TO_USE} \
     -v system_domain=${SYSTEM_DOMAIN} \
     -v cf_client_id=autoscaler_client_id \
     -v cf_client_secret=autoscaler_client_secret \
@@ -64,8 +64,7 @@ pushd app-autoscaler-release
   if [ $EXIT_CODE != "0" ]; then
     bosh -n -d app-autoscaler \
       deploy templates/app-autoscaler-deployment.yml \
-      -o example/operation/loggregator-certs-from-cf.yml \
-      -o ../persistent_disk.yml \
+      ${OPS_FILES_TO_USE} \
       -v system_domain=${SYSTEM_DOMAIN} \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
