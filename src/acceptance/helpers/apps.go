@@ -1,12 +1,13 @@
 package helpers
 
 import (
-	"acceptance/app"
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
+
+	cfh "github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -32,9 +33,8 @@ func DeleteApps(cfg *config.Config, apps []string, threshold int) {
 }
 
 func SendMetric(cfg *config.Config, appName string, metric int) {
-	curler := app.NewAppCurler(cfg)
 	Eventually(func() string {
-		response := curler.Curl(appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), 60*time.Second)
+		response := cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric))
 		if response == "" {
 			return "success"
 		}
