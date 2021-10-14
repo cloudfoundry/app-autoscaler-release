@@ -2,6 +2,7 @@ package pre_upgrade_test
 
 import (
 	. "acceptance/helpers"
+	"fmt"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 
@@ -20,9 +21,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	)
 
 	JustBeforeEach(func() {
-		appName = CreateApp("nodeapp-cpu", initialInstanceCount)
+		appName = CreateTestApp(cfg, "nodeapp-cpu", initialInstanceCount)
 		appGUID = GetAppGuid(cfg, appName)
-		StartApp(appName)
+		StartApp(appName, cfg.CfPushTimeoutDuration())
 		WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		_ = CreatePolicy(cfg, appName, appGUID, policy)
 	})
@@ -42,9 +43,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 				WaitForNInstancesRunning(appGUID, 2, 3*time.Minute)
 
-				// lets attempt to scale back down
-				response = helpers.CurlAppWithTimeout(cfg, appName, "/cpu/0/5", 10*time.Second)
-				Expect(response).Should(ContainSubstring(`set app cpu utilization to 1% for 5 minutes, busyTime=10, idleTime=990`))
+				By("lets attempt to scale back down")
+
+				for i := 0; i < 2; i++ {
+					response = helpers.CurlAppWithTimeout(cfg, appName, "/cpu/close", 10*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGUID, i))
+					Expect(response).Should(ContainSubstring(`close cpu test`))
+				}
 
 				WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
 			})

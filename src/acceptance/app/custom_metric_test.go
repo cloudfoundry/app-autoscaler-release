@@ -1,149 +1,60 @@
 package app_test
 
 import (
-	"acceptance/app"
-	"acceptance/config"
-	. "acceptance/helpers"
+	"acceptance/helpers"
 	"fmt"
 	"os"
+	"time"
 
-	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
-	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
-
-	"strconv"
-	"strings"
-	"time"
 )
 
 var _ = Describe("AutoScaler custom metrics policy", func() {
 	var (
-		appName              string
-		appGUID              string
-		initialInstanceCount int
-		policy               string
-		doneChan             chan bool
-		doneAcceptChan       chan bool
-		ticker               *time.Ticker
+		appName string
+		appGUID string
+		policy  string
 	)
-
-	Context("when scaling by custom metrics", func() {
-
-		JustBeforeEach(func() {
-			appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
-			countStr := strconv.Itoa(initialInstanceCount)
-			createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
-			Expect(createApp).To(Exit(0), "failed creating app")
-
-			mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")
-
-			guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-			Expect(guid).To(Exit(0))
-			appGUID = strings.TrimSpace(string(guid.Out.Contents()))
-			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
-			if !cfg.IsServiceOfferingEnabled() {
-				CreateCustomMetricCred(appName, appGUID)
-			}
-			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
-			WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
-
-			doneChan = make(chan bool)
-			doneAcceptChan = make(chan bool)
-		})
-
-		AfterEach(func() {
-			close(doneChan)
-			Eventually(doneAcceptChan, 30*time.Second).Should(Receive())
-
-			if os.Getenv("SKIP_TEARDOWN") == "true" {
-				fmt.Println("Skipping Teardown...")
-			} else {
-				DeletePolicy(appName, appGUID)
-				if !cfg.IsServiceOfferingEnabled() {
-					DeleteCustomMetricCred(appGUID)
-				}
-
-				Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
-			}
-		})
-
-		Context("when test_metric is less than scaling in threshold", func() {
-
-			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(1, 2, "test_metric", 500)
-				initialInstanceCount = 2
-			})
-
-			JustBeforeEach(func() {
-				ticker = time.NewTicker(15 * time.Second)
-				curler := app.NewAppCurler(cfg)
-				go func(chan bool) {
-					defer GinkgoRecover()
-					for {
-						select {
-						case <-doneChan:
-							ticker.Stop()
-							doneAcceptChan <- true
-							return
-						case <-ticker.C:
-							Eventually(func() string {
-								response := curler.Curl(appName, "/custom-metrics/test_metric/100", 60*time.Second)
-								if response == "" {
-									return "success"
-								}
-								return response
-							}, cfg.DefaultTimeoutDuration(), 5*time.Second).Should(ContainSubstring("success"))
-						}
-					}
-				}(doneChan)
-			})
-
-			It("should scale in", func() {
-				finishTime := time.Duration(interval*2)*time.Second + 5*time.Minute
-				WaitForNInstancesRunning(appGUID, 1, finishTime)
-			})
-		})
-
-		Context("when test_metric is more than scaling in threshold", func() {
-
-			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(1, 2, "test_metric", 500)
-				initialInstanceCount = 1
-			})
-
-			JustBeforeEach(func() {
-				ticker = time.NewTicker(15 * time.Second)
-				curler := app.NewAppCurler(cfg)
-				go func(chan bool) {
-					defer GinkgoRecover()
-					for {
-						select {
-						case <-doneChan:
-							ticker.Stop()
-							doneAcceptChan <- true
-							return
-						case <-ticker.C:
-							Eventually(func() string {
-								response := curler.Curl(appName, "/custom-metrics/test_metric/800", 60*time.Second)
-								if response == "" {
-									return "success"
-								}
-								return response
-							}, cfg.DefaultTimeoutDuration(), 5*time.Second).Should(ContainSubstring("success"))
-						}
-					}
-				}(doneChan)
-			})
-
-			It("should scale out", func() {
-				finishTime := time.Duration(interval*2)*time.Second + 5*time.Minute
-				WaitForNInstancesRunning(appGUID, 2, finishTime)
-			})
-		})
-
+	BeforeEach(func() {
+		policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+		appName = helpers.CreateTestApp(cfg, "node-custom-metric", 1)
+		appGUID = helpers.GetAppGuid(cfg, appName)
+		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
+		if !cfg.IsServiceOfferingEnabled() {
+			helpers.CreateCustomMetricCred(cfg, appName, appGUID)
+		}
+		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
+		helpers.WaitForNInstancesRunning(appGUID, 1, cfg.DefaultTimeoutDuration())
 	})
 
+	AfterEach(func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			fmt.Println("Skipping Teardown...")
+		} else {
+			DeletePolicy(appName, appGUID)
+			if !cfg.IsServiceOfferingEnabled() {
+				helpers.DeleteCustomMetricCred(cfg, appGUID)
+			}
+			helpers.DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
+		}
+	})
+
+	Context("when scaling by custom metrics", func() {
+		It("should scale out and scale in", func() {
+			By("Scale out to 2 instances")
+			scaleOut := func() int {
+				helpers.SendMetric(cfg, appName, 550)
+				return helpers.RunningInstances(appGUID, 5*time.Second)
+			}
+			Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
+
+			By("Scale in to 1 instances")
+			scaleIn := func() int {
+				helpers.SendMetric(cfg, appName, 100)
+				return helpers.RunningInstances(appGUID, 5*time.Second)
+			}
+			Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
+		})
+	})
 })

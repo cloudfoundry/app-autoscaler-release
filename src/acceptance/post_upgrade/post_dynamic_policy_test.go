@@ -2,6 +2,7 @@ package post_upgrade_test
 
 import (
 	"acceptance/helpers"
+	"fmt"
 
 	cfh "github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 
@@ -48,9 +49,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			helpers.WaitForNInstancesRunning(appGUID, 2, 3*time.Minute)
 
-			// lets attempt to scale back down
-			response = cfh.CurlAppWithTimeout(cfg, appName, "/cpu/0/5", 10*time.Second)
-			Expect(response).Should(ContainSubstring(`set app cpu utilization to 1% for 5 minutes, busyTime=10, idleTime=990`))
+			By("lets attempt to scale back down")
+
+			for i := 0; i < 2; i++ {
+				response = cfh.CurlAppWithTimeout(cfg, appName, "/cpu/close", 10*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGUID, i))
+				Expect(response).Should(ContainSubstring(`close cpu test`))
+			}
 
 			helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
 		})

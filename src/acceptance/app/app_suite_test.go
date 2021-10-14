@@ -2,7 +2,6 @@ package app_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -18,11 +17,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
-)
-
-const (
-	CustomMetricPath    = "/v1/apps/{appId}/credential"
-	CustomMetricCredEnv = "AUTO_SCALER_CUSTOM_METRIC_ENV"
 )
 
 var (
@@ -151,34 +145,4 @@ func DeletePolicy(appName, appGUID string) {
 	} else {
 		DeletePolicyWithAPI(appGUID)
 	}
-}
-
-func CreateCustomMetricCred(appName, appGUID string) {
-	oauthToken := OauthToken(cfg)
-	customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest("PUT", customMetricURL, nil)
-	Expect(err).ShouldNot(HaveOccurred())
-	req.Header.Add("Authorization", oauthToken)
-
-	resp, err := doAPIRequest(req)
-	Expect(err).ShouldNot(HaveOccurred())
-	defer resp.Body.Close()
-	Expect(resp.StatusCode).To(Equal(http.StatusOK))
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	Expect(err).NotTo(HaveOccurred())
-	setEnv := cf.Cf("set-env", appName, CustomMetricCredEnv, string(bodyBytes)).Wait(cfg.DefaultTimeoutDuration())
-	Expect(setEnv).To(Exit(0), "failed set custom metric credential env")
-}
-
-func DeleteCustomMetricCred(appGUID string) {
-	oauthToken := OauthToken(cfg)
-	customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest("DELETE", customMetricURL, nil)
-	Expect(err).ShouldNot(HaveOccurred())
-	req.Header.Add("Authorization", oauthToken)
-
-	resp, err := doAPIRequest(req)
-	Expect(err).ShouldNot(HaveOccurred())
-	defer resp.Body.Close()
-	Expect(resp.StatusCode).To(Equal(http.StatusOK))
 }

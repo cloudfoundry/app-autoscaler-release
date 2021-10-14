@@ -1,9 +1,7 @@
 package post_upgrade_test
 
 import (
-	"acceptance/app"
 	"acceptance/helpers"
-	"fmt"
 	"time"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
@@ -41,28 +39,17 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 
 		By("Scaling out to 2 instances")
 		scaleOut := func() int {
-			SendMetric(appName, 550)
+			helpers.SendMetric(cfg, appName, 550)
 			return helpers.RunningInstances(appGUID, 5*time.Second)
 		}
 		Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
 
 		By("Scaling in to 1 instance")
 		scaleIn := func() int {
-			SendMetric(appName, 100)
+			helpers.SendMetric(cfg, appName, 100)
 			return helpers.RunningInstances(appGUID, 5*time.Second)
 		}
 		Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
 	})
 
 })
-
-func SendMetric(appName string, metric int) {
-	curler := app.NewAppCurler(cfg)
-	Eventually(func() string {
-		response := curler.Curl(appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), 60*time.Second)
-		if response == "" {
-			return "success"
-		}
-		return response
-	}, cfg.DefaultTimeoutDuration(), 5*time.Second).Should(ContainSubstring("success"))
-}
