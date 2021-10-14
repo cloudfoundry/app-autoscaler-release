@@ -31,6 +31,7 @@ anchors:
 groups:
 - name: autoscaler-release
   jobs:
+  - set-pipeline
   - unit-tests-main
   - unit-tests-pr
   - integration-tests-main
@@ -149,6 +150,14 @@ resources:
     regexp: releases/app-autoscaler-v(.*).tgz
 
 jobs:
+- name: set-pipeline
+  public: true
+  plan:
+  - get: app-autoscaler-ci
+    trigger: true
+  - set_pipeline: self
+    file: app-autoscaler-ci/autoscaler/pipeline.yml
+
 - name: unit-tests-main
   public: true
   build_logs_to_retain: 100
