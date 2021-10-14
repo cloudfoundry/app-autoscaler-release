@@ -121,5 +121,5 @@ app.get('/cpu/:util/:minute', async function (req, res) {
 
 app.get('/cpu/close', async function (req, res) {
     enableCpuTest = false;
-    res.send('close cpu test');
+    res.status(200).send('close cpu test');
 });

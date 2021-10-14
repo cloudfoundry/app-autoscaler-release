@@ -52,7 +52,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			By("lets attempt to scale back down")
 
 			for i := 0; i < 2; i++ {
-				response = cfh.CurlAppWithTimeout(cfg, appName, "/cpu/close", 10*time.Second, "-H", fmt.Sprintf(`"X-Cf-App-Instance":"%s:%d"`, appGUID, i))
+				response = cfh.CurlAppWithTimeout(cfg, appName, "/cpu/close", 10*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGUID, i))
 				Expect(response).Should(ContainSubstring(`close cpu test`))
 			}
 
