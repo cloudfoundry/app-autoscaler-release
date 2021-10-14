@@ -16,7 +16,6 @@ import (
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
-	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 )
@@ -93,18 +92,6 @@ type SpecificDateSchedule struct {
 	ScheduledInstanceMin  int    `json:"instance_min_count"`
 	ScheduledInstanceMax  int    `json:"instance_max_count"`
 	ScheduledInstanceInit int    `json:"initial_min_instance_count"`
-}
-
-func Curl(cfg *config.Config, args ...string) (int, []byte, error) {
-	curlCmd := helpers.Curl(cfg, append([]string{"--output", "/dev/stderr", "--write-out", "%{http_code}"}, args...)...).Wait(cfg.DefaultTimeoutDuration())
-	if curlCmd.ExitCode() != 0 {
-		return 0, curlCmd.Err.Contents(), fmt.Errorf("curl failed: exit code %d", curlCmd.ExitCode())
-	}
-	statusCode, err := strconv.Atoi(string(curlCmd.Out.Contents()))
-	if err != nil {
-		return 0, curlCmd.Err.Contents(), err
-	}
-	return statusCode, curlCmd.Err.Contents(), nil
 }
 
 func OauthToken(cfg *config.Config) string {
@@ -309,28 +296,6 @@ func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Durati
 	}, timeout, 10*time.Second).Should(Equal(instances))
 }
 
-func allInstancesCPU(appGUID string, timeout time.Duration) []float64 {
-	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/stats")
-	Expect(cmd.Wait(timeout)).To(Exit(0))
-
-	var stats appStats
-	err := json.Unmarshal(cmd.Out.Contents(), &stats)
-	Expect(err).ToNot(HaveOccurred())
-
-	if len(stats) == 0 {
-		return []float64{}
-	}
-
-	cpu := make([]float64, len(stats))
-
-	for k, instance := range stats {
-		i, err := strconv.Atoi(k)
-		Expect(err).NotTo(HaveOccurred())
-		cpu[i] = instance.Stats.Usage.CPU
-	}
-	return cpu
-}
-
 func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
 	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/stats")
 	Expect(cmd.Wait(timeout)).To(Exit(0))
@@ -351,21 +316,6 @@ func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
 		mem[i] = instance.Stats.Usage.Mem
 	}
 	return mem
-}
-
-func AverageCPUByInstance(appGUID string, timeout time.Duration) float64 {
-	cpuArray := allInstancesCPU(appGUID, timeout)
-	instanceCount := len(cpuArray)
-	if instanceCount == 0 {
-		return math.MaxInt64
-	}
-
-	var cpuSum float64
-	for _, c := range cpuArray {
-		cpuSum += c
-	}
-
-	return cpuSum / float64(instanceCount)
 }
 
 func AverageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
@@ -445,6 +395,7 @@ func GetHTTPClient(cfg *config.Config) *http.Client {
 		Timeout: 30 * time.Second,
 	}
 }
+
 func GetAppGuid(cfg *config.Config, appName string) string {
 	guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
 	Expect(guid).To(Exit(0))

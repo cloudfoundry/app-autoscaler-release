@@ -2,10 +2,7 @@ package post_upgrade_test
 
 import (
 	"acceptance/helpers"
-	"fmt"
-
-	cfh "github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
-
+``
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -40,23 +37,16 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			}
 			Expect(expectedPolicy).To(BeEquivalentTo(policy))
 
-			By("should scale out and in again")
-			Expect(helpers.RunningInstances(appGUID, 5*time.Second)).To(Equal(1))
-			helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
-
-			response := cfh.CurlAppWithTimeout(cfg, appName, "/cpu/50/1", 10*time.Second)
-			Expect(response).Should(ContainSubstring(`set app cpu utilization to 50% for 1 minutes, busyTime=10, idleTime=10`))
-
+			By("should scale out to 2 instances")
+			helpers.AppSetCpuUsage(cfg, appName, 50, 5)
 			helpers.WaitForNInstancesRunning(appGUID, 2, 3*time.Minute)
 
-			By("lets attempt to scale back down")
-
+			By("should scale in to 1 instance after cpu usage is reduced")
 			for i := 0; i < 2; i++ {
-				response = cfh.CurlAppWithTimeout(cfg, appName, "/cpu/close", 10*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGUID, i))
-				Expect(response).Should(ContainSubstring(`close cpu test`))
+				helpers.AppEndCpuTest(cfg, appName, i)
 			}
-
 			helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
+
 		})
 	})
 })
