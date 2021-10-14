@@ -1,0 +1,21 @@
+---
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/metricshandler?
+  value:
+    tls:
+      ca_cert: ((/bosh-autoscaler/cf/diego_instance_identity_ca.certificate))
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_forwarder/mtls_host?
+  value: autoscaler-metricsforwarder-mtls.((system_domain))
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/-
+  value:
+  - name: autoscaler_metrics_forwarder_mtls
+    registration_interval: 20s
+    port: 6201
+    tags:
+      component: autoscaler_metrics_forwarder_mtls
+    uris:
+    - autoscaler-metricsforwarder-mtls.((system_domain))
