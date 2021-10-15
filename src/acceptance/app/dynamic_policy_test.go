@@ -32,12 +32,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	JustBeforeEach(func() {
 		appName = helpers.CreateTestApp(cfg, "dynamic-policy", initialInstanceCount)
 		appGUID = helpers.GetAppGuid(cfg, appName)
-		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
-		if !cfg.IsServiceOfferingEnabled() {
-			helpers.CreateCustomMetricCred(cfg, appName, appGUID)
-		}
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		helpers.WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 	})
 
 	AfterEach(func() {
@@ -263,7 +260,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				}(doneChan)
 			})
 			It("should scale in", func() {
-				helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
+				helpers.WaitForNInstancesRunning(appGUID, 1, 4*time.Minute)
 			})
 		})
 
