@@ -60,3 +60,16 @@ func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int)
 func DeleteTestApp(appName string, timeout time.Duration) {
 	Expect(cf.Cf("delete", appName, "-f", "-r").Wait(timeout)).To(Exit(0))
 }
+
+func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url string) string {
+	appGuid := GetAppGuid(cfg, appName)
+	return cfh.CurlAppWithTimeout(cfg, appName, url, 10*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGuid, appInstance))
+}
+
+func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int) {
+	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/cpu/%d/%d", percent, minutes), 10*time.Second)).Should(ContainSubstring(`set app cpu utilization`))
+}
+
+func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
+	Expect(CurlAppInstance(cfg, appName, instance, "/cpu/close")).Should(ContainSubstring(`close cpu test`))
+}

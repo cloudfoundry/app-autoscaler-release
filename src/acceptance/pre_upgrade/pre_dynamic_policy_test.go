@@ -1,15 +1,11 @@
 package pre_upgrade_test
 
 import (
-	. "acceptance/helpers"
-	"fmt"
-
-	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
+	"acceptance/helpers"
 
 	"time"
 
 	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("AutoScaler dynamic policy", func() {
@@ -21,11 +17,11 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	)
 
 	JustBeforeEach(func() {
-		appName = CreateTestApp(cfg, "nodeapp-cpu", initialInstanceCount)
-		appGUID = GetAppGuid(cfg, appName)
-		StartApp(appName, cfg.CfPushTimeoutDuration())
-		WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
-		_ = CreatePolicy(cfg, appName, appGUID, policy)
+		appName = helpers.CreateTestApp(cfg, "nodeapp-cpu", initialInstanceCount)
+		appGUID = helpers.GetAppGuid(cfg, appName)
+		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
+		helpers.WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+		_ = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 	})
 
 	Context("when scaling by cpu", func() {
@@ -33,24 +29,22 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when cpu is greater than and then less than threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "cpu", 5, 10)
+				policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "cpu", 5, 10)
 				initialInstanceCount = 1
 			})
 
 			It("should scale out and back in", func() {
-				response := helpers.CurlAppWithTimeout(cfg, appName, "/cpu/50/1", 10*time.Second)
-				Expect(response).Should(ContainSubstring(`set app cpu utilization to 50% for 1 minutes, busyTime=10, idleTime=10`))
 
-				WaitForNInstancesRunning(appGUID, 2, 3*time.Minute)
+				By("should scale out to 2 instances")
+				helpers.AppSetCpuUsage(cfg, appName, 50, 5)
+				helpers.WaitForNInstancesRunning(appGUID, 2, 3*time.Minute)
 
-				By("lets attempt to scale back down")
-
+				By("should scale in to 1 instance after cpu usage is reduced")
 				for i := 0; i < 2; i++ {
-					response = helpers.CurlAppWithTimeout(cfg, appName, "/cpu/close", 10*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGUID, i))
-					Expect(response).Should(ContainSubstring(`close cpu test`))
+					helpers.AppEndCpuTest(cfg, appName, i)
 				}
+				helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
 
-				WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
 			})
 
 		})

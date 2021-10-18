@@ -1,6 +1,5 @@
 var express = require('express');
 var app = express();
-var http = require('http');
 var request = require('request');
 var enableCpuTest = false;
 
@@ -105,7 +104,7 @@ app.get('/cpu/:util/:minute', async function (req, res) {
     var idleTime = busyTime * (100 - util) / util;
     var msg = 'set app cpu utilization to ' + util + '% for ' + minute + ' minutes, busyTime=' + busyTime + ', idleTime=' + idleTime
     console.log(msg);
-    res.send(msg);
+    res.status(200).send(msg);
     var startTime = new Date().getTime();
     var endTime = startTime + minute * 60 * 1000;
     enableCpuTest = true;
