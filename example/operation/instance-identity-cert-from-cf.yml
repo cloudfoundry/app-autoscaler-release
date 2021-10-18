@@ -12,7 +12,7 @@
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/-
   value:
-  - name: autoscaler_metrics_forwarder_mtls
+    name: autoscaler_metrics_forwarder_mtls
     registration_interval: 20s
     port: 6201
     tags:
