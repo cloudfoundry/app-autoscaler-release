@@ -66,7 +66,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
-				helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
+				helpers.WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 			})
 		})
 
