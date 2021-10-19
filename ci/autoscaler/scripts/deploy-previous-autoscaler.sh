@@ -39,13 +39,10 @@ else
      --secret "autoscaler_client_secret"
 fi
 
-OPS_FILES="-o example/operation/loggregator-certs-from-cf.yml"
-OPS_FILES="$OPS_FILES -o ../persistent_disk.yml"
-
 pushd app-autoscaler-release
   OPS_FILES_TO_USE=""
   for OPS_FILE in $OPS_FILES; do
-    if [ -f "${$OPS_FILE}" ]; then
+    if [ -f "${OPS_FILE}" ]; then
       OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
     fi
   done
