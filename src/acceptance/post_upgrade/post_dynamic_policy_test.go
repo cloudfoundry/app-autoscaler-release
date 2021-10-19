@@ -2,7 +2,7 @@ package post_upgrade_test
 
 import (
 	"acceptance/helpers"
-``
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
