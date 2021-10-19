@@ -58,7 +58,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		})
 	})
 
-	Context("when scaling by custom metrics via MTLS", func() {
+	FContext("when scaling by custom metrics via MTLS", func() {
 		It("should scale out and scale in", func() {
 			By("Scale out to 2 instances")
 			scaleOut := func() int {

@@ -1,5 +1,6 @@
 var express = require('express');
 var app = express();
+const fs = require('fs').promises;
 var request = require('request');
 var enableCpuTest = false;
 
@@ -125,27 +126,30 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
         var options = {
             uri: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
             method: 'POST',
-            key: await readFile(process.env.CF_INSTANCE_KEY),
-            cert: await readFile(process.env.CF_INSTANCE_CERT),
+            key: await fs.readFile(process.env.CF_INSTANCE_KEY),
+            cert: await fs.readFile(process.env.CF_INSTANCE_CERT),
             body: JSON.stringify(postData),
             headers: { 'Content-Type': 'application/json' }
         }
         request(options, function (err, result, body) {
-            if (err || result.statusCode !== 200) {
-                console.log(err);
-                res.status(result.statusCode).json({
-                    err: err,
-                    statusCode: result.statusCode,
+            if (err || result.statusCode > 299) {
+                console.log("error: " + err)
+                var payload = {
+                    err: err ? err.message : null,
+                    statusCode: result ? result.statusCode : null,
                     response: body,
-                }).end();
+                }
+                console.log(JSON.stringify(payload));
+                res.status(500).json(payload).end();
             } else {
-                res.send("success with mtls").end();
+                res.status(200).send("success with mtls").end();
             }
         });
 
     }catch(err) {
-        console.log(err);
-        res.status(500).send(err);
+        var payload = { exception: err };
+        console.log(payload);
+        res.status(500).json(payload);
     }
 });
 
