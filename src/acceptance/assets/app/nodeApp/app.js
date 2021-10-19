@@ -1,7 +1,7 @@
-var express = require('express');
-var app = express();
-const fs = require('fs').promises;
-var request = require('request');
+const express = require('express');
+const app = express();
+const http = require('http');
+const request = require('request');
 var enableCpuTest = false;
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -24,9 +24,7 @@ app.get('/', function (req, res) {
     res.status(200).send('dummy application root');
 });
 
-app.listen(process.env.PORT || 8080, function () {
-    console.log('dummy application started');
-});
+
 
 app.get('/custom-metrics/:type/:value', function (req, res) {
   try {
@@ -130,8 +128,8 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
         var options = {
             uri: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
             method: 'POST',
-            key: await fs.readFile(process.env.CF_INSTANCE_KEY),
-            cert: await fs.readFile(process.env.CF_INSTANCE_CERT),
+            key: await readFile(process.env.CF_INSTANCE_KEY),
+            cert: await readFile(process.env.CF_INSTANCE_CERT),
             body: JSON.stringify(postData),
             headers: { 'Content-Type': 'application/json' }
         }
@@ -184,3 +182,5 @@ app.get('/cpu/close', async function (req, res) {
     enableCpuTest = false;
     res.status(200).send('close cpu test');
 });
+
+module.exports = app ;
