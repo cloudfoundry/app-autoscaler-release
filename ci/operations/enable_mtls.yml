@@ -1,0 +1,7 @@
+---
+# Enable XFCC header for MTLS
+- type: replace
+  path: /instance_groups/name=router/jobs/name=gorouter/properties/router/forwarded_client_cert?
+  value: forward
+
+
