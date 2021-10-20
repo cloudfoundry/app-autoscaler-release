@@ -416,8 +416,9 @@ jobs:
   - task: combine-ops-files
     file: app-autoscaler-ci/autoscaler/tasks/combine-ops.yml
     input_mapping:
-      ops-files: combined-ops
+      ops-files: cf-deployment
       custom-ops: app-autoscaler-ci
+      app-autoscaler-ci: app-autoscaler-ci
     output_mapping:
       combined-ops: ops-files
 
