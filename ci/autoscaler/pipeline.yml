@@ -214,7 +214,6 @@ jobs:
       context: unit-tests
 
 
-
 - name: integration-tests-main
   public: true
   build_logs_to_retain: 100
@@ -412,16 +411,26 @@ jobs:
       passed: [setup-infrastructure]
       trigger: true
     - get: autoscaler-env-vars-store
+    - get: autoscaler-ci
+
+  - task: combine-ops-files
+    file: app-autoscaler-ci/autoscaler/tasks/combine-ops.yml
+    input_mapping:
+      ops-files: combined-ops
+      custom-ops: autoscaler-ci
+    output_mapping:
+      combined-ops: ops-files
+
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
       bbl-state: bbl-state
       cf-deployment: cf-deployment
-      ops-files: cf-deployment
+      ops-files: ops-files
       vars-files: autoscaler-env-vars-store
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml"
+      OPS_FILES: "operations/scale-to-one-az.yml operations/use-compiled-releases.yml operations/enable_mtls.yml"
     ensure:
       put: autoscaler-env-vars-store
       params:
@@ -433,8 +442,6 @@ jobs:
       bbl-state: bbl-state
     params:
       ERRAND_NAME: smoke-tests
-
-
 
 
 - name: acceptance-main
