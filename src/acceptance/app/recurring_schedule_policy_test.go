@@ -84,10 +84,10 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 				By("setting to initial_min_instance_count")
 				// … + stats_window_secs (autoscaler-config)
 				latency := 2 * time.Minute // for looping, networking, etc.
-				waitingTime :=
+				waitingTime := time.Duration(cfg.DefaultStatWindowSecs)*time.Second +
 					time.Duration(policy.ScalingRules[0].BreachDurationSeconds)*time.Second +
-						time.Duration(cfg.AggregateInterval)*time.Second +
-						latency
+					time.Duration(cfg.AggregateInterval)*time.Second +
+					latency
 				jobRunTime := time.Until(startTime.Add(waitingTime))
 				WaitForNInstancesRunning(appGUID, 3, jobRunTime)
 

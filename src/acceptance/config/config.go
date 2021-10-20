@@ -45,9 +45,10 @@ type Config struct {
 	ExistingClient                 string  `json:"existing_client"`
 	ExistingClientSecret           string  `json:"existing_client_secret"`
 
-	ServiceName       string `json:"service_name"`
-	ServicePlan       string `json:"service_plan"`
-	AggregateInterval int    `json:"aggregate_interval"`
+	ServiceName           string `json:"service_name"`
+	ServicePlan           string `json:"service_plan"`
+	AggregateInterval     int    `json:"aggregate_interval"`
+	DefaultStatWindowSecs int    `yaml:"defaultStatWindowSecs"`
 
 	CfJavaTimeout   int `json:"cf_java_timeout"`
 	NodeMemoryLimit int `json:"node_memory_limit"`
