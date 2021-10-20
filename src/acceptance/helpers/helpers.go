@@ -235,7 +235,7 @@ func GenerateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, 
 
 func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, threshold int64,
 	timezone string, startTime, endTime time.Time, daysOfMonthOrWeek Days,
-	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
+	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) ScalingPolicy {
 	scalingInRule := ScalingRule{
 		MetricType:            "memoryused",
 		BreachDurationSeconds: TestBreachDurationSeconds,
@@ -264,7 +264,7 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 		recurringSchedule.DaysOfWeek = []int{day}
 	}
 
-	policy := ScalingPolicy{
+	return ScalingPolicy{
 		InstanceMin:  instanceMin,
 		InstanceMax:  instanceMax,
 		ScalingRules: []*ScalingRule{&scalingInRule},
@@ -273,11 +273,21 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 			RecurringSchedules: []*RecurringSchedule{&recurringSchedule},
 		},
 	}
+}
 
-	bytes, err := MarshalWithoutHTMLEscape(policy)
+func GenerateDynamicAndRecurringSchedulePolicyAsJson(instanceMin, instanceMax int, threshold int64,
+	timezone string, startTime, endTime time.Time, daysOfMonthOrWeek Days,
+	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
+	policy := GenerateDynamicAndRecurringSchedulePolicy(
+		instanceMin, instanceMax, threshold,
+		timezone, startTime, endTime, daysOfMonthOrWeek,
+		scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit,
+	)
+
+	jsonBytes, err := MarshalWithoutHTMLEscape(policy)
 	Expect(err).NotTo(HaveOccurred())
 
-	return string(bytes)
+	return string(jsonBytes)
 }
 
 func RunningInstances(appGUID string, timeout time.Duration) int {

@@ -25,7 +25,8 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		daysOfMonthOrWeek    Days
 		startTime            time.Time
 		endTime              time.Time
-		policy               string
+		policy               ScalingPolicy
+		policyAsJson         string
 	)
 
 	BeforeEach(func() {
@@ -69,8 +70,9 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			Expect(err).NotTo(HaveOccurred())
 			startTime, endTime = getStartAndEndTime(location, 70*time.Second, time.Duration(interval+120)*time.Second)
 			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
+			policyAsJson = GenerateDynamicAndRecurringSchedulePolicyAsJson(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 
-			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
+			instanceName = CreatePolicy(cfg, appName, appGUID, policyAsJson)
 		})
 
 		Context("with days of month", func() {
@@ -80,7 +82,13 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 			It("should scale", func() {
 				By("setting to initial_min_instance_count")
-				jobRunTime := time.Until(startTime.Add(5 * time.Minute))
+				// … + stats_window_secs (autoscaler-config)
+				latency := 2 * time.Minute // for looping, networking, etc.
+				waitingTime :=
+					time.Duration(policy.ScalingRules[0].BreachDurationSeconds)*time.Second +
+						time.Duration(cfg.AggregateInterval)*time.Second +
+						latency
+				jobRunTime := time.Until(startTime.Add(waitingTime))
 				WaitForNInstancesRunning(appGUID, 3, jobRunTime)
 
 				By("setting schedule's instance_min_count")
