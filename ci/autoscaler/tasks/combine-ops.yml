@@ -5,16 +5,10 @@ image_resource:
   source:
     repository: ghcr.io/cloudfoundry/app-autoscaler-ci-deploy
     tag: master
-input_mapping:
+inputs:
   - name: ops-files
   - name: custom-ops
-output_mapping:
+outputs:
   - name: combined-ops
 run:
-  path: sh
-  args:
-    - -exc
-    - |
-      mkdir combined-ops/operations \
-      && cp -r ops-files/operations/* combined-ops/operations \
-      && cp -r custom-ops/operations/* combined-ops/operations
+  path: app-autoscaler-ci/autoscaler/scripts/combine-ops.sh
