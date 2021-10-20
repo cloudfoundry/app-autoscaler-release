@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	cfh "github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -58,21 +59,12 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		})
 	})
 
-	FContext("when scaling by custom metrics via MTLS", func() {
-		It("should scale out and scale in", func() {
-			By("Scale out to 2 instances")
-			scaleOut := func() int {
-				helpers.SendMtlsMetric(cfg, appName, 550)
-				return helpers.RunningInstances(appGUID, 5*time.Second)
-			}
-			Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
-
-			By("Scale in to 1 instances")
-			scaleIn := func() int {
-				helpers.SendMtlsMetric(cfg, appName, 100)
-				return helpers.RunningInstances(appGUID, 5*time.Second)
-			}
-			Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
+	Context("when adding custom-metrics via mtls", func() {
+		It("should successfully add a metric using the app", func() {
+			By("adding policy so test_metric is allowed")
+			policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+			By("sending metric via mtls endpoint")
+			cfh.CurlAppWithTimeout(cfg, appName, "/custom-metrics/mtls/test_metric/10", 10*time.Second, "-f")
 		})
 	})
 })
