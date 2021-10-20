@@ -2,7 +2,7 @@ package post_upgrade_test
 
 import (
 	"acceptance/helpers"
-``
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -39,13 +39,13 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			By("should scale out to 2 instances")
 			helpers.AppSetCpuUsage(cfg, appName, 50, 5)
-			helpers.WaitForNInstancesRunning(appGUID, 2, 3*time.Minute)
+			helpers.WaitForNInstancesRunning(appGUID, 2, 10*time.Minute)
 
 			By("should scale in to 1 instance after cpu usage is reduced")
 			for i := 0; i < 2; i++ {
 				helpers.AppEndCpuTest(cfg, appName, i)
 			}
-			helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
+			helpers.WaitForNInstancesRunning(appGUID, 1, 10*time.Minute)
 
 		})
 	})

@@ -55,7 +55,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			It("should scale out", func() {
-				helpers.WaitForNInstancesRunning(appGUID, 2, 3*time.Minute)
+				helpers.WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
 
 		})
@@ -66,7 +66,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
-				helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
+				helpers.WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 			})
 		})
 
@@ -81,7 +81,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			It("should scale out", func() {
-				helpers.WaitForNInstancesRunning(appGUID, 2, 3*time.Minute)
+				helpers.WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
 
 		})
@@ -92,7 +92,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 2
 			})
 			It("should scale in", func() {
-				helpers.WaitForNInstancesRunning(appGUID, 1, 3*time.Minute)
+				helpers.WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 			})
 		})
 
@@ -260,7 +260,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				}(doneChan)
 			})
 			It("should scale in", func() {
-				helpers.WaitForNInstancesRunning(appGUID, 1, 4*time.Minute)
+				helpers.WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 			})
 		})
 
