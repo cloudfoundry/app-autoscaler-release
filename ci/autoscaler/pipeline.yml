@@ -8,7 +8,7 @@ anchors:
       SKIP_SSL_VALIDATION: true
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-  cleanup-task-main: &cleanupTaskPr
+  cleanup-task-pr: &cleanupTaskPr
     task: cleanup
     file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
     params:
@@ -54,6 +54,7 @@ groups:
 - name: autoscaler-deploy
   jobs:
   - deploy-autoscaler
+  - deploy-autoscaler-pr
   - delete-autoscaler
 
 resource_types:
@@ -337,6 +338,35 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+
+- name: deploy-autoscaler-pr
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+    - in_parallel:
+        - get: app-autoscaler-ci
+        - get: bbl-state
+          passed: [deploy-cf]
+        - get: app-autoscaler-release-pr
+    - task: run-pre-release-script
+      file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
+      params:
+        SCRIPT_NAME: ./scripts/update
+      input_mapping:
+        release: app-autoscaler-release-pr
+      output_mapping:
+        release: app-autoscaler-release-pr
+    - task: deploy-autoscaler
+      file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
+      params:
+        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-pr
+    - task: register-broker
+      file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+      params:
+        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
 
 
 - name: delete-autoscaler
