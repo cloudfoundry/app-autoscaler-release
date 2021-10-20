@@ -56,7 +56,7 @@ DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
 retry java -cp "$DB_DIR/target/lib/*:$operator_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=operator.db.changelog.yml update
 <% else %>
-rety java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=databasechangelog-primarykey.yml update
 retry java -cp "$DB_DIR/target/lib/*:$operator_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=operator.db.changelog.yml update
