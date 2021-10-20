@@ -411,13 +411,13 @@ jobs:
       passed: [setup-infrastructure]
       trigger: true
     - get: autoscaler-env-vars-store
-    - get: autoscaler-ci
+    - get: app-autoscaler-ci
 
   - task: combine-ops-files
     file: app-autoscaler-ci/autoscaler/tasks/combine-ops.yml
     input_mapping:
       ops-files: combined-ops
-      custom-ops: autoscaler-ci
+      custom-ops: app-autoscaler-ci
     output_mapping:
       combined-ops: ops-files
 
