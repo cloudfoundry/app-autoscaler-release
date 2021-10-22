@@ -44,7 +44,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					helpers.AppEndCpuTest(cfg, appName, i)
 				}
 				helpers.WaitForNInstancesRunning(appGUID, 1, 10*time.Minute)
-
 			})
 
 		})
