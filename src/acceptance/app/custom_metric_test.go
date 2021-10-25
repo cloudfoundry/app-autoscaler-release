@@ -27,6 +27,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		}
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		helpers.WaitForNInstancesRunning(appGUID, 1, cfg.DefaultTimeoutDuration())
+		helpers.WaitForAppReady(cfg, appName)
 	})
 
 	AfterEach(func() {
@@ -59,7 +60,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		})
 	})
 
-	Context("when adding custom-metrics via mtls", func() {
+	FContext("when adding custom-metrics via mtls", func() {
 		It("should successfully add a metric using the app", func() {
 			By("adding policy so test_metric is allowed")
 			policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)

@@ -9,15 +9,19 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 app.get('/slow/:time', async function (req, res) {
     var delayInMS = parseInt(req.params.time, 10);
     await new Promise(done => setTimeout(done, delayInMS));
-    res.send('dummy application with slow response');
+    res.status(200).send('dummy application with slow response');
 });
 
 app.get('/fast', function (req, res) {
-    res.send('dummy application with fast response');
+    res.status(200).send('dummy application with fast response');
+});
+
+app.get('/health', function (req, res) {
+  res.status(200).json({status: "OK", cpuTestRunning: enableCpuTest});
 });
 
 app.get('/', function (req, res) {
-    res.send('dummy application root');
+    res.status(200).send('dummy application root');
 });
 
 app.listen(process.env.PORT || 8080, function () {

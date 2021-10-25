@@ -73,3 +73,18 @@ func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int
 func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
 	Expect(CurlAppInstance(cfg, appName, instance, "/cpu/close")).Should(ContainSubstring(`close cpu test`))
 }
+
+func WaitForAppReady(cfg *config.Config, appName string) {
+
+	Eventually(func() string {
+		health := &struct {
+			Status         string `json:"status"`
+			CpuTestRunning bool   `json:"cpuTestRunning"`
+		}{}
+		err := json.Unmarshal([]byte(cfh.CurlApp(cfg, appName, "/health")), health)
+		if err != nil {
+			return err.Error()
+		}
+		return health.Status
+	}, cfg.DefaultTimeoutDuration(), 5*time.Minute).Should(ContainSubstring("OK"))
+}
