@@ -75,7 +75,6 @@ func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
 }
 
 func WaitForAppReady(cfg *config.Config, appName string) {
-
 	Eventually(func() string {
 		health := &struct {
 			Status         string `json:"status"`
