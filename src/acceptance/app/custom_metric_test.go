@@ -27,7 +27,6 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		}
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		helpers.WaitForNInstancesRunning(appGUID, 1, cfg.DefaultTimeoutDuration())
-		helpers.WaitForAppReady(cfg, appName)
 	})
 
 	AfterEach(func() {
