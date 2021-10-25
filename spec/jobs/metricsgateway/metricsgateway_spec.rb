@@ -21,17 +21,6 @@ describe 'metricsgateway' do
           - name: foo
             password: default
             tag: default
-        sbss_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
         cf:
           api: https://api.cf.domain
           auth_endpoint: https://login.cf.domain

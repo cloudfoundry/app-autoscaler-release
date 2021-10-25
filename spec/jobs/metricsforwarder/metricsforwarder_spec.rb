@@ -21,17 +21,6 @@ describe 'metricsforwarder' do
           - name: foo
             password: default
             tag: default
-        sbss_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
         cf:
           api: https://api.cf.domain
           auth_endpoint: https://login.cf.domain
@@ -77,6 +66,36 @@ describe 'metricsforwarder' do
              { 'port' => 1234,
                'username' => 'test-user',
                'password' => 'test-user-password'
+             }
+           )
+		end
+
+    it 'has no instance identity configured by default' do
+      rendered_template = YAML.safe_load(template.render(properties))
+      expect(rendered_template).
+        to_not include( 'metrics_forwarder' )
+    end
+
+    it 'has instance identity configured' do
+      properties['autoscaler'].merge!(
+        'metricsforwarder' => {
+          'metricshandler' => {
+            'tls' => {
+              'ca_cert' => '--- THIS IS A CERTIFICATE ---',
+            }
+          }
+        }
+      )
+
+      rendered_template = YAML.safe_load(template.render(properties))
+      expect(rendered_template).
+        to include(
+             {
+               "metrics_forwarder" => {
+                 "tls"=> {
+                   "ca_file" => "/var/vcap/jobs/metricsforwarder/config/certs/instance_identity_ca.crt"
+                 }
+               }
              }
            )
     end
