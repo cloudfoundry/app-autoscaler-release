@@ -85,5 +85,5 @@ func WaitForAppReady(cfg *config.Config, appName string) {
 			return err.Error()
 		}
 		return health.Status
-	}, cfg.DefaultTimeoutDuration(), 5*time.Minute).Should(ContainSubstring("OK"))
+	}, cfg.DefaultTimeoutDuration(), 1*time.Second).Should(ContainSubstring("OK"))
 }
