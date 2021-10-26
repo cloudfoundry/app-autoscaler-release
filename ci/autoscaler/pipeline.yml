@@ -20,14 +20,18 @@ anchors:
     on_abort:
       <<: *cleanupTaskMain
     on_failure:
-      <<: *cleanupTaskMain 
+      <<: *cleanupTaskMain
   cleanup-pr: &cleanupPr
     on_abort:
       <<: *cleanupTaskPr
     on_failure:
-      <<: *cleanupTaskPr 
+      <<: *cleanupTaskPr
+  app-autoscaler-ops-files: &app-autoscaler-ops-files
+    OPS_FILES: |
+      example/operation/loggregator-certs-from-cf.yml
+      example/operation/postgres-persistent-disk.yml
+      example/operation/add-extra-plan.yml
 
-    
 groups:
 - name: autoscaler-release
   jobs:
@@ -332,6 +336,7 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
@@ -353,6 +358,7 @@ jobs:
       file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
       params:
         SCRIPT_NAME: ./scripts/update
+        <<: *app-autoscaler-ops-files
       input_mapping:
         release: app-autoscaler-release-pr
       output_mapping:
@@ -361,6 +367,7 @@ jobs:
       file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
       params:
         SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+        <<: *app-autoscaler-ops-files
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-pr
     - task: register-broker
@@ -499,6 +506,7 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
@@ -552,7 +560,7 @@ jobs:
       NAME_PREFIX: ASUP
       SUITES: |
         pre_upgrade
-      NODES: 1  
+      NODES: 1
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     <<: *cleanupMain
@@ -568,9 +576,7 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      OPS_FILES: |
-        example/operation/loggregator-certs-from-cf.yml
-        example/operation/postgres-persistent-disk.yml
+      <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     <<: *cleanupMain
@@ -583,7 +589,7 @@ jobs:
       NAME_PREFIX: ASUP
       SUITES: |
         post_upgrade
-      NODES: 1 
+      NODES: 1
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     <<: *cleanupMain
