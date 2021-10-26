@@ -3,6 +3,7 @@ package broker_test
 import (
 	"acceptance/config"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
@@ -54,6 +55,36 @@ var _ = Describe("AutoScaler Service Broker", func() {
 
 		unbindService = cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+
+		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+		Expect(deleteService).To(Exit(0))
+	})
+
+	It("should update service instance from lite to standard plan", func() {
+		instanceName := generator.PrefixedRandomName("autoscaler", "service")
+		servicePlanName := "lite"
+		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
+		Expect(createService).To(Exit(0), "failed creating service")
+
+		updateToServicePlanName := "standard"
+		updateService := cf.Cf("update-service", instanceName, "-p", updateToServicePlanName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(updateService).To(Exit(0), "failed updating service")
+		Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeFalse())
+
+		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+		Expect(deleteService).To(Exit(0))
+	})
+
+	It("should not update service instance from standard to lite plan", func() {
+		instanceName := generator.PrefixedRandomName("autoscaler", "service")
+		servicePlanName := "standard"
+		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
+		Expect(createService).To(Exit(0), "failed creating service")
+
+		updateToServicePlanName := "lite"
+		updateService := cf.Cf("update-service", instanceName, "-p", updateToServicePlanName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(updateService).To(Exit(1), "failed updating service")
+		Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeTrue())
 
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteService).To(Exit(0))
