@@ -63,7 +63,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 	It("should update service instance from lite to standard plan", func() {
 		instanceName := generator.PrefixedRandomName("autoscaler", "service")
 		servicePlanName := "lite"
-		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
+		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName ).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
 
 		updateToServicePlanName := "standard"
@@ -78,7 +78,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 	It("should not update service instance from standard to lite plan", func() {
 		instanceName := generator.PrefixedRandomName("autoscaler", "service")
 		servicePlanName := "standard"
-		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
+		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
 
 		updateToServicePlanName := "lite"
