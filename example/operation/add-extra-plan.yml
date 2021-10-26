@@ -4,4 +4,5 @@
   value:
     id: standard
     name: standard
+    plan_updateable: true
     description: This is the standard service plan for the Auto-Scaling service.
