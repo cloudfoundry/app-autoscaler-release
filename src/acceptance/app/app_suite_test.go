@@ -29,35 +29,6 @@ var (
 	initialInstanceCount int
 )
 
-type CFResourceObject struct {
-	Resources []struct {
-		GUID      string `json:"guid"`
-		CreatedAt string `json:"created_at"`
-		Name      string `json:"name"`
-		Username  string `json:"username"`
-	} `json:"resources"`
-}
-
-type CFOrgs struct {
-	Resources []struct {
-		Name      string `json:"name"`
-		GUID      string `json:"guid"`
-		CreatedAt string `json:"created_at"`
-	} `json:"resources"`
-}
-
-type CFSpaces struct {
-	Resources []struct {
-		Entity struct {
-			Name string `json:"name"`
-		}
-		Metadata struct {
-			GUID      string `json:"guid"`
-			CreatedAt string `json:"created_at"`
-		}
-	} `json:"resources"`
-}
-
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
 
@@ -132,7 +103,7 @@ func DeletePolicyWithAPI(appGUID string) {
 
 	resp, err := doAPIRequest(req)
 	Expect(err).ShouldNot(HaveOccurred())
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	Expect(resp.StatusCode).To(Equal(http.StatusOK))
 }
 

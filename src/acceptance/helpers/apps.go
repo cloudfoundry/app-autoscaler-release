@@ -33,13 +33,7 @@ func DeleteApps(cfg *config.Config, apps []string, threshold int) {
 }
 
 func SendMetric(cfg *config.Config, appName string, metric int) {
-	Eventually(func() string {
-		response := cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric))
-		if response == "" {
-			return "success"
-		}
-		return response
-	}, cfg.DefaultTimeoutDuration(), 5*time.Second).Should(ContainSubstring("success"))
+	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), "-f")
 }
 
 func StartApp(appName string, timeout time.Duration) bool {
@@ -49,7 +43,14 @@ func StartApp(appName string, timeout time.Duration) bool {
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
 	appName := generator.PrefixedRandomName("autoscaler", appType)
 	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
+	createApp := cf.Cf("push", appName, "--no-start", "--no-route",
+		"-i", countStr,
+		"-b", cfg.NodejsBuildpackName,
+		"-m", "128M",
+		"-p", config.NODE_APP,
+		"-u", "http",
+		"--endpoint", "/health",
+	).Wait(cfg.CfPushTimeoutDuration())
 	Expect(createApp).To(Exit(0), "failed creating app")
 
 	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
@@ -72,18 +73,4 @@ func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int
 
 func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
 	Expect(CurlAppInstance(cfg, appName, instance, "/cpu/close")).Should(ContainSubstring(`close cpu test`))
-}
-
-func WaitForAppReady(cfg *config.Config, appName string) {
-	Eventually(func() string {
-		health := &struct {
-			Status         string `json:"status"`
-			CpuTestRunning bool   `json:"cpuTestRunning"`
-		}{}
-		err := json.Unmarshal([]byte(cfh.CurlApp(cfg, appName, "/health")), health)
-		if err != nil {
-			return err.Error()
-		}
-		return health.Status
-	}, cfg.DefaultTimeoutDuration(), 1*time.Second).Should(ContainSubstring("OK"))
 }

@@ -44,47 +44,6 @@ var (
 	client              *http.Client
 )
 
-type CFResourceObject struct {
-	Resources []struct {
-		GUID      string `json:"guid"`
-		CreatedAt string `json:"created_at"`
-		Name      string `json:"name"`
-		Username  string `json:"username"`
-	} `json:"resources"`
-}
-
-type CFUsers struct {
-	Resources []struct {
-		Entity struct {
-			Username string `json:"username"`
-		}
-		Metadata struct {
-			GUID      string `json:"guid"`
-			CreatedAt string `json:"created_at"`
-		}
-	} `json:"resources"`
-}
-
-type CFOrgs struct {
-	Resources []struct {
-		Name      string `json:"name"`
-		GUID      string `json:"guid"`
-		CreatedAt string `json:"created_at"`
-	} `json:"resources"`
-}
-
-type CFSpaces struct {
-	Resources []struct {
-		Entity struct {
-			Name string `json:"name"`
-		}
-		Metadata struct {
-			GUID      string `json:"guid"`
-			CreatedAt string `json:"created_at"`
-		}
-	} `json:"resources"`
-}
-
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
 

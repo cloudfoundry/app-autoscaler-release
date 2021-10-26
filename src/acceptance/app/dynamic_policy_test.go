@@ -128,13 +128,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							Eventually(func() string {
-								response := cfh.CurlApp(cfg, appName, "/slow/3000")
-								if response == "" {
-									return "dummy application with slow response"
-								}
-								return response
-							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with slow response"))
+							cfh.CurlApp(cfg, appName, "/slow/3000", "-f")
 						}
 					}
 				}(doneChan)
@@ -163,13 +157,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							Eventually(func() string {
-								response := cfh.CurlApp(cfg, appName, "/fast")
-								if response == "" {
-									return "dummy application with fast response"
-								}
-								return response
-							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+							cfh.CurlApp(cfg, appName, "/fast", "-f")
 						}
 					}
 				}(doneChan)
@@ -212,13 +200,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							Eventually(func() string {
-								response := cfh.CurlApp(cfg, appName, "/fast")
-								if response == "" {
-									return "dummy application with fast response"
-								}
-								return response
-							}, 10*time.Second, 25*time.Millisecond).Should(ContainSubstring("dummy application with fast response"))
+							cfh.CurlApp(cfg, appName, "/fast", "-f")
 						}
 					}
 				}(doneChan)
@@ -248,13 +230,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							Eventually(func() string {
-								response := cfh.CurlApp(cfg, appName, "/fast")
-								if response == "" {
-									return "dummy application with fast response"
-								}
-								return response
-							}, 10*time.Second, 1*time.Second).Should(ContainSubstring("dummy application with fast response"))
+							cfh.CurlApp(cfg, appName, "/fast", "-f")
 						}
 					}
 				}(doneChan)
