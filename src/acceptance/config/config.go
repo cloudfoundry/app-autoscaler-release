@@ -45,6 +45,7 @@ type Config struct {
 	ExistingClient                 string  `json:"existing_client"`
 	ExistingClientSecret           string  `json:"existing_client_secret"`
 
+	ServiceBroker     string `json:"service_broker"`
 	ServiceName       string `json:"service_name"`
 	ServicePlan       string `json:"service_plan"`
 	AggregateInterval int    `json:"aggregate_interval"`
