@@ -2,6 +2,8 @@ package broker_test
 
 import (
 	"acceptance/helpers"
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
@@ -20,9 +22,13 @@ var _ = Describe("AutoScaler Service Broker", func() {
 	})
 
 	AfterEach(func() {
-		Eventually(cf.Cf("app", appName, "--guid"), cfg.DefaultTimeoutDuration()).Should(Exit())
-		Eventually(cf.Cf("logs", appName, "--recent"), cfg.DefaultTimeoutDuration()).Should(Exit())
-		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			fmt.Println("Skipping Teardown...")
+		} else {
+			Eventually(cf.Cf("app", appName, "--guid"), cfg.DefaultTimeoutDuration()).Should(Exit())
+			Eventually(cf.Cf("logs", appName, "--recent"), cfg.DefaultTimeoutDuration()).Should(Exit())
+			Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+		}
 	})
 
 	It("performs lifecycle operations", func() {
@@ -61,16 +67,19 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		instanceName := generator.PrefixedRandomName("autoscaler", "service")
 		//TODO get first plan name
 		servicePlanName := "autoscaler-free-plan"
+		By(fmt.Sprintf("create service %s", instanceName))
 		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
 
 		//TODO get second plan name
+		By("update service plan to acceptance-standard")
 		updateToServicePlanName := "acceptance-standard"
 		updateService := cf.Cf("update-service", instanceName, "-p", updateToServicePlanName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(updateService).To(Exit(0), "failed updating service")
 
 		Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeFalse())
 
+		By("delete service")
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteService).To(Exit(0))
 	})
