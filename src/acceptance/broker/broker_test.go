@@ -2,6 +2,7 @@ package broker_test
 
 import (
 	"acceptance/helpers"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -13,6 +14,32 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
 )
+
+type serviceInstance string
+
+func createService(onPlan string) serviceInstance {
+	instanceName := generator.PrefixedRandomName("autoscaler", "service")
+	By(fmt.Sprintf("create service %s on plan %s", instanceName, onPlan))
+	createService := cf.Cf("create-service", cfg.ServiceName, onPlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+	Expect(createService).To(Exit(0), "failed creating service")
+	return serviceInstance(instanceName)
+}
+func (s serviceInstance) updatePlan(toPlan string) {
+	updateService := s.updatePlanRaw(toPlan)
+	Expect(updateService).To(Exit(0), "failed updating service")
+	Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeFalse())
+}
+
+func (s serviceInstance) updatePlanRaw(toPlan string) *Session {
+	By(fmt.Sprintf("update service plan to %s", toPlan))
+	updateService := cf.Cf("update-service", string(s), "-p", toPlan).Wait(cfg.DefaultTimeoutDuration())
+	return updateService
+}
+
+func (s serviceInstance) delete() {
+	deleteService := cf.Cf("delete-service", string(s), "-f").Wait(cfg.DefaultTimeoutDuration())
+	Expect(deleteService).To(Exit(0))
+}
 
 var _ = Describe("AutoScaler Service Broker", func() {
 	var appName string
@@ -62,41 +89,68 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		Expect(deleteService).To(Exit(0))
 	})
 
-	FIt("should update service instance from  autoscaler-free-plan to acceptance-standard", func() {
-		//TODO only run if there is  "autoscaler-free-plan" as first and "acceptance-standard" as second plan"
-		instanceName := generator.PrefixedRandomName("autoscaler", "service")
-		//TODO get first plan name
-		servicePlanName := "autoscaler-free-plan"
-		By(fmt.Sprintf("create service %s", instanceName))
-		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
-
-		//TODO get second plan name
-		By("update service plan to acceptance-standard")
-		updateToServicePlanName := "acceptance-standard"
-		updateService := cf.Cf("update-service", instanceName, "-p", updateToServicePlanName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(updateService).To(Exit(0), "failed updating service")
-
-		Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeFalse())
+	It("should update service instance from  autoscaler-free-plan to acceptance-standard", func() {
+		plans := getPlans()
+		if plans.length() < 2 {
+			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
+			return
+		}
+		service := createService(plans[0])
+		service.updatePlan(plans[1])
 
 		By("delete service")
-		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0))
+		service.delete()
 	})
 
-	It("should not update service instance from acceptance-standard to first", func() {
-		//TODO only run if there is  "autoscaler-free-plan" as first and "acceptance-standard" as second plan"
-		instanceName := generator.PrefixedRandomName("autoscaler", "service")
-		servicePlanName := "acceptance-standard"
-		createService := cf.Cf("create-service", cfg.ServiceName, servicePlanName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
+	It("should fail to update service instance from acceptance-standard to first", func() {
+		plans := getPlans()
+		if plans.length() < 2 {
+			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
+			return
+		}
+		if !plans.contains("acceptance-standard") {
+			Skip(fmt.Sprintf("Acceptance test standard plan required plans:%+v", plans))
+			return
+		}
 
-		updateToServicePlanName := "autoscaler-free-plan"
-		updateService := cf.Cf("update-service", instanceName, "-p", updateToServicePlanName).Wait(cfg.DefaultTimeoutDuration())
+		service := createService("acceptance-standard")
+		updateService := service.updatePlanRaw(plans[0])
 		Expect(updateService).To(Exit(1), "failed updating service")
 		Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeTrue())
 
-		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0))
+		service.delete()
 	})
 })
+
+type plans []string
+
+func (p plans) length() int { return len(p) }
+func (p plans) contains(planName string) bool {
+	for _, plan := range p {
+		if plan == planName {
+			return true
+		}
+	}
+	return false
+}
+
+func getPlans() plans {
+	brokerName := "autoscaler"
+	serviceOfferName := "autoscaler"
+	getPlans := cf.Cf("curl",
+		fmt.Sprintf("/v3/service_plans?fields[service_offering.service_broker]=name&service_broker_names=%s&service_offering_names=%s",
+			brokerName, serviceOfferName),
+		"-f").
+		Wait(cfg.DefaultTimeoutDuration())
+	Expect(getPlans).To(Exit(0), "failed getting plans")
+
+	plansResult := &struct{ Resources []struct{ Name string } }{}
+	err := json.Unmarshal(getPlans.Out.Contents(), plansResult)
+	Expect(err).NotTo(HaveOccurred())
+
+	var p plans
+	for _, item := range plansResult.Resources {
+		p = append(p, item.Name)
+	}
+	return p
+}
