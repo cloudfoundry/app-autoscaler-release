@@ -2,9 +2,9 @@
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/broker/server/catalog/services/0/plans/-
   value:
-    id: standard
+    id: acceptance-standard
     name: standard
-    plan_updateable: true
+    plan_updateable: false
     description: This is the standard service plan for the Auto-Scaling service.
 
 - type: replace
