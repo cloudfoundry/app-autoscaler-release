@@ -1,9 +1,11 @@
 package broker_test
 
 import (
-	"acceptance/config"
+	"acceptance/helpers"
+	"encoding/json"
 	"fmt"
-	"time"
+	"os"
+	"strings"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -13,21 +15,47 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
+type serviceInstance string
+
+func createService(onPlan string) serviceInstance {
+	instanceName := generator.PrefixedRandomName("autoscaler", "service")
+	By(fmt.Sprintf("create service %s on plan %s", instanceName, onPlan))
+	createService := cf.Cf("create-service", cfg.ServiceName, onPlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+	Expect(createService).To(Exit(0), "failed creating service")
+	return serviceInstance(instanceName)
+}
+func (s serviceInstance) updatePlan(toPlan string) {
+	updateService := s.updatePlanRaw(toPlan)
+	Expect(updateService).To(Exit(0), "failed updating service")
+	Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeFalse())
+}
+
+func (s serviceInstance) updatePlanRaw(toPlan string) *Session {
+	By(fmt.Sprintf("update service plan to %s", toPlan))
+	updateService := cf.Cf("update-service", string(s), "-p", toPlan).Wait(cfg.DefaultTimeoutDuration())
+	return updateService
+}
+
+func (s serviceInstance) delete() {
+	deleteService := cf.Cf("delete-service", string(s), "-f").Wait(cfg.DefaultTimeoutDuration())
+	Expect(deleteService).To(Exit(0))
+}
+
 var _ = Describe("AutoScaler Service Broker", func() {
 	var appName string
 
 	BeforeEach(func() {
-		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
-		createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-b", cfg.NodejsBuildpackName, "-m", fmt.Sprintf("%dM", cfg.NodeMemoryLimit), "-p", config.NODE_APP).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createApp).To(Exit(0), "failed creating app")
-
-		mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")
+		appName = helpers.CreateTestApp(cfg, "broker-test", 1)
 	})
 
 	AfterEach(func() {
-		appReport(appName, cfg.DefaultTimeoutDuration())
-		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			fmt.Println("Skipping Teardown...")
+		} else {
+			Eventually(cf.Cf("app", appName, "--guid"), cfg.DefaultTimeoutDuration()).Should(Exit())
+			Eventually(cf.Cf("logs", appName, "--recent"), cfg.DefaultTimeoutDuration()).Should(Exit())
+			Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+		}
 	})
 
 	It("performs lifecycle operations", func() {
@@ -38,9 +66,11 @@ var _ = Describe("AutoScaler Service Broker", func() {
 
 		bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
 		Expect(bindService).To(Exit(1))
+
 		combinedBuffer := gbytes.BufferWithBytes(append(bindService.Out.Contents(), bindService.Err.Contents()...))
 		//Eventually(combinedBuffer).Should(gbytes.Say(`context":"(root).scaling_rules.1.adjustment","description":"Does not match pattern '^[-+][1-9]+[0-9]*$'"`))
 		Eventually(string(combinedBuffer.Contents())).Should(ContainSubstring(`[{"context":"(root).scaling_rules.1.adjustment","description":"Does not match pattern '^[-+][1-9]+[0-9]*%?$'"}]`))
+
 		By("Test bind&unbind with policy")
 		bindService = cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/all.json").Wait(cfg.DefaultTimeoutDuration())
 		Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
@@ -58,9 +88,69 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteService).To(Exit(0))
 	})
+
+	It("should update service instance from  autoscaler-free-plan to acceptance-standard", func() {
+		plans := getPlans()
+		if plans.length() < 2 {
+			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
+			return
+		}
+		service := createService(plans[0])
+		service.updatePlan(plans[1])
+
+		By("delete service")
+		service.delete()
+	})
+
+	It("should fail to update service instance from acceptance-standard to first", func() {
+		plans := getPlans()
+		if plans.length() < 2 {
+			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
+			return
+		}
+		if !plans.contains("acceptance-standard") {
+			Skip(fmt.Sprintf("Acceptance test standard plan required plans:%+v", plans))
+			return
+		}
+
+		service := createService("acceptance-standard")
+		updateService := service.updatePlanRaw(plans[0])
+		Expect(updateService).To(Exit(1), "failed updating service")
+		Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeTrue())
+
+		service.delete()
+	})
 })
 
-func appReport(appName string, timeout time.Duration) {
-	Eventually(cf.Cf("app", appName, "--guid"), timeout).Should(Exit())
-	Eventually(cf.Cf("logs", appName, "--recent"), timeout).Should(Exit())
+type plans []string
+
+func (p plans) length() int { return len(p) }
+func (p plans) contains(planName string) bool {
+	for _, plan := range p {
+		if plan == planName {
+			return true
+		}
+	}
+	return false
+}
+
+func getPlans() plans {
+	brokerName := "autoscaler"
+	serviceOfferName := "autoscaler"
+	getPlans := cf.Cf("curl",
+		fmt.Sprintf("/v3/service_plans?fields[service_offering.service_broker]=name&service_broker_names=%s&service_offering_names=%s",
+			brokerName, serviceOfferName),
+		"-f").
+		Wait(cfg.DefaultTimeoutDuration())
+	Expect(getPlans).To(Exit(0), "failed getting plans")
+
+	plansResult := &struct{ Resources []struct{ Name string } }{}
+	err := json.Unmarshal(getPlans.Out.Contents(), plansResult)
+	Expect(err).NotTo(HaveOccurred())
+
+	var p plans
+	for _, item := range plansResult.Resources {
+		p = append(p, item.Name)
+	}
+	return p
 }

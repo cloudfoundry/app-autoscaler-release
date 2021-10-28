@@ -56,7 +56,7 @@ type Config struct {
 	ServiceOfferingEnabled bool   `json:"service_offering_enabled"`
 	EnableServiceAccess    bool   `json:"enable_service_access"`
 
-	HealthEndpointsBasicAuthEnabled bool `json:"health_endpoints_basic_auth_enabled""`
+	HealthEndpointsBasicAuthEnabled bool `json:"health_endpoints_basic_auth_enabled"`
 }
 
 var defaults = Config{
@@ -149,7 +149,7 @@ func loadConfigFromPath(path string, config *Config) error {
 	if err != nil {
 		return err
 	}
-	defer configFile.Close()
+	defer func() { _ = configFile.Close() }()
 
 	decoder := json.NewDecoder(configFile)
 	return decoder.Decode(config)
