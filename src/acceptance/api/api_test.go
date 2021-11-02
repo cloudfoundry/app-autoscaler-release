@@ -357,6 +357,7 @@ var _ = Describe("AutoScaler Public API", func() {
 					Expect(entry.AppId).To(Equal(appGUID))
 					Expect(entry.ScalingType).Should(BeNumerically("==", 0))
 					Expect(entry.Status).Should(BeNumerically("==", 0))
+
 					Expect(entry.Reason).To(Equal(fmt.Sprintf("+1 instance(s) because memoryused >= 30MB for %d seconds", TestBreachDurationSeconds)))
 				}
 			})

@@ -1,0 +1,21 @@
+export AUTOSCALER_API_CLIENT_ID="<%= p('autoscaler_api_client_id') %>"
+export AUTOSCALER_API_VERIFICATION_CLIENT_ID="<%= p('autoscaler_api_verification_client_id') %>"
+export AUTOSCALER_API_VERIFICATION_CLIENT_SECRET="<%= p('autoscaler_api_verification_client_secret') %>"
+export CF_AUTH_ENDPOINT="<%= p('autoscaler.cf.auth_endpoint') %>"
+export SKIP_SSL_VALIDATION="<%= p('autoscaler.cf.skip_ssl_validation') %>"
+
+
+# SBSS Environment Variables
+<%
+  address = p('sbss.sbss_db.address')
+  db_port = p('sbss.sbss_db.port')
+  role = p_arr('sbss.sbss_db.roles').find { |role| role['tag'] == 'sbssdb' or role['tag'] == 'default'} 
+  database = p_arr('sbss.sbss_db.databases').find { |database| database['tag'] == 'sbssdb' or database['tag'] == 'default'} 
+%>
+export SBSS_DB_ADDRESS="<%= address %>"
+export SBSS_DB_DATABASE="<%= database['name'] %>"
+export SBSS_DB_PORT="<%= db_port %>"
+export SBSS_DB_USERNAME="<%= role['name'] %>"
+export SBSS_DB_PASSWORD="<%= role['password'] %>"
+export SBSS_RESTRICTED_DBUSER_NAME="<%= p('sbss.restricted_dbuser_name') %>"
+export SBSS_RESTRICTED_DBUSER_PASSWORD="<%= p('sbss.restricted_dbuser_password') %>"

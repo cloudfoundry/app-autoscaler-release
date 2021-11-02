@@ -107,7 +107,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		AfterEach(func() {
 			close(doneChan)
-			Eventually(doneAcceptChan, 10*time.Second).Should(Receive())
+			Eventually(doneAcceptChan, 30*time.Second).Should(Receive())
 		})
 
 		Context("when responsetime is greater than scaling out threshold", func() {
@@ -179,7 +179,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		AfterEach(func() {
 			close(doneChan)
-			Eventually(doneAcceptChan, 10*time.Second).Should(Receive())
+			Eventually(doneAcceptChan, 30*time.Second).Should(Receive())
 		})
 
 		Context("when throughput is greater than scaling out threshold", func() {

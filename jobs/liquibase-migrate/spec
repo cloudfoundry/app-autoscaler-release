@@ -1,0 +1,27 @@
+---
+name: liquibase-migrate
+
+templates:
+  run.erb: bin/run
+
+packages:
+  - db
+  - java
+  - apiserver
+  - eventgenerator
+  - metricscollector
+  - scalingengine
+  - scheduler
+  - servicebroker
+
+properties: 
+  database.address:
+    description: "database host"
+  database.databases:
+    description: "database names"
+  database.port:
+    description: "database port"
+  database.roles:
+    description: "database username/password"
+  database.db_scheme:
+    description: "database scheme"

@@ -1,4 +1,4 @@
-set -e -x 
+set -e -x
 
 mkdir -p java
 pushd java
