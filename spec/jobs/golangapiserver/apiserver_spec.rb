@@ -19,6 +19,7 @@ describe 'golangapiserver' do
           port: 5432
           roles:
           - name: foo
+            password: default
             tag: default
         policy_db:
           address: 10.11.137.101
