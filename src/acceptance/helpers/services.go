@@ -46,7 +46,7 @@ func DeleteServices(cfg *config.Config, services []string) {
 
 const (
 	CustomMetricPath    = "/v1/apps/{appId}/credential"
-	CustomMetricCredEnv = "AUTO_SCALER_CUSTOM_METRIC_ENV"
+	CustomMetricCredEnv = "AUTO_SCALER_CUSTOM_METRIC_ENV" // #nosec G101
 )
 
 func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
