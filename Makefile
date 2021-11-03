@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 modules:= acceptance changelog changeloglockcleaner
 # TODO add to the module list "apitester common app-autoscaler"
 
