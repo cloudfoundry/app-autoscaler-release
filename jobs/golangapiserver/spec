@@ -156,7 +156,7 @@ properties:
     default: disable
     description: "sslmode to connect to postgres server"
   autoscaler.policy_db_connection_config.max_open_connections:
-    default: 100
+    default: 20
   autoscaler.policy_db_connection_config.max_idle_connections:
     default: 10
   autoscaler.policy_db_connection_config.connection_max_lifetime:
@@ -180,7 +180,7 @@ properties:
     default: disable
     description: "sslmode to connect to postgres server"
   autoscaler.binding_db_connection_config.max_open_connections:
-    default: 100
+    default: 20
   autoscaler.binding_db_connection_config.max_idle_connections:
     default: 10
   autoscaler.binding_db_connection_config.connection_max_lifetime:
