@@ -77,6 +77,43 @@ describe 'golangapiserver' do
             'broker_password' => 'fake_b_password_2' },
         )
       end
+
+      it 'writes deprecated service_broker_usernames' do
+        properties['autoscaler']['apiserver']['broker'].merge!(
+          'username' => 'deprecated_username',
+          'password' => 'deprecated_password'
+        )
+
+        rendered_template = YAML.safe_load(template.render(properties))
+
+        expect(rendered_template['broker_credentials']).to include(
+          { 'broker_username' => 'deprecated_username',
+            'broker_password' => 'deprecated_password' },
+        )
+      end
+
+      it 'favour list of credentials over deprecated values' do
+        properties['autoscaler']['apiserver']['broker'].merge!(
+          'broker_credentials' => [
+            { 'broker_username' => 'fake_b_user_1',
+              'broker_password' => 'fake_b_password_1' },
+            { 'broker_username' => 'fake_b_user_2',
+              'broker_password' => 'fake_b_password_2' },
+          ],
+          'username' => 'deprecated_username',
+          'password' => 'deprecated_password'
+        )
+
+        rendered_template = YAML.safe_load(template.render(properties))
+
+        expect(rendered_template['broker_credentials']).to include(
+          { 'broker_username' => 'fake_b_user_1',
+            'broker_password' => 'fake_b_password_1' },
+          { 'broker_username' => 'fake_b_user_2',
+            'broker_password' => 'fake_b_password_2' },
+        )
+      end
+
     end
   end
 end

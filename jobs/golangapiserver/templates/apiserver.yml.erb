@@ -48,7 +48,13 @@ public_api_server:
 broker_server:
   port:  <%= p("autoscaler.apiserver.broker.server.port") %>
 
+<% if p("autoscaler.apiserver.broker.broker_credentials") != '' %>
 <%= {'broker_credentials' => p('autoscaler.apiserver.broker.broker_credentials')}.to_yaml.lines[1..-1].join %>
+<% else %>
+broker_credentials:
+- broker_username: <%= p("autoscaler.apiserver.broker.username") %>
+  broker_password: <%= p("autoscaler.apiserver.broker.password") %>
+<% end %>
 
 catalog_path: /var/vcap/jobs/golangapiserver/config/catalog.json
 catalog_schema_path: /var/vcap/packages/golangapiserver/catalog.schema.json

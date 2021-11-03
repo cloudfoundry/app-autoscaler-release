@@ -50,14 +50,20 @@ properties:
   autoscaler.apiserver.broker.server.server_key:
     description: "PEM-encoded server key"
 
+  autoscaler.apiserver.broker.username:
+    description: "DEPRECATED - username to authenticate with service broker"
+  autoscaler.apiserver.broker.password:
+    description: "DEPRECATED - password to authenticate with service broker"
+
   autoscaler.apiserver.broker.broker_credentials:
     description: |
-      The list of credentials to authenticate with service broker. This is usefull when credential rotation is required
+      The list of credentials to authenticate with service broker. This is useful when credential rotation is required
       example:
        - broker_username: user1
          broker_password: password1
        - broker_username: user2
          broker_password: password2
+    default: ''
   autoscaler.apiserver.broker.server.catalog:
     description: ""
   autoscaler.apiserver.broker.server.dashboard_redirect_uri:
