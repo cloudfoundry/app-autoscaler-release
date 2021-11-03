@@ -20,8 +20,6 @@ describe 'golangapiserver' do
           roles:
           - name: foo
             tag: default
-          - name: autoscaler-sbss-user
-            tag: sbssdb
         policy_db:
           address: 10.11.137.101
           databases:
@@ -32,22 +30,12 @@ describe 'golangapiserver' do
           roles:
           - name: foo
             tag: default
-          - name: autoscaler-sbss-user
-            tag: sbssdb
-        sbss_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            tag: default
           db_scheme: postgres
           port: 5432
           roles:
           - name: foo
             password: default
             tag: default
-          - name: autoscaler-sbss-user
-            password: default
-            tag: sbssdb
         cf:
           api: https://api.cf.domain
           auth_endpoint: https://login.cf.domain
@@ -61,7 +49,7 @@ describe 'golangapiserver' do
     ))
   end
 
-  context 'config/apisderer.yml' do
+  context 'config/apiserver.yml' do
     context 'apiserver does not use buildin mode' do
       before(:each) do
         properties['autoscaler']['apiserver'].merge!(
