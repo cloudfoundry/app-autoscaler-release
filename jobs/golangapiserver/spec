@@ -51,7 +51,13 @@ properties:
     description: "PEM-encoded server key"
 
   autoscaler.apiserver.broker.broker_credentials:
-    description: "the list of credentials to authenticate with service broker"
+    description: |
+      The list of credentials to authenticate with service broker. This is usefull when credential rotation is required
+      example:
+       - broker_username: user1
+         broker_password: password1
+       - broker_username: user2
+         broker_password: password2
   autoscaler.apiserver.broker.server.catalog:
     description: ""
   autoscaler.apiserver.broker.server.dashboard_redirect_uri:
