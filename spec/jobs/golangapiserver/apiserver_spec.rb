@@ -46,7 +46,6 @@ describe 'golangapiserver' do
           broker:
             server:
               dashboard_redirect_uri: https://application-autoscaler-dashboard.cf.domain
-            plan_check: --
     ))
   end
 
