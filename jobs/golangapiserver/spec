@@ -234,7 +234,7 @@ properties:
     default: ''
   autoscaler.apiserver.broker.quota_management.enabled:
     description: "Whether quota management is enabled"
-    default: 'false'
+    default: false
   autoscaler.apiserver.broker.quota_management.api:
     description: "The quota management API endpoint"
   autoscaler.apiserver.broker.quota_management.client_id:
