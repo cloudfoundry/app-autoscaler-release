@@ -245,3 +245,24 @@ properties:
     description: "The quota management API oauth_url"
   autoscaler.apiserver.broker.quota_management.skip_ssl_validation:
     description: "The quota management API skip_ssl_validation setting"
+  autoscaler.apiserver.broker.plan_check:
+    description: |
+        The plan check config which consists of
+        plan_definitions:
+          example_definition_name:
+             planCheckEnabled: boolean (true|false)
+             schedules_count: int (0..)
+             scaling_rules_count: int (0..)
+             plan_updateable: boolean (true|false)
+        Example below:
+        =======
+        plan_definitions:
+          Some-example-uuid-ONE:
+            planCheckEnabled: true
+            schedules_count: 2
+            scaling_rules_count: 4
+          Some-example-uuid-TWO:
+            planCheckEnabled: true
+            schedules_count: 10
+            scaling_rules_count: 10
+    default: ''

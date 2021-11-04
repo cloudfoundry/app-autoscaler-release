@@ -153,5 +153,32 @@ describe 'golangapiserver' do
         expect(rendered_template['quota_management']).to be_nil
       end
     end
+
+    context 'plan_check' do
+
+      it 'by default plan checks are disabled' do
+
+        rendered_template = YAML.safe_load(template.render(properties))
+
+        expect(rendered_template['plan_check']).to be_nil
+      end
+
+      it 'plan checks can be enabled' do
+        properties['autoscaler']['apiserver']['broker'].merge!(
+          'plan_check' => {
+            'plan_definitions' => {
+              'Some-example-uuid-ONE' => { 'planCheckEnabled' => true, 'schedules_count' => 2, 'scaling_rules_count' => 4 },
+              'Some-example-uuid-TWO' => { 'planCheckEnabled' => true, 'schedules_count' => 10, 'scaling_rules_count' => 10 },
+            } })
+
+        rendered_template = YAML.safe_load(template.render(properties))
+
+        expect(rendered_template['plan_check']).to include(
+                                                     {"plan_definitions"=>{
+                                                       "Some-example-uuid-ONE"=>{"planCheckEnabled"=>true, "scaling_rules_count"=>4, "schedules_count"=>2},
+                                                       "Some-example-uuid-TWO"=>{"planCheckEnabled"=>true, "scaling_rules_count"=>10, "schedules_count"=>10}
+                                                     }})
+      end
+    end
   end
 end
