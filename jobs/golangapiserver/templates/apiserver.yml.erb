@@ -135,4 +135,6 @@ quota_management:
   end
 end %>
 
+<% if p('autoscaler.apiserver.broker.plan_check') != '' %>
 <%= {"plan_check" => p("autoscaler.apiserver.broker.plan_check")}.to_yaml.lines[1..-1].join %>
+<% end %>
