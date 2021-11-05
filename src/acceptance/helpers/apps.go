@@ -41,7 +41,7 @@ func StartApp(appName string, timeout time.Duration) bool {
 }
 
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
-	appName := generator.PrefixedRandomName("autoscaler", appType)
+	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
 	countStr := strconv.Itoa(initialInstanceCount)
 	createApp := cf.Cf("push", appName, "--no-start", "--no-route",
 		"-i", countStr,

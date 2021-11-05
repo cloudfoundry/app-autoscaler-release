@@ -40,11 +40,16 @@ type Config struct {
 	JavaBuildpackName              string  `json:"java_buildpack_name"`
 	NodejsBuildpackName            string  `json:"nodejs_buildpack_name"`
 	NamePrefix                     string  `json:"name_prefix"`
-	AdminClient                    string  `json:"admin_client"`
-	AdminClientSecret              string  `json:"admin_client_secret"`
-	ExistingClient                 string  `json:"existing_client"`
-	ExistingClientSecret           string  `json:"existing_client_secret"`
+	InstancePrefix                 string  `json:"instance_prefix"`
+	AppPrefix                      string  `json:"app_prefix"`
+	Prefix                         string  `json:"prefix"`
 
+	AdminClient          string `json:"admin_client"`
+	AdminClientSecret    string `json:"admin_client_secret"`
+	ExistingClient       string `json:"existing_client"`
+	ExistingClientSecret string `json:"existing_client_secret"`
+
+	ServiceBroker     string `json:"service_broker"`
 	ServiceName       string `json:"service_name"`
 	ServicePlan       string `json:"service_plan"`
 	AggregateInterval int    `json:"aggregate_interval"`
@@ -74,6 +79,10 @@ var defaults = Config{
 	TimeoutScale:                 1.0,
 	ArtifactsDirectory:           filepath.Join("..", "results"),
 	NamePrefix:                   "ASATS",
+	InstancePrefix:               "service",
+	AppPrefix:                    "nodeapp",
+	Prefix:                       "autoscaler",
+	ServiceBroker:                "autoscaler",
 
 	CfJavaTimeout:                   10,  // minutes
 	NodeMemoryLimit:                 128, // MB
@@ -112,6 +121,10 @@ func validate(t *testing.T, c *Config) {
 
 	if c.TimeoutScale <= 0 {
 		c.TimeoutScale = 1.0
+	}
+
+	if c.ServiceBroker == "" {
+		t.Fatal("missing configuration 'service_broker'")
 	}
 
 	if c.ServiceName == "" {

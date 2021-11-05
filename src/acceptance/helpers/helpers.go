@@ -101,12 +101,12 @@ func OauthToken(cfg *config.Config) string {
 }
 
 func EnableServiceAccess(cfg *config.Config, orgName string) {
-	enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+	enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
 	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
 }
 
 func DisableServiceAccess(cfg *config.Config, orgName string) {
-	enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+	enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
 	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
 }
 
@@ -347,8 +347,8 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 
 func CreatePolicy(cfg *config.Config, appName, appGUID, policy string) string {
 	if cfg.IsServiceOfferingEnabled() {
-		instanceName := generator.PrefixedRandomName("autoscaler", "service")
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
 
 		bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
