@@ -33,6 +33,7 @@ const (
 var (
 	cfg                 *config.Config
 	setup               *workflowhelpers.ReproducibleTestSuiteSetup
+	otherSetup          *workflowhelpers.ReproducibleTestSuiteSetup
 	appName             string
 	appGUID             string
 	instanceName        string
@@ -59,10 +60,16 @@ func TestAcceptance(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 
+	otherConfig := *cfg
+	otherConfig.NamePrefix = otherConfig.NamePrefix + "_other"
+
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
+	otherSetup = workflowhelpers.NewTestSuiteSetup(&otherConfig)
 
 	Cleanup(cfg, setup)
+	Cleanup(&otherConfig, otherSetup)
 
+	otherSetup.Setup()
 	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
@@ -158,6 +165,7 @@ var _ = AfterSuite(func() {
 			}
 		})
 
+		otherSetup.Teardown()
 		setup.Teardown()
 	}
 })

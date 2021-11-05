@@ -11,8 +11,11 @@ import (
 
 	. "acceptance/helpers"
 
+	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
+	"github.com/cloudfoundry-incubator/cf-test-helpers/workflowhelpers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gexec"
 )
 
 type AppInstanceMetric struct {
@@ -276,6 +279,39 @@ var _ = Describe("AutoScaler Public API", func() {
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(string(raw)).Should(Equal(policy))
+
+		})
+
+		Context("for an unrelated user", func() {
+
+			var secondUserToken string
+
+			BeforeEach(func() {
+				workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+					// Make "other user" a space auditor in the space along with a space developer in the other space
+					cmd := cf.Cf("set-space-role", otherSetup.RegularUserContext().Username, setup.RegularUserContext().Org, setup.RegularUserContext().Space, "SpaceAuditor")
+					Expect(cmd.Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
+				})
+				workflowhelpers.AsUser(otherSetup.RegularUserContext(), cfg.DefaultTimeoutDuration(), func() {
+					secondUserToken = OauthToken(cfg)
+				})
+			})
+
+			It("should not be possible to read the policy", func() {
+				req, err := http.NewRequest("GET", policyURL, nil)
+				Expect(err).ShouldNot(HaveOccurred())
+				req.Header.Add("Authorization", secondUserToken)
+				req.Header.Add("Content-Type", "application/json")
+
+				resp, err := DoAPIRequest(req)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				defer func() { _ = resp.Body.Close() }()
+
+				_, err = ioutil.ReadAll(resp.Body)
+				Expect(err).ShouldNot(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(401))
+			})
 		})
 
 		Context("When scale out is triggered ", func() {
