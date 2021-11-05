@@ -64,13 +64,13 @@ var _ = BeforeSuite(func() {
 	otherConfig.NamePrefix = otherConfig.NamePrefix + "_other"
 
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-	otherSetup = workflowhelpers.NewTestSuiteSetup(cfg)
+	otherSetup = workflowhelpers.NewTestSuiteSetup(&otherConfig)
 
 	Cleanup(cfg, setup)
-	Cleanup(cfg, otherSetup)
+	Cleanup(&otherConfig, otherSetup)
 
-	setup.Setup()
 	otherSetup.Setup()
+	setup.Setup()
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {

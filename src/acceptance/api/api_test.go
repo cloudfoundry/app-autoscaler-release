@@ -312,7 +312,6 @@ var _ = Describe("AutoScaler Public API", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 				Expect(resp.StatusCode).To(Equal(401))
 			})
-
 		})
 
 		Context("When scale out is triggered ", func() {
