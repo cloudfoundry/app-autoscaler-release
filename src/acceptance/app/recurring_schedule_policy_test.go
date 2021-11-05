@@ -30,13 +30,13 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 	BeforeEach(func() {
 		if cfg.IsServiceOfferingEnabled() {
-			instanceName = generator.PrefixedRandomName("autoscaler", "service")
-			createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			instanceName = generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+			createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
 			Expect(createService).To(Exit(0), "failed creating service")
 		}
 
 		initialInstanceCount = 1
-		appName = generator.PrefixedRandomName("autoscaler", "nodeapp")
+		appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
 		countStr := strconv.Itoa(initialInstanceCount)
 		createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
 		Expect(createApp).To(Exit(0), "failed creating app")

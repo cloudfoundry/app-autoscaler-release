@@ -18,9 +18,9 @@ import (
 type serviceInstance string
 
 func createService(onPlan string) serviceInstance {
-	instanceName := generator.PrefixedRandomName("autoscaler", "service")
+	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 	By(fmt.Sprintf("create service %s on plan %s", instanceName, onPlan))
-	createService := cf.Cf("create-service", cfg.ServiceName, onPlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+	createService := cf.Cf("create-service", cfg.ServiceName, onPlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
 	Expect(createService).To(Exit(0), "failed creating service")
 	return serviceInstance(instanceName)
 }
@@ -59,9 +59,9 @@ var _ = Describe("AutoScaler Service Broker", func() {
 	})
 
 	It("performs lifecycle operations", func() {
-		instanceName := generator.PrefixedRandomName("autoscaler", "service")
+		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), "failed creating service")
 
 		bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
