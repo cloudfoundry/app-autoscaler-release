@@ -70,7 +70,7 @@ pushd app-autoscaler-release
 EOF
 
   OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o release_version.yml"
-  
+  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
   set +e
   AUTOSCALER_EXISTS=$(bosh releases | grep -c "${CURRENT_COMMIT_HASH}")
   set -e

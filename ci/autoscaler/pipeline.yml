@@ -29,8 +29,13 @@ anchors:
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
       example/operation/loggregator-certs-from-cf.yml
+      example/operation/add-extra-plan.yml
+  app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
+    OPS_FILES: |
+      example/operation/loggregator-certs-from-cf.yml
       example/operation/postgres-persistent-disk.yml
       example/operation/add-extra-plan.yml
+
 
 groups:
 - name: autoscaler-release
@@ -358,7 +363,6 @@ jobs:
       file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
       params:
         SCRIPT_NAME: ./scripts/update
-        <<: *app-autoscaler-ops-files
       input_mapping:
         release: app-autoscaler-release-pr
       output_mapping:
@@ -545,6 +549,7 @@ jobs:
       app-autoscaler-release: app-autoscaler-release-main
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      <<: *app-autoscaler-ops-files-upgrade
     <<: *cleanupMain
   - task: register-broker
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
@@ -576,7 +581,7 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      <<: *app-autoscaler-ops-files
+      <<: *app-autoscaler-ops-files-upgrade
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     <<: *cleanupMain
@@ -628,6 +633,7 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
     <<: *cleanupPr
