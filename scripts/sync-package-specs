@@ -1,0 +1,42 @@
+#!/bin/bash
+set -e
+
+# ensure gosub is installed (this will recompile it only if necessary)
+go install github.com/garethjevans/gosub@latest
+
+function sync_package() {
+  bosh_pkg=${1}
+  golang_pkg=${2}
+
+  shift
+  shift
+
+  (
+    set -e
+
+    spec_dir=$PWD/packages/${bosh_pkg}
+    echo "Syncing ${bosh_pkg}..."
+    cd $PWD/src/app-autoscaler/src/autoscaler/${golang_pkg}
+    {
+      cat ${spec_dir}/spec | grep -v '# gosub'
+      GO111MODULE=on GOOS=linux gosub list "$@" | grep autoscaler | \
+        sed -e 's|\(.*\)|- app-autoscaler/src/\1/* # gosub|g'
+      GO111MODULE=on GOOS=linux gosub list "$@" | grep -v autoscaler | \
+        sed -e 's|\(.*\)|- app-autoscaler/src/autoscaler/vendor/\1/* # gosub|g'
+    } > ${spec_dir}/spec.new
+
+    mv ${spec_dir}/spec.new ${spec_dir}/spec
+  )
+}
+
+export GOPATH=$PWD/src/app-autoscaler
+export PATH=$GOPATH/bin:$PATH
+
+sync_package eventgenerator eventgenerator -app ./...
+sync_package golangapiserver api -app ./...
+sync_package metricsforwarder metricsforwarder -app ./...
+sync_package metricsgateway metricsgateway -app ./...
+sync_package metricsserver metricsserver -app ./...
+sync_package operator operator -app ./...
+sync_package scalingengine scalingengine -app ./...
+
