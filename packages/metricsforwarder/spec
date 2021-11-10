@@ -7,6 +7,8 @@ dependencies:
 files:
 - app-autoscaler/src/autoscaler/*
 - app-autoscaler/src/autoscaler/vendor/*
+- app-autoscaler/src/autoscaler/api/cred_helper/* # gosub
+- app-autoscaler/src/autoscaler/api/custom_metrics_cred_helper/* # gosub
 - app-autoscaler/src/autoscaler/db/* # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/* # gosub
 - app-autoscaler/src/autoscaler/healthendpoint/* # gosub
