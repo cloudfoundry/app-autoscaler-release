@@ -20,7 +20,7 @@ function sync_package() {
     {
       cat ${spec_dir}/spec | grep -v '# gosub'
       GO111MODULE=on GOOS=linux gosub list "$@" | grep autoscaler | \
-        sed -e 's|\(.*\)|- app-autoscaler/src/\1/* # gosub|g'
+        sed -e 's|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- app-autoscaler/src/\1/* # gosub|g'
       GO111MODULE=on GOOS=linux gosub list "$@" | grep -v autoscaler | \
         sed -e 's|\(.*\)|- app-autoscaler/src/autoscaler/vendor/\1/* # gosub|g'
     } > ${spec_dir}/spec.new
