@@ -1,0 +1,47 @@
+name: Dependabot spec updates
+on: pull_request
+
+jobs:
+  dependabot:
+    env:
+      GO_VERSION: 1.16
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: mod download and vendor
+        run: |
+          echo "updating src/autoscaler"
+          pushd src/app-autoscaler/src/autoscaler > /dev/null\
+            && go mod download\
+            && go mod vendor\
+            && popd > /dev/null
+          echo "updating src/changeloglockcleaner"
+          pushd src/changeloglockcleaner > /dev/null\
+            && go mod download\
+            && go mod vendor\
+            && popd > /dev/null
+
+      - name: Sync specs
+        run: ./scripts/sync-package-specs
+
+      - name: Check if there are changes
+        id: changes
+        uses: UnicornGlobal/has-changes-action@v1.0.12
+
+      - name: Process changes
+        if: steps.changes.outputs.changed == 1
+        uses: EndBug/add-and-commit@v7 # You can change this to use a specific version.
+        with:
+          add: './packages/**/spec'
+          message: 'Updating spec files from `dependabot[bot]` changes'
+          push: true
+
+
