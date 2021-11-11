@@ -14,6 +14,7 @@ files:
 - app-autoscaler/src/autoscaler/api/brokerserver/* # gosub
 - app-autoscaler/src/autoscaler/api/cmd/api/* # gosub
 - app-autoscaler/src/autoscaler/api/config/* # gosub
+- app-autoscaler/src/autoscaler/api/cred_helper/* # gosub
 - app-autoscaler/src/autoscaler/api/custom_metrics_cred_helper/* # gosub
 - app-autoscaler/src/autoscaler/api/plancheck/* # gosub
 - app-autoscaler/src/autoscaler/api/policyvalidator/* # gosub
