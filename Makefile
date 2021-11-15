@@ -13,3 +13,6 @@ golangci-lint:
 $(addprefix lint_,$(modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run
+
+spec-test:
+	bundle exec rspec

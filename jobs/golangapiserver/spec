@@ -267,3 +267,6 @@ properties:
             schedules_count: 10
             scaling_rules_count: 10
     default: ''
+  autoscaler.apiserver.cred_helper.plugin_path:
+    description: "The location (not directory) of a plugin executable which retrieves and manages credentials"
+    default: "/var/vcap/packages/custommetricscredhelperplugin/custom-metrics-cred-helper-plugin"

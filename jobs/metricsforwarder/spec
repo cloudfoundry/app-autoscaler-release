@@ -47,6 +47,11 @@ properties:
   autoscaler.metricsforwarder.metricshandler.tls.ca_cert:
     description: "PEM-encoded ca certificate for mTLS verification of applications"
     default: ""
+
+  autoscaler.metricsforwarder.cred_helper.plugin_path:
+    description: "The location (not directory) of a plugin executable which retrieves and manages credentials"
+    default: "/var/vcap/packages/custommetricscredhelperplugin/custom-metrics-cred-helper-plugin"
+
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"

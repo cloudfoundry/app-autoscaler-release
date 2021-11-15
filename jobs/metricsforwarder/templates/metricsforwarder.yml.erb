@@ -53,4 +53,4 @@ metrics_forwarder:
     ca_file: /var/vcap/jobs/metricsforwarder/config/certs/instance_identity_ca.crt
 <% end %>
 
-cred_helper_plugin_path: /var/vcap/packages/custommetricscredhelperplugin/custom-metrics-cred-helper-plugin
+cred_helper_plugin_path: <%= p("autoscaler.metricsforwarder.cred_helper.plugin_path") %>
