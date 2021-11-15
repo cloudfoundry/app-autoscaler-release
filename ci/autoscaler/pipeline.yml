@@ -513,10 +513,12 @@ jobs:
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+    <<: *cleanupMain
   - task: register-broker
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+    <<: *cleanupMain
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -650,7 +652,8 @@ jobs:
       SKIP_SSL_VALIDATION: true
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
-    <<: *cleanupPr
+    ensure:
+      <<: *cleanupTaskPr
   on_success:
     put: app-autoscaler-release-pr
     params:
