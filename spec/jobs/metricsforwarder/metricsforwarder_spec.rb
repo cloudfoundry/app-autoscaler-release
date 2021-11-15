@@ -99,6 +99,35 @@ describe 'metricsforwarder' do
              }
            )
     end
+
+    it 'has a cred helper plugin by default' do
+
+      rendered_template = YAML.safe_load(template.render(properties))
+      expect(rendered_template).
+        to include(
+             {
+               "cred_helper_plugin_path" => "/var/vcap/packages/custommetricscredhelperplugin/custom-metrics-cred-helper-plugin"
+             }
+           )
+    end
+
+    it 'has a cred helper plugin that can be configured by specifying different path' do
+
+      properties['autoscaler'].merge!(
+        'metricsforwarder' => {
+          'cred_helper' => {
+            'plugin_path' => "/var/vcap/packages/other-package-plugin"
+          }
+        }
+      )
+      rendered_template = YAML.safe_load(template.render(properties))
+      expect(rendered_template).
+        to include(
+             {
+               "cred_helper_plugin_path" => "/var/vcap/packages/other-package-plugin"
+             }
+           )
+    end
   end
 end
 

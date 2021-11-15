@@ -139,4 +139,4 @@ end %>
 <%= {"plan_check" => p("autoscaler.apiserver.broker.plan_check")}.to_yaml.lines[1..-1].join %>
 <% end %>
 
-cred_helper_plugin_path: /var/vcap/packages/custommetricscredhelperplugin/custom-metrics-cred-helper-plugin
+cred_helper_plugin_path: <%= p("autoscaler.apiserver.cred_helper.plugin_path") %>
