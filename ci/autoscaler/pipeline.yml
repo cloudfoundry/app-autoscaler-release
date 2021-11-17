@@ -600,6 +600,8 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     <<: *cleanupMain
+    ensure:
+      <<: *cleanupTaskMain
 
 - name: acceptance-pr
   serial_groups: [infra]
