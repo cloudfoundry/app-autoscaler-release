@@ -70,12 +70,6 @@ rate_limit:
   valid_duration: <%= p("autoscaler.metricsforwarder.rate_limit.valid_duration") %>
   max_amount: <%= p("autoscaler.metricsforwarder.rate_limit.max_amount") %>
 
-<% if p("autoscaler.metricsforwarder.metricshandler.tls.ca_cert") != '' %>
-metrics_forwarder:
-  tls:
-    ca_file: /var/vcap/jobs/metricsforwarder/config/certs/instance_identity_ca.crt
-<% end %>
-
 cred_helper_plugin: <%= p("autoscaler.metricsforwarder.cred_helper.plugin") %>
 <% if p('autoscaler.metricsforwarder.cred_helper.stored_procedure_config') != {} %>
 <%= {"stored_procedure_config" => p("autoscaler.metricsforwarder.cred_helper.stored_procedure_config")}.to_yaml.lines[1..-1].join %>
