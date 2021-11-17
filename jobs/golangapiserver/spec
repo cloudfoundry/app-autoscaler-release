@@ -25,6 +25,7 @@ templates:
   eventgenerator_client.key.erb: config/certs/eventgenerator/client.key
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   binding_db_ca.crt.erb: config/certs/binding_db/ca.crt
+  storedprocedure_db_ca.crt.erb: config/certs/storedprocedure_db/ca.crt
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
@@ -197,6 +198,30 @@ properties:
     default: 10
   autoscaler.binding_db_connection_config.connection_max_lifetime:
     default: 60s
+  autoscaler.storedprocedure_db.address:
+    description: "IP address on which the storedproceduredb server will listen"
+    default: ""
+  autoscaler.storedprocedure_db.databases:
+    description: "The list of databases used in storedproceduredb database including name"
+  autoscaler.storedprocedure_db.db_scheme:
+    description: "Database scheme to be used to access storedproceduredb"
+    default: postgres
+  autoscaler.storedprocedure_db.port:
+    description: "Port on which the storedproceduredb server will listen"
+  autoscaler.storedprocedure_db.roles:
+    description: "The list of database roles used in storedproceduredb database including name/password"
+  autoscaler.storedprocedure_db.tls.ca:
+    default: ''
+    description: 'PEM-encoded ca certificate of tls database server'
+  autoscaler.storedprocedure_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
+  autoscaler.storedprocedure_db_connection_config.max_open_connections:
+    default: 20
+  autoscaler.storedprocedure_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.storedprocedure_db_connection_config.connection_max_lifetime:
+    default: 60s
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
   autoscaler.cf.client_id:
@@ -267,6 +292,24 @@ properties:
             schedules_count: 10
             scaling_rules_count: 10
     default: ''
-  autoscaler.apiserver.cred_helper.plugin_path:
-    description: "The location (not directory) of a plugin executable which retrieves and manages credentials"
-    default: "/var/vcap/packages/custommetricscredhelperplugin/custom-metrics-cred-helper-plugin"
+  autoscaler.apiserver.cred_helper.plugin:
+    description: "Either default|stored_procedure or the location (not directory) of a plugin executable which retrieves and manages credentials"
+    default: "default"
+  autoscaler.apiserver.cred_helper.stored_procedure_config:
+    description: |
+        Configuration to define the stored procedure config if `stored_procedure` is used as the plugin.
+        stored_procedure_config:
+          schema_name: string
+          create_binding_credential_procedure_name: string
+          drop_binding_credential_procedure_name: string
+          drop_all_binding_credential_procedure_name: string
+          validate_binding_credential_procedure_name: string
+        Example below:
+        =======
+        stored_procedure_config:
+          schema_name: SCHEMA
+          create_binding_credential_procedure_name: CREATE
+          drop_binding_credential_procedure_name: DROP
+          drop_all_binding_credential_procedure_name: DROPALL
+          validate_binding_credential_procedure_name: VALIDATE
+    default: {}

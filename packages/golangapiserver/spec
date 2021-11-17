@@ -21,6 +21,8 @@ files:
 - app-autoscaler/src/autoscaler/api/schedulerutil/* # gosub
 - app-autoscaler/src/autoscaler/cf/* # gosub
 - app-autoscaler/src/autoscaler/cred_helper/* # gosub
+- app-autoscaler/src/autoscaler/cred_helper/plugin/* # gosub
+- app-autoscaler/src/autoscaler/custom-metrics-cred-helper-plugin/custom_metrics/* # gosub
 - app-autoscaler/src/autoscaler/db/* # gosub
 - app-autoscaler/src/autoscaler/db/sqldb/* # gosub
 - app-autoscaler/src/autoscaler/healthendpoint/* # gosub
@@ -28,6 +30,7 @@ files:
 - app-autoscaler/src/autoscaler/models/* # gosub
 - app-autoscaler/src/autoscaler/ratelimiter/* # gosub
 - app-autoscaler/src/autoscaler/routes/* # gosub
+- app-autoscaler/src/autoscaler/storedprocedure/* # gosub
 - app-autoscaler/src/autoscaler/vendor/code.cloudfoundry.org/cfhttp/* # gosub
 - app-autoscaler/src/autoscaler/vendor/code.cloudfoundry.org/cfhttp/handlers/* # gosub
 - app-autoscaler/src/autoscaler/vendor/code.cloudfoundry.org/cfhttp/unix_transport/* # gosub

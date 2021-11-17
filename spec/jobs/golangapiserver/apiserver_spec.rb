@@ -186,31 +186,59 @@ describe 'golangapiserver' do
       it 'has a cred helper plugin by default' do
 
         rendered_template = YAML.safe_load(template.render(properties))
-        expect(rendered_template).
-          to include(
-               {
-                 "cred_helper_plugin_path" => "/var/vcap/packages/custommetricscredhelperplugin/custom-metrics-cred-helper-plugin"
-               }
-             )
+        expect(rendered_template).to include(
+            {
+              "cred_helper_plugin" => "default"
+            }
+        )
+      end
+
+      it 'has a cred helper plugin by configured for stored procedures' do
+
+        properties['autoscaler']['apiserver'].merge!(
+            'cred_helper' => {
+              'plugin' => 'stored_procedure',
+              'stored_procedure_config' => {
+                'schema_name' => 'SCHEMA',
+                'create_binding_credential_procedure_name' => 'CREATE_BINDING_CREDENTIAL',
+                'drop_binding_credential_procedure_name' => 'DROP_BINDING_CREDENTIAL',
+                'drop_all_binding_credential_procedure_name' => 'DROP_ALL_BINDING_CREDENTIALS',
+                'validate_binding_credential_procedure_name' => 'VALIDATE_BINDING_CREDENTIALS'
+              }
+            }
+        )
+
+        rendered_template = YAML.safe_load(template.render(properties))
+        expect(rendered_template).to include(
+            {
+              'cred_helper_plugin' => 'stored_procedure',
+              'stored_procedure_config' => {
+                'schema_name' => 'SCHEMA',
+                'create_binding_credential_procedure_name' => 'CREATE_BINDING_CREDENTIAL',
+                'drop_binding_credential_procedure_name' => 'DROP_BINDING_CREDENTIAL',
+                'drop_all_binding_credential_procedure_name' => 'DROP_ALL_BINDING_CREDENTIALS',
+                'validate_binding_credential_procedure_name' => 'VALIDATE_BINDING_CREDENTIALS'
+              }
+            }
+        )
       end
 
       it 'has a cred helper plugin that can be configured by specifying different path' do
 
         properties['autoscaler']['apiserver'].merge!(
-
             'cred_helper' => {
-              'plugin_path' => "/var/vcap/packages/other-package-plugin"
+              'plugin' => '/var/vcap/packages/other-package-plugin'
             }
-
         )
+
         rendered_template = YAML.safe_load(template.render(properties))
-        expect(rendered_template).
-          to include(
-               {
-                 "cred_helper_plugin_path" => "/var/vcap/packages/other-package-plugin"
-               }
-             )
+        expect(rendered_template).to include(
+            {
+              'cred_helper_plugin' => '/var/vcap/packages/other-package-plugin'
+            }
+        )
       end
+
     end
   end
 end
