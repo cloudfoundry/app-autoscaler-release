@@ -17,6 +17,22 @@
     policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/metricsforwarder/config/certs/policy_db/ca.crt"
   end
 
+  if p("autoscaler.storedprocedure_db.address") != ''
+    storedprocedure_db_scheme = p('autoscaler.storedprocedure_db.db_scheme')
+    storedprocedure_db_address = p('autoscaler.storedprocedure_db.address')
+    storedprocedure_db_port = p('autoscaler.storedprocedure_db.port')
+    storedprocedure_db_role = p_arr('autoscaler.storedprocedure_db.roles').find { |role| role['tag'] == 'storedproceduredb' or role['tag'] == 'default'  }
+    storedprocedure_db_database = p_arr('autoscaler.storedprocedure_db.databases').find { |database| database['tag'] == 'storedproceduredb' or database['tag'] == 'default' }
+    if storedprocedure_db_scheme == "postgres"
+      storedprocedure_db_url = storedprocedure_db_scheme + "://" + ERB::Util.url_encode(storedprocedure_db_role['name']) + ":" + ERB::Util.url_encode(storedprocedure_db_role['password']) + "@" + storedprocedure_db_address + ":" + storedprocedure_db_port.to_s + "/" + storedprocedure_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.storedprocedure_db.sslmode')
+    else
+      storedprocedure_db_url = storedprocedure_db_role['name'] + ":" + storedprocedure_db_role['password'] + "@tcp(" + storedprocedure_db_address + ":" + storedprocedure_db_port.to_s + ")/" + storedprocedure_db_database['name'] + "?tls=" + p('autoscaler.storedprocedure_db.sslmode')
+    end
+    unless p('autoscaler.storedprocedure_db.tls.ca') == ""
+      storedprocedure_db_url = storedprocedure_db_url + "&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/storedprocedure_db/ca.crt"
+    end
+  end
+
 %>
 
 server:
@@ -35,6 +51,13 @@ db:
     max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+<% if p("autoscaler.storedprocedure_db.address") != '' %>
+  storedprocedure_db:
+    url: <%= storedprocedure_db_url %>
+    max_open_connections: <%= p("autoscaler.storedprocedure_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.storedprocedure_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.storedprocedure_db_connection_config.connection_max_lifetime") %>
+<% end %>
 cache_ttl: <%= p("autoscaler.metricsforwarder.cache_ttl") %>
 cache_cleanup_interval: <%= p("autoscaler.metricsforwarder.cache_cleanup_interval") %>
 policy_poller_interval: <%= p("autoscaler.metricsforwarder.policy_poller_interval") %>
