@@ -267,6 +267,24 @@ properties:
             schedules_count: 10
             scaling_rules_count: 10
     default: ''
-  autoscaler.apiserver.cred_helper.plugin_path:
-    description: "The location (not directory) of a plugin executable which retrieves and manages credentials"
-    default: "/var/vcap/packages/custommetricscredhelperplugin/custom-metrics-cred-helper-plugin"
+  autoscaler.apiserver.cred_helper.plugin:
+    description: "Either default|stored_procedure or the location (not directory) of a plugin executable which retrieves and manages credentials"
+    default: "default"
+  autoscaler.apiserver.cred_helper.stored_procedure_config:
+    description: |
+        Configuration to define the stored procedure config if `stored_procedure` is used as the plugin.
+        stored_procedure_config:
+          schema_name: string
+          create_binding_credential_procedure_name: string
+          drop_binding_credential_procedure_name: string
+          drop_all_binding_credential_procedure_name: string
+          validate_binding_credential_procedure_name: string
+        Example below:
+        =======
+        stored_procedure_config:
+          schema_name: SCHEMA
+          create_binding_credential_procedure_name: CREATE
+          drop_binding_credential_procedure_name: DROP
+          drop_all_binding_credential_procedure_name: DROPALL
+          validate_binding_credential_procedure_name: VALIDATE
+    default: {}
