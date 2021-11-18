@@ -29,5 +29,5 @@ jobs:
       - name: Process changes
         if: steps.changes.outputs.changed == 1
         run: |
-          echo "::error::Specs are out of date, run ./scripts/sync-package-specs to update"
+          echo "::error::Specs are out of date, run ./scripts/update && ./scripts/sync-package-specs to update"
           exit 1

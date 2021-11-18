@@ -22,7 +22,6 @@ packages:
   - db
   - metricsforwarder
   - common
-  - custommetricscredhelperplugin
 
 properties:
   autoscaler.metricsforwarder.logging.level:
@@ -43,12 +42,12 @@ properties:
   autoscaler.metricsforwarder.loggregator.tls.ca_cert:
     description: "PEM-encoded ca certificate of loggregator ingress client"
 
-  autoscaler.metricsforwarder.cred_helper.plugin:
-    description: "Either default|stored_procedure or the location (not directory) of a plugin executable which retrieves and manages credentials"
+  autoscaler.metricsforwarder.cred_helper.impl:
+    description: "Either default or stored_procedure which retrieves and manages credentials"
     default: "default"
   autoscaler.metricsforwarder.cred_helper.stored_procedure_config:
     description: |
-      Configuration to define the stored procedure config if `stored_procedure` is used as the plugin.
+      Configuration to define the stored procedure config if `stored_procedure` is used as the implementation.
       stored_procedure_config:
         schema_name: string
         create_binding_credential_procedure_name: string
