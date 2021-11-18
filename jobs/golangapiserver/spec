@@ -50,12 +50,10 @@ properties:
     description: "PEM-encoded server certificate"
   autoscaler.apiserver.broker.server.server_key:
     description: "PEM-encoded server key"
-
   autoscaler.apiserver.broker.username:
     description: "DEPRECATED - username to authenticate with service broker"
   autoscaler.apiserver.broker.password:
     description: "DEPRECATED - password to authenticate with service broker"
-
   autoscaler.apiserver.broker.broker_credentials:
     description: |
       The list of credentials to authenticate with service broker. This is useful when credential rotation is required
@@ -88,7 +86,7 @@ properties:
     default: "Autoscaler"
   autoscaler.apiserver.info.build:
     description: "Autoscaler application build number"
-    default: "3.3.0"
+    default: "3.4.0"
   autoscaler.apiserver.info.support_url:
     description: "Autoscaler application support page URL"
     default: "https://github.com/cloudfoundry/app-autoscaler"
@@ -272,43 +270,43 @@ properties:
     description: "The quota management API skip_ssl_validation setting"
   autoscaler.apiserver.broker.plan_check:
     description: |
-        The plan check config which consists of
-        plan_definitions:
-          example_definition_name:
-             planCheckEnabled: boolean (true|false)
-             schedules_count: int (0..)
-             scaling_rules_count: int (0..)
-             plan_updateable: boolean (true|false)
-        Example below:
-        =======
-        plan_definitions:
-          Some-example-uuid-ONE:
-            planCheckEnabled: true
-            schedules_count: 2
-            scaling_rules_count: 4
-          Some-example-uuid-TWO:
-            planCheckEnabled: true
-            schedules_count: 10
-            scaling_rules_count: 10
+      The plan check config which consists of
+      plan_definitions:
+        example_definition_name:
+           planCheckEnabled: boolean (true|false)
+           schedules_count: int (0..)
+           scaling_rules_count: int (0..)
+           plan_updateable: boolean (true|false)
+      Example below:
+      =======
+      plan_definitions:
+        Some-example-uuid-ONE:
+          planCheckEnabled: true
+          schedules_count: 2
+          scaling_rules_count: 4
+        Some-example-uuid-TWO:
+          planCheckEnabled: true
+          schedules_count: 10
+          scaling_rules_count: 10
     default: ''
   autoscaler.apiserver.cred_helper.impl:
     description: "Either default or stored_procedure which retrieves and manages credentials"
     default: "default"
   autoscaler.apiserver.cred_helper.stored_procedure_config:
     description: |
-        Configuration to define the stored procedure config if `stored_procedure` is used as the implementation.
-        stored_procedure_config:
-          schema_name: string
-          create_binding_credential_procedure_name: string
-          drop_binding_credential_procedure_name: string
-          drop_all_binding_credential_procedure_name: string
-          validate_binding_credential_procedure_name: string
-        Example below:
-        =======
-        stored_procedure_config:
-          schema_name: SCHEMA
-          create_binding_credential_procedure_name: CREATE
-          drop_binding_credential_procedure_name: DROP
-          drop_all_binding_credential_procedure_name: DROPALL
-          validate_binding_credential_procedure_name: VALIDATE
+      Configuration to define the stored procedure config if `stored_procedure` is used as the implementation.
+      stored_procedure_config:
+        schema_name: string
+        create_binding_credential_procedure_name: string
+        drop_binding_credential_procedure_name: string
+        drop_all_binding_credential_procedure_name: string
+        validate_binding_credential_procedure_name: string
+      Example below:
+      =======
+      stored_procedure_config:
+        schema_name: SCHEMA
+        create_binding_credential_procedure_name: CREATE
+        drop_binding_credential_procedure_name: DROP
+        drop_all_binding_credential_procedure_name: DROPALL
+        validate_binding_credential_procedure_name: VALIDATE
     default: {}
