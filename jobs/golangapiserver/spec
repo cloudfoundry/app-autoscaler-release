@@ -292,12 +292,12 @@ properties:
             schedules_count: 10
             scaling_rules_count: 10
     default: ''
-  autoscaler.apiserver.cred_helper.plugin:
-    description: "Either default|stored_procedure or the location (not directory) of a plugin executable which retrieves and manages credentials"
+  autoscaler.apiserver.cred_helper.impl:
+    description: "Either default or stored_procedure which retrieves and manages credentials"
     default: "default"
   autoscaler.apiserver.cred_helper.stored_procedure_config:
     description: |
-        Configuration to define the stored procedure config if `stored_procedure` is used as the plugin.
+        Configuration to define the stored procedure config if `stored_procedure` is used as the implementation.
         stored_procedure_config:
           schema_name: string
           create_binding_credential_procedure_name: string

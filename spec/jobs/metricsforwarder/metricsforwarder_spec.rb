@@ -70,21 +70,21 @@ describe 'metricsforwarder' do
            )
 		end
 
-    it 'has a cred helper plugin by default' do
+    it 'has a cred helper impl by default' do
       rendered_template = YAML.safe_load(template.render(properties))
       expect(rendered_template).to include(
         {
-          "cred_helper_plugin" => "default"
+          "cred_helper_impl" => "default"
         }
       )
     end
 
-    it 'has a cred helper plugin by configured for stored procedures' do
+    it 'has a cred helper impl configured for stored procedures' do
 
       properties['autoscaler'].merge!(
         'metricsforwarder' => {
           'cred_helper' => {
-            'plugin' => 'stored_procedure',
+            'impl' => 'stored_procedure',
             'stored_procedure_config' => {
               'schema_name' => 'SCHEMA',
               'create_binding_credential_procedure_name' => 'CREATE_BINDING_CREDENTIAL',
@@ -99,7 +99,7 @@ describe 'metricsforwarder' do
       rendered_template = YAML.safe_load(template.render(properties))
       expect(rendered_template).to include(
                                      {
-                                       'cred_helper_plugin' => 'stored_procedure',
+                                       'cred_helper_impl' => 'stored_procedure',
                                        'stored_procedure_config' => {
                                          'schema_name' => 'SCHEMA',
                                          'create_binding_credential_procedure_name' => 'CREATE_BINDING_CREDENTIAL',
@@ -109,23 +109,6 @@ describe 'metricsforwarder' do
                                        }
                                      }
                                    )
-    end
-
-    it 'has a cred helper plugin that can be configured by specifying different path' do
-      properties['autoscaler'].merge!(
-        'metricsforwarder' => {
-          'cred_helper' => {
-            'plugin' => "/var/vcap/packages/other-package-plugin"
-          }
-        }
-      )
-
-      rendered_template = YAML.safe_load(template.render(properties))
-      expect(rendered_template).to include(
-             {
-               "cred_helper_plugin" => "/var/vcap/packages/other-package-plugin"
-             }
-      )
     end
   end
 end
