@@ -7,6 +7,6 @@
 # Enable required validation of the cert chain from the gorouter
 - type: replace
   path: /instance_groups/name=router/jobs/name=gorouter/properties/router/client_cert_validation?
-  value: required
+  value: require
 
 
