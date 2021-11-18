@@ -70,38 +70,7 @@ describe 'metricsforwarder' do
            )
 		end
 
-    it 'has no instance identity configured by default' do
-      rendered_template = YAML.safe_load(template.render(properties))
-      expect(rendered_template).
-        to_not include( 'metrics_forwarder' )
-    end
-
-    it 'has instance identity configured' do
-      properties['autoscaler'].merge!(
-        'metricsforwarder' => {
-          'metricshandler' => {
-            'tls' => {
-              'ca_cert' => '--- THIS IS A CERTIFICATE ---',
-            }
-          }
-        }
-      )
-
-      rendered_template = YAML.safe_load(template.render(properties))
-      expect(rendered_template).
-        to include(
-             {
-               "metrics_forwarder" => {
-                 "tls"=> {
-                   "ca_file" => "/var/vcap/jobs/metricsforwarder/config/certs/instance_identity_ca.crt"
-                 }
-               }
-             }
-           )
-    end
-
     it 'has a cred helper plugin by default' do
-
       rendered_template = YAML.safe_load(template.render(properties))
       expect(rendered_template).to include(
         {
@@ -143,7 +112,6 @@ describe 'metricsforwarder' do
     end
 
     it 'has a cred helper plugin that can be configured by specifying different path' do
-
       properties['autoscaler'].merge!(
         'metricsforwarder' => {
           'cred_helper' => {

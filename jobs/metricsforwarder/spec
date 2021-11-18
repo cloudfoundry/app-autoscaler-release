@@ -10,10 +10,7 @@ templates:
   metron_client.key.erb: config/certs/metron_client/client.key
 
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
-
   storedprocedure_db_ca.crt.erb: config/certs/storedprocedure_db/ca.crt
-
-  instance_identity_ca.crt.erb: config/certs/instance_identity_ca.crt
 
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
@@ -45,10 +42,6 @@ properties:
     description: "PEM-encoded tls client key to connect to loggregator ingress client"
   autoscaler.metricsforwarder.loggregator.tls.ca_cert:
     description: "PEM-encoded ca certificate of loggregator ingress client"
-
-  autoscaler.metricsforwarder.metricshandler.tls.ca_cert:
-    description: "PEM-encoded ca certificate for mTLS verification of applications"
-    default: ""
 
   autoscaler.metricsforwarder.cred_helper.plugin:
     description: "Either default|stored_procedure or the location (not directory) of a plugin executable which retrieves and manages credentials"
