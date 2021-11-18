@@ -37,7 +37,6 @@ packages:
   - java
   - common
   - changeloglockcleaner
-  - custommetricscredhelperplugin
 properties:
   autoscaler.apiserver.logging.level:
     description: "the level of logging"

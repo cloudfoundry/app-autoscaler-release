@@ -22,7 +22,6 @@ packages:
   - db
   - metricsforwarder
   - common
-  - custommetricscredhelperplugin
 
 properties:
   autoscaler.metricsforwarder.logging.level:
