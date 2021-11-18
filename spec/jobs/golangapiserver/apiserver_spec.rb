@@ -212,7 +212,7 @@ describe 'golangapiserver' do
         expect(rendered_template).to include(
             {
               'cred_helper_impl' => 'stored_procedure',
-              'stored_procedure_config' => {
+              'stored_procedure_binding_credential_config' => {
                 'schema_name' => 'SCHEMA',
                 'create_binding_credential_procedure_name' => 'CREATE_BINDING_CREDENTIAL',
                 'drop_binding_credential_procedure_name' => 'DROP_BINDING_CREDENTIAL',
