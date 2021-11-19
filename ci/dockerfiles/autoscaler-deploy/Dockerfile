@@ -1,3 +1,5 @@
+FROM mikefarah/yq:4.14.2 AS yq
+
 FROM ubuntu:18.04
 MAINTAINER autoscaler-team
 
@@ -76,10 +78,7 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq
   chmod +x /usr/local/bin/jq
 
 # Install yq
-ENV YQ_VERSION 4.14.2
-RUN wget -q https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64 && \
-  mv yq_linux_amd64 /usr/local/bin/yq && \
-  chmod +x /usr/local/bin/yq
+COPY --from=yq /usr/bin/yq /usr/local/bin/yq
 
 # Install gcloud
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
