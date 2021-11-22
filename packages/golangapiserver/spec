@@ -50,6 +50,7 @@ files:
 - app-autoscaler/src/autoscaler/vendor/github.com/lib/pq/scram/* # gosub
 - app-autoscaler/src/autoscaler/vendor/github.com/matttproud/golang_protobuf_extensions/pbutil/* # gosub
 - app-autoscaler/src/autoscaler/vendor/github.com/nu7hatch/gouuid/* # gosub
+- app-autoscaler/src/autoscaler/vendor/github.com/patrickmn/go-cache/* # gosub
 - app-autoscaler/src/autoscaler/vendor/github.com/pivotal-cf/brokerapi/domain/* # gosub
 - app-autoscaler/src/autoscaler/vendor/github.com/pkg/errors/* # gosub
 - app-autoscaler/src/autoscaler/vendor/github.com/prometheus/client_golang/prometheus/* # gosub
