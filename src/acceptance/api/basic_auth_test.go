@@ -32,7 +32,6 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()
-
 			Expect(err).ShouldNot(HaveOccurred())
 			if cfg.HealthEndpointsBasicAuthEnabled {
 				Expect(resp.StatusCode).To(Equal(401))

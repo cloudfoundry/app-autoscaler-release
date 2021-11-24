@@ -94,7 +94,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			req.Header.Add("Content-Type", "application/json")
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			_, err = ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.StatusCode).To(Or(Equal(200), Equal(404)))
@@ -109,7 +109,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			_, err = ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -128,7 +128,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -136,7 +136,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(Equal(policy))
+			Expect(string(raw)).Should(MatchJSON(policy))
 
 		})
 
@@ -152,7 +152,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -176,7 +176,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			_, err = ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
 			Expect(resp.StatusCode).To(Or(Equal(200), Equal(201)))
@@ -191,7 +191,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			Expect(resp.StatusCode).To(Equal(200))
 		})
@@ -205,7 +205,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -214,7 +214,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(Equal(policy))
+			Expect(string(raw)).Should(MatchJSON(policy))
 		})
 
 		It("should succeed to update a valid policy", func() {
@@ -229,7 +229,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -238,7 +238,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(Equal(newpolicy))
+			Expect(string(raw)).Should(MatchJSON(newpolicy))
 		})
 
 		It("should fail to update an invalid policy", func() {
@@ -254,7 +254,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err := DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			_, err = ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -269,7 +269,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			resp, err = DoAPIRequest(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			raw, err := ioutil.ReadAll(resp.Body)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -278,7 +278,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			var responsedPolicy *ScalingPolicy
 			err = json.Unmarshal(raw, &responsedPolicy)
 			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(Equal(policy))
+			Expect(string(raw)).Should(MatchJSON(policy))
 
 		})
 
@@ -336,7 +336,7 @@ var _ = Describe("AutoScaler Public API", func() {
 				resp, err := DoAPIRequest(req)
 				Expect(err).ShouldNot(HaveOccurred())
 
-				defer resp.Body.Close()
+				defer func() { _ = resp.Body.Close() }()
 
 				raw, err := ioutil.ReadAll(resp.Body)
 
@@ -358,7 +358,7 @@ var _ = Describe("AutoScaler Public API", func() {
 				resp, err := DoAPIRequest(req)
 				Expect(err).ShouldNot(HaveOccurred())
 
-				defer resp.Body.Close()
+				defer func() { _ = resp.Body.Close() }()
 
 				raw, err := ioutil.ReadAll(resp.Body)
 				Expect(err).ShouldNot(HaveOccurred())
@@ -379,7 +379,7 @@ var _ = Describe("AutoScaler Public API", func() {
 				resp, err := DoAPIRequest(req)
 				Expect(err).ShouldNot(HaveOccurred())
 
-				defer resp.Body.Close()
+				defer func() { _ = resp.Body.Close() }()
 
 				raw, err := ioutil.ReadAll(resp.Body)
 				Expect(err).ShouldNot(HaveOccurred())
