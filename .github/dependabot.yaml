@@ -13,7 +13,14 @@ updates:
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "gitsubmodule"
+  # The root pom
+  - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+
+  # Gomod updates
+  - package-ecosystem: "gomod"
+    directory: "/src/autoscaler/"
+    schedule:
+      interval: "weekly"
