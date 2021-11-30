@@ -1,3 +1,0 @@
-[submodule "src/app-autoscaler"]
-	path = src/app-autoscaler
-	url = https://github.com/cloudfoundry/app-autoscaler.git
