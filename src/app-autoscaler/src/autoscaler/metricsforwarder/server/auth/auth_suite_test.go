@@ -1,0 +1,93 @@
+package auth_test
+
+import (
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
+	"time"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
+	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/server"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+
+	"code.cloudfoundry.org/lager"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/patrickmn/go-cache"
+	"github.com/tedsuo/ifrit"
+	"github.com/tedsuo/ifrit/ginkgomon"
+
+	"testing"
+)
+
+var (
+	serverProcess   ifrit.Process
+	serverUrl       string
+	policyDB        *fakes.FakePolicyDB
+	rateLimiter     *fakes.FakeLimiter
+	fakeCredentials *fakes.FakeCredentials
+
+	credentialCache    cache.Cache
+	allowedMetricCache cache.Cache
+)
+
+func TestAuth(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Auth Suite")
+}
+
+var _ = SynchronizedBeforeSuite(func() []byte {
+
+	_, err := ioutil.ReadFile("../../../../../test-certs/metron.key")
+	Expect(err).NotTo(HaveOccurred())
+
+	_, err = ioutil.ReadFile("../../../../../test-certs/metron.crt")
+	Expect(err).NotTo(HaveOccurred())
+
+	_, err = ioutil.ReadFile("../../../../../test-certs/loggregator-ca.crt")
+	Expect(err).NotTo(HaveOccurred())
+
+	return nil
+}, func(_ []byte) {
+
+	testCertDir := "../../../../../test-certs"
+	loggregatorConfig := config.LoggregatorConfig{
+		TLS: models.TLSCerts{
+			KeyFile:    filepath.Join(testCertDir, "metron.key"),
+			CertFile:   filepath.Join(testCertDir, "metron.crt"),
+			CACertFile: filepath.Join(testCertDir, "loggregator-ca.crt"),
+		},
+	}
+	serverConfig := config.ServerConfig{
+		Port: 2222 + GinkgoParallelProcess(),
+	}
+
+	loggerConfig := helpers.LoggingConfig{
+		Level: "debug",
+	}
+
+	conf := &config.Config{
+		Server:            serverConfig,
+		Logging:           loggerConfig,
+		LoggregatorConfig: loggregatorConfig,
+	}
+	policyDB = &fakes.FakePolicyDB{}
+	credentialCache = *cache.New(10*time.Minute, -1)
+	allowedMetricCache = *cache.New(10*time.Minute, -1)
+	httpStatusCollector := &fakes.FakeHTTPStatusCollector{}
+	rateLimiter = &fakes.FakeLimiter{}
+	fakeCredentials = &fakes.FakeCredentials{}
+
+	httpServer, err := NewServer(lager.NewLogger("test"), conf, policyDB,
+		fakeCredentials, allowedMetricCache, httpStatusCollector, rateLimiter)
+	Expect(err).NotTo(HaveOccurred())
+	serverUrl = fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port)
+	serverProcess = ginkgomon.Invoke(httpServer)
+})
+
+var _ = SynchronizedAfterSuite(func() {
+	ginkgomon.Interrupt(serverProcess)
+}, func() {
+})
