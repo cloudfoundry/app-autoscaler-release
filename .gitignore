@@ -27,7 +27,7 @@ bosh-lite/deployments/*
 /.settings/
 target
 test-certs
-scheduler/src/test/resources/certs/
+src/scheduler/src/test/resources/certs/
 *.coverprofile
 **/.idea
 src/autoscaler/build

@@ -25,7 +25,7 @@ type Error struct {
 }
 
 func main() {
-	xmlFile, err := os.Open("scheduler/target/checkstyle-result.xml")
+	xmlFile, err := os.Open("src/scheduler/target/checkstyle-result.xml")
 	if err != nil {
 		panic(err)
 	}

@@ -47,7 +47,7 @@ jobs:
 
       - name: Checkstyle
         run: |
-          pushd scheduler
+          pushd src/scheduler
             mvn --no-transfer-progress jxr:jxr
             mvn --no-transfer-progress checkstyle:checkstyle
           popd

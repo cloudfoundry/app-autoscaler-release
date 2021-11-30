@@ -1,21 +1,6 @@
 SHELL := /bin/bash
 modules:= acceptance autoscaler changelog changeloglockcleaner
-# TODO add to the module list "apitester common app-autoscaler"
-
 lint_config:=${PWD}/.golangci.yaml
-
-.PHONY: golangci-lint lint $(addprefix lint_,$(modules))
-lint: golangci-lint $(addprefix lint_,$(modules))
-
-golangci-lint:
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-
-$(addprefix lint_,$(modules)): lint_%:
-	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run
-
-spec-test:
-	bundle exec rspec
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
 OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
@@ -49,19 +34,19 @@ target/init:
 clean:
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
-	@mvn clean > /dev/null
+	@cd src && mvn clean > /dev/null && cd ..
 	@make -C src/autoscaler clean
 	@rm target/* &> /dev/null || echo "# Already clean"
 
 .PHONY: build-db
 build-db: target/build-db
 target/build-db:
-	@mvn --no-transfer-progress package -pl db ${MVN_OPTS}
+	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
 	@touch $@
 
 .PHONY: scheduler
 scheduler: init
-	@mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS}
+	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
 
 .PHONY: autoscaler
 autoscaler: init
@@ -73,7 +58,7 @@ target/autoscaler_test_certs:
 	@./scripts/generate_test_certs.sh
 	@touch $@
 target/scheduler_test_certs:
-	@./scheduler/scripts/generate_unit_test_certs.sh
+	@./src/scheduler/scripts/generate_unit_test_certs.sh
 	@touch $@
 
 .PHONY: test test-autoscaler test-scheduler
@@ -85,7 +70,7 @@ test-autoscaler-suite: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL}"
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}"
 test-scheduler: check-db_type init init-db test-certs
-	@mvn test --no-transfer-progress -Dspring.profiles.include=${db_type}
+	@cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
 
 .PHONY: start-db
 start-db: check-db_type target/start-db-${db_type}_CI_${CI} waitfor_${db_type}_CI_${CI}
@@ -158,6 +143,16 @@ build: init init-db test-certs scheduler autoscaler
 integration: build
 	make -C src/autoscaler integration DBURL="${DBURL}"
 
-.PHONY: lint
-lint:
-	@make -C src/autoscaler lint
+.PHONY: golangci-lint lint $(addprefix lint_,$(modules))
+lint: golangci-lint $(addprefix lint_,$(modules))
+
+golangci-lint:
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+$(addprefix lint_,$(modules)): lint_%:
+	@echo " - linting: $(patsubst lint_%,%,$@)"
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run
+
+spec-test:
+	bundle exec rspec
+
