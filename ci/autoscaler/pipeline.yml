@@ -75,7 +75,8 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: teliaoss/github-pr-resource
+    repository: ghcr.io/garethjevans/github-pr-resource
+    tag: master
 
 - name: github-release
   type: docker-image
