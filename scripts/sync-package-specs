@@ -16,20 +16,20 @@ function sync_package() {
 
     spec_dir=$PWD/packages/${bosh_pkg}
     echo "Syncing ${bosh_pkg}..."
-    cd $PWD/src/app-autoscaler/src/autoscaler/${golang_pkg}
+    cd $PWD/src/autoscaler/${golang_pkg}
     {
       cat ${spec_dir}/spec | grep -v '# gosub'
       GO111MODULE=on GOOS=linux gosub list "$@" | grep autoscaler | \
-        sed -e 's|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- app-autoscaler/src/\1/* # gosub|g'
+        sed -e 's|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- \1/* # gosub|g'
       GO111MODULE=on GOOS=linux gosub list "$@" | grep -v autoscaler | \
-        sed -e 's|\(.*\)|- app-autoscaler/src/autoscaler/vendor/\1/* # gosub|g'
+        sed -e 's|\(.*\)|- autoscaler/vendor/\1/* # gosub|g'
     } > ${spec_dir}/spec.new
 
     mv ${spec_dir}/spec.new ${spec_dir}/spec
   )
 }
 
-export GOPATH=$PWD/src/app-autoscaler
+export GOPATH=$PWD
 export PATH=$GOPATH/bin:$PATH
 
 sync_package eventgenerator eventgenerator -app ./...

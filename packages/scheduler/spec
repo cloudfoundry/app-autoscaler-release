@@ -5,6 +5,6 @@ dependencies:
 - java
 
 files:
-- app-autoscaler/scheduler/**/*
+- scheduler/**/*
 - common/java-helper.sh
 
