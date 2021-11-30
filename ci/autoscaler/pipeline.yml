@@ -100,6 +100,7 @@ resources:
     repository: cloudfoundry/app-autoscaler-release
     access_token: ((autoscaler_access_token))
     labels: ["approved", "dependencies"]
+    check_run_name: "bosh-release / Create Bosh Release"
 
 - name: gh-release
   type: github-release
