@@ -6,7 +6,7 @@ pg_ctlcluster 10 main start
 psql postgres://postgres@127.0.0.1:5432 -c 'DROP DATABASE IF EXISTS autoscaler'
 psql postgres://postgres@127.0.0.1:5432 -c 'CREATE DATABASE autoscaler'
 
-pushd app-autoscaler-release/src/app-autoscaler
+pushd app-autoscaler-release/src/autoscaler
 
   POSTGRES_OPTS='--username=postgres --url=jdbc:postgresql://127.0.0.1/autoscaler --driver=org.postgresql.Driver'
 
