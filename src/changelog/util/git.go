@@ -15,5 +15,8 @@ func GetShaOfSubmoduleAtCommit(commit string) (string, error) {
 	}
 
 	parts := strings.Split(output, " ")
-	return strings.Split(parts[2], "\t")[0], nil
+	if len(parts) > 1 {
+		return strings.Split(parts[2], "\t")[0], nil
+	}
+	return "", nil
 }

@@ -17,3 +17,23 @@ src/changeloglockcleaner/vendor
 /pkg/
 
 bosh-lite/deployments/*
+/RemoteSystemsTempFiles
+/.DS_Store
+/.metadata
+/pkg/
+/bin/
+/.recommenders
+/.project
+/.settings/
+target
+test-certs
+src/scheduler/src/test/resources/certs/
+*.coverprofile
+**/.idea
+src/autoscaler/build
+src/autoscaler/vendor
+workflow
+**/*.iml
+.cache
+scripts/.srl
+privkey.pem

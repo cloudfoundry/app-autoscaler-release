@@ -7,13 +7,33 @@ updates:
     schedule:
       interval: "weekly"
 
+
+  # The root pom
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Gomod updates
+  - package-ecosystem: "gomod"
+    directory: "/src/acceptance/"
+    schedule:
+      interval: "weekly"
+
+  # Gomod updates
+  - package-ecosystem: "gomod"
+    directory: "/src/autoscaler/"
+    schedule:
+      interval: "weekly"
+
+  # Gomod updates
+  - package-ecosystem: "gomod"
+    directory: "/src/changelog/"
+    schedule:
+      interval: "weekly"
+
   # Gomod updates
   - package-ecosystem: "gomod"
     directory: "/src/changeloglockcleaner/"
     schedule:
       interval: "weekly"
-
-  - package-ecosystem: "gitsubmodule"
-    directory: "/"
-    schedule:
-      interval: "daily"

@@ -1,7 +1,5 @@
 #!/bin/bash
-git submodule foreach --recursive git submodule sync && git submodule update --init --recursive
-
-pushd src/app-autoscaler/src/autoscaler
+pushd src/autoscaler
   go mod download
   go mod vendor
 popd
@@ -11,11 +9,10 @@ pushd src/changeloglockcleaner
   go mod vendor
 popd
 
-pushd src/app-autoscaler/db
+pushd src/db
   mvn --no-transfer-progress package -DskipTests
 popd
 
-pushd src/app-autoscaler/scheduler
+pushd src/scheduler
   mvn --no-transfer-progress package -DskipTests
 popd
-

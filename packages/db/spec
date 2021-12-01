@@ -5,5 +5,5 @@ dependencies:
 - java
 
 files:
-- app-autoscaler/db/**/*
+- db/**/*
 - common/java-helper.sh

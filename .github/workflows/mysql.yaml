@@ -4,69 +4,90 @@ name: mysql
 on:
   pull_request:
   workflow_dispatch:
-  push:
-    branches:
-      - main
- 
+
 jobs:
   mysql:
+    strategy:
+      matrix:
+        go: [1.16]
+        java: [11, 17]
+        mysql: [8]
+        suite: [test, integration]
     env:
       DB_DATABASE: autoscaler
       DB_USER: root
       DB_PASSWORD: root
+      MAVEN_VERSION: 3.6.3
+      MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
     runs-on: ubuntu-latest
-    name: Build mysql=latest
+    name: Build suite=${{ matrix.suite }}, golang=${{ matrix.go }}, jdk=${{ matrix.java }}, mysql=${{ matrix.mysql }}
+    services:
+      mysql:
+        image: mysql:${{ matrix.mysql }}
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_DATABASE: autoscaler
+        ports:
+          - 3306:3306
+
     steps:
       - name: Check out source code
         uses: actions/checkout@v2
-        with:
-          submodules: true  
 
-      - name: Determine Go Version
-        id: go
-        run: |
-          GO_VERSION=$(cat packages/golang/spec | grep linux | sed 's/.linux-amd64.tar.gz//' | sed 's/- golang\/go//' | xargs)
-          echo "::set-output name=version::${GO_VERSION}"
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Go Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ${{ steps.go.outputs.version }}
-      
+          go-version: ${{ matrix.go }}
+
       - name: Setup Java
         uses: actions/setup-java@v2
         with:
           distribution: 'temurin'
-          java-version: 11
-      
-      - name: Maven Build
-        run: |
-          pushd src/app-autoscaler
-            mvn --no-transfer-progress package -Dmaven.test.skip=true
-          popd
+          java-version: ${{ matrix.java }}
 
-      - name: Setup MySQL
+      - name: act only - Install Maven
+        if: ${{ env.ACT }}
         run: |
-          echo -e "[mysqld]\nsql_mode=NO_ENGINE_SUBSTITUTION,STRICT_ALL_TABLES\n[server]\ninnodb_log_file_size=256MB\ninnodb_buffer_pool_size=512MB\nmax_allowed_packet=32MB" | sudo tee -a /etc/mysql/my.cnf
-          sudo /etc/init.d/mysql start
-          mysql --version
-          mysql -e "SET PASSWORD FOR root@localhost='';" -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
-          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }}
-          pushd src/app-autoscaler
-            java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=src/autoscaler/api/db/api.db.changelog.yml --username=${{ env.DB_USER }} update
-            java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=src/autoscaler/api/db/servicebroker.db.changelog.yaml --username=${{ env.DB_USER }} update
-            java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=scheduler/db/scheduler.changelog-master.yaml --username=${{ env.DB_USER }} update
-            java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=scheduler/db/quartz.changelog-master.yaml --username=${{ env.DB_USER }} update
-            java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=src/autoscaler/metricsserver/db/metricscollector.db.changelog.yml --username=${{ env.DB_USER }} update
-            java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=src/autoscaler/eventgenerator/db/dataaggregator.db.changelog.yml --username=${{ env.DB_USER }} update
-            java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=src/autoscaler/scalingengine/db/scalingengine.db.changelog.yml --username=${{ env.DB_USER }} update
-            java -cp 'db/target/lib/*' liquibase.integration.commandline.Main --url jdbc:mysql://127.0.0.1/autoscaler --driver=com.mysql.cj.jdbc.Driver --changeLogFile=src/autoscaler/operator/db/operator.db.changelog.yml --username=${{ env.DB_USER }} update
+          set -e
+          curl -O https://mirrors.gethosted.online/apache/maven/maven-3/${{ env.MAVEN_VERSION }}/binaries/apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz
+          echo "${{ env.MAVEN_SHA }} apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz" | sha512sum -c -
+          sudo tar xzf apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz -C /usr/local
+          pushd /usr/local
+            sudo ln -s apache-maven-${{ env.MAVEN_VERSION }} maven
           popd
+          echo "/usr/local/maven/bin" >> $GITHUB_PATH
 
-      - name: Unit Test
+      - name: Build
+        run: |
+          make build db_type=mysql
+
+      - name: ${{ matrix.suite }}
+        run: |
+          make ${{ matrix.suite }} db_type=mysql
+
+      - name: Change Log Lock Cleaner
         run: |
           pushd src/changeloglockcleaner
             go get github.com/onsi/ginkgo/ginkgo
             export DBURL="root@tcp(localhost)/autoscaler?tls=false"
             ginkgo -r -race -randomizeAllSpecs -keepGoing
           popd
+

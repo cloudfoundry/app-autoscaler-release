@@ -1,5 +1,5 @@
 set -e -x
 
-pushd app-autoscaler/db
+pushd db
   cp -R * ${BOSH_INSTALL_TARGET}
 popd

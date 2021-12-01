@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	owner  string = "cloudfoundry"
-	repo   string = "app-autoscaler-release"
-	branch string = "main"
+	owner  = "cloudfoundry"
+	repo   = "app-autoscaler-release"
+	branch = "main"
 )
 
 func main() {
@@ -36,8 +36,6 @@ func main() {
 		}
 	}
 
-	// fmt.Printf("commitsFromReleases=%+v\n", commitsFromReleases)
-
 	latestCommitSHA, err := client.FetchLatestReleaseCommitFromBranch(owner, repo, branch, commitsFromReleases)
 	if err != nil {
 		panic(err)
@@ -57,20 +55,22 @@ func main() {
 			panic(err)
 		}
 
-		fromSha, err := util.GetShaOfSubmoduleAtCommit(commit)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Printf("Checking from %s to %s\n", fromSha, toSha)
-		if fromSha != toSha {
-			// get PRs from app-autoscaler too
-			otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, fromSha, toSha)
+		if toSha != "" {
+			fromSha, err := util.GetShaOfSubmoduleAtCommit(commit)
 			if err != nil {
 				panic(err)
 			}
 
-			prs = append(prs, otherPRs...)
+			fmt.Printf("Checking from %s to %s\n", fromSha, toSha)
+			if fromSha != toSha {
+				// get PRs from app-autoscaler too
+				otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, fromSha, toSha)
+				if err != nil {
+					panic(err)
+				}
+
+				prs = append(prs, otherPRs...)
+			}
 		}
 	}
 
