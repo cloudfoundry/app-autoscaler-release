@@ -42,9 +42,7 @@ groups:
   jobs:
   - set-pipeline
   - unit-tests-main
-  - unit-tests-pr
   - integration-tests-main
-  - integration-tests-pr
   - acceptance-main
   - acceptance-pr
   - draft
@@ -186,46 +184,6 @@ jobs:
       app-autoscaler-release: app-autoscaler-release-main
 
 
-
-
-- name: unit-tests-pr
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  plan:
-  - in_parallel:
-    - get: app-autoscaler-release-pr
-      trigger: true
-      version: every
-      params:
-        submodules: true
-    - get: app-autoscaler-ci
-  - put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: pending
-      context: unit-tests
-    get_params:
-      submodules: true
-  - task: run-unit-tests
-    file: app-autoscaler-ci/autoscaler/tasks/run-unit-tests.yml
-    attempts: 3
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-pr
-  on_success:
-    put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: success
-      context: unit-tests
-  on_failure:
-    put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: failure
-      context: unit-tests
-
-
 - name: integration-tests-main
   public: true
   build_logs_to_retain: 100
@@ -240,45 +198,6 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/run-integration-tests.yml
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-
-
-- name: integration-tests-pr
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  serial_groups: [integration]
-  plan:
-  - in_parallel:
-    - get: app-autoscaler-release-pr
-      trigger: true
-      version: every
-      params:
-        submodules: true
-    - get: app-autoscaler-ci
-  - put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: pending
-      context: integration-tests
-    get_params:
-      submodules: true
-  - task: run-integration-tests
-    file: app-autoscaler-ci/autoscaler/tasks/run-integration-tests.yml
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-pr
-  on_success:
-    put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: success
-      context: integration-tests
-  on_failure:
-    put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: failure
-      context: integration-tests
-
 
 
 - name: setup-infrastructure
@@ -615,7 +534,6 @@ jobs:
     - get: bbl-state
       passed: [deploy-cf]
     - get: app-autoscaler-release-pr
-      passed: [unit-tests-pr, integration-tests-pr]
       trigger: true
       version: every
       params:
