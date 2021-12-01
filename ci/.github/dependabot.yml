@@ -2,6 +2,12 @@
 version: 2
 updates:
   - package-ecosystem: "docker"
-    directory: "/dockerfiles"
+    directory: "/dockerfiles/autoscaler-deploy"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/dockerfiles/autoscaler-test"
+    schedule:
+      interval: "weekly"
+
