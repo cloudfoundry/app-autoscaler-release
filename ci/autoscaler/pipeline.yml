@@ -73,7 +73,8 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: teliaoss/github-pr-resource
+    repository: ghcr.io/garethjevans/github-pr-resource
+    tag: master
 
 - name: github-release
   type: docker-image
@@ -97,6 +98,7 @@ resources:
     repository: cloudfoundry/app-autoscaler-release
     access_token: ((autoscaler_access_token))
     labels: ["approved", "dependencies"]
+    check_run_name: "bosh-release / Create Bosh Release"
 
 - name: gh-release
   type: github-release
