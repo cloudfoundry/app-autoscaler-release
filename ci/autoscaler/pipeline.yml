@@ -620,9 +620,6 @@ jobs:
   - put: release
     params:
       file: "generated-release/artifacts/app-autoscaler-v*.tgz"
-  - put: release
-    params:
-      file: "generated-release/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
   - put: app-autoscaler-release-main
       params:
         rebase: true
