@@ -1,6 +1,30 @@
-#!/bin/bash
-
+#!/usr/bin/env bash -x
 set -euo pipefail
+
+function create_release() {
+   set -e
+   local VERSION=$1
+   local GENERATED=$2
+   bosh create-release \
+        --force \
+        --version "$VERSION" \
+        --tarball=app-autoscaler-v$VERSION.tgz
+
+    RELEASE_TGZ=app-autoscaler-v$VERSION.tgz
+    RELEASE_SHA1="$(sha1sum $RELEASE_TGZ | head -n1 | awk '{print $1}')"
+    mkdir -p ${GENERATED}/artifacts
+    mv app-autoscaler-v${VERSION}.tgz ${GENERATED}/artifacts/
+}
+
+function create_tests() {
+  set -e
+  local VERSION=$1
+  local GENERATED=$2
+  ACCEPTANCE_TESTS_FILE="${GENERATED}/artifacts/app-autoscaler-acceptance-tests-v${VERSION}.tgz"
+  tar --create --auto-compress --directory='./src' \
+  --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
+  ACCEPTANCE_SHA1=$(sha1sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}')
+}
 
 export PREVIOUS_VERSION="$(cat gh-release/tag)"
 
@@ -46,26 +70,17 @@ EOF
     git add jobs/golangapiserver/spec
     git commit -m "Updated release version to $VERSION in golangapiserver"
 
-    # create bosh release with the specified version
-    bosh create-release \
-      --final \
-      --version "$VERSION" \
-      --tarball=app-autoscaler-v$VERSION.tgz
-
-    RELEASE_TGZ=app-autoscaler-v$VERSION.tgz
-    export SHA1=$(sha1sum $RELEASE_TGZ | head -n1 | awk '{print $1}')
-    echo "SHA1=$SHA1"
-
-    mkdir -p ${GENERATED}/artifacts
-    mv app-autoscaler-v${VERSION}.tgz ${GENERATED}/artifacts/
+    create_release $VERSION $GENERATED
 
     git add -A
     git status
     git commit -m "release v${VERSION}"
   else
-    export SHA1="dummy-sha"
-    echo "SHA1=$SHA1"
+    export RELEASE_SHA1="dummy-sha"
+    echo "SHA1=$RELEASE_SHA1"
   fi
+
+  create_tests ${VERSION} ${GENERATED}
 
   echo "${VERSION}" > ${GENERATED}/tag
 
@@ -76,9 +91,13 @@ EOF
 \`\`\`yaml
 releases:
 - name: app-autoscaler
-  version: $VERSION
+  version: ${VERSION}
   url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-v${VERSION}.tgz
-  sha1: $SHA1
+  sha1: ${RELEASE_SHA1}
+- name: app-autoscaler-acceptance-tests
+  version: ${VERSION}
+  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+  sha1: ${ACCEPTANCE_SHA1}
 \`\`\`
 EOF
 
@@ -86,3 +105,4 @@ EOF
 popd
 
 cp -a app-autoscaler-release ${REPO_OUT}
+
