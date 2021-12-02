@@ -620,16 +620,16 @@ jobs:
   - put: release
     params:
       file: "generated-release/artifacts/app-autoscaler-v*.tgz"
-  - put: app-autoscaler-release-main
-      params:
-        rebase: true
-        repository: pushme/app-autoscaler-release
   - put: gh-release
     params:
       name: generated-release/name
       tag: generated-release/tag
       body: generated-release/changelog.md
       globs: [generated-release/artifacts/*]
+  - put: app-autoscaler-release-main
+      params:
+        rebase: true
+        repository: pushme/app-autoscaler-release
 
 
 
