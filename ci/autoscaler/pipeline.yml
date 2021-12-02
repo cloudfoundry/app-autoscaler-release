@@ -617,19 +617,23 @@ jobs:
       GITHUB_TOKEN: ((autoscaler_access_token))
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-  - put: app-autoscaler-release-main
-    params:
-      rebase: true
-      repository: pushme/app-autoscaler-release
   - put: release
     params:
-      file: "generated-release/artifacts/app-autoscaler-*.tgz"
+      file: "generated-release/artifacts/app-autoscaler-v*.tgz"
+  - put: release
+    params:
+      file: "generated-release/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
+  - put: app-autoscaler-release-main
+      params:
+        rebase: true
+        repository: pushme/app-autoscaler-release
   - put: gh-release
     params:
       name: generated-release/name
       tag: generated-release/tag
       body: generated-release/changelog.md
       globs: [generated-release/artifacts/*]
+
 
 
 
