@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -n "${DEBUG}" ] && set -x
 set -euo pipefail
 
 function create_release() {
@@ -6,7 +7,7 @@ function create_release() {
    local VERSION=$1
    local GENERATED=$2
    bosh create-release \
-        --force \
+        --final \
         --version "$VERSION" \
         --tarball=app-autoscaler-v$VERSION.tgz
 
@@ -71,6 +72,7 @@ EOF
     git commit -m "Updated release version to $VERSION in golangapiserver"
 
     create_release $VERSION $GENERATED
+    create_tests ${VERSION} ${GENERATED}
 
     git add -A
     git status
@@ -80,7 +82,6 @@ EOF
     echo "SHA1=$RELEASE_SHA1"
   fi
 
-  create_tests ${VERSION} ${GENERATED}
 
   echo "${VERSION}" > ${GENERATED}/tag
 
@@ -105,4 +106,3 @@ EOF
 popd
 
 cp -a app-autoscaler-release ${REPO_OUT}
-
