@@ -79,12 +79,9 @@ EOF
     git commit -m "release v${VERSION}"
   else
     export RELEASE_SHA1="dummy-sha"
-    echo "SHA1=$RELEASE_SHA1"
+    export ACCEPTANCE_SHA1="dummy-sha"
   fi
-
-
   echo "${VERSION}" > ${GENERATED}/tag
-
   cat >> ${GENERATED}/changelog.md <<EOF
 
 ## Deployment
