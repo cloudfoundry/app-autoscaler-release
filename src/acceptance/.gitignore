@@ -2,3 +2,4 @@
 *config.json
 *.test
 **/*.log
+vendor
