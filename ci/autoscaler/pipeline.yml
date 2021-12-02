@@ -627,9 +627,9 @@ jobs:
       body: generated-release/changelog.md
       globs: [generated-release/artifacts/*]
   - put: app-autoscaler-release-main
-      params:
-        rebase: true
-        repository: pushme/app-autoscaler-release
+    params:
+      rebase: true
+      repository: pushme/app-autoscaler-release
 
 
 
