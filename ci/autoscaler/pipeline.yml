@@ -152,12 +152,19 @@ resources:
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
     tag_filter: v12.*
 
-- name: release
+- name: release-bucket
   type: gcs-resource
   source:
     bucket: app-autoscaler-releases
     json_key: ((autoscaler_releases_uploader_key))
     regexp: releases/app-autoscaler-v(.*).tgz
+
+- name: acceptance-tests-bucket
+  type: gcs-resource
+  source:
+    bucket: app-autoscaler-releases
+    json_key: ((autoscaler_releases_uploader_key))
+    regexp: releases/app-autoscaler-acceptance-tests-v(.*).tgz
 
 jobs:
 - name: set-pipeline
@@ -597,7 +604,8 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
-    - get: release
+    - get: release-bucket
+    - get: acceptance-tests-bucket
     - get: gh-release
     - get: app-autoscaler-ci
     - get: app-autoscaler-release-main
@@ -617,9 +625,12 @@ jobs:
       GITHUB_TOKEN: ((autoscaler_access_token))
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-  - put: release
+  - put: release-bucket
     params:
       file: "generated-release/artifacts/app-autoscaler-v*.tgz"
+  - put: acceptance-tests-bucket
+    params:
+      file: "generated-release/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
   - put: gh-release
     params:
       name: generated-release/name
