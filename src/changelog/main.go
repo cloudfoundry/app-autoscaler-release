@@ -3,7 +3,6 @@ package main
 import (
 	"changelog/display"
 	"changelog/github"
-	"changelog/util"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -27,54 +26,32 @@ func main() {
 		panic(err)
 	}
 
+	//fmt.Printf("all releases %+v", commitsFromReleases )
+
 	var commit string
 	for k, v := range commitsFromReleases {
-		if v == "v"+previousVersion {
-			commit = k
-		} else if v == previousVersion {
+		// e.g. search for 1.0.0 or v1.0.0
+		if v == "v"+previousVersion || v == previousVersion {
 			commit = k
 		}
 	}
 
-	latestCommitSHA, err := client.FetchLatestReleaseCommitFromBranch(owner, repo, branch, commitsFromReleases)
-	if err != nil {
-		panic(err)
-	}
+	var allPullRequests []github.PullRequest
 
-	prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, commit, latestCommitSHA)
-	if err != nil {
-		panic(err)
-	}
-
-	skipSubmodule := os.Getenv("SKIP_SUBMODULE")
-	if skipSubmodule != "true" {
-		fmt.Printf("Also querying submodule for changes...\n")
-		//git ls-tree HEAD src/app-autoscaler | awk '{print $3}'
-		toSha, err := util.GetShaOfSubmoduleAtCommit("HEAD")
+	if commit != "" {
+		latestCommitSHA, err := client.FetchLatestReleaseCommitFromBranch(owner, repo, branch, commitsFromReleases)
 		if err != nil {
 			panic(err)
 		}
 
-		if toSha != "" {
-			fromSha, err := util.GetShaOfSubmoduleAtCommit(commit)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Printf("Checking from %s to %s\n", fromSha, toSha)
-			if fromSha != toSha {
-				// get PRs from app-autoscaler too
-				otherPRs, err := client.FetchPullRequestsAfterCommit(owner, "app-autoscaler", branch, fromSha, toSha)
-				if err != nil {
-					panic(err)
-				}
-
-				prs = append(prs, otherPRs...)
-			}
+		prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, commit, latestCommitSHA)
+		if err != nil {
+			panic(err)
 		}
+		allPullRequests = append(allPullRequests, prs...)
 	}
 
-	changelog, nextVersion, err := display.GenerateOutput(prs, previousVersion)
+	changelog, nextVersion, err := display.GenerateOutput(allPullRequests, previousVersion)
 	if err != nil {
 		panic(err)
 	}
@@ -97,5 +74,5 @@ func main() {
 		fmt.Println(nextVersion)
 	}
 
-	fmt.Printf("Total PRs %d\n", len(prs))
+	fmt.Printf("Total PRs %d\n", len(allPullRequests))
 }
