@@ -12,7 +12,7 @@ function create_release() {
         --tarball=app-autoscaler-v$VERSION.tgz
 
     RELEASE_TGZ=app-autoscaler-v$VERSION.tgz
-    RELEASE_SHA1="$(sha1sum $RELEASE_TGZ | head -n1 | awk '{print $1}')"
+    RELEASE_SHA256="$(sha256sum $RELEASE_TGZ | head -n1 | awk '{print $1}')"
     mkdir -p ${GENERATED}/artifacts
     mv app-autoscaler-v${VERSION}.tgz ${GENERATED}/artifacts/
 }
@@ -24,7 +24,7 @@ function create_tests() {
   ACCEPTANCE_TESTS_FILE="${GENERATED}/artifacts/app-autoscaler-acceptance-tests-v${VERSION}.tgz"
   tar --create --auto-compress --directory='./src' \
   --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
-  ACCEPTANCE_SHA1=$(sha1sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}')
+  ACCEPTANCE_SHA256=$(sha256sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}')
 }
 
 export PREVIOUS_VERSION="$(cat gh-release/tag)"
@@ -78,8 +78,8 @@ EOF
     git status
     git commit -m "release v${VERSION}"
   else
-    export RELEASE_SHA1="dummy-sha"
-    export ACCEPTANCE_SHA1="dummy-sha"
+    export RELEASE_SHA256="dummy-sha"
+    export ACCEPTANCE_SHA256="dummy-sha"
   fi
   echo "${VERSION}" > ${GENERATED}/tag
   cat >> ${GENERATED}/changelog.md <<EOF
@@ -91,11 +91,11 @@ releases:
 - name: app-autoscaler
   version: ${VERSION}
   url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-v${VERSION}.tgz
-  sha1: ${RELEASE_SHA1}
+  sha1: sha256:${RELEASE_SHA256}
 - name: app-autoscaler-acceptance-tests
   version: ${VERSION}
   url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-acceptance-tests-v${VERSION}.tgz
-  sha1: ${ACCEPTANCE_SHA1}
+  sha1: sha256:${ACCEPTANCE_SHA256}
 \`\`\`
 EOF
 
