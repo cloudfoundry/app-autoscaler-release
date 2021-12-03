@@ -165,6 +165,7 @@ resources:
     bucket: app-autoscaler-releases
     json_key: ((autoscaler_releases_uploader_key))
     regexp: releases/app-autoscaler-acceptance-tests-v(.*).tgz
+    initial_path: releases/app-autoscaler-acceptance-tests-v0.0.1.tgz
 
 jobs:
 - name: set-pipeline
