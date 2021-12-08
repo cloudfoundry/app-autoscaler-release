@@ -41,11 +41,13 @@ describe 'golangapiserver' do
           address: 10.11.137.101
           port: 5432
           databases:
-          - name: foo
+          - name: default_db
             tag: default
+          - name: store_procedure_db
+            tag: storedproceduredb
           db_scheme: postgres
           roles:
-          - name: foo
+          - name: default_username
             tag: default
           - name: stored_procedure_username
             tag: storedproceduredb
@@ -193,18 +195,12 @@ describe 'golangapiserver' do
       end
     end
 
-    context 'storedprocedure_db' do
-      it 'selects db role with storedproceduredb tag by default' do
-        rendered_template = YAML.safe_load(template.render(properties))
-        expect( rendered_template["db"]["storedprocedure_db"]["url"] ).to include( "stored_procedure_username")
-      end
-    end
 
     context 'cred_helper_impl' do
 
       it 'has a cred helper impl by default' do
 
-        rendered_template = YkAML.safe_load(template.render(properties))
+        rendered_template = YAML.safe_load(template.render(properties))
         expect(rendered_template).to include(
             {
               "cred_helper_impl" => "default"
@@ -243,4 +239,14 @@ describe 'golangapiserver' do
       end
      end
   end
+
+    let(:rendered_template){ YAML.safe_load(template.render(properties)) }
+    context 'storedprocedure_db' do
+      it 'selects db role with storedproceduredb tag by default' do
+        rendered_template["db"]["storedprocedure_db"]["url"].tap do |url|
+          expect(url).to include("stored_procedure_username")
+          expect(url).to include("store_procedure_db")
+        end
+      end
+    end
 end
