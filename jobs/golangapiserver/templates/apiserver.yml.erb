@@ -8,7 +8,7 @@ require 'yaml'
     binding_db_scheme = p('autoscaler.binding_db.db_scheme')
     binding_db_address = p('autoscaler.binding_db.address')
     binding_db_port = p('autoscaler.binding_db.port')
-    binding_db_role = p_arr('autoscaler.binding_db.roles').find { |role| role['tag'] == 'binding_db' or role['tag'] == 'default' } 
+    binding_db_role = p_arr('autoscaler.binding_db.roles').find { |role| role['tag'] == 'binding_db' or role['tag'] == 'default' }
     binding_db_database = p_arr('autoscaler.binding_db.databases').find { |database| database['tag'] == 'binding_db' or database['tag'] == 'default' } 
     if binding_db_scheme == "postgres"
       binding_db_url = binding_db_scheme + "://" + ERB::Util.url_encode(binding_db_role['name']) + ":" + ERB::Util.url_encode(binding_db_role['password']) + "@" + binding_db_address + ":" + binding_db_port.to_s + "/" + binding_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.binding_db.sslmode')
@@ -38,8 +38,12 @@ require 'yaml'
     storedprocedure_db_scheme = p('autoscaler.storedprocedure_db.db_scheme')
     storedprocedure_db_address = p('autoscaler.storedprocedure_db.address')
     storedprocedure_db_port = p('autoscaler.storedprocedure_db.port')
-    storedprocedure_db_role = p_arr('autoscaler.storedprocedure_db.roles').find { |role| role['tag'] == 'storedproceduredb' or role['tag'] == 'default'  }
-    storedprocedure_db_database = p_arr('autoscaler.storedprocedure_db.databases').find { |database| database['tag'] == 'storedproceduredb' or database['tag'] == 'default' }
+
+    roles = p_arr('autoscaler.storedprocedure_db.roles')
+    storedprocedure_db_role = roles.find { |role| role['tag'] == 'storedproceduredb'} || roles.find { |role| role['tag'] == 'default'  }
+
+    databases = p_arr('autoscaler.storedprocedure_db.databases')
+    storedprocedure_db_database = databases.find { |d| d['tag'] == 'storedproceduredb'} ||  databases.find { |d| d['tag'] == 'default' }
     if storedprocedure_db_scheme == "postgres"
       storedprocedure_db_url = storedprocedure_db_scheme + "://" + ERB::Util.url_encode(storedprocedure_db_role['name']) + ":" + ERB::Util.url_encode(storedprocedure_db_role['password']) + "@" + storedprocedure_db_address + ":" + storedprocedure_db_port.to_s + "/" + storedprocedure_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.storedprocedure_db.sslmode')
     else
