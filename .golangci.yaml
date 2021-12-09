@@ -85,7 +85,7 @@ linters:
     - goprintffuncname
     - gosec
     - gosimple
-    - gomoddirectives
+      # - gomoddirectives - commented out to allow replace directives
     - gomodguard  
     - ineffassign
     - misspell
