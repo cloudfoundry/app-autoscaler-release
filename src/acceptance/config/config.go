@@ -17,6 +17,7 @@ type Config struct {
 	UseHttp                        bool    `json:"use_http"`
 	AdminUser                      string  `json:"admin_user"`
 	AdminPassword                  string  `json:"admin_password"`
+	AdminOrigin                    string  `json:"admin_origin"`
 	UseExistingUser                bool    `json:"use_existing_user"`
 	ShouldKeepUser                 bool    `json:"keep_user_at_suite_end"`
 	ExistingUser                   string  `json:"existing_user"`
@@ -282,6 +283,10 @@ func (c *Config) GetAdminUser() string {
 
 func (c *Config) GetAdminPassword() string {
 	return c.AdminPassword
+}
+
+func (c *Config) GetAdminOrigin() string {
+	return c.AdminOrigin
 }
 
 func (c *Config) GetApiEndpoint() string {

@@ -8,4 +8,4 @@ require (
 	github.com/onsi/gomega v1.17.0
 )
 
-replace github.com/cloudfoundry-incubator/cf-test-helpers => github.com/garethjevans/cf-test-helpers v1.1.0
+replace github.com/cloudfoundry-incubator/cf-test-helpers => github.com/garethjevans/cf-test-helpers v1.1.1

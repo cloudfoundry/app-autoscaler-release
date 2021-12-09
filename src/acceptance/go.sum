@@ -7,6 +7,8 @@ github.com/fsnotify/fsnotify v1.5.1 h1:mZcQUHVQUQWoPXXtuf9yuEXKudkV2sx1E06UadKWp
 github.com/fsnotify/fsnotify v1.5.1/go.mod h1:T3375wBYaZdLLcVNkcVbzGHY7f1l/uK5T5Ai1i3InKU=
 github.com/garethjevans/cf-test-helpers v1.1.0 h1:UFhiaoYjXjwLw/XQJ3N3I9LGLvRxMK+aFDmjdvphUoI=
 github.com/garethjevans/cf-test-helpers v1.1.0/go.mod h1:wnHe0PzVhVPx2PEyxX+X5J19DjBJEBx115Xi3b4PMQk=
+github.com/garethjevans/cf-test-helpers v1.1.1 h1:jfvLyxF3JOdwykrXNO1yAdyqmweDH7AfiLY0FJy3Vhk=
+github.com/garethjevans/cf-test-helpers v1.1.1/go.mod h1:wnHe0PzVhVPx2PEyxX+X5J19DjBJEBx115Xi3b4PMQk=
 github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 h1:p104kn46Q8WdvHunIJ9dAyjPVtrBPhSr3KT2yUst43I=
 github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0/go.mod h1:fyg7847qk6SyHyPtNmDHnmrv/HOrqktSC+C9fM+CJOE=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
