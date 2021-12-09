@@ -7,3 +7,5 @@ require (
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.17.0
 )
+
+replace github.com/cloudfoundry-incubator/cf-test-helpers => github.com/garethjevans/cf-test-helpers v1.1.1
