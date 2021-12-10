@@ -5,6 +5,8 @@ builds:
     version: 3.7.1
   62348a7c-a2b7-4c93-4bcf-4ddde190d64d:
     version: 3.6.1
+  7e1c76c0-16ba-43ab-4eb4-438ab907ed37:
+    version: 3.7.3
   94ddc28c-1e7c-4c00-7cf7-49a5051db8db:
     version: 3.7.0
   9657ac39-846f-4c50-718b-f6a7688dc53c:
