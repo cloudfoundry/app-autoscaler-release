@@ -14,13 +14,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.cloudfoundry.autoscaler.scheduler.dao.ActiveScheduleDao;
 import org.cloudfoundry.autoscaler.scheduler.entity.ActiveScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.EmbeddedTomcatUtil;
@@ -38,8 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.quartz.CronExpression;
@@ -68,8 +59,6 @@ import org.springframework.web.client.RestOperations;
 public class AppScalingScheduleJobTest {
 
   private static EmbeddedTomcatUtil embeddedTomcatUtil;
-  @Mock private Appender mockAppender;
-  @Captor private ArgumentCaptor<LogEvent> logCaptor;
   @Autowired private MessageBundleResourceHelper messageBundleResourceHelper;
   private Scheduler memScheduler;
   @MockBean private Scheduler scheduler;
@@ -98,16 +87,9 @@ public class AppScalingScheduleJobTest {
     memScheduler = createMemScheduler();
     testDataDbUtil.cleanupData(memScheduler);
 
-    Mockito.reset(mockAppender);
     Mockito.reset(activeScheduleDao);
     Mockito.reset(restOperations);
     Mockito.reset(scheduler);
-
-    Mockito.when(mockAppender.getName()).thenReturn("MockAppender");
-    Mockito.when(mockAppender.isStarted()).thenReturn(true);
-    Mockito.when(mockAppender.isStopped()).thenReturn(false);
-
-    setLogLevel(Level.INFO);
   }
 
   private Scheduler createMemScheduler() throws SchedulerException {
@@ -147,13 +129,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).deleteActiveSchedulesByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(1)).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.activeschedule.start", appId, scheduleId);
-    assertThat("Log level should be INFO", logCaptor.getValue().getLevel(), is(Level.INFO));
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
 
     // For end job
     ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
@@ -208,17 +183,6 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.never())
         .deleteActiveSchedulesByAppId(Mockito.anyString());
     Mockito.verify(activeScheduleDao, Mockito.never()).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scheduler.job.start.specificdate.schedule.skipped",
-            TestDataSetupHelper.convertDateTimeString(endJobStartTime, TimeZone.getDefault()),
-            jobInformation.getJobDetail().getKey(),
-            appId,
-            scheduleId);
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be WARN", logCaptor.getValue().getLevel(), is(Level.WARN));
 
     // For end job
     Mockito.verify(scheduler, Mockito.never())
@@ -253,13 +217,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).deleteActiveSchedulesByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(1)).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.activeschedule.start", appId, scheduleId);
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be INFO", logCaptor.getValue().getLevel(), is(Level.INFO));
 
     // For end job
     ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
@@ -288,7 +245,6 @@ public class AppScalingScheduleJobTest {
   public void
       testNotifyStartOfActiveScheduleToScalingEngine_with_RecurringSchedule_throw_ParseException()
           throws Exception {
-    setLogLevel(Level.ERROR);
 
     // Build the job and trigger
     JobInformation jobInformation = new JobInformation<>(AppScalingRecurringScheduleStartJob.class);
@@ -312,18 +268,6 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.never())
         .deleteActiveSchedulesByAppId(Mockito.anyString());
     Mockito.verify(activeScheduleDao, Mockito.never()).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scheduler.job.cronexpression.parse.failed",
-            "Illegal characters for this position: 'INV'",
-            "Invalid cron expression",
-            jobInformation.getJobDetail().getKey(),
-            appId,
-            scheduleId);
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
 
     // For end job
     Mockito.verify(scheduler, Mockito.never())
@@ -367,16 +311,6 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.times(1)).findByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(0)).deleteActiveSchedulesByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(0)).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scheduler.job.start.schedule.skipped.conflict",
-            jobInformation.getJobDetail().getKey(),
-            appId,
-            scheduleId);
-    assertThat("Log level should be WARN", logCaptor.getValue().getLevel(), is(Level.WARN));
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
 
     // For end job
     Mockito.verify(scheduler, Mockito.never())
@@ -416,16 +350,6 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.times(1)).findByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(0)).deleteActiveSchedulesByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(0)).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scheduler.job.start.schedule.skipped.conflict",
-            jobInformation.getJobDetail().getKey(),
-            appId,
-            scheduleId);
-    assertThat("Log level should be WARN", logCaptor.getValue().getLevel(), is(Level.WARN));
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
 
     // For end job
     Mockito.verify(scheduler, Mockito.never())
@@ -437,7 +361,6 @@ public class AppScalingScheduleJobTest {
   public void
       testCreateActiveScheduleFailed_with_existing_ActiveSchedule_DatabaseValidationException()
           throws Exception {
-    setLogLevel(Level.ERROR);
 
     // Build the job and trigger
     JobInformation jobInformation =
@@ -466,13 +389,6 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.times(0))
         .deleteActiveSchedulesByAppId(Mockito.anyObject());
     Mockito.verify(activeScheduleDao, Mockito.never()).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "database.error.get.failed", "test exception", appId);
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
 
     // For end job
     Mockito.verify(scheduler, Mockito.never())
@@ -507,13 +423,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(1))
         .delete(activeScheduleEntity.getId(), startJobIdentifier);
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.activeschedule.remove", appId, scheduleId);
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be INFO", logCaptor.getValue().getLevel(), is(Level.INFO));
 
     // For notify to Scaling Engine
     assertNotifyScalingEngineForEndJob(activeScheduleEntity);
@@ -521,9 +430,6 @@ public class AppScalingScheduleJobTest {
 
   @Test
   public void testCreateActiveSchedules_throw_DatabaseValidationException() throws Exception {
-
-    setLogLevel(Level.ERROR);
-
     int expectedNumOfTimesJobRescheduled = 2;
 
     // Build the job
@@ -557,14 +463,6 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.times(expectedNumOfTimesJobRescheduled))
         .create(Mockito.anyObject());
 
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "database.error.create.activeschedule.failed", "test exception", appId, scheduleId);
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
-
     // For end job
     ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
     ArgumentCaptor<Trigger> triggerArgumentCaptor = ArgumentCaptor.forClass(Trigger.class);
@@ -587,7 +485,6 @@ public class AppScalingScheduleJobTest {
 
   @Test
   public void testRemoveActiveSchedules_throw_DatabaseValidationException() throws Exception {
-    setLogLevel(Level.ERROR);
     int expectedNumOfTimesJobRescheduled = 2;
 
     // Build the job
@@ -620,13 +517,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(expectedNumOfTimesJobRescheduled))
         .delete(scheduleId, startJobIdentifier);
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "database.error.delete.activeschedule.failed", "test exception", appId, scheduleId);
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
 
     // For notify to Scaling Engine
     assertNotifyScalingEngineForEndJob(activeScheduleEntity);
@@ -634,8 +524,6 @@ public class AppScalingScheduleJobTest {
 
   @Test
   public void testCreateActiveSchedules_when_JobRescheduleMaxCountReached() throws Exception {
-    setLogLevel(Level.ERROR);
-
     int expectedNumOfTimesJobRescheduled = 5;
 
     // Build the job
@@ -669,19 +557,6 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.times(expectedNumOfTimesJobRescheduled))
         .create(Mockito.anyObject());
 
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scheduler.job.reschedule.failed.max.reached",
-            jobInformation.getTrigger().getKey(),
-            appId,
-            scheduleId,
-            expectedNumOfTimesJobRescheduled,
-            ScheduleJobHelper.RescheduleCount.ACTIVE_SCHEDULE.name());
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
-
     // For end job
     Mockito.verify(scheduler, Mockito.never())
         .scheduleJob(Mockito.anyObject(), Mockito.anyObject());
@@ -692,8 +567,6 @@ public class AppScalingScheduleJobTest {
 
   @Test
   public void testRemoveActiveSchedules_when_JobRescheduleMaxCountReached() throws Exception {
-    setLogLevel(Level.ERROR);
-
     int expectedNumOfTimesJobRescheduled = 5;
 
     // Build the job
@@ -725,18 +598,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(expectedNumOfTimesJobRescheduled))
         .delete(scheduleId, startJobIdentifier);
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scheduler.job.reschedule.failed.max.reached",
-            jobInformation.getTrigger().getKey(),
-            appId,
-            scheduleId,
-            expectedNumOfTimesJobRescheduled,
-            ScheduleJobHelper.RescheduleCount.ACTIVE_SCHEDULE.name());
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
 
     // For notify to Scaling Engine
     Mockito.verify(restOperations, Mockito.never()).delete(Mockito.anyString());
@@ -771,14 +632,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).delete(scheduleId, startJobIdentifier);
 
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.activeschedule.notFound", appId, scheduleId);
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be Info", logCaptor.getValue().getLevel(), is(Level.INFO));
-
     // For notify to Scaling Engine
     assertNotifyScalingEngineForEndJob(activeScheduleEntity);
   }
@@ -786,7 +639,6 @@ public class AppScalingScheduleJobTest {
   @Test
   public void testNotifyStartOfActiveScheduleToScalingEngine_when_invalidRequest()
       throws Exception {
-    setLogLevel(Level.ERROR);
     // Build the job and trigger
     JobInformation jobInformation =
         new JobInformation<>(AppScalingSpecificDateScheduleStartJob.class);
@@ -814,19 +666,6 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.times(1)).deleteActiveSchedulesByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(1)).create(Mockito.anyObject());
 
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.failed",
-            400,
-            "test error message",
-            appId,
-            scheduleId,
-            JobActionEnum.START);
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
-
     // For end job
     ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
     ArgumentCaptor<Trigger> triggerArgumentCaptor = ArgumentCaptor.forClass(Trigger.class);
@@ -849,8 +688,6 @@ public class AppScalingScheduleJobTest {
 
   @Test
   public void testNotifyEndOfActiveScheduleToScalingEngine_when_invalidRequest() throws Exception {
-    setLogLevel(Level.ERROR);
-
     // Build the job and trigger
     JobInformation jobInformation = new JobInformation<>(AppScalingScheduleEndJob.class);
     Date endJobStartTime = TestDataSetupHelper.getCurrentDateTime(1);
@@ -879,26 +716,12 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).delete(scheduleId, startJobIdentifier);
 
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.failed",
-            400,
-            "test error message",
-            appId,
-            scheduleId,
-            JobActionEnum.END);
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
-
     // For notify to Scaling Engine
     assertNotifyScalingEngineForEndJob(activeScheduleEntity);
   }
 
   @Test
   public void testNotifyStartOfActiveScheduleToScalingEngine_when_responseError() throws Exception {
-    setLogLevel(Level.ERROR);
     // Build the job and trigger
     JobInformation jobInformation =
         new JobInformation<>(AppScalingSpecificDateScheduleStartJob.class);
@@ -922,18 +745,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).deleteActiveSchedulesByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(1)).create(anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.failed",
-            500,
-            "test error message",
-            appId,
-            scheduleId,
-            JobActionEnum.START);
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
 
     // For end job
     ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
@@ -957,8 +768,6 @@ public class AppScalingScheduleJobTest {
 
   @Test
   public void testNotifyEndOfActiveScheduleToScalingEngine_when_responseError() throws Exception {
-    setLogLevel(Level.ERROR);
-
     // Build the job and trigger
     JobInformation jobInformation = new JobInformation<>(AppScalingScheduleEndJob.class);
     Date endJobStartTime = TestDataSetupHelper.getCurrentDateTime(1);
@@ -983,18 +792,6 @@ public class AppScalingScheduleJobTest {
     testJobListener.waitForJobToFinish(TimeUnit.MINUTES.toMillis(1));
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).delete(scheduleId, startJobIdentifier);
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.failed",
-            500,
-            "test error message",
-            appId,
-            scheduleId,
-            JobActionEnum.END);
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
 
     // For notify to Scaling Engine
     assertNotifyScalingEngineForEndJob(activeScheduleEntity);
@@ -1002,8 +799,6 @@ public class AppScalingScheduleJobTest {
 
   @Test
   public void testNotifyScalingEngine_when_invalidUrl() throws Exception {
-    setLogLevel(Level.ERROR);
-
     // Build the job and trigger
     JobInformation jobInformation =
         new JobInformation<>(AppScalingSpecificDateScheduleStartJob.class);
@@ -1031,28 +826,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).deleteActiveSchedulesByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(1)).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scalingengine.notification.error",
-            "test exception",
-            appId,
-            scheduleId,
-            JobActionEnum.START);
-
-    assertLogHasMessageCount(Level.ERROR, expectedMessage, 2);
-
-    expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scheduler.job.reschedule.failed.max.reached",
-            jobInformation.getTrigger().getKey(),
-            appId,
-            scheduleId,
-            2,
-            ScheduleJobHelper.RescheduleCount.SCALING_ENGINE_NOTIFICATION.name());
-
-    assertThat(logCaptor.getValue().getMessage().getFormattedMessage(), is(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
 
     // For end job
     ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
@@ -1076,7 +849,6 @@ public class AppScalingScheduleJobTest {
 
   @Test
   public void testNotifyScalingEngine_when_failed_to_schedule_endJob() throws Exception {
-    setLogLevel(Level.ERROR);
     // Build the job
     JobInformation jobInformation =
         new JobInformation<>(AppScalingSpecificDateScheduleStartJob.class);
@@ -1102,18 +874,6 @@ public class AppScalingScheduleJobTest {
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).deleteActiveSchedulesByAppId(appId);
     Mockito.verify(activeScheduleDao, Mockito.times(1)).create(Mockito.anyObject());
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
-
-    String expectedMessage =
-        messageBundleResourceHelper.lookupMessage(
-            "scheduler.job.end.schedule.failed",
-            "test exception",
-            "\\w.*",
-            appId,
-            scheduleId,
-            "\\w.*");
-    assertTrue(logCaptor.getValue().getMessage().getFormattedMessage().matches(expectedMessage));
-    assertThat("Log level should be ERROR", logCaptor.getValue().getLevel(), is(Level.ERROR));
 
     // For end job
     ArgumentCaptor<JobDetail> jobDetailArgumentCaptor = ArgumentCaptor.forClass(JobDetail.class);
@@ -1133,18 +893,6 @@ public class AppScalingScheduleJobTest {
 
     // For notify to Scaling Engine
     assertNotifyScalingEngineForStartJob(activeScheduleEntity, startJobIdentifier);
-  }
-
-  private void assertLogHasMessageCount(Level logLevel, String expectedMessage, int expectedCount) {
-    int messageCount = 0;
-    List<LogEvent> logEvents = logCaptor.getAllValues();
-    for (LogEvent logEvent : logEvents) {
-      if (logEvent.getLevel() == logLevel
-          && logEvent.getMessage().getFormattedMessage().equals(expectedMessage)) {
-        ++messageCount;
-      }
-    }
-    assertThat("Log should have message", messageCount, is(expectedCount));
   }
 
   private void assertEndJobArgument(
@@ -1179,18 +927,6 @@ public class AppScalingScheduleJobTest {
             + "/active_schedules/"
             + activeScheduleEntity.getId();
     Mockito.verify(restOperations, Mockito.times(1)).delete(scalingEnginePathActiveSchedule);
-  }
-
-  private void setLogLevel(Level level) {
-    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-    Configuration config = ctx.getConfiguration();
-
-    LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
-    loggerConfig.removeAppender("MockAppender");
-
-    loggerConfig.setLevel(level);
-    loggerConfig.addAppender(mockAppender, level, null);
-    ctx.updateLoggers();
   }
 
   private JobDataMap setupJobDataForSpecificDateSchedule(

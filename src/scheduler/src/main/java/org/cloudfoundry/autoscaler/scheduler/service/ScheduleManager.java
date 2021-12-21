@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cloudfoundry.autoscaler.scheduler.dao.ActiveScheduleDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.PolicyJsonDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.RecurringScheduleDao;
@@ -39,6 +37,8 @@ import org.cloudfoundry.autoscaler.scheduler.util.error.MessageBundleResourceHel
 import org.cloudfoundry.autoscaler.scheduler.util.error.SchedulerInternalException;
 import org.cloudfoundry.autoscaler.scheduler.util.error.ValidationErrorResult;
 import org.quartz.CronExpression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -63,7 +63,7 @@ public class ScheduleManager {
   @Value("${autoscaler.scalingengine.url}")
   private String scalingEngineUrl;
 
-  private Logger logger = LogManager.getLogger(this.getClass());
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   /**
    * Calls dao and fetch all the schedules for the specified application id.

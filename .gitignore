@@ -34,6 +34,7 @@ src/autoscaler/build
 src/autoscaler/vendor
 workflow
 **/*.iml
+**/*.test
 .cache
 scripts/.srl
 privkey.pem

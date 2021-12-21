@@ -3,18 +3,18 @@ package org.cloudfoundry.autoscaler.scheduler.quartz;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.TimeZone;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cloudfoundry.autoscaler.scheduler.util.DateHelper;
 import org.cloudfoundry.autoscaler.scheduler.util.ScheduleJobHelper;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AppScalingSpecificDateScheduleStartJob extends AppScalingScheduleStartJob {
-  private Logger logger = LogManager.getLogger(this.getClass());
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Override
   boolean shouldExecuteStartJob(
