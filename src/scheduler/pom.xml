@@ -18,7 +18,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <io.prometheus.simpleclient.version>0.12.0</io.prometheus.simpleclient.version>
+        <io.prometheus.simpleclient.version>0.14.1</io.prometheus.simpleclient.version>
         <log4j2.version>2.17.0</log4j2.version>
     </properties>
 
