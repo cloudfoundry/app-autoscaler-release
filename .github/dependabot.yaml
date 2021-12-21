@@ -10,7 +10,7 @@ updates:
 
   # The root pom
   - package-ecosystem: "maven"
-    directory: "/"
+    directory: "/src/"
     schedule:
       interval: "weekly"
 
