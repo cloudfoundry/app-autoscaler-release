@@ -1,8 +1,8 @@
 package org.cloudfoundry.autoscaler.scheduler;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cloudfoundry.autoscaler.scheduler.conf.MetricsConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.audit.AuditAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.info.InfoContributorAutoConfiguration;
@@ -54,7 +54,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
     })
 public class SchedulerApplication {
 
-  private Logger logger = LogManager.getLogger(this.getClass());
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @EventListener
   public void onApplicationReady(ApplicationReadyEvent event) {

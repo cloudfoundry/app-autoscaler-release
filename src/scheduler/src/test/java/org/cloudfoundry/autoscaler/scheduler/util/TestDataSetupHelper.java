@@ -20,8 +20,6 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cloudfoundry.autoscaler.scheduler.entity.ActiveScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.entity.RecurringScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.entity.SpecificDateScheduleEntity;
@@ -34,11 +32,13 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class to set up the test data for the test classes */
 public class TestDataSetupHelper {
   private static Class<?> clazz = TestDataSetupHelper.class;
-  private static Logger logger = LogManager.getLogger(clazz);
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   private static List<String> genAppIds = new ArrayList<>();
   public static String timeZone = "GMT";
@@ -277,7 +277,6 @@ public class TestDataSetupHelper {
             DateHelper.DAY_OF_WEEK_MINIMUM,
             DateHelper.DAY_OF_WEEK_MAXIMUM,
             today);
-    logger.debug("Generate day of week array:" + Arrays.toString(array));
     return array;
   }
 
@@ -291,7 +290,6 @@ public class TestDataSetupHelper {
             DateHelper.DAY_OF_MONTH_MINIMUM,
             DateHelper.DAY_OF_MONTH_MAXIMUM,
             today);
-    logger.debug("Generate day of month array:" + Arrays.toString(array));
     return array;
   }
 

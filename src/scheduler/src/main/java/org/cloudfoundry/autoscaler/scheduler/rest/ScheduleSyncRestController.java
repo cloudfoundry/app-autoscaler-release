@@ -1,9 +1,9 @@
 package org.cloudfoundry.autoscaler.scheduler.rest;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cloudfoundry.autoscaler.scheduler.rest.model.SynchronizeResult;
 import org.cloudfoundry.autoscaler.scheduler.service.ScheduleManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ScheduleSyncRestController {
 
   @Autowired private ScheduleManager scheduleManager;
-  private Logger logger = LogManager.getLogger(this.getClass());
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @RequestMapping(method = RequestMethod.PUT)
   @ResponseStatus(HttpStatus.OK)

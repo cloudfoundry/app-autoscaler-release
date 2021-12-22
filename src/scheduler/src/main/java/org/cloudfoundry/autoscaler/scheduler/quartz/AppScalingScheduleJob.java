@@ -2,8 +2,6 @@ package org.cloudfoundry.autoscaler.scheduler.quartz;
 
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cloudfoundry.autoscaler.scheduler.dao.ActiveScheduleDao;
 import org.cloudfoundry.autoscaler.scheduler.entity.ActiveScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.JobActionEnum;
@@ -16,6 +14,8 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -29,7 +29,7 @@ import org.springframework.web.client.RestOperations;
 /** QuartzJobBean class that executes the job */
 @Component
 public abstract class AppScalingScheduleJob extends QuartzJobBean {
-  private Logger logger = LogManager.getLogger(this.getClass());
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Value("${autoscaler.scalingengine.url}")
   private String scalingEngineUrl;

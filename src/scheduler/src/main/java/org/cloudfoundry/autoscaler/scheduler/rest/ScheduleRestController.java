@@ -5,12 +5,12 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.cloudfoundry.autoscaler.scheduler.rest.model.ApplicationSchedules;
 import org.cloudfoundry.autoscaler.scheduler.rest.model.Schedules;
 import org.cloudfoundry.autoscaler.scheduler.service.ScheduleManager;
 import org.cloudfoundry.autoscaler.scheduler.util.error.ValidationErrorResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +29,7 @@ public class ScheduleRestController {
 
   @Autowired private ValidationErrorResult validationErrorResult;
   @Autowired ScheduleManager scheduleManager;
-  private Logger logger = LogManager.getLogger(this.getClass());
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @RequestMapping(method = RequestMethod.GET)
   @ApiOperation(

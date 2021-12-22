@@ -24,13 +24,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.cloudfoundry.autoscaler.scheduler.dao.ActiveScheduleDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.PolicyJsonDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.RecurringScheduleDao;
@@ -59,7 +52,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,10 +97,6 @@ public class ScheduleManagerTest {
 
   private MockRestServiceServer mockServer;
 
-  @Mock private Appender mockAppender;
-
-  @Captor private ArgumentCaptor<LogEvent> logCaptor;
-
   @Before
   public void before() throws SchedulerException {
     testDataDbUtil.cleanupData();
@@ -117,15 +105,8 @@ public class ScheduleManagerTest {
     Mockito.reset(specificDateScheduleDao);
     Mockito.reset(recurringScheduleDao);
     Mockito.reset(activeScheduleDao);
-    Mockito.reset(mockAppender);
     Mockito.reset(restOperations);
     mockServer = MockRestServiceServer.createServer((RestTemplate) restOperations);
-
-    Mockito.when(mockAppender.getName()).thenReturn("MockAppender");
-    Mockito.when(mockAppender.isStarted()).thenReturn(true);
-    Mockito.when(mockAppender.isStopped()).thenReturn(false);
-
-    setLogLevel(Level.INFO);
   }
 
   @Test
@@ -532,8 +513,6 @@ public class ScheduleManagerTest {
 
   @Test
   public void testNotifyScalingEngine_when_ResourceAccessException() throws Exception {
-    setLogLevel(Level.ERROR);
-
     String appId = TestDataSetupHelper.generateAppIds(1)[0];
     long scheduleId = 1L;
 
@@ -604,8 +583,6 @@ public class ScheduleManagerTest {
         .andRespond(withStatus(HttpStatus.OK));
 
     scheduleManager.deleteSchedules(appId);
-
-    Mockito.verify(mockAppender, Mockito.atLeastOnce()).append(logCaptor.capture());
 
     for (SpecificDateScheduleEntity specificDateScheduleEntity : specificDateScheduleEntities) {
       Mockito.verify(specificDateScheduleDao, Mockito.times(1)).delete(specificDateScheduleEntity);
@@ -1321,17 +1298,5 @@ public class ScheduleManagerTest {
                 ScheduleTypeEnum.RECURRING);
       }
     }
-  }
-
-  private void setLogLevel(Level level) {
-    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-    Configuration config = ctx.getConfiguration();
-
-    LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
-    loggerConfig.removeAppender("MockAppender");
-
-    loggerConfig.setLevel(level);
-    loggerConfig.addAppender(mockAppender, level, null);
-    ctx.updateLoggers();
   }
 }
