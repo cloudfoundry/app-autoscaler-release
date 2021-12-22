@@ -164,8 +164,7 @@ public class ScheduleManagerTest {
 
     SpecificDateScheduleEntity specificDateScheduleEntity =
         new SpecificDateScheduleEntitiesBuilder(1).setAppid(appId).setScheduleId().build().get(0);
-    Mockito.when(specificDateScheduleDao.create(any()))
-        .thenReturn(specificDateScheduleEntity);
+    Mockito.when(specificDateScheduleDao.create(any())).thenReturn(specificDateScheduleEntity);
 
     scheduleManager.createSchedules(schedules);
 
@@ -186,8 +185,7 @@ public class ScheduleManagerTest {
 
     RecurringScheduleEntity recurringScheduleEntity =
         new RecurringScheduleEntitiesBuilder(1, 0).setAppId(appId).setScheduleId().build().get(0);
-    Mockito.when(recurringScheduleDao.create(any()))
-        .thenReturn(recurringScheduleEntity);
+    Mockito.when(recurringScheduleDao.create(any())).thenReturn(recurringScheduleEntity);
 
     scheduleManager.createSchedules(schedules);
 
@@ -213,8 +211,7 @@ public class ScheduleManagerTest {
 
     RecurringScheduleEntity recurringScheduleEntity =
         new RecurringScheduleEntitiesBuilder(1, 0).setAppId(appId).setScheduleId().build().get(0);
-    Mockito.when(recurringScheduleDao.create(any()))
-        .thenReturn(recurringScheduleEntity);
+    Mockito.when(recurringScheduleDao.create(any())).thenReturn(recurringScheduleEntity);
 
     scheduleManager.createSchedules(schedules);
 
@@ -244,13 +241,11 @@ public class ScheduleManagerTest {
 
     RecurringScheduleEntity recurringScheduleEntity =
         new RecurringScheduleEntitiesBuilder(1, 0).setAppId(appId).setScheduleId().build().get(0);
-    Mockito.when(recurringScheduleDao.create(any()))
-        .thenReturn(recurringScheduleEntity);
+    Mockito.when(recurringScheduleDao.create(any())).thenReturn(recurringScheduleEntity);
 
     SpecificDateScheduleEntity specificDateScheduleEntity =
         new SpecificDateScheduleEntitiesBuilder(1).setAppid(appId).setScheduleId().build().get(0);
-    Mockito.when(specificDateScheduleDao.create(any()))
-        .thenReturn(specificDateScheduleEntity);
+    Mockito.when(specificDateScheduleDao.create(any())).thenReturn(specificDateScheduleEntity);
 
     scheduleManager.createSchedules(schedules);
 
@@ -280,13 +275,11 @@ public class ScheduleManagerTest {
 
     RecurringScheduleEntity recurringScheduleEntity =
         new RecurringScheduleEntitiesBuilder(1, 0).setAppId(appId).setScheduleId().build().get(0);
-    Mockito.when(recurringScheduleDao.create(any()))
-        .thenReturn(recurringScheduleEntity);
+    Mockito.when(recurringScheduleDao.create(any())).thenReturn(recurringScheduleEntity);
 
     SpecificDateScheduleEntity specificDateScheduleEntity =
         new SpecificDateScheduleEntitiesBuilder(1).setAppid(appId).setScheduleId().build().get(0);
-    Mockito.when(specificDateScheduleDao.create(any()))
-        .thenReturn(specificDateScheduleEntity);
+    Mockito.when(specificDateScheduleDao.create(any())).thenReturn(specificDateScheduleEntity);
 
     scheduleManager.createSchedules(schedules);
 
@@ -318,8 +311,7 @@ public class ScheduleManagerTest {
 
     RecurringScheduleEntity recurringScheduleEntity =
         new RecurringScheduleEntitiesBuilder(1, 0).setAppId(appId).setScheduleId().build().get(0);
-    Mockito.when(recurringScheduleDao.create(any()))
-        .thenReturn(recurringScheduleEntity);
+    Mockito.when(recurringScheduleDao.create(any())).thenReturn(recurringScheduleEntity);
 
     scheduleManager.createSchedules(schedules);
 
@@ -353,10 +345,8 @@ public class ScheduleManagerTest {
         new SpecificDateScheduleEntitiesBuilder(1).setAppid(appId).setScheduleId().build().get(0);
     RecurringScheduleEntity recurringScheduleEntity =
         new RecurringScheduleEntitiesBuilder(1, 0).setAppId(appId).setScheduleId().build().get(0);
-    Mockito.when(specificDateScheduleDao.create(any()))
-        .thenReturn(specificDateScheduleEntity);
-    Mockito.when(recurringScheduleDao.create(any()))
-        .thenReturn(recurringScheduleEntity);
+    Mockito.when(specificDateScheduleDao.create(any())).thenReturn(specificDateScheduleEntity);
+    Mockito.when(recurringScheduleDao.create(any())).thenReturn(recurringScheduleEntity);
 
     scheduleManager.createSchedules(schedules);
 
@@ -858,10 +848,8 @@ public class ScheduleManagerTest {
     when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
         .thenReturn(new ArrayList<Object[]>());
     when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<Object[]>());
-    when(specificDateScheduleDao.create(any()))
-        .thenReturn(schedules.getSpecificDate().get(0));
-    when(recurringScheduleDao.create(any()))
-        .thenReturn(schedules.getRecurringSchedule().get(0));
+    when(specificDateScheduleDao.create(any())).thenReturn(schedules.getSpecificDate().get(0));
+    when(recurringScheduleDao.create(any())).thenReturn(schedules.getRecurringSchedule().get(0));
 
     SynchronizeResult result = scheduleManager.synchronizeSchedules();
 

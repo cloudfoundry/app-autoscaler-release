@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -186,8 +185,7 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.never()).create(any());
 
     // For end job
-    Mockito.verify(scheduler, Mockito.never())
-        .scheduleJob(any(), any());
+    Mockito.verify(scheduler, Mockito.never()).scheduleJob(any(), any());
 
     // For notify to Scaling Engine
     Mockito.verify(restOperations, Mockito.never()).put(Mockito.anyString(), notNull());
@@ -271,8 +269,7 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.never()).create(any());
 
     // For end job
-    Mockito.verify(scheduler, Mockito.never())
-        .scheduleJob(any(), any());
+    Mockito.verify(scheduler, Mockito.never()).scheduleJob(any(), any());
 
     // For notify to Scaling Engine
     Mockito.verify(restOperations, Mockito.never()).put(Mockito.anyString(), Mockito.notNull());
@@ -314,8 +311,7 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.times(0)).create(any());
 
     // For end job
-    Mockito.verify(scheduler, Mockito.never())
-        .scheduleJob(any(), any());
+    Mockito.verify(scheduler, Mockito.never()).scheduleJob(any(), any());
     Mockito.verify(restOperations, Mockito.never()).put(Mockito.anyString(), notNull());
   }
 
@@ -353,8 +349,7 @@ public class AppScalingScheduleJobTest {
     Mockito.verify(activeScheduleDao, Mockito.times(0)).create(any());
 
     // For end job
-    Mockito.verify(scheduler, Mockito.never())
-        .scheduleJob(any(), any());
+    Mockito.verify(scheduler, Mockito.never()).scheduleJob(any(), any());
     Mockito.verify(restOperations, Mockito.never()).put(Mockito.anyString(), notNull());
   }
 
@@ -387,13 +382,11 @@ public class AppScalingScheduleJobTest {
     testJobListener.waitForJobToFinish(TimeUnit.MINUTES.toMillis(1));
 
     Mockito.verify(activeScheduleDao, Mockito.times(1)).findByAppId(appId);
-    Mockito.verify(activeScheduleDao, Mockito.times(0))
-        .deleteActiveSchedulesByAppId(any());
+    Mockito.verify(activeScheduleDao, Mockito.times(0)).deleteActiveSchedulesByAppId(any());
     Mockito.verify(activeScheduleDao, Mockito.never()).create(any());
 
     // For end job
-    Mockito.verify(scheduler, Mockito.never())
-        .scheduleJob(any(), any());
+    Mockito.verify(scheduler, Mockito.never()).scheduleJob(any(), any());
     Mockito.verify(restOperations, Mockito.never()).put(Mockito.anyString(), notNull());
   }
 
@@ -559,8 +552,7 @@ public class AppScalingScheduleJobTest {
         .create(any());
 
     // For end job
-    Mockito.verify(scheduler, Mockito.never())
-        .scheduleJob(any(), any());
+    Mockito.verify(scheduler, Mockito.never()).scheduleJob(any(), any());
 
     // For notify to Scaling Engine
     Mockito.verify(restOperations, Mockito.never()).put(Mockito.anyString(), notNull());
@@ -814,9 +806,7 @@ public class AppScalingScheduleJobTest {
 
     Mockito.doThrow(new ResourceAccessException("test exception"))
         .when(restOperations)
-        .put(
-            eq(scalingEngineUrl + "/v1/apps/" + appId + "/active_schedules/" + scheduleId),
-            any());
+        .put(eq(scalingEngineUrl + "/v1/apps/" + appId + "/active_schedules/" + scheduleId), any());
 
     TestJobListener testJobListener = new TestJobListener(2);
     memScheduler.getListenerManager().addJobListener(testJobListener);

@@ -438,9 +438,7 @@ public class ScheduleJobManagerTest {
     Long scheduleId = 1L;
     ScheduleTypeEnum type = ScheduleTypeEnum.SPECIFIC_DATE;
 
-    Mockito.doThrow(new SchedulerException("test exception"))
-        .when(scheduler)
-        .deleteJob(any());
+    Mockito.doThrow(new SchedulerException("test exception")).when(scheduler).deleteJob(any());
 
     scheduleJobManager.deleteJob(appId, scheduleId, type);
 
@@ -461,9 +459,7 @@ public class ScheduleJobManagerTest {
     Long scheduleId = 1L;
     ScheduleTypeEnum type = ScheduleTypeEnum.RECURRING;
 
-    Mockito.doThrow(new SchedulerException("test exception"))
-        .when(scheduler)
-        .deleteJob(any());
+    Mockito.doThrow(new SchedulerException("test exception")).when(scheduler).deleteJob(any());
 
     scheduleJobManager.deleteJob(appId, scheduleId, type);
 
