@@ -57,9 +57,9 @@ CHECKSTYLE_OUTPUT=$(java \
   -jar "$DOWNLOAD_PATH"/"$CHECKSTYLE_JAR_NAME" \
   -p "${CHECKSTYLE_CONFIG_PATH}"/checkstyle.properties \
   -c "${CHECKSTYLE_CONFIG_PATH}"/"${CHECKSTYLE_CONFIG_FILE_NAME}" \
-  -o "${result_log}" $changed_java_files  )
-FILES_NEEDS_CORRECTION=$(echo "$CHECKSTYLE_OUTPUT" | sed  '0d;1d;$d' "$result_log")
+  -o "${result_log}" $changed_java_files)
 
+FILES_NEEDS_CORRECTION=$(cat "${result_log}" | grep -v "Starting audit..." | grep -v "Audit done")
 
 if  [[ -n "$FILES_NEEDS_CORRECTION" ]]; then
   echo "$FILES_NEEDS_CORRECTION"
