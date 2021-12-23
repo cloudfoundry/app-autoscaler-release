@@ -3,7 +3,7 @@ package org.cloudfoundry.autoscaler.scheduler.rest;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -196,8 +196,7 @@ public class ScheduleRestControllerTest {
         getApplicationSchedulesFromResultActions(resultActions);
     assertSchedulesFoundEquals(applicationSchedules, appId, resultActions, 4, 3);
 
-    Mockito.verify(scheduler, Mockito.times(7))
-        .scheduleJob(Mockito.anyObject(), Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.times(7)).scheduleJob(any(), any());
   }
 
   @Test
@@ -225,8 +224,7 @@ public class ScheduleRestControllerTest {
         testDataDbUtil.getNumberOfRecurringSchedulesByAppId(appId),
         is(0));
 
-    Mockito.verify(scheduler, Mockito.times(2))
-        .scheduleJob(Mockito.anyObject(), Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.times(2)).scheduleJob(any(), any());
   }
 
   @Test
@@ -254,8 +252,7 @@ public class ScheduleRestControllerTest {
         testDataDbUtil.getNumberOfRecurringSchedulesByAppId(appId),
         is(2));
 
-    Mockito.verify(scheduler, Mockito.times(2))
-        .scheduleJob(Mockito.anyObject(), Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.times(2)).scheduleJob(any(), any());
   }
 
   @Test
@@ -284,8 +281,7 @@ public class ScheduleRestControllerTest {
         testDataDbUtil.getNumberOfRecurringSchedulesByAppId(appId),
         is(2));
 
-    Mockito.verify(scheduler, Mockito.times(4))
-        .scheduleJob(Mockito.anyObject(), Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.times(4)).scheduleJob(any(), any());
   }
 
   @Test
@@ -321,9 +317,8 @@ public class ScheduleRestControllerTest {
         testDataDbUtil.getNumberOfRecurringSchedulesByAppId(appId),
         is(1));
 
-    Mockito.verify(scheduler, Mockito.times(3))
-        .scheduleJob(Mockito.anyObject(), Mockito.anyObject());
-    Mockito.verify(scheduler, Mockito.times(10)).deleteJob(Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.times(3)).scheduleJob(any(), any());
+    Mockito.verify(scheduler, Mockito.times(10)).deleteJob(any());
   }
 
   @Test
@@ -384,7 +379,7 @@ public class ScheduleRestControllerTest {
         testDataDbUtil.getNumberOfRecurringSchedulesByAppId(appId),
         is(0));
 
-    Mockito.verify(scheduler, Mockito.times(2)).deleteJob(Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.times(2)).deleteJob(any());
   }
 
   @Test
@@ -414,7 +409,7 @@ public class ScheduleRestControllerTest {
         testDataDbUtil.getNumberOfRecurringSchedulesByAppId(appId),
         is(0));
 
-    Mockito.verify(scheduler, Mockito.times(2)).deleteJob(Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.times(2)).deleteJob(any());
   }
 
   @Test
@@ -445,7 +440,7 @@ public class ScheduleRestControllerTest {
         testDataDbUtil.getNumberOfRecurringSchedulesByAppId(appId),
         is(0));
 
-    Mockito.verify(scheduler, Mockito.times(10)).deleteJob(Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.times(10)).deleteJob(any());
   }
 
   @Test
@@ -484,7 +479,7 @@ public class ScheduleRestControllerTest {
         testDataDbUtil.getNumberOfRecurringSchedules(),
         is(4));
 
-    Mockito.verify(scheduler, Mockito.never()).deleteJob(Mockito.anyObject());
+    Mockito.verify(scheduler, Mockito.never()).deleteJob(any());
   }
 
   private void assertNoSchedulesFound(ResultActions resultActions) throws Exception {

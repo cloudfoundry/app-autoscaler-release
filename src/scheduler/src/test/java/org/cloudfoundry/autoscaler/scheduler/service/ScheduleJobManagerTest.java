@@ -13,8 +13,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -361,7 +361,7 @@ public class ScheduleJobManagerTest {
 
     scheduleJobManager.deleteJob(appId, scheduleId, scheduleType);
 
-    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(anyObject());
+    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(any());
   }
 
   @Test
@@ -383,7 +383,7 @@ public class ScheduleJobManagerTest {
     // Set mock object for Quartz.
     Mockito.doThrow(new SchedulerException("test exception"))
         .when(scheduler)
-        .scheduleJob(Mockito.anyObject(), Mockito.anyObject());
+        .scheduleJob(any(), any());
 
     scheduleJobManager.createSimpleJob(specificDateScheduleEntity);
 
@@ -417,7 +417,7 @@ public class ScheduleJobManagerTest {
     // Set mock object for Quartz.
     Mockito.doThrow(new SchedulerException("test exception"))
         .when(scheduler)
-        .scheduleJob(Mockito.anyObject(), Mockito.anyObject());
+        .scheduleJob(any(), any());
 
     scheduleJobManager.createCronJob(recurringScheduleEntity);
 
@@ -438,9 +438,7 @@ public class ScheduleJobManagerTest {
     Long scheduleId = 1L;
     ScheduleTypeEnum type = ScheduleTypeEnum.SPECIFIC_DATE;
 
-    Mockito.doThrow(new SchedulerException("test exception"))
-        .when(scheduler)
-        .deleteJob(Mockito.anyObject());
+    Mockito.doThrow(new SchedulerException("test exception")).when(scheduler).deleteJob(any());
 
     scheduleJobManager.deleteJob(appId, scheduleId, type);
 
@@ -461,9 +459,7 @@ public class ScheduleJobManagerTest {
     Long scheduleId = 1L;
     ScheduleTypeEnum type = ScheduleTypeEnum.RECURRING;
 
-    Mockito.doThrow(new SchedulerException("test exception"))
-        .when(scheduler)
-        .deleteJob(Mockito.anyObject());
+    Mockito.doThrow(new SchedulerException("test exception")).when(scheduler).deleteJob(any());
 
     scheduleJobManager.deleteJob(appId, scheduleId, type);
 
