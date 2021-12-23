@@ -1,10 +1,14 @@
 #!/bin/bash
 
+# Tests that are skipped by default and why:
+# mtls - this requires changes to gorouter/haproxy to allow mtls operations
+
 $(dirname $0)/test \
   -v \
   -slowSpecThreshold=120 \
   -randomizeAllSpecs \
   -keepGoing \
   -race \
+  -skip "mtls" \
   $@ \
   . broker app api
