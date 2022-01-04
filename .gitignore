@@ -16,6 +16,7 @@ src/changeloglockcleaner/vendor
 /bin/
 /pkg/
 
+**/pom.xml.versionsBackup
 bosh-lite/deployments/*
 /RemoteSystemsTempFiles
 /.DS_Store

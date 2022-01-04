@@ -6,13 +6,17 @@ git restore src/db/pom.xml
 rm -f liquibase.properties
 
 make clean
-# set liquibase to 3.6.3
-sed -i 's/3.10.3/3.6.3/' src/db/pom.xml
-make init-db | grep -v '##'
-# set liquibase to 4.x.x
 
-sed -i 's/3.6.3/4.6.2/' src/db/pom.xml
 pushd src/db
+  # set liquibase to 3.6.3
+  mvn versions:use-dep-version -Dincludes=org.liquibase:liquibase-core -DdepVersion=3.6.3 -DforceVersion=true
+popd
+
+make init-db | grep -v '##'
+
+pushd src/db
+  # set liquibase to 4.x.x
+  mvn versions:use-dep-version -Dincludes=org.liquibase:liquibase-core -DdepVersion=4.6.2 -DforceVersion=true
   mvn clean package -DskipTests
 popd
 
