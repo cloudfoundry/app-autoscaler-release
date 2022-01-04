@@ -4,6 +4,7 @@ templates:
   operator_ctl: bin/operator_ctl
   operator.yml.erb: config/operator.yml
   pre-start.erb: bin/pre-start
+  liquibase.properties: bin/liquibase.properties
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
