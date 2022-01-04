@@ -121,6 +121,9 @@ stemcells:
 - alias: default
   os: ubuntu-bionic
   version: latest
+- alias: xenial
+  os: ubuntu-xenial
+  version: latest
 
 # Canary details
 update:
@@ -138,7 +141,7 @@ instance_groups:
   instances: 1
   update:
     serial: true
-  stemcell: default
+  stemcell: xenial
   vm_type: small
   networks:
   - name: default
