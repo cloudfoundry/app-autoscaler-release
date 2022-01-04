@@ -8,15 +8,14 @@ rm -f liquibase.properties
 make clean
 
 pushd src/db
+  # set liquibase to 3.6.3
   mvn versions:use-dep-version -Dincludes=org.liquibase:liquibase-core -DdepVersion=3.6.3 -DforceVersion=true
 popd
 
-# set liquibase to 3.6.3
 make init-db | grep -v '##'
-# set liquibase to 4.x.x
 
-sed -i 's/3.6.3/4.6.2/' src/db/pom.xml
 pushd src/db
+  # set liquibase to 4.x.x
   mvn versions:use-dep-version -Dincludes=org.liquibase:liquibase-core -DdepVersion=4.6.2 -DforceVersion=true
   mvn clean package -DskipTests
 popd
