@@ -94,6 +94,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/codes/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/connectivity/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/credentials/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/credentials/insecure/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/encoding/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/encoding/proto/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/grpclog/* # gosub
@@ -119,7 +120,6 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/internal/syscall/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/transport/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/transport/networktype/* # gosub
-- autoscaler/vendor/google.golang.org/grpc/internal/xds/env/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/keepalive/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/metadata/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/peer/* # gosub
