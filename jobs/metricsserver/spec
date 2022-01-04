@@ -2,6 +2,7 @@
 name: metricsserver
 templates:
   pre-start.erb: bin/pre-start
+  liquibase.properties: bin/liquibase.properties
   metricsserver_ctl: bin/metricsserver_ctl
   metricsserver.yml.erb: config/metricsserver.yml
   metricsserver_ca.crt.erb: config/certs/metricsserver/ca.crt

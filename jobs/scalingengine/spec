@@ -2,6 +2,7 @@
 name: scalingengine
 templates:
   pre-start.erb: bin/pre-start
+  liquibase.properties: bin/liquibase.properties
   scalingengine_ctl: bin/scalingengine_ctl
   scalingengine.yml.erb: config/scalingengine.yml
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt

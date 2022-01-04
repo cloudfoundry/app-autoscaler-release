@@ -3,6 +3,7 @@ name: scheduler
 templates:
   scheduler.erb: bin/scheduler
   pre-start.erb: bin/pre-start
+  liquibase.properties: bin/liquibase.properties
   application.properties.erb: config/application.properties
   install_crt_keystore.erb: bin/install_crt_keystore
   install_crt_truststore.erb: bin/install_crt_truststore

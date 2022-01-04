@@ -2,6 +2,7 @@
 name: eventgenerator
 templates:
   pre-start.erb: bin/pre-start
+  liquibase.properties: bin/liquibase.properties
   eventgenerator_ctl: bin/eventgenerator_ctl
   eventgenerator.yml.erb: config/eventgenerator.yml
   eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt

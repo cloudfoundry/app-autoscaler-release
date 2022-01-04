@@ -3,6 +3,7 @@ templates:
   apiserver_ctl.erb: bin/apiserver_ctl
   apiserver.yml.erb: config/apiserver.yml
   pre-start.erb: bin/pre-start
+  liquibase.properties: bin/liquibase.properties
   info.json.erb: config/info.json
   catalog.json.erb: config/catalog.json
   apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
