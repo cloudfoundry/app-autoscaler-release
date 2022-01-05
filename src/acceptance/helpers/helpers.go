@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
+	"github.com/cloudfoundry-incubator/cf-test-helpers/v2/generator"
 
-	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
+	"github.com/cloudfoundry-incubator/cf-test-helpers/v2/cf"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 )

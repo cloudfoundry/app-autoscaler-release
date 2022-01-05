@@ -3,7 +3,7 @@ package sqldb_test
 import (
 	. "changeloglockcleaner/sqldb"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

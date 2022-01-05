@@ -5,7 +5,7 @@ import (
 
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 )
 
 var _ = Describe("AutoScaler dynamic policy", func() {

@@ -58,7 +58,7 @@ linters-settings:
     # https://staticcheck.io/docs/options#checks
     checks: ["all", "-ST1003", "-ST1005", "-ST1023"]
     dot-import-whitelist:
-      - github.com/onsi/ginkgo
+      - github.com/onsi/ginkgo/v2
       - github.com/onsi/gomega
       - github.com/onsi/gomega/gexec
     # https://staticcheck.io/docs/options#initialisms
