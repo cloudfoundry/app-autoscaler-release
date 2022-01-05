@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -75,11 +74,6 @@ var (
 
 var _ = Describe("AutoScaler Public API", func() {
 
-	var (
-		policy string
-		body   io.Reader
-	)
-
 	BeforeEach(func() {
 		oauthToken = OauthToken(cfg)
 	})
@@ -87,205 +81,70 @@ var _ = Describe("AutoScaler Public API", func() {
 	Context("when no policy defined", func() {
 
 		BeforeEach(func() {
-			//delete policy here to make sure the condtion "no policy defined"
-			req, err := http.NewRequest("DELETE", policyURL, nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-			defer func() { _ = resp.Body.Close() }()
-			_, err = ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Or(Equal(200), Equal(404)))
+			_, status := deletePolicy()
+			Expect(status).To(Or(Equal(200), Equal(404)))
 		})
 
 		It("should fail with 404 when retrieve policy", func() {
-			req, err := http.NewRequest("GET", policyURL, nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			_, err = ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(404))
+			_, status := getPolicy()
+			Expect(status).To(Equal(404))
 		})
 
 		It("should succeed to create a valid policy", func() {
-			policy = GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
-			body = bytes.NewBuffer([]byte(policy))
-
-			req, err := http.NewRequest("PUT", policyURL, body)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			raw, err := ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Or(Equal(200), Equal(201)))
-			var responsedPolicy *ScalingPolicy
-			err = json.Unmarshal(raw, &responsedPolicy)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(MatchJSON(policy))
-
+			policy := GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
+			newPolicy, status := createPolicy(policy)
+			Expect(status).To(Or(Equal(200), Equal(201)))
+			Expect(string(newPolicy)).Should(MatchJSON(policy))
 		})
 
 		It("should fail to create an invalid policy", func() {
-			policy = GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 30)
-			body = bytes.NewBuffer([]byte(policy))
-
-			req, err := http.NewRequest("PUT", policyURL, body)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			raw, err := ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(400))
-			Expect(string(raw)).Should(ContainSubstring(`[{"context":"(root).instance_min_count","description":"Must be greater than or equal to 1"}]`))
+			response, status := createPolicy(GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 30))
+			Expect(status).To(Equal(400))
+			Expect(string(response)).Should(ContainSubstring(`[{"context":"(root).instance_min_count","description":"Must be greater than or equal to 1"}]`))
 		})
 
 	})
 
 	Context("When policy is defined", func() {
+		memThreshold := int64(10)
+		var policy string
 
 		BeforeEach(func() {
-			policy = GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
-			body = bytes.NewBuffer([]byte(policy))
-
-			req, err := http.NewRequest("PUT", policyURL, body)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-			_, err = ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Or(Equal(200), Equal(201)))
+			policy = GenerateDynamicScaleOutPolicy(1, 2, "memoryused", memThreshold)
+			_, status := createPolicy(policy)
+			Expect(status).To(Or(Equal(200), Equal(201)))
 		})
 
 		It("should succeed to delete a policy", func() {
-			req, err := http.NewRequest("DELETE", policyURL, nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			Expect(resp.StatusCode).To(Equal(200))
+			_, status := deletePolicy()
+			Expect(status).To(Equal(200))
 		})
 
 		It("should succeed to get a policy", func() {
-			req, err := http.NewRequest("GET", policyURL, nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			raw, err := ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(200))
-
-			var responsedPolicy *ScalingPolicy
-			err = json.Unmarshal(raw, &responsedPolicy)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(MatchJSON(policy))
+			gotPolicy, status := getPolicy()
+			Expect(status).To(Equal(200))
+			Expect(string(gotPolicy)).Should(MatchJSON(policy))
 		})
 
 		It("should succeed to update a valid policy", func() {
-			newpolicy := GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
-			body = bytes.NewBuffer([]byte(newpolicy))
-
-			req, err := http.NewRequest("PUT", policyURL, body)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			raw, err := ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(200))
-
-			var responsedPolicy *ScalingPolicy
-			err = json.Unmarshal(raw, &responsedPolicy)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(MatchJSON(newpolicy))
+			newPolicy, status := createPolicy(GenerateDynamicScaleOutPolicy(1, 2, "memoryused", memThreshold))
+			Expect(status).To(Equal(200))
+			Expect(string(newPolicy)).Should(MatchJSON(policy))
 		})
 
 		It("should fail to update an invalid policy", func() {
 			By("return 400 when the new policy is invalid")
-			newpolicy := GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 30)
-			body = bytes.NewBuffer([]byte(newpolicy))
-
-			req, err := http.NewRequest("PUT", policyURL, body)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err := DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			_, err = ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(400))
+			_, status := createPolicy(GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 30))
+			Expect(status).To(Equal(400))
 
 			By("the original policy is not changed")
-			req, err = http.NewRequest("GET", policyURL, nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			req.Header.Add("Authorization", oauthToken)
-			req.Header.Add("Content-Type", "application/json")
-
-			resp, err = DoAPIRequest(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			raw, err := ioutil.ReadAll(resp.Body)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(200))
-
-			var responsedPolicy *ScalingPolicy
-			err = json.Unmarshal(raw, &responsedPolicy)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(string(raw)).Should(MatchJSON(policy))
+			existing, status := getPolicy()
+			Expect(status).To(Equal(200))
+			Expect(string(existing)).Should(MatchJSON(policy))
 
 		})
 
 		Context("for an unrelated user", func() {
-
-			var secondUserToken string
-
 			BeforeEach(func() {
 				workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 					// Make "other user" a space auditor in the space along with a space developer in the other space
@@ -293,24 +152,13 @@ var _ = Describe("AutoScaler Public API", func() {
 					Expect(cmd.Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 				})
 				workflowhelpers.AsUser(otherSetup.RegularUserContext(), cfg.DefaultTimeoutDuration(), func() {
-					secondUserToken = OauthToken(cfg)
+					oauthToken = OauthToken(cfg)
 				})
 			})
 
 			It("should not be possible to read the policy", func() {
-				req, err := http.NewRequest("GET", policyURL, nil)
-				Expect(err).ShouldNot(HaveOccurred())
-				req.Header.Add("Authorization", secondUserToken)
-				req.Header.Add("Content-Type", "application/json")
-
-				resp, err := DoAPIRequest(req)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				defer func() { _ = resp.Body.Close() }()
-
-				_, err = ioutil.ReadAll(resp.Body)
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(resp.StatusCode).To(Equal(401))
+				_, status := getPolicy()
+				Expect(status).To(Equal(401))
 			})
 		})
 
@@ -318,84 +166,117 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			BeforeEach(func() {
 				totalTime := time.Duration(cfg.AggregateInterval*2)*time.Second + 3*time.Minute
-				finishTime := time.Now().Add(totalTime)
 
 				Eventually(func() uint64 {
 					return AverageMemoryUsedByInstance(appGUID, totalTime)
-				}, totalTime, 15*time.Second).Should(BeNumerically(">=", 30*MB))
+				}, totalTime, 15*time.Second).Should(BeNumerically(">=", memThreshold*MB))
 
-				WaitForNInstancesRunning(appGUID, 2, time.Until(finishTime))
+				WaitForNInstancesRunning(appGUID, 2, totalTime)
 			})
 
-			It("should succeed to get instance metrics", func() {
-				req, err := http.NewRequest("GET", metricURL, nil)
-				Expect(err).ShouldNot(HaveOccurred())
-				req.Header.Add("Authorization", oauthToken)
-				req.Header.Add("Content-Type", "application/json")
+			It("should successfully scale out", func() {
 
-				resp, err := DoAPIRequest(req)
-				Expect(err).ShouldNot(HaveOccurred())
+				By("check instance metrics")
+				Expect(len(getMetrics().Metrics)).Should(BeNumerically(">=", 1))
 
-				defer func() { _ = resp.Body.Close() }()
+				By("check aggregated metrics")
+				Expect(len(getAggregatedMetrics().Metrics)).Should(BeNumerically(">=", 1))
 
-				raw, err := ioutil.ReadAll(resp.Body)
-
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(resp.StatusCode).To(Equal(200))
-
-				var metrics *MetricsResults
-				err = json.Unmarshal(raw, &metrics)
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(len(metrics.Metrics)).Should(BeNumerically(">=", 1))
-			})
-
-			It("should succeed to get aggregated metrics", func() {
-				req, err := http.NewRequest("GET", aggregatedMetricURL, nil)
-				Expect(err).ShouldNot(HaveOccurred())
-				req.Header.Add("Authorization", oauthToken)
-				req.Header.Add("Content-Type", "application/json")
-
-				resp, err := DoAPIRequest(req)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				defer func() { _ = resp.Body.Close() }()
-
-				raw, err := ioutil.ReadAll(resp.Body)
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(resp.StatusCode).To(Equal(200))
-
-				var metrics *AggregatedMetricsResults
-				err = json.Unmarshal(raw, &metrics)
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(len(metrics.Metrics)).Should(BeNumerically(">=", 1))
-			})
-
-			It("should succeed to get histories", func() {
-				req, err := http.NewRequest("GET", historyURL, nil)
-				Expect(err).ShouldNot(HaveOccurred())
-				req.Header.Add("Authorization", oauthToken)
-				req.Header.Add("Content-Type", "application/json")
-
-				resp, err := DoAPIRequest(req)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				defer func() { _ = resp.Body.Close() }()
-
-				raw, err := ioutil.ReadAll(resp.Body)
-				Expect(err).ShouldNot(HaveOccurred())
-				Expect(resp.StatusCode).To(Equal(200))
-
-				var histories *HistoryResults
-				err = json.Unmarshal(raw, &histories)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				for _, entry := range histories.Histories {
+				By("check history has scale event")
+				for _, entry := range getHistory().Histories {
 					Expect(entry.AppId).To(Equal(appGUID))
 					Expect(entry.ScalingType).Should(BeNumerically("==", 0))
 					Expect(entry.Status).Should(BeNumerically("==", 0))
-					Expect(entry.Reason).To(Equal(fmt.Sprintf("+1 instance(s) because memoryused >= 30MB for %d seconds", TestBreachDurationSeconds)))
+					Expect(entry.Reason).To(Equal(fmt.Sprintf("+1 instance(s) because memoryused >= %dMB for %d seconds", memThreshold, TestBreachDurationSeconds)))
 				}
 			})
 		})
 	})
 })
+
+func getHistory() *HistoryResults {
+	raw, status := get(historyURL)
+	Expect(status).To(Equal(200))
+
+	var histories *HistoryResults
+	err := json.Unmarshal(raw, &histories)
+	Expect(err).ShouldNot(HaveOccurred())
+	return histories
+}
+
+func getAggregatedMetrics() *AggregatedMetricsResults {
+	raw, status := get(aggregatedMetricURL)
+	Expect(status).To(Equal(200))
+	var metrics *AggregatedMetricsResults
+	err := json.Unmarshal(raw, &metrics)
+	Expect(err).ShouldNot(HaveOccurred())
+	return metrics
+}
+
+func getMetrics() *MetricsResults {
+	raw, status := get(metricURL)
+	Expect(status).To(Equal(200))
+
+	var metrics *MetricsResults
+	err := json.Unmarshal(raw, &metrics)
+	Expect(err).ShouldNot(HaveOccurred())
+	return metrics
+}
+
+func createPolicy(policy string) ([]byte, int) {
+	return put(policyURL, policy)
+}
+
+func put(url string, body string) ([]byte, int) {
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(body)))
+	Expect(err).ShouldNot(HaveOccurred())
+	req.Header.Add("Authorization", oauthToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := DoAPIRequest(req)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	defer func() { _ = resp.Body.Close() }()
+
+	raw, err := ioutil.ReadAll(resp.Body)
+	Expect(err).ShouldNot(HaveOccurred())
+	return raw, resp.StatusCode
+}
+
+func deletePolicy() ([]byte, int) {
+	return deleteReq(policyURL)
+}
+
+func deleteReq(url string) ([]byte, int) {
+	//delete policy here to make sure the condtion "no policy defined"
+	req, err := http.NewRequest("DELETE", url, nil)
+	Expect(err).ShouldNot(HaveOccurred())
+	req.Header.Add("Authorization", oauthToken)
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := DoAPIRequest(req)
+	Expect(err).ShouldNot(HaveOccurred())
+	defer func() { _ = resp.Body.Close() }()
+	response, err := ioutil.ReadAll(resp.Body)
+	Expect(err).ShouldNot(HaveOccurred())
+	return response, resp.StatusCode
+}
+
+func getPolicy() ([]byte, int) {
+	return get(policyURL)
+}
+
+func get(url string) ([]byte, int) {
+	req, err := http.NewRequest("GET", url, nil)
+	Expect(err).ShouldNot(HaveOccurred())
+	req.Header.Add("Authorization", oauthToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := DoAPIRequest(req)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	defer func() { _ = resp.Body.Close() }()
+
+	policy, err := ioutil.ReadAll(resp.Body)
+	Expect(err).ShouldNot(HaveOccurred())
+	return policy, resp.StatusCode
+}
