@@ -14,7 +14,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		It("should succeed to check health", func() {
 			req, err := http.NewRequest("GET", healthURL, nil)
 			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := DoAPIRequest(req)
+			resp, err := app.client.Do(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()
@@ -28,7 +28,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, "autoscaler", "autoscaler-eventgenerator", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := DoAPIRequest(req)
+			resp, err := app.client.Do(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()
@@ -45,7 +45,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, "autoscaler", "autoscaler-scalingengine", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := DoAPIRequest(req)
+			resp, err := app.client.Do(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()
@@ -63,7 +63,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, "autoscaler", "autoscaler-operator", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := DoAPIRequest(req)
+			resp, err := app.client.Do(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()
@@ -81,7 +81,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, "autoscaler", "autoscaler-metricsserver", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := DoAPIRequest(req)
+			resp, err := app.client.Do(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()
@@ -99,7 +99,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, "autoscaler", "autoscaler-metricsgateway", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := DoAPIRequest(req)
+			resp, err := app.client.Do(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()
@@ -117,7 +117,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, "autoscaler", "autoscaler-metricsforwarder", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := DoAPIRequest(req)
+			resp, err := app.client.Do(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()
@@ -135,7 +135,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, "autoscaler", "autoscaler-scheduler", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := DoAPIRequest(req)
+			resp, err := app.client.Do(req)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			defer func() { _ = resp.Body.Close() }()

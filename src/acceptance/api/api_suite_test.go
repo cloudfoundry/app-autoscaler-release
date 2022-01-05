@@ -1,18 +1,11 @@
 package api_test
 
 import (
-	"crypto/tls"
-	"fmt"
-	"net"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
-	"testing"
-	"time"
-
 	"acceptance/config"
 	. "acceptance/helpers"
+	"fmt"
+	"os"
+	"testing"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -23,26 +16,13 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
-const (
-	HealthPath           = "/health"
-	MetricPath           = "/v1/apps/{appId}/metric_histories/{metric_type}"
-	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
-	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
-)
-
 var (
-	cfg                 *config.Config
-	setup               *workflowhelpers.ReproducibleTestSuiteSetup
-	otherSetup          *workflowhelpers.ReproducibleTestSuiteSetup
-	appName             string
-	appGUID             string
-	instanceName        string
-	healthURL           string
-	policyURL           string
-	metricURL           string
-	aggregatedMetricURL string
-	historyURL          string
-	client              *http.Client
+	app          *App
+	cfg          *config.Config
+	instanceName string
+	setup        *workflowhelpers.ReproducibleTestSuiteSetup
+	otherSetup   *workflowhelpers.ReproducibleTestSuiteSetup
+	healthURL    string
 )
 
 func TestAcceptance(t *testing.T) {
@@ -78,22 +58,10 @@ var _ = BeforeSuite(func() {
 		}
 	})
 
-	appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
-	initialInstanceCount := 1
-	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
-	Expect(createApp).To(Exit(0), "failed creating app")
-
-	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")
-
-	guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	Expect(guid).To(Exit(0))
-	appGUID = strings.TrimSpace(string(guid.Out.Contents()))
-
-	Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
-	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
-
+	app = New(cfg)
+	app.Create(1)
+	app.Start()
+	healthURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, HealthPath)
 	if cfg.IsServiceOfferingEnabled() {
 		CheckServiceExists(cfg)
 
@@ -101,35 +69,9 @@ var _ = BeforeSuite(func() {
 		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
 		Expect(createService).To(Exit(0), fmt.Sprintf("failed creating service %s", instanceName))
 
-		bindService := cf.Cf("bind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(0), fmt.Sprintf("failed binding service %s to app %s", instanceName, appName))
+		bindService := cf.Cf("bind-service", app.name, instanceName).Wait(cfg.DefaultTimeoutDuration())
+		Expect(bindService).To(Exit(0), fmt.Sprintf("failed binding service %s to app %s", instanceName, app.name))
 	}
-
-	// #nosec G402
-	client = &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			Dial: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).Dial,
-			TLSHandshakeTimeout: 10 * time.Second,
-			DisableCompression:  true,
-			DisableKeepAlives:   true,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: cfg.SkipSSLValidation,
-			},
-		},
-		Timeout: 30 * time.Second,
-	}
-
-	healthURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, HealthPath)
-	policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-	metricURL = strings.Replace(MetricPath, "{metric_type}", "memoryused", -1)
-	metricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(metricURL, "{appId}", appGUID, -1))
-	aggregatedMetricURL = strings.Replace(AggregatedMetricPath, "{metric_type}", "memoryused", -1)
-	aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(aggregatedMetricURL, "{appId}", appGUID, -1))
-	historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
 })
 
 var _ = AfterSuite(func() {
@@ -137,8 +79,8 @@ var _ = AfterSuite(func() {
 		fmt.Println("Skipping Teardown...")
 	} else {
 		if cfg.IsServiceOfferingEnabled() {
-			if appName != "" && instanceName != "" {
-				unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+			if app != nil && instanceName != "" {
+				unbindService := cf.Cf("unbind-service", app.name, instanceName).Wait(cfg.DefaultTimeoutDuration())
 				if unbindService.ExitCode() != 0 {
 					purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 					Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
@@ -154,10 +96,7 @@ var _ = AfterSuite(func() {
 			}
 		}
 
-		if appName != "" {
-			deleteApp := cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())
-			Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", appName))
-		}
+		app.Delete()
 
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
@@ -169,7 +108,3 @@ var _ = AfterSuite(func() {
 		setup.Teardown()
 	}
 })
-
-func DoAPIRequest(req *http.Request) (*http.Response, error) {
-	return client.Do(req)
-}
