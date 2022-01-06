@@ -1,4 +1,4 @@
-FROM mikefarah/yq:4.16.1 AS yq
+FROM mikefarah/yq:4.16.2 AS yq
 
 FROM ubuntu:18.04
 MAINTAINER autoscaler-team
@@ -35,7 +35,7 @@ RUN \
       apt-get clean
 
 # Install go
-ENV GO_VERSION 1.16.8
+ENV GO_VERSION 1.17.5
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
   tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
   rm -rf go${GO_VERSION}.linux-amd64.tar.gz && \
