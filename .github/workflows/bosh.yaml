@@ -18,7 +18,7 @@ jobs:
       - name: Determine Go Version
         id: go
         run: |
-          GO_VERSION=$(cat packages/golang/spec | grep linux | sed 's/.linux-amd64.tar.gz//' | sed 's/- golang\/go//' | xargs)
+          GO_VERSION=$(cat config/blobs.yml | grep golang | sed 's/.linux-amd64.tar.gz://' | sed 's/golang\/go//' | xargs)
           echo "::set-output name=version::${GO_VERSION}"
 
       - name: Setup Go
