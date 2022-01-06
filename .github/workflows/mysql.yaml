@@ -9,7 +9,7 @@ jobs:
   mysql:
     strategy:
       matrix:
-        go: [1.16]
+        go: [1.17]
         java: [11, 17]
         mysql: [8]
         suite: [test, integration]
