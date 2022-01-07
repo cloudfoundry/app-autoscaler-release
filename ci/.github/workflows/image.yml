@@ -69,6 +69,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}
 
       - name: Build and push
+        id: build-and-push
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: dockerfiles/autoscaler-${{ matrix.image_suffix }} 
