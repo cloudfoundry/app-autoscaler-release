@@ -111,15 +111,7 @@ func DisableServiceAccess(cfg *config.Config, orgName string) {
 }
 
 func CheckServiceExists(cfg *config.Config) {
-	version := cf.Cf("version").Wait(cfg.DefaultTimeoutDuration())
-	Expect(version).To(Exit(0), "Could not determine cf version")
-
-	var serviceExists *Session
-	if strings.Contains(string(version.Out.Contents()), "version 7") {
-		serviceExists = cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-	} else {
-		serviceExists = cf.Cf("marketplace", "-s", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-	}
+	serviceExists := cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
 
 	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
 }
