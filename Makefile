@@ -134,7 +134,11 @@ waitfor_mysql_CI_false:
 	@until [[ ! -z `docker exec mysql mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null` ]]; do echo -n "."; sleep 1; done
 waitfor_mysql_CI_true:
 	@echo -n " - Waiting for table creation ."
-	@which mysql >/dev/null && until [[ ! -z $(shell mysql -u "root" -h `hostname` --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null) ]]; do echo -n "."; sleep 1; done
+	@which mysql >/dev/null &&\
+	 until [[ ! -z "$(shell mysql -u "root" -h `hostname` --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]];\
+	 do\
+	  echo -n "."; sleep 1;\
+	 done
 
 .PHONY: stop-db
 stop-db: check-db_type
