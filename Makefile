@@ -8,7 +8,8 @@ db_type:=postgres
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"; ;; \
  			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
-
+MYSQL_TAG := 8
+POSTGRES_TAG := 12
 # Fix for golang issue with Montery 6/12/2021. Fix already in trunk but not released
 # https://github.com/golang/go/issues/49138
 # https://github.com/golang/go/commit/5f6552018d1ec920c3ca3d459691528f48363c3c
@@ -98,7 +99,7 @@ target/start-db-postgres_CI_false:
 			--health-timeout 2s \
 			--health-retries 10 \
 			-d \
-			postgres:9.6 >/dev/null;\
+			postgres:${POSTGRES_TAG} >/dev/null;\
 	else echo " - $@ already up'"; fi;
 	@touch $@
 target/start-db-postgres_CI_true:
@@ -116,11 +117,12 @@ target/start-db-mysql_CI_false:
 			docker rm ${db_type}; \
 		fi;\
 		echo " - starting docker for ${db_type}";\
+		docker pull mysql:${MYSQL_TAG}; \
 		docker run -p 3306:3306  --name mysql \
 			-e MYSQL_ALLOW_EMPTY_PASSWORD=true \
 			-e MYSQL_DATABASE=autoscaler \
 			-d \
-			mysql:latest \
+			mysql:${MYSQL_TAG} \
 			>/dev/null;\
 	else echo " - $@ already up"; fi;
 	@touch $@
@@ -133,8 +135,17 @@ waitfor_mysql_CI_false:
 	@echo -n " - Waiting for table creation ."
 	@until [[ ! -z `docker exec mysql mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null` ]]; do echo -n "."; sleep 1; done
 waitfor_mysql_CI_true:
-	@echo -n " - Waiting for table creation ."
-	@which mysql >/dev/null && until [[ ! -z $(shell mysql -u "root" -h `hostname` --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null) ]]; do echo -n "."; sleep 1; done
+	@echo -n " - Waiting for table creation "
+	@which mysql >/dev/null &&\
+	 {\
+	   T=0;\
+	   until [[ ! -z "$(shell mysql -u "root" -h "127.0.0.1"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
+	     || [[ $${T} -gt 30 ]];\
+	   do echo -n "."; sleep 1; T=$$((T+1)); done;\
+	 }
+	@[ ! -z "$(shell mysql -u "root" -h "127.0.0.1" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
+	  || { echo "ERROR: Mysql timed out creating database"; exit 1; }
+
 
 .PHONY: stop-db
 stop-db: check-db_type
