@@ -139,11 +139,11 @@ waitfor_mysql_CI_true:
 	@which mysql >/dev/null &&\
 	 {\
 	   T=0;\
-	   until [[ ! -z "$(shell mysql -u "root" -h `hostname` --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
+	   until [[ ! -z "$(shell mysql -u "root" -h "127.0.0.1"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
 	     || [[ $${T} -gt 30 ]];\
 	   do echo -n "."; sleep 1; T=$$((T+1)); done;\
 	 }
-	[ ! -z "$(shell mysql -u "root" -h `hostname` --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]\
+	@[ ! -z "$(shell mysql -u "root" -h "127.0.0.1" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
 	  || { echo "ERROR: Mysql timed out creating database"; exit 1; }
 
 
