@@ -23,6 +23,8 @@ builds:
     version: 3.4.1
   bae228ab-d77b-4dfc-4f8a-b1389163dec2:
     version: 3.5.0
+  c27934a3-32d6-4355-57d2-67f6fffe1a5e:
+    version: 5.0.3
   d97c4930-59f6-4ded-6bad-dbbb02e159f4:
     version: 3.6.0
   daae69ef-70a0-460d-6765-5324b96822aa:
