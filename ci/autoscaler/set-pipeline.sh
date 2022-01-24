@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# To run this script you need to have set up the target using
+# fly -t "autoscaler" login -c "https://bosh.ci.cloudfoundry.org" -n "app-autoscaler"
 set -euo pipefail
 
 TARGET=autoscaler
