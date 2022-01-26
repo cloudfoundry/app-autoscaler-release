@@ -22,6 +22,6 @@ GCP_DNS_VALUES=$(gcloud dns record-sets list --project ${BBL_GCP_PROJECT_ID} --z
 if [ "${BBL_DNS_VALUES}" == "${GCP_DNS_VALUES}" ]; then
   echo "${BBL_DNS_VALUES} is correct"
 else
-  echo "${GCP_DNS_ZONE} need to be updated to ${BBL_DNS_VALUES}"
+  echo "dns zone:${GCP_DNS_ZONE} name:${GCP_DNS_NAME} need to be updated to ${BBL_DNS_VALUES}"
   exit 1
 fi
