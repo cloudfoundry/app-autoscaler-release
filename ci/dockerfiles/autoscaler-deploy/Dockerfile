@@ -32,7 +32,7 @@ RUN \
             ruby-dev \
             python3 \
             ca-certificates \
-            cf7-cli \
+            cf8-cli \
             gh \
       && \
       apt-get clean
