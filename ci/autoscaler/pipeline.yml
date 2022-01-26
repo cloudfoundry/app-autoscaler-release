@@ -132,7 +132,7 @@ resources:
   icon: github
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-env-bbl-state
-    private_key: ((autoscaler_git_key))
+    private_key: ((autoscaler_bbl_git_key))
     branch: main
     paths:
     - deployment-vars.yml
