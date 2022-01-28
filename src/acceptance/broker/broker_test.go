@@ -9,10 +9,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
-	. "github.com/onsi/gomega/gexec"
 )
 
 type serviceInstance string
@@ -116,7 +113,6 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		service := createService("acceptance-standard")
 		updateService := service.updatePlanRaw(plans[0])
 		Expect(updateService).To(Exit(1), "failed updating service")
-		fmt.Printf("Out.Contents: \"%s\"",updateService.Err.Contents())
 		Expect(strings.Contains(string(updateService.Err.Contents()), "The service does not support changing plans.")).To(BeTrue())
 
 		service.delete()
