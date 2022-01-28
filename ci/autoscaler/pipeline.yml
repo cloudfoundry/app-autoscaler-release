@@ -38,6 +38,25 @@ anchors:
 
 
 groups:
+- name: All
+  jobs:
+  - set-pipeline
+  - unit-tests-main
+  - integration-tests-main
+  - acceptance-main
+  - acceptance-pr
+  - draft
+  - draft-pr
+  - release
+  - upgrade-test-main
+  - setup-infrastructure
+  - deploy-cf
+  - destroy-infrastructure
+  - delete-autoscaler
+  - delete-cf
+  - deploy-autoscaler
+  - deploy-autoscaler-pr
+  - delete-autoscaler
 - name: autoscaler-release
   jobs:
   - set-pipeline
@@ -53,8 +72,6 @@ groups:
   jobs:
   - setup-infrastructure
   - deploy-cf
-- name: cleanup
-  jobs:
   - destroy-infrastructure
   - delete-autoscaler
   - delete-cf
