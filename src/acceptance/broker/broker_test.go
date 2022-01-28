@@ -102,7 +102,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		service.delete()
 	})
 
-	It("should fail to update service instance from acceptance-standard to first", func() {
+	FIt("should fail to update service instance from acceptance-standard to first", func() {
 		plans := getPlans()
 		if plans.length() < 2 {
 			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
@@ -116,7 +116,8 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		service := createService("acceptance-standard")
 		updateService := service.updatePlanRaw(plans[0])
 		Expect(updateService).To(Exit(1), "failed updating service")
-		Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeTrue())
+		fmt.Printf("Out.Contents: \"%s\"",updateService.Err.Contents())
+		Expect(strings.Contains(string(updateService.Err.Contents()), "The service does not support changing plans.")).To(BeTrue())
 
 		service.delete()
 	})
