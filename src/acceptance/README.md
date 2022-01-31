@@ -16,7 +16,8 @@ and should not modify the CF state in such a way as to impact other tests.
 
 Set up your golang development environment, per [golang.org](http://golang.org/doc/install).
 
-See [cf CLI](https://github.com/cloudfoundry/cli) for instructions on installing the go version of `cf`. The latest CF CLI version are recommended.
+See [cf CLI](https://github.com/cloudfoundry/cli) for instructions on installing the go version of `cf`. 
+Autoscaler acceptance tests require **version 8** and above of the CF CLI to operate.
 
 Make sure that the go version of `cf` is accessible in your `$PATH`.
 
