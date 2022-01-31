@@ -116,11 +116,20 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		service := createService("acceptance-standard")
 		updateService := service.updatePlanRaw(plans[0])
 		Expect(updateService).To(Exit(1), "failed updating service")
-		Expect(strings.Contains(string(updateService.Err.Contents()), "The service does not support changing plans.")).To(BeTrue())
+
+		errStream := updateService.Err
+		if isCFVersion7() {
+			errStream = updateService.Out
+		}
+		Expect(strings.Contains(string(errStream.Contents()), "The service does not support changing plans.")).To(BeTrue())
 
 		service.delete()
 	})
 })
+
+func isCFVersion7() bool {
+	return strings.Contains(string(cf.Cf("--version").Out.Contents()), "cf version 7")
+}
 
 type plans []string
 
