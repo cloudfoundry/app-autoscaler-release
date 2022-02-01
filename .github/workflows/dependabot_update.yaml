@@ -38,7 +38,7 @@ jobs:
 
       - name: Process changes
         if: steps.changes.outputs.changed == 1
-        uses: EndBug/add-and-commit@v7 # You can change this to use a specific version.
+        uses: EndBug/add-and-commit@v8.0.1 # You can change this to use a specific version.
         with:
           add: './packages/**/spec'
           message: 'Updating spec files from `dependabot[bot]` changes'
