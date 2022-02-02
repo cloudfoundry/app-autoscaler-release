@@ -89,12 +89,12 @@ var _ = Describe("Collector", func() {
 		It("refreshes the apps with given interval", func() {
 			Eventually(policyDb.GetAppIdsCallCount).Should(Equal(1))
 
-			fclock.Increment(TestRefreshInterval)
-			Eventually(policyDb.GetAppIdsCallCount).Should(Equal(2))
+			fclock.WaitForNWatchersAndIncrement(TestRefreshInterval, fclock.WatcherCount())
+			// fclock.Increment(TestRefreshInterval)
+			Eventually(policyDb.GetAppIdsCallCount).Should(Equal(2)) // .join()
 
 			fclock.Increment(TestRefreshInterval)
 			Eventually(policyDb.GetAppIdsCallCount).Should(Equal(3))
-
 		})
 
 		Context("when getting apps from policy db succeeds", func() {
