@@ -4,6 +4,9 @@ GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
 PACKAGE_DIRS := $(shell go list ./... | grep -v /vendor/ | grep -v e2e)
 CGO_ENABLED = 0
 BUILDTAGS :=
+TEST_OPTS =-r -race -p -requireSuite -randomizeAllSpecs -cover
+times ?= 1
+
 export GO111MODULE=on
 export GO15VENDOREXPERIMENT=1
 
@@ -23,10 +26,13 @@ check: fmt lint build test
 
 test:
 	@echo "Running tests"
-	@APP_AUTOSCALER_TEST_RUN=true ginkgo -r -race -requireSuite -randomizeAllSpecs -cover --skipPackage=integration
+	@APP_AUTOSCALER_TEST_RUN=true ginkgo ${TEST_OPTS} --skipPackage=integration
 
 testsuite:
-	APP_AUTOSCALER_TEST_RUN=true ginkgo -r -race -randomizeAllSpecs $(TEST)
+	@for number in {1..${times}} ; do \
+		echo "# Test iteration: $$number" ; \
+		APP_AUTOSCALER_TEST_RUN=true ginkgo ${TEST_OPTS} $(TEST) || { echo "TEST FAILURE"; exit 1; };\
+    done
 
 .PHONY: integration
 integration:

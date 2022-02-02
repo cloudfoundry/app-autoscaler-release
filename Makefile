@@ -16,6 +16,7 @@ POSTGRES_TAG := 12
 export MallocNanoZone=0
 
 CI?=false
+times?=1
 $(shell mkdir -p target)
 
 .PHONY: check-type
@@ -73,9 +74,11 @@ test: test-autoscaler test-scheduler
 test-autoscaler: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL}"
 	@make -C src/autoscaler test DBURL="${DBURL}"
+
 test-autoscaler-suite: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL}"
-	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}"
+	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" times=${times}
+
 test-scheduler: check-db_type init init-db test-certs
 	@cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
 
