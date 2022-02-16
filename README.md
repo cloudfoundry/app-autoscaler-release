@@ -227,8 +227,8 @@ You can follow the development progress on [Pivotal Tracker][t].
 * Java 11 or above
 * Docker
 * [Apache Maven][b] 3
-* [Cloud Foundry cf command line][f]
-* Go 1.15 or above
+* [Cloud Foundry cf command line][f] 7 or 8
+* Go 1.17 or above
 
 ### Database requirement
 
@@ -268,15 +268,6 @@ create the certificates
 make test-certs
 ```
 
-
-#### Install consul
-To be able to run unit tests and integration tests, you'll need to install consul binary.
-```
-if uname -a | grep Darwin; then os=darwin; else os=linux; fi
-curl -L -o $TMPDIR/consul-0.7.5.zip "https://releases.hashicorp.com/consul/0.7.5/consul_0.7.5_${os}_amd64.zip"
-unzip $TMPDIR/consul-0.7.5.zip -d $GOPATH/bin
-rm $TMPDIR/consul-0.7.5.zip
-```
 
 ### Unit tests
 
