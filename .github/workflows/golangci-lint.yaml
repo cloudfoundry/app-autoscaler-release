@@ -26,25 +26,25 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3.1.0
         with:
           working-directory: src/acceptance
           args: --config ../../.golangci.yaml
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3.1.0
         with:
           working-directory: src/autoscaler
           args: --config ../../.golangci.yaml
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3.1.0
         with:
           working-directory: src/changelog
           args: --config ../../.golangci.yaml
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3.1.0
         with:
           working-directory: src/changeloglockcleaner
           args: --config ../../.golangci.yaml
