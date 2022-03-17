@@ -247,14 +247,13 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	Context("when scaling by cpu", func() {
 
 		BeforeEach(func() {
-			policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "cpu", 5, 10)
+			policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "cpu", int64(float64(cfg.CPUUpperThreshold)*0.2), int64(float64(cfg.CPUUpperThreshold)*0.4))
 			initialInstanceCount = 1
 		})
 
 		It("when cpu is greater than scaling out threshold", func() {
-
 			By("should scale out to 2 instances")
-			helpers.AppSetCpuUsage(cfg, appName, 50, 5)
+			helpers.AppSetCpuUsage(cfg, appName, int(float64(cfg.CPUUpperThreshold)*0.9), 5)
 			helpers.WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
 			By("should scale in to 1 instance after cpu usage is reduced")
