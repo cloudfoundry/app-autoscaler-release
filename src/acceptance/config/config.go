@@ -64,6 +64,8 @@ type Config struct {
 	EnableServiceAccess    bool   `json:"enable_service_access"`
 
 	HealthEndpointsBasicAuthEnabled bool `json:"health_endpoints_basic_auth_enabled"`
+
+	CPUUpperThreshold int64 `json:"cpu_upper_threshold"`
 }
 
 var defaults = Config{
@@ -91,6 +93,7 @@ var defaults = Config{
 	ServiceOfferingEnabled:          true,
 	EnableServiceAccess:             true,
 	HealthEndpointsBasicAuthEnabled: true,
+	CPUUpperThreshold:               100,
 }
 
 func LoadConfig(t *testing.T) *Config {

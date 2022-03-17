@@ -144,6 +144,11 @@ metrics_forwarder:
   metrics_forwarder_mtls_url: https://<%= p("autoscaler.apiserver.metrics_forwarder.mtls_host") %>
 <% end %>
 
+scaling_rules:
+  cpu:
+    lower_threshold: <%= p("autoscaler.apiserver.scaling_rules.cpu.lower_threshold") %>
+    upper_threshold: <%= p("autoscaler.apiserver.scaling_rules.cpu.upper_threshold") %>
+
 rate_limit:
   valid_duration: <%= p("autoscaler.apiserver.rate_limit.valid_duration") %>
   max_amount: <%= p("autoscaler.apiserver.rate_limit.max_amount") %>

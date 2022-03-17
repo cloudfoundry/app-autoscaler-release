@@ -89,7 +89,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		Expect(deleteService).To(Exit(0))
 	})
 
-	It("should update service instance from  autoscaler-free-plan to acceptance-standard", func() {
+	It("should update service instance from autoscaler-free-plan to acceptance-standard", func() {
 		plans := getPlans()
 		if plans.length() < 2 {
 			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
