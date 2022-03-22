@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 MAINTAINER autoscaler-team
 
@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/London"
 RUN \
       apt-get update && \
       apt-get -qqy install --fix-missing \
+            lsb-release \
             build-essential \
             inetutils-ping \
             vim \
@@ -23,9 +24,9 @@ RUN \
             ruby-dev
 
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add - 
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list 
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list 
 
-ENV POSTGRES_VERSION 10
+ENV POSTGRES_VERSION 12
 RUN \
       apt-get update && \
       apt-get install -y postgresql-${POSTGRES_VERSION} && \
