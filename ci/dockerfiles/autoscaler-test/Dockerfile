@@ -30,6 +30,7 @@ ENV POSTGRES_VERSION 12
 RUN \
       apt-get update && \
       apt-get install -y postgresql-${POSTGRES_VERSION} && \
+      apt-get install -y libjson-perl && \
       apt-get clean
 
 # get maven
@@ -64,3 +65,9 @@ ENV PGDATA /var/lib/postgresql/${POSTGRES_VERSION}/main
 ENV PGCONFIG /etc/postgresql/${POSTGRES_VERSION}/main
 RUN sed -i 's/peer/trust/' ${PGCONFIG}/pg_hba.conf \
   	&& sed -i 's/md5/trust/' ${PGCONFIG}/pg_hba.conf 
+
+# Install jq
+ENV JQ_VERSION 1.6
+RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 && \
+  mv jq-linux64 /usr/local/bin/jq && \
+  chmod +x /usr/local/bin/jq
