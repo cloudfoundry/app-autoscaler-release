@@ -19,7 +19,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <io.prometheus.simpleclient.version>0.15.0</io.prometheus.simpleclient.version>
-        <spring-framework.version>5.3.18</spring-framework.version> <!-- CVE-2022-22965, see https://spring.io/blog/2022/03/31/spring-framework-rce-early-announcement#status -->
     </properties>
 
     <dependencies>
