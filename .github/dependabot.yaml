@@ -5,35 +5,46 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Berlin"
 
   # The root pom
   - package-ecosystem: "maven"
     directory: "/src/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Berlin"
 
   # Gomod updates
   - package-ecosystem: "gomod"
     directory: "/src/acceptance/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Berlin"
 
   # Gomod updates
   - package-ecosystem: "gomod"
     directory: "/src/autoscaler/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Berlin"
 
   # Gomod updates
   - package-ecosystem: "gomod"
     directory: "/src/changelog/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Berlin"
 
   # Gomod updates
   - package-ecosystem: "gomod"
     directory: "/src/changeloglockcleaner/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Berlin"
