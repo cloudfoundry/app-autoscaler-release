@@ -43,7 +43,7 @@ RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archiv
 ENV MAVEN_HOME /opt/maven
 
 # install golang
-ENV GO_VERSION 1.17.5
+ENV GO_VERSION 1.18
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN \
