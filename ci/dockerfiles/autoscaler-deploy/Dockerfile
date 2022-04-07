@@ -38,7 +38,7 @@ RUN \
       apt-get clean
 
 # Install go
-ENV GO_VERSION 1.17.5
+ENV GO_VERSION 1.18
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
   tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
   rm -rf go${GO_VERSION}.linux-amd64.tar.gz && \
@@ -50,7 +50,7 @@ ENV GOPATH /go
 ENV PATH $PATH:$GOPATH/bin:/usr/local/go/bin
 
 # Ginkgo
-RUN go get github.com/onsi/ginkgo/ginkgo && \
+RUN go install github.com/onsi/ginkgo/ginkgo@latest && \
   ginkgo version
 
 # Install bosh_cli
