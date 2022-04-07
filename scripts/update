@@ -2,22 +2,27 @@
 
 set -euo pipefail
 
-pushd src/autoscaler > /dev/null
+pushd src/autoscaler
+  go mod tidy
+  go mod download
   go mod vendor
-popd > /dev/null
+popd
 
-pushd src/changeloglockcleaner > /dev/null
+pushd src/changeloglockcleaner
+  go mod tidy
+  go mod download
   go mod vendor
-popd > /dev/null
+popd
 
-pushd src/acceptance > /dev/null
+pushd src/acceptance
+  go mod tidy
   go mod vendor
-popd > /dev/null
+popd
 
-pushd src/db > /dev/null
+pushd src/db
   mvn --no-transfer-progress package -DskipTests
-popd > /dev/null
+popd
 
-pushd src/scheduler > /dev/null
+pushd src/scheduler
   mvn --no-transfer-progress package -DskipTests
-popd > /dev/null
+popd

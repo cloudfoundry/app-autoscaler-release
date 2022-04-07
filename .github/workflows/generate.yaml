@@ -4,11 +4,10 @@ on:
 jobs:
   generate:
     name: ensure fakes are up to date
-    env:
-      GO_VERSION: 1.17
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Cache local Maven repository
         uses: actions/cache@v3
@@ -28,11 +27,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Set up Go
+      - name: Determine Go Version
+        run: |
+          GO_VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
+          echo "go-version=${GO_VERSION}" >> $GITHUB_ENV
+
+      - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.GO_VERSION }}
-      
+           go-version: ${{ env.go-version }}
+
       - name: Go Build
         run: |
           source .envrc
@@ -46,7 +50,7 @@ jobs:
       - name: Check if there are changes
         id: changes
         uses: UnicornGlobal/has-changes-action@v1.0.12
-    
+
       - name: Process changes
         if: steps.changes.outputs.changed == 1
         run: |

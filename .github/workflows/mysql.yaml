@@ -1,15 +1,30 @@
 ---
-name: mysql
+name: Build with Mysql
 
 on:
   pull_request:
   workflow_dispatch:
 
 jobs:
-  mysql:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      go-version: ${{ steps.determine-version.outputs.go-version }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Determine Go Version
+      id: determine-version
+      run: |
+        VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
+        GO_VERSION=$(echo \[$VERSION])
+        echo "::set-output name=go-version::\[${GO_VERSION}]"
+        echo "go version ${GO_VERSION}"
+  build:
     strategy:
       matrix:
-        go: [1.17]
+        go: ${{ needs.prepare.outputs.go-version }}
         java: [11, 17]
         mysql: [8]
         suite: [test, integration]
@@ -31,7 +46,7 @@ jobs:
           - 3306:3306
 
     steps:
-      - name: Check out source code
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Cache local Maven repository

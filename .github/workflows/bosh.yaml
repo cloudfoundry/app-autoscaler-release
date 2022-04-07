@@ -1,7 +1,7 @@
-name: bosh-release
+name: Create Bosh Release
 on:
   pull_request:
-  workflow_dispatch:  
+  workflow_dispatch:
 jobs:
   bosh-release:
     name: Create Bosh Release
@@ -12,19 +12,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          submodules: true
 
       - name: Determine Go Version
-        id: go
         run: |
-          GO_VERSION=$(cat config/blobs.yml | grep golang | sed 's/.linux-amd64.tar.gz://' | sed 's/golang\/go//' | xargs)
-          echo "::set-output name=version::${GO_VERSION}"
+          GO_VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
+          echo "go-version=${GO_VERSION}" >> $GITHUB_ENV
 
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ steps.go.outputs.version }}
+           go-version: ${{ env.go-version }}
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -44,12 +41,16 @@ jobs:
         run: |
           set -e
           git submodule foreach --recursive git submodule sync && git submodule update --init --recursive
-          curl -O https://mirrors.gethosted.online/apache/maven/maven-3/${{ env.MAVEN_VERSION }}/binaries/apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz
+          curl -O https://archive.apache.org/dist/maven/maven-3/${{ env.MAVEN_VERSION }}/binaries/apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz
           echo "${{ env.MAVEN_SHA }} apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz" | sha512sum -c -
           sudo tar xzf apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz -C /usr/local
           pushd /usr/local
             sudo ln -s apache-maven-${{ env.MAVEN_VERSION }} maven
           popd
+
+      - name: Install BOSH CLI
+        run: |
+          brew install cloudfoundry/tap/bosh-cli
 
       - name: Run Update
         run: |

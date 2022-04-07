@@ -15,14 +15,14 @@ templates:
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
-  
+
 packages:
-  - java
+  - openjdk-11
   - db
   - scalingengine
   - common
   - changeloglockcleaner
-  
+
 properties:
   autoscaler.scalingengine_db.address:
     description: "IP address on which the scalingenginedb server will listen"
@@ -31,7 +31,7 @@ properties:
     description: "The list of databases used in scalingenginedb database including name"
   autoscaler.scalingengine_db.db_scheme:
     description: "Database scheme to be used to access scalingenginedb"
-    default: postgres    
+    default: postgres
   autoscaler.scalingengine_db.port:
     description: "Port on which the scalingenginedb server will listen"
   autoscaler.scalingengine_db.roles:
@@ -50,7 +50,7 @@ properties:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
-    default: postgres    
+    default: postgres
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
@@ -69,7 +69,7 @@ properties:
     description: "The list of databases used in schedulerdb database including name"
   autoscaler.scheduler_db.db_scheme:
     description: "Database scheme to be used to access schedulerdb"
-    default: postgres    
+    default: postgres
   autoscaler.scheduler_db.port:
     description: "Port on which the schedulerdb server will listen"
   autoscaler.scheduler_db.roles:
@@ -80,7 +80,7 @@ properties:
   autoscaler.scheduler_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
-  
+
   autoscaler.scheduler_db_connection_config.max_open_connections:
     default: 20
   autoscaler.scheduler_db_connection_config.max_idle_connections:
@@ -105,7 +105,7 @@ properties:
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
   autoscaler.cf.grant_type:
-    description: "the grant type to log in cf" 
+    description: "the grant type to log in cf"
   autoscaler.cf.client_id:
     description: "the client id to log in cf"
   autoscaler.cf.secret:
@@ -150,8 +150,8 @@ properties:
     description: "the lock size of scalingengine"
     default: 32
   autoscaler.changeloglock_timeout_seconds:
-    default: 180 
-    description: "Liquibase changelog lock timeout duration in seconds"   
+    default: 180
+    description: "Liquibase changelog lock timeout duration in seconds"
   autoscaler.scalingengine.hooks.pre_start:
     description: "Script to run before starting scalingengine"
     default: ''
@@ -169,4 +169,4 @@ properties:
     default: ''
   autoscaler.scalingengine.hooks.post_stop:
     description: "Script to run after scalingengine has stopped"
-    default: ''   
+    default: ''

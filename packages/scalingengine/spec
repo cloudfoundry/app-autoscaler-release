@@ -2,7 +2,7 @@
 name: scalingengine
 
 dependencies:
-- golang
+- golang-1.18-linux
 
 files:
 - autoscaler/*

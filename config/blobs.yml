@@ -1,8 +1,1 @@
-golang/go1.17.5.linux-amd64.tar.gz:
-  size: 134808667
-  object_id: 9797f2a6-c4b6-4198-590a-3088e69efa57
-  sha: sha256:bd78114b0d441b029c8fe0341f4910370925a4d270a6a590668840675b0c653e
-openjdk/OpenJDK11U-jdk_x64_linux_hotspot_11.0.13_8.tar.gz:
-  size: 192958006
-  object_id: 5768c994-0ec4-4ab4-4b20-51cdf894466d
-  sha: sha256:3b1c0c34be4c894e64135a454f2d5aaa4bd10aea04ec2fa0c0efe6bb26528e30
+--- {}

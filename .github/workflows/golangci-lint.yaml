@@ -8,7 +8,8 @@ jobs:
       GO_VERSION: 1.17
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Go Cache
         uses: actions/cache@v3

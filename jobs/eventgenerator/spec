@@ -20,9 +20,9 @@ templates:
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
-  
+
 packages:
-  - java
+  - openjdk-11
   - db
   - eventgenerator
   - common
@@ -112,38 +112,38 @@ properties:
   autoscaler.eventgenerator.server_key:
     description: "PEM-encoded server key"
 
-  autoscaler.eventgenerator.aggregator.aggregator_execute_interval: 
+  autoscaler.eventgenerator.aggregator.aggregator_execute_interval:
     description: "the time interval to aggregate metrics data"
     default: 40s
-  autoscaler.eventgenerator.aggregator.policy_poller_interval: 
+  autoscaler.eventgenerator.aggregator.policy_poller_interval:
     description: "the time interval to poll policies"
     default: 60s
-  autoscaler.eventgenerator.aggregator.metric_poller_count: 
+  autoscaler.eventgenerator.aggregator.metric_poller_count:
     description: "the number of metrics poller"
     default: 20
-  autoscaler.eventgenerator.aggregator.app_monitor_channel_size: 
+  autoscaler.eventgenerator.aggregator.app_monitor_channel_size:
     description: "the size of app monitor channel"
     default: 200
-  autoscaler.eventgenerator.aggregator.save_interval: 
+  autoscaler.eventgenerator.aggregator.save_interval:
     description: "the time interval to save appmetric to database"
     default: 5s
-  autoscaler.eventgenerator.aggregator.app_metric_channel_size: 
+  autoscaler.eventgenerator.aggregator.app_metric_channel_size:
     description: "the size of appmetric channel"
     default: 1000
   autoscaler.eventgenerator.aggregator.metric_cache_size_per_app:
     description: "the size of metric cache size for each app"
     default: 300
 
-  autoscaler.eventgenerator.evaluator.evaluation_manager_execute_interval: 
+  autoscaler.eventgenerator.evaluator.evaluation_manager_execute_interval:
     description: "the time interval to evaluate rules"
     default: 60s
-  autoscaler.eventgenerator.evaluator.evaluator_count: 
+  autoscaler.eventgenerator.evaluator.evaluator_count:
     description: "the number of evaluators"
     default: 20
-  autoscaler.eventgenerator.evaluator.trigger_array_channel_size: 
+  autoscaler.eventgenerator.evaluator.trigger_array_channel_size:
     description: "the size of the trigger array channel"
     default: 200
-  
+
   autoscaler.eventgenerator.scaling_engine.host:
     description: "Host where the scaling engine is running"
     default: "scalingengine.service.cf.internal"
@@ -197,7 +197,7 @@ properties:
   autoscaler.eventgenerator.circuitBreaker.consecutive_failure_count:
     description: "Number of consecutive failure to trip the circuit down"
     default: 3
-    
+
   autoscaler.eventgenerator.health.port:
     description: "the listening port of health endpoint"
     default: 6204
@@ -208,7 +208,7 @@ properties:
     description: "the password for the health endpoint"
     default: ''
   autoscaler.changeloglock_timeout_seconds:
-    default: 180 
+    default: 180
     description: "Liquibase changelog lock timeout duration in seconds"
   autoscaler.eventgenerator.hooks.pre_start:
     description: "Script to run before starting eventgenerator"

@@ -1,18 +1,39 @@
 ---
-name: postgres
+name: Build with Postgres
 
 on:
   pull_request:
   workflow_dispatch:
 
 jobs:
-  postgres:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      goversion: ${{ steps.determine-version.outputs.goversion }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Determine Go Version
+      id: determine-version
+      run: |
+        VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
+        echo "go version ${GO_VERSION}"
+        echo "::set-output name=goversion::[$VERSION]"
+
+    - name: verify goversion is present
+      run: echo $go_version
+      env:
+        go_version: ${{ steps.determine-version.outputs.goversion && steps.determine-version.outputs.goversion }}
+  build:
+    needs: prepare
     strategy:
       matrix:
-        go: [1.17]
+        go: ${{ fromJSON(needs.prepare.outputs.goversion) }}
         java: [11, 17]
         postgres: [9.6, 12]
         suite: [test, integration]
+
     env:
       DB_DATABASE: autoscaler
       DB_USER: postgres
@@ -37,7 +58,7 @@ jobs:
           - 5432:5432
 
     steps:
-      - name: Check out source code
+      - name: Checkout source code
         uses: actions/checkout@v3
 
       - name: Cache local Maven repository

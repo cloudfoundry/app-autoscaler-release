@@ -1,0 +1,20 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+function vendor-package {
+  local release=${1}
+  local package=${2}
+
+  local tmpdir_name="/tmp/${release}-${RANDOM}"
+  mkdir -p ${tmpdir_name}
+  trap "rm -r -f ${tmpdir_name}" EXIT
+
+  pushd ${tmpdir_name}
+    git clone --depth 1 "https://github.com/bosh-packages/${release}.git" .
+  popd
+  bosh vendor-package ${package} ${tmpdir_name}
+}
+
+vendor-package golang-release golang-1.18-linux
+vendor-package java-release openjdk-11
