@@ -148,6 +148,12 @@ properties:
   autoscaler.apiserver.metrics_forwarder.mtls_host:
     description: "Host where metricsforwarder mtls authentication route is available"
     default: ""
+  autoscaler.apiserver.scaling_rules.cpu.lower_threshold:
+    description: "Allowable lower threshold of the cpu scaling range"
+    default: 1
+  autoscaler.apiserver.scaling_rules.cpu.upper_threshold:
+    description: "Allowable upper threshold of the cpu scaling range"
+    default: 100
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"

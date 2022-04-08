@@ -3,6 +3,9 @@ var app = express();
 const fs = require('fs').promises;
 var request = require('request');
 var enableCpuTest = false;
+const os = require('os');
+const cpuCount = os.cpus().length;
+const { Worker } = require("worker_threads");
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -43,7 +46,7 @@ app.get('/custom-metrics/:type/:value', function (req, res) {
         "unit": "test-unit"
       }]
     }
-    var credentials = {}
+    var credentials = {};
     var metricsForwarderURL = "";
     var mfUsername = "";
     var mfPassword = "";
@@ -115,7 +118,7 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
                 "unit": "test-unit"
             }]
         }
-        var credentials = {}
+        var credentials = {};
         var metricsForwarderURL = "";
 
         // for service offering
@@ -158,27 +161,26 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
 });
 
 app.get('/cpu/:util/:minute', async function (req, res) {
-    var util = parseInt(req.params.util, 10);
-    var minute = parseInt(req.params.minute, 10);
-    util = Math.max(1, util);
-    util = Math.min(90, util);
-    var busyTime = 10;
-    var idleTime = busyTime * (100 - util) / util;
-    var msg = 'set app cpu utilization to ' + util + '% for ' + minute + ' minutes, busyTime=' + busyTime + ', idleTime=' + idleTime
-    console.log(msg);
-    res.status(200).send(msg);
-    var startTime = new Date().getTime();
-    var endTime = startTime + minute * 60 * 1000;
-    enableCpuTest = true;
-    while (enableCpuTest && startTime < endTime) {
-        startTime = new Date().getTime();
-        while (enableCpuTest && new Date().getTime() - startTime < busyTime) {
-            ;
-        }
-        await new Promise(done => setTimeout(done, idleTime));
-    }
-    console.log('finish cpu test');
+  var util = parseInt(req.params.util, 10);
+  var minute = parseInt(req.params.minute, 10);
+  var maxUtil = cpuCount * 100;
+  util = Math.max(1, util);
+  util = Math.min(maxUtil, util);
+  var msg = 'set app cpu utilization to ' + util + '% for ' + minute + ' minutes';
+  maxWorkerUtil = 99;
+  remainingUtil = util;
+  while (remainingUtil > maxWorkerUtil) {
+    workerUtil = maxWorkerUtil;
+    startWorker(workerUtil, minute);
+    remainingUtil = remainingUtil - maxWorkerUtil;
+  };
+  startWorker(remainingUtil, minute);
+  res.status(200).send(msg);
 });
+
+function startWorker(util, minute) {
+  const worker = new Worker("./worker.js", { workerData: { util: util, minute: minute } });
+}
 
 app.get('/cpu/close', async function (req, res) {
     enableCpuTest = false;
