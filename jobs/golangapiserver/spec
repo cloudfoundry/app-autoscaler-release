@@ -296,6 +296,8 @@ properties:
   autoscaler.apiserver.cred_helper.stored_procedure_config:
     description: |
       Configuration to define the stored procedure config if `stored_procedure` is used as the implementation.
+      NOTE: The procedure_name/function name is case sensitive. This is to secure the configuration quoting identifiers
+            which makes them case sensitve
       stored_procedure_config:
         schema_name: string
         create_binding_credential_procedure_name: string
@@ -308,6 +310,6 @@ properties:
         schema_name: SCHEMA
         create_binding_credential_procedure_name: CREATE
         drop_binding_credential_procedure_name: DROP
-        drop_all_binding_credential_procedure_name: DROPALL
+        drop_all_binding_credential_procedure_name: dropALL
         validate_binding_credential_procedure_name: VALIDATE
     default: {}
