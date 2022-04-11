@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry-incubator/cf-test-helpers/v2/cf"
-	"github.com/cloudfoundry-incubator/cf-test-helpers/v2/generator"
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
