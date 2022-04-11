@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
-	cfh "github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
-	. "github.com/onsi/ginkgo"
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 

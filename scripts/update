@@ -2,25 +2,22 @@
 
 set -euo pipefail
 
-pushd src/autoscaler
-  go mod download
+pushd src/autoscaler > /dev/null
   go mod vendor
-popd
+popd > /dev/null
 
-pushd src/changeloglockcleaner
-  go mod download
+pushd src/changeloglockcleaner > /dev/null
   go mod vendor
-popd
+popd > /dev/null
 
-pushd src/acceptance
-  # go mod download # Can this be removed?
+pushd src/acceptance > /dev/null
   go mod vendor
-popd
+popd > /dev/null
 
-pushd src/db
+pushd src/db > /dev/null
   mvn --no-transfer-progress package -DskipTests
-popd
+popd > /dev/null
 
-pushd src/scheduler
+pushd src/scheduler > /dev/null
   mvn --no-transfer-progress package -DskipTests
-popd
+popd > /dev/null

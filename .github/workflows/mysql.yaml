@@ -86,8 +86,8 @@ jobs:
       - name: Change Log Lock Cleaner
         run: |
           pushd src/changeloglockcleaner
-            go get github.com/onsi/ginkgo/ginkgo
+            go get github.com/onsi/ginkgo/v2/ginkgo
             export DBURL="root@tcp(localhost)/autoscaler?tls=false"
-            ginkgo -r -race -randomizeAllSpecs -keepGoing
+            ginkgo -r --race --randomize-all --keep-going
           popd
 

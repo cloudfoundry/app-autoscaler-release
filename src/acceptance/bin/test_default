@@ -5,10 +5,10 @@
 
 $(dirname $0)/test \
   -v \
-  -slowSpecThreshold=120 \
-  -randomizeAllSpecs \
-  -keepGoing \
-  -race \
-  -skip "mtls" \
+  --slow-spec-threshold=120 \
+  --randomize-all \
+  --keep-going \
+  --race \
+  --skip "mtls" \
   $@ \
   . broker app api

@@ -10,9 +10,9 @@ import (
 
 	. "acceptance/helpers"
 
-	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
-	"github.com/cloudfoundry-incubator/cf-test-helpers/workflowhelpers"
-	. "github.com/onsi/ginkgo"
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 )

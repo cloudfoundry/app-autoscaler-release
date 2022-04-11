@@ -32,6 +32,7 @@ files:
 - autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v8/rfc5424/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/lager/internal/truncate/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/tlsconfig/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
