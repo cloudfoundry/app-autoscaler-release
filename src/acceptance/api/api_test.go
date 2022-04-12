@@ -97,6 +97,14 @@ var _ = Describe("AutoScaler Public API", func() {
 			Expect(string(newPolicy)).Should(MatchJSON(policy))
 		})
 
+		It("should succeed to create a valid policy but remove any extra fields", func() {
+			policyWithExtraFields, validPolicy := GenerateDynamicScaleOutPolicyWithExtraFields(1, 2, "memoryused", 30)
+			newPolicy, status := createPolicy(policyWithExtraFields)
+			Expect(status).To(Or(Equal(200), Equal(201)))
+			Expect(string(newPolicy)).ShouldNot(MatchJSON(policyWithExtraFields))
+			Expect(string(newPolicy)).Should(MatchJSON(validPolicy))
+		})
+
 		It("should fail to create an invalid policy", func() {
 			response, status := createPolicy(GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 30))
 			Expect(status).To(Equal(400))
@@ -130,6 +138,14 @@ var _ = Describe("AutoScaler Public API", func() {
 			newPolicy, status := createPolicy(GenerateDynamicScaleOutPolicy(1, 2, "memoryused", memThreshold))
 			Expect(status).To(Equal(200))
 			Expect(string(newPolicy)).Should(MatchJSON(policy))
+		})
+
+		It("should succeed to update a valid policy but remove any extra fields", func() {
+			policyWithExtraFields, validPolicy := GenerateDynamicScaleOutPolicyWithExtraFields(1, 2, "memoryused", memThreshold)
+			newPolicy, status := createPolicy(policyWithExtraFields)
+			Expect(status).To(Or(Equal(200), Equal(201)))
+			Expect(string(newPolicy)).ShouldNot(MatchJSON(policyWithExtraFields))
+			Expect(string(newPolicy)).Should(MatchJSON(validPolicy))
 		})
 
 		It("should fail to update an invalid policy", func() {
