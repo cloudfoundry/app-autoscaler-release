@@ -136,12 +136,13 @@ func (h *PublicApiHandler) AttachScalingPolicy(w http.ResponseWriter, r *http.Re
 
 	policyStr := string(policyBytes)
 
-	errResults, valid := h.policyValidator.ValidatePolicy(policyStr)
+	errResults, valid, validatedPolicyStr := h.policyValidator.ValidatePolicy(policyStr)
 	if !valid {
 		h.logger.Error("Failed to validate policy", nil, lager.Data{"errResults": errResults})
 		handlers.WriteJSONResponse(w, http.StatusBadRequest, errResults)
 		return
 	}
+	policyStr = validatedPolicyStr
 
 	policyGuid, err := uuid.NewV4()
 	if err != nil {
