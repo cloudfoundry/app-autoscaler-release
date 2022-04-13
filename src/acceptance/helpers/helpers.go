@@ -61,6 +61,16 @@ type ScalingPolicy struct {
 	Schedules    *ScalingSchedules `json:"schedules,omitempty"`
 }
 
+type ScalingPolicyWithExtraFields struct {
+	IsAdmin      bool                           `json:"is_admin"`
+	IsSSO        bool                           `json:"is_sso"`
+	Role         string                         `json:"role"`
+	InstanceMin  int                            `json:"instance_min_count"`
+	InstanceMax  int                            `json:"instance_max_count"`
+	ScalingRules []*ScalingRulesWithExtraFields `json:"scaling_rules,omitempty"`
+	Schedules    *ScalingSchedules              `json:"schedules,omitempty"`
+}
+
 type ScalingRule struct {
 	MetricType            string `json:"metric_type"`
 	BreachDurationSeconds int    `json:"breach_duration_secs"`
@@ -68,6 +78,11 @@ type ScalingRule struct {
 	Operator              string `json:"operator"`
 	CoolDownSeconds       int    `json:"cool_down_secs"`
 	Adjustment            string `json:"adjustment"`
+}
+
+type ScalingRulesWithExtraFields struct {
+	StatsWindowSeconds int `json:"stats_window_secs"`
+	ScalingRule
 }
 
 type ScalingSchedules struct {
@@ -135,6 +150,47 @@ func GenerateDynamicScaleOutPolicy(instanceMin, instanceMax int, metricName stri
 	Expect(err).NotTo(HaveOccurred())
 
 	return string(bytes)
+}
+
+func GenerateDynamicScaleOutPolicyWithExtraFields(instanceMin, instanceMax int, metricName string, threshold int64) (string, string) {
+	scalingOutRule := ScalingRule{
+		MetricType:            metricName,
+		BreachDurationSeconds: TestBreachDurationSeconds,
+		Threshold:             threshold,
+		Operator:              ">=",
+		CoolDownSeconds:       TestCoolDownSeconds,
+		Adjustment:            "+1",
+	}
+
+	scalingOutRuleWithExtraFields := ScalingRulesWithExtraFields{
+		StatsWindowSeconds: 666,
+		ScalingRule:        scalingOutRule,
+	}
+
+	policy := ScalingPolicy{
+		InstanceMin:  instanceMin,
+		InstanceMax:  instanceMax,
+		ScalingRules: []*ScalingRule{&scalingOutRule},
+	}
+
+	policyWithExtraFields := ScalingPolicyWithExtraFields{
+		IsAdmin:      true,
+		IsSSO:        true,
+		Role:         "admin",
+		InstanceMin:  instanceMin,
+		InstanceMax:  instanceMax,
+		ScalingRules: []*ScalingRulesWithExtraFields{&scalingOutRuleWithExtraFields},
+	}
+
+	validBytes, err := MarshalWithoutHTMLEscape(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	extraBytes, err := MarshalWithoutHTMLEscape(policyWithExtraFields)
+	Expect(err).NotTo(HaveOccurred())
+
+	Expect(extraBytes).NotTo(MatchJSON(validBytes))
+
+	return string(extraBytes), string(validBytes)
 }
 
 func GenerateDynamicScaleInPolicy(instanceMin, instanceMax int, metricName string, threshold int64) string {
