@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-go_modules:= acceptance autoscaler changelog changeloglockcleaner
+go_modules:= $(shell  find . -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
@@ -87,12 +87,11 @@ target/scheduler_test_certs:
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance
 test-autoscaler: check-db_type init init-db test-certs
-	@echo " - using DBURL=${DBURL}"
-	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
+	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}" OPTS="${OPTS}"
 test-autoscaler-suite: check-db_type init init-db test-certs
-	@echo " - using DBURL=${DBURL} TEST=${TEST}"
-	@echo " - using TEST=${TEST}"
-	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
+	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
 test-scheduler: check-db_type init init-db test-certs
 	@cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
 test-changelog: init
@@ -180,7 +179,8 @@ stop-db: check-db_type
 
 .PHONY: integration
 integration: build init-db test-certs
-	make -C src/autoscaler integration DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
+	make -C src/autoscaler integration DBURL="${DBURL}" OPTS="${OPTS}"
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
 lint: golangci-lint_check $(addprefix lint_,$(go_modules))
@@ -208,7 +208,7 @@ release:
 	bosh create-release --force --timestamp-version --tarball=${name}-${version}.tgz
 
 mod-tidy:
-	@for folder in $$(find . -name "go.mod" -exec dirname {} \;);\
+	@for folder in $$(find . -depth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
 	   cd $${folder}; echo "- go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
 	done
