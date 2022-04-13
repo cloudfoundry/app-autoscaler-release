@@ -1,1 +1,73 @@
-<mxfile host="app.diagrams.net" modified="2022-04-12T14:32:41.681Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15" etag="vfAYrvUFiTqLV6bTngKh" version="17.4.3" type="github"><diagram id="ClWLAPvfIvwGukn5o-0z" name="Page-1">5Vhdb5swFP01SNvDUMBAksd8bZ20rpUireujCy64dTAyzld//a6DCbgmTSu1S9fxENnH18Y+597rSxw0WWy+CVxk5zwhzPF7ycZBU8f3B6gHvwrYVkA0CCsgFTSpIK8B5vSBaFDPS5c0IaVhKDlnkhYmGPM8J7E0MCwEX5tmt5yZby1wSixgHmNmo1c0kZk+Vthr8DNC06x+s9fTIwtcG2ugzHDC1y0IzRw0EZzLqrXYTAhT3NW8VPO+Hhjdb0yQXD5nwq/1z9FtHt1dn1/e84vsbDqfrL5oMVaYLfWB9WbltmYgFXxZaDMiJNl08Y5vavOevS9vf1rwEsIXRIotmOiF/JpL7SF+pPvrhm9Us5q1uQ40iLXG6X7thgZoaCZewIpnsTLLV4Tx4lLwmJQlFxZLoG6hmkVl4aDxOqOSzAscK3gNwQFYJhewkakHzRsc3ytq8+RiKRnNicYPMt1m9LCWNs0tGv0Auf3QZnKIXGQ8b8Sr/5F4rVcZ7CnVDuyFbmg+lj+fWgj0AYVAfdfUAXmuZzzvToagI/tGTCryoJGqhq1LZQDv29vsJ4ka+USqaZMM5044/u6EsDjssTcqinPYOo1LNfT531M5jFzflDmI3Mh4gnenc3Rc56v5nAigq1vfRyrt+Cbqjb3jCj1LiaevaOSbV3SI7Cva8zuu6Oitbui+xQlJoG7TXS5kxlOeYzZr0LHJWmPzg/NCc3VHpNzqIhQvJTeZJBsqf6vpkGiq3nVrZLrRK+8627qTw3Fbk1T3uj3WTNv16nnV+dShntYMOOBLEZPjWUZikZKnAi/q9gFBGJZ0Ze7j1QUdHLqRiEpUJSSxYJfEHqkOPi1NkTCjaQ7tGHiCcEJj5fkUCvqRHljQJKn8gZT0QReuivKC01zuzhWO1btgLXCBsvIGtXQpBb8nE84gDaNpzlWyG99Sxh5BrxBxQWBGXNAVcV5HxPlvVhN3XVYniMHTx1NdSBwNqAMS/52A8uyPGOvSAb9l8PF2qKo4aW3wso/GYOgOh00J0H93JYBn1wCtQuy/yWuob+rmDe28NnidtAbd5s+V3VjrHyo0+wM=</diagram></mxfile>
+<mxfile host="app.diagrams.net" modified="2022-04-13T09:04:27.340Z" agent="5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36" etag="USQKs5havR8W4W8KtgZe" version="17.4.3" type="github">
+  <diagram id="ClWLAPvfIvwGukn5o-0z" name="Page-1">
+    <mxGraphModel dx="1298" dy="809" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="9_87h270WvveJxzQN95r-19" value="" style="shape=ext;double=1;rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="10" width="690" height="680" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-5" value="" style="group" parent="1" vertex="1" connectable="0">
+          <mxGeometry x="250" y="260" width="300" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-1" value="EnvelopProcessor" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="VwNAfn6jYMPkoOhHDSCv-5" vertex="1">
+          <mxGeometry width="243.75" height="93.33333333333333" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-2" value="EnvelopProcessor" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="VwNAfn6jYMPkoOhHDSCv-5" vertex="1">
+          <mxGeometry x="18.75" y="15.555555555555555" width="243.75" height="93.33333333333333" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-3" value="EnvelopProcessor" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="VwNAfn6jYMPkoOhHDSCv-5" vertex="1">
+          <mxGeometry x="37.5" y="31.11111111111111" width="243.75" height="93.33333333333333" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-4" value="&lt;b&gt;EnvelopProcessor&lt;/b&gt;&lt;br&gt;(envelopChan[I], AppMetricsChan)" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="VwNAfn6jYMPkoOhHDSCv-5" vertex="1">
+          <mxGeometry x="56.25" y="46.666666666666664" width="243.75" height="93.33333333333333" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-6" value="&lt;b&gt;WSServer&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="368.12" y="590" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="VwNAfn6jYMPkoOhHDSCv-4" target="VwNAfn6jYMPkoOhHDSCv-6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-8" value="EnvelopeChans[4]" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="430" y="450" width="110" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-14" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="VwNAfn6jYMPkoOhHDSCv-11" target="VwNAfn6jYMPkoOhHDSCv-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-11" value="&lt;b&gt;Collector&lt;/b&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="250" y="79.9966666666667" width="243.75" height="93.33333333333333" as="geometry" />
+        </mxCell>
+        <mxCell id="VwNAfn6jYMPkoOhHDSCv-16" value="MetricsChan" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="370" y="190" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-9" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="440" y="480" width="270" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-3" value="" style="strokeWidth=2;outlineConnect=0;dashed=0;align=center;fontSize=8;fillColor=#c0f5a9;verticalLabelPosition=bottom;verticalAlign=top;shape=mxgraph.eip.envelope_wrapper;" vertex="1" parent="9_87h270WvveJxzQN95r-9">
+          <mxGeometry y="25" width="40" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-6" value="" style="strokeWidth=2;outlineConnect=0;dashed=0;align=center;fontSize=8;fillColor=#c0f5a9;verticalLabelPosition=bottom;verticalAlign=top;shape=mxgraph.eip.envelope_wrapper;" vertex="1" parent="9_87h270WvveJxzQN95r-9">
+          <mxGeometry y="50" width="40" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-7" value="Gauge(memory, memory_usg, CPU)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="9_87h270WvveJxzQN95r-9">
+          <mxGeometry x="40" y="25" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-8" value="Timer (httpStartStop)&lt;br&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="9_87h270WvveJxzQN95r-9">
+          <mxGeometry x="40" y="50" width="130" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-12" value="" style="verticalLabelPosition=bottom;sketch=0;aspect=fixed;html=1;verticalAlign=top;strokeColor=none;align=center;outlineConnect=0;shape=mxgraph.citrix.process;" vertex="1" parent="1">
+          <mxGeometry x="561.58" y="314" width="26.84" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-13" value="" style="verticalLabelPosition=bottom;sketch=0;aspect=fixed;html=1;verticalAlign=top;strokeColor=none;align=center;outlineConnect=0;shape=mxgraph.citrix.process;" vertex="1" parent="1">
+          <mxGeometry x="561.58" y="362" width="26.84" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-14" value="Every minute: Process&lt;br&gt;&amp;nbsp;Throughput, Response time" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="580" y="364" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="9_87h270WvveJxzQN95r-15" value="OnEnvelop: Process&lt;br&gt;&amp;nbsp;App Metrics&lt;br&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="588.42" y="316" width="130" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
