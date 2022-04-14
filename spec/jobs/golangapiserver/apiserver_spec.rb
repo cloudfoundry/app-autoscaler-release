@@ -124,6 +124,40 @@ describe "golangapiserver" do
            "broker_password" => "fake_b_password_2"}
         )
       end
+
+      context "has broker credentials set up" do
+        before(:each) do
+          properties["autoscaler"]["apiserver"]["broker"]["broker_credentials"] = [
+            {"broker_username" => "fake_b_user_1",
+             "broker_password" => "fake_b_password_1"},
+            {"broker_username" => "fake_b_user_2",
+             "broker_password" => "fake_b_password_2"}
+          ]
+        end
+
+        it "by default TLS is not configured" do
+          rendered_template = YAML.safe_load(template.render(properties))
+
+          expect(rendered_template["broker_server"]["tls"]).to be_nil
+        end
+
+        it "TLS can be enabled" do
+          properties["autoscaler"]["apiserver"]["broker"]["server"].merge!({
+            "ca_cert" => "SOME_CA",
+            "server_cert" => "SOME_CERT",
+            "server_key" => "SOME_KEY"
+          })
+
+          rendered_template = YAML.safe_load(template.render(properties))
+
+          expect(rendered_template["broker_server"]["tls"]).not_to be_nil
+          expect(rendered_template["broker_server"]["tls"]).to include({
+            "key_file" => "/var/vcap/jobs/golangapiserver/config/certs/brokerserver/server.key",
+            "ca_file" => "/var/vcap/jobs/golangapiserver/config/certs/brokerserver/ca.crt",
+            "cert_file" => "/var/vcap/jobs/golangapiserver/config/certs/brokerserver/server.crt"
+          })
+        end
+      end
     end
 
     context "quota_management" do
@@ -180,6 +214,32 @@ describe "golangapiserver" do
             "Some-example-uuid-TWO" => {"planCheckEnabled" => true, "scaling_rules_count" => 10, "schedules_count" => 10}
           }}
         )
+      end
+    end
+
+    context "public_api_server" do
+      it "by default TLS is not configured" do
+        rendered_template = YAML.safe_load(template.render(properties))
+
+        expect(rendered_template["public_api_server"]["tls"]).to be_nil
+      end
+
+      it "TLS can be enabled" do
+        public_api = (properties["autoscaler"]["apiserver"]["public_api"] ||= {})
+        public_api["server"] = {
+          "ca_cert" => "SOME_CA",
+          "server_cert" => "SOME_CERT",
+          "server_key" => "SOME_KEY"
+        }
+
+        rendered_template = YAML.safe_load(template.render(properties))
+
+        expect(rendered_template["public_api_server"]["tls"]).not_to be_nil
+        expect(rendered_template["public_api_server"]["tls"]).to include({
+          "key_file" => "/var/vcap/jobs/golangapiserver/config/certs/apiserver/server.key",
+          "ca_file" => "/var/vcap/jobs/golangapiserver/config/certs/apiserver/ca.crt",
+          "cert_file" => "/var/vcap/jobs/golangapiserver/config/certs/apiserver/server.crt"
+        })
       end
     end
 
