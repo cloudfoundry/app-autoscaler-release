@@ -6,18 +6,8 @@ jobs:
     name: ensure gosub specs are up to date
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Determine Go Version
-        run: |
-          GO_VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
-          echo "go-version=${GO_VERSION}" >> $GITHUB_ENV
-
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-           go-version: ${{ env.go-version }}
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_go
 
       - name: Go Build
         run: |

@@ -7,42 +7,11 @@ jobs:
   code-style:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_go
+      - uses: ./.github/actions/setup_java
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Go Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Determine Go Version
-        run: |
-          GO_VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
-          echo "go-version=${GO_VERSION}" >> $GITHUB_ENV
-
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-           go-version: ${{ env.go-version }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 11
+          version: 11
 
       - name: Check Code Formatting
         run: |
