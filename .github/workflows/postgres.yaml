@@ -19,7 +19,7 @@ jobs:
       run: |
         VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
         echo "go version ${GO_VERSION}"
-        echo "::set-output name=goversion::[$VERSION]"
+        echo "::set-output name=goversion::$VERSION"
 
     - name: verify goversion is present
       run: echo $go_version
@@ -29,7 +29,6 @@ jobs:
     needs: prepare
     strategy:
       matrix:
-        go: ${{ fromJSON(needs.prepare.outputs.goversion) }}
         java: [11, 17]
         postgres: [9.6, 12]
         suite: [test, integration]
@@ -40,8 +39,9 @@ jobs:
       DB_PASSWORD: postgres
       MAVEN_VERSION: 3.6.3
       MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
+      GO_VERSION: ${{ fromJSON(needs.prepare.outputs.goversion) }}
     runs-on: ubuntu-latest
-    name: Build suite=${{ matrix.suite }}, golang=${{ matrix.go }}, jdk=${{ matrix.java }}, postgres=${{ matrix.postgres }}
+    name: Build suite=${{ matrix.suite }}, jdk=${{ matrix.java }}, postgres=${{ matrix.postgres }}
     services:
       postgres:
         image: postgres:${{ matrix.postgres }}
@@ -75,14 +75,14 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-${{ matrix.go }}--go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-${{ env.GO_VERSION }}--go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
 
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go }}
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Setup Java
         uses: actions/setup-java@v3
