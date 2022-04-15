@@ -3,22 +3,20 @@ platform: linux
 
 image_resource:
   type: docker-image
-  source: 
+  source:
     repository: ghcr.io/cloudfoundry/app-autoscaler-ci-deploy
     tag: master
 
 inputs:
 - name: app-autoscaler-release
-- name: bosh-golang-release
-
-outputs:
-- name: release
+- name: golang-release
+- get: java-release
 
 params:
   GIT_USER_NAME: CI Bot
   GIT_USER_EMAIL: ci@cloudfoundry.org
 
 run:
-  path: app-autoscaler-ci/autoscaler/scripts/bump-golang-package.sh
+  path: app-autoscaler-ci/autoscaler/scripts/update-versions.sh
 
 
