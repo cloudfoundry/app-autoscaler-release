@@ -80,6 +80,9 @@ groups:
   - deploy-autoscaler
   - deploy-autoscaler-pr
   - delete-autoscaler
+- name: autoscaler-bosh-dependencies
+  jobs:
+    - bump-bosh-golang-release
 
 resource_types:
 - name: gcs-resource
@@ -183,6 +186,19 @@ resources:
     json_key: ((autoscaler_releases_uploader_key))
     regexp: releases/app-autoscaler-acceptance-tests-v(.*).tgz
     initial_path: releases/app-autoscaler-acceptance-tests-v0.0.1.tgz
+
+- name: trigger-after-1-minute
+  type: time
+  icon: clock-outline
+  source:
+   # start: 12:00 AM
+   # stop: 1:00 AM
+   interval: 60s
+
+- name: bosh-golang-release
+  type: git
+  source:
+    uri: https://github.com/bosh-packages/golang-release
 
 jobs:
 - name: set-pipeline
@@ -704,3 +720,26 @@ jobs:
       PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+
+
+
+- name: bump-bosh-golang-release
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  plan:
+  - in_parallel:
+    - get: trigger-after-1-minute
+      trigger: true
+    - get: app-autoscaler-release-main
+    - get: bosh-golang-release
+  - task: bump-golang-package
+    file: app-autoscaler-ci/autoscaler/tasks/bump-golang-package.yml
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+    output_mapping:
+      release: app-autoscaler-release-main
+  - put: app-autoscaler-release-main
+    params:
+      repository: app-autoscaler-release-main
+      rebase: true
