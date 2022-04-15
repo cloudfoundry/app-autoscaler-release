@@ -4,13 +4,11 @@ set -euo pipefail
 
 pushd src/autoscaler
   go mod tidy
-  go mod download
   go mod vendor
 popd
 
 pushd src/changeloglockcleaner
   go mod tidy
-  go mod download
   go mod vendor
 popd
 

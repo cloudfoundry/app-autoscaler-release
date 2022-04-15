@@ -120,6 +120,8 @@ issues:
   # Disable this restriction
   max-same-issues: 0
 run:
+  # We still us go 1.17 since not all checks of golangci do support version 1.18 yet.
+  # See https://github.com/golangci/golangci-lint/issues/2649
   go: '1.17'
   skip-dirs:
     - test/testdata_etc
