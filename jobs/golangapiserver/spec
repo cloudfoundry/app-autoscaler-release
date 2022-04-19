@@ -32,10 +32,10 @@ templates:
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 packages:
-  - golang
+  - golang-1.18-linux
   - golangapiserver
   - db
-  - java
+  - openjdk-11
   - common
   - changeloglockcleaner
 properties:
