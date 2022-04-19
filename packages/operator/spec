@@ -2,7 +2,7 @@
 name: operator
 
 dependencies:
-- golang-1.18-linux
+- golang-1-linux
 
 files:
 - autoscaler/*
