@@ -2,8 +2,7 @@
 name: db
 
 dependencies:
-- java
+- openjdk-11
 
 files:
 - db/**/*
-- common/java-helper.sh
