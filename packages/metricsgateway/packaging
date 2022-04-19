@@ -1,6 +1,6 @@
 set -e -x
 
-export GOROOT=$(readlink -nf /var/vcap/packages/golang)
+export GOROOT=$(readlink -nf /var/vcap/packages/golang-1.18-linux)
 export PATH=$GOROOT/bin:$PATH
 export GOPATH=${BOSH_COMPILE_TARGET}
 export GOCACHE=/tmp/gocache

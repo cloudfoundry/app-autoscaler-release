@@ -19,7 +19,7 @@ case $1 in
     chown -R vcap:vcap $RUN_DIR $LOG_DIR
     echo $$ > $PIDFILE
     chown vcap:vcap $PIDFILE
-    PATH=/var/vcap/packages/java/bin:$PATH
+    PATH=/var/vcap/packages/openjdk-11/bin:$PATH
     export PATH
 
     <% unless p("autoscaler.scheduler.hooks.pre_start").empty? %>
