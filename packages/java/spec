@@ -1,7 +1,0 @@
----
-name: java
-
-dependencies:
-
-files:
-- openjdk/OpenJDK11U-jdk_x64_linux_hotspot_*.tar.gz

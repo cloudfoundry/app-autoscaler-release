@@ -32,10 +32,10 @@ templates:
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 packages:
-  - golang
+  - golang-1.18-linux
   - golangapiserver
   - db
-  - java
+  - openjdk-11
   - common
   - changeloglockcleaner
 properties:
@@ -87,7 +87,7 @@ properties:
     default: "Autoscaler"
   autoscaler.apiserver.info.build:
     description: "Autoscaler application build number"
-    default: "5.2.0"
+    default: "5.2.1"
   autoscaler.apiserver.info.support_url:
     description: "Autoscaler application support page URL"
     default: "https://github.com/cloudfoundry/app-autoscaler-release"

@@ -11,7 +11,7 @@
 source /var/vcap/packages/common/dns-helper.sh
 source /var/vcap/packages/common/retry-helper.sh
 
-export PATH=/var/vcap/packages/java/bin:$PATH
+export PATH=/var/vcap/packages/openjdk-11/bin:$PATH
 
 require_consul='<%= p("autoscaler.metricsserver.require_consul") %>'
 
