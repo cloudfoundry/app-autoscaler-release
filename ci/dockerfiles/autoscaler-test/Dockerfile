@@ -21,7 +21,8 @@ RUN \
             gnupg \
             gnupg2 \
             ruby \
-            ruby-dev
+            ruby-dev &&\
+    apt-get clean
 
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add - 
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list 
@@ -64,7 +65,7 @@ RUN gem install cf-uaac
 ENV PGDATA /var/lib/postgresql/${POSTGRES_VERSION}/main
 ENV PGCONFIG /etc/postgresql/${POSTGRES_VERSION}/main
 RUN sed -i 's/peer/trust/' ${PGCONFIG}/pg_hba.conf \
-  	&& sed -i 's/md5/trust/' ${PGCONFIG}/pg_hba.conf 
+  	&& sed -i 's/md5/trust/' ${PGCONFIG}/pg_hba.conf
 
 # Install jq
 ENV JQ_VERSION 1.6
