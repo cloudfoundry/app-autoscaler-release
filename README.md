@@ -200,7 +200,7 @@ scheduler|https://autoscaler-scheduler.((system_domain))/health|scheduler|/autos
 
 These endpoints can be disabled by using the ops file `example/operations/disable-basicauth-on-health-endpoints.yml`
 
-# App-AutoScaler [![Build Status](https://github.com/cloudfoundry/app-autoscaler/actions/workflows/postgres.yaml/badge.svg)](https://github.com/cloudfoundry/app-autoscaler/actions/workflows/postgres.yaml) [![Build Status](https://github.com/cloudfoundry/app-autoscaler/actions/workflows/mysql.yaml/badge.svg)](https://github.com/cloudfoundry/app-autoscaler/actions/workflows/mysql.yaml)
+# App-AutoScaler [![Build Status](https://github.com/cloudfoundry/app-autoscaler/actions/workflows/postgres.yaml/badge.svg)](https://github.com/cloudfoundry/app-autoscaler/actions/workflows/postgres.yaml) [![Build Status](https://github.com/cloudfoundry/app-autoscaler/actions/workflows/mysql.yaml/badge.svg)](https://github.com/cloudfoundry/app-autoscaler/actions/workflows/mysql.yaml) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=app-autoscaler-release&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=app-autoscaler-release)
 
 The `App-AutoScaler` provides the capability to adjust the computation resources for Cloud Foundry applications through
 
