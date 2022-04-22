@@ -9,6 +9,7 @@ image_resource:
 
 inputs:
 - name: app-autoscaler-release
+- name: app-autoscaler-ci
 
 params:
   GIT_USER_NAME: CI Bot
