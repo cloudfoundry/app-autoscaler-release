@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+autoscaler_dir="app-autoscaler-release"
 
 function golang_version {
-  version=$(<packages/golang-1-linux/version)
+  version=$(<${autoscaler_dir}/packages/golang-1-linux/version)
   echo $version | sed s/\\./-/g
 }
 
 function java_version {
-  cat packages/openjdk-11/spec | grep -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g'
+  cat "${autoscaler_dir}/packages/openjdk-11/spec" | grep -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g'
 }
 
 pushd app-autoscaler-release > /dev/null
