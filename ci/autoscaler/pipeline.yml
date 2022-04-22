@@ -734,7 +734,6 @@ jobs:
       type: golang
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-      golang-release: golang-release
       java-release: golang-release
   - task: create-pr
     file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
@@ -759,7 +758,6 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
       golang-release: java-release
-      java-release: java-release
   - task: create-pr
     file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
     params:
