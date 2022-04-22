@@ -38,7 +38,7 @@ anchors:
 
 
 groups:
-- name: All
+- name: all
   jobs:
   - set-pipeline
   - unit-tests-main
@@ -80,6 +80,10 @@ groups:
   - deploy-autoscaler
   - deploy-autoscaler-pr
   - delete-autoscaler
+- name: update-sdks
+  jobs:
+    - update-golang
+    - update-java
 
 resource_types:
 - name: gcs-resource
@@ -183,6 +187,18 @@ resources:
     json_key: ((autoscaler_releases_uploader_key))
     regexp: releases/app-autoscaler-acceptance-tests-v(.*).tgz
     initial_path: releases/app-autoscaler-acceptance-tests-v0.0.1.tgz
+
+- name: golang-release
+  type: bosh-io-release
+  check_every: 5m
+  source:
+    repository: https://github.com/bosh-packages/golang-release
+
+- name: java-release
+  type: bosh-io-release
+  check_every: 5m
+  source:
+    repository: https://github.com/bosh-packages/golang-release
 
 jobs:
 - name: set-pipeline
@@ -704,3 +720,40 @@ jobs:
       PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+
+
+
+
+- name: update-golang
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  plan:
+  - in_parallel:
+    - get: app-autoscaler-release-main
+    - get: golang-release
+  - task: update
+    file: app-autoscaler-ci/autoscaler/tasks/update-sdk.yml
+    params:
+      type: golang
+  - task: create-pr
+    file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
+    params:
+      type: golang
+
+- name: update-java
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  plan:
+  - in_parallel:
+    - get: app-autoscaler-release-main
+    - get: java-release
+  - task: update
+    file: app-autoscaler-ci/autoscaler/tasks/update-sdk.yml
+    params:
+      type: java
+  - task: create-pr
+    file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
+    params:
+      type: java
