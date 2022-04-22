@@ -9,8 +9,6 @@ image_resource:
 
 inputs:
 - name: app-autoscaler-release
-- name: golang-release
-- name: java-release
 
 params:
   GIT_USER_NAME: CI Bot
