@@ -189,16 +189,18 @@ resources:
     initial_path: releases/app-autoscaler-acceptance-tests-v0.0.1.tgz
 
 - name: golang-release
-  type: bosh-io-release
+  type: git
+  icon: github
   check_every: 5m
   source:
     repository: https://github.com/bosh-packages/golang-release
 
 - name: java-release
-  type: bosh-io-release
+  type: git
+  icon: github
   check_every: 5m
   source:
-    repository: https://github.com/bosh-packages/golang-release
+    repository: https://github.com/bosh-packages/java-release
 
 jobs:
 - name: set-pipeline
@@ -425,6 +427,7 @@ jobs:
     output_mapping:
       combined-ops: ops-files
 
+
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
@@ -491,8 +494,6 @@ jobs:
       app-autoscaler-release: app-autoscaler-release-main
     ensure:
       <<: *cleanupTaskMain
-
-
 
 - name: upgrade-test-main
   serial_groups: [infra]
@@ -565,6 +566,7 @@ jobs:
     ensure:
       <<: *cleanupTaskMain
 
+
 - name: acceptance-pr
   serial_groups: [infra]
   public: true
@@ -631,8 +633,6 @@ jobs:
       context: acceptance-tests
 
 
-
-
 - name: release
   public: true
   build_logs_to_retain: 100
@@ -677,9 +677,6 @@ jobs:
       repository: pushme/app-autoscaler-release
 
 
-
-
-
 - name: draft-pr
   public: true
   build_logs_to_retain: 100
@@ -698,8 +695,6 @@ jobs:
       PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
-
-
 
 
 - name: draft
@@ -722,8 +717,6 @@ jobs:
       app-autoscaler-release: app-autoscaler-release-main
 
 
-
-
 - name: update-golang
   public: true
   build_logs_to_retain: 100
@@ -733,13 +726,14 @@ jobs:
     - get: app-autoscaler-release-main
     - get: golang-release
   - task: update
-    file: app-autoscaler-ci/autoscaler/tasks/update-sdk.yml
+    file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: golang
   - task: create-pr
     file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
     params:
       type: golang
+
 
 - name: update-java
   public: true
@@ -750,7 +744,7 @@ jobs:
     - get: app-autoscaler-release-main
     - get: java-release
   - task: update
-    file: app-autoscaler-ci/autoscaler/tasks/update-sdk.yml
+    file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: java
   - task: create-pr
