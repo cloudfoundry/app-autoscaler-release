@@ -153,6 +153,9 @@ stop-db: check-db_type
 .PHONY: build
 build: init init-db test-certs scheduler autoscaler
 
+.PHONY: just-build
+just-build: init scheduler autoscaler
+
 .PHONY: integration
 integration: build
 	make -C src/autoscaler integration DBURL="${DBURL}"
