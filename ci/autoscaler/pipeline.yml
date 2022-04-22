@@ -38,7 +38,7 @@ anchors:
 
 
 groups:
-- name: All
+- name: all
   jobs:
   - set-pipeline
   - unit-tests-main
@@ -80,10 +80,10 @@ groups:
   - deploy-autoscaler
   - deploy-autoscaler-pr
   - delete-autoscaler
-- name: autoscaler-bosh-dependencies
+- name: update-sdks
   jobs:
-    - bump-bosh-golang-release
-    - bump-bosh-golang-release-bash-version
+    - update-golang
+    - update-java
 
 resource_types:
 - name: gcs-resource
@@ -187,14 +187,6 @@ resources:
     json_key: ((autoscaler_releases_uploader_key))
     regexp: releases/app-autoscaler-acceptance-tests-v(.*).tgz
     initial_path: releases/app-autoscaler-acceptance-tests-v0.0.1.tgz
-
-#- name: trigger-after-midnight
-#  type: time
-#  icon: clock-outline
-#  source:
-#    start: 12:00 AM
-#    stop: 1:00 AM
-#    days: [Saturday]
 
 - name: golang-release
   type: bosh-io-release
@@ -732,7 +724,7 @@ jobs:
 
 
 
-- name: update-dependencies
+- name: update-golang
   public: true
   build_logs_to_retain: 100
   serial: true
@@ -740,8 +732,28 @@ jobs:
   - in_parallel:
     - get: app-autoscaler-release-main
     - get: golang-release
-    - get: java-release
-  - task: update-golang-versions
-    file: app-autoscaler-ci/autoscaler/tasks/update-versions.yml
+  - task: update
+    file: app-autoscaler-ci/autoscaler/tasks/update-sdk.yml
+    params:
+      type: golang
   - task: create-pr
     file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
+    params:
+      type: golang
+
+- name: update-java
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  plan:
+  - in_parallel:
+    - get: app-autoscaler-release-main
+    - get: java-release
+  - task: update
+    file: app-autoscaler-ci/autoscaler/tasks/update-sdk.yml
+    params:
+      type: java
+  - task: create-pr
+    file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
+    params:
+      type: java

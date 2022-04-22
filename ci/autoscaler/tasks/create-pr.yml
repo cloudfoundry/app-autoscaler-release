@@ -10,13 +10,13 @@ image_resource:
 inputs:
 - name: app-autoscaler-release
 - name: golang-release
-- get: java-release
+- name: java-release
 
 params:
   GIT_USER_NAME: CI Bot
   GIT_USER_EMAIL: ci@cloudfoundry.org
-  GITHUB_TOKEN: ((autoscaler_access_token))
-
+  github_token: ((autoscaler_access_token))
+  type:
 run:
   path: app-autoscaler-ci/autoscaler/scripts/create-pr.sh
 
