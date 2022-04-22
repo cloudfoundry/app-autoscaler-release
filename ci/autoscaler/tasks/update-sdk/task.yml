@@ -15,7 +15,8 @@ inputs:
 params:
   GIT_USER_NAME: CI Bot
   GIT_USER_EMAIL: ci@cloudfoundry.org
+  type:
 
 run:
-  path: app-autoscaler-release-main/scripts/update_${type}_package.sh
+  path: update_${type}_package.sh
 
