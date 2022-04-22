@@ -193,14 +193,16 @@ resources:
   icon: github
   check_every: 5m
   source:
-    repository: https://github.com/bosh-packages/golang-release
+    uri: https://github.com/bosh-packages/golang-release.git
+    branch: master
 
 - name: java-release
   type: git
   icon: github
   check_every: 5m
   source:
-    repository: https://github.com/bosh-packages/java-release
+    uri:  https://github.com/bosh-packages/java-release.git
+    branch: master
 
 jobs:
 - name: set-pipeline
@@ -724,16 +726,22 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-release-main
+    - get: app-autoscaler-ci
     - get: golang-release
   - task: update
     file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: golang
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+      golang-release: golang-release
+      java-release: golang-release
   - task: create-pr
     file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
     params:
       type: golang
-
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
 
 - name: update-java
   public: true
@@ -742,12 +750,19 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-release-main
+    - get: app-autoscaler-ci
     - get: java-release
   - task: update
     file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: java
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+      golang-release: java-release
+      java-release: java-release
   - task: create-pr
     file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
     params:
       type: java
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main

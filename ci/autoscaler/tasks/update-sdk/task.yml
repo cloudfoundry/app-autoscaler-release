@@ -18,5 +18,5 @@ params:
   type:
 
 run:
-  path: update_${type}_package.sh
+  path: app-autoscaler-ci/autoscaler/scripts/update_${type}_package.sh
 

@@ -11,7 +11,7 @@ function java_version {
   cat packages/openjdk-11/spec | grep -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g'
 }
 
-pushd app-autoscaler-release-main
+pushd app-autoscaler-release > /dev/null
   version=$(${type}_version)
   dashed_version=$(echo $version | sed s/\\./-/g )
 
@@ -23,4 +23,4 @@ pushd app-autoscaler-release-main
   git commit -a -m "${pr_title}"
   gh auth login --with-token "${github_token}"
   gh pr create --base origin/main --title "${pr_title}" --body "${pr_description}"
-popd
+popd > /dev/null
