@@ -727,14 +727,15 @@ jobs:
   - in_parallel:
     - get: app-autoscaler-release-main
     - get: app-autoscaler-ci
+    - get: java-release
     - get: golang-release
+      trigger: true
   - task: update
     file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: golang
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-      java-release: golang-release
   - task: create-pr
     file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
     params:
@@ -751,13 +752,14 @@ jobs:
     - get: app-autoscaler-release-main
     - get: app-autoscaler-ci
     - get: java-release
+      trigger: true
+    - get: golang-release
   - task: update
     file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: java
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-      golang-release: java-release
   - task: create-pr
     file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
     params:
