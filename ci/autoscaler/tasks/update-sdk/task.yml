@@ -16,8 +16,11 @@ inputs:
 params:
   GIT_USER_NAME: CI Bot
   GIT_USER_EMAIL: ci@cloudfoundry.org
-  UPLOADER_KEY:
+  github_token: ((autoscaler_access_token))
+  UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
   type:
+
+output: app-autoscaler-release
 
 run:
   path: app-autoscaler-ci/autoscaler/tasks/update-sdk/update_package.sh

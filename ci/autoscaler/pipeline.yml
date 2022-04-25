@@ -732,18 +732,13 @@ jobs:
     - get: java-release
     - get: golang-release
       trigger: true
-  - task: update
+  - task: update-golang-sdk
     file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: golang
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-  - task: create-pr
-    file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
-    params:
-      type: golang
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
+
 
 - name: update-java
   public: true
@@ -756,15 +751,8 @@ jobs:
     - get: java-release
       trigger: true
     - get: golang-release
-  - task: update
+  - task: update-java-sdk
     file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
-    params:
-      type: java
-      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
-  - task: create-pr
-    file: app-autoscaler-ci/autoscaler/tasks/create-pr.yml
     params:
       type: java
     input_mapping:

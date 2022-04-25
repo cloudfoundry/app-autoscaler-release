@@ -35,6 +35,7 @@ pushd "${autoscaler_dir}" > /dev/null
   configure_git_credentials
 
   git checkout -b "${update_branch}"
+  git add .
   git commit -a -m "${pr_title}"
   gh auth login --with-token "${github_token}"
   gh pr create --base origin/main --title "${pr_title}" --body "${pr_description}"
