@@ -2,7 +2,7 @@
 
 set -euo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-autoscaler_dir="${script_dir}/../../../app-autoscaler-release"
+autoscaler_dir="${script_dir}/../../../../app-autoscaler-release"
 
 function golang_version {
   version=$(<${autoscaler_dir}/packages/golang-1-linux/version)
