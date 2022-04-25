@@ -3,7 +3,33 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
+  generate-gosub:
+    name: ensure gosub specs are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trust My Directory
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_go
+
+      - name: Go Build
+        run: |
+          source .envrc
+          ./scripts/sync-package-specs
+
+      - name: Check if there are changes
+        id: changes
+        uses: UnicornGlobal/has-changes-action@v1.0.12
+
+      - name: Process changes
+        if: steps.changes.outputs.changed == 1
+        run: |
+          echo "::error::Specs are out of date, run ./scripts/update && ./scripts/sync-package-specs to update"
+          exit 1
+
   bosh-release:
+    needs: generate-gosub
     name: Create Bosh Release
     runs-on: ubuntu-latest
     env:
