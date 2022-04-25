@@ -3,7 +3,6 @@
 set -exuo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-export GOOGLE_APPLICATION_CREDENTIALS="${UPLOADER_KEY}"
 
 function vendor-package {
   local release=${1}
@@ -11,16 +10,11 @@ function vendor-package {
   local autoscaler_location=${3}
   local package_location="$(pwd)/${release}"
 
-  pushd app-autoscaler-release
-
-
-
-
   vendored_commit=$(cat "${release}/.git/ref")
-
 
   pushd "${autoscaler_location}" > /dev/null
     # generate the private.yml file with the credentials
+    echo "Generating private.yml..."
     cat > config/private.yml <<EOF
 ---
 blobstore:
@@ -28,7 +22,6 @@ blobstore:
     credentials_source: static
     json_key:
 EOF
-    echo "Generating private.yml..."
     yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
     bosh vendor-package "${package}" "${package_location}"
