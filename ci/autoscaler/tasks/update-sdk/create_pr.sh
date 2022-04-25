@@ -1,17 +1,14 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -exuo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 autoscaler_dir="${script_dir}/../../../../app-autoscaler-release"
 
 function golang_version {
-  version=$(<${autoscaler_dir}/packages/golang-1-linux/version)
-  echo $version | sed s/\\./-/g
+  cat ${autoscaler_dir}/packages/golang-1-linux/version
 }
 
 function java_version {
-  pushd "${autoscaler_dir}"; git status; popd
-  ls "${autoscaler_dir}/packages/openjdk-11/"
   cat "${autoscaler_dir}/packages/openjdk-11/spec" | grep -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g'
 }
 
@@ -26,7 +23,7 @@ function configure_git_credentials(){
 
 pushd "${autoscaler_dir}" > /dev/null
   version=$(${type}_version)
-  dashed_version=$(echo "$version" | sed s/\\./-/g )
+  dashed_version=$(echo "$version" | sed -E 's/[._]/-/g' )
 
   update_branch="${type}-version-bump-${dashed_version}"
   pr_title="Update ${type} version to ${version}"
@@ -35,7 +32,6 @@ pushd "${autoscaler_dir}" > /dev/null
   configure_git_credentials
 
   git checkout -b "${update_branch}"
-  git add .
   git commit -a -m "${pr_title}"
   gh auth login --with-token "${github_token}"
   gh pr create --base origin/main --title "${pr_title}" --body "${pr_description}"
