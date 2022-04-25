@@ -3,6 +3,7 @@
 set -exuo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+export GOOGLE_APPLICATION_CREDENTIALS="${UPLOADER_KEY}"
 
 function vendor-package {
   local release=${1}

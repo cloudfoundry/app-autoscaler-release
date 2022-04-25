@@ -16,6 +16,7 @@ inputs:
 params:
   GIT_USER_NAME: CI Bot
   GIT_USER_EMAIL: ci@cloudfoundry.org
+  UPLOADER_KEY:
   type:
 
 run:

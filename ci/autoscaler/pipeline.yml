@@ -760,6 +760,7 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: java
+      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: create-pr
