@@ -33,6 +33,6 @@ pushd "${autoscaler_dir}" > /dev/null
 
   git checkout -b "${update_branch}"
   git commit -a -m "${pr_title}"
-  gh auth login --with-token "${github_token}"
+  echo "${github_token}" | gh auth login --with-token
   gh pr create --base origin/main --title "${pr_title}" --body "${pr_description}"
 popd > /dev/null
