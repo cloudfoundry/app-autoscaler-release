@@ -195,6 +195,7 @@ resources:
   source:
     uri: https://github.com/bosh-packages/golang-release.git
     branch: master
+    version_depth: 20
 
 - name: java-release
   type: git
@@ -203,6 +204,7 @@ resources:
   source:
     uri:  https://github.com/bosh-packages/java-release.git
     branch: master
+    version_depth: 20
 
 jobs:
 - name: set-pipeline

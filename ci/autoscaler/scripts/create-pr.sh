@@ -10,6 +10,8 @@ function golang_version {
 }
 
 function java_version {
+  pushd "${autoscaler_dir}"; git diff; popd
+  ls "${autoscaler_dir}/packages/openjdk-11/"
   cat "${autoscaler_dir}/packages/openjdk-11/spec" | grep -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g'
 }
 

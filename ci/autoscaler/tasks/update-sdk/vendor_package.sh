@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-set -euo pipefail
+set -exuo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
@@ -25,5 +25,7 @@ function vendor-package {
     if [[ -f "${package_version_file}" ]]; then
       cp "${package_version_file}" "packages/${package}"
     fi
+
+    git diff
   popd >/dev/null
 }
