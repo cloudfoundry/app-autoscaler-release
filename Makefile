@@ -151,13 +151,10 @@ stop-db: check-db_type
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
 .PHONY: build
-build: init init-db test-certs scheduler autoscaler
-
-.PHONY: just-build
-just-build: init scheduler autoscaler
+build: init scheduler autoscaler
 
 .PHONY: integration
-integration: build
+integration: build init-db test-certs
 	make -C src/autoscaler integration DBURL="${DBURL}"
 
 .PHONY: golangci-lint lint $(addprefix lint_,$(modules))

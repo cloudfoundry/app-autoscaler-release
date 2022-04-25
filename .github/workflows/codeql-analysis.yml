@@ -53,7 +53,7 @@ jobs:
 
     - name: Build
       run: |
-        make just-build
+        make build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
