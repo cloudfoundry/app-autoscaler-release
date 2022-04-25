@@ -15,6 +15,7 @@ TBD
 - Talks to Loggregator via gRPC to fetch Gauge and Timer metrics.
 - Dispatch and shard metrics to assigned Metric server via WSServer.
 - Keeps track of current appIDs for which it should fetch metrics.
+- Filters envelops for active AppPolicies.
 
 ### MetricsServer
 
