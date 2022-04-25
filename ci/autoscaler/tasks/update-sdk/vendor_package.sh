@@ -26,6 +26,7 @@ EOF
 
     bosh vendor-package "${package}" "${package_location}"
     echo "${vendored_commit}" >> "packages/${package}/vendored-commit"
+    cp "${package_location}/packages/${package}/spec" "packages/${package}/"
 
     package_version_file="${package_location}/packages/${package}/version"
     if [[ -f "${package_version_file}" ]]; then
