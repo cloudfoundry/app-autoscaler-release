@@ -8,14 +8,16 @@ function vendor-package {
   local release=${1}
   local package=${2}
   local autoscaler_location=${3}
+  local package_location=${4}
 
   local tmpdir_name=$(mktemp -d)
-  trap "rm -rf ${tmpdir_name}" EXIT
+  #trap "rm -rf ${tmpdir_name}" EXIT
+  echo $tmpdir_name
 
-  pushd "${tmpdir_name}" > /dev/null
-    git clone --depth 1 "https://github.com/bosh-packages/${release}.git" .
-    vendored_commit=$(git rev-parse HEAD)
-  popd  > /dev/null
+
+  pushd "${package_location}" > /dev/null
+    vendored_commit=$(cat ${package_location}.git/ref)
+  popd
 
   pushd "${autoscaler_location}" > /dev/null
     bosh vendor-package "${package}" "${tmpdir_name}"
