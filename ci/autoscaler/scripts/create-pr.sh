@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-autoscaler_dir="app-autoscaler-release"
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+autoscaler_dir="${script_dir}/../../../app-autoscaler-release"
 
 function golang_version {
   version=$(<${autoscaler_dir}/packages/golang-1-linux/version)
@@ -21,9 +22,9 @@ function configure_git_credentials(){
   fi
 }
 
-pushd app-autoscaler-release > /dev/null
+pushd "${autoscaler_dir}" > /dev/null
   version=$(${type}_version)
-  dashed_version=$(echo $version | sed s/\\./-/g )
+  dashed_version=$(echo "$version" | sed s/\\./-/g )
 
   update_branch="${type}-version-bump-${dashed_version}"
   pr_title="Update ${type} version to ${version}"
