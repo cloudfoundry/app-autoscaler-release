@@ -26,6 +26,6 @@ function vendor-package {
       cp "${package_version_file}" "packages/${package}"
     fi
 
-    git diff
+    git --no-pager diff
   popd >/dev/null
 }
