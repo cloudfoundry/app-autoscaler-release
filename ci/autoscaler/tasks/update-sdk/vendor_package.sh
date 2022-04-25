@@ -11,11 +11,18 @@ function vendor-package {
   local autoscaler_location=${3}
   local package_location="$(pwd)/${release}"
 
-
   vendored_commit=$(cat "${release}/.git/ref")
 
-
   pushd "${autoscaler_location}" > /dev/null
+  # generate the private.yml file with the credentials
+    cat > config/private.yml <<EOF
+---
+blobstore:
+  options:
+    credentials_source: static
+    json_key: "${UPLOADER_KEY}"
+EOF
+
     bosh vendor-package "${package}" "${package_location}"
     echo "${vendored_commit}" >> "packages/${package}/vendored-commit"
 
