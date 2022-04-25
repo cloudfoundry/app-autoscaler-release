@@ -8,22 +8,17 @@ function vendor-package {
   local release=${1}
   local package=${2}
   local autoscaler_location=${3}
-  local package_location=${4}
-
-  local tmpdir_name=$(mktemp -d)
-  #trap "rm -rf ${tmpdir_name}" EXIT
-  echo $tmpdir_name
+  local package_location="$(pwd)/${release}"
 
 
-  pushd "${package_location}" > /dev/null
-    vendored_commit=$(cat ${package_location}.git/ref)
-  popd
+  vendored_commit=$(cat "${release}/.git/ref")
+
 
   pushd "${autoscaler_location}" > /dev/null
-    bosh vendor-package "${package}" "${tmpdir_name}"
+    bosh vendor-package "${package}" "${package_location}"
     echo "${vendored_commit}" >> "packages/${package}/vendored-commit"
 
-    package_version_file="${tmpdir_name}/packages/${package}/version"
+    package_version_file="${package_location}/packages/${package}/version"
     if [[ -f "${package_version_file}" ]]; then
       cp "${package_version_file}" "packages/${package}"
     fi
