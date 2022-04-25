@@ -12,6 +12,15 @@ function java_version {
   cat "${autoscaler_dir}/packages/openjdk-11/spec" | grep -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g'
 }
 
+function configure_git_credentials(){
+ if [[ -z $(git config --global user.email) ]]; then
+       git config --global user.email "${GIT_USER_EMAIL}"
+     fi
+  if [[ -z $(git config --global user.name) ]]; then
+       git config --global user.name "${GIT_USER_NAME}"
+  fi
+}
+
 pushd app-autoscaler-release > /dev/null
   version=$(${type}_version)
   dashed_version=$(echo $version | sed s/\\./-/g )
@@ -20,7 +29,9 @@ pushd app-autoscaler-release > /dev/null
   pr_title="Update ${type} version to ${version}"
   pr_description="Automatic version bump of ${type} to ${version}"
 
-  git checkout -b ${update_branch}
+  configure_git_credentials
+
+  git checkout -b "${update_branch}"
   git commit -a -m "${pr_title}"
   gh auth login --with-token "${github_token}"
   gh pr create --base origin/main --title "${pr_title}" --body "${pr_description}"
