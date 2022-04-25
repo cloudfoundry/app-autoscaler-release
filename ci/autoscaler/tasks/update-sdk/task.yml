@@ -20,8 +20,6 @@ params:
   UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
   type:
 
-output: app-autoscaler-release
-
 run:
   path: app-autoscaler-ci/autoscaler/tasks/update-sdk/update_package.sh
 
