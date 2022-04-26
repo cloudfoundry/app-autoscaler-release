@@ -17,7 +17,7 @@ params:
   GIT_USER_NAME: CI Bot
   GIT_USER_EMAIL: ci@cloudfoundry.org
   UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
-  GITHUB_TOKEN: ((autoscaler_access_token))
+  GITHUB_ACCESS_TOKEN: ((autoscaler_access_token))
   type:
 
 run:
