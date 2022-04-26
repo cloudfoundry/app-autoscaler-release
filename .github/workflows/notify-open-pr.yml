@@ -10,8 +10,54 @@ jobs:
       - name: notify slack
         uses: 8398a7/action-slack@v3
         with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest # selectable (default: repo,message)
+          status: custom
+          icon_emoji: ':gh-pull-request:'
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest
+          custom_payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":star:* Incomming PR in Application autoscaler :*\n ${process.env.AS_AUTHOR}  \n - *Author*: ${process.env.AS_AUTHOR}\n - link: ${process.env.AS_PULL_REQUEST}"
+                  },
+                  "accessory": {
+                    "type": "image",
+                    "image_url": "https://samlearnsazure.files.wordpress.com/2020/02/00featuredimage-4.png?w=200&h=200&crop=1",
+                    "alt_text": "Pull request"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Add your review :green:",
+                        "emoji": true
+                      },
+                      "value": "add your review",
+                      "url": "${process.env.AS_PULL_REQUEST}/files#submit-review"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View",
+                        "emoji": true
+                      },
+                      "value": "view files",
+                      "url": "${process.env.AS_PULL_REQUEST}/files"
+                    }
+                  ]
+                }
+              ]
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
         if: always() # Pick up events even if the job fails or is canceled.
