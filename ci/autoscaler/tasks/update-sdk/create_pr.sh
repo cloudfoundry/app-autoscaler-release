@@ -33,16 +33,9 @@ pushd "${autoscaler_dir}" > /dev/null
   configure_git_credentials
 
   git checkout -b "${update_branch}"
-  git status
   git commit -a -m "${pr_title}"
 
-  mkdir ~/.ssh
-  chmod 700 ~/.ssh
-  echo "${GITHUB_PRIVATE_KEY}" >> ~/.ssh/id_rsa
-  chmod 600 ~/.ssh/id_rsa
-  ssh-add ~/.ssh/id_rsa
-
-  gh auth login
+  echo "${GITHUB_TOKEN}" | gh auth login --with-token
 
   gh pr create --base origin/main --title "${pr_title}" --body "${pr_description}"
 popd > /dev/null
