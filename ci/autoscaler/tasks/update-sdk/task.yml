@@ -18,6 +18,7 @@ params:
   GIT_USER_EMAIL: ci@cloudfoundry.org
   UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
   GITHUB_ACCESS_TOKEN: ((autoscaler_access_token))
+  GITHUB_PRIVATE_KEY: ((autoscaler_git_key))
   type:
 
 run:
