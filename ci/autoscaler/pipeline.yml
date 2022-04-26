@@ -738,7 +738,12 @@ jobs:
       type: golang
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-
+    output_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  - put: app-autoscaler-release-main
+    params:
+      rebase: true
+      repository: app-autoscaler-release
 
 - name: update-java
   public: true
