@@ -47,5 +47,5 @@ pushd "${autoscaler_dir}" > /dev/null
 
   git push --set-upstream origin "${update_branch}"
 
-  gh pr create --base origin/main --title "${pr_title}" --body "${pr_description}"
+  gh pr create --base main --head "${update_branch}" --title "${pr_title}" --body "${pr_description}" --label 'approved' --label 'dependencies'
 popd > /dev/null
