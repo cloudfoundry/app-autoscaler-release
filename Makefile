@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-modules:= acceptance autoscaler changelog changeloglockcleaner
+modules:=acceptance autoscaler changelog changeloglockcleaner
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
@@ -33,27 +33,43 @@ target/init:
 	@make -C src/autoscaler buildtools
 	@touch $@
 
-.PHONY: clean
-clean:
+.PHONY: clean-autoscaler clean-java clean-vendor
+clean: clean-autoscaler clean-java clean-targets clean-vendor
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
+	@make clean-targets
+clean-java:
+	@echo " - cleaning java resources"
 	@cd src && mvn clean > /dev/null && cd ..
+clean-targets:
+	@echo " - cleaning build target files"
+	@rm target/* &> /dev/null || echo "  - Already clean"
+clean-vendor:
+	@echo " - cleaning vendored go"
+	@find . -name "vendor" -type d -exec rm -rf {} \;
+clean-autoscaler:
 	@make -C src/autoscaler clean
-	@rm target/* &> /dev/null || echo "# Already clean"
 
-.PHONY: build-db
+.PHONY: build build-test build-all build-db  $(modules)
+build: init build-db $(modules)
+build-test: init $(addprefix test_,$(modules))
+build-all: build build-test
 build-db: target/build-db
 target/build-db:
 	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
 	@touch $@
-
-.PHONY: scheduler
 scheduler: init
 	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
-
-.PHONY: autoscaler
 autoscaler: init
 	@make -C src/autoscaler build
+changeloglockcleaner:
+	@make -C src/changeloglockcleaner build
+changelog:
+	@make -C src/changelog build
+$(addprefix test_,$(modules)):
+	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
+	@make -C src/$(patsubst test_%,%,$@) build_tests
+
 
 .PHONY: test-certs
 test-certs: target/autoscaler_test_certs target/scheduler_test_certs
@@ -64,17 +80,23 @@ target/scheduler_test_certs:
 	@./src/scheduler/scripts/generate_unit_test_certs.sh
 	@touch $@
 
-.PHONY: test test-autoscaler test-scheduler
-test: test-autoscaler test-scheduler
+
+.PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
+test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
 test-autoscaler: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL}"
-	@make -C src/autoscaler test DBURL="${DBURL}"
+	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}"
 test-autoscaler-suite: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} TEST=${TEST}"
 	@echo " - using TEST=${TEST}"
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}"
 test-scheduler: check-db_type init init-db test-certs
 	@cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
+test-changelog: init
+	@make -C src/changelog test
+test-changeloglockcleaner: init init-db test-certs
+	@make -C src/changeloglockcleaner test DBURL="${DBURL}"
+
 
 .PHONY: start-db
 start-db: check-db_type target/start-db-${db_type}_CI_${CI} waitfor_${db_type}_CI_${CI}
@@ -150,18 +172,12 @@ stop-db: check-db_type
 	@rm target/start-db-${db_type} &> /dev/null || echo " - Seems the make target was deleted stopping anyway!"
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
-.PHONY: build
-build: init scheduler autoscaler
-
 .PHONY: integration
 integration: build init-db test-certs
 	make -C src/autoscaler integration DBURL="${DBURL}"
 
 .PHONY: golangci-lint lint $(addprefix lint_,$(modules))
 lint: golangci-lint $(addprefix lint_,$(modules))
-
-
-
 
 golangci-lint:
 	@make -C src/autoscaler golangci-lint
