@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-modules:=acceptance autoscaler changelog changeloglockcleaner
+modules:= acceptance autoscaler changelog changeloglockcleaner
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
@@ -66,6 +66,7 @@ changeloglockcleaner:
 	@make -C src/changeloglockcleaner build
 changelog:
 	@make -C src/changelog build
+acceptance: test_acceptance
 $(addprefix test_,$(modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
 	@make -C src/$(patsubst test_%,%,$@) build_tests
