@@ -1,5 +1,6 @@
 SHELL := /bin/bash
-modules:= acceptance autoscaler changelog changeloglockcleaner
+go_modules:= acceptance autoscaler changelog changeloglockcleaner
+all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
@@ -22,7 +23,7 @@ check-db_type:
 	 esac
 
 .PHONY: init-db
-init-db: check-db_type start-db build-db target/init-db-${db_type}
+init-db: check-db_type start-db db target/init-db-${db_type}
 target/init-db-${db_type}:
 	@./scripts/initialise_db.sh ${db_type}
 	@touch $@
@@ -34,7 +35,7 @@ target/init:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-autoscaler clean-java clean-targets clean-vendor
+clean: clean-vendor clean-autoscaler clean-java clean-targets
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 	@make clean-targets
@@ -50,24 +51,25 @@ clean-vendor:
 clean-autoscaler:
 	@make -C src/autoscaler clean
 
-.PHONY: build build-test build-all build-db  $(modules)
-build: init build-db $(modules)
-build-test: init $(addprefix test_,$(modules))
+.PHONY: build build-test build-all $(all_modules)
+build: init  $(all_modules)
+build-test: init $(addprefix test_,$(go_modules))
 build-all: build build-test
-build-db: target/build-db
-target/build-db:
+db: target/db
+target/db:
+	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
 	@touch $@
 scheduler: init
+	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
 autoscaler: init
 	@make -C src/autoscaler build
-changeloglockcleaner:
+changeloglockcleaner: init
 	@make -C src/changeloglockcleaner build
-changelog:
+changelog: init
 	@make -C src/changelog build
-acceptance: test_acceptance
-$(addprefix test_,$(modules)):
+$(addprefix test_,$(go_modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
 	@make -C src/$(patsubst test_%,%,$@) build_tests
 
@@ -177,13 +179,13 @@ stop-db: check-db_type
 integration: build init-db test-certs
 	make -C src/autoscaler integration DBURL="${DBURL}"
 
-.PHONY: golangci-lint lint $(addprefix lint_,$(modules))
-lint: golangci-lint $(addprefix lint_,$(modules))
+.PHONY: golangci-lint lint $(addprefix lint_,$(go_modules))
+lint: golangci-lint $(addprefix lint_,$(go_modules))
 
 golangci-lint:
 	@make -C src/autoscaler golangci-lint
 
-$(addprefix lint_,$(modules)): lint_%:
+$(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run ${OPTS}
 
