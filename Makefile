@@ -166,6 +166,8 @@ lint: golangci-lint $(addprefix lint_,$(modules))
 golangci-lint:
 	@make -C src/autoscaler golangci-lint
 
+prepare-scheduler-test: check-db_type init init-db target/scheduler_test_certs
+
 $(addprefix lint_,$(modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run ${OPTS}
