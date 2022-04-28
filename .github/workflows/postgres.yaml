@@ -50,11 +50,3 @@ jobs:
       - name: ${{ matrix.suite }}
         run: |
           make ${{ matrix.suite }}
-
-      - name: Change Log Lock Cleaner
-        run: |
-          pushd src/changeloglockcleaner
-            go get github.com/onsi/ginkgo/v2/ginkgo
-            export DBURL="postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"
-            ginkgo -r --race --randomize-all --keep-going
-          popd

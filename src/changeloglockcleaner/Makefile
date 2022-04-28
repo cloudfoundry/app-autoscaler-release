@@ -9,12 +9,16 @@ CGO_ENABLED = 0
 BUILDTAGS :=
 
 build:
-	CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(BUILDTAGS) $(BUILDFLAGS) -o changeloglockcleaner main.go
+	@echo "# building changeloglockcleaner"
+	@CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(BUILDTAGS) $(BUILDFLAGS) -o changeloglockcleaner main.go
+
+build_tests:
+	@for package in $$( find . -name "*.go" -exec dirname {} \; | sort | uniq  ); do echo " - compiling changeloglockcleaner/$${package}"; go test -c -o /dev/null $${package}; done;
 
 check: fmt lint build test
 
 test:
-	go test -cover ./...
+	ginkgo -r --race --randomize-all --keep-going
 
 get-fmt-deps: ## Install goimports
 	$(GO_NOMOD) get golang.org/x/tools/cmd/goimports
