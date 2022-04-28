@@ -26,6 +26,18 @@ pushd "${autoscaler_dir}" > /dev/null
 
   git checkout -b "${update_branch}"
   git commit -a -m "${pr_title}"
-  echo "${github_token}" | gh auth login --with-token
-  gh pr create --base origin/main --title "${pr_title}" --body "${pr_description}"
+
+  printenv GITHUB_ACCESS_TOKEN | gh auth login --with-token -h github.com
+
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+  printenv GITHUB_PRIVATE_KEY > "$HOME/.ssh/id_rsa"
+  chmod 600 "$HOME/.ssh/id_rsa"
+  eval "$(ssh-agent -s)"
+  ssh-add "$HOME/.ssh/id_rsa"
+  ssh-keyscan -t rsa,dsa github.com 2>&1 > "$HOME/.ssh/known_hosts"
+
+  git push --set-upstream origin "${update_branch}"
+
+  gh pr create --base main --head "${update_branch}" --title "${pr_title}" --body "${pr_description}" --label 'approved' --label 'dependencies'
 popd > /dev/null

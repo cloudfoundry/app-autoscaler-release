@@ -57,6 +57,8 @@ groups:
   - deploy-autoscaler
   - deploy-autoscaler-pr
   - delete-autoscaler
+  - update-golang
+  - update-java
 - name: autoscaler-release
   jobs:
   - set-pipeline
