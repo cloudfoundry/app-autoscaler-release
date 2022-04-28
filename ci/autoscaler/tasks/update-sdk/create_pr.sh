@@ -16,12 +16,13 @@ function configure_git_credentials(){
 }
 
 package_version=$(cat ./version)
+package_sha=$(cat ./vendored-commit)
 
 pushd "${autoscaler_dir}" > /dev/null
   dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
-  update_branch="${type}-version-bump-${dashed_version}"
+  update_branch="${type}-version-bump-${dashed_version}_${package_sha}"
   pr_title="Update ${type} version to ${package_version}"
-  pr_description="Automatic version bump of ${type} to ${package_version}"
+  pr_description="Automatic version bump of ${type} to \`${package_version}\`\nPackage commit sha: \`${package_sha}\`"
 
   configure_git_credentials
 

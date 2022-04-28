@@ -13,7 +13,7 @@ function vendor-package {
   local package_location="$(pwd)/${release}"
 
   echo "# Building package for ${release} for version '${version}'"
-  vendored_commit=$(cat "${release}/.git/ref")
+  cat "${release}/.git/ref" > "${root_dir}/vendored-commit"
 
   pushd "${autoscaler_dir}" > /dev/null
     # generate the private.yml file with the credentials
@@ -28,7 +28,7 @@ EOF
     yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
     bosh vendor-package "${package}" "${package_location}"
-    echo -n "${vendored_commit}" > "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
+    cp "${root_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
     echo -n "${version}" > "packages/${package}/version" && git add "packages/${package}/version"
 
     echo "# Git diff -----"

@@ -726,7 +726,6 @@ jobs:
 - name: update-golang
   public: true
   build_logs_to_retain: 100
-  serial: true
   plan:
   - in_parallel:
     - get: app-autoscaler-release-main
@@ -745,7 +744,6 @@ jobs:
 - name: update-java
   public: true
   build_logs_to_retain: 100
-  serial: true
   plan:
   - in_parallel:
     - get: app-autoscaler-release-main
