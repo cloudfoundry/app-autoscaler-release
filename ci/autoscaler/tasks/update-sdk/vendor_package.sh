@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
-
-set -exuo pipefail
+[ -n "${DEBUG}" ] && set -x
+set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 root_dir="${script_dir}/../../../.."
@@ -28,8 +28,8 @@ EOF
     yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
     bosh vendor-package "${package}" "${package_location}"
-    echo "${vendored_commit}" > "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
-    echo "${version}" > "packages/${package}/version" && git add "packages/${package}/version"
+    echo -n "${vendored_commit}" > "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
+    echo -n "${version}" > "packages/${package}/version" && git add "packages/${package}/version"
 
     echo "# Git diff -----"
     git --no-pager diff

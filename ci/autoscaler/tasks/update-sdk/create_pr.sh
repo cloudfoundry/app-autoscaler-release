@@ -1,6 +1,7 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
+[ -n "${DEBUG}" ] && set -x
+set -euo pipefail
 
-set -exuo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 autoscaler_dir="${script_dir}/../../../../app-autoscaler-release"
 
