@@ -5,15 +5,6 @@ set -exuo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 root_dir="${script_dir}/../../../.."
 autoscaler_dir="${root_dir}/app-autoscaler-release"
-java_dir="${root_dir}/java-release"
-
-function golang_version {
-  cat "${autoscaler_dir}/packages/golang-1-linux/version"
-}
-
-function java_version {
-  cat "${java_dir}/packages/openjdk-11/spec" | grep -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g'
-}
 
 function vendor-package {
   local release=${1}
