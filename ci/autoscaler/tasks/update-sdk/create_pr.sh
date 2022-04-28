@@ -5,14 +5,6 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 autoscaler_dir="${script_dir}/../../../../app-autoscaler-release"
 java_dir="${script_dir}/../../../../java-release"
 
-function golang_version {
-  cat ${autoscaler_dir}/packages/golang-1-linux/version
-}
-
-function java_version {
-  cat "${java_dir}/packages/openjdk-11/spec" | grep -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g'
-}
-
 function configure_git_credentials(){
  if [[ -z $(git config --global user.email) ]]; then
        git config --global user.email "${GIT_USER_EMAIL}"
