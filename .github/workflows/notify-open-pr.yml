@@ -2,11 +2,18 @@ name: Notify of incomming or re-opened PR's
 on:
   pull_request:
 #    types: [opened, reopened]
+    - opened
+    - labeled
+    - unlabeled
 jobs:
   pr-notify:
     name: send a notification of a Open or re-opened PR
     runs-on: ubuntu-latest
     steps:
+      - uses: docker://agilepathway/pull-request-label-checker:latest
+        with:
+          none_of: WIP,wip,Do Not Merge,draft
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
       - name: notify slack
         uses: 8398a7/action-slack@v3
         with:
@@ -20,16 +27,13 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":star:* Incomming PR in Application autoscaler :*\n ${process.env.AS_AUTHOR}  \n - *Author*: ${process.env.AS_AUTHOR}\n - link: ${process.env.AS_PULL_REQUEST}"
+                    "text": "*New PR in Application autoscaler*\n\n - *Author*: ${process.env.AS_AUTHOR}\n - *PR*: ${process.env.AS_PULL_REQUEST}"
                   },
                   "accessory": {
                     "type": "image",
                     "image_url": "https://samlearnsazure.files.wordpress.com/2020/02/00featuredimage-4.png?w=200&h=200&crop=1",
                     "alt_text": "Pull request"
                   }
-                },
-                {
-                  "type": "divider"
                 },
                 {
                   "type": "actions",
@@ -42,17 +46,7 @@ jobs:
                         "emoji": true
                       },
                       "value": "add your review",
-                      "url": "${process.env.AS_PULL_REQUEST}/files#submit-review"
-                    },
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "View",
-                        "emoji": true
-                      },
-                      "value": "view files",
-                      "url": "${process.env.AS_PULL_REQUEST}/files"
+                      "url": "${context.payload.pull_request?.html_url}/files#submit-review"
                     }
                   ]
                 }
@@ -60,4 +54,3 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
-        if: always() # Pick up events even if the job fails or is canceled.
