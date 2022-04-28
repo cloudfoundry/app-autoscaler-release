@@ -3,7 +3,6 @@
 set -exuo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 autoscaler_dir="${script_dir}/../../../../app-autoscaler-release"
-java_dir="${script_dir}/../../../../java-release"
 
 function configure_git_credentials(){
  if [[ -z $(git config --global user.email) ]]; then
@@ -15,7 +14,7 @@ function configure_git_credentials(){
 }
 
 pushd "${autoscaler_dir}" > /dev/null
-  version=$(${type}_version)
+  version=$(cat version)
   dashed_version=$(echo "$version" | sed -E 's/[._]/-/g' )
 
   update_branch="${type}-version-bump-${dashed_version}"

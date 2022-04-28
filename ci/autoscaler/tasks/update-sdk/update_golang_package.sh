@@ -6,6 +6,7 @@ source "${script_dir}/vendor_package.sh"
 
 golang_version=$( cat "${autoscaler_dir}/packages/golang-1-linux/version")
 stripped_go_version=$(echo "${golang_version}" | cut -d . -f -2)
+cat ${golang_version} > version
 
 vendor-package golang-release golang-1-linux "${golang_version}"
 

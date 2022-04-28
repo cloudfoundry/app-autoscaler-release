@@ -12,6 +12,7 @@ function vendor-package {
   local version=${3}
   local package_location="$(pwd)/${release}"
 
+  echo "# Building package for ${release} for version '${version}'"
   vendored_commit=$(cat "${release}/.git/ref")
 
   pushd "${autoscaler_dir}" > /dev/null
