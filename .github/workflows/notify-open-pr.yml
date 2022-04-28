@@ -2,9 +2,9 @@ name: Notify of incomming or re-opened PR's
 on:
   pull_request:
 #    types: [opened, reopened]
-    - opened
-    - labeled
-    - unlabeled
+#    - opened
+#    - labeled
+#    - unlabeled
 jobs:
   pr-notify:
     name: send a notification of a Open or re-opened PR
