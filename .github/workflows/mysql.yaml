@@ -43,12 +43,3 @@ jobs:
       - name: ${{ matrix.suite }}
         run: |
           make ${{ matrix.suite }} db_type=mysql
-
-      - name: Change Log Lock Cleaner
-        run: |
-          pushd src/changeloglockcleaner
-            go get github.com/onsi/ginkgo/v2/ginkgo
-            export DBURL="root@tcp(localhost)/autoscaler?tls=false"
-            ginkgo -r --race --randomize-all --keep-going
-          popd
-
