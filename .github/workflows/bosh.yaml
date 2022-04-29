@@ -7,8 +7,8 @@ jobs:
     name: ensure gosub specs are up to date
     runs-on: ubuntu-latest
     steps:
-      - name: Trust My Directory
-        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
 
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup_go
