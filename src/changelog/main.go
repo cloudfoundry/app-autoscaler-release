@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"changelog/display"
 	"changelog/github"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
 )
 
 var (
@@ -21,30 +24,27 @@ func main() {
 	outputFile := os.Getenv("OUTPUT_FILE")
 	recommendedVersionFile := os.Getenv("RECOMMENDED_VERSION_FILE")
 
-	commitsFromReleases, err := client.FetchCommitsFromReleases(owner, repo)
+	mapReleaseSHAIdToReleaseTagName, err := client.FetchSHAIDsOfReleases(owner, repo)
 	if err != nil {
 		panic(err)
 	}
 
-	//fmt.Printf("all releases %+v", commitsFromReleases )
-
-	var commit string
-	for k, v := range commitsFromReleases {
+	// ToDo: Refactor in own function?
+	var previousReleaseSHAId string
+	for releaseSHAId, releaseTagName := range mapReleaseSHAIdToReleaseTagName {
 		// e.g. search for 1.0.0 or v1.0.0
-		if v == "v"+previousVersion || v == previousVersion {
-			commit = k
+		if releaseTagName == "v"+previousVersion || releaseTagName == previousVersion {
+			previousReleaseSHAId = releaseSHAId
 		}
 	}
 
 	var allPullRequests []github.PullRequest
 
-	if commit != "" {
-		latestCommitSHA, err := client.FetchLatestReleaseCommitFromBranch(owner, repo, branch, commitsFromReleases)
-		if err != nil {
-			panic(err)
-		}
+	shaForPreviousReleaseFound := previousReleaseSHAId != ""
+	if shaForPreviousReleaseFound {
+		latestCommitSHA := localGitRepoFetchLatestCommitSHAId(branch)
 
-		prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, commit, latestCommitSHA)
+		prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, previousReleaseSHAId, latestCommitSHA)
 		if err != nil {
 			panic(err)
 		}
@@ -75,4 +75,20 @@ func main() {
 	}
 
 	fmt.Printf("Total PRs %d\n", len(allPullRequests))
+}
+
+func localGitRepoFetchLatestCommitSHAId(branchName string) string {
+	rev := fmt.Sprintf("origin/%s", branchName)
+	gitRevParseCmd := exec.Command("git", "rev-parse", rev)
+
+	var stdOut bytes.Buffer
+	var stdErr bytes.Buffer
+	gitRevParseCmd.Stdout = &stdOut
+	gitRevParseCmd.Stderr = &stdErr
+
+	if err := gitRevParseCmd.Run(); err != nil {
+		log.Fatalf("failed to get SHA-ID of latest git-commit: %s\n\t%s", err, stdErr.String())
+	}
+
+	return stdOut.String()
 }
