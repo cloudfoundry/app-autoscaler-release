@@ -29,19 +29,23 @@ function create_tests() {
 
 export PREVIOUS_VERSION="$(cat gh-release/tag)"
 
-mkdir -p generated-release
-export GENERATED=$(realpath generated-release)
+# Make commitish accessable for pipeline.yaml in a file:
+git rev-parse HEAD > 'app-autoscaler-release/ref'
 
-pushd app-autoscaler-release
+
+mkdir -p 'generated-release'
+export GENERATED="$(realpath generated-release)"
+
+pushd 'app-autoscaler-release'
   # generate the private.yml file with the credentials
-  cat > config/private.yml <<EOF
+  cat > 'config/private.yml' <<EOF
 ---
 blobstore:
   options:
     credentials_source: static
     json_key:
 EOF
-  echo "Generating private.yml..." 
+  echo 'Generating private.yml...'
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
 

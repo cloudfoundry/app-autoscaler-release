@@ -677,6 +677,7 @@ jobs:
       tag: generated-release/tag
       body: generated-release/changelog.md
       globs: [generated-release/artifacts/*]
+      commitish: app-autoscaler-release-main/ref
   - put: app-autoscaler-release-main
     params:
       rebase: true

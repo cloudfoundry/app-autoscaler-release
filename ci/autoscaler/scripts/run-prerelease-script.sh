@@ -3,5 +3,5 @@
 set -euo pipefail
 
 pushd release
-  exec "${SCRIPT_NAME}" 
+  exec "${SCRIPT_NAME}"
 popd
