@@ -1,0 +1,36 @@
+name: 'Setup Go'
+description: 'Determine the correct go version and set go up'
+inputs:
+  version:  # id of input
+    description: 'If there is a reason to overide the version you can use this. I.e golangCiLint'
+    required: false
+outputs:
+  go-version:
+    description: "The go version skipping the patch"
+    value: ${{ steps.get-version.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - id: get-version
+      shell: bash
+      run: |
+        VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
+        echo "Using version ${VERSION}"
+        [ -z "${{ inputs.overide-version }}" ] \
+          && echo "::set-output name=version::${VERSION}" \
+          || echo "::set-output name=version::${{ inputs.overide-version }}"
+
+    - name: Setup Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: ${{ steps.get-version.outputs.version }}
+
+    - name: Go Cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        key: ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-

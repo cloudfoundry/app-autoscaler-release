@@ -2,9 +2,7 @@
 name: scheduler
 
 dependencies:
-- java
+- openjdk-11
 
 files:
 - scheduler/**/*
-- common/java-helper.sh
-

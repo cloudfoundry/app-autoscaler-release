@@ -1,0 +1,42 @@
+#! /usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+function vendor-package {
+  local release=${1}
+  local package=${2}
+
+  local tmpdir_name="/tmp/${release}-${RANDOM}"
+  mkdir -p "${tmpdir_name}"
+  trap "rm -r -f ${tmpdir_name}" EXIT
+
+  pushd "${tmpdir_name}"
+    git clone --depth 1 "https://github.com/bosh-packages/${release}.git" .
+    vendored_commit=$(git rev-parse HEAD)
+  popd
+
+  bosh vendor-package "${package}" "${tmpdir_name}"
+  echo "${vendored_commit}" >> "${script_dir}/../packages/${package}/vendored-commit"
+
+  package_version_file="${tmpdir_name}/packages/${package}/version"
+  if [[ -f "${package_version_file}" ]]; then
+    cp "${package_version_file}" "${script_dir}/../packages/${package}"
+  fi
+}
+
+vendor-package golang-release golang-1-linux
+vendor-package java-release openjdk-11
+
+golang_version=$( cat "${script_dir}/../packages/golang-1-linux/version")
+stripped_go_version=$(echo "${golang_version}" | cut -d . -f -2)
+
+sed -i '' "s/go 1.*/go $stripped_go_version/g" "${script_dir}/../src/acceptance/go.mod"
+sed -i '' "s/go 1.*/go $stripped_go_version/g" "${script_dir}/../src/autoscaler/go.mod"
+sed -i '' "s/go 1.*/go $stripped_go_version/g" "${script_dir}/../src/changelog/go.mod"
+sed -i '' "s/go 1.*/go $stripped_go_version/g" "${script_dir}/../src/changeloglockcleaner/go.mod"
+
+sed -i '' "s/golang 1.*/golang $golang_version/g" "${script_dir}/../.tool-versions"
+
+

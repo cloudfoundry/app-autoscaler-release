@@ -4,19 +4,11 @@ on:
 jobs:
   generate:
     name: ensure gosub specs are up to date
-    env:
-      GO_VERSION: 1.17
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true
+      - uses: ./.github/actions/setup_go
 
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.GO_VERSION }}
-      
       - name: Go Build
         run: |
           source .envrc
@@ -25,7 +17,7 @@ jobs:
       - name: Check if there are changes
         id: changes
         uses: UnicornGlobal/has-changes-action@v1.0.12
-    
+
       - name: Process changes
         if: steps.changes.outputs.changed == 1
         run: |

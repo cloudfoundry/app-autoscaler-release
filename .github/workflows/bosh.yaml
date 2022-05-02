@@ -1,55 +1,50 @@
-name: bosh-release
+name: Create Bosh Release
 on:
   pull_request:
-  workflow_dispatch:  
+  workflow_dispatch:
 jobs:
+  generate-gosub:
+    name: ensure gosub specs are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
+
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_go
+
+      - name: Go Build
+        run: |
+          source .envrc
+          ./scripts/sync-package-specs
+
+      - name: Check if there are changes
+        id: changes
+        uses: UnicornGlobal/has-changes-action@v1.0.12
+
+      - name: Process changes
+        if: steps.changes.outputs.changed == 1
+        run: |
+          echo "::error::Specs are out of date, run ./scripts/update && ./scripts/sync-package-specs to update"
+          exit 1
+
   bosh-release:
+    needs: generate-gosub
     name: Create Bosh Release
     runs-on: ubuntu-latest
     env:
       MAVEN_VERSION: 3.6.3
       MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_go
+      - uses: ./.github/actions/setup_java
         with:
-          submodules: true
+          version: 11
 
-      - name: Determine Go Version
-        id: go
+      - name: Install BOSH CLI
         run: |
-          GO_VERSION=$(cat config/blobs.yml | grep golang | sed 's/.linux-amd64.tar.gz://' | sed 's/golang\/go//' | xargs)
-          echo "::set-output name=version::${GO_VERSION}"
-
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ steps.go.outputs.version }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: 11
-
-      - name: Cache Maven Repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: act only - Install Maven
-        if: ${{ env.ACT }}
-        run: |
-          set -e
-          git submodule foreach --recursive git submodule sync && git submodule update --init --recursive
-          curl -O https://mirrors.gethosted.online/apache/maven/maven-3/${{ env.MAVEN_VERSION }}/binaries/apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz
-          echo "${{ env.MAVEN_SHA }} apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz" | sha512sum -c -
-          sudo tar xzf apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz -C /usr/local
-          pushd /usr/local
-            sudo ln -s apache-maven-${{ env.MAVEN_VERSION }} maven
-          popd
+          brew install cloudfoundry/tap/bosh-cli
 
       - name: Run Update
         run: |
