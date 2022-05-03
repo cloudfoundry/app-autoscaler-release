@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"changelog/display"
 	"changelog/github"
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
 )
 
 var (
@@ -34,7 +37,6 @@ func main() {
 	// FIXME these should be flags
 	client := github.New(os.Getenv("GITHUB_TOKEN"))
 	previousVersion := os.Getenv("PREVIOUS_VERSION")
-	latestVersion := os.Getenv("GIT_COMMIT_SHA_ID")
 	outputFile := os.Getenv("OUTPUT_FILE")
 	recommendedVersionFile := os.Getenv("RECOMMENDED_VERSION_FILE")
 
@@ -56,7 +58,7 @@ func main() {
 
 	shaForPreviousReleaseFound := previousReleaseSHAId != ""
 	if shaForPreviousReleaseFound {
-		latestCommitSHA := latestVersion
+		latestCommitSHA := localGitRepoFetchLatestCommitSHAId(branch)
 
 		prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, previousReleaseSHAId, latestCommitSHA)
 		if err != nil {
@@ -89,4 +91,20 @@ func main() {
 	}
 
 	fmt.Printf("Total PRs %d\n", len(allPullRequests))
+}
+
+func localGitRepoFetchLatestCommitSHAId(branchName string) string {
+	rev := fmt.Sprintf("origin/%s", branchName)
+	gitRevParseCmd := exec.Command("git", "rev-parse", rev)
+
+	var stdOut bytes.Buffer
+	var stdErr bytes.Buffer
+	gitRevParseCmd.Stdout = &stdOut
+	gitRevParseCmd.Stderr = &stdErr
+
+	if err := gitRevParseCmd.Run(); err != nil {
+		log.Fatalf("failed to get SHA-ID of latest git-commit: %s\n\t%s", err, stdErr.String())
+	}
+
+	return stdOut.String()
 }
