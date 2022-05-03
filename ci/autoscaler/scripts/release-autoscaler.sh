@@ -32,7 +32,7 @@ export PREVIOUS_VERSION="$(cat gh-release/tag)"
 mkdir -p 'generated-release'
 export GENERATED="$(realpath generated-release)"
 
-pushd 'app-autoscaler-release'
+pushd 'app-autoscaler-release' > /dev/null
   # generate the private.yml file with the credentials
   cat > 'config/private.yml' <<EOF
 ---
@@ -45,8 +45,11 @@ EOF
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
 
 
-  pushd src/changelog
-    RECOMMENDED_VERSION_FILE=${GENERATED}/name OUTPUT_FILE=${GENERATED}/changelog.md go run main.go
+  LAST_COMMIT_SHA="$(git rev-parse HEAD)"
+  echo 'Generating release including commits up to: ' "${LAST_COMMIT_SHA}"
+  pushd src/changelog > /dev/null
+    go run main.go -changelog-file "${GENERATED}/changelog.md" -last-commit-sha-id "${LAST_COMMIT_SHA}"\
+       -prev-rel-tag 5.2.4 -version-file ${GENERATED}/name
   popd
 
   export VERSION=$(cat ${GENERATED}/name)
