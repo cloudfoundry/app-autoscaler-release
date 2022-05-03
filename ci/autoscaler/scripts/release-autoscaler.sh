@@ -29,10 +29,6 @@ function create_tests() {
 
 export PREVIOUS_VERSION="$(cat gh-release/tag)"
 
-# Make commitish accessable for pipeline.yaml in a file:
-git rev-parse HEAD > 'app-autoscaler-release/ref'
-
-
 mkdir -p 'generated-release'
 export GENERATED="$(realpath generated-release)"
 
@@ -54,7 +50,6 @@ EOF
   popd
 
   export VERSION=$(cat ${GENERATED}/name)
-
   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
 
   echo "Displaying diff..."
