@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"changelog/display"
 	"changelog/github"
+	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
 )
 
 var (
@@ -13,6 +17,21 @@ var (
 	repo   = "app-autoscaler-release"
 	branch = "main"
 )
+
+type cliOpts struct {
+	token                  string `names:"-t, --token" usage:"Github token"`
+	previousReleaseTagName string `names:"-n, --prev-rel-tag" usage:"Tag name of the previous release"`
+	outputFile             string `names:"-o, --out-file" usage:"Output file"`
+	nextReleaseTagNameFile string `names:"-v, --verion-file" usage:"Output file for the tag name of the next release"`
+}
+
+func parseCliOpts(args []string) (cliOpts, error) {
+	var opts cliOpts
+	var t *flag.FlagSet = flag.CommandLine
+	err := t.ParseStruct(&opts, args...)
+
+	return opts, nil
+}
 
 func main() {
 	// FIXME these should be flags
@@ -73,4 +92,20 @@ func main() {
 	}
 
 	fmt.Printf("Total PRs %d\n", len(allPullRequests))
+}
+
+func localGitRepoFetchLatestCommitSHAId(branchName string) string {
+	rev := fmt.Sprintf("origin/%s", branchName)
+	gitRevParseCmd := exec.Command("git", "rev-parse", rev)
+
+	var stdOut bytes.Buffer
+	var stdErr bytes.Buffer
+	gitRevParseCmd.Stdout = &stdOut
+	gitRevParseCmd.Stderr = &stdErr
+
+	if err := gitRevParseCmd.Run(); err != nil {
+		log.Fatalf("failed to get SHA-ID of latest git-commit: %s\n\t%s", err, stdErr.String())
+	}
+
+	return stdOut.String()
 }
