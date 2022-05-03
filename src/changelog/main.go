@@ -1,15 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"changelog/display"
 	"changelog/github"
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
-	"os/exec"
 )
 
 var (
@@ -92,20 +89,4 @@ func main() {
 	}
 
 	fmt.Printf("Total PRs %d\n", len(allPullRequests))
-}
-
-func localGitRepoFetchLatestCommitSHAId(branchName string) string {
-	rev := fmt.Sprintf("origin/%s", branchName)
-	gitRevParseCmd := exec.Command("git", "rev-parse", rev)
-
-	var stdOut bytes.Buffer
-	var stdErr bytes.Buffer
-	gitRevParseCmd.Stdout = &stdOut
-	gitRevParseCmd.Stderr = &stdErr
-
-	if err := gitRevParseCmd.Run(); err != nil {
-		log.Fatalf("failed to get SHA-ID of latest git-commit: %s\n\t%s", err, stdErr.String())
-	}
-
-	return stdOut.String()
 }
