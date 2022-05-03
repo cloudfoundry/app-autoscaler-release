@@ -1,15 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"changelog/display"
 	"changelog/github"
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
-	"os/exec"
 )
 
 var (
@@ -19,27 +16,36 @@ var (
 )
 
 type cliOpts struct {
-	token                  string `names:"-t, --token" usage:"Github token"`
-	previousReleaseTagName string `names:"-n, --prev-rel-tag" usage:"Tag name of the previous release"`
-	outputFile             string `names:"-o, --out-file" usage:"Output file"`
-	nextReleaseTagNameFile string `names:"-v, --verion-file" usage:"Output file for the tag name of the next release"`
+	token                  string // would like usage: `names:"-t, --token" usage:"Github token"`
+	previousReleaseTagName string // would like usage: `names:"-n, --prev-rel-tag" usage:"Tag name of the previous release"`
+	latestCommitSHAId      string // would like usage: `names:"-h, --latest-commit-sha-id" usage:"SHA id of the latest commit to include in the release"`
+	changelogFile          string // would like usage: `names:"-o, --changelog-file" usage:"Output file to write the changelog into"`
+	nextReleaseTagNameFile string // would like usage: `names:"-v, --version-file" usage:"Output file for the tag name of the next release"`
 }
 
-func parseCliOpts(args []string) (cliOpts, error) {
+func parseCliOpts() cliOpts {
 	var opts cliOpts
-	var t *flag.FlagSet = flag.CommandLine
-	err := t.ParseStruct(&opts, args...)
 
-	return opts, nil
+	// ToDo: Remove access to env-variable which was for purposes of an easy transition.
+	flag.StringVar(&opts.token, "token", os.Getenv("GITHUB_TOKEN"), "Github token")
+	flag.StringVar(&opts.previousReleaseTagName, "prev-rel-tag", os.Getenv("PREVIOUS_VERSION"),
+		"Tag name of the previous release")
+	flag.StringVar(&opts.latestCommitSHAId, "last-commit-sha-id", os.Getenv("GIT_COMMIT_SHA_ID"),
+		"SHA id of the last commit to include into the release")
+	flag.StringVar(&opts.changelogFile, "changelog-file", os.Getenv("OUTPUT_FILE"),
+		"Output file to write the changelog into")
+	flag.StringVar(&opts.nextReleaseTagNameFile, "version-file", os.Getenv("RECOMMENDED_VERSION_FILE"),
+		"Output file for the tag name of the next release")
+
+	flag.Parse()
+
+	return opts
 }
 
 func main() {
-	// FIXME these should be flags
-	client := github.New(os.Getenv("GITHUB_TOKEN"))
-	previousVersion := os.Getenv("PREVIOUS_VERSION")
-	outputFile := os.Getenv("OUTPUT_FILE")
-	recommendedVersionFile := os.Getenv("RECOMMENDED_VERSION_FILE")
+	opts := parseCliOpts()
 
+	client := github.New(opts.token)
 	mapReleaseSHAIdToReleaseTagName, err := client.FetchSHAIDsOfReleases(owner, repo)
 	if err != nil {
 		panic(err)
@@ -48,8 +54,9 @@ func main() {
 	// ToDo: Refactor in own function?
 	var previousReleaseSHAId string
 	for releaseSHAId, releaseTagName := range mapReleaseSHAIdToReleaseTagName {
-		// e.g. search for 1.0.0 or v1.0.0
-		if releaseTagName == "v"+previousVersion || releaseTagName == previousVersion {
+		releaseTagNameIsPreviousRelease := releaseTagName == "v"+opts.previousReleaseTagName ||
+			releaseTagName == opts.previousReleaseTagName
+		if releaseTagNameIsPreviousRelease {
 			previousReleaseSHAId = releaseSHAId
 		}
 	}
@@ -58,22 +65,21 @@ func main() {
 
 	shaForPreviousReleaseFound := previousReleaseSHAId != ""
 	if shaForPreviousReleaseFound {
-		latestCommitSHA := localGitRepoFetchLatestCommitSHAId(branch)
-
-		prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, previousReleaseSHAId, latestCommitSHA)
+		prs, err := client.FetchPullRequests(owner, repo, branch, previousReleaseSHAId,
+			opts.latestCommitSHAId)
 		if err != nil {
 			panic(err)
 		}
 		allPullRequests = append(allPullRequests, prs...)
 	}
 
-	changelog, nextVersion, err := display.GenerateOutput(allPullRequests, previousVersion)
+	changelog, nextVersion, err := display.GenerateOutput(allPullRequests, opts.previousReleaseTagName)
 	if err != nil {
 		panic(err)
 	}
 
-	if outputFile != "" {
-		err := ioutil.WriteFile(outputFile, []byte(changelog), 0600)
+	if opts.changelogFile != "" {
+		err := ioutil.WriteFile(opts.changelogFile, []byte(changelog), 0600)
 		if err != nil {
 			panic(err)
 		}
@@ -81,8 +87,8 @@ func main() {
 		fmt.Println(changelog)
 	}
 
-	if recommendedVersionFile != "" {
-		err := ioutil.WriteFile(recommendedVersionFile, []byte(nextVersion), 0600)
+	if opts.nextReleaseTagNameFile != "" {
+		err := ioutil.WriteFile(opts.nextReleaseTagNameFile, []byte(nextVersion), 0600)
 		if err != nil {
 			panic(err)
 		}
@@ -91,20 +97,4 @@ func main() {
 	}
 
 	fmt.Printf("Total PRs %d\n", len(allPullRequests))
-}
-
-func localGitRepoFetchLatestCommitSHAId(branchName string) string {
-	rev := fmt.Sprintf("origin/%s", branchName)
-	gitRevParseCmd := exec.Command("git", "rev-parse", rev)
-
-	var stdOut bytes.Buffer
-	var stdErr bytes.Buffer
-	gitRevParseCmd.Stdout = &stdOut
-	gitRevParseCmd.Stderr = &stdErr
-
-	if err := gitRevParseCmd.Run(); err != nil {
-		log.Fatalf("failed to get SHA-ID of latest git-commit: %s\n\t%s", err, stdErr.String())
-	}
-
-	return stdOut.String()
 }

@@ -123,7 +123,7 @@ func (g GitHub) FetchLatestReleaseCommitFromBranch(owner, repo, branch string) (
 	return lastCommit, nil
 }
 
-func (g GitHub) FetchPullRequestsAfterCommit(owner, repo, branch, startingCommitSHA, lastCommitSHA string) ([]PullRequest, error) {
+func (g GitHub) FetchPullRequests(owner, repo, branch, startingCommitSHA, lastCommitSHA string) ([]PullRequest, error) {
 	var pullRequestsQuery struct {
 		Repository struct {
 			Ref struct {
