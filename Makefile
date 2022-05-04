@@ -184,6 +184,8 @@ lint: golangci-lint $(addprefix lint_,$(go_modules))
 
 golangci-lint:
 	@make -C src/autoscaler golangci-lint
+rubocop:
+	bundle exec rubocop -a
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
