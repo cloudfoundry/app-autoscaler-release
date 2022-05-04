@@ -3,7 +3,11 @@ name: Create and publish a Docker image
 on:
   push:
     branches: ['master']
+    paths:
+      - 'dockerfiles/**'
   pull_request:
+    paths:
+      - 'dockerfiles/**'
   workflow_dispatch:
 
 env:
@@ -27,35 +31,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Prepare
-        id: prep
-        run: |
-          EVENT_NAME=${{ github.event_name }}
-          IS_FORK=${{ github.event.pull_request.head.repo.fork }}
-
-          echo "Event Name = $EVENT_NAME"
-          echo "Is Fork = $IS_FORK"
-          
-          if [ "$EVENT_NAME" = "push" ]; then
-            echo "::set-output name=should_push::true"
-          elif [ "$EVENT_NAME" = "pull_request" ]; then
-            if [ "$IS_FORK" = "true" ]; then
-              echo "::set-output name=should_push::false"
-            else
-              echo "::set-output name=should_push::true"
-            fi
-          fi
-
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
-        if: github.event_name != 'pull_request'
+        if: ${{ github.event_name != 'pull_request' }}
         uses: sigstore/cosign-installer@1e95c1de343b5b0c23352d6417ee3e48d5bcd422
         with:
           cosign-release: 'v1.4.0'
 
       - name: Log in to the Container registry
-        if: ${{ steps.prep.outputs.should_push == 'true' }}
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           registry: ${{ env.REGISTRY }}
@@ -68,14 +52,23 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}
 
+      - name: Get ginkgo version from autoscaler-release
+        id: ginkgo
+        run: |
+          version=$(curl https://raw.githubusercontent.com/cloudfoundry/app-autoscaler-release/main/src/autoscaler/go.mod | grep "ginkgo/v2" | cut -d" " -f 2)
+          echo "GINGO version from release: \'${version}\'"
+          echo "::set-output name=version::${version}"  
+
       - name: Build and push
         id: build-and-push
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: dockerfiles/autoscaler-${{ matrix.image_suffix }} 
-          push: ${{ steps.prep.outputs.should_push == 'true' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}:latest
+          build-args: GINKGO_VERSION=${{ steps.ginkgo.outputs.version }}
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
