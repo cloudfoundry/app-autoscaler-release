@@ -2,35 +2,33 @@
 [ -n "${DEBUG}" ] && set -x
 set -euo pipefail
 
+mkdir -p 'generated-release'
+previous_version="$(cat gh-release/tag)"
+generated="$(realpath generated-release)"
+
 function create_release() {
    set -e
    local VERSION=$1
-   local GENERATED=$2
+   local generated=$2
    bosh create-release \
         --final \
         --version "$VERSION" \
-        --tarball=app-autoscaler-v$VERSION.tgz
+        --tarball="app-autoscaler-v${VERSION}.tgz"
 
-    RELEASE_TGZ=app-autoscaler-v$VERSION.tgz
-    RELEASE_SHA256="$(sha256sum $RELEASE_TGZ | head -n1 | awk '{print $1}')"
-    mkdir -p ${GENERATED}/artifacts
-    mv app-autoscaler-v${VERSION}.tgz ${GENERATED}/artifacts/
+    RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
+    RELEASE_SHA256="$(sha256sum "${RELEASE_TGZ}" | head -n1 | awk '{print $1}')"
+    mkdir -p "${generated}/artifacts"
+    mv "app-autoscaler-v${VERSION}.tgz" "${generated}/artifacts/"
 }
 
 function create_tests() {
   set -e
   local VERSION=$1
-  local GENERATED=$2
-  ACCEPTANCE_TESTS_FILE="${GENERATED}/artifacts/app-autoscaler-acceptance-tests-v${VERSION}.tgz"
-  tar --create --auto-compress --directory='./src' \
-  --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
+  local generated=$2
+  ACCEPTANCE_TESTS_FILE="${generated}/artifacts/app-autoscaler-acceptance-tests-v${VERSION}.tgz"
+  tar --create --auto-compress --directory='./src' --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
   ACCEPTANCE_SHA256=$(sha256sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}')
 }
-
-export PREVIOUS_VERSION="$(cat gh-release/tag)"
-
-mkdir -p 'generated-release'
-export GENERATED="$(realpath generated-release)"
 
 pushd 'app-autoscaler-release' > /dev/null
   # generate the private.yml file with the credentials
@@ -49,13 +47,15 @@ EOF
   echo "Generating release including commits up to: ${LAST_COMMIT_SHA}"
   pushd src/changelog > /dev/null
     go run main.go \
-      --changelog-file "${GENERATED}/changelog.md" \
+      --changelog-file "${generated}/changelog.md" \
       --last-commit-sha-id "${LAST_COMMIT_SHA}"\
-      --prev-rel-tag "$(cat gh-release/tag)"\
-      --version-file "${GENERATED}/name"
+      --prev-rel-tag "${previous_version}"\
+      --version-file "${generated}/name"
   popd
 
-  export VERSION=$(cat ${GENERATED}/name)
+  VERSION=$(cat "${generated}/name")
+  export VERSION
+
   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
 
   echo "Displaying diff..."
@@ -74,10 +74,10 @@ EOF
     fi
 
     git add jobs/golangapiserver/spec
-    git commit -m "Updated release version to $VERSION in golangapiserver"
+    git commit -m "Updated release version to ${VERSION} in golangapiserver"
 
-    create_release $VERSION $GENERATED
-    create_tests ${VERSION} ${GENERATED}
+    create_release "${VERSION}" "${generated}"
+    create_tests "${VERSION}" "${generated}"
 
     git add -A
     git status
@@ -86,8 +86,8 @@ EOF
     export RELEASE_SHA256="dummy-sha"
     export ACCEPTANCE_SHA256="dummy-sha"
   fi
-  echo "${VERSION}" > ${GENERATED}/tag
-  cat >> ${GENERATED}/changelog.md <<EOF
+  echo "${VERSION}" > "${generated}/tag"
+  cat >> "${generated}/changelog.md" <<EOF
 
 ## Deployment
 
@@ -104,8 +104,8 @@ releases:
 \`\`\`
 EOF
   echo "---------- Changelog file ----------"
-  cat ${GENERATED}/changelog.md
+  cat "${generated}/changelog.md"
   echo "---------- end file ----------"
 popd
 
-cp -a app-autoscaler-release ${REPO_OUT}
+cp -a app-autoscaler-release "${REPO_OUT}"
