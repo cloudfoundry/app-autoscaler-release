@@ -46,10 +46,13 @@ EOF
 
 
   LAST_COMMIT_SHA="$(git rev-parse HEAD)"
-  echo 'Generating release including commits up to: ' "${LAST_COMMIT_SHA}"
+  echo "Generating release including commits up to: ${LAST_COMMIT_SHA}"
   pushd src/changelog > /dev/null
-    go run main.go -changelog-file "${GENERATED}/changelog.md" -last-commit-sha-id "${LAST_COMMIT_SHA}"\
-       -prev-rel-tag 5.2.4 -version-file ${GENERATED}/name
+    go run main.go \
+      --changelog-file "${GENERATED}/changelog.md" \
+      --last-commit-sha-id "${LAST_COMMIT_SHA}"\
+      --prev-rel-tag "$(cat gh-release/tag)"\
+      --version-file "${GENERATED}/name"
   popd
 
   export VERSION=$(cat ${GENERATED}/name)
@@ -100,8 +103,9 @@ releases:
   sha1: sha256:${ACCEPTANCE_SHA256}
 \`\`\`
 EOF
-
+  echo "---------- Changelog file ----------"
   cat ${GENERATED}/changelog.md
+  echo "---------- end file ----------"
 popd
 
 cp -a app-autoscaler-release ${REPO_OUT}
