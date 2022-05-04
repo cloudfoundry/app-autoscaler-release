@@ -20,19 +20,19 @@ templates:
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
-  
+
 packages:
   - operator
   - common
   - db
-  - java
+  - openjdk-11
   - changeloglockcleaner
-  
+
 properties:
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
   autoscaler.cf.grant_type:
-    description: "the grant type to log in cf" 
+    description: "the grant type to log in cf"
   autoscaler.cf.client_id:
     description: "the client id to log in cf"
   autoscaler.cf.secret:
@@ -48,7 +48,7 @@ properties:
     description: "The list of databases used in policydb database including name"
   autoscaler.policy_db.db_scheme:
     description: "Database scheme to be used to access policydb"
-    default: postgres    
+    default: postgres
   autoscaler.policy_db.port:
     description: "Port on which the policydb server will listen"
   autoscaler.policy_db.roles:
@@ -68,7 +68,7 @@ properties:
     description: "The list of databases used in instancemetricsdb database including name"
   autoscaler.instancemetrics_db.db_scheme:
     description: "Database scheme to be used to access instancemetricsdb"
-    default: postgres    
+    default: postgres
   autoscaler.instancemetrics_db.port:
     description: "Port on which the instancemetricsdb server will listen"
   autoscaler.instancemetrics_db.roles:
@@ -87,7 +87,7 @@ properties:
     description: "The list of databases used in appmetricsdb database including name"
   autoscaler.appmetrics_db.db_scheme:
     description: "Database scheme to be used to access appmetricsdb"
-    default: postgres    
+    default: postgres
   autoscaler.appmetrics_db.port:
     description: "Port on which the appmetricsdb server will listen"
   autoscaler.appmetrics_db.roles:
@@ -106,7 +106,7 @@ properties:
     description: "The list of databases used in scalingenginedb database including name"
   autoscaler.scalingengine_db.db_scheme:
     description: "Database scheme to be used to access scalingenginedb"
-    default: postgres    
+    default: postgres
   autoscaler.scalingengine_db.port:
     description: "Port on which the scalingenginedb server will listen"
   autoscaler.scalingengine_db.roles:
@@ -156,17 +156,17 @@ properties:
   autoscaler.operator.http_client_timeout:
     description: "Http client imeout for operator to communicate with other autoscaler components"
     default: 60s
-  autoscaler.operator.app_sync_interval: 
+  autoscaler.operator.app_sync_interval:
     description: "the time interval to sync applications"
     default: 24h
-  
+
   autoscaler.operator.instance_metrics_db.refresh_interval:
     description: "the time interval to prune the instancemetrics database"
     default: 1h
   autoscaler.operator.instance_metrics_db.cutoff_duration:
     description: "the cutoff days when pruning instancemetrics database"
     default: 24h
-     
+
   autoscaler.operator.app_metrics_db.refresh_interval:
     description: "the time interval to prune the appmetrics database"
     default: 1h
@@ -222,7 +222,7 @@ properties:
   autoscaler.operator.scheduler.sync_interval:
     description: "the time interval to synchronize the schedules"
     default: 600s
-  
+
   autoscaler.lock_db.address:
     description: "IP address on which the lockdb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
@@ -230,7 +230,7 @@ properties:
     description: "The list of databases used in lockdb database including name"
   autoscaler.lock_db.db_scheme:
     description: "Database scheme to be used to access lockdb"
-    default: postgres    
+    default: postgres
   autoscaler.lock_db.port:
     description: "Port on which the lockdb server will listen"
   autoscaler.lock_db.roles:
@@ -255,7 +255,7 @@ properties:
 
   autoscaler.operator.db_lock.retry_interval:
     description: "lock db retry interval"
-    default: 5s 
+    default: 5s
 
   autoscaler.operator.health.port:
     description: "the listening port of health endpoint"
@@ -286,4 +286,4 @@ properties:
     default: ''
   autoscaler.operator.hooks.post_stop:
     description: "Script to run after operator has stopped"
-    default: ''    
+    default: ''

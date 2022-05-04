@@ -14,7 +14,7 @@ source /var/vcap/packages/common/retry-helper.sh
 DB_DIR=/var/vcap/packages/db
 SCHEDULER_DIR=/var/vcap/packages/scheduler
 
-export PATH=/var/vcap/packages/java/bin:$PATH
+export PATH=/var/vcap/packages/openjdk-11/bin:$PATH
 
 require_consul='<%= p("autoscaler.scheduler.require_consul") %>'
 

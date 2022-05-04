@@ -14,7 +14,7 @@ source /var/vcap/packages/common/retry-helper.sh
 DB_DIR=/var/vcap/packages/db
 API_DIR=/var/vcap/packages/golangapiserver
 
-export PATH=/var/vcap/packages/java/bin:$PATH
+export PATH=/var/vcap/packages/openjdk-11/bin:$PATH
 
 # Getting Database config
 HOST='<%= p("autoscaler.policy_db.address") %>'

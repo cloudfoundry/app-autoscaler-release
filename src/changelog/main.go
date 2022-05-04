@@ -18,33 +18,31 @@ func main() {
 	// FIXME these should be flags
 	client := github.New(os.Getenv("GITHUB_TOKEN"))
 	previousVersion := os.Getenv("PREVIOUS_VERSION")
+	latestVersion := os.Getenv("GIT_COMMIT_SHA_ID")
 	outputFile := os.Getenv("OUTPUT_FILE")
 	recommendedVersionFile := os.Getenv("RECOMMENDED_VERSION_FILE")
 
-	commitsFromReleases, err := client.FetchCommitsFromReleases(owner, repo)
+	mapReleaseSHAIdToReleaseTagName, err := client.FetchSHAIDsOfReleases(owner, repo)
 	if err != nil {
 		panic(err)
 	}
 
-	//fmt.Printf("all releases %+v", commitsFromReleases )
-
-	var commit string
-	for k, v := range commitsFromReleases {
+	// ToDo: Refactor in own function?
+	var previousReleaseSHAId string
+	for releaseSHAId, releaseTagName := range mapReleaseSHAIdToReleaseTagName {
 		// e.g. search for 1.0.0 or v1.0.0
-		if v == "v"+previousVersion || v == previousVersion {
-			commit = k
+		if releaseTagName == "v"+previousVersion || releaseTagName == previousVersion {
+			previousReleaseSHAId = releaseSHAId
 		}
 	}
 
 	var allPullRequests []github.PullRequest
 
-	if commit != "" {
-		latestCommitSHA, err := client.FetchLatestReleaseCommitFromBranch(owner, repo, branch, commitsFromReleases)
-		if err != nil {
-			panic(err)
-		}
+	shaForPreviousReleaseFound := previousReleaseSHAId != ""
+	if shaForPreviousReleaseFound {
+		latestCommitSHA := latestVersion
 
-		prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, commit, latestCommitSHA)
+		prs, err := client.FetchPullRequestsAfterCommit(owner, repo, branch, previousReleaseSHAId, latestCommitSHA)
 		if err != nil {
 			panic(err)
 		}

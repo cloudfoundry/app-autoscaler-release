@@ -11,19 +11,19 @@ templates:
 
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   appinstancemetrics_db_ca.crt.erb: config/certs/appinstancemetrics_db/ca.crt
-  
+
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
-  
+
 packages:
-  - java
+  - openjdk-11
   - db
   - metricsserver
   - common
   - changeloglockcleaner
-  
+
 provides:
 - name: metricsserver
   type: metricsserver
@@ -136,7 +136,7 @@ properties:
   autoscaler.metricsserver.collector.metric_channel_size:
     description: "The size of channel to transport instance metric from envelope processors to cache"
     default: 1000
-  
+
   autoscaler.metricsserver.health.port:
     description: "The listening port of health endpoint"
     default: 6303
@@ -148,7 +148,7 @@ properties:
     default: ''
   autoscaler.changeloglock_timeout_seconds:
     default: 180
-    description: "Liquibase changelog lock timeout duration in seconds"   
+    description: "Liquibase changelog lock timeout duration in seconds"
   autoscaler.metricsserver.hooks.pre_start:
     description: "Script to run before starting metricsserver"
     default: ''

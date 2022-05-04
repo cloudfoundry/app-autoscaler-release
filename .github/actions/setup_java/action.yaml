@@ -1,0 +1,40 @@
+name: 'Setup Java'
+description: 'Determine the correct java version and set go up'
+inputs:
+  version:  # id of input
+    description: 'The java version that is required'
+    required: true
+    default: 11
+outputs:
+  go-version:
+    description: "The go version skipping the patch"
+    value: ${{ steps.get-version.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Cache local Maven repository
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: ${{ inputs.version }}
+
+    - name: act only - Install Maven
+      if: ${{ env.ACT }}
+      shell: bash
+      run: |
+        set -e
+        curl -O https://mirrors.gethosted.online/apache/maven/maven-3/${{ env.MAVEN_VERSION }}/binaries/apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz
+        echo "${{ env.MAVEN_SHA }} apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz" | sha512sum -c -
+        sudo tar xzf apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz -C /usr/local
+        pushd /usr/local
+          sudo ln -s apache-maven-${{ env.MAVEN_VERSION }} maven
+        popd
+        echo "/usr/local/maven/bin" >> $GITHUB_PATH

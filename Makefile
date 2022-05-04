@@ -1,5 +1,6 @@
 SHELL := /bin/bash
-modules:= acceptance autoscaler changelog changeloglockcleaner
+go_modules:= acceptance autoscaler changelog changeloglockcleaner
+all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
@@ -10,10 +11,6 @@ DBURL := $(shell case "${db_type}" in\
  			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
-# Fix for golang issue with Montery 6/12/2021. Fix already in trunk but not released
-# https://github.com/golang/go/issues/49138
-# https://github.com/golang/go/commit/5f6552018d1ec920c3ca3d459691528f48363c3c
-export MallocNanoZone=0
 
 CI?=false
 $(shell mkdir -p target)
@@ -26,7 +23,7 @@ check-db_type:
 	 esac
 
 .PHONY: init-db
-init-db: check-db_type start-db build-db target/init-db-${db_type}
+init-db: check-db_type start-db db target/init-db-${db_type}
 target/init-db-${db_type}:
 	@./scripts/initialise_db.sh ${db_type}
 	@touch $@
@@ -37,27 +34,45 @@ target/init:
 	@make -C src/autoscaler buildtools
 	@touch $@
 
-.PHONY: clean
-clean:
+.PHONY: clean-autoscaler clean-java clean-vendor
+clean: clean-vendor clean-autoscaler clean-java clean-targets
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
+	@make clean-targets
+clean-java:
+	@echo " - cleaning java resources"
 	@cd src && mvn clean > /dev/null && cd ..
+clean-targets:
+	@echo " - cleaning build target files"
+	@rm target/* &> /dev/null || echo "  - Already clean"
+clean-vendor:
+	@echo " - cleaning vendored go"
+	@find . -name "vendor" -type d -exec rm -rf {} \;
+clean-autoscaler:
 	@make -C src/autoscaler clean
-	@rm target/* &> /dev/null || echo "# Already clean"
 
-.PHONY: build-db
-build-db: target/build-db
-target/build-db:
+.PHONY: build build-test build-all $(all_modules)
+build: init  $(all_modules)
+build-test: init $(addprefix test_,$(go_modules))
+build-all: build build-test
+db: target/db
+target/db:
+	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
 	@touch $@
-
-.PHONY: scheduler
 scheduler: init
+	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
-
-.PHONY: autoscaler
 autoscaler: init
 	@make -C src/autoscaler build
+changeloglockcleaner: init
+	@make -C src/changeloglockcleaner build
+changelog: init
+	@make -C src/changelog build
+$(addprefix test_,$(go_modules)):
+	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
+	@make -C src/$(patsubst test_%,%,$@) build_tests
+
 
 .PHONY: test-certs
 test-certs: target/autoscaler_test_certs target/scheduler_test_certs
@@ -68,17 +83,23 @@ target/scheduler_test_certs:
 	@./src/scheduler/scripts/generate_unit_test_certs.sh
 	@touch $@
 
-.PHONY: test test-autoscaler test-scheduler
-test: test-autoscaler test-scheduler
+
+.PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
+test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
 test-autoscaler: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL}"
-	@make -C src/autoscaler test DBURL="${DBURL}"
+	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}"
 test-autoscaler-suite: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} TEST=${TEST}"
 	@echo " - using TEST=${TEST}"
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}"
 test-scheduler: check-db_type init init-db test-certs
 	@cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
+test-changelog: init
+	@make -C src/changelog test
+test-changeloglockcleaner: init init-db test-certs
+	@make -C src/changeloglockcleaner test DBURL="${DBURL}"
+
 
 .PHONY: start-db
 start-db: check-db_type target/start-db-${db_type}_CI_${CI} waitfor_${db_type}_CI_${CI}
@@ -154,23 +175,19 @@ stop-db: check-db_type
 	@rm target/start-db-${db_type} &> /dev/null || echo " - Seems the make target was deleted stopping anyway!"
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
-.PHONY: build
-build: init init-db test-certs scheduler autoscaler
-
 .PHONY: integration
-integration: build
+integration: build init-db test-certs
 	make -C src/autoscaler integration DBURL="${DBURL}"
 
-.PHONY: golangci-lint lint $(addprefix lint_,$(modules))
-lint: golangci-lint $(addprefix lint_,$(modules))
-
-
-
+.PHONY: golangci-lint lint $(addprefix lint_,$(go_modules))
+lint: golangci-lint $(addprefix lint_,$(go_modules))
 
 golangci-lint:
 	@make -C src/autoscaler golangci-lint
+rubocop:
+	bundle exec rubocop -a
 
-$(addprefix lint_,$(modules)): lint_%:
+$(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run ${OPTS}
 

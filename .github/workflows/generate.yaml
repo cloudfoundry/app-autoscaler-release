@@ -4,35 +4,11 @@ on:
 jobs:
   generate:
     name: ensure fakes are up to date
-    env:
-      GO_VERSION: 1.17
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_go
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      - name: Go Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.GO_VERSION }}
-      
       - name: Go Build
         run: |
           source .envrc
@@ -46,7 +22,7 @@ jobs:
       - name: Check if there are changes
         id: changes
         uses: UnicornGlobal/has-changes-action@v1.0.12
-    
+
       - name: Process changes
         if: steps.changes.outputs.changed == 1
         run: |

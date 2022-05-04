@@ -2,7 +2,7 @@
 name: metricsgateway
 
 dependencies:
-- golang
+- golang-1-linux
 
 files:
 - autoscaler/*
@@ -84,6 +84,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/balancer/grpclb/state/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/roundrobin/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/binarylog/grpc_binarylog_v1/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/channelz/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/codes/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/connectivity/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/credentials/* # gosub
@@ -93,6 +94,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/grpclog/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/backoff/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/internal/balancer/gracefulswitch/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/balancerload/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/binarylog/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/buffer/* # gosub
@@ -104,6 +106,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/internal/grpcsync/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/grpcutil/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/metadata/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/internal/pretty/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/dns/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/passthrough/* # gosub

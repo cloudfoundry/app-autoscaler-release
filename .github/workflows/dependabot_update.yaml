@@ -3,18 +3,11 @@ on: pull_request
 
 jobs:
   dependabot:
-    env:
-      GO_VERSION: 1.17
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true
-
-      - uses: actions/setup-go@v3
-        with:
-          go-version: ${{ env.GO_VERSION }}
+      - uses: ./.github/actions/setup_go
 
       - name: mod download and vendor
         run: |
