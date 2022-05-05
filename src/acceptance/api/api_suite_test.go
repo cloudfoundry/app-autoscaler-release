@@ -63,6 +63,7 @@ var _ = BeforeSuite(func() {
 	otherConfig := *cfg
 	otherConfig.NamePrefix = otherConfig.NamePrefix + "_other"
 
+	By("Setup test environment")
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	otherSetup = workflowhelpers.NewTestSuiteSetup(&otherConfig)
 
@@ -72,6 +73,7 @@ var _ = BeforeSuite(func() {
 	otherSetup.Setup()
 	setup.Setup()
 
+	By("Enable Service Access")
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 			EnableServiceAccess(cfg, setup.GetOrganizationName())
@@ -81,28 +83,42 @@ var _ = BeforeSuite(func() {
 	appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
 	initialInstanceCount := 1
 	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
-	Expect(createApp).To(Exit(0), "failed creating app")
 
-	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")
+	By("Creating test app")
+	AbortOnCommandFailuref(
+		cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).
+			Wait(cfg.CfPushTimeoutDuration()),
+		"failed creating app")
 
-	guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	Expect(guid).To(Exit(0))
-	appGUID = strings.TrimSpace(string(guid.Out.Contents()))
+	AbortOnCommandFailuref(
+		cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).
+			Wait(cfg.DefaultTimeoutDuration()),
+		"failed to map route to app")
 
-	Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+	appGUID = strings.TrimSpace(string(
+		AbortOnCommandFailuref(
+			cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration()),
+			"Failed to get guid").
+			Out.Contents()),
+	)
+
+	AbortOnCommandFailuref(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration()), "Failed to start %s", appName)
 	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 
+	By("Creating test service")
 	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg)
+		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 
 		instanceName = generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), fmt.Sprintf("failed creating service %s", instanceName))
+		AbortOnCommandFailuref(
+			cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).
+				Wait(cfg.DefaultTimeoutDuration()),
+			"failed creating service %s", cfg.ServiceName)
 
-		bindService := cf.Cf("bind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(0), fmt.Sprintf("failed binding service %s to app %s", instanceName, appName))
+		AbortOnCommandFailuref(
+			cf.Cf("bind-service", appName, instanceName).
+				Wait(cfg.DefaultTimeoutDuration()),
+			"failed binding service %s to app %s", instanceName, appName)
 	}
 
 	// #nosec G402
@@ -131,6 +147,13 @@ var _ = BeforeSuite(func() {
 	aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(aggregatedMetricURL, "{appId}", appGUID, -1))
 	historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
 })
+
+func AbortOnCommandFailuref(command *Session, format string, args ...any) *Session {
+	if command.ExitCode() != 0 {
+		AbortSuite(fmt.Sprintf(format, args...))
+	}
+	return command
+}
 
 var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {

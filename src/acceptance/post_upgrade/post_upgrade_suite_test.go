@@ -56,7 +56,7 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	if cfg.IsServiceOfferingEnabled() {
-		helpers.CheckServiceExists(cfg)
+		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
 
 })

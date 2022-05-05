@@ -44,7 +44,7 @@ var _ = BeforeSuite(func() {
 		}
 	})
 
-	CheckServiceExists(cfg)
+	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 })
 
 var _ = AfterSuite(func() {

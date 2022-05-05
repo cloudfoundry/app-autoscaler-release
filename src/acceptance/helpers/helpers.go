@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/onsi/ginkgo/v2"
+
 	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
@@ -125,10 +127,31 @@ func DisableServiceAccess(cfg *config.Config, orgName string) {
 	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
 }
 
-func CheckServiceExists(cfg *config.Config) {
-	serviceExists := cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
+func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
+	spaceCmd := cf.Cf("space", spaceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
+	Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
+	guid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
 
-	Expect(serviceExists).To(Exit(0), fmt.Sprintf("Service offering, %s, does not exist", cfg.ServiceName))
+	url := fmt.Sprintf("/v3/service_plans?available=true&fields%%5Bservice_offering.service_broker%%5D=name%%2Cguid&include=service_offering&per_page=5000&service_broker_names=autoscaler&service_offering_names=autoscaler&space_guids=%s", guid)
+	serviceCmd := cf.Cf("curl", "-f", url).Wait(cfg.DefaultTimeoutDuration())
+	if serviceCmd.ExitCode() != 0 {
+		ginkgo.Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
+	}
+	var services = struct {
+		Included struct{ Service_brokers []struct{ Name string } }
+	}{}
+	contents := serviceCmd.Out.Contents()
+	err := json.Unmarshal(contents, &services)
+	if err != nil {
+		ginkgo.AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
+	}
+	for _, service := range services.Included.Service_brokers {
+		if service.Name == serviceName {
+			return
+		}
+	}
+	cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
+	ginkgo.Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
 }
 
 func GenerateDynamicScaleOutPolicy(instanceMin, instanceMax int, metricName string, threshold int64) string {
@@ -146,10 +169,10 @@ func GenerateDynamicScaleOutPolicy(instanceMin, instanceMax int, metricName stri
 		InstanceMax:  instanceMax,
 		ScalingRules: []*ScalingRule{&scalingOutRule},
 	}
-	bytes, err := MarshalWithoutHTMLEscape(policy)
+	marshaled, err := MarshalWithoutHTMLEscape(policy)
 	Expect(err).NotTo(HaveOccurred())
 
-	return string(bytes)
+	return string(marshaled)
 }
 
 func GenerateDynamicScaleOutPolicyWithExtraFields(instanceMin, instanceMax int, metricName string, threshold int64) (string, string) {
@@ -208,10 +231,10 @@ func GenerateDynamicScaleInPolicy(instanceMin, instanceMax int, metricName strin
 		InstanceMax:  instanceMax,
 		ScalingRules: []*ScalingRule{&scalingInRule},
 	}
-	bytes, err := MarshalWithoutHTMLEscape(policy)
+	marshaled, err := MarshalWithoutHTMLEscape(policy)
 	Expect(err).NotTo(HaveOccurred())
 
-	return string(bytes)
+	return string(marshaled)
 }
 
 func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName string, minThreshold int64, maxThreshold int64) string {
@@ -239,10 +262,10 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 		ScalingRules: []*ScalingRule{&scalingOutRule, &scalingInRule},
 	}
 
-	bytes, err := MarshalWithoutHTMLEscape(policy)
+	marshaled, err := MarshalWithoutHTMLEscape(policy)
 	Expect(err).NotTo(HaveOccurred())
 
-	return string(bytes)
+	return string(marshaled)
 }
 
 func GenerateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, threshold int64,
@@ -275,10 +298,10 @@ func GenerateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, 
 		},
 	}
 
-	bytes, err := MarshalWithoutHTMLEscape(policy)
+	marshaled, err := MarshalWithoutHTMLEscape(policy)
 	Expect(err).NotTo(HaveOccurred())
 
-	return strings.TrimSpace(string(bytes))
+	return strings.TrimSpace(string(marshaled))
 }
 
 func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, threshold int64,
@@ -322,10 +345,10 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 		},
 	}
 
-	bytes, err := MarshalWithoutHTMLEscape(policy)
+	marshaled, err := MarshalWithoutHTMLEscape(policy)
 	Expect(err).NotTo(HaveOccurred())
 
-	return string(bytes)
+	return string(marshaled)
 }
 
 func RunningInstances(appGUID string, timeout time.Duration) int {
@@ -419,7 +442,7 @@ func CreatePolicyWithAPI(cfg *config.Config, appGUID, policy string) {
 
 	resp, err := client.Do(req)
 	Expect(err).ShouldNot(HaveOccurred())
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
 	Expect([]int{http.StatusOK, http.StatusCreated}).To(ContainElement(resp.StatusCode))
 }
