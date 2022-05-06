@@ -7,6 +7,8 @@ builds:
     version: 3.4.2
   1cd42334-e708-43e9-70fe-d4d0a9a8a1a6:
     version: 5.0.5
+  20b8ceb8-2d84-42ce-4646-75fbc4a65d56:
+    version: 5.2.6
   53eeae9d-bd7c-4e51-60f3-ec9440b3b2cd:
     version: 5.1.0
   55ebede2-f903-4c5b-4f0c-be49f8769baa:

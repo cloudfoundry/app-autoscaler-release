@@ -29,6 +29,7 @@ TBD
 - Provides HTTPServer GET endpoint to retrieve metrics_history by appid/metrictype.
 - Transforms GAUGE envelopes into autoscaler compatible metrics (memoryutil, )
 
+
 ### EventGenerator
 
 ![Alt text](./eventgenerator.svg)
@@ -37,7 +38,7 @@ TBD
 - Fetches and caches AppPolicy's rules related metrics to evaluate scaling events.
 - Evaluates app policies rules and generates scaling events based on metrics cache.
 - Manages coolDown threshold for scaling events.
-- 
+ 
 ### MetricsForwarder
 
 ![Alt text](./metrics_forwarder.svg)
@@ -45,3 +46,5 @@ TBD
 - Provides an HTTP server to stream app custom metrics to loggregator.
 - Authenticate requests via XFCC or BasicAuth.
 - Validates received metrics against app policy to check if it is a required metric.
+- Manages coolDown threshold for scaling events.
+
