@@ -19,9 +19,9 @@ templates:
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
-  
+
 packages:
-  - java
+  - openjdk-11
   - db
   - metricsgateway
   - common
@@ -108,7 +108,7 @@ properties:
   autoscaler.metricsgateway.require_consul:
     description: "Whether to start consul agent"
     default: false
-  
+
   autoscaler.metricsgateway.health.port:
     description: "The listening port of health endpoint"
     default: 6503

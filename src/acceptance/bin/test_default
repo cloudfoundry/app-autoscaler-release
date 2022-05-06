@@ -5,7 +5,7 @@
 
 $(dirname $0)/test \
   -v \
-  --slow-spec-threshold=120 \
+  --slow-spec-threshold=120s \
   --randomize-all \
   --keep-going \
   --race \

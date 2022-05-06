@@ -2,7 +2,7 @@
 name: metricsgateway
 
 dependencies:
-- golang
+- golang-1-linux
 
 files:
 - autoscaler/*

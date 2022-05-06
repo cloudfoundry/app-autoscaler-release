@@ -10,10 +10,6 @@ DBURL := $(shell case "${db_type}" in\
  			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
-# Fix for golang issue with Montery 6/12/2021. Fix already in trunk but not released
-# https://github.com/golang/go/issues/49138
-# https://github.com/golang/go/commit/5f6552018d1ec920c3ca3d459691528f48363c3c
-export MallocNanoZone=0
 
 CI?=false
 $(shell mkdir -p target)
@@ -155,10 +151,10 @@ stop-db: check-db_type
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
 .PHONY: build
-build: init init-db test-certs scheduler autoscaler
+build: init scheduler autoscaler
 
 .PHONY: integration
-integration: build
+integration: build init-db test-certs
 	make -C src/autoscaler integration DBURL="${DBURL}"
 
 .PHONY: golangci-lint lint $(addprefix lint_,$(modules))

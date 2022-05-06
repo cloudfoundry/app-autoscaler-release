@@ -2,7 +2,7 @@
 name: metricsserver
 
 dependencies:
-- golang
+- golang-1-linux
 
 files:
 - autoscaler/*

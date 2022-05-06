@@ -18,7 +18,7 @@ templates:
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 
 packages:
-  - java
+  - openjdk-11
   - db
   - metricsforwarder
   - common

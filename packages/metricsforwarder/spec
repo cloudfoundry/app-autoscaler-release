@@ -2,7 +2,7 @@
 name: metricsforwarder
 
 dependencies:
-- golang
+- golang-1-linux
 
 files:
 - autoscaler/*
