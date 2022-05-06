@@ -9,6 +9,7 @@ import (
 	"math"
 	"net"
 	"net/http"
+	url2 "net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -130,13 +131,13 @@ func DisableServiceAccess(cfg *config.Config, orgName string) {
 func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
 	spaceCmd := cf.Cf("space", spaceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
 	Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
-	guid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
+	spaceGuid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
 
-	url := fmt.Sprintf("/v3/service_plans?available=true&fields%%5Bservice_offering.service_broker%%5D=name%%2Cguid&include=service_offering&per_page=5000&service_broker_names=autoscaler&service_offering_names=autoscaler&space_guids=%s", guid)
-	serviceCmd := cf.Cf("curl", "-f", url).Wait(cfg.DefaultTimeoutDuration())
+	serviceCmd := cf.Cf("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
 	if serviceCmd.ExitCode() != 0 {
 		ginkgo.Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
 	}
+
 	var services = struct {
 		Included struct{ Service_brokers []struct{ Name string } }
 	}{}
@@ -152,6 +153,20 @@ func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
 	}
 	cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
 	ginkgo.Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
+}
+
+func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
+	values := url2.Values{
+		"available": []string{"true"},
+		"fields[service_offering.service_broker]": []string{"name,guid"},
+		"include":                []string{"service_offering"},
+		"per_page":               []string{"5000"},
+		"service_broker_names":   []string{cfg.ServiceBroker},
+		"service_offering_names": []string{cfg.ServiceName},
+		"space_guids":            []string{spaceGuid},
+	}
+	url := &url2.URL{Path: "/v3/service_plans", RawQuery: values.Encode()}
+	return url.String()
 }
 
 func GenerateDynamicScaleOutPolicy(instanceMin, instanceMax int, metricName string, threshold int64) string {

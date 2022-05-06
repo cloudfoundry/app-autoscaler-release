@@ -13,8 +13,11 @@ build_tests:
 
 check: lint build_tests
 
+test-unit:
+	ginkgo --race run helpers
+
 test:
-	bin/test $@
+	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
 lint:
 	golangci-lint run
