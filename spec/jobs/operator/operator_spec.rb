@@ -1,12 +1,12 @@
-require 'rspec'
-require 'json'
-require 'bosh/template/test'
-require 'yaml'
+require "rspec"
+require "json"
+require "bosh/template/test"
+require "yaml"
 
-describe 'operator' do
-  let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), '../../..')) }
-  let(:job) { release.job('operator') }
-  let(:template) { job.template('config/operator.yml') }
+describe "operator" do
+  let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), "../../..")) }
+  let(:job) { release.job("operator") }
+  let(:template) { job.template("config/operator.yml") }
   let(:properties) do
     YAML.safe_load(%(
       autoscaler:
@@ -76,46 +76,39 @@ describe 'operator' do
     ))
   end
 
-  context 'config/operator.yml' do
-
-    it 'does not set username nor password if not configured' do
-      properties['autoscaler'].merge!(
-        'operator' => {
-          'health' => {
-            'port' => 1234
-          }
+  context "config/operator.yml" do
+    it "does not set username nor password if not configured" do
+      properties["autoscaler"]["operator"] = {
+        "health" => {
+          "port" => 1234
         }
-      )
+      }
 
       rendered_template = YAML.safe_load(template.render(properties))
 
-      expect(rendered_template['health']).
-        to include(
-             { 'port' => 1234 }
-           )
+      expect(rendered_template["health"])
+        .to include(
+          {"port" => 1234}
+        )
     end
 
-    it 'check operator basic auth username and password' do
-      properties['autoscaler'].merge!(
-        'operator' => {
-          'health' => {
-            'port' => 1234,
-            'username' => 'test-user',
-            'password' => 'test-user-password'
-          }
+    it "check operator basic auth username and password" do
+      properties["autoscaler"]["operator"] = {
+        "health" => {
+          "port" => 1234,
+          "username" => "test-user",
+          "password" => "test-user-password"
         }
-      )
+      }
 
       rendered_template = YAML.safe_load(template.render(properties))
 
-      expect(rendered_template['health']).
-        to include(
-             { 'port' => 1234,
-               'username' => 'test-user',
-               'password' => 'test-user-password'
-             }
-           )
+      expect(rendered_template["health"])
+        .to include(
+          {"port" => 1234,
+           "username" => "test-user",
+           "password" => "test-user-password"}
+        )
     end
   end
 end
-

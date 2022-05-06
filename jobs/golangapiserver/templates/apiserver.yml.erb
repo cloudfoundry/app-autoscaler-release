@@ -66,9 +66,22 @@ cf:
 
 public_api_server:
   port:  <%= p("autoscaler.apiserver.public_api.server.port") %>
+  <% if_p("autoscaler.apiserver.public_api.server.ca_cert", "autoscaler.apiserver.public_api.server.server_cert", "autoscaler.apiserver.public_api.server.server_key") do %>
+  tls:
+    ca_file: /var/vcap/jobs/golangapiserver/config/certs/apiserver/ca.crt
+    cert_file: /var/vcap/jobs/golangapiserver/config/certs/apiserver/server.crt
+    key_file: /var/vcap/jobs/golangapiserver/config/certs/apiserver/server.key
+  <% end %>
+
 <% if p("autoscaler.apiserver.use_buildin_mode") == false %>
 broker_server:
   port:  <%= p("autoscaler.apiserver.broker.server.port") %>
+  <% if_p("autoscaler.apiserver.broker.server.ca_cert", "autoscaler.apiserver.broker.server.server_cert", "autoscaler.apiserver.broker.server.server_key") do %>
+  tls:
+    ca_file: /var/vcap/jobs/golangapiserver/config/certs/brokerserver/ca.crt
+    cert_file: /var/vcap/jobs/golangapiserver/config/certs/brokerserver/server.crt
+    key_file: /var/vcap/jobs/golangapiserver/config/certs/brokerserver/server.key
+  <% end %>
 
 <% if p("autoscaler.apiserver.broker.broker_credentials") != '' %>
 <%= {'broker_credentials' => p('autoscaler.apiserver.broker.broker_credentials')}.to_yaml.lines[1..-1].join %>
