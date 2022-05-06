@@ -57,7 +57,7 @@ var _ = BeforeSuite(func() {
 	})
 
 	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg)
+		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
 
 	interval = cfg.AggregateInterval
