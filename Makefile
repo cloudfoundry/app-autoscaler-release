@@ -180,12 +180,24 @@ integration: build init-db test-certs
 	make -C src/autoscaler integration DBURL="${DBURL}"
 
 .PHONY: golangci-lint lint $(addprefix lint_,$(go_modules))
-lint: golangci-lint $(addprefix lint_,$(go_modules))
+lint: golangci-lint_check golangci-lint $(addprefix lint_,$(go_modules))
+
+golangci-lint_check:
+	@current_version=$(shell golangci-lint version | cut -d " " -f 4);\
+	current_major_version=$(shell golangci-lint version | cut -d " " -f 4| sed -E 's/v([0-9]+\.[0-9]+)\..*/\1/');\
+	expected_version=$(shell cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2 | sed -E 's/v([0-9]+\.[0-9]+)\..*/\1/');\
+	if [ "$${current_major_version}" != "$${expected_version}" ]; then \
+        echo "ERROR: Expected to have golangci-lint version '$${expected_version}.x' but we have $$(current_version)";\
+        exit 1;\
+    fi
 
 golangci-lint:
 	@make -C src/autoscaler golangci-lint
 
 prepare-scheduler-test: check-db_type init init-db target/scheduler_test_certs
+
+rubocop:
+	bundle exec rubocop -a
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"

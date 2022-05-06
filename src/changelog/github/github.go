@@ -42,7 +42,7 @@ func New(token string) GitHub {
 	}
 }
 
-func (g GitHub) FetchCommitsFromReleases(owner, repo string) (map[string]string, error) {
+func (g GitHub) FetchSHAIDsOfReleases(owner, repo string) (map[string]string, error) {
 	var releaseSHAsQuery struct {
 		Repository struct {
 			Releases struct {
@@ -76,7 +76,7 @@ func (g GitHub) FetchCommitsFromReleases(owner, repo string) (map[string]string,
 	return releaseSHAs, nil
 }
 
-func (g GitHub) FetchLatestReleaseCommitFromBranch(owner, repo, branch string, releaseSHAs map[string]string) (string, error) {
+func (g GitHub) FetchLatestReleaseCommitFromBranch(owner, repo, branch string) (string, error) {
 	var commitsQuery struct {
 		Repository struct {
 			Ref struct {
@@ -123,7 +123,7 @@ func (g GitHub) FetchLatestReleaseCommitFromBranch(owner, repo, branch string, r
 	return lastCommit, nil
 }
 
-func (g GitHub) FetchPullRequestsAfterCommit(owner, repo, branch, startingCommitSHA, lastCommitSHA string) ([]PullRequest, error) {
+func (g GitHub) FetchPullRequests(owner, repo, branch, startingCommitSHA, lastCommitSHA string) ([]PullRequest, error) {
 	var pullRequestsQuery struct {
 		Repository struct {
 			Ref struct {

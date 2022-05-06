@@ -27,7 +27,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 <!--        <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>-->
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+<!--        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>-->
 
     </properties>
 
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.4</version>
+            <version>42.3.5</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
