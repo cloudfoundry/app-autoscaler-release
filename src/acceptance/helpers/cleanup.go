@@ -4,6 +4,8 @@ import (
 	"acceptance/config"
 	"fmt"
 
+	"github.com/onsi/ginkgo/v2"
+
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
@@ -12,8 +14,7 @@ import (
 )
 
 func Cleanup(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteSetup) {
-	fmt.Println("Clearing down existing test orgs/spaces...")
-
+	ginkgo.By("Clearing down existing test orgs/spaces...")
 	workflowhelpers.AsUser(wfh.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		orgs := GetTestOrgs(cfg)
 
@@ -33,6 +34,5 @@ func Cleanup(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteSetup
 			DeleteOrg(cfg, org)
 		}
 	})
-
-	fmt.Println("Clearing down existing test orgs/spaces... Complete")
+	ginkgo.By("Clearing down existing test orgs/spaces... Complete")
 }

@@ -3,3 +3,4 @@
 *.test
 **/*.log
 vendor
+ginkgo_v2
