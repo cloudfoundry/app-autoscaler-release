@@ -11,6 +11,7 @@ files:
 - autoscaler/collection/* # gosub
 - autoscaler/db/* # gosub
 - autoscaler/db/sqldb/* # gosub
+- autoscaler/envelopeprocessor/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
 - autoscaler/metricsserver/cmd/metricsserver/* # gosub
@@ -37,6 +38,7 @@ files:
 - autoscaler/vendor/github.com/golang/protobuf/ptypes/timestamp/* # gosub
 - autoscaler/vendor/github.com/gorilla/mux/* # gosub
 - autoscaler/vendor/github.com/gorilla/websocket/* # gosub
+- autoscaler/vendor/github.com/imdario/mergo/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
 - autoscaler/vendor/github.com/lib/pq/* # gosub
@@ -61,6 +63,7 @@ files:
 - autoscaler/vendor/github.com/tedsuo/ifrit/sigmon/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
+- autoscaler/vendor/golang.org/x/exp/maps/* # gosub
 - autoscaler/vendor/golang.org/x/net/context/* # gosub
 - autoscaler/vendor/golang.org/x/net/http/httpguts/* # gosub
 - autoscaler/vendor/golang.org/x/net/http2/* # gosub
