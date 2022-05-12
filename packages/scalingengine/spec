@@ -13,6 +13,7 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
+- autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/models/* # gosub
 - autoscaler/routes/* # gosub
 - autoscaler/scalingengine/* # gosub

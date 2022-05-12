@@ -18,6 +18,7 @@ files:
 - autoscaler/eventgenerator/server/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
+- autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/models/* # gosub
 - autoscaler/routes/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/* # gosub

@@ -30,7 +30,6 @@ runs:
       with:
         path: |
           ~/go/pkg/mod
-          ~/.cache/go-build
         key: ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-

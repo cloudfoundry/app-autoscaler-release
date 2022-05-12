@@ -209,3 +209,9 @@ release:
 	./scripts/update
 	bosh create-release --force --timestamp-version --tarball=${name}-${version}.tgz
 
+mod-tidy:
+	@for folder in $$(find . -name "go.mod" -exec dirname {} \;);\
+	do\
+	   cd $${folder}; echo "- go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
+	done
+
