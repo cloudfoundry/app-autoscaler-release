@@ -1,9 +1,12 @@
 package healthendpoint
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/server/common"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/gorilla/mux"
@@ -46,7 +49,7 @@ func NewServer(logger lager.Logger, port int, gatherer prometheus.Gatherer) (ifr
 	}
 
 	logger.Info("new-health-server", lager.Data{"addr": addr})
-	return http_server.New(addr, router), nil
+	return http_server.New(addr, promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})), nil
 }
 
 // open the healthcheck port with basic authentication.
@@ -58,7 +61,7 @@ func NewServerWithBasicAuth(logger lager.Logger, port int, gatherer prometheus.G
 		healthServer, err := NewServer(logger, port, gatherer)
 		return healthServer, err
 	} else {
-		healthRouter, err := HealthRouter(logger, port, gatherer, username, password, usernameHash, passwordHash)
+		healthRouter, err := HealthBasicAuthRouter(logger, gatherer, username, password, usernameHash, passwordHash)
 		if err != nil {
 			return nil, err
 		}
@@ -72,11 +75,9 @@ func NewServerWithBasicAuth(logger lager.Logger, port int, gatherer prometheus.G
 		logger.Info("new-health-server-basic-auth", lager.Data{"addr": addr})
 		return http_server.New(addr, healthRouter), nil
 	}
-
 }
 
-func HealthRouter(logger lager.Logger, port int, gatherer prometheus.Gatherer, username string, password string,
-	usernameHash string, passwordHash string) (*mux.Router, error) {
+func HealthBasicAuthRouter(logger lager.Logger, gatherer prometheus.Gatherer, username string, password string, usernameHash string, passwordHash string) (*mux.Router, error) {
 	var usernameHashByte []byte
 	var err error
 	if usernameHash == "" {
@@ -114,8 +115,25 @@ func HealthRouter(logger lager.Logger, port int, gatherer prometheus.Gatherer, u
 
 	// add router path and router handler
 	middleWareHandlerRouter.Handle("/health", r)
+	middleWareHandlerRouter.Handle("/health/readiness", common.VarsFunc(readiness))
 
 	middleWareHandlerRouter.PathPrefix("").Handler(r)
 
 	return middleWareHandlerRouter, nil
+}
+
+type readinessCheck struct{}
+type readinessReponse struct {
+	Status string           `json:"status"`
+	Checks []readinessCheck `json:"checks"`
+}
+
+func readiness(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+	w.Header().Set("Content-Type", "application/json")
+	response, err := json.Marshal(readinessReponse{Status: "OK", Checks: []readinessCheck{}})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"error":"Internal error"}`))
+	}
+	_, _ = w.Write(response)
 }
