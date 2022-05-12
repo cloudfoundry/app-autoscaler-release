@@ -123,14 +123,14 @@ func HealthBasicAuthRouter(logger lager.Logger, gatherer prometheus.Gatherer, us
 }
 
 type readinessCheck struct{}
-type readinessReponse struct {
+type readinessResponse struct {
 	Status string           `json:"status"`
 	Checks []readinessCheck `json:"checks"`
 }
 
 func readiness(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	w.Header().Set("Content-Type", "application/json")
-	response, err := json.Marshal(readinessReponse{Status: "OK", Checks: []readinessCheck{}})
+	response, err := json.Marshal(readinessResponse{Status: "OK", Checks: []readinessCheck{}})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(`{"error":"Internal error"}`))
