@@ -58,46 +58,10 @@ func NewServerWithBasicAuth(logger lager.Logger, port int, gatherer prometheus.G
 		healthServer, err := NewServer(logger, port, gatherer)
 		return healthServer, err
 	} else {
-		var usernameHashByte []byte
-		var err error
-		if usernameHash == "" {
-			// when username and password are set for health check
-			usernameHashByte, err = bcrypt.GenerateFromPassword([]byte(username), bcrypt.MinCost) // use MinCost as the config already provided it as cleartext
-			if err != nil {
-				logger.Error("failed-new-server-username", err)
-				return nil, err
-			}
-		} else {
-			usernameHashByte = []byte(usernameHash)
+		healthRouter, err := HealthRouter(logger, port, gatherer, username, password, usernameHash, passwordHash)
+		if err != nil {
+			return nil, err
 		}
-
-		var passwordHashByte []byte
-		if passwordHash == "" {
-			passwordHashByte, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost) // use MinCost as the config already provided it as cleartext
-			if err != nil {
-				logger.Error("failed-new-server-password", err)
-				return nil, err
-			}
-		} else {
-			passwordHashByte = []byte(passwordHash)
-		}
-
-		basicAuthentication := &basicAuthenticationMiddleware{
-			usernameHash: usernameHashByte,
-			passwordHash: passwordHashByte,
-		}
-
-		r := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
-
-		// basic authentication middleware
-		middleWareHandlerRouter := mux.NewRouter()
-		middleWareHandlerRouter.Use(basicAuthentication.Middleware)
-
-		// add router path and router handler
-		middleWareHandlerRouter.Handle("/health", r)
-
-		middleWareHandlerRouter.PathPrefix("").Handler(r)
-
 		var addr string
 		if os.Getenv("APP_AUTOSCALER_TEST_RUN") == "true" {
 			addr = fmt.Sprintf("localhost:%d", port)
@@ -106,7 +70,52 @@ func NewServerWithBasicAuth(logger lager.Logger, port int, gatherer prometheus.G
 		}
 
 		logger.Info("new-health-server-basic-auth", lager.Data{"addr": addr})
-
-		return http_server.New(addr, middleWareHandlerRouter), nil
+		return http_server.New(addr, healthRouter), nil
 	}
+
+}
+
+func HealthRouter(logger lager.Logger, port int, gatherer prometheus.Gatherer, username string, password string,
+	usernameHash string, passwordHash string) (*mux.Router, error) {
+	var usernameHashByte []byte
+	var err error
+	if usernameHash == "" {
+		// when username and password are set for health check
+		usernameHashByte, err = bcrypt.GenerateFromPassword([]byte(username), bcrypt.MinCost) // use MinCost as the config already provided it as cleartext
+		if err != nil {
+			logger.Error("failed-new-server-username", err)
+			return nil, err
+		}
+	} else {
+		usernameHashByte = []byte(usernameHash)
+	}
+
+	var passwordHashByte []byte
+	if passwordHash == "" {
+		passwordHashByte, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost) // use MinCost as the config already provided it as cleartext
+		if err != nil {
+			logger.Error("failed-new-server-password", err)
+			return nil, err
+		}
+	} else {
+		passwordHashByte = []byte(passwordHash)
+	}
+
+	basicAuthentication := &basicAuthenticationMiddleware{
+		usernameHash: usernameHashByte,
+		passwordHash: passwordHashByte,
+	}
+
+	r := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
+
+	// basic authentication middleware
+	middleWareHandlerRouter := mux.NewRouter()
+	middleWareHandlerRouter.Use(basicAuthentication.Middleware)
+
+	// add router path and router handler
+	middleWareHandlerRouter.Handle("/health", r)
+
+	middleWareHandlerRouter.PathPrefix("").Handler(r)
+
+	return middleWareHandlerRouter, nil
 }
