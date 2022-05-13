@@ -87,14 +87,16 @@ func HealthBasicAuthRouter(logger lager.Logger, gatherer prometheus.Gatherer, us
 
 	// /health
 	router := mux.NewRouter()
-	subrouter := router.PathPrefix("/health").Subrouter()
-	subrouter.Use(basicAuthentication.Middleware)
-	subrouter.Handle("", promHandler)
-
+	// unauthenticated paths
 	router.Handle("/health/readiness", common.VarsFunc(readiness))
 
-	router.Use(basicAuthentication.Middleware)
-	router.PathPrefix("").Handler(promHandler)
+	//authenticated paths
+	subRouter := router.Path("/health").Subrouter()
+	subRouter.Use(basicAuthentication.Middleware)
+
+	subRouterForAnything := router.PathPrefix("").Subrouter()
+	subRouterForAnything.Use(basicAuthentication.Middleware)
+	subRouterForAnything.PathPrefix("").Handler(promHandler)
 
 	return router, nil
 }

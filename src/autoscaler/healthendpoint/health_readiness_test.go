@@ -30,7 +30,7 @@ var _ = FDescribe("Health Readiness", func() {
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 
-	Context("Health endpoint is called", func() {
+	Context("Health endpoint is called without basic auth", func() {
 		It("should have json response", func() {
 			apitest.New().
 				Handler(healthServer).
