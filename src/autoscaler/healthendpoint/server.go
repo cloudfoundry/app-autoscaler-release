@@ -78,6 +78,61 @@ func NewServerWithBasicAuth(logger lager.Logger, port int, gatherer prometheus.G
 }
 
 func HealthBasicAuthRouter(logger lager.Logger, gatherer prometheus.Gatherer, username string, password string, usernameHash string, passwordHash string) (*mux.Router, error) {
+	basicAuthentication, err := createBasicAuthMiddleware(logger, usernameHash, username, passwordHash, password)
+	if err != nil {
+		return nil, err
+	}
+
+	promHandler := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
+
+	// /health
+	router := mux.NewRouter()
+	subrouter := router.PathPrefix("/health").Subrouter()
+	subrouter.Use(basicAuthentication.Middleware)
+	subrouter.Handle("", promHandler)
+
+	router.Handle("/health/readiness", common.VarsFunc(readiness))
+
+	router.Use(basicAuthentication.Middleware)
+	router.PathPrefix("").Handler(promHandler)
+
+	return router, nil
+}
+
+func createBasicAuthMiddleware(logger lager.Logger, usernameHash string, username string, passwordHash string, password string) (*basicAuthenticationMiddleware, error) {
+	usernameHashByte, err := getUserHashBytes(logger, usernameHash, username)
+	if err != nil {
+		return nil, err
+	}
+
+	passwordHashByte, err := getPasswordHashBytes(logger, passwordHash, password)
+	if err != nil {
+		return nil, err
+	}
+
+	basicAuthentication := &basicAuthenticationMiddleware{
+		usernameHash: usernameHashByte,
+		passwordHash: passwordHashByte,
+	}
+	return basicAuthentication, nil
+}
+
+func getPasswordHashBytes(logger lager.Logger, passwordHash string, password string) ([]byte, error) {
+	var passwordHashByte []byte
+	var err error
+	if passwordHash == "" {
+		passwordHashByte, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost) // use MinCost as the config already provided it as cleartext
+		if err != nil {
+			logger.Error("failed-new-server-password", err)
+			return nil, err
+		}
+	} else {
+		passwordHashByte = []byte(passwordHash)
+	}
+	return passwordHashByte, nil
+}
+
+func getUserHashBytes(logger lager.Logger, usernameHash string, username string) ([]byte, error) {
 	var usernameHashByte []byte
 	var err error
 	if usernameHash == "" {
@@ -90,36 +145,7 @@ func HealthBasicAuthRouter(logger lager.Logger, gatherer prometheus.Gatherer, us
 	} else {
 		usernameHashByte = []byte(usernameHash)
 	}
-
-	var passwordHashByte []byte
-	if passwordHash == "" {
-		passwordHashByte, err = bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost) // use MinCost as the config already provided it as cleartext
-		if err != nil {
-			logger.Error("failed-new-server-password", err)
-			return nil, err
-		}
-	} else {
-		passwordHashByte = []byte(passwordHash)
-	}
-
-	basicAuthentication := &basicAuthenticationMiddleware{
-		usernameHash: usernameHashByte,
-		passwordHash: passwordHashByte,
-	}
-
-	r := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
-
-	// basic authentication middleware
-	middleWareHandlerRouter := mux.NewRouter()
-	middleWareHandlerRouter.Use(basicAuthentication.Middleware)
-
-	// add router path and router handler
-	middleWareHandlerRouter.Handle("/health", r)
-	middleWareHandlerRouter.Handle("/health/readiness", common.VarsFunc(readiness))
-
-	middleWareHandlerRouter.PathPrefix("").Handler(r)
-
-	return middleWareHandlerRouter, nil
+	return usernameHashByte, err
 }
 
 type readinessCheck struct{}

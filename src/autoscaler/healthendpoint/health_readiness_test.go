@@ -35,7 +35,6 @@ var _ = FDescribe("Health Readiness", func() {
 			apitest.New().
 				Handler(healthServer).
 				Get("/health/readiness").
-				BasicAuth(username, password).
 				Expect(t).
 				Status(http.StatusOK).
 				Header("Content-Type", "application/json").
@@ -43,6 +42,28 @@ var _ = FDescribe("Health Readiness", func() {
 	"status" : "OK",
 	"checks" : []
 }`).
+				End()
+		})
+	})
+
+	Context("Prometheus Health endpoint is called", func() {
+		It("should require basic auth", func() {
+			apitest.New().
+				Handler(healthServer).
+				Get("/health").
+				Expect(t).
+				Status(http.StatusUnauthorized).
+				End()
+		})
+	})
+
+	Context("Health endpoint default response", func() {
+		It("should require basic auth", func() {
+			apitest.New().
+				Handler(healthServer).
+				Get("/any").
+				Expect(t).
+				Status(http.StatusUnauthorized).
 				End()
 		})
 	})
