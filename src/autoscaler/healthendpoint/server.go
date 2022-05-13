@@ -54,14 +54,14 @@ func NewServer(logger lager.Logger, port int, gatherer prometheus.Gatherer) (ifr
 
 // open the healthcheck port with basic authentication.
 // Make sure that username and password is not empty
-func NewServerWithBasicAuth(logger lager.Logger, port int, gatherer prometheus.Gatherer, username string, password string, usernameHash string, passwordHash string) (ifrit.Runner, error) {
+func NewServerWithBasicAuth(healthCheckers []Checker, logger lager.Logger, port int, gatherer prometheus.Gatherer, username string, password string, usernameHash string, passwordHash string) (ifrit.Runner, error) {
 	logger.Info("new-health-server", lager.Data{"####username": username, "####password": password})
 	if username == "" && password == "" {
 		//when username and password are not set then dont use basic authentication
 		healthServer, err := NewServer(logger, port, gatherer)
 		return healthServer, err
 	} else {
-		healthRouter, err := HealthBasicAuthRouter(logger, gatherer, username, password, usernameHash, passwordHash)
+		healthRouter, err := HealthBasicAuthRouter(healthCheckers, logger, gatherer, username, password, usernameHash, passwordHash)
 		if err != nil {
 			return nil, err
 		}
@@ -77,26 +77,33 @@ func NewServerWithBasicAuth(logger lager.Logger, port int, gatherer prometheus.G
 	}
 }
 
-func HealthBasicAuthRouter(logger lager.Logger, gatherer prometheus.Gatherer, username string, password string, usernameHash string, passwordHash string) (*mux.Router, error) {
+func HealthBasicAuthRouter(
+	healthCheckers []Checker,
+	logger lager.Logger,
+	gatherer prometheus.Gatherer,
+	username string,
+	password string,
+	usernameHash string,
+	passwordHash string) (*mux.Router, error) {
+
 	basicAuthentication, err := createBasicAuthMiddleware(logger, usernameHash, username, passwordHash, password)
 	if err != nil {
 		return nil, err
 	}
-
 	promHandler := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
 
 	// /health
 	router := mux.NewRouter()
 	// unauthenticated paths
-	router.Handle("/health/readiness", common.VarsFunc(readiness))
+	router.Handle("/health/readiness", common.VarsFunc(readiness(healthCheckers)))
 
 	//authenticated paths
-	subRouter := router.Path("/health").Subrouter()
-	subRouter.Use(basicAuthentication.Middleware)
+	health := router.Path("/health").Subrouter()
+	health.Use(basicAuthentication.Middleware)
 
-	subRouterForAnything := router.PathPrefix("").Subrouter()
-	subRouterForAnything.Use(basicAuthentication.Middleware)
-	subRouterForAnything.PathPrefix("").Handler(promHandler)
+	everything := router.PathPrefix("").Subrouter()
+	everything.Use(basicAuthentication.Middleware)
+	everything.PathPrefix("").Handler(promHandler)
 
 	return router, nil
 }
@@ -150,18 +157,33 @@ func getUserHashBytes(logger lager.Logger, usernameHash string, username string)
 	return usernameHashByte, err
 }
 
-type readinessCheck struct{}
+type ReadinessCheck struct {
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	Status string `json:"status"`
+}
 type readinessResponse struct {
 	Status string           `json:"status"`
-	Checks []readinessCheck `json:"checks"`
+	Checks []ReadinessCheck `json:"checks"`
 }
 
-func readiness(w http.ResponseWriter, r *http.Request, vars map[string]string) {
-	w.Header().Set("Content-Type", "application/json")
-	response, err := json.Marshal(readinessResponse{Status: "OK", Checks: []readinessCheck{}})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(`{"error":"Internal error"}`))
+type Checker func() ReadinessCheck
+
+func readiness(checkers []Checker) func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+	return func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+		w.Header().Set("Content-Type", "application/json")
+
+		checks := make([]ReadinessCheck, 0, 8)
+
+		for _, checker := range checkers {
+			check := checker()
+			checks = append(checks, check)
+		}
+		response, err := json.Marshal(readinessResponse{Status: "OK", Checks: checks})
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(`{"error":"Internal error"}`))
+		}
+		_, _ = w.Write(response)
 	}
-	_, _ = w.Write(response)
 }
