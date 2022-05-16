@@ -1,6 +1,9 @@
 name: gosub
 on:
   pull_request:
+    paths-ignore:
+    - 'docs/**'
+    - '**.md'
 jobs:
   generate:
     name: ensure gosub specs are up to date

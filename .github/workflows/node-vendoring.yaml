@@ -2,7 +2,9 @@ name: Check Node Vendoring
 
 on:
   pull_request:
-
+    paths-ignore:
+    - 'docs/**'
+    - '**.md'
 jobs:
   check-node-vendoring:
     runs-on: ubuntu-latest

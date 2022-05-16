@@ -1,6 +1,9 @@
 name: generate
 on:
   pull_request:
+    paths-ignore:
+    - 'docs/**'
+    - '**.md'
 jobs:
   generate:
     name: ensure fakes are up to date
