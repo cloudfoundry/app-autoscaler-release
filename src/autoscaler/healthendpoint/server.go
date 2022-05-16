@@ -85,7 +85,6 @@ func HealthBasicAuthRouter(
 	password string,
 	usernameHash string,
 	passwordHash string) (*mux.Router, error) {
-
 	basicAuthentication, err := createBasicAuthMiddleware(logger, usernameHash, username, passwordHash, password)
 	if err != nil {
 		return nil, err
