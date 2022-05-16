@@ -25,16 +25,16 @@ runs:
       with:
         go-version: ${{ steps.get-version.outputs.version }}
 
-    - name: Go Cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-        key: ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-
-
-    - name: Clean test and complication caches
-      shell: bash
-      run: go clean -cache -testcache
+#    - name: Go Cache
+#      uses: actions/cache@v3
+#      with:
+#        path: |
+#          ~/go/pkg/mod
+#          ~/.cache/go-build
+#        key: ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-${{ hashFiles('**/go.sum') }}
+#        restore-keys: |
+#          ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-
+#
+#    - name: Clean test and complication caches
+#      shell: bash
+#      run: go clean -cache -testcache
