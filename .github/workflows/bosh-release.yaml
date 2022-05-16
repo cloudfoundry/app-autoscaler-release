@@ -7,9 +7,6 @@ jobs:
     name: ensure gosub specs are up to date
     runs-on: ubuntu-latest
     steps:
-      - name: Trust my checkout
-        run: git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
-
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup_go
 
@@ -18,15 +15,15 @@ jobs:
           source .envrc
           ./scripts/sync-package-specs
 
-      - name: Check if there are changes
-        id: changes
-        uses: UnicornGlobal/has-changes-action@v1.0.12
-
-      - name: Process changes
-        if: steps.changes.outputs.changed == 1
+      - name: Check if there is any change
         run: |
-          echo "::error::Specs are out of date, run ./scripts/update && ./scripts/sync-package-specs to update"
-          exit 1
+          git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"; \
+          [ $(git status --porcelain | wc -l) -eq 0 ] || \
+          { \
+            git status;\
+            echo "::error::Specs are out of date, run ./scripts/update && ./scripts/sync-package-specs to update";\
+            exit 1;\
+          }
 
   bosh-release:
     needs: generate-gosub
