@@ -70,7 +70,8 @@ var _ = Describe("MetricPoller", func() {
 	)
 	BeforeEach(func() {
 		logger = lagertest.NewTestLogger("MetricPoller-test")
-		//nolint:staticcheck //TODO https://github.com/cloudfoundry/app-autoscaler-release/issues/549
+
+		//TODO https://github.com/cloudfoundry/app-autoscaler-release/issues/549
 		appMonitorsChan = make(chan *models.AppMonitor, 1)
 		appMetricChan = make(chan *models.AppMetric, 1)
 		metricServer = nil
