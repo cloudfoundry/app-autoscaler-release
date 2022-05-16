@@ -116,9 +116,10 @@ resources:
 
 - name: app-autoscaler-release-pr
   type: pull-request
-  check_every: 2m
+  check_every: 1m
   source:
     repository: cloudfoundry/app-autoscaler-release
+    disable_forks: false
     access_token: ((autoscaler_access_token))
     labels: ["approved", "dependencies"]
     check_run_name: "Create Bosh Release"

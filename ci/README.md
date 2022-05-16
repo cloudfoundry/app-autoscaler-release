@@ -22,3 +22,13 @@ out as well as the app-autoscaler private key
 
 These docker images in this repo are built and pushed with GitHub actions, they are hosted on ghcr.io
 
+## Deploy pipeline
+
+__Setup__
+
+```
+fly --target autoscaler login --team-name app-autoscaler --concourse-url https://bosh.ci.cloudfoundry.org/
+push autoscaler
+./set-pipeline.sh
+popd
+```
