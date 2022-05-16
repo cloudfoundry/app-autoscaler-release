@@ -25,7 +25,7 @@ var _ = Describe("Health Readiness", func() {
 
 	BeforeEach(func() {
 		t = GinkgoT()
-		logger = lager.NewLogger("healthendpoint ")
+		logger = lager.NewLogger("healthendpoint-test")
 		logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
 
 		username = "test-user-name"
@@ -40,7 +40,7 @@ var _ = Describe("Health Readiness", func() {
 	})
 
 	Context("Readiness endpoint is called without basic auth", func() {
-		It("should have json response", func() {
+		It("should have json response with empty checks", func() {
 			apitest.New().
 				Handler(healthRoute).
 				Get("/health/readiness").
@@ -73,7 +73,7 @@ var _ = Describe("Health Readiness", func() {
 		})
 	})
 
-	Context("Prometheus Health endpoint is called without basic auth", func() {
+	Context("Endpoints are called without basic auth", func() {
 		BeforeEach(func() {
 			username = ""
 			password = ""
@@ -99,7 +99,7 @@ var _ = Describe("Health Readiness", func() {
 	})
 
 	Context("Prometheus Health endpoint is called", func() {
-		It("should require basic auth", func() {
+		It("/health should require basic auth with http status 401 ", func() {
 			apitest.New().
 				Handler(healthRoute).
 				Get("/health").
@@ -110,7 +110,7 @@ var _ = Describe("Health Readiness", func() {
 	})
 
 	Context("Health endpoint default response", func() {
-		It("should require basic auth", func() {
+		It("/any should require basic auth with http status 401", func() {
 			apitest.New().
 				Handler(healthRoute).
 				Get("/any").

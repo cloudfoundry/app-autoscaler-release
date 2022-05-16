@@ -34,3 +34,7 @@ runs:
         key: ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go${{ steps.get-version.outputs.version }}-
+
+    - name: Clean test and complication caches
+      shell: bash
+      run: go clean -cache -testcache
