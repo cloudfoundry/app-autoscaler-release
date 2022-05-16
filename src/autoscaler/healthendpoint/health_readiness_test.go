@@ -19,21 +19,27 @@ var _ = Describe("Health Readiness", func() {
 		healthRoute *mux.Router
 		logger      lager.Logger
 		checkers    []healthendpoint.Checker
+		username    string
+		password    string
 	)
-	const username = "test-user-name"
-	const password = "test-user-password"
 
 	BeforeEach(func() {
 		t = GinkgoT()
+		logger = lager.NewLogger("healthendpoint ")
+		logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
+
+		username = "test-user-name"
+		password = "test-user-password"
 	})
 
 	JustBeforeEach(func() {
 		var err error
-		healthRoute, err = healthendpoint.HealthBasicAuthRouter(checkers, logger, prometheus.NewRegistry(), username, password, "", "")
+		healthRoute, err = healthendpoint.NewHealthRouter(checkers, logger, prometheus.NewRegistry(), username, password, "", "")
 		Expect(err).ShouldNot(HaveOccurred())
+
 	})
 
-	Context("Health endpoint is called without basic auth", func() {
+	Context("Readiness endpoint is called without basic auth", func() {
 		It("should have json response", func() {
 			apitest.New().
 				Handler(healthRoute).
@@ -46,7 +52,7 @@ var _ = Describe("Health Readiness", func() {
 		})
 	})
 
-	Context("Health endpoint is called without basic auth", func() {
+	Context("Readiness endpoint is called without basic auth", func() {
 		BeforeEach(func() {
 			checkers = []healthendpoint.Checker{func() healthendpoint.ReadinessCheck {
 				return healthendpoint.ReadinessCheck{Name: "policy", Type: "database", Status: "OK"}
@@ -63,6 +69,31 @@ var _ = Describe("Health Readiness", func() {
 	"status" : "OK",
 	"checks" : [ {"name": "policy", "type": "database", "status": "OK" } ]
 }`).
+				End()
+		})
+	})
+
+	Context("Prometheus Health endpoint is called without basic auth", func() {
+		BeforeEach(func() {
+			username = ""
+			password = ""
+		})
+		It("/anything should respond OK", func() {
+			apitest.New().
+				Handler(healthRoute).
+				Get("/anything").
+				Expect(t).
+				Status(http.StatusOK).
+				Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8").
+				End()
+		})
+		It("/health/readiness should response OK", func() {
+			apitest.New().
+				Handler(healthRoute).
+				Get("/health/readiness").
+				Expect(t).
+				Status(http.StatusOK).
+				Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8").
 				End()
 		})
 	})

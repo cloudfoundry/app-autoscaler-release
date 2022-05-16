@@ -23,7 +23,7 @@ type basicAuthenticationMiddleware struct {
 	passwordHash []byte
 }
 
-// basic authentication middleware functionality for healthcheck
+// Middleware basic authentication middleware functionality for healthcheck
 func (bam *basicAuthenticationMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		username, password, authOK := r.BasicAuth()
@@ -36,11 +36,13 @@ func (bam *basicAuthenticationMiddleware) Middleware(next http.Handler) http.Han
 	})
 }
 
-func NewServer(logger lager.Logger, port int, gatherer prometheus.Gatherer) (ifrit.Runner, error) {
-	router := mux.NewRouter()
-	r := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
-	router.PathPrefix("").Handler(r)
-
+// NewServerWithBasicAuth open the healthcheck port with basic authentication.
+// Make sure that username and password is not empty
+func NewServerWithBasicAuth(healthCheckers []Checker, logger lager.Logger, port int, gatherer prometheus.Gatherer, username string, password string, usernameHash string, passwordHash string) (ifrit.Runner, error) {
+	healthRouter, err := NewHealthRouter(healthCheckers, logger, gatherer, username, password, usernameHash, passwordHash)
+	if err != nil {
+		return nil, err
+	}
 	var addr string
 	if os.Getenv("APP_AUTOSCALER_TEST_RUN") == "true" {
 		addr = fmt.Sprintf("localhost:%d", port)
@@ -48,33 +50,27 @@ func NewServer(logger lager.Logger, port int, gatherer prometheus.Gatherer) (ifr
 		addr = fmt.Sprintf("0.0.0.0:%d", port)
 	}
 
-	logger.Info("new-health-server", lager.Data{"addr": addr})
-	return http_server.New(addr, promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})), nil
+	logger.Info("new-health-server-basic-auth", lager.Data{"addr": addr})
+	return http_server.New(addr, healthRouter), nil
 }
 
-// open the healthcheck port with basic authentication.
-// Make sure that username and password is not empty
-func NewServerWithBasicAuth(healthCheckers []Checker, logger lager.Logger, port int, gatherer prometheus.Gatherer, username string, password string, usernameHash string, passwordHash string) (ifrit.Runner, error) {
+func NewHealthRouter(healthCheckers []Checker, logger lager.Logger, gatherer prometheus.Gatherer, username string, password string, usernameHash string, passwordHash string) (*mux.Router, error) {
 	logger.Info("new-health-server", lager.Data{"####username": username, "####password": password})
+	var healthRouter *mux.Router
+	var err error
 	if username == "" && password == "" {
-		//when username and password are not set then dont use basic authentication
-		healthServer, err := NewServer(logger, port, gatherer)
-		return healthServer, err
+		//when username and password are not set then don't use basic authentication
+		healthRouter = mux.NewRouter()
+		r := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
+		healthRouter.PathPrefix("").Handler(r)
+		healthRouter.Handle("/health/readiness", common.VarsFunc(readiness(healthCheckers)))
 	} else {
-		healthRouter, err := HealthBasicAuthRouter(healthCheckers, logger, gatherer, username, password, usernameHash, passwordHash)
+		healthRouter, err = HealthBasicAuthRouter(healthCheckers, logger, gatherer, username, password, usernameHash, passwordHash)
 		if err != nil {
 			return nil, err
 		}
-		var addr string
-		if os.Getenv("APP_AUTOSCALER_TEST_RUN") == "true" {
-			addr = fmt.Sprintf("localhost:%d", port)
-		} else {
-			addr = fmt.Sprintf("0.0.0.0:%d", port)
-		}
-
-		logger.Info("new-health-server-basic-auth", lager.Data{"addr": addr})
-		return http_server.New(addr, healthRouter), nil
 	}
+	return healthRouter, nil
 }
 
 func HealthBasicAuthRouter(
