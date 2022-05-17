@@ -54,5 +54,5 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           pushd src/scheduler
-            mvn --no-transfer-progress compile spotbugs:spotbugs org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            mvn --no-transfer-progress compile spotbugs:spotbugs org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
           popd
