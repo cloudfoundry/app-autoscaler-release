@@ -113,11 +113,14 @@ For more flexibility you can run `./bin/test` and specify many more options, e.g
 For example, to execute all test suites, and have tests run in parallel across four processes one would run:
 
 ```bash
-./bin/test -r -nodes=4
+./bin/test -r --nodes=4 --flake-attempts=3
 ```
 
-Be careful with this number, as it's effectively "how many apps to push at once", as nearly every example pushes an app.
+*NOTE*:
+ -  *--nodes*: indicates how many tests to run in parrallel. We have found these to be flaky and probably not used for a stable run.
+ -  *--flake-attempts*: This will help with the flakiness of some tests. We are trying to stablise them better but this will take a long time.
 
+Be careful with this number, as it's effectively "how many apps to push at once", as nearly every example pushes an app.
 To execute the acceptance tests for a specific suite, e.g. `broker`, run the following:
 
 ```bash
@@ -126,7 +129,7 @@ To execute the acceptance tests for a specific suite, e.g. `broker`, run the fol
 
 The suite names correspond to directory names.
 
-To see verbose output from `ginkgo`, use the `-v` flag.
+To see verbose output from `ginkgo`, use the `-v` or '-vv' flag.
 
 ```bash
 ./bin/test broker -v
