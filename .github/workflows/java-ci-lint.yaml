@@ -53,6 +53,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          echo "SONAR TOKEN IS : ${{ secrets.SONAR_TOKEN }}"
+          echo "SONAR TOKEN in env IS : ${{ env.SONAR_TOKEN }}"
           pushd src/scheduler
-            mvn --no-transfer-progress compile spotbugs:spotbugs org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            mvn --no-transfer-progress compile spotbugs:spotbugs org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
           popd
