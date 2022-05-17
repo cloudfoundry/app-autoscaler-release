@@ -1,7 +1,8 @@
 var express = require('express');
 var app = express();
-const fs = require('fs').promises;
-var request = require('request');
+const fs = require('fs');
+const https = require('https');
+const axios = require('axios');
 var enableCpuTest = false;
 const os = require('os');
 const cpuCount = os.cpus().length;
@@ -31,7 +32,7 @@ app.listen(process.env.PORT || 8080, function () {
     console.log('dummy application started');
 });
 
-app.get('/custom-metrics/:type/:value', function (req, res) {
+app.get('/custom-metrics/:type/:value', async function (req, res) {
   try {
     var metricType = req.params.type;
     var metricValue = parseInt(req.params.value, 10);
@@ -79,24 +80,27 @@ app.get('/custom-metrics/:type/:value', function (req, res) {
     }
 
     var options = {
-      uri: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
+      url: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
       method: 'POST',
-      body: JSON.stringify(postData),
+      data: postData,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Basic ' + Buffer.from(
             mfUsername + ":" + mfPassword).toString('base64')
-      }
+      },
+      validateStatus: null
     }
-    request(options, function (err, result, body) {
-      if (err || result.statusCode !== 200) {
-        console.log(err);
-        res.status(result.statusCode).json(
-            {error: err, body: body, statusCode: result.statusCode});
-      } else {
-        res.status(200).send("success");
+    const result = await axios(options);
+    if (result.status !== 200) {
+      console.log(`Got non-200 response ${result.status} response ${result.data}`);
+      var payload = {
+          statusCode: result.status,
+          response: result.data,
       }
-    });
+      res.status(500).json(payload).end();
+    } else {
+      res.status(200).send("success");
+    }
   } catch (err) {
     console.log(err);
     res.status(500).json({exception: JSON.stringify(err)}).end();
@@ -130,30 +134,31 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
             }
         }
 
-        var options = {
-            uri: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
-            method: 'POST',
-            key: await fs.readFile(process.env.CF_INSTANCE_KEY),
-            cert: await fs.readFile(process.env.CF_INSTANCE_CERT),
-            body: JSON.stringify(postData),
-            headers: { 'Content-Type': 'application/json' }
-        }
-        request(options, function (err, result, body) {
-            if (err || result.statusCode > 299) {
-                console.log("error: " + err)
-                var payload = {
-                    err: err ? err.message : null,
-                    statusCode: result ? result.statusCode : null,
-                    response: body,
-                }
-                console.log(JSON.stringify(payload));
-                res.status(500).json(payload).end();
-            } else {
-                res.status(200).send("success with mtls").end();
-            }
+        const httpsAgent = new https.Agent({
+            cert: fs.readFileSync(process.env.CF_INSTANCE_CERT),
+            key: fs.readFileSync(process.env.CF_INSTANCE_KEY),
         });
+        var options = {
+            url: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
+            method: 'POST',
+            data: postData,
+            headers: { 'Content-Type': 'application/json' },
+            validateStatus: null,
+            httpsAgent: httpsAgent
+        }
+        const result = await axios(options);
+        if (result.status !== 200) {
+            console.log(`Got non-200 response ${result.status} response ${result.data}`);
+            var payload = {
+                statusCode: result.status,
+                response: result.data,
+            }
+            res.status(500).json(payload).end();
+        } else {
+            res.status(200).send("success with mtls").end();
+        }
 
-    }catch(err) {
+    } catch(err) {
         var payload = { exception: err };
         console.log(payload);
         res.status(500).json(payload);
