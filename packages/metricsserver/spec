@@ -14,6 +14,7 @@ files:
 - autoscaler/envelopeprocessor/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
+- autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/metricsserver/cmd/metricsserver/* # gosub
 - autoscaler/metricsserver/collector/* # gosub
 - autoscaler/metricsserver/config/* # gosub
