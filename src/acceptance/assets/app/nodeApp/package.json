@@ -3,11 +3,20 @@
 	"version": "0.0.1",
 	"description": "A sample nodejs app for AutoScaler",
 	"scripts": {
-		"start": "node app.js"
+		"start": "node app.js",
+		"lint": "npx eslint . --fix"
 	},
-	"engines": { "node": ">=12.0.0" },
+	"engines": {
+		"node": "^16.14.0"
+	},
 	"dependencies": {
-		"express": "4.17.1",
-		"request": "2.88.2"
+		"axios": "0.27.2",
+		"express": "4.18.1"
+	},
+	"devDependencies": {
+		"eslint-config-standard": "^17.0.0",
+		"eslint-plugin-import": "^2.26.0",
+		"eslint-plugin-n": "^15.2.0",
+		"eslint-plugin-promise": "^6.0.0"
 	}
 }

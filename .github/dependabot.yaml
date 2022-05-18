@@ -48,3 +48,11 @@ updates:
       interval: "daily"
       time: "08:00"
       timezone: "Europe/Berlin"
+
+  # The ASATS app
+  - package-ecosystem: "npm"
+    directory: "/src/acceptance/assets/app/nodeApp/"
+    schedule:
+      interval: "daily"
+      time: "08:00"
+      timezone: "Europe/Berlin"

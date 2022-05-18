@@ -139,14 +139,16 @@ func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
 	}
 
 	var services = struct {
-		Included struct{ Service_brokers []struct{ Name string } }
+		Included struct {
+			ServiceOfferings []struct{ Name string } `json:"service_offerings"`
+		}
 	}{}
 	contents := serviceCmd.Out.Contents()
 	err := json.Unmarshal(contents, &services)
 	if err != nil {
 		ginkgo.AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
 	}
-	for _, service := range services.Included.Service_brokers {
+	for _, service := range services.Included.ServiceOfferings {
 		if service.Name == serviceName {
 			return
 		}
