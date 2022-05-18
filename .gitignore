@@ -17,6 +17,7 @@ src/changeloglockcleaner/vendor
 /pkg/
 
 **/coverprofile.out
+**/coverprofile.out.*
 **/pom.xml.versionsBackup
 bosh-lite/deployments/*
 /RemoteSystemsTempFiles
