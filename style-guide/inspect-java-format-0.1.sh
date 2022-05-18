@@ -59,7 +59,7 @@ CHECKSTYLE_OUTPUT=$(java \
   -c "${CHECKSTYLE_CONFIG_PATH}"/"${CHECKSTYLE_CONFIG_FILE_NAME}" \
   -o "${result_log}" $changed_java_files)
 
-FILES_NEEDS_CORRECTION=$(cat "${result_log}" | grep -v "Starting audit..." | grep -v "Audit done")
+FILES_NEEDS_CORRECTION=$(cat "${result_log}" | grep -v "Starting audit..." | { grep -v "Audit done" || true; } )
 
 if  [[ -n "$FILES_NEEDS_CORRECTION" ]]; then
   echo "$FILES_NEEDS_CORRECTION"
