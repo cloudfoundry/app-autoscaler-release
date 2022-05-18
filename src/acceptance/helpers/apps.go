@@ -55,6 +55,12 @@ func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int)
 
 	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
 	Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")
+
+	if cfg.GetSkipSSLValidation() {
+		setNodeTLSRejectUnauthorizedEnvironmentVariable := cf.Cf("set-env", appName, "NODE_TLS_REJECT_UNAUTHORIZED", "0").Wait(cfg.DefaultTimeoutDuration())
+		Expect(setNodeTLSRejectUnauthorizedEnvironmentVariable).To(Exit(0), "failed to set NODE_TLS_REJECT_UNAUTHORIZED environment variable")
+	}
+
 	return appName
 }
 
