@@ -23,15 +23,8 @@ import org.springframework.boot.autoconfigure.validation.ValidationAutoConfigura
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@EnableSwagger2
 @ConfigurationPropertiesScan(basePackageClasses = MetricsConfig.class)
 @SpringBootApplication(
     exclude = {
@@ -63,15 +56,5 @@ public class SchedulerApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(SchedulerApplication.class, args);
-  }
-
-  @Bean
-  public Docket api() {
-    return new Docket(DocumentationType.SWAGGER_2)
-        .useDefaultResponseMessages(false)
-        .select()
-        .apis(RequestHandlerSelectors.basePackage("org.cloudfoundry.autoscaler.scheduler"))
-        .paths(PathSelectors.any())
-        .build();
   }
 }
