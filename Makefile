@@ -130,7 +130,8 @@ target/start-db-postgres_CI_true:
 	@echo " - $@ already up'"
 waitfor_postgres_CI_false:
 	@echo -n " - waiting for ${db_type} ."
-	@until docker exec postgres pg_isready &>/dev/null ; do echo -n "."; sleep 1; done
+	@COUNTER=0; until $$(docker exec postgres pg_isready &>/dev/null) || [ $$COUNTER -gt 10 ]; do echo -n "."; sleep 1; let COUNTER+=1; done;\
+ 	if [ $$COUNTER -gt 10 ]; then echo; echo "Error: timed out waiting for postgres. Try \"make clean\" first." >&2 ; exit 1; fi
 waitfor_postgres_CI_true:
 	@echo " - no ci postgres checks"
 
