@@ -58,7 +58,7 @@ func main() {
 	logger := helpers.InitLoggerFromConfig(&conf.Logging, "metricsforwarder")
 	mfClock := clock.NewClock()
 
-	policyDB := createPolicyDb(conf, logger)
+	policyDB := db.CreatePolicyDb(conf.Db[db.PolicyDb], logger)
 	defer func() { _ = policyDB.Close() }()
 
 	credentialProvider := credentialsProvider(conf, logger, policyDB)
@@ -86,15 +86,6 @@ func main() {
 		os.Exit(1)
 	}
 	logger.Info("exited")
-}
-
-func createPolicyDb(conf *config.Config, logger lager.Logger) *sqldb.PolicySQLDB {
-	policyDB, err := sqldb.NewPolicySQLDB(conf.Db[db.PolicyDb], logger.Session("policy-db"))
-	if err != nil {
-		logger.Fatal("Failed To connect to policyDB", err, lager.Data{"dbConfig": conf.Db[db.PolicyDb]})
-		os.Exit(1)
-	}
-	return policyDB
 }
 
 func createPrometheusRegistry(policyDB *sqldb.PolicySQLDB, httpStatusCollector healthendpoint.HTTPStatusCollector, logger lager.Logger) *prometheus.Registry {

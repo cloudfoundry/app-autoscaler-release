@@ -60,13 +60,8 @@ func main() {
 
 	members := grouper.Members{}
 
-	var policyDb db.PolicyDB
-	policyDb, err = sqldb.NewPolicySQLDB(conf.DB[db.PolicyDb], logger.Session("policydb-db"))
-	if err != nil {
-		logger.Error("failed to connect to policydb database", err, lager.Data{"dbConfig": conf.DB[db.PolicyDb]})
-		os.Exit(1)
-	}
-	defer func() { _ = policyDb.Close() }()
+	policyDB := db.CreatePolicyDb(conf.DB[db.PolicyDb], logger)
+	defer func() { _ = policyDB.Close() }()
 
 	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "golangapiserver")
 	prometheusCollectors := []prometheus.Collector{
