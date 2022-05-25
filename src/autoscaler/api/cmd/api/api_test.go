@@ -287,7 +287,11 @@ var _ = Describe("Api", func() {
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				body, err := ioutil.ReadAll(rsp.Body)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(body).To(MatchJSON(`{"overall_status": "UP","checks": [ { "name":"policy_db", "type":"database", "status":"UP"}, { "name":"storedprocedure_db", "type":"database", "status":"UP"}]}`))
+				Expect(body).To(MatchJSON(`{"overall_status": "UP","checks": [ 
+{ "name":"policy_db", "type":"database", "status":"UP"}, 
+{ "name":"storedprocedure_db", "type":"database", "status":"UP"},
+{"name": "binding_db", "type": "database", "status": "UP"}
+]}`))
 			})
 
 		})

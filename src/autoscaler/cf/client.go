@@ -1,9 +1,11 @@
 package cf
 
 import (
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -47,6 +49,7 @@ type Endpoints struct {
 }
 
 type CFClient interface {
+	healthendpoint.Pinger
 	Login() error
 	RefreshAuthToken() (string, error)
 	GetTokens() (Tokens, error)
@@ -59,6 +62,8 @@ type CFClient interface {
 	GetServiceInstancesInOrg(orgGUID, servicePlanGuid string) (int, error)
 	GetServicePlan(serviceInstanceGuid string) (string, error)
 }
+
+var _ CFClient = &cfClient{}
 
 type cfClient struct {
 	logger                              lager.Logger
@@ -80,6 +85,8 @@ type cfClient struct {
 	instanceMapLock                     *sync.Mutex
 	serviceInstanceGuidToBrokerPlanGuid map[string]string
 }
+
+var ErrHealthPingFailure = errors.New("health ping failure")
 
 func NewCFClient(conf *CFConfig, logger lager.Logger, clk clock.Clock) CFClient {
 	c := &cfClient{}
@@ -116,30 +123,38 @@ func NewCFClient(conf *CFConfig, logger lager.Logger, clk clock.Clock) CFClient 
 }
 
 func (c *cfClient) retrieveEndpoints() error {
-	c.logger.Info("retrieve-endpoints", lager.Data{"infoURL": c.infoURL})
+	endpoints, err := c.getInfo()
+	if err != nil {
+		return err
+	}
+	c.endpoints = endpoints
+	c.tokenURL = c.endpoints.TokenEndpoint + PathCFAuth
+	c.introspectTokenURL = c.endpoints.TokenEndpoint + PathIntrospectToken
+	return nil
+}
 
+func (c *cfClient) getInfo() (Endpoints, error) {
+	c.logger.Info("retrieve-endpoints", lager.Data{"infoURL": c.infoURL})
 	resp, err := c.httpClient.Get(c.infoURL)
 	if err != nil {
 		c.logger.Error("retrieve-endpoints-get", err)
-		return err
+		return Endpoints{}, err
 	}
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("Error requesting endpoints: %s [%d] %s", c.infoURL, resp.StatusCode, resp.Status)
+		err = fmt.Errorf("error requesting endpoints: %s [%d] %s", c.infoURL, resp.StatusCode, resp.Status)
 		c.logger.Error("retrieve-endpoints-response", err)
-		return err
+		return Endpoints{}, err
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&c.endpoints)
+	var endpoints Endpoints
+	err = json.NewDecoder(resp.Body).Decode(&endpoints)
 	if err != nil {
 		c.logger.Error("retrieve-endpoints-decode", err)
-		return err
+		return Endpoints{}, err
 	}
-
-	c.tokenURL = c.endpoints.TokenEndpoint + PathCFAuth
-	c.introspectTokenURL = c.endpoints.TokenEndpoint + PathIntrospectToken
-	return nil
+	return endpoints, nil
 }
 
 func (c *cfClient) requestClientCredentialGrant(formData *url.Values) error {
@@ -185,6 +200,14 @@ func (c *cfClient) Login() error {
 	}
 
 	return c.requestClientCredentialGrant(&c.loginForm)
+}
+
+func (c *cfClient) Ping() error {
+	_, err := c.getInfo()
+	if err != nil {
+		return fmt.Errorf("%w:%s", ErrHealthPingFailure, err.Error())
+	}
+	return nil
 }
 
 func (c *cfClient) RefreshAuthToken() (string, error) {

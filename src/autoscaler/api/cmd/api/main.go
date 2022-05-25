@@ -110,7 +110,11 @@ func main() {
 
 	publicApiHttpServer := createApiServer(conf, logger, policyDb, credentialProvider, checkBindingFunc, cfClient, httpStatusCollector, bindingDB)
 
-	checkers := []healthendpoint.Checker{healthendpoint.DbChecker(db.PolicyDb, policyDb), healthendpoint.DbChecker(db.StoredProcedureDb, credentialProvider)}
+	checkers := []healthendpoint.Checker{
+		healthendpoint.DbChecker(db.PolicyDb, policyDb),
+		healthendpoint.DbChecker(db.StoredProcedureDb, credentialProvider),
+		healthendpoint.DbChecker(db.BindingDb, bindingDB),
+	}
 	healthServer, err := healthendpoint.NewServerWithBasicAuth(conf.Health, checkers, logger.Session("health-server"), promRegistry, time.Now)
 	if err != nil {
 		logger.Fatal("Failed to create health server:", err)

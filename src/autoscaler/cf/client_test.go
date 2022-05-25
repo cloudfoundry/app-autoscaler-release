@@ -70,6 +70,10 @@ var _ = Describe("Client", func() {
 				Expect(cfc.GetEndpoints().TokenEndpoint).To(Equal("test-token-endpoint"))
 				Expect(cfc.GetEndpoints().DopplerEndpoint).To(Equal("test-doppler-endpoint"))
 			})
+
+			It("can Ping successfully", func() {
+				Expect(cfc.Ping()).ToNot(HaveOccurred())
+			})
 		})
 
 		Context("when retrieving endpoints fails", func() {

@@ -69,6 +69,7 @@ type PolicyDB interface {
 
 type BindingDB interface {
 	healthendpoint.DatabaseStatus
+	healthendpoint.Pinger
 	CreateServiceInstance(serviceInstance models.ServiceInstance) error
 	GetServiceInstance(serviceInstanceId string) (*models.ServiceInstance, error)
 	GetServiceInstanceByAppId(appId string) (*models.ServiceInstance, error)

@@ -15,10 +15,16 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 )
 
+var _ db.BindingDB = &BindingSQLDB{}
+
 type BindingSQLDB struct {
 	dbConfig db.DatabaseConfig
 	logger   lager.Logger
 	sqldb    *sqlx.DB
+}
+
+func (bdb *BindingSQLDB) Ping() error {
+	return bdb.sqldb.Ping()
 }
 
 func NewBindingSQLDB(dbConfig db.DatabaseConfig, logger lager.Logger) (*BindingSQLDB, error) {
