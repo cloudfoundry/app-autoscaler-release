@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -23,7 +24,11 @@ type PolicySQLDB struct {
 }
 
 func (pdb *PolicySQLDB) Ping() error {
-	return pdb.sqldb.Ping()
+	err := pdb.sqldb.Ping()
+	if err != nil {
+		return fmt.Errorf("PolicySQLDB Ping: %w", err)
+	}
+	return nil
 }
 
 func NewPolicySQLDB(dbConfig db.DatabaseConfig, logger lager.Logger) (*PolicySQLDB, error) {

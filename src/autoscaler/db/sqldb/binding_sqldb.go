@@ -3,6 +3,7 @@ package sqldb
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -24,7 +25,11 @@ type BindingSQLDB struct {
 }
 
 func (bdb *BindingSQLDB) Ping() error {
-	return bdb.sqldb.Ping()
+	err := bdb.sqldb.Ping()
+	if err != nil {
+		return fmt.Errorf("BindingSQLDB Ping: %w", err)
+	}
+	return nil
 }
 
 func NewBindingSQLDB(dbConfig db.DatabaseConfig, logger lager.Logger) (*BindingSQLDB, error) {

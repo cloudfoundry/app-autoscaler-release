@@ -22,7 +22,11 @@ type StoredProcedureSQLDb struct {
 }
 
 func (sdb *StoredProcedureSQLDb) Ping() error {
-	return sdb.sqldb.Ping()
+	err := sdb.sqldb.Ping()
+	if err != nil {
+		return fmt.Errorf("StoredProcedureSQLDb Ping: %w", err)
+	}
+	return nil
 }
 
 func NewStoredProcedureSQLDb(config models.StoredProcedureConfig, dbConfig db.DatabaseConfig, logger lager.Logger) (*StoredProcedureSQLDb, error) {

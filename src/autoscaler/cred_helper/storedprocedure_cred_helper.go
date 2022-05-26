@@ -3,6 +3,7 @@ package cred_helper
 import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"fmt"
 
 	"code.cloudfoundry.org/lager"
 )
@@ -14,7 +15,11 @@ type storedProcedureCredentials struct {
 }
 
 func (c *storedProcedureCredentials) Ping() error {
-	return c.storedProcedureDb.Ping()
+	err := c.storedProcedureDb.Ping()
+	if err != nil {
+		return fmt.Errorf("storedProcedureCredentials Ping: %w", err)
+	}
+	return nil
 }
 
 func (c *storedProcedureCredentials) Close() error {

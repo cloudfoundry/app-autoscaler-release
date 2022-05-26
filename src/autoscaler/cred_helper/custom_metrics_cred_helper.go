@@ -28,7 +28,11 @@ type customMetricsCredentials struct {
 }
 
 func (c *customMetricsCredentials) Ping() error {
-	return c.policyDB.Ping()
+	err := c.policyDB.Ping()
+	if err != nil {
+		return fmt.Errorf("customMetricsCredentials Ping: %w", err)
+	}
+	return nil
 }
 
 func (c *customMetricsCredentials) Close() error {
