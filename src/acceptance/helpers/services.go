@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 
+	. "github.com/onsi/ginkgo/v2"
+
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 
 	. "github.com/onsi/gomega"
@@ -37,7 +39,7 @@ func DeleteServices(cfg *config.Config, services []string) {
 	for _, service := range services {
 		deleteService := cf.Cf("delete-service", service, "-f").Wait(cfg.DefaultTimeoutDuration())
 		if deleteService.ExitCode() != 0 {
-			fmt.Printf("unable to delete the service %s, attempting to purge...\n", service)
+			GinkgoT().Logf("unable to delete the service %s, attempting to purge...\n", service)
 			purgeService := cf.Cf("purge-service-instance", service, "-f").Wait(cfg.DefaultTimeoutDuration())
 			Expect(purgeService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
 		}

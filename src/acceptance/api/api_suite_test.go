@@ -45,108 +45,121 @@ var (
 	client              *http.Client
 )
 
+const componentName = "Public API Suite"
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
+	RunSpecs(t, componentName)
+}
 
-	cfg = config.LoadConfig(t)
-	componentName := "Public API Suite"
+var _ = SynchronizedBeforeSuite(
+	func() []byte {
+		cfg, othercfg := LoadConfigs()
+
+		setup = workflowhelpers.NewTestSuiteSetup(cfg)
+		otherSetup = workflowhelpers.NewTestSuiteSetup(&othercfg)
+
+		Cleanup(cfg, setup)
+		Cleanup(&othercfg, otherSetup)
+		return nil
+	}, func([]byte) {
+		var otherConfig config.Config
+		cfg, otherConfig = LoadConfigs()
+
+		setup = workflowhelpers.NewTestSuiteSetup(cfg)
+		otherSetup = workflowhelpers.NewTestSuiteSetup(&otherConfig)
+
+		By("Setup test environment")
+		otherSetup.Setup()
+		setup.Setup()
+
+		By("Enable Service Access")
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+				EnableServiceAccess(cfg, setup.GetOrganizationName())
+			}
+		})
+
+		appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
+		initialInstanceCount := 1
+		countStr := strconv.Itoa(initialInstanceCount)
+
+		By("Creating test app")
+		AbortOnCommandFailuref(
+			cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).
+				Wait(cfg.CfPushTimeoutDuration()),
+			"failed creating app")
+
+		AbortOnCommandFailuref(
+			cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).
+				Wait(cfg.DefaultTimeoutDuration()),
+			"failed to map route to app")
+
+		appGUID = strings.TrimSpace(string(
+			AbortOnCommandFailuref(
+				cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration()),
+				"Failed to get guid").
+				Out.Contents()),
+		)
+
+		AbortOnCommandFailuref(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration()), "Failed to start %s", appName)
+		WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+
+		By("Creating test service")
+		if cfg.IsServiceOfferingEnabled() {
+			CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
+
+			instanceName = generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+			AbortOnCommandFailuref(
+				cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).
+					Wait(cfg.DefaultTimeoutDuration()),
+				"failed creating service %s", cfg.ServiceName)
+
+			AbortOnCommandFailuref(
+				cf.Cf("bind-service", appName, instanceName).
+					Wait(cfg.DefaultTimeoutDuration()),
+				"failed binding service %s to app %s", instanceName, appName)
+		}
+
+		// #nosec G402
+		client = &http.Client{
+			Transport: &http.Transport{
+				Proxy: http.ProxyFromEnvironment,
+				Dial: (&net.Dialer{
+					Timeout:   30 * time.Second,
+					KeepAlive: 30 * time.Second,
+				}).Dial,
+				TLSHandshakeTimeout: 10 * time.Second,
+				DisableCompression:  true,
+				DisableKeepAlives:   true,
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: cfg.SkipSSLValidation,
+				},
+			},
+			Timeout: 30 * time.Second,
+		}
+
+		healthURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, HealthPath)
+		policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
+		metricURL = strings.Replace(MetricPath, "{metric_type}", "memoryused", -1)
+		metricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(metricURL, "{appId}", appGUID, -1))
+		aggregatedMetricURL = strings.Replace(AggregatedMetricPath, "{metric_type}", "memoryused", -1)
+		aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(aggregatedMetricURL, "{appId}", appGUID, -1))
+		historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
+	},
+)
+
+func LoadConfigs() (*config.Config, config.Config) {
+	cfg = config.LoadConfig(GinkgoT())
 
 	if cfg.GetArtifactsDirectory() != "" {
 		helpers.EnableCFTrace(cfg, componentName)
 	}
 
-	RunSpecs(t, componentName)
-}
-
-var _ = BeforeSuite(func() {
-
 	otherConfig := *cfg
 	otherConfig.NamePrefix = otherConfig.NamePrefix + "_other"
-
-	By("Setup test environment")
-	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-	otherSetup = workflowhelpers.NewTestSuiteSetup(&otherConfig)
-
-	Cleanup(cfg, setup)
-	Cleanup(&otherConfig, otherSetup)
-
-	otherSetup.Setup()
-	setup.Setup()
-
-	By("Enable Service Access")
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-			EnableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
-
-	appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
-	initialInstanceCount := 1
-	countStr := strconv.Itoa(initialInstanceCount)
-
-	By("Creating test app")
-	AbortOnCommandFailuref(
-		cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).
-			Wait(cfg.CfPushTimeoutDuration()),
-		"failed creating app")
-
-	AbortOnCommandFailuref(
-		cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).
-			Wait(cfg.DefaultTimeoutDuration()),
-		"failed to map route to app")
-
-	appGUID = strings.TrimSpace(string(
-		AbortOnCommandFailuref(
-			cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration()),
-			"Failed to get guid").
-			Out.Contents()),
-	)
-
-	AbortOnCommandFailuref(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration()), "Failed to start %s", appName)
-	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
-
-	By("Creating test service")
-	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-
-		instanceName = generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		AbortOnCommandFailuref(
-			cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).
-				Wait(cfg.DefaultTimeoutDuration()),
-			"failed creating service %s", cfg.ServiceName)
-
-		AbortOnCommandFailuref(
-			cf.Cf("bind-service", appName, instanceName).
-				Wait(cfg.DefaultTimeoutDuration()),
-			"failed binding service %s to app %s", instanceName, appName)
-	}
-
-	// #nosec G402
-	client = &http.Client{
-		Transport: &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			Dial: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).Dial,
-			TLSHandshakeTimeout: 10 * time.Second,
-			DisableCompression:  true,
-			DisableKeepAlives:   true,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: cfg.SkipSSLValidation,
-			},
-		},
-		Timeout: 30 * time.Second,
-	}
-
-	healthURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, HealthPath)
-	policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-	metricURL = strings.Replace(MetricPath, "{metric_type}", "memoryused", -1)
-	metricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(metricURL, "{appId}", appGUID, -1))
-	aggregatedMetricURL = strings.Replace(AggregatedMetricPath, "{metric_type}", "memoryused", -1)
-	aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(aggregatedMetricURL, "{appId}", appGUID, -1))
-	historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
-})
+	return cfg, otherConfig
+}
 
 func AbortOnCommandFailuref(command *Session, format string, args ...any) *Session {
 	if command.ExitCode() != 0 {
@@ -155,43 +168,45 @@ func AbortOnCommandFailuref(command *Session, format string, args ...any) *Sessi
 	return command
 }
 
-var _ = AfterSuite(func() {
-	if os.Getenv("SKIP_TEARDOWN") == "true" {
-		fmt.Println("Skipping Teardown...")
-	} else {
-		if cfg.IsServiceOfferingEnabled() {
-			if appName != "" && instanceName != "" {
-				unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-				if unbindService.ExitCode() != 0 {
-					purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-					Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+var _ = SynchronizedAfterSuite(
+	func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			fmt.Println("Skipping Teardown...")
+		} else {
+			if cfg.IsServiceOfferingEnabled() {
+				if appName != "" && instanceName != "" {
+					unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+					if unbindService.ExitCode() != 0 {
+						purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+						Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+					}
+				}
+
+				if instanceName != "" {
+					deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+					if deleteService.ExitCode() != 0 {
+						purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
+						Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+					}
 				}
 			}
 
-			if instanceName != "" {
-				deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-				if deleteService.ExitCode() != 0 {
-					purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-					Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
+			if appName != "" {
+				deleteApp := cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())
+				Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", appName))
+			}
+
+			workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+				if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+					DisableServiceAccess(cfg, setup.GetOrganizationName())
 				}
-			}
+			})
+
+			otherSetup.Teardown()
+			setup.Teardown()
 		}
-
-		if appName != "" {
-			deleteApp := cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())
-			Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", appName))
-		}
-
-		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-				DisableServiceAccess(cfg, setup.GetOrganizationName())
-			}
-		})
-
-		otherSetup.Teardown()
-		setup.Teardown()
-	}
-})
+	},
+	func() {})
 
 func DoAPIRequest(req *http.Request) (*http.Response, error) {
 	return client.Do(req)

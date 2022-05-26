@@ -3,15 +3,12 @@ package pre_upgrade_test
 import (
 	"acceptance/config"
 	"acceptance/helpers"
-	"fmt"
 	"testing"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 )
 
 var (
@@ -21,47 +18,29 @@ var (
 
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
-	cfg = config.LoadConfig(t)
-	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-
 	RunSpecs(t, "Pre Upgrade Test Suite")
 }
 
-var _ = BeforeSuite(func() {
+var _ = SynchronizedBeforeSuite(
+	func() []byte {
+		cfg = config.LoadConfig(GinkgoT())
+		setup := workflowhelpers.NewTestSuiteSetup(cfg)
+		helpers.Cleanup(cfg, setup)
+		return nil
+	},
+	func([]byte) {
+		cfg = config.LoadConfig(GinkgoT())
+		setup = workflowhelpers.NewTestSuiteSetup(cfg)
+		setup.Setup()
 
-	fmt.Println("Clearing down existing test orgs/spaces...")
-	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		orgs := helpers.GetTestOrgs(cfg)
-
-		for _, org := range orgs {
-			orgName, orgGuid, spaceName, spaceGuid := helpers.GetOrgSpaceNamesAndGuids(cfg, org)
-			if spaceName != "" {
-				target := cf.Cf("target", "-o", orgName, "-s", spaceName).Wait(cfg.DefaultTimeoutDuration())
-				Expect(target).To(Exit(0), fmt.Sprintf("failed to target %s and %s", orgName, spaceName))
-
-				apps := helpers.GetApps(cfg, orgGuid, spaceGuid, "autoscaler-")
-				helpers.DeleteApps(cfg, apps, 0)
-
-				services := helpers.GetServices(cfg, orgGuid, spaceGuid, "autoscaler-")
-				helpers.DeleteServices(cfg, services)
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if cfg.ShouldEnableServiceAccess() {
+				helpers.EnableServiceAccess(cfg, setup.GetOrganizationName())
 			}
+		})
 
-			helpers.DeleteOrg(cfg, org)
+		if cfg.IsServiceOfferingEnabled() {
+			helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 		}
-	})
-
-	fmt.Println("Clearing down existing test orgs/spaces... Complete")
-	setup.Setup()
-
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.ShouldEnableServiceAccess() {
-			helpers.EnableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
-
-	if cfg.IsServiceOfferingEnabled() {
-		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-	}
-})
+	},
+)

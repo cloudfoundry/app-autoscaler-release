@@ -19,33 +19,43 @@ var (
 	setup *workflowhelpers.ReproducibleTestSuiteSetup
 )
 
+const componentName = "Broker Suite"
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
 
-	cfg = config.LoadConfig(t)
-	componentName := "Broker Suite"
-
-	if cfg.GetArtifactsDirectory() != "" {
-		helpers.EnableCFTrace(cfg, componentName)
-	}
 	if cfg.IsServiceOfferingEnabled() {
 		RunSpecs(t, componentName)
 	}
 }
 
-var _ = BeforeSuite(func() {
-
-	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-	setup.Setup()
-
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.ShouldEnableServiceAccess() {
-			EnableServiceAccess(cfg, setup.GetOrganizationName())
+var _ = SynchronizedBeforeSuite(
+	func() []byte {
+		cfg = config.LoadConfig(GinkgoT())
+		if cfg.GetArtifactsDirectory() != "" {
+			helpers.EnableCFTrace(cfg, componentName)
 		}
-	})
+		setup = workflowhelpers.NewTestSuiteSetup(cfg)
+		Cleanup(cfg, setup)
+		return nil
+	},
+	func([]byte) {
+		cfg = config.LoadConfig(GinkgoT())
+		if cfg.GetArtifactsDirectory() != "" {
+			helpers.EnableCFTrace(cfg, componentName)
+		}
 
-	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-})
+		setup = workflowhelpers.NewTestSuiteSetup(cfg)
+		setup.Setup()
+
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if cfg.ShouldEnableServiceAccess() {
+				EnableServiceAccess(cfg, setup.GetOrganizationName())
+			}
+		})
+
+		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
+	})
 
 var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {

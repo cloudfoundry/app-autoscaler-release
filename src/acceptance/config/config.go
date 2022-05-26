@@ -5,8 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"testing"
 	"time"
+
+	"github.com/onsi/ginkgo/v2"
 )
 
 const NODE_APP = "../assets/app/nodeApp"
@@ -96,7 +97,7 @@ var defaults = Config{
 	CPUUpperThreshold:               100,
 }
 
-func LoadConfig(t *testing.T) *Config {
+func LoadConfig(t ginkgo.GinkgoTInterface) *Config {
 	path := os.Getenv("CONFIG")
 	if path == "" {
 		t.Fatal("Must set $CONFIG to point to a json file.")
@@ -111,7 +112,7 @@ func LoadConfig(t *testing.T) *Config {
 	return &config
 }
 
-func validate(t *testing.T, c *Config) {
+func validate(t ginkgo.GinkgoTInterface, c *Config) {
 	if c.ApiEndpoint == "" {
 		t.Fatal("missing configuration 'api'")
 	}

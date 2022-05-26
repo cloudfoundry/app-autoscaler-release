@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 
@@ -32,8 +33,8 @@ type cfSpaces struct {
 	} `json:"resources"`
 }
 
-func GetTestOrgs(cfg *config.Config) []string {
-	rawOrgs := cf.Cf("curl", "/v3/organizations").Wait(cfg.DefaultTimeoutDuration())
+func GetOrgsWithPrefix(prefix string, timeout time.Duration) []string {
+	rawOrgs := cf.Cf("curl", "/v3/organizations").Wait(timeout)
 	Expect(rawOrgs).To(Exit(0), "unable to get orgs")
 
 	var orgs cfOrgs
@@ -42,7 +43,7 @@ func GetTestOrgs(cfg *config.Config) []string {
 
 	var orgNames []string
 	for _, org := range orgs.Resources {
-		if strings.HasPrefix(org.Name, cfg.NamePrefix) {
+		if strings.HasPrefix(org.Name, prefix) {
 			orgNames = append(orgNames, org.Name)
 		}
 	}

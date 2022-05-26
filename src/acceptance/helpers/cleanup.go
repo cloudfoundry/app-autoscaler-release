@@ -16,8 +16,7 @@ import (
 func Cleanup(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteSetup) {
 	ginkgo.By("Clearing down existing test orgs/spaces...")
 	workflowhelpers.AsUser(wfh.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		orgs := GetTestOrgs(cfg)
-
+		orgs := GetOrgsWithPrefix(cfg.NamePrefix, cfg.DefaultTimeoutDuration())
 		for _, org := range orgs {
 			orgName, orgGuid, spaceName, spaceGuid := GetOrgSpaceNamesAndGuids(cfg, org)
 			if spaceName != "" {
@@ -30,8 +29,9 @@ func Cleanup(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteSetup
 				services := GetServices(cfg, orgGuid, spaceGuid, "autoscaler-")
 				DeleteServices(cfg, services)
 			}
-
-			DeleteOrg(cfg, org)
+			if !cfg.UseExistingOrganization {
+				DeleteOrg(cfg, org)
+			}
 		}
 	})
 	ginkgo.By("Clearing down existing test orgs/spaces... Complete")
