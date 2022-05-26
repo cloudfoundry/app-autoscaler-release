@@ -1,9 +1,10 @@
 package cred_helper
 
 import (
+	"fmt"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"fmt"
 
 	"code.cloudfoundry.org/lager"
 )

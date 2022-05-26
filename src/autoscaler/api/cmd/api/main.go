@@ -114,6 +114,7 @@ func main() {
 		healthendpoint.DbChecker(db.PolicyDb, policyDb),
 		healthendpoint.DbChecker(db.StoredProcedureDb, credentialProvider),
 		healthendpoint.DbChecker(db.BindingDb, bindingDB),
+		healthendpoint.CfChecker(cfClient),
 	}
 	healthServer, err := healthendpoint.NewServerWithBasicAuth(conf.Health, checkers, logger.Session("health-server"), promRegistry, time.Now)
 	if err != nil {

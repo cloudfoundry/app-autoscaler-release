@@ -107,6 +107,14 @@ func readinessHandler(checkers []Checker) handler {
 }
 
 func DbChecker(dbName string, pinger Pinger) Checker {
+	return pingChecker(dbName, "database", pinger)
+}
+
+func CfChecker(pinger Pinger) Checker {
+	return pingChecker("cf_api", "service", pinger)
+}
+
+func pingChecker(name string, checkType string, pinger Pinger) Checker {
 	if pinger != nil {
 		return func() ReadinessCheck {
 			status := statusUp
@@ -114,11 +122,11 @@ func DbChecker(dbName string, pinger Pinger) Checker {
 			if err != nil {
 				status = statusDown
 			}
-			return ReadinessCheck{Name: dbName, Type: "database", Status: status}
+			return ReadinessCheck{Name: name, Type: checkType, Status: status}
 		}
 	} else {
 		return func() ReadinessCheck {
-			return ReadinessCheck{Name: dbName, Type: "database", Status: statusUp}
+			return ReadinessCheck{Name: name, Type: checkType, Status: statusUp}
 		}
 	}
 }

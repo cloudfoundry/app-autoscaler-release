@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -86,8 +85,6 @@ type cfClient struct {
 	instanceMapLock                     *sync.Mutex
 	serviceInstanceGuidToBrokerPlanGuid map[string]string
 }
-
-var ErrHealthPingFailure = errors.New("health ping failure")
 
 func NewCFClient(conf *CFConfig, logger lager.Logger, clk clock.Clock) CFClient {
 	c := &cfClient{}
