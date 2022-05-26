@@ -29,42 +29,48 @@ var (
 	initialInstanceCount int
 )
 
+const componentName = "Application Scale Suite"
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	cfg = config.LoadConfig(t)
-	componentName := "Application Scale Suite"
-
-	if cfg.GetArtifactsDirectory() != "" {
-		helpers.EnableCFTrace(cfg, componentName)
-	}
-
 	RunSpecs(t, componentName)
 }
 
-var _ = BeforeSuite(func() {
-
-	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-
-	Cleanup(cfg, setup)
-
-	setup.Setup()
-
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-			EnableServiceAccess(cfg, setup.GetOrganizationName())
+var _ = SynchronizedBeforeSuite(
+	func() []byte {
+		cfg := config.LoadConfig(GinkgoT())
+		if cfg.GetArtifactsDirectory() != "" {
+			helpers.EnableCFTrace(cfg, componentName)
 		}
+
+		setup := workflowhelpers.NewTestSuiteSetup(cfg)
+		Cleanup(cfg, setup)
+		return nil
+	},
+	func([]byte) {
+		cfg = config.LoadConfig(GinkgoT())
+		if cfg.GetArtifactsDirectory() != "" {
+			helpers.EnableCFTrace(cfg, componentName)
+		}
+
+		setup = workflowhelpers.NewTestSuiteSetup(cfg)
+		setup.Setup()
+
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+				EnableServiceAccess(cfg, setup.GetOrganizationName())
+			}
+		})
+
+		if cfg.IsServiceOfferingEnabled() {
+			CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
+		}
+
+		interval = cfg.AggregateInterval
+
+		client = GetHTTPClient(cfg)
+
 	})
-
-	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-	}
-
-	interval = cfg.AggregateInterval
-
-	client = GetHTTPClient(cfg)
-
-})
 
 var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
