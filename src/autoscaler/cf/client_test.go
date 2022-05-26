@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"time"
 
+	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+
 	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo/v2"
@@ -14,9 +16,36 @@ import (
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 )
 
+type CloudController struct {
+	*ghttp.Server
+}
+
+func (c *CloudController) setupMockInfoOK() {
+	c.setupMockInfo(http.StatusOK)
+}
+
+func (c *CloudController) setupMockInfo(status int) {
+	c.AppendHandlers(
+		ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", PathCFInfo),
+			ghttp.RespondWithJSONEncoded(status, Endpoints{
+				AuthEndpoint:    "test-auth-endpoint",
+				TokenEndpoint:   "test-token-endpoint",
+				DopplerEndpoint: "test-doppler-endpoint",
+			}),
+		),
+	)
+}
+
+func NewCloudControler() *CloudController {
+	return &CloudController{
+		ghttp.NewServer(),
+	}
+}
+
 var _ = Describe("Client", func() {
 	var (
-		fakeCC    *ghttp.Server
+		fakeCC    *CloudController
 		fakeUAA   *ghttp.Server
 		cfc       CFClient
 		conf      *CFConfig
@@ -27,7 +56,7 @@ var _ = Describe("Client", func() {
 	)
 
 	BeforeEach(func() {
-		fakeCC = ghttp.NewServer()
+		fakeCC = NewCloudControler()
 		fakeUAA = ghttp.NewServer()
 		conf = &CFConfig{}
 		conf.API = fakeCC.URL()
@@ -44,6 +73,28 @@ var _ = Describe("Client", func() {
 		}
 	})
 
+	Describe("Ping", func() {
+		Context("when retrieving endpoints", func() {
+			BeforeEach(func() {
+				cfc = NewCFClient(conf, lager.NewLogger("cf"), fclock)
+			})
+
+			It("can Ping successfully", func() {
+				fakeCC.setupMockInfoOK()
+				Expect(cfc.Ping()).ToNot(HaveOccurred())
+			})
+
+			It("fails when non 200 is returned", func() {
+				fakeCC.setupMockInfo(http.StatusInternalServerError)
+				Expect(cfc.Ping()).To(HaveErrorMessage(MatchRegexp("cf client Ping: error requesting endpoints:.* 500 Internal Server Error")))
+			})
+
+			It("fails when not reachable", func() {
+				fakeCC.Close()
+				Expect(cfc.Ping()).To(HaveErrorMessage(MatchRegexp("cf client Ping: .* connect: connection refused")))
+			})
+		})
+	})
 	Describe("Login", func() {
 
 		JustBeforeEach(func() {
@@ -53,26 +104,14 @@ var _ = Describe("Client", func() {
 
 		Context("when retrieving endpoints succeeds", func() {
 			BeforeEach(func() {
-				fakeCC.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", PathCFInfo),
-						ghttp.RespondWithJSONEncoded(http.StatusOK, Endpoints{
-							AuthEndpoint:    "test-auth-endpoint",
-							TokenEndpoint:   "test-token-endpoint",
-							DopplerEndpoint: "test-doppler-endpoint",
-						}),
-					),
-				)
+				fakeCC.setupMockInfoOK()
 			})
 
 			It("has endpoints", func() {
+				Expect(err).ToNot(HaveOccurred())
 				Expect(cfc.GetEndpoints().AuthEndpoint).To(Equal("test-auth-endpoint"))
 				Expect(cfc.GetEndpoints().TokenEndpoint).To(Equal("test-token-endpoint"))
 				Expect(cfc.GetEndpoints().DopplerEndpoint).To(Equal("test-doppler-endpoint"))
-			})
-
-			It("can Ping successfully", func() {
-				Expect(cfc.Ping()).ToNot(HaveOccurred())
 			})
 		})
 
@@ -99,7 +138,7 @@ var _ = Describe("Client", func() {
 				})
 
 				It("should error", func() {
-					Expect(err).To(MatchError(MatchRegexp("Error requesting endpoints: .*")))
+					Expect(err).To(MatchError(MatchRegexp("error requesting endpoints: .*")))
 				})
 			})
 		})

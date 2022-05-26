@@ -176,6 +176,16 @@ type FakeBindingDB struct {
 		result1 *models.ServiceInstance
 		result2 error
 	}
+	PingStub        func() error
+	pingMutex       sync.RWMutex
+	pingArgsForCall []struct {
+	}
+	pingReturns struct {
+		result1 error
+	}
+	pingReturnsOnCall map[int]struct {
+		result1 error
+	}
 	UpdateServiceInstanceStub        func(models.ServiceInstance) error
 	updateServiceInstanceMutex       sync.RWMutex
 	updateServiceInstanceArgsForCall []struct {
@@ -1049,6 +1059,59 @@ func (fake *FakeBindingDB) GetServiceInstanceByAppIdReturnsOnCall(i int, result1
 	}{result1, result2}
 }
 
+func (fake *FakeBindingDB) Ping() error {
+	fake.pingMutex.Lock()
+	ret, specificReturn := fake.pingReturnsOnCall[len(fake.pingArgsForCall)]
+	fake.pingArgsForCall = append(fake.pingArgsForCall, struct {
+	}{})
+	stub := fake.PingStub
+	fakeReturns := fake.pingReturns
+	fake.recordInvocation("Ping", []interface{}{})
+	fake.pingMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeBindingDB) PingCallCount() int {
+	fake.pingMutex.RLock()
+	defer fake.pingMutex.RUnlock()
+	return len(fake.pingArgsForCall)
+}
+
+func (fake *FakeBindingDB) PingCalls(stub func() error) {
+	fake.pingMutex.Lock()
+	defer fake.pingMutex.Unlock()
+	fake.PingStub = stub
+}
+
+func (fake *FakeBindingDB) PingReturns(result1 error) {
+	fake.pingMutex.Lock()
+	defer fake.pingMutex.Unlock()
+	fake.PingStub = nil
+	fake.pingReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeBindingDB) PingReturnsOnCall(i int, result1 error) {
+	fake.pingMutex.Lock()
+	defer fake.pingMutex.Unlock()
+	fake.PingStub = nil
+	if fake.pingReturnsOnCall == nil {
+		fake.pingReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.pingReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeBindingDB) UpdateServiceInstance(arg1 models.ServiceInstance) error {
 	fake.updateServiceInstanceMutex.Lock()
 	ret, specificReturn := fake.updateServiceInstanceReturnsOnCall[len(fake.updateServiceInstanceArgsForCall)]
@@ -1141,6 +1204,8 @@ func (fake *FakeBindingDB) Invocations() map[string][][]interface{} {
 	defer fake.getServiceInstanceMutex.RUnlock()
 	fake.getServiceInstanceByAppIdMutex.RLock()
 	defer fake.getServiceInstanceByAppIdMutex.RUnlock()
+	fake.pingMutex.RLock()
+	defer fake.pingMutex.RUnlock()
 	fake.updateServiceInstanceMutex.RLock()
 	defer fake.updateServiceInstanceMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

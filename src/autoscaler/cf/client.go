@@ -1,7 +1,6 @@
 package cf
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/clock"
@@ -205,7 +206,7 @@ func (c *cfClient) Login() error {
 func (c *cfClient) Ping() error {
 	_, err := c.getInfo()
 	if err != nil {
-		return fmt.Errorf("%w:%s", ErrHealthPingFailure, err.Error())
+		return fmt.Errorf("cf client Ping: %w", err)
 	}
 	return nil
 }

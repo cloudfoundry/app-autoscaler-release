@@ -122,6 +122,16 @@ type FakeCFClient struct {
 	loginReturnsOnCall map[int]struct {
 		result1 error
 	}
+	PingStub        func() error
+	pingMutex       sync.RWMutex
+	pingArgsForCall []struct {
+	}
+	pingReturns struct {
+		result1 error
+	}
+	pingReturnsOnCall map[int]struct {
+		result1 error
+	}
 	RefreshAuthTokenStub        func() (string, error)
 	refreshAuthTokenMutex       sync.RWMutex
 	refreshAuthTokenArgsForCall []struct {
@@ -699,6 +709,59 @@ func (fake *FakeCFClient) LoginReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
+func (fake *FakeCFClient) Ping() error {
+	fake.pingMutex.Lock()
+	ret, specificReturn := fake.pingReturnsOnCall[len(fake.pingArgsForCall)]
+	fake.pingArgsForCall = append(fake.pingArgsForCall, struct {
+	}{})
+	stub := fake.PingStub
+	fakeReturns := fake.pingReturns
+	fake.recordInvocation("Ping", []interface{}{})
+	fake.pingMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeCFClient) PingCallCount() int {
+	fake.pingMutex.RLock()
+	defer fake.pingMutex.RUnlock()
+	return len(fake.pingArgsForCall)
+}
+
+func (fake *FakeCFClient) PingCalls(stub func() error) {
+	fake.pingMutex.Lock()
+	defer fake.pingMutex.Unlock()
+	fake.PingStub = stub
+}
+
+func (fake *FakeCFClient) PingReturns(result1 error) {
+	fake.pingMutex.Lock()
+	defer fake.pingMutex.Unlock()
+	fake.PingStub = nil
+	fake.pingReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeCFClient) PingReturnsOnCall(i int, result1 error) {
+	fake.pingMutex.Lock()
+	defer fake.pingMutex.Unlock()
+	fake.PingStub = nil
+	if fake.pingReturnsOnCall == nil {
+		fake.pingReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.pingReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeCFClient) RefreshAuthToken() (string, error) {
 	fake.refreshAuthTokenMutex.Lock()
 	ret, specificReturn := fake.refreshAuthTokenReturnsOnCall[len(fake.refreshAuthTokenArgsForCall)]
@@ -838,6 +901,8 @@ func (fake *FakeCFClient) Invocations() map[string][][]interface{} {
 	defer fake.isUserSpaceDeveloperMutex.RUnlock()
 	fake.loginMutex.RLock()
 	defer fake.loginMutex.RUnlock()
+	fake.pingMutex.RLock()
+	defer fake.pingMutex.RUnlock()
 	fake.refreshAuthTokenMutex.RLock()
 	defer fake.refreshAuthTokenMutex.RUnlock()
 	fake.setAppInstancesMutex.RLock()
