@@ -1,0 +1,24 @@
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/use_log_cache
+  value: true
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/host
+  value: log-cache.service.cf.internal
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/port
+  value: 8080
+
+- type: replace
+  path: /instance_groups/name=asmetric/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/ca_cert
+  value: ((/bosh-autoscaler/cf/log_cache.ca))
+
+- type: replace
+  path: /instance_groups/name=asmetric/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/client_cert
+  value: ((/bosh-autoscaler/cf/log_cache.certificate))
+
+- type: replace
+  path: /instance_groups/name=asmetric/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/client_key
+  value: ((/bosh-autoscaler/cf/log_cache.private_key))
+
