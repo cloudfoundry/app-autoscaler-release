@@ -90,6 +90,7 @@ scalingEngine:
 
 metricCollector:
   metric_collector_url: https://<%= p("autoscaler.eventgenerator.metricscollector.host") %>:<%= p("autoscaler.eventgenerator.metricscollector.port") %>
+  use_log_cache: <%= p("autoscaler.eventgenerator.metricscollector.use_log_cache") %>
   tls:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.crt
