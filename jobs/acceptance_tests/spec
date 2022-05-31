@@ -1,0 +1,45 @@
+---
+name: acceptance_tests
+
+templates:
+  run.erb: bin/run
+  config.json.erb: bin/config.json
+  bpm.yml.erb: config/bpm.yml
+
+packages:
+ - golang-1-linux
+ - acceptance
+ - cf-cli-8-linux
+
+properties:
+  acceptance_tests.system_domain:
+    description: cf cli system domain
+  acceptance_tests.admin_user:
+    description: cf admin username
+    default: admin
+  acceptance_tests.admin_password:
+    description: cf admin password
+  acceptance_tests.skip_ssl_validation:
+    description: cf skip ssl validation
+    default: true
+  acceptance_tests.use_http:
+    description: use http intead of https
+    default: false
+  acceptance_tests.service_name:
+    description: name of autoscaler service offering
+    default: "autoscaler"
+  acceptance_tests.service_plan:
+    description: name of autoscaler service plan
+    default: "autoscaler-free-plan"
+  acceptance_tests.aggregate_interval:
+    description: aggregate interval
+    default: 120
+  acceptance_tests.name_prefix:
+    description: test apps/service intances prefix
+    default: ASUP
+  acceptance_tests.service_offering_enabled:
+    description: service offering enabled
+    default: true
+  acceptance_tests.verbose:
+    description: test verbosity
+    verbose: false

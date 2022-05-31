@@ -1,0 +1,21 @@
+<%
+  require 'json'
+
+config = {
+  "api": 'api.' + p("acceptance_tests.system_domain"),
+  "admin_user": p("acceptance_tests.admin_user"),
+  "admin_password": p("acceptance_tests.admin_password"),
+  "apps_domain": p("acceptance_tests.system_domain"),
+  "skip_ssl_validation": p("acceptance_tests.skip_ssl_validation"),
+  "use_http": p("acceptance_tests.use_http"),
+  "service_name": p("acceptance_tests.service_name"),
+  "service_plan": p("acceptance_tests.service_plan"),
+  "aggregate_interval": p("acceptance_tests.aggregate_interval"),
+  "name_prefix": p('acceptance_tests.name_prefix'),
+  "autoscaler_api": 'autoscaler.' + p("acceptance_tests.system_domain"),
+  "service_offering_enabled": p('acceptance_tests.service_offering_enabled'),
+}
+
+%>
+
+<%= JSON.pretty_generate(config) %>

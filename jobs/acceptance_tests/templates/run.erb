@@ -1,0 +1,33 @@
+#!/bin/bash -l
+
+set -ex
+
+export PATH=/var/vcap/packages/cf-cli-8-linux/bin:${PATH} # put the cf cli on the path
+export CONFIG=/var/vcap/jobs/acceptance_tests/bin/config.json
+
+ACCEPTANCE_BIN=/var/vcap/packages/acceptance/bin
+
+mkdir -p /var/vcap/sys/log/acceptance_tests
+
+EXITSTATUS=0
+verbose=<%= properties.acceptance_tests.verbose ? "-v" : "" %>
+
+
+"${ACCEPTANCE_BIN}/ginkgo" "${ACCEPTANCE_BIN}/api.test" \
+  -randomizeAllSpecs $verbose -slowSpecThreshold=120 -keepGoing || EXITSTATUS=$?
+
+"${ACCEPTANCE_BIN}/ginkgo" "${ACCEPTANCE_BIN}/app.test" \
+  -randomizeAllSpecs $verbose -slowSpecThreshold=120 -keepGoing || EXITSTATUS=$?
+
+"${ACCEPTANCE_BIN}/ginkgo" "${ACCEPTANCE_BIN}/broker.test" \
+  -randomizeAllSpecs $verbose -slowSpecThreshold=120 -keepGoing || EXITSTATUS=$?
+
+echo "Smoke Tests Complete; exit status: $EXITSTATUS"
+
+for i in /var/vcap/sys/log/acceptance_tests/*.txt; do
+  if [ -e "$i" ]; then
+    mv $i $i.log # needed to make download-logs work
+  fi
+done
+
+exit $EXITSTATUS
