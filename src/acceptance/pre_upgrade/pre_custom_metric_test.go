@@ -1,8 +1,9 @@
 package pre_upgrade_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"time"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

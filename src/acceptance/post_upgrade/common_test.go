@@ -1,8 +1,9 @@
 package post_upgrade_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"strings"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 )
 
 func GetAppInfo(org, space, appType string) (fullAppName string, appGuid string) {

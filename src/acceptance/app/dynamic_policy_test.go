@@ -1,9 +1,10 @@
 package app_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"fmt"
 	"os"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"

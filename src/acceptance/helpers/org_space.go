@@ -1,10 +1,11 @@
 package helpers
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 

@@ -1,11 +1,12 @@
 package post_upgrade_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"fmt"
 	"os"
 	"testing"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"

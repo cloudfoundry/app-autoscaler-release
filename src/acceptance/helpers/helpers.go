@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"bytes"
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -13,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 
 	. "github.com/onsi/ginkgo/v2"
 

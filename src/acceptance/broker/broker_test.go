@@ -1,11 +1,12 @@
 package broker_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/generator"

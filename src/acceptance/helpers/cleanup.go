@@ -1,8 +1,9 @@
 package helpers
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 	"fmt"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 
 	"github.com/onsi/ginkgo/v2"
 

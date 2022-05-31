@@ -1,10 +1,11 @@
 package app_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
-	. "code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"fmt"
 	"os"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
+	. "code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	"strconv"
 	"strings"
