@@ -1,7 +1,7 @@
 package post_upgrade_test
 
 import (
-	"acceptance/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

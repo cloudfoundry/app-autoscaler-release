@@ -1,9 +1,11 @@
 package helpers_test
 
 import (
-	"acceptance/config"
-	"acceptance/helpers"
 	"testing"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
+
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 
 	"github.com/stretchr/testify/assert"
 )

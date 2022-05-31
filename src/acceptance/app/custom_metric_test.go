@@ -1,7 +1,7 @@
 package app_test
 
 import (
-	"acceptance/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"fmt"
 	"os"
 	"time"

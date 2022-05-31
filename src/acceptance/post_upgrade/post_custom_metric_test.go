@@ -1,7 +1,8 @@
 package post_upgrade_test
 
 import (
-	"acceptance/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
+
 	"time"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"

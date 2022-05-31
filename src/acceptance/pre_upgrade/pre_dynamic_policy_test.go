@@ -1,7 +1,7 @@
 package pre_upgrade_test
 
 import (
-	"acceptance/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	"time"
 

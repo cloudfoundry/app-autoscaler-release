@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"acceptance/config"
-	. "acceptance/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
+	. "code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/helpers"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"

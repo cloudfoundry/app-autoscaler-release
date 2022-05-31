@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	. "acceptance/helpers"
+	. "code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"

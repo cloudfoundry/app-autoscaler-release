@@ -1,8 +1,8 @@
 package pre_upgrade_test
 
 import (
-	"acceptance/config"
-	"acceptance/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"fmt"
 	"testing"
 

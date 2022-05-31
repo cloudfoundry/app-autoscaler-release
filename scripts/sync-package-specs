@@ -1,12 +1,14 @@
 #!/bin/bash
 set -e
+set -x
 
 # ensure gosub is installed (this will recompile it only if necessary)
 go install github.com/garethjevans/gosub@latest
 
 function sync_package() {
   bosh_pkg=${1}
-  golang_pkg=${2}
+  pkg_src=${2}
+  golang_pkg=${3}
 
   shift
   shift
@@ -16,13 +18,13 @@ function sync_package() {
 
     spec_dir=$PWD/packages/${bosh_pkg}
     echo "Syncing ${bosh_pkg}..."
-    cd $PWD/src/autoscaler/${golang_pkg}
+    cd $PWD/src/${pkg_src}/${golang_pkg}
     {
       cat ${spec_dir}/spec | grep -v '# gosub'
-      GO111MODULE=on GOOS=linux gosub list "$@" | grep autoscaler | \
+      GO111MODULE=on GOOS=linux gosub list "$@" | grep ${pkg_src} | \
         sed -e 's|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- \1/* # gosub|g'
-      GO111MODULE=on GOOS=linux gosub list "$@" | grep -v autoscaler | \
-        sed -e 's|\(.*\)|- autoscaler/vendor/\1/* # gosub|g'
+      GO111MODULE=on GOOS=linux gosub list "$@" | grep -v ${pkg_src} | \
+        sed -e "s|\(.*\)|- ${pkg_src}/vendor/\1/* # gosub|g"
     } > ${spec_dir}/spec.new
 
     mv ${spec_dir}/spec.new ${spec_dir}/spec
@@ -32,11 +34,12 @@ function sync_package() {
 export GOPATH=$PWD
 export PATH=$GOPATH/bin:$PATH
 
-sync_package eventgenerator eventgenerator -app ./...
-sync_package golangapiserver api -app ./...
-sync_package metricsforwarder metricsforwarder -app ./...
-sync_package metricsgateway metricsgateway -app ./...
-sync_package metricsserver metricsserver -app ./...
-sync_package operator operator -app ./...
-sync_package scalingengine scalingengine -app ./...
+# sync_package eventgenerator autoscaler eventgenerator -app ./...
+# sync_package golangapiserver autoscaler api -app ./...
+# sync_package metricsforwarder autoscaler metricsforwarder -app ./...
+# sync_package metricsgateway autoscaler metricsgateway -app ./...
+# sync_package metricsserver autoscaler metricsserver -app ./...
+# sync_package operator autoscaler operator -app ./...
+# sync_package scalingengine autoscaler scalingengine -app ./...
+sync_package acceptance acceptance . -app ./...
 

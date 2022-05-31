@@ -1,0 +1,79 @@
+---
+name: acceptance
+
+dependencies:
+- golang-1-linux
+
+files:
+- acceptance/go.mod
+- acceptance/go.sum
+- acceptance/vendor/modules.txt
+- acceptance/assets/**/*
+- acceptance/vendor/github.com/onsi/ginkgo/v2/ginkgo/**/*
+- acceptance/vendor/github.com/go-task/slim-sprig/*
+- acceptance/vendor/github.com/google/pprof/profile/*
+- acceptance/vendor/golang.org/x/tools/go/ast/**/*
+- acceptance/vendor/golang.org/x/tools/internal/**/*
+- acceptance/* # gosub
+- acceptance/api/* # gosub
+- acceptance/app/* # gosub
+- acceptance/broker/* # gosub
+- acceptance/config/* # gosub
+- acceptance/helpers/* # gosub
+- acceptance/post_upgrade/* # gosub
+- acceptance/pre_upgrade/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/cf/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/commandreporter/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/commandstarter/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/generator/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/helpers/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/helpers/internal/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/internal/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/silentcommandstarter/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers/* # gosub
+- acceptance/vendor/github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers/internal/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/config/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/formatter/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/internal/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/internal/global/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/internal/interrupt_handler/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/internal/parallel_support/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/internal/testingtproxy/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/reporters/* # gosub
+- acceptance/vendor/github.com/onsi/ginkgo/v2/types/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/format/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/gbytes/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/gexec/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/internal/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/internal/gutil/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/matchers/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/matchers/support/goraph/bipartitegraph/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/matchers/support/goraph/edge/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/matchers/support/goraph/node/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/matchers/support/goraph/util/* # gosub
+- acceptance/vendor/github.com/onsi/gomega/types/* # gosub
+- acceptance/vendor/golang.org/x/net/html/* # gosub
+- acceptance/vendor/golang.org/x/net/html/atom/* # gosub
+- acceptance/vendor/golang.org/x/net/html/charset/* # gosub
+- acceptance/vendor/golang.org/x/sys/internal/unsafeheader/* # gosub
+- acceptance/vendor/golang.org/x/sys/unix/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/charmap/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/htmlindex/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/internal/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/internal/identifier/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/japanese/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/korean/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/simplifiedchinese/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/traditionalchinese/* # gosub
+- acceptance/vendor/golang.org/x/text/encoding/unicode/* # gosub
+- acceptance/vendor/golang.org/x/text/internal/language/* # gosub
+- acceptance/vendor/golang.org/x/text/internal/language/compact/* # gosub
+- acceptance/vendor/golang.org/x/text/internal/tag/* # gosub
+- acceptance/vendor/golang.org/x/text/internal/utf8internal/* # gosub
+- acceptance/vendor/golang.org/x/text/language/* # gosub
+- acceptance/vendor/golang.org/x/text/runes/* # gosub
+- acceptance/vendor/golang.org/x/text/transform/* # gosub
+- acceptance/vendor/gopkg.in/yaml.v2/* # gosub

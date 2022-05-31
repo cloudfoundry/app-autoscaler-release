@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -ex
+
+mkdir -p ${BOSH_INSTALL_TARGET}/src
+cp -a . ${BOSH_INSTALL_TARGET}/src
+
+pushd "${BOSH_INSTALL_TARGET}"
+  source /var/vcap/packages/golang-*-linux/bosh/compile.env
+
+  pushd src/acceptance/vendor
+    go install github.com/onsi/ginkgo/v2/ginkgo
+  popd
+
+  pushd src/acceptance
+    mv ./assets "${BOSH_INSTALL_TARGET}/"
+    go test -c -race -o "${BOSH_INSTALL_TARGET}/bin/api.test" ./api
+    go test -c -race -o "${BOSH_INSTALL_TARGET}/bin/app.test" ./app
+    go test -c -race -o "${BOSH_INSTALL_TARGET}/bin/broker.test" ./broker
+    go test -c -race -o "${BOSH_INSTALL_TARGET}/bin/pre_upgrade.test" ./pre_upgrade
+    go test -c -race -o "${BOSH_INSTALL_TARGET}/bin/post_upgrade.test" ./post_upgrade
+  popd
+popd

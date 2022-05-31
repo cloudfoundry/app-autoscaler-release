@@ -1,8 +1,8 @@
 package helpers
 
 import (
-	"acceptance/config"
 	"bytes"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"

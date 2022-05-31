@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"acceptance/config"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

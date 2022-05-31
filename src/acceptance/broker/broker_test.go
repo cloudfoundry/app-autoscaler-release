@@ -1,7 +1,7 @@
 package broker_test
 
 import (
-	"acceptance/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/acceptance/helpers"
 	"encoding/json"
 	"fmt"
 	"os"

@@ -1,4 +1,4 @@
-module acceptance
+module code.cloudfoundry.org/app-autoscaler/src/acceptance
 
 go 1.18
 
