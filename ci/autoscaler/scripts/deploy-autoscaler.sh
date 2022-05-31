@@ -105,7 +105,8 @@ EOF
   bosh create-release --force --version=${CURRENT_COMMIT_HASH}
 
   echo "Uploading Release"
-  bosh upload-release
+  bosh upload-release dev_releases/app-autoscaler/app-autoscaler-${CURRENT_COMMIT_HASH}.yml
+
 
   echo "Deploying Release"
   deploy
