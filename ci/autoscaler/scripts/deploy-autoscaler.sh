@@ -3,18 +3,35 @@
 set -euo pipefail
 
 VAR_DIR=bbl-state/bbl-state/vars
-pushd bbl-state/bbl-state
+
+system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
+bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
+ops_files="${OPS_FILES:-()}"
+
+VAR_DIR=bbl-state/bbl-state/vars
+pushd ${bbl_state_path}
   eval "$(bbl print-env)"
 popd
 
 export UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 
-uaac target https://uaa.$SYSTEM_DOMAIN --skip-ssl-validation
+uaac target https://uaa.${system_domain} --skip-ssl-validation
 uaac token client get admin -s $UAA_CLIENT_SECRET
 
 set +e
 exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
+
+function deploy () {
+  bosh -n -d app-autoscaler \
+    deploy templates/app-autoscaler-deployment.yml \
+    ${OPS_FILES_TO_USE} \
+    -v system_domain=${system_domain} \
+    -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
+    -v cf_client_id=autoscaler_client_id \
+    -v cf_client_secret=autoscaler_client_secret \
+    -v skip_ssl_validation=true
+}
 
 if [[ $exist == 0 ]]; then
   echo "Updating client token"
@@ -54,7 +71,7 @@ pushd app-autoscaler-release
       fi
     done
   fi
-  for OPS_FILE in $OPS_FILES; do
+  for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
       OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
     fi
@@ -77,15 +94,8 @@ EOF
   if [[ "${AUTOSCALER_EXISTS}" == 1 ]]; then
     echo "the app-autoscaler release is already uploaded with the commit ${CURRENT_COMMIT_HASH}"
     echo "Attempting redeploy..."
+    deploy
 
-    bosh -n -d app-autoscaler \
-      deploy templates/app-autoscaler-deployment.yml \
-      ${OPS_FILES_TO_USE} \
-      -v system_domain=${SYSTEM_DOMAIN} \
-      -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
-      -v cf_client_id=autoscaler_client_id \
-      -v cf_client_secret=autoscaler_client_secret \
-      -v skip_ssl_validation=true
     exit 0
   fi
 
@@ -96,13 +106,6 @@ EOF
   bosh upload-release
 
   echo "Deploying Release"
-  bosh -n -d app-autoscaler \
-    deploy templates/app-autoscaler-deployment.yml \
-    ${OPS_FILES_TO_USE} \
-    -v system_domain=${SYSTEM_DOMAIN} \
-    -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
-    -v cf_client_id=autoscaler_client_id \
-    -v cf_client_secret=autoscaler_client_secret \
-    -v skip_ssl_validation=true
+  deploy
 
 popd
