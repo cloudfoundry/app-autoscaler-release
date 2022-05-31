@@ -96,7 +96,7 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: ghcr.io/garethjevans/github-pr-resource
+    repository: ghcr.io/bonzofenix/github-pr-resource
     tag: master
 
 - name: github-release
