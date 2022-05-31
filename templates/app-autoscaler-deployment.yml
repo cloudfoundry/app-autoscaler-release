@@ -257,17 +257,17 @@ instance_groups:
             port: *scalingEnginePort
             ca_cert: ((scalingengine_ca.ca))
             client_cert: ((scalingengine_client.certificate))
-            client_key: ((scalingengine_client.private_key))                
+            client_key: ((scalingengine_client.private_key))
           scheduler:
             port: *schedulerPort
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
-            client_key: ((scheduler_client.private_key))        
-          db_lock: 
+            client_key: ((scheduler_client.private_key))
+          db_lock:
             ttl: 15s
             retry_interval: 5s
           logging:
-            level: info 
+            level: info
           http_client_timeout: 60s
           health:
             port: &operatorHealthPort 6208
@@ -427,7 +427,7 @@ instance_groups:
   vm_type: small
   update:
     max_in_flight: 1
-    serial: true  
+    serial: true
   jobs:
   - name: metricsgateway
     release: app-autoscaler
@@ -501,7 +501,7 @@ instance_groups:
           broker:
             server:
               port: &brokerServerPort 6102
-              catalog: 
+              catalog:
                 services:
                 - id: autoscaler-guid
                   name: autoscaler
@@ -535,9 +535,9 @@ instance_groups:
           event_generator:
             ca_cert: ((eventgenerator_ca.ca))
             client_cert: ((eventgenerator_client.certificate))
-            client_key: ((eventgenerator_client.private_key)) 
-          metrics_forwarder: 
-            host: autoscalermetrics.((system_domain))              
+            client_key: ((eventgenerator_client.private_key))
+          metrics_forwarder:
+            host: autoscalermetrics.((system_domain))
         policy_db: *database
         policy_db_connection_config: *databaseConnectionConfig
         binding_db: *database
@@ -614,6 +614,25 @@ instance_groups:
           agent:
             cert: ((loggregator_tls_agent.certificate))
             key: ((loggregator_tls_agent.private_key))
+- name: acceptance_tests
+  azs:
+  - z1
+  instances: 1
+  lifecycle: errand
+  networks:
+  - name: default
+  stemcell: default
+  vm_type: small
+  update:
+    max_in_flight: 1
+    serial: true
+  jobs:
+  - name: acceptance_tests
+    release: app-autoscaler
+    properties:
+      acceptance_tests:
+        system_domain: ((system_domain))
+        admin_password: ((admin_password))
 
 variables:
 - name: database_password
@@ -677,7 +696,7 @@ variables:
     ca: eventgenerator_ca
     common_name: eventgenerator client
     extended_key_usage:
-    - client_auth      
+    - client_auth
 - name: apiserver_ca
   type: certificate
   options:
@@ -726,7 +745,7 @@ variables:
     ca: servicebroker_ca
     common_name: servicebroker.service.cf.internal
     alternative_names:
-    - servicebroker.service.cf.internal  
+    - servicebroker.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth
