@@ -14,6 +14,7 @@ pushd ${bbl_state_path}
 popd
 
 export UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
+CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
 uaac target https://uaa.${system_domain} --skip-ssl-validation
 uaac token client get admin -s $UAA_CLIENT_SECRET
@@ -28,6 +29,7 @@ function deploy () {
     ${OPS_FILES_TO_USE} \
     -v system_domain=${system_domain} \
     -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
+    -v admin_password=${CF_ADMIN_PASSWORD} \
     -v cf_client_id=autoscaler_client_id \
     -v cf_client_secret=autoscaler_client_secret \
     -v skip_ssl_validation=true
