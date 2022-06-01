@@ -4,7 +4,7 @@ databaseChangeLog:
       - not:
         - primaryKeyExists:
             tableName: DATABASECHANGELOG
-            primaryKeyName: "PK_DATABASECHANGELOG"
+            primaryKeyName: "PRIMARY"
   - changeSet:
       id: 1
       author: aqan213
