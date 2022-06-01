@@ -4,7 +4,7 @@
 
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/host
-  value: log-cache.service.cf.internal
+  value: logcache
 
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/port
@@ -26,7 +26,7 @@
 - type: replace
   path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/-
   value:
-    domain: log-cache.service.cf.internal
+    domain: logcache
     targets:
       - deployment: cf
         domain: bosh
