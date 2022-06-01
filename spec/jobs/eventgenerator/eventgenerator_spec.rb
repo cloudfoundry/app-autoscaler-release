@@ -84,6 +84,11 @@ describe "eventgenerator" do
           .to include({"use_log_cache" => false })
       end
 
+      it "should add https protocol to metric_collector_url" do
+        expect(rendered_template['metricCollector']['metric_collector_url'])
+          .to include("http")
+      end
+
       describe "when log cache on" do
         before do
           properties["autoscaler"]["eventgenerator"] = {
@@ -96,6 +101,11 @@ describe "eventgenerator" do
         it "check eventgenerator use log cache" do
           expect(rendered_template['metricCollector'])
             .to include({"use_log_cache" => true })
+        end
+
+        it "should not add https protocol to metric_collector_url" do
+          expect(rendered_template['metricCollector']['metric_collector_url'])
+            .not_to include("http")
         end
       end
     end
