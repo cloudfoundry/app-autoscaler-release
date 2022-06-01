@@ -2,8 +2,10 @@
 
 set -euo pipefail
 
+bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 VAR_DIR=bbl-state/bbl-state/vars
-pushd bbl-state/bbl-state
+
+pushd ${bbl_state_path}
   eval "$(bbl print-env)"
 popd
 
