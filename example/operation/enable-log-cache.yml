@@ -22,3 +22,14 @@
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/client_key
   value: ((/bosh-autoscaler/cf/log_cache.private_key))
 
+
+- type: replace
+  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/-
+  value:
+    domain: log-cache.service.cf.internal
+    targets:
+      - deployment: cf
+        domain: bosh
+        instance_group: log-cache
+        network: default
+        query: '*'
