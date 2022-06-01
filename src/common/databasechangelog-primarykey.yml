@@ -1,14 +1,14 @@
 databaseChangeLog:
-  - changeSet:
-      id: 1
-      author: aqan213
-      dbms: mysql
-      preConditions:
+  - preConditions:
       - onFail: MARK_RAN
       - not:
         - primaryKeyExists:
             tableName: DATABASECHANGELOG
             primaryKeyName: "PK_DATABASECHANGELOG"
+  - changeSet:
+      id: 1
+      author: aqan213
+      dbms: mysql
       changes: 
         - addPrimaryKey:
             columnNames: "id,author,filename"
