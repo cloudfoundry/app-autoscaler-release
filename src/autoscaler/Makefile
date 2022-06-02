@@ -56,10 +56,10 @@ ginkgo_check:
 
 test: ginkgo_check
 	@echo "Running tests"
-	@APP_AUTOSCALER_TEST_RUN=true ginkgo ${GINKGO_OPTS} --skip-package=integration
+	@APP_AUTOSCALER_TEST_RUN=true ginkgo -p ${GINKGO_OPTS} --skip-package=integration
 
 testsuite: ginkgo_check
-	APP_AUTOSCALER_TEST_RUN=true ginkgo -v ${GINKGO_OPTS} ${TEST}
+	APP_AUTOSCALER_TEST_RUN=true ginkgo -p ${GINKGO_OPTS} ${TEST}
 
 .PHONY: integration
 integration: ginkgo_check
@@ -70,12 +70,9 @@ generate:
 	@echo "# Generating counterfeits"
 	@COUNTERFEITER_NO_GENERATE_WARNING=true go generate ./...
 
-get-fmt-deps:
-	go get golang.org/x/tools/cmd/goimports
-
-importfmt: get-fmt-deps
+importfmt:
 	@echo "# Formatting the imports"
-	@goimports -w $(GO_DEPENDENCIES)
+	@go run golang.org/x/tools/cmd/goimports@latest -w $(GO_DEPENDENCIES)
 
 fmt: importfmt
 	@FORMATTED=`go fmt $(PACKAGE_DIRS)`
