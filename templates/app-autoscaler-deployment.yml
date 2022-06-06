@@ -1,6 +1,17 @@
 ---
+# Anchors here is to make the ops files simpler using anchors for replacement instead of mutiple commands in the ops file.
+anchors:
+  domains:
+    postgres: &postgres_domain autoscalerpostgres.service.cf.internal
+    api: &api_domain apiserver.service.cf.internal
+    scheduler: &scheduler_domain autoscalerscheduler.service.cf.internal
+    servicebroker: &servicebroker_domain servicebroker.service.cf.internal
+    eventgenerator: &eventgenerator_domain eventgenerator.service.cf.internal
+    scalingengine: &scalingengine_domain scalingengine.service.cf.internal
+    metricsgateway: &metricsgateway_domain metricsgateway.service.cf.internal
+    metricsserver: &metricsserver_domain metricsserver.service.cf.internal
 
-name: app-autoscaler
+name: &deployment_name app-autoscaler
 
 # Release Details
 releases:
@@ -35,69 +46,64 @@ addons:
     release: bosh-dns-aliases
     properties:
       aliases:
-      - domain: autoscalerpostgres.service.cf.internal
+      - domain: *postgres_domain
         targets:
         - query: '*'
           instance_group: postgres_autoscaler
-          deployment: app-autoscaler
+          deployment: *deployment_name
           network: default
           domain: bosh
-      - domain: apiserver.service.cf.internal
+      - domain: *api_domain
         targets:
         - query: '*'
           instance_group: asapi
-          deployment: app-autoscaler
+          deployment: *deployment_name
           network: default
           domain: bosh
-      - domain: autoscalerscheduler.service.cf.internal
+      - domain: *scheduler_domain
         targets:
         - query: '*'
           instance_group: asactors
-          deployment: app-autoscaler
+          deployment: *deployment_name
           network: default
           domain: bosh
-      - domain: servicebroker.service.cf.internal
+      - domain: *servicebroker_domain
         targets:
         - query: '*'
           instance_group: asapi
-          deployment: app-autoscaler
+          deployment: *deployment_name
           network: default
           domain: bosh
-      - domain: eventgenerator.service.cf.internal
+      - domain: *eventgenerator_domain
         targets:
         - query: '*'
           instance_group: asmetrics
-          deployment: app-autoscaler
+          deployment: *deployment_name
           network: default
           domain: bosh
-      - domain: scalingengine.service.cf.internal
+      - domain: *scalingengine_domain
         targets:
         - query: '*'
           instance_group: asactors
-          deployment: app-autoscaler
+          deployment: *deployment_name
           network: default
           domain: bosh
-      - domain: reverse-log-proxy.service.cf.internal
-        targets:
-        - query: '*'
-          instance_group: log-api
-          deployment: cf
-          network: default
-          domain: bosh
-      - domain: metricsgateway.service.cf.internal
+      - domain: *metricsgateway_domain
         targets:
         - query: '*'
           instance_group: asnozzle
-          deployment: app-autoscaler
+          deployment: *deployment_name
           network: default
           domain: bosh
-      - domain: metricsserver.service.cf.internal
+      - domain: *metricsserver_domain
         targets:
         - query: '*'
           instance_group: asmetrics
-          deployment: app-autoscaler
+          deployment: *deployment_name
           network: default
           domain: bosh
+
+      # Cf internal names
       - domain: nats.service.cf.internal
         targets:
           - deployment: cf
@@ -105,6 +111,13 @@ addons:
             instance_group: nats
             network: default
             query: '*'
+      - domain: reverse-log-proxy.service.cf.internal
+        targets:
+            - query: '*'
+              instance_group: log-api
+              deployment: cf
+              network: default
+              domain: bosh
       - domain: _.nats.service.cf.internal
         targets:
           - deployment: cf
@@ -257,17 +270,17 @@ instance_groups:
             port: *scalingEnginePort
             ca_cert: ((scalingengine_ca.ca))
             client_cert: ((scalingengine_client.certificate))
-            client_key: ((scalingengine_client.private_key))                
+            client_key: ((scalingengine_client.private_key))
           scheduler:
             port: *schedulerPort
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
-            client_key: ((scheduler_client.private_key))        
-          db_lock: 
+            client_key: ((scheduler_client.private_key))
+          db_lock:
             ttl: 15s
             retry_interval: 5s
           logging:
-            level: info 
+            level: info
           http_client_timeout: 60s
           health:
             port: &operatorHealthPort 6208
@@ -385,13 +398,13 @@ instance_groups:
             back_off_max_interval: 120m
             consecutive_failure_count: 5
           scaling_engine:
-            host: scalingengine.service.cf.internal
+            host: *scalingengine_domain
             port: *scalingEnginePort
             ca_cert: ((scalingengine_ca.ca))
             client_cert: ((scalingengine_client.certificate))
             client_key: ((scalingengine_client.private_key))
           metricscollector:
-            host: metricsserver.service.cf.internal
+            host: *metricsserver_domain
             port: *metricsserverPort
             ca_cert: ((metricsserver_ca.ca))
             client_cert: ((metricsserver_client.certificate))
@@ -427,7 +440,7 @@ instance_groups:
   vm_type: small
   update:
     max_in_flight: 1
-    serial: true  
+    serial: true
   jobs:
   - name: metricsgateway
     release: app-autoscaler
@@ -501,7 +514,7 @@ instance_groups:
           broker:
             server:
               port: &brokerServerPort 6102
-              catalog: 
+              catalog:
                 services:
                 - id: autoscaler-guid
                   name: autoscaler
@@ -527,7 +540,7 @@ instance_groups:
             client_cert: ((scalingengine_client.certificate))
             client_key: ((scalingengine_client.private_key))
           metrics_collector:
-            host: metricsserver.service.cf.internal
+            host: *metricsserver_domain
             port: *metricsserverPort
             ca_cert: ((metricsserver_ca.ca))
             client_cert: ((metricsserver_client.certificate))
@@ -535,9 +548,9 @@ instance_groups:
           event_generator:
             ca_cert: ((eventgenerator_ca.ca))
             client_cert: ((eventgenerator_client.certificate))
-            client_key: ((eventgenerator_client.private_key)) 
-          metrics_forwarder: 
-            host: autoscalermetrics.((system_domain))              
+            client_key: ((eventgenerator_client.private_key))
+          metrics_forwarder:
+            host: autoscalermetrics.((system_domain))
         policy_db: *database
         policy_db_connection_config: *databaseConnectionConfig
         binding_db: *database
@@ -643,9 +656,9 @@ variables:
   type: certificate
   options:
     ca: scalingengine_ca
-    common_name: scalingengine.service.cf.internal
+    common_name: *scalingengine_domain
     alternative_names:
-    - scalingengine.service.cf.internal
+    - *scalingengine_domain
     extended_key_usage:
     - client_auth
     - server_auth
@@ -665,9 +678,9 @@ variables:
   type: certificate
   options:
     ca: eventgenerator_ca
-    common_name: eventgenerator.service.cf.internal
+    common_name: *eventgenerator_domain
     alternative_names:
-    - eventgenerator.service.cf.internal
+    - *eventgenerator_domain
     extended_key_usage:
     - client_auth
     - server_auth
@@ -677,7 +690,7 @@ variables:
     ca: eventgenerator_ca
     common_name: eventgenerator client
     extended_key_usage:
-    - client_auth      
+    - client_auth
 - name: apiserver_ca
   type: certificate
   options:
@@ -687,9 +700,9 @@ variables:
   type: certificate
   options:
     ca: apiserver_ca
-    common_name: apiserver.service.cf.internal
+    common_name: *api_domain
     alternative_names:
-    - apiserver.service.cf.internal
+    - *api_domain
     extended_key_usage:
     - client_auth
     - server_auth
@@ -724,9 +737,9 @@ variables:
   type: certificate
   options:
     ca: servicebroker_ca
-    common_name: servicebroker.service.cf.internal
+    common_name: *servicebroker_domain
     alternative_names:
-    - servicebroker.service.cf.internal  
+    - *servicebroker_domain
     extended_key_usage:
     - client_auth
     - server_auth
@@ -761,9 +774,9 @@ variables:
   type: certificate
   options:
     ca: scheduler_ca
-    common_name: autoscalerscheduler.service.cf.internal
+    common_name: *scheduler_domain
     alternative_names:
-    - autoscalerscheduler.service.cf.internal
+    - *scheduler_domain
     extended_key_usage:
     - client_auth
     - server_auth
@@ -783,8 +796,10 @@ variables:
   type: certificate
   options:
     ca: metricsserver_ca
-    common_name: metricsserver.service.cf.internal
-    alternative_names: ["metricsserver.service.cf.internal","*.asmetrics.default.app-autoscaler.bosh"]
+    common_name: *metricsserver_domain
+    alternative_names:
+    - *metricsserver_domain
+    - "*.asmetrics.default.app-autoscaler.bosh"
     extended_key_usage:
     - client_auth
     - server_auth
@@ -804,9 +819,9 @@ variables:
   type: certificate
   options:
     ca: postgres_ca
-    common_name: autoscalerpostgres.service.cf.internal
+    common_name: *postgres_domain
     alternative_names:
-    - autoscalerpostgres.service.cf.internal
+    - *postgres_domain
     extended_key_usage:
     - client_auth
     - server_auth
