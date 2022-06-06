@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
+service_name="${SERVICE_NAME:-autoscaler}"
 VAR_DIR=bbl-state/bbl-state/vars
 pushd bbl-state/bbl-state
   eval "$(bbl print-env)"
@@ -19,8 +21,7 @@ cat > acceptance_config.json <<EOF
   "apps_domain": "${SYSTEM_DOMAIN}",
   "skip_ssl_validation": ${SKIP_SSL_VALIDATION},
   "use_http": false,
-
-  "service_name": "autoscaler",
+  "service_name": "${service_name}",
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
   "name_prefix": "${NAME_PREFIX}",
@@ -32,11 +33,11 @@ EOF
 
 SUITES_TO_RUN=""
 for SUITE in $SUITES; do
-  echo "Checking suite $SUITE"	
+  echo "Checking suite $SUITE"
   if [[ -d "$SUITE" ]]; then
      echo "Adding suite $SUITE to list"
      SUITES_TO_RUN="$SUITES_TO_RUN $SUITE"
-  fi 
+  fi
 done
 
 echo "Running $SUITES_TO_RUN"
