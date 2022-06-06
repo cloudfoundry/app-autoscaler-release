@@ -1,0 +1,83 @@
+name: Acceptance Tests
+on:
+  pull_request:
+jobs:
+  acceptance_test:
+    name: run the acceptance test for a PR
+    runs-on: ubuntu-latest
+    env:
+      MAVEN_VERSION: 3.6.3
+      MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - uses: ./app-autoscaler-release/.github/actions/setup_go
+        with:
+          source: app-autoscaler-release/src/autoscaler
+      - uses: ./app-autoscaler-release/.github/actions/setup_java
+        with:
+          version: 11
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # Not needed with a .ruby-version file
+          ruby-version: 2.7
+          # runs 'bundle install' and caches installed gems automatically
+          bundler-cache: true
+
+      - name: Install uaac
+        run: gem install cf-uaac
+
+      - name: Install bosh
+        run: |
+          curl -sLf https://github.com/cloudfoundry/bosh-cli/releases/download/v7.0.1/bosh-cli-7.0.1-linux-amd64 -o /usr/bin/bosh
+          chmod a+x /usr/bin/bosh
+          bosh --version
+
+      - name: Install bbl
+        run: |
+          curl -sLf "https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.89/bbl-v8.4.89_linux_x86-64" -o /usr/bin/bbl
+          chmod a+x /usr/bin/bbl
+          bbl version
+
+      - name: Install credhub
+        run: |
+          curl -sLf https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.3/credhub-linux-2.9.3.tgz | tar -zx -C /usr/bin/
+          chmod a+x /usr/bin/credhub
+          credhub --version
+
+      - name: Install yq
+        run: |
+          curl -sLf https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/bin/yq
+          chmod a+x /usr/bin/yq
+          yq --version
+
+      - name: clone BBL repo
+        uses: actions/checkout@v3
+        with:
+          repository: cloudfoundry/app-autoscaler-env-bbl-state
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          path: bbl
+
+      - name: clone CI repo
+        uses: actions/checkout@v3
+        with:
+          repository: cloudfoundry/app-autoscaler-ci
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          path: ci
+
+      - name: run update
+        run: cd ${GITHUB_WORKSPACE}/app-autoscaler-release; ./scripts/update
+
+      - name: deploy autoscaler
+        run: |
+          OPS_FILES="${GITHUB_WORKSPACE}/ci/example/operation/loggregator-certs-from-cf.yml\
+           ${GITHUB_WORKSPACE}/ci/example/operation/postgres-persistent-disk.yml\
+           ${GITHUB_WORKSPACE}/ci/example/operation/add-extra-plan.yml"\
+           BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"\
+           ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/deploy-autoscaler.sh
+  
+
+      
