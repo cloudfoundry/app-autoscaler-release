@@ -30,8 +30,5 @@ runs:
         curl -sL -O https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
         echo "${{ env.MAVEN_SHA }} apache-maven-${MAVEN_VERSION}-bin.tar.gz" | sha512sum -c -
         sudo tar xzf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /usr/local
-        pushd /usr/local > /dev/null
-          sudo ln -s apache-maven-${MAVEN_VERSION} maven
-        popd  > /dev/null
-        echo "/usr/local/maven/bin" >> $GITHUB_PATH
-        mvn --version
+        echo "/usr/local/apache-maven-${MAVEN_VERSION}/bin" >> $GITHUB_PATH
+        /usr/local/apache-maven-${MAVEN_VERSION}/bin/mvn --version
