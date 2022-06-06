@@ -25,7 +25,7 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
-  bosh -n -d app-autoscaler \
+  bosh -n -d ${deployment_name} \
     deploy templates/app-autoscaler-deployment.yml \
     ${OPS_FILES_TO_USE} \
     -v system_domain=${system_domain} \
