@@ -6,6 +6,7 @@ VAR_DIR=bbl-state/bbl-state/vars
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
+deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 ops_files="${OPS_FILES:-()}"
 
 VAR_DIR=bbl-state/bbl-state/vars
@@ -28,6 +29,7 @@ function deploy () {
     deploy templates/app-autoscaler-deployment.yml \
     ${OPS_FILES_TO_USE} \
     -v system_domain=${system_domain} \
+    -v deployment_name=${deployment_name} \
     -v app_autoscaler_version=${CURRENT_COMMIT_HASH} \
     -v admin_password=${CF_ADMIN_PASSWORD} \
     -v cf_client_id=autoscaler_client_id \
@@ -70,12 +72,14 @@ pushd app-autoscaler-release
     for OPS_FILE in $(cat REQUIRED_OPS_FILES); do
       if [ -f "${OPS_FILE}" ]; then
         OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
+        #TODO: exit on else
       fi
     done
   fi
   for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
       OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
+      #TODO: exit on else
     fi
   done
 
@@ -88,7 +92,14 @@ pushd app-autoscaler-release
   value: ((app_autoscaler_version))
 EOF
 
-  OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o release_version.yml"
+      cat << EOF > deployment_name.yml
+---
+- type: replace
+  path: /name
+  value: ((deployment_name))
+EOF
+
+  OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o release_version.yml -o deployment_name.yml"
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
   set +e
   AUTOSCALER_EXISTS=$(bosh releases | grep -c "${CURRENT_COMMIT_HASH}")
