@@ -96,7 +96,13 @@ EOF
 ---
 - type: replace
   path: /name
-  value: ((deployment_name))
+  value:  &deployment_name ((deployment_name))
+
+- type: replace
+  path: /variables/name=metricsserver_server/options/alternative_names
+  value:
+  - "metricsserver.service.cf.internal"
+  - "*.asmetrics.default.((deployment_name)).bosh"
 EOF
 
   OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o release_version.yml -o deployment_name.yml"
