@@ -121,6 +121,7 @@ EOF
 
 - type: replace
   path: /instance_groups/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/uris
+  value:
   - ((deployment_name))-metricsforwarder.((system_domain))
 
 EOF
