@@ -73,11 +73,23 @@ jobs:
 
       - name: deploy autoscaler
         run: |
-          OPS_FILES="${GITHUB_WORKSPACE}/ci/example/operation/loggregator-certs-from-cf.yml\
-           ${GITHUB_WORKSPACE}/ci/example/operation/postgres-persistent-disk.yml\
-           ${GITHUB_WORKSPACE}/ci/example/operation/add-extra-plan.yml"\
-           BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"\
-           ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/deploy-autoscaler.sh
+          export DEPLOYMENT_NAME="app-autoscaler-${{ github.event.pull_request.number }}"
+          export OPS_FILES="${GITHUB_WORKSPACE}/app-autoscaler-release/example/operation/loggregator-certs-from-cf.yml ${GITHUB_WORKSPACE}/app-autoscaler-release/example/operation/postgres-persistent-disk.yml ${GITHUB_WORKSPACE}/app-autoscaler-release/example/operation/add-extra-plan.yml"
+          export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
+          ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/deploy-autoscaler.sh
+
+      - name: register autoscaler broker
+        run: |
+          export SERVICE_BROKER_NAME="autscalerservicebroker-${{ github.event.pull_request.number }}"
+          export SERVICE_NAME="autoscaler-${{ github.event.pull_request.number }}"
+          export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
+          ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/register-broker.sh
   
 
-      
+      - name: run acceptance test
+        run: |
+          export SERVICE_BROKER_NAME="autscalerservicebroker-${{ github.event.pull_request.number }}"
+          export SERVICE_NAME="autoscaler-${{ github.event.pull_request.number }}"
+          export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
+          ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/register-broker.sh
+  
