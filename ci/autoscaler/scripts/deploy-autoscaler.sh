@@ -105,22 +105,22 @@ EOF
   - "*.asmetrics.default.((deployment_name)).bosh"
 
 - type: replace
-  path: /instance_groups/name=route_registrar/properties/route_registrar/routes/name=api_server/uris
+  path: /instance_groups/jobs/name=route_registrar/properties/route_registrar/routes/name=api_server/uris
   value:
   - ((deployment_name)).((system_domain))
 
 - type: replace
-  path: /instance_groups/name=route_registrar/properties/route_registrar/routes/name=autoscaler_service_broker/uris
+  path: /instance_groups/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_service_broker/uris
   value:
   - ((deployment_name))servicebroker.((system_domain))
 
 - type: replace
-  path: /instance_groups/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metrics_forwarder/uris
+  path: /instance_groups/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metrics_forwarder/uris
   value:
   - ((deployment_name))metrics.((system_domain))
 
 - type: replace
-  path: /instance_groups/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/uris
+  path: /instance_groups/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/uris
   value:
   - ((deployment_name))-metricsforwarder.((system_domain))
 
