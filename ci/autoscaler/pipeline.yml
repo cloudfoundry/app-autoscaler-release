@@ -30,6 +30,14 @@ anchors:
     OPS_FILES: |
       example/operation/loggregator-certs-from-cf.yml
       example/operation/add-extra-plan.yml
+
+  app-autoscaler-ops-files-pr: &app-autoscaler-ops-files-pr
+    OPS_FILES: |
+      example/operation/loggregator-certs-from-cf.yml
+      example/operation/add-extra-plan.yml
+      example/operation/set-release-version.yml
+      example/operation/set-deployment-name.yml
+
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
       example/operation/loggregator-certs-from-cf.yml
@@ -342,7 +350,7 @@ jobs:
       file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
       params:
         SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-        <<: *app-autoscaler-ops-files
+        <<: *app-autoscaler-ops-files-pr
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-pr
     - task: register-broker
@@ -607,7 +615,7 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      <<: *app-autoscaler-ops-files
+      <<: *app-autoscaler-ops-files-pr
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-pr
     <<: *cleanupPr
