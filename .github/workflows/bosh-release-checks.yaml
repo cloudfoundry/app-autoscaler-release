@@ -46,6 +46,12 @@ jobs:
         run: |
           brew install cloudfoundry/tap/bosh-cli
 
+      - name: Set up GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: latest
+          platform: x64
+
       - name: Run Update
         run: |
           set -e
