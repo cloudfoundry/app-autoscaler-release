@@ -3,47 +3,27 @@
 # Parameters:
 # deployment_name: Unique deployment name.
 ---
-- type: replace
-  path: /name
-  value:  &deployment_name ((deployment_name))
 
 # Change the Public dns names to be unique for the deployment
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=api_server/uris
-  value:
-    - ((deployment_name)).((system_domain))
+  value: [ ((deployment_name)).((system_domain)) ]
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_service_broker/uris
-  value:
-    - ((deployment_name))servicebroker.((system_domain))
+  value: [ ((deployment_name))servicebroker.((system_domain)) ]
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metrics_forwarder/uris
-  value:
-    - ((deployment_name))metrics.((system_domain))
+  value: [ ((deployment_name))metrics.((system_domain)) ]
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/uris
-  value:
-    - ((deployment_name))-metricsforwarder.((system_domain))
+  value: [ ((deployment_name))-metricsforwarder.((system_domain)) ]
 
-# Change the internal dns names to be unique for the deployment
-- type: replace
-  path: /anchors/domains
-  value:
-    postgres: &postgres_domain ((deployment_name)).postgres.service.cf.internal
-    api: &api_domain ((deployment_name)).apiserver.service.cf.internal
-    scheduler: &scheduler_domain ((deployment_name)).scheduler.service.cf.internal
-    servicebroker: &servicebroker_domain ((deployment_name)).servicebroker.service.cf.internal
-    eventgenerator: &eventgenerator_domain ((deployment_name)).eventgenerator.service.cf.internal
-    scalingengine: &scalingengine_domain ((deployment_name)).scalingengine.service.cf.internal
-    metricsgateway: &metricsgateway_domain ((deployment_name)).metricsgateway.service.cf.internal
-    metricsserver: &metricsserver_domain ((deployment_name)).metricsserver.service.cf.internal
-
-
-- type: replace
-  path: /variables/name=metricsserver_server/options/alternative_names
-  value:
-    - *metricsserver_domain
-    - "*.asmetrics.default.app-autoscaler.bosh"
+#TODO
+#- type: replace
+#  path: /variables/name=metricsserver_server/options/alternative_names
+#  value:
+#    - *metricsserver_domain
+#    - "*.asmetrics.default.app-autoscaler.bosh"

@@ -1,17 +1,17 @@
 ---
-# Anchors here is to make the ops files simpler using anchors for replacement instead of mutiple commands in the ops file.
+# Anchors here is to make the ops files simpler using anchors for replacement instead of multiple commands in the ops file.
 anchors:
   domains:
-    postgres: &postgres_domain autoscalerpostgres.service.cf.internal
-    api: &api_domain apiserver.service.cf.internal
-    scheduler: &scheduler_domain autoscalerscheduler.service.cf.internal
-    servicebroker: &servicebroker_domain servicebroker.service.cf.internal
-    eventgenerator: &eventgenerator_domain eventgenerator.service.cf.internal
-    scalingengine: &scalingengine_domain scalingengine.service.cf.internal
-    metricsgateway: &metricsgateway_domain metricsgateway.service.cf.internal
-    metricsserver: &metricsserver_domain metricsserver.service.cf.internal
+    postgres: &postgres_domain ((postgres_domain))
+    api: &api_domain ((api_domain))
+    scheduler: &scheduler_domain ((scheduler_domain))
+    servicebroker: &servicebroker_domain ((servicebroker_domain))
+    eventgenerator: &eventgenerator_domain ((eventgenerator_domain))
+    scalingengine: &scalingengine_domain ((scalingengine_domain))
+    metricsgateway: &metricsgateway_domain ((metricsgateway_domain))
+    metricsserver: &metricsserver_domain ((metricsserver_domain))
 
-name: &deployment_name app-autoscaler
+name: &deployment_name ((deployment_name))
 
 # Release Details
 releases:
@@ -163,8 +163,9 @@ instance_groups:
     release: postgres
     properties:
       databases: &database
-        sslmode: &sslmode verify-full
-        tls: &database_tls
+        address: *postgres_domain
+        sslmode: verify-full
+        tls:
           ca: ((postgres_ca.ca))
           certificate: ((postgres_server.certificate))
           private_key: ((postgres_server.private_key))
@@ -799,7 +800,7 @@ variables:
     common_name: *metricsserver_domain
     alternative_names:
     - *metricsserver_domain
-    - "*.asmetrics.default.app-autoscaler.bosh"
+    - "*.asmetrics.default.((deployment_name)).bosh"
     extended_key_usage:
     - client_auth
     - server_auth
