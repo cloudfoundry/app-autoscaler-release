@@ -77,7 +77,7 @@ jobs:
           export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
            ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
            ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
-           ${AUTOSCALER_DIR}/example/operation/set-deployment-name.yml"
+           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
           export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
           ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/deploy-autoscaler.sh
 
