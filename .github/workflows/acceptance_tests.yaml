@@ -9,7 +9,7 @@ jobs:
       MAVEN_VERSION: 3.6.3
       MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
       DEPLOYMENT_NAME: app-autoscaler-${{ github.event.pull_request.number }}
-      AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release/"
+      AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
     steps:
       - run: echo "autoscaler folder ${AUTOSCALER_DIR}"
       - uses: actions/checkout@v3
@@ -97,6 +97,7 @@ jobs:
           ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/register-broker.sh
 
       - name: Cleanup deployments
+        if: always()
         run: |
           echo TODO
           exit 1
