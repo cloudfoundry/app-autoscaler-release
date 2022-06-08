@@ -12,7 +12,7 @@ pushd ${bbl_state_path}
   eval "$(bbl print-env)"
 popd
 
-cf api https://api.${SYSTEM_DOMAIN} --skip-ssl-validation
+cf api https://api.${system_domain} --skip-ssl-validation
 
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 cf auth admin $CF_ADMIN_PASSWORD
