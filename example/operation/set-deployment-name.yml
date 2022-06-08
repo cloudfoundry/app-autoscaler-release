@@ -12,7 +12,7 @@
     domains:
       postgres: &postgres_domain ((deployment_name)).autoscalerpostgres.service.cf.internal
       api: &api_domain ((deployment_name)).apiserver.service.cf.internal
-      scheduler: &scheduler_domain ((deployment_name)).scheduler.service.cf.internal
+      scheduler: &scheduler_domain ((deployment_name)).autoscalerscheduler.service.cf.internal
       servicebroker: &servicebroker_domain ((deployment_name)).servicebroker.service.cf.internal
       eventgenerator: &eventgenerator_domain ((deployment_name)).eventgenerator.service.cf.internal
       scalingengine: &scalingengine_domain ((deployment_name)).scalingengine.service.cf.internal
@@ -21,62 +21,63 @@
 
 # Addons 
 - type: replace
-  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases
+  path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties
   value: 
+    aliases:
        - domain: *postgres_domain
          targets:
            - query: '*'
              instance_group: postgres_autoscaler
-             deployment: (( deployment_name ))
+             deployment: ((deployment_name))
              network: default
              domain: bosh
        - domain: *api_domain
          targets:
            - query: '*'
              instance_group: asapi
-             deployment: (( deployment_name ))
+             deployment: ((deployment_name))
              network: default
              domain: bosh
        - domain: *scheduler_domain
          targets:
            - query: '*'
              instance_group: asactors
-             deployment: (( deployment_name ))
+             deployment: ((deployment_name))
              network: default
              domain: bosh
        - domain: *servicebroker_domain
          targets:
            - query: '*'
              instance_group: asapi
-             deployment: (( deployment_name ))
+             deployment: ((deployment_name))
              network: default
              domain: bosh
        - domain: *eventgenerator_domain
          targets:
            - query: '*'
              instance_group: asmetrics
-             deployment: (( deployment_name ))
+             deployment: ((deployment_name))
              network: default
              domain: bosh
        - domain: *scalingengine_domain
          targets:
            - query: '*'
              instance_group: asactors
-             deployment: (( deployment_name ))
+             deployment: ((deployment_name))
              network: default
              domain: bosh
        - domain: *metricsgateway_domain
          targets:
            - query: '*'
              instance_group: asnozzle
-             deployment: (( deployment_name ))
+             deployment: ((deployment_name))
              network: default
              domain: bosh
        - domain: *metricsserver_domain
          targets:
            - query: '*'
              instance_group: asmetrics
-             deployment: (( deployment_name ))
+             deployment: ((deployment_name))
              network: default
              domain: bosh
        # Cf internal names
@@ -107,18 +108,97 @@
   path: /instance_groups/name=postgres_autoscaler/jobs/name=postgres/properties/databases/address?
   value: *postgres_domain
 
-# eventgenerator
+# asactors - scalingengine
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db/address?
+  value: *postgres_domain
+
+# asactors - scheduler
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler_db/address?
+  value: *postgres_domain
+
+# asactors - operator
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db/address?
+  value: *postgres_domain
+
+# asmetrics - metricsserver
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
+
+# asmetrics - eventgenerator
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/scaling_engine/host
   value:  *scalingengine_domain
+
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/host
   value:  *metricsserver_domain
 
-# golangapiserver
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
+
+# asnozzle - metricsgateway
+- type: replace
+  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
+
+# asapi - golangapiserver
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_collector/host
   value: *metricsserver_domain
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/binding_db/address?
+  value: *postgres_domain
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
+
+# asapi - metricsforwarder
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
 
 # route_registrar external/Public dns entries
 - type: replace
