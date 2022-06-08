@@ -55,6 +55,13 @@ jobs:
           chmod a+x /usr/bin/yq
           yq --version
 
+      - name: Install cf
+        run: |
+          wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+          echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+          apt update
+          apt-get install cf8-cli
+
       - name: clone BBL repo
         uses: actions/checkout@v3
         with:
