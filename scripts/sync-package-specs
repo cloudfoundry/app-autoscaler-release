@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 # ensure gosub is installed (this will recompile it only if necessary)
 go install github.com/garethjevans/gosub@latest
