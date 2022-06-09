@@ -5,7 +5,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 root_dir=${script_dir}/../
 current_hash=$(git log -1 --pretty=format:"%H")
 version=${DEPLOYMENT_VERSION:-${current_hash}}
-deploy_name=${DEPLOYMENT_NAME:-app-autoscaler-12345}
+deploy_name=${DEPLOYMENT_NAME:-app-autoscaler-42}
 system_domain=autoscaler.ci.cloudfoundry.org
 bbl_state_path="${root_dir}/../app-autoscaler-env-bbl-state/bbl-state/"
 
@@ -25,7 +25,7 @@ bosh -n -d ${deploy_name}\
  -o "${root_dir}/example/operation/loggregator-certs-from-cf.yml"\
  -o "${root_dir}/example/operation/add-extra-plan.yml"\
  -o "${root_dir}/example/operation/set-release-version.yml"\
- -o "${root_dir}/example/operation/set-deployment-name.yml"\
+ -o "${root_dir}/example/operation/enable-name-based-deployments.yml"\
  -v system_domain="${system_domain}"\
  -v deployment_name="${deploy_name}"\
  -v app_autoscaler_version="${version}"\
