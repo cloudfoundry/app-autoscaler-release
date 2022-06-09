@@ -4,8 +4,9 @@ set -euo pipefail
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 service_name="${SERVICE_NAME:-autoscaler}"
-VAR_DIR=bbl-state/bbl-state/vars
-pushd bbl-state/bbl-state
+bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
+
+pushd ${bbl_state_path}
   eval "$(bbl print-env)"
 popd
 
@@ -15,10 +16,10 @@ export GOPATH=$PWD/app-autoscaler-release
 pushd app-autoscaler-release/src/acceptance
 cat > acceptance_config.json <<EOF
 {
-  "api": "api.${SYSTEM_DOMAIN}",
+  "api": "api.${system_domain}",
   "admin_user": "admin",
   "admin_password": "${CF_ADMIN_PASSWORD}",
-  "apps_domain": "${SYSTEM_DOMAIN}",
+  "apps_domain": "${system_domain}",
   "skip_ssl_validation": ${SKIP_SSL_VALIDATION},
   "use_http": false,
   "service_name": "${service_name}",
@@ -26,7 +27,7 @@ cat > acceptance_config.json <<EOF
   "aggregate_interval": 120,
   "name_prefix": "${NAME_PREFIX}",
 
-  "autoscaler_api": "autoscaler.${SYSTEM_DOMAIN}",
+  "autoscaler_api": "${service_name}.${system_domain}",
   "service_offering_enabled": ${SERVICE_OFFERING_ENABLED}
 }
 EOF
