@@ -195,6 +195,10 @@
   path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/policy_db/address?
   value: *postgres_domain
 
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/broker/server/catalog/services/id=autoscaler-guid/name
+  value: ((deployment_name))
+
 # asapi - metricsforwarder
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db/address?

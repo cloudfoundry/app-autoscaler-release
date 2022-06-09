@@ -99,8 +99,9 @@ jobs:
           export SERVICE_OFFERING_ENABLED=true
           export SKIP_SSL_VALIDATION=true
           export NAME_PREFIX=ASATS
-          export SUITES="api app broker"
+          export SUITES=api #"api app broker"
           export NODES=3
+          export 
           ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/run-acceptance-tests.sh
 
       - name: Cleanup deployments
