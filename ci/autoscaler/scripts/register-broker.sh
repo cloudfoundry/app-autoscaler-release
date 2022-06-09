@@ -5,6 +5,7 @@ set -euo pipefail
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 service_broker_name="${SERVICE_BROKER_NAME:-autoscalerservicebroker}"
 service_name="${SERVICE_NAME:-autoscaler}"
+deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 VAR_DIR=bbl-state/bbl-state/vars
 
@@ -25,7 +26,7 @@ if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
   #cf delete-service-broker -f autoscaler
 else
   echo "Creating service broker..."
-  AUTOSCALER_SERVICE_BROKER_PASSWORD=$(credhub get  -n /bosh-autoscaler/app-autoscaler/autoscaler_service_broker_password -q)
+  AUTOSCALER_SERVICE_BROKER_PASSWORD=$(credhub get  -n /bosh-autoscaler/${deployment_name}/autoscaler_service_broker_password -q)
   cf create-service-broker ${service_name} autoscaler_service_broker_user $AUTOSCALER_SERVICE_BROKER_PASSWORD https://${service_broker_name}.${system_domain}
 fi
 
