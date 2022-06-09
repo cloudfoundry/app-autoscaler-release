@@ -35,19 +35,19 @@ jobs:
       - name: Install uaac
         run: gem install cf-uaac
 
-      - name: Install bosh
+      - name: Install bosh-cli
         run: |
           curl -sLf https://github.com/cloudfoundry/bosh-cli/releases/download/v7.0.1/bosh-cli-7.0.1-linux-amd64 -o /usr/bin/bosh
           chmod a+x /usr/bin/bosh
           bosh --version
 
-      - name: Install bbl
+      - name: Install bbl-cli
         run: |
           curl -sLf "https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.89/bbl-v8.4.89_linux_x86-64" -o /usr/bin/bbl
           chmod a+x /usr/bin/bbl
           bbl version
 
-      - name: Install credhub
+      - name: Install credhub-cli
         run: |
           curl -sLf https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.3/credhub-linux-2.9.3.tgz | tar -zx -C /usr/bin/
           chmod a+x /usr/bin/credhub
@@ -59,7 +59,7 @@ jobs:
           chmod a+x /usr/bin/yq
           yq --version
 
-      - name: Install cf
+      - name: Install cf-cli
         run: |
           curl -sLf "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=github" | tar -zx -C /usr/bin
           cf version
@@ -92,21 +92,20 @@ jobs:
 
       - name: register autoscaler broker
         run: ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/register-broker.sh
-  
 
-      - name: run acceptance test
+      - name: run acceptance tests
         run: |
-          # TODO 
-          exit 1
-          export SERVICE_BROKER_NAME="autscalerservicebroker-${{ github.event.pull_request.number }}"
-          export SERVICE_NAME="autoscaler-${{ github.event.pull_request.number }}"
-          export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
-
-          ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/register-broker.sh
+          export SYSTEM_DOMAIN=autoscaler.ci.cloudfoundry.org
+          export SERVICE_OFFERING_ENABLED=true
+          export SKIP_SSL_VALIDATION=true
+          export NAME_PREFIX=ASATS
+          export SUITES="api app broker"
+          export NODES=3
+          ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/run-acceptance-tests.sh
 
       - name: Cleanup deployments
         if: always()
         run: |
           echo TODO
           exit 1
-  
+
