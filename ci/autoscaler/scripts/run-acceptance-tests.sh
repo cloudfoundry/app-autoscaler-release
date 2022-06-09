@@ -22,7 +22,7 @@ cat > acceptance_config.json <<EOF
   "apps_domain": "${system_domain}",
   "skip_ssl_validation": ${SKIP_SSL_VALIDATION},
   "use_http": false,
-  "service_name": "${service_name}",
+  "service_name": "autoscaler",
   "service_broker": "${service_name}",
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
