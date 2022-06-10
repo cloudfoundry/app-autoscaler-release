@@ -12,7 +12,7 @@ jobs:
       SERVICE_BROKER_NAME: "app-autoscaler-${{ github.event.pull_request.number }}servicebroker"
       SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
       BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
-
+      SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
       AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
     steps:
       - uses: actions/checkout@v3
@@ -72,17 +72,13 @@ jobs:
 
       - name: run acceptance tests
         run: |
-          export SYSTEM_DOMAIN=autoscaler.ci.cloudfoundry.org
           export SERVICE_OFFERING_ENABLED=true
           export SKIP_SSL_VALIDATION=true
-          export NAME_PREFIX=ASATS
-          export SUITES=api #"api app broker"
-          export NODES=3
-          export 
+          export NAME_PREFIX="TESTS-${DEPLOYMENT_NAME}"
+          export SUITES=api #"api app broker"      
+          export NODES=1
           ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/run-acceptance-tests.sh
 
       - name: Cleanup deployments
         if: always()
-        run: |
-          echo TODO
-          exit 1
+        run: ${GITHUB_WORKSPACE}/ci/scripts/cleanup-autoscaler.sh
