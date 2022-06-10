@@ -37,6 +37,13 @@ jobs:
       MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
     steps:
       - uses: actions/checkout@v3
+      - name: Set up GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: latest
+          platform: x64
+      - name: Check GCC version
+        run: gcc --version
       - uses: ./.github/actions/setup_go
       - uses: ./.github/actions/setup_java
         with:
@@ -46,11 +53,6 @@ jobs:
         run: |
           brew install cloudfoundry/tap/bosh-cli
 
-      - name: Set up GCC
-        uses: egor-tensin/setup-gcc@v1
-        with:
-          version: latest
-          platform: x64
 
       - name: Run Update
         run: |
