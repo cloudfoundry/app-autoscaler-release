@@ -8,24 +8,11 @@ anchors:
       SKIP_SSL_VALIDATION: true
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-  cleanup-task-pr: &cleanupTaskPr
-    task: cleanup
-    file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      SKIP_SSL_VALIDATION: true
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-pr
   cleanup-main: &cleanupMain
     on_abort:
       <<: *cleanupTaskMain
     on_failure:
       <<: *cleanupTaskMain
-  cleanup-pr: &cleanupPr
-    on_abort:
-      <<: *cleanupTaskPr
-    on_failure:
-      <<: *cleanupTaskPr
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
       example/operation/loggregator-certs-from-cf.yml
@@ -52,9 +39,7 @@ groups:
   - unit-tests-main
   - integration-tests-main
   - acceptance-main
-  - acceptance-pr
   - draft
-  - draft-pr
   - release
   - upgrade-test-main
   - setup-infrastructure
@@ -63,7 +48,6 @@ groups:
   - delete-autoscaler
   - delete-cf
   - deploy-autoscaler
-  - deploy-autoscaler-pr
   - delete-autoscaler
   - update-golang
   - update-java
@@ -73,9 +57,7 @@ groups:
   - unit-tests-main
   - integration-tests-main
   - acceptance-main
-  - acceptance-pr
   - draft
-  - draft-pr
   - release
   - upgrade-test-main
 - name: infrastructure
@@ -88,7 +70,6 @@ groups:
 - name: autoscaler-deploy
   jobs:
   - deploy-autoscaler
-  - deploy-autoscaler-pr
   - delete-autoscaler
 - name: update-sdks
   jobs:
@@ -121,16 +102,6 @@ resources:
     private_key: ((autoscaler_git_key))
     branch: main
     fetch_tags: true
-
-- name: app-autoscaler-release-pr
-  type: pull-request
-  check_every: 1m
-  source:
-    repository: cloudfoundry/app-autoscaler-release
-    disable_forks: false
-    access_token: ((autoscaler_access_token))
-    labels: ["approved", "dependencies"]
-    check_run_name: "Create Bosh Release"
 
 - name: gh-release
   type: github-release
@@ -172,6 +143,7 @@ resources:
 - name: cf-deployment
   type: git
   icon: github
+
   source:
     uri: https://github.com/cloudfoundry/cf-deployment.git
     branch: main
@@ -327,37 +299,6 @@ jobs:
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-
-- name: deploy-autoscaler-pr
-  serial_groups: [infra]
-  public: true
-  build_logs_to_retain: 100
-  plan:
-    - in_parallel:
-        - get: app-autoscaler-ci
-        - get: bbl-state
-          passed: [deploy-cf]
-        - get: app-autoscaler-release-pr
-    - task: run-pre-release-script
-      file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
-      params:
-        SCRIPT_NAME: ./scripts/update
-      input_mapping:
-        release: app-autoscaler-release-pr
-      output_mapping:
-        release: app-autoscaler-release-pr
-    - task: deploy-autoscaler
-      file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
-      params:
-        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-        <<: *app-autoscaler-ops-files-pr
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-pr
-    - task: register-broker
-      file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
-      params:
-        SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-
 
 - name: delete-autoscaler
   serial_groups: [infra]
@@ -581,73 +522,6 @@ jobs:
     ensure:
       <<: *cleanupTaskMain
 
-
-- name: acceptance-pr
-  serial_groups: [infra]
-  public: true
-  build_logs_to_retain: 100
-  plan:
-  - in_parallel:
-    - get: app-autoscaler-ci
-    - get: bbl-state
-      passed: [deploy-cf]
-    - get: app-autoscaler-release-pr
-      trigger: true
-      version: every
-      params:
-        submodules: true
-  - put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: pending
-      context: acceptance-tests
-    get_params:
-      submodules: true
-  - task: run-pre-release-script
-    file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
-    params:
-      SCRIPT_NAME: ./scripts/update
-    input_mapping:
-      release: app-autoscaler-release-pr
-    output_mapping:
-      release: app-autoscaler-release-pr
-  - task: deploy-autoscaler
-    file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
-    params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      <<: *app-autoscaler-ops-files-pr
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-pr
-    <<: *cleanupPr
-  - task: register-broker
-    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
-    params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-    <<: *cleanupPr
-  - task: autoscaler-acceptance
-    file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
-    params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      SERVICE_OFFERING_ENABLED: true
-      SKIP_SSL_VALIDATION: true
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-pr
-    ensure:
-      <<: *cleanupTaskPr
-  on_success:
-    put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: success
-      context: acceptance-tests
-  on_failure:
-    put: app-autoscaler-release-pr
-    params:
-      path: app-autoscaler-release-pr
-      status: failure
-      context: acceptance-tests
-
-
 - name: release
   public: true
   build_logs_to_retain: 100
@@ -692,25 +566,25 @@ jobs:
       rebase: true
       repository: pushme/app-autoscaler-release
 
-
-- name: draft-pr
-  public: true
-  build_logs_to_retain: 100
-  plan:
-  - in_parallel:
-    - get: gh-release
-    - get: app-autoscaler-ci
-    - get: app-autoscaler-release-pr
-      passed: [acceptance-pr]
-      trigger: true
-  - task: dummy-release-autoscaler
-    file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
-    params:
-      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
-      GITHUB_TOKEN: ((autoscaler_access_token))
-      PERFORM_BOSH_RELEASE: false
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-pr
+# TODO move to a github action a possibly make it add the draft release notes to the PR?
+#- name: draft-pr
+#  public: true
+#  build_logs_to_retain: 100
+#  plan:
+#  - in_parallel:
+#    - get: gh-release
+#    - get: app-autoscaler-ci
+#    - get: app-autoscaler-release-pr
+#      passed: [acceptance-pr]
+#      trigger: true
+#  - task: dummy-release-autoscaler
+#    file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
+#    params:
+#      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
+#      GITHUB_TOKEN: ((autoscaler_access_token))
+#      PERFORM_BOSH_RELEASE: false
+#    input_mapping:
+#      app-autoscaler-release: app-autoscaler-release-pr
 
 
 - name: draft

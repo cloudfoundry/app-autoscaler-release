@@ -6,6 +6,7 @@ system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 service_name="${SERVICE_NAME:-autoscaler}"
 deployment_name="${DEPLOYMENT_NAME:-autoscaler}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
+autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 
 pushd ${bbl_state_path}
   eval "$(bbl print-env)"
@@ -13,8 +14,8 @@ popd
 
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
-export GOPATH=$PWD/app-autoscaler-release
-pushd app-autoscaler-release/src/acceptance
+export GOPATH="$PWD/app-autoscaler-release"
+pushd "${autoscaler_dir}/src/acceptance"
 cat > acceptance_config.json <<EOF
 {
   "api": "api.${system_domain}",
