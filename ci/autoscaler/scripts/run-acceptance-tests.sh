@@ -30,7 +30,7 @@ cat > acceptance_config.json <<EOF
   "aggregate_interval": 120,
   "name_prefix": "${NAME_PREFIX}",
 
-  "autoscaler_api": "${service_name}.${system_domain}",
+  "autoscaler_api": "${deployment_name}.${system_domain}",
   "service_offering_enabled": ${SERVICE_OFFERING_ENABLED}
 }
 EOF
