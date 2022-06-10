@@ -76,10 +76,10 @@ jobs:
           export SERVICE_OFFERING_ENABLED=true
           export SKIP_SSL_VALIDATION=true
           export NAME_PREFIX="TESTS-${DEPLOYMENT_NAME}"
-          export SUITES=api #"api app broker"
-          export NODES=1
+          export SUITES="api app broker"
+          export NODES=3
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
       - name: Cleanup deployments
-        # if: always()
+        if: always()
         run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
