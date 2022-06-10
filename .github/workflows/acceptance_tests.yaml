@@ -15,7 +15,6 @@ jobs:
 
       AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
     steps:
-      #- run: export; echo $SERVICE_BROKER_NAME; exit 1
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
@@ -32,37 +31,15 @@ jobs:
           ruby-version: 2.7
           bundler-cache: true
 
-      - name: Install uaac
-        run: gem install cf-uaac
+      - name: Cli Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            "${{ env.HOME }}/bin/"
+          key: ${{ runner.os }}-deploy_cli-${{ hashFiles( '${{ env.AUTOSCALER_DIR }}/.github/workflows/install_cli.sh' ) }}
 
-      - name: Install bosh-cli
-        run: |
-          curl -sLf https://github.com/cloudfoundry/bosh-cli/releases/download/v7.0.1/bosh-cli-7.0.1-linux-amd64 -o /usr/bin/bosh
-          chmod a+x /usr/bin/bosh
-          bosh --version
-
-      - name: Install bbl-cli
-        run: |
-          curl -sLf "https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.89/bbl-v8.4.89_linux_x86-64" -o /usr/bin/bbl
-          chmod a+x /usr/bin/bbl
-          bbl version
-
-      - name: Install credhub-cli
-        run: |
-          curl -sLf https://github.com/cloudfoundry/credhub-cli/releases/download/2.9.3/credhub-linux-2.9.3.tgz | tar -zx -C /usr/bin/
-          chmod a+x /usr/bin/credhub
-          credhub --version
-
-      - name: Install yq
-        run: |
-          curl -sLf https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/bin/yq
-          chmod a+x /usr/bin/yq
-          yq --version
-
-      - name: Install cf-cli
-        run: |
-          curl -sLf "https://packages.cloudfoundry.org/stable?release=linux64-binary&version=v8&source=github" | tar -zx -C /usr/bin
-          cf version
+      - name: Install deployment ClIs
+        run: "${AUTOSCALER_DIR}/.github/workflows/install_cli.sh"
 
       - name: clone BBL repo
         uses: actions/checkout@v3
@@ -78,17 +55,17 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
           path: ci
 
-      # - name: run update
-      #   run: cd ${AUTOSCALER_DIR}; ./scripts/update
+      - name: run update
+        run: cd ${AUTOSCALER_DIR}; ./scripts/update
 
-      # - name: deploy autoscaler
-      #   run: |
-      #     export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
-      #      ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
-      #      ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
-      #      ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
-      #     export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
-      #     ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/deploy-autoscaler.sh
+      - name: deploy autoscaler
+        run: |
+         export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
+          ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
+          ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
+          ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
+         export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
+         ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker
         run: ${GITHUB_WORKSPACE}/ci/autoscaler/scripts/register-broker.sh
@@ -109,4 +86,3 @@ jobs:
         run: |
           echo TODO
           exit 1
-
