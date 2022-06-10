@@ -17,7 +17,7 @@ password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
 #credhub delete -p "/bosh-autoscaler/${deploy_name}"
 
-bosh -n -d ${deploy_name}\
+bosh -n -d "${deploy_name}"\
  deploy --dry-run --no-redact\
  "${root_dir}/templates/app-autoscaler-deployment.yml"\
  -o "${root_dir}/example/operation/instance-identity-cert-from-cf.yml"\
