@@ -7,7 +7,7 @@ deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 ORG_PREFIX="ASATS|ASUP|CUST_MET|TESTS-${deployment_name}"
 SERVICE_PREFIX=autoscaler
 
-ORGS=$(cf orgs | grep -v name | grep -E ${ORG_PREFIX})
+ORGS="$(cf orgs | grep -v name | grep -E ${ORG_PREFIX})"
 for ORG in $ORGS; do
 	set +e
 	cf delete-org "$ORG" -f
