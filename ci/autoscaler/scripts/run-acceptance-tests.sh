@@ -4,6 +4,7 @@ set -euo pipefail
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 service_name="${SERVICE_NAME:-autoscaler}"
+deployment_name="${DEPLOYMENT_NAME:-autoscaler}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 
 pushd ${bbl_state_path}
@@ -22,7 +23,7 @@ cat > acceptance_config.json <<EOF
   "apps_domain": "${system_domain}",
   "skip_ssl_validation": ${SKIP_SSL_VALIDATION},
   "use_http": false,
-  "service_name": "${service_name}",
+  "service_name": "${deployment_name}",
   "service_broker": "${service_name}",
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
