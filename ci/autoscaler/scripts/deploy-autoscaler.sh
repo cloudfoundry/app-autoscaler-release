@@ -7,6 +7,7 @@ system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 ops_files="${OPS_FILES:-''}"
+autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
@@ -48,7 +49,7 @@ else
 	--secret "autoscaler_client_secret"
 fi
 
-pushd app-autoscaler-release
+pushd "$autoscaler_dir"
   # Determine if we need to upload a stemcell at this point.
   #TODO refactor out function for stemcell check and update.
   STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' templates/app-autoscaler-deployment.yml)
