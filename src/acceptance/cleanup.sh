@@ -14,9 +14,9 @@ for ORG in $ORGS; do
 	# shellcheck disable=SC2181
 	if [ "$?" != "0" ]; then
 		cf target -o "$ORG"
-		SERVICES=$(cf services | grep -v name | grep ${SERVICE_PREFIX} | awk '{print $1}')
-		for SERVICE in "$SERVICES"; do
-			cf purge-service-instance $SERVICE -f
+		SERVICES=$(cf services | grep "${SERVICE_PREFIX}" |  awk 'NR>1 { print $1}')
+		for SERVICE in $SERVICES; do
+			cf purge-service-instance "$SERVICE" -f
 		done
 		cf delete-org -f "$ORG"
 	fi
