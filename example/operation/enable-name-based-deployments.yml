@@ -205,13 +205,10 @@
   value: *postgres_domain
 
 # route_registrar external/Public dns entries
+## asapi
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=api_server/uris
   value: [ ((deployment_name)).((system_domain)) ]
-
-- type: replace
-  path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_service_broker/uris
-  value: [ ((deployment_name))servicebroker.((system_domain)) ]
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_service_broker/uris
@@ -224,6 +221,37 @@
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/uris
   value: [ ((deployment_name))-metricsforwarder.((system_domain)) ]
+
+## asmetrics
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_eventgenerator_health/uris
+  value: [ ((deployment_name))-eventgenerator.((system_domain)) ]
+
+- type: replace
+  path: /instance_groups/name=asmetrics/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsserver_health/uris
+  value: [ ((deployment_name))-metricsserver.((system_domain)) ]
+
+## asnozzle
+
+- type: replace
+  path: /instance_groups/name=asnozzle/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsgateway_health/uris
+  value: [ ((deployment_name))-metricsgateway.((system_domain)) ]
+
+## asactors
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_scalingengine_health/uris
+  value: [ ((deployment_name))-scalingengine.((system_domain)) ]
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_operator_health/uris
+  value: [ ((deployment_name))-operator.((system_domain)) ]
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_scheduler_health/uris
+  value: [ ((deployment_name))-scheduler.((system_domain)) ]
+
 
 # variables
 # - scalingengine_server
