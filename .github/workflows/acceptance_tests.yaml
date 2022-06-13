@@ -66,6 +66,7 @@ jobs:
           ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
          export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
+         export DEBUG=true
          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker
