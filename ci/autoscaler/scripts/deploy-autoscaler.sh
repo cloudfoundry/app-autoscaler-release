@@ -1,6 +1,5 @@
 #!/bin/bash
 
-[ -z "${DEBUG+x}" ] || set -x
 set -euo pipefail
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
