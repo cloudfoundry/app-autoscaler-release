@@ -12,7 +12,7 @@ echo "Deleting orgs: '${ORGS}'"
 
 for ORG in $ORGS; do
 	# shellcheck disable=SC2181
-	if cf delete-org "$ORG" -f; then
+	if ! cf delete-org "$ORG" -f; then
 		cf target -o "$ORG"
 		SERVICES=$(cf services | grep "${SERVICE_PREFIX}" |  awk 'NR>1 { print $1}')
 		for SERVICE in $SERVICES; do

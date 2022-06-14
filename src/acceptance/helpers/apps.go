@@ -44,14 +44,15 @@ func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int)
 	By("Creating test app")
 	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
 	countStr := strconv.Itoa(initialInstanceCount)
-	AbortOnCommandFailuref(cf.Cf("push", appName, "--no-start", "--no-route",
+	createApp := cf.Cf("push", appName, "--no-start", "--no-route",
 		"-i", countStr,
 		"-b", cfg.NodejsBuildpackName,
 		"-m", "128M",
 		"-p", config.NODE_APP,
 		"-u", "http",
 		"--endpoint", "/health",
-	), "Failes to create application")
+	).Wait(cfg.CfPushTimeoutDuration())
+	Expect(createApp).To(Exit(0), "failed creating app")
 
 	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
 	Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")
