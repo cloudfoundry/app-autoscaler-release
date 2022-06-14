@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -82,27 +81,9 @@ var _ = BeforeSuite(func() {
 
 	appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
 	initialInstanceCount := 1
-	countStr := strconv.Itoa(initialInstanceCount)
-
-	By("Creating test app")
-	AbortOnCommandFailuref(
-		cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).
-			Wait(cfg.CfPushTimeoutDuration()),
-		"failed creating app")
-
-	AbortOnCommandFailuref(
-		cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).
-			Wait(cfg.DefaultTimeoutDuration()),
-		"failed to map route to app")
-
-	appGUID = strings.TrimSpace(string(
-		AbortOnCommandFailuref(
-			cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration()),
-			"Failed to get guid").
-			Out.Contents()),
-	)
-
-	AbortOnCommandFailuref(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration()), "Failed to start %s", appName)
+	appName = CreateTestApp(cfg, appName, initialInstanceCount)
+	appGUID = GetAppGuid(cfg, appName)
+	StartApp(appName, cfg.CfPushTimeoutDuration())
 	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 
 	By("Creating test service")
@@ -147,13 +128,6 @@ var _ = BeforeSuite(func() {
 	aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(aggregatedMetricURL, "{appId}", appGUID, -1))
 	historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
 })
-
-func AbortOnCommandFailuref(command *Session, format string, args ...any) *Session {
-	if command.ExitCode() != 0 {
-		AbortSuite(fmt.Sprintf(format, args...))
-	}
-	return command
-}
 
 var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
