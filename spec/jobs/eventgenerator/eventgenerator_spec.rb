@@ -100,7 +100,7 @@ describe "eventgenerator" do
 
         it "check eventgenerator use log cache" do
           expect(rendered_template['metricCollector'])
-            .to include({"use_log_cache" => true })
+            .to include({"use_log_cache" => true})
         end
 
         it "should not add https protocol to metric_collector_url" do
