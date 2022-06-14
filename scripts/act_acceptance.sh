@@ -13,4 +13,4 @@ export SKIP_SSL_VALIDATION=true
 export NAME_PREFIX="TESTS-${DEPLOYMENT_NAME}"
 export SUITES=api #"api app broker"
 export NODES=1
-${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+"${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh"
