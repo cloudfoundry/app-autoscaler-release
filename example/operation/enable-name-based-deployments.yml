@@ -18,6 +18,9 @@
       scalingengine: &scalingengine_domain ((deployment_name)).scalingengine.service.cf.internal
       metricsgateway: &metricsgateway_domain ((deployment_name)).metricsgateway.service.cf.internal
       metricsserver: &metricsserver_domain ((deployment_name)).metricsserver.service.cf.internal
+    public_domains:
+      metricsforwarder: &metricsforwarder_public_domain ((deployment_name))metrics.((system_domain))
+      metricsforwarder_mtls: &metricsforwarder_mtls_public_domain ((deployment_name))-metricsforwarder-mtls.((system_domain))
 
 # Addons 
 - type: replace
@@ -232,6 +235,19 @@
   path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/broker/server/catalog/services/id=autoscaler-guid/name
   value: ((deployment_name))
 
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_forwarder/host?
+  value: *metricsforwarder_public_domain
+
+## values originally in instance-identity-cert-from-cf.yml
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_forwarder/mtls_host?
+  value: *metricsforwarder_mtls_public_domain
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metrics_forwarder_mtls/uris
+  value: [ *metricsforwarder_mtls_public_domain ]
+
 ###########
 # asapi - metricsforwarder
 - type: replace
@@ -250,7 +266,7 @@
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metrics_forwarder/uris
-  value: [ ((deployment_name))metrics.((system_domain)) ]
+  value: [ *metricsforwarder_public_domain ]
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/uris
