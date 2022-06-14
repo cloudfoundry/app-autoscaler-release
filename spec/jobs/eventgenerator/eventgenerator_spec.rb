@@ -99,7 +99,7 @@ describe "eventgenerator" do
         end
 
         it "check eventgenerator use log cache" do
-          expect(rendered_template['metricCollector'])
+          expect(rendered_template["metricCollector"])
             .to include({"use_log_cache" => true})
         end
 
