@@ -1,9 +1,8 @@
 #!/bin/bash
 
-
 ## BEGIN CERTIFICATE INSTALLATION
 #define JDK_HOME
-JDK_HOME=/var/vcap/packages/java
+JDK_HOME=/var/vcap/packages/openjdk-11
 
 CERT_ALIAS=$1
 CERT_FILE=$2
