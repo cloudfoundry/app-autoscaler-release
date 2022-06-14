@@ -492,3 +492,10 @@ func GetAppGuid(cfg *config.Config, appName string) string {
 	Expect(guid).To(Exit(0))
 	return strings.TrimSpace(string(guid.Out.Contents()))
 }
+
+func AbortOnCommandFailuref(command *Session, format string, args ...any) *Session {
+	if command.ExitCode() != 0 {
+		AbortSuite(fmt.Sprintf(format, args...))
+	}
+	return command
+}

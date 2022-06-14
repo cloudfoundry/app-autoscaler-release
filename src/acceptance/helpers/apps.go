@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"
-
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/generator"
+	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 )
@@ -41,17 +41,17 @@ func StartApp(appName string, timeout time.Duration) bool {
 }
 
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
+	By("Creating test app")
 	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
 	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push", appName, "--no-start", "--no-route",
+	AbortOnCommandFailuref(cf.Cf("push", appName, "--no-start", "--no-route",
 		"-i", countStr,
 		"-b", cfg.NodejsBuildpackName,
 		"-m", "128M",
 		"-p", config.NODE_APP,
 		"-u", "http",
 		"--endpoint", "/health",
-	).Wait(cfg.CfPushTimeoutDuration())
-	Expect(createApp).To(Exit(0), "failed creating app")
+	), "Failes to create application")
 
 	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
 	Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")

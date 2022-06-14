@@ -11,6 +11,7 @@ export CI_DIR="../app-autoscaler-ci/"
 export SERVICE_OFFERING_ENABLED=true
 export SKIP_SSL_VALIDATION=true
 export NAME_PREFIX="TESTS-${DEPLOYMENT_NAME}"
-export SUITES=api #"api app broker"
-export NODES=1
+export SUITES="api app broker"
+export NODES=8
+export SKIP_TEARDOWN=true
 "${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh"
