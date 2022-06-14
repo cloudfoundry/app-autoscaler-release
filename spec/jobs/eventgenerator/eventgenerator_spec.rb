@@ -80,8 +80,8 @@ describe "eventgenerator" do
 
     describe "use_log_cache feature" do
       it "keeps log cache off by default" do
-        expect(rendered_template['metricCollector'])
-          .to include({"use_log_cache" => false })
+        expect(rendered_template["metricCollector"])
+          .to include({"use_log_cache" => false})
       end
 
       it "should add https protocol to metric_collector_url" do
