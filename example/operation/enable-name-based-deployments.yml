@@ -108,31 +108,38 @@
   path: /instance_groups/name=postgres_autoscaler/jobs/name=postgres/properties/databases/address?
   value: *postgres_domain
 
+###########
 # asactors - scalingengine
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db/address?
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db/address?
   value: *postgres_domain
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db/address?
+  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db/address?
   value: *postgres_domain
 
 - type: replace
   path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db/address?
   value: *postgres_domain
 
+###########
 # asactors - scheduler
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/policy_db/address?
-  value: *postgres_domain
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler/scaling_engine/host?
+  value: *scalingengine_domain
 
 - type: replace
   path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler_db/address?
   value: *postgres_domain
 
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/policy_db/address?
+  value: *postgres_domain
+
+###########
 # asactors - operator
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db/address?
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db/address?
   value: *postgres_domain
 
 - type: replace
@@ -140,17 +147,28 @@
   value: *postgres_domain
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db/address?
-  value: *postgres_domain
-
-- type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db/address?
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db/address?
   value: *postgres_domain
 
 - type: replace
   path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db/address?
   value: *postgres_domain
 
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/operator/scaling_engine/host?
+  value: *scalingengine_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scheduler.host?
+  value: *scheduler_domain
+
+- type: replace
+  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db/address?
+  value: *postgres_domain
+
+
+
+###########
 # asmetrics - metricsserver
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db/address?
@@ -160,6 +178,7 @@
   path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db/address?
   value: *postgres_domain
 
+###########
 # asmetrics - eventgenerator
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/scaling_engine/host
@@ -177,16 +196,14 @@
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db/address?
   value: *postgres_domain
 
+###########
 # asnozzle - metricsgateway
 - type: replace
   path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db/address?
   value: *postgres_domain
 
+###########
 # asapi - golangapiserver
-- type: replace
-  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_collector/host
-  value: *metricsserver_domain
-
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/binding_db/address?
   value: *postgres_domain
@@ -196,9 +213,26 @@
   value: *postgres_domain
 
 - type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/scheduler/host?
+  value: *scheduler_domain
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_collector/host?
+  value: *metricsserver_domain
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/scaling_engine/host?
+  value: *scalingengine_domain
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/event_generator/host?
+  value: *eventgenerator_domain
+
+- type: replace
   path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/broker/server/catalog/services/id=autoscaler-guid/name
   value: ((deployment_name))
 
+###########
 # asapi - metricsforwarder
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db/address?
