@@ -66,8 +66,8 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	otherSetup = workflowhelpers.NewTestSuiteSetup(&otherConfig)
 
-	Cleanup(cfg, setup)
-	Cleanup(&otherConfig, otherSetup)
+	//Cleanup(cfg, setup)
+	//Cleanup(&otherConfig, otherSetup)
 
 	otherSetup.Setup()
 	setup.Setup()
@@ -79,7 +79,6 @@ var _ = BeforeSuite(func() {
 		}
 	})
 
-	appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
 	initialInstanceCount := 1
 	appName = CreateTestApp(cfg, appName, initialInstanceCount)
 	appGUID = GetAppGuid(cfg, appName)
