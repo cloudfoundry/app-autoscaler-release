@@ -7,6 +7,7 @@ service_name="${SERVICE_NAME:-autoscaler}"
 deployment_name="${DEPLOYMENT_NAME:-autoscaler}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
+gingko_opts="${GINKGO_OPTS:-}"
 
 pushd ${bbl_state_path}
   eval "$(bbl print-env)"
@@ -47,7 +48,7 @@ done
 echo "Running $SUITES_TO_RUN"
 
 if [ "${SUITES_TO_RUN}" != "" ]; then
-  CONFIG=$PWD/acceptance_config.json ./bin/test -skip "mtls" -race -nodes=${NODES} --slow-spec-threshold=120s -trace ${SUITES_TO_RUN}
+  CONFIG=$PWD/acceptance_config.json ./bin/test $gingko_opts -race -nodes=${NODES} --slow-spec-threshold=120s -trace ${SUITES_TO_RUN}
 else
   echo "Nothing to run!"
 fi
