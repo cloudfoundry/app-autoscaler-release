@@ -37,30 +37,39 @@ func SendMetric(cfg *config.Config, appName string, metric int) {
 }
 
 func StartApp(appName string, timeout time.Duration) bool {
-	return Expect(cf.Cf("start", appName).Wait(timeout)).To(Exit(0))
+	startApp := cf.Cf("start", appName).Wait(timeout)
+	if startApp.ExitCode() != 0 {
+		cf.Cf("logs", appName, "--recent").Wait()
+	}
+	return Expect(startApp).To(Exit(0))
 }
 
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
 	By("Creating test app")
+
+	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
+	if cfg.GetSkipSSLValidation() {
+		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
+	}
+
 	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
 	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push", appName, "--no-start", "--no-route",
-		"-i", countStr,
-		"-b", cfg.NodejsBuildpackName,
-		"-m", "128M",
+	createApp := cf.Cf("push",
+		"--var", "app_name="+appName,
+		"--var", "app_domain="+cfg.AppsDomain,
+		"--var", "service_name="+cfg.ServiceName,
+		"--var", "instances="+countStr,
+		"--var", "buildpack="+cfg.NodejsBuildpackName,
+		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
 		"-p", config.NODE_APP,
-		"-u", "http",
-		"--endpoint", "/health",
+		"-f", config.NODE_APP+"/app_manifest.yml",
+		"--no-start",
 	).Wait(cfg.CfPushTimeoutDuration())
-	Expect(createApp).To(Exit(0), "failed creating app")
 
-	mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")
-
-	if cfg.GetSkipSSLValidation() {
-		setNodeTLSRejectUnauthorizedEnvironmentVariable := cf.Cf("set-env", appName, "NODE_TLS_REJECT_UNAUTHORIZED", "0").Wait(cfg.DefaultTimeoutDuration())
-		Expect(setNodeTLSRejectUnauthorizedEnvironmentVariable).To(Exit(0), "failed to set NODE_TLS_REJECT_UNAUTHORIZED environment variable")
+	if createApp.ExitCode() != 0 {
+		cf.Cf("log", appName, "--recent")
 	}
+	Expect(createApp).To(Exit(0), "failed creating app")
 
 	return appName
 }
