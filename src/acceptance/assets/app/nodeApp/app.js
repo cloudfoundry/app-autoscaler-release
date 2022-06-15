@@ -11,7 +11,7 @@ let credentials = {}
 let metricsForwarderURL = ''
 let mfUsername = ''
 let mfPassword = ''
-let serviceName = process.env.SERVICE_NAME
+const serviceName = process.env.SERVICE_NAME
 
 // for service offering
 if (process.env.VCAP_SERVICES) {
@@ -38,13 +38,11 @@ if (metricsForwarderURL === '' || mfUsername === '' || mfPassword === '') {
     mfPassword = credentials.password
   } else {
     console.error('ERROR: not all credentials were provided.')
-    console.log(
-        `metricsForwarderURL "${metricsForwarderURL}" || mfUsername === "${mfUsername}" || mfPassword "${mfPassword}"`)
+    console.log(`metricsForwarderURL "${metricsForwarderURL}" || mfUsername === "${mfUsername}" || mfPassword (length) "${mfPassword.length}"`)
     console.error(`ERROR: process.env.VCAP_SERVICES: ${process.env.VCAP_SERVICES}`)
     process.exit(1)
   }
 }
-
 
 app.get('/slow/:time', async function (req, res) {
   const delayInMS = parseInt(req.params.time, 10)

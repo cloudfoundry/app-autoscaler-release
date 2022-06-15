@@ -372,12 +372,12 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 }
 
 func RunningInstances(appGUID string, timeout time.Duration) int {
-	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/summary")
+	cmd := cf.CfSilent("curl", "/v2/apps/"+appGUID+"/summary")
 	Expect(cmd.Wait(timeout)).To(Exit(0))
-
 	var summary appSummary
 	err := json.Unmarshal(cmd.Out.Contents(), &summary)
 	Expect(err).ToNot(HaveOccurred())
+	GinkgoWriter.Printf("App instances found %d\n", summary.RunningInstances)
 	return summary.RunningInstances
 }
 

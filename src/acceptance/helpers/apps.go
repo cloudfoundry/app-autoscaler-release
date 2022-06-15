@@ -67,7 +67,7 @@ func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int)
 	).Wait(cfg.CfPushTimeoutDuration())
 
 	if createApp.ExitCode() != 0 {
-		cf.Cf("log", appName, "--recent")
+		cf.Cf("logs", appName, "--recent")
 	}
 	Expect(createApp).To(Exit(0), "failed creating app")
 
