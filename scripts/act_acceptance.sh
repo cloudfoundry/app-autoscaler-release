@@ -1,17 +1,11 @@
 #!/bin/bash
 
 set -euo pipefail
-export DEPLOYMENT_NAME="app-autoscaler-44"
-export SERVICE_BROKER_NAME="app-autoscaler-44servicebroker"
-export SERVICE_NAME="autoscaler-44"
-export BBL_STATE_PATH="../app-autoscaler-env-bbl-state/bbl-state"
-export SYSTEM_DOMAIN="autoscaler.ci.cloudfoundry.org"
-export AUTOSCALER_DIR="${PWD}"
-export CI_DIR="../app-autoscaler-ci/"
-export SERVICE_OFFERING_ENABLED=true
-export SKIP_SSL_VALIDATION=true
-export NAME_PREFIX="TESTS-${DEPLOYMENT_NAME}"
-export SUITES="api app broker"
-export NODES=1
+export script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+source "$script_dir/pr-vars.source.sh"
 export SKIP_TEARDOWN=true
+
+export SUITES="app"
+export GINKGO_OPTS="--progress"
+
 "${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh"
