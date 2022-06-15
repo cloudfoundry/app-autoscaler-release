@@ -104,7 +104,7 @@ describe "eventgenerator" do
         end
 
         it "should not add https protocol to metric_collector_url" do
-          expect(rendered_template['metricCollector']["metric_collector_url"])
+          expect(rendered_template["metricCollector"]["metric_collector_url"])
             .not_to include("http")
         end
       end
