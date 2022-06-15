@@ -85,7 +85,7 @@ describe "eventgenerator" do
       end
 
       it "should add https protocol to metric_collector_url" do
-        expect(rendered_template["metricCollector"]['metric_collector_url'])
+        expect(rendered_template["metricCollector"]["metric_collector_url"])
           .to include("http")
       end
 
