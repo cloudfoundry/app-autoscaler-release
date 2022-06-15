@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Source this file please - used for manual debug. Adjust as needed.
+# shellcheck disable=SC2155
 export script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 export DEPLOYMENT_NAME="app-autoscaler-44"
@@ -22,4 +23,4 @@ export SERVICE_OFFERING_ENABLED=true
 export SKIP_SSL_VALIDATION=true
 export NAME_PREFIX="TESTS-${DEPLOYMENT_NAME}"
 export SUITES="api app broker"
-export NODES=8
+export NODES=3
