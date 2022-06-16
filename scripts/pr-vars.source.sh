@@ -21,6 +21,6 @@ export DEBUG=true
 
 export SERVICE_OFFERING_ENABLED=true
 export SKIP_SSL_VALIDATION=true
-export NAME_PREFIX="TESTS-${DEPLOYMENT_NAME}"
+export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
 export SUITES="api app broker"
 export NODES=3

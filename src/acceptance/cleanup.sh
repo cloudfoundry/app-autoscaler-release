@@ -16,7 +16,7 @@ function delete_org(){
 }
 
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
-ORG_PREFIX="ASATS|ASUP|CUST_MET|TESTS-${deployment_name}"
+ORG_PREFIX="ASATS|ASUP|CUST_MET|${deployment_name}-TESTS"
 SERVICE_PREFIX=autoscaler
 
 ORGS=$(cf orgs |  awk 'NR>3{ print $1}' | grep -E "${ORG_PREFIX}" || true)

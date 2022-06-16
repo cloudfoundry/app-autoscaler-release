@@ -82,8 +82,6 @@ var _ = BeforeSuite(func() {
 	initialInstanceCount := 1
 	appName = CreateTestApp(cfg, appName, initialInstanceCount)
 	appGUID = GetAppGuid(cfg, appName)
-	StartApp(appName, cfg.CfPushTimeoutDuration())
-	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 
 	By("Creating test service")
 	if cfg.IsServiceOfferingEnabled() {
@@ -100,6 +98,8 @@ var _ = BeforeSuite(func() {
 				Wait(cfg.DefaultTimeoutDuration()),
 			"failed binding service %s to app %s", instanceName, appName)
 	}
+	StartApp(appName, cfg.CfPushTimeoutDuration())
+	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 
 	// #nosec G402
 	client = &http.Client{
