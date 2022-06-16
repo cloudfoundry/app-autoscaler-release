@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         
       - name: run update
         run: cd ${AUTOSCALER_DIR}; ./scripts/update
@@ -35,7 +35,6 @@ jobs:
           ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
           ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
-         export DEBUG=true
          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker
@@ -49,7 +48,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
 
       - name: run acceptance test - api
         run: |
@@ -69,7 +68,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
 
       - name: run acceptance test - app
         run: |
@@ -88,7 +87,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
 
       - name: run acceptance tests - broker
         run: |
@@ -104,9 +103,11 @@ jobs:
     name: Cleanup deployments
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: clone CI repo
+        uses: actions/checkout@v3
         with:
-          path: app-autoscaler-release
-    
-      - if: always()
-        run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
+          repository: cloudfoundry/app-autoscaler-ci
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          path: ci
+
+      - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
