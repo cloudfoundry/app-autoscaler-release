@@ -39,7 +39,7 @@ func SendMetric(cfg *config.Config, appName string, metric int) {
 func StartApp(appName string, timeout time.Duration) bool {
 	startApp := cf.Cf("start", appName).Wait(timeout)
 	if startApp.ExitCode() != 0 {
-		cf.Cf("logs", appName, "--recent").Wait()
+		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
 	}
 	return Expect(startApp).To(Exit(0))
 }
@@ -67,7 +67,7 @@ func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int)
 	).Wait(cfg.CfPushTimeoutDuration())
 
 	if createApp.ExitCode() != 0 {
-		cf.Cf("logs", appName, "--recent")
+		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
 	}
 	Expect(createApp).To(Exit(0), "failed creating app")
 
