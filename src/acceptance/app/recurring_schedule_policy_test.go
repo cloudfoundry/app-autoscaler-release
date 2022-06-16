@@ -52,11 +52,9 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 			location, err := time.LoadLocation("GMT")
 			Expect(err).NotTo(HaveOccurred())
 			startTime, endTime = getStartAndEndTime(location, 70*time.Second, time.Duration(interval+120)*time.Second)
-			scheduleInstanceInit := 3
-			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, scheduleInstanceInit)
+			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
-			WaitForNInstancesRunning(appGUID, scheduleInstanceInit, cfg.DefaultTimeoutDuration())
 		})
 
 		Context("with days of month", func() {
