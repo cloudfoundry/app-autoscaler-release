@@ -3,9 +3,6 @@ description: 'Common steps for all acceptance tests'
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
-      with:
-        path: app-autoscaler-release
     - uses: ./app-autoscaler-release/.github/actions/setup_go
       with:
         source: app-autoscaler-release/src/autoscaler
