@@ -1,9 +1,7 @@
 {
-  "action": "labeled",
-  "label": {
-    "name": "allow-acceptance-tests"
-  },
+  "action": "synchronize",
   "pull_request": {
-    "number": 44
+    "number": 44,
+    "labels": [{ "name":"allow-acceptance-tests"}]
   }
 }
