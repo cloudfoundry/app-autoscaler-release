@@ -15,7 +15,7 @@ env:
   
 jobs:
   deploy_autoscaler:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') 
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') }}
     #if: ${{ github.event.pr_request.labels.includes('allow-acceptance-tests') || github.event.pr_request.labels.includes('dependencies')  }}
     # if: ${{ github.event.label.name == 'allow-acceptance-tests' || github.event.label.name == 'dependencies' }}
     name: Deploy autoscaler for PR
