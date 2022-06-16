@@ -21,6 +21,9 @@ jobs:
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps: 
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
         
       - name: run update
@@ -43,6 +46,9 @@ jobs:
     name: Run API acceptance test for PR
     runs-on: ubuntu-latest
     steps: 
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
 
       - name: run acceptance test - api
@@ -60,6 +66,9 @@ jobs:
     name: Run API acceptance test for PR
     runs-on: ubuntu-latest
     steps: 
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
 
       - name: run acceptance test - app
@@ -76,6 +85,9 @@ jobs:
     name: Run API acceptance test for PR
     runs-on: ubuntu-latest
     steps: 
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
 
       - name: run acceptance tests - broker
@@ -92,5 +104,9 @@ jobs:
     name: Cleanup deployments
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+    
       - if: always()
         run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
