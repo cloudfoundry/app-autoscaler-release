@@ -1,8 +1,10 @@
 name: Acceptance Tests
 on:
   pull_request:
+    types: [ labeled ]
 jobs:
   acceptance_test:
+    if: ${{ github.event.label.name == 'allow-acceptance-tests' || github.event.label.name == 'dependencies' }}
     name: run the acceptance test for a PR
     runs-on: ubuntu-latest
     env:
@@ -78,9 +80,8 @@ jobs:
           export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
           export SUITES="api app broker"
           export NODES=3
-          export SKIP_TEARDOWN=true
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
-#      - name: Cleanup deployments
-#        if: always()
-#        run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
+      - name: Cleanup deployments
+        if: always()
+        run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
