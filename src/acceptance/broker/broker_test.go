@@ -122,8 +122,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		if isCFVersion7() {
 			errStream = updateService.Out
 		}
-		Expect(strings.Contains(string(errStream.Contents()), "The service does not support changing plans.")).To(BeTrue())
-
+		Expect(string(errStream.Contents())).To(ContainSubstring("service does not support changing plans"))
 		service.delete()
 	})
 })

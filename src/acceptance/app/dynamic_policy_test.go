@@ -34,7 +34,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		appGUID = helpers.GetAppGuid(cfg, appName)
 		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
-		helpers.WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 	})
 
 	AfterEach(func() {

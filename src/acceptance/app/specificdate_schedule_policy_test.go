@@ -54,12 +54,9 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
 			startDateTime = timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(time.Duration(interval+120) * time.Second)
-			scheduledInstanceInit := 3
-			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, scheduledInstanceInit)
-
+			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
-			WaitForNInstancesRunning(appGUID, scheduledInstanceInit, cfg.DefaultTimeoutDuration())
 		})
 
 		It("should scale", func() {
