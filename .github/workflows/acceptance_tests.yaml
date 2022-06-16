@@ -73,14 +73,34 @@ jobs:
       - name: register autoscaler broker
         run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
 
-      - name: run acceptance tests
+      - name: run acceptance test - api
         run: |
           export SERVICE_OFFERING_ENABLED=true
           export SKIP_SSL_VALIDATION=true
           export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
-          export SUITES="api app broker"
+          export SUITES="api"
           export NODES=3
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+
+      - name: run acceptance test - app
+        run: |
+          export SERVICE_OFFERING_ENABLED=true
+          export SKIP_SSL_VALIDATION=true
+          export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
+          export SUITES="app"
+          export NODES=3
+          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+
+      - name: run acceptance tests - broker
+        run: |
+          export SERVICE_OFFERING_ENABLED=true
+          export SKIP_SSL_VALIDATION=true
+          export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
+          export SUITES="broker"
+          export NODES=3
+          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+
+
 
       - name: Cleanup deployments
         if: always()
