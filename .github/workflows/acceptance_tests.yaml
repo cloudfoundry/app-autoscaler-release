@@ -1,63 +1,27 @@
 name: Acceptance Tests
 on:
   pull_request:
-    types: [ labeled ]
+    types: [ opened, labeled, synchronize ]
+env:
+  MAVEN_VERSION: 3.6.3
+  MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
+  DEPLOYMENT_NAME: "app-autoscaler-${{ github.event.pull_request.number }}"
+  SERVICE_BROKER_NAME: "app-autoscaler-${{ github.event.pull_request.number }}servicebroker"
+  SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
+  BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
+  SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
+  AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
+  CI_DIR: "${{ github.workspace }}/ci"
+  
 jobs:
-  acceptance_test:
-    if: ${{ github.event.label.name == 'allow-acceptance-tests' || github.event.label.name == 'dependencies' }}
-    name: run the acceptance test for a PR
+  deploy_autoscaler:
+    if: ${{ github.event.pr_request.labels.includes('allow-acceptance-tests') || github.event.pr_request.labels.includes('dependencies')  }}
+    # if: ${{ github.event.label.name == 'allow-acceptance-tests' || github.event.label.name == 'dependencies' }}
+    name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
-    env:
-      MAVEN_VERSION: 3.6.3
-      MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
-      DEPLOYMENT_NAME: "app-autoscaler-${{ github.event.pull_request.number }}"
-      SERVICE_BROKER_NAME: "app-autoscaler-${{ github.event.pull_request.number }}servicebroker"
-      SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
-      BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
-      SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
-      AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
-      CI_DIR: "${{ github.workspace }}/ci"
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/setup_go
-        with:
-          source: app-autoscaler-release/src/autoscaler
-      - uses: ./app-autoscaler-release/.github/actions/setup_java
-        with:
-          version: 11
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.7
-          bundler-cache: true
-
-      - name: Cli Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            "${{ env.HOME }}/bin/"
-          key: ${{ runner.os }}-deploy_cli-${{ hashFiles( '${{ env.AUTOSCALER_DIR }}/.github/workflows/install_cli.sh' ) }}
-
-      - name: Install deployment ClIs
-        run: "${AUTOSCALER_DIR}/.github/workflows/install_cli.sh"
-
-      - name: clone BBL repo
-        uses: actions/checkout@v3
-        with:
-          repository: cloudfoundry/app-autoscaler-env-bbl-state
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-          path: bbl
-
-      - name: clone CI repo
-        uses: actions/checkout@v3
-        with:
-          repository: cloudfoundry/app-autoscaler-ci
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-          path: ci
-
+    steps: 
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
+        
       - name: run update
         run: cd ${AUTOSCALER_DIR}; ./scripts/update
 
@@ -73,6 +37,13 @@ jobs:
       - name: register autoscaler broker
         run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
 
+  acceptance_test_api:
+    needs: deploy_autoscaler
+    name: Run API acceptance test for PR
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
+
       - name: run acceptance test - api
         run: |
           export SERVICE_OFFERING_ENABLED=true
@@ -81,6 +52,14 @@ jobs:
           export SUITES="api"
           export NODES=3
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+
+  acceptance_test_app:
+    # TODO: allow parallel tests run once we have resources available
+    needs: acceptance_test_api
+    name: Run API acceptance test for PR
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
 
       - name: run acceptance test - app
         run: |
@@ -91,6 +70,13 @@ jobs:
           export NODES=3
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
+  acceptance_test_broker:
+    needs: acceptance_test_app
+    name: Run API acceptance test for PR
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_test_common
+
       - name: run acceptance tests - broker
         run: |
           export SERVICE_OFFERING_ENABLED=true
@@ -100,8 +86,10 @@ jobs:
           export NODES=3
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
-
-
-      - name: Cleanup deployments
-        if: always()
+  deployment_cleanup:
+    needs: acceptance_test_broker
+    name: Cleanup deployments
+    runs-on: ubuntu-latest
+    steps:
+      - if: always()
         run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
