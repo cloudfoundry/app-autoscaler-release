@@ -12,7 +12,7 @@ env:
   SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/ci"
-  
+
 jobs:
   deploy_autoscaler:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') }}
@@ -20,22 +20,22 @@ jobs:
     # if: ${{ github.event.label.name == 'allow-acceptance-tests' || github.event.label.name == 'dependencies' }}
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
-        
+
       - name: run update
         run: cd ${AUTOSCALER_DIR}; ./scripts/update
 
       - name: deploy autoscaler
         run: |
-         export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
-          ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
-          ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
-          ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
-         ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+          export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
+           ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
+           ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
+           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
+          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker
         run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
@@ -44,7 +44,7 @@ jobs:
     needs: deploy_autoscaler
     name: Run API acceptance test for PR
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
@@ -64,7 +64,7 @@ jobs:
     needs: acceptance_test_api
     name: Run API acceptance test for PR
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
@@ -83,7 +83,7 @@ jobs:
     needs: acceptance_test_app
     name: Run API acceptance test for PR
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
@@ -98,16 +98,23 @@ jobs:
           export NODES=3
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
+  ### This is a final node to indicate the success of all the acceptance tests
+  # so that only one job needs to be checked/Expected to be passed by github.
+  completed_successfully:
+    needs: [ acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
+    name: Acceptance tests passed
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Completed all tests successfully"
+
   deployment_cleanup:
-    needs: acceptance_test_broker
+    needs: completed_successfully
     name: Cleanup deployments
     runs-on: ubuntu-latest
     steps:
-      - name: clone CI repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
-          repository: cloudfoundry/app-autoscaler-ci
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-          path: ci
+          path: app-autoscaler-release
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
 
       - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
