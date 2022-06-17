@@ -1,5 +1,9 @@
 name: 'Acceptance Tests Common'
 description: 'Common steps for all acceptance tests'
+inputs:
+  ssh_key:  # id of input
+    description: 'The BBL ssh key'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -38,5 +42,5 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: cloudfoundry/app-autoscaler-ci
-        ssh-key: ${{ secrets.BBL_SSH_KEY }}
+        ssh-key:
         path: ci
