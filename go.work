@@ -1,0 +1,8 @@
+go 1.18
+
+use (
+	./src/acceptance
+	./src/autoscaler
+	./src/changelog
+	./src/changeloglockcleaner
+)
