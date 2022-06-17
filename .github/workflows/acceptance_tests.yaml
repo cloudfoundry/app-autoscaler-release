@@ -16,8 +16,6 @@ env:
 jobs:
   deploy_autoscaler:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') }}
-    #if: ${{ github.event.pr_request.labels.includes('allow-acceptance-tests') || github.event.pr_request.labels.includes('dependencies')  }}
-    # if: ${{ github.event.label.name == 'allow-acceptance-tests' || github.event.label.name == 'dependencies' }}
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +42,7 @@ jobs:
 
   acceptance_test_api:
     needs: deploy_autoscaler
-    name: Run API acceptance test for PR
+    name: API acceptance tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -66,7 +64,7 @@ jobs:
   acceptance_test_app:
     # TODO: allow parallel tests run once we have resources available
     needs: acceptance_test_api
-    name: Run API acceptance test for PR
+    name: APP acceptance tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -87,7 +85,7 @@ jobs:
 
   acceptance_test_broker:
     needs: acceptance_test_app
-    name: Run API acceptance test for PR
+    name: Broker acceptance tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
