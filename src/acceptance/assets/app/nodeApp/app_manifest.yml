@@ -1,0 +1,22 @@
+---
+applications:
+- name: ((app_name))
+  env:
+    NODE_TLS_REJECT_UNAUTHORIZED: ((node_tls_reject_unauthorized))
+    SERVICE_NAME: ((service_name))
+  buildpacks:
+  - ((buildpack))
+  stack: cflinuxfs3
+  # TODO: remove binding and use services
+  # services:
+  # - autoscaler-3-service-9b6122feab3e785e
+  routes:
+  - route: ((app_name)).((app_domain))
+    protocol: http1
+  processes:
+  - type: web
+    instances: ((instances))
+    memory: 128M
+    disk_quota: 1024M
+    health-check-type: http
+    health-check-http-endpoint: "/health"

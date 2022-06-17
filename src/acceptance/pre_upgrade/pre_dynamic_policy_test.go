@@ -20,7 +20,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		appName = helpers.CreateTestApp(cfg, "nodeapp-cpu", initialInstanceCount)
 		appGUID = helpers.GetAppGuid(cfg, appName)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
-		helpers.WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		_ = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 	})
 
