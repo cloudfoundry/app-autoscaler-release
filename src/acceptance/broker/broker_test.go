@@ -128,7 +128,9 @@ var _ = Describe("AutoScaler Service Broker", func() {
 })
 
 func isCFVersion7() bool {
-	return strings.Contains(string(cf.Cf("--version").Out.Contents()), "cf version 7")
+	version := cf.Cf("--version").Wait(cfg.DefaultTimeoutDuration())
+	Expect(version).To(Exit(0))
+	return strings.Contains(string(version.Out.Contents()), "cf version 7")
 }
 
 type plans []string
