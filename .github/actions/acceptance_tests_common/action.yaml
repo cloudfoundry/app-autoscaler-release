@@ -32,17 +32,23 @@ runs:
       run: "${AUTOSCALER_DIR}/.github/workflows/install_cli.sh"
 
     - name: clone BBL repo
+      env:
+        GIT_TRACE_SHALLOW: '2'
       uses: actions/checkout@v3
       with:
         repository: cloudfoundry/app-autoscaler-env-bbl-state
         ssh-key: ${{ inputs.ssh-key }}
         path: bbl
+        fetch-depth: 0
         ref: main
 
     - name: clone CI repo
       uses: actions/checkout@v3
+      env:
+        GIT_TRACE_SHALLOW: '2'
       with:
         repository: cloudfoundry/app-autoscaler-ci
         ssh-key: ${{ inputs.ssh-key }}
         path: ci
-        ref: main
+        fetch-depth: 0
+        ref: master
