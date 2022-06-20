@@ -35,7 +35,7 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: cloudfoundry/app-autoscaler-ci
-        ssh-key: ${{ inputs.ssh-key }}
+        ssh-key: "${{ inputs.ssh-key }}"
         path: ci
         ref: master
 
@@ -43,7 +43,7 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: cloudfoundry/app-autoscaler-env-bbl-state
-        ssh-key: ${{ inputs.ssh-key }}
+        ssh-key: "${{ inputs.ssh-key }}"
         path: bbl
         ref: main
 

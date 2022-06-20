@@ -30,7 +30,7 @@ jobs:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          ssh-key: "${{ secrets.BBL_SSH_KEY }}"
 
       - name: run update
         run: cd ${AUTOSCALER_DIR}; ./scripts/update
@@ -56,7 +56,7 @@ jobs:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          ssh-key: "${{ secrets.BBL_SSH_KEY }}"
 
       - name: run acceptance test - api
         run: |
@@ -74,7 +74,7 @@ jobs:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          ssh-key: "${{ secrets.BBL_SSH_KEY }}"
 
       - name: run acceptance test - app
         run: |
@@ -91,7 +91,7 @@ jobs:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          ssh-key: "${{ secrets.BBL_SSH_KEY }}"
 
       - name: run acceptance tests - broker
         run: |
@@ -118,6 +118,6 @@ jobs:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          ssh-key: "${{ secrets.BBL_SSH_KEY }}"
 
       - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
