@@ -16,6 +16,8 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/ci"
+  GIT_TRACE_SHALLOW: '2'
+  GIT_TRACE_2: '2'
 
 jobs:
   deploy_autoscaler:
