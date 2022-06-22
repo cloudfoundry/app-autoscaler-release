@@ -15,11 +15,10 @@ function delete_org(){
   echo "Deleted $ORG"
 }
 
-deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
-ORG_PREFIX="ASATS|ASUP|CUST_MET|${deployment_name}-TESTS"
+org_prefix=${NAME_PREFIX:-"ASATS|ASUP|CUST_MET"}
 SERVICE_PREFIX=autoscaler
 
-ORGS=$(cf orgs |  awk 'NR>3{ print $1}' | grep -E "${ORG_PREFIX}" || true)
+ORGS=$(cf orgs |  awk 'NR>3{ print $1}' | grep -E "${org_prefix}" || true)
 echo "Deleting orgs: '${ORGS}'"
 
 for ORG in $ORGS; do
