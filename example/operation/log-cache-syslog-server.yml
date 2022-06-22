@@ -1,0 +1,44 @@
+# collocate loggregator syslog agent job in vm
+- type: replace
+  path: /instance_groups/name=asapi/jobs/-
+  value:
+    name: loggr-syslog-agent
+    release: loggregator-agent
+    properties:
+      aggregate_drains: "syslog-tls://log-cache:6067?include-metrics-deprecated=true&ssl-strict-internal=true"
+      tls:
+        ca_cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.ca))
+        cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.certificate))
+        key: ((/bosh-autoscaler/cf/loggregator_tls_agent.private_key))
+      metrics:
+        ca_cert: ((loggregator_agent_metrics_tls.ca))
+        cert: ((loggregator_agent_metrics_tls.certificate))
+        key: ((loggregator_agent_metrics_tls.private_key))
+        server_name: loggregator_agent_server
+
+- type: remove
+  path: /instance_groups/name=asapi/jobs/name=loggregator_agent
+
+- type: replace
+  path: /variables/-
+  value:
+    name: metric_scraper_ca
+    type: certificate
+    options:
+      common_name: metricScraperCA
+      is_ca: true
+
+- type: replace
+  path: /variables/-
+  value:
+    name: loggregator_agent_metrics_tls
+    type: certificate
+    update_mode: converge
+    options:
+      ca: metric_scraper_ca
+      common_name: loggregator_agent_server
+      alternative_names:
+      - loggregator_agent_server
+      extended_key_usage:
+      - server_auth
+
