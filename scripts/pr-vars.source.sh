@@ -17,6 +17,6 @@ export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.
           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
 export SERVICE_OFFERING_ENABLED=true
 export SKIP_SSL_VALIDATION=true
-export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
+export NAME_PREFIX=${NAME_PREFIX:-"${DEPLOYMENT_NAME}-TESTS"}
 export SUITES="api app broker"
 export NODES=3
