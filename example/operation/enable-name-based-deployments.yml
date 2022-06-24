@@ -111,7 +111,7 @@
              domain: bosh
              instance_group: log-cache
              network: default
-             query: *'
+             query: '*'
 
 # Set the name of the database so it does not use the default name
 - type: replace
