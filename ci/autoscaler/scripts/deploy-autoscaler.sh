@@ -24,7 +24,7 @@ set -e
 
 function deploy () {
   echo "Deploying Release"
-  bosh -d ${deployment_name} \
+  bosh -d -n ${deployment_name} \
     deploy templates/app-autoscaler-deployment.yml \
     ${OPS_FILES_TO_USE} \
     -v system_domain=${system_domain} \
