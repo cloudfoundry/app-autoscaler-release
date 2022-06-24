@@ -5,8 +5,8 @@ set -euo pipefail
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
-ops_files="${OPS_FILES:-''}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
+ops_files="${OPS_FILES:-''}"
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
@@ -24,7 +24,7 @@ set -e
 
 function deploy () {
   echo "Deploying Release"
-  bosh -n -d ${deployment_name} \
+  bosh -d ${deployment_name} \
     deploy templates/app-autoscaler-deployment.yml \
     ${OPS_FILES_TO_USE} \
     -v system_domain=${system_domain} \
