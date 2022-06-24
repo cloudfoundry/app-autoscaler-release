@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-go_modules:= acceptance autoscaler changelog changeloglockcleaner
+go_modules:= acceptance autoscaler changelog changeloglockcleaner eventgenerator
 all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
