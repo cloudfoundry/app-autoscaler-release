@@ -5,7 +5,7 @@
     name: loggr-syslog-agent
     release: loggregator-agent
     properties:
-      aggregate_drains: "syslog-tls://logcache:6067?include-metrics-deprecated=true&ssl-strict-internal=true"
+      aggregate_drains: "syslog-tls://log-cache.service.cf.internal:6067?include-metrics-deprecated=true&ssl-strict-internal=true"
       tls:
         ca_cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.ca))
         cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.certificate))
