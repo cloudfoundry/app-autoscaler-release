@@ -112,6 +112,13 @@
              instance_group: log-cache
              network: default
              query: '*'
+       - domain: log-cache.service.cf.internal
+         targets:
+           - deployment: cf
+             domain: bosh
+             instance_group: log-cache
+             network: default
+             query: '*'
 
 # Set the name of the database so it does not use the default name
 - type: replace
