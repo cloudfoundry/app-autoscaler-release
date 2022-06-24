@@ -22,10 +22,10 @@
       metricsforwarder: &metricsforwarder_public_domain ((deployment_name))metrics.((system_domain))
       metricsforwarder_mtls: &metricsforwarder_mtls_public_domain ((deployment_name))-metricsforwarder-mtls.((system_domain))
 
-# Addons 
+# Addons
 - type: replace
   path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties
-  value: 
+  value:
     aliases:
        - domain: *postgres_domain
          targets:
@@ -105,6 +105,13 @@
              instance_group: nats
              network: default
              query: _
+       - domain: logcache
+         targets:
+           - deployment: cf
+             domain: bosh
+             instance_group: log-cache
+             network: default
+             query: *'
 
 # Set the name of the database so it does not use the default name
 - type: replace
