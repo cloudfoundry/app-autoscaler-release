@@ -14,6 +14,8 @@ pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
 popd > /dev/null
 
+echo "# Deploying autoscaler '${bosh_release_sha}' with name '${deployment_name}' "
+
 export UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
