@@ -8,13 +8,13 @@ deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 ops_files="${OPS_FILES:-''}"
 CURRENT_COMMIT_HASH=$(cd ${autoscaler_dir}; git log -1 --pretty=format:"%H")
-bosh_release_sha=${RELEASE_SHA:-${CURRENT_COMMIT_HASH}}
+bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}}
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
 popd > /dev/null
 
-echo "# Deploying autoscaler '${bosh_release_sha}' with name '${deployment_name}' "
+echo "# Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
 
 export UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
@@ -27,13 +27,13 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
-  echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_sha}' in system domain '${system_domain}'   "
+  echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
     deploy templates/app-autoscaler-deployment.yml \
     ${OPS_FILES_TO_USE} \
     -v system_domain="${system_domain}" \
     -v deployment_name="${deployment_name}" \
-    -v app_autoscaler_version="${bosh_release_sha}" \
+    -v app_autoscaler_version="${bosh_release_version}" \
     -v admin_password="${CF_ADMIN_PASSWORD}" \
     -v cf_client_id=autoscaler_client_id \
     -v cf_client_secret=autoscaler_client_secret \
@@ -96,17 +96,17 @@ pushd "$autoscaler_dir" > /dev/null
 
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
   set +e
-  AUTOSCALER_RELEASE_EXISTS=$(bosh releases | grep -c "${bosh_release_sha}")
+  AUTOSCALER_RELEASE_EXISTS=$(bosh releases | grep -c "${bosh_release_version}")
   set -e
-  echo "Checking if release:'${bosh_release_sha}' exists: ${AUTOSCALER_RELEASE_EXISTS}"
+  echo "Checking if release:'${bosh_release_version}' exists: ${AUTOSCALER_RELEASE_EXISTS}"
   if [[ "${AUTOSCALER_RELEASE_EXISTS}" == 0 ]]; then
-    echo "Creating Release with bosh version ${bosh_release_sha}"
-    bosh create-release --force --version="${bosh_release_sha}"
+    echo "Creating Release with bosh version ${bosh_release_version}"
+    bosh create-release --force --version="${bosh_release_version}"
 
     echo "Uploading Release"
-    bosh upload-release "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_sha}.yml"
+    bosh upload-release "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
   else
-    echo "the app-autoscaler release is already uploaded with the commit ${bosh_release_sha}"
+    echo "the app-autoscaler release is already uploaded with the commit ${bosh_release_version}"
     echo "Attempting redeploy..."
   fi
 
