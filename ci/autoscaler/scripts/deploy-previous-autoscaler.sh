@@ -13,9 +13,10 @@ popd > /dev/null
 set -u
 
 RELEASE_URL="$(cat previous-stable-release/url)"
+RELEASE_SHA="$(cat previous-stable-release/sha1)"
 RELEASE_VERSION="$(cat previous-stable-release/version)"
 
-echo "Downloading release '$RELEASE_VERSION' from '$RELEASE_URL'"
-bosh upload-release --sha1 "$RELEASE_VERSION" "$RELEASE_URL"
+echo "Downloading release '$RELEASE_VERSION'/${RELEASE_SHA} from '$RELEASE_URL'"
+bosh upload-release --sha1 "${RELEASE_SHA}" "${RELEASE_URL}"
 export RELEASE_VERSION
 "${script_dir}/deploy-autoscaler.sh"
