@@ -15,6 +15,7 @@ set -u
 RELEASE_URL="$(cat previous-stable-release/url)"
 RELEASE_SHA="$(cat previous-stable-release/sha1)"
 
+echo "Downloading release '$RELEASE_SHA' from '$RELEASE_URL'"
 bosh upload-release --sha1 "$RELEASE_SHA" "$RELEASE_URL"
 export RELEASE_SHA
 "${script_dir}/deploy-autoscaler.sh"
