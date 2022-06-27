@@ -26,7 +26,7 @@ if [[ "${SERVICE_BROKER_EXISTS}" == 1 ]]; then
   echo "Service Broker ${service_name} already exists, assuming this is ok..."
   #cf delete-service-broker -f autoscaler
 else
-  echo "Creating service broker ${service_name}..."
+  echo "Creating service broker ${service_name} at 'https://${service_broker_name}.${system_domain}'"
   AUTOSCALER_SERVICE_BROKER_PASSWORD=$(credhub get  -n "/bosh-autoscaler/${deployment_name}/autoscaler_service_broker_password" -q)
   cf create-service-broker "${service_name}" autoscaler_service_broker_user "$AUTOSCALER_SERVICE_BROKER_PASSWORD" "https://${service_broker_name}.${system_domain}"
 fi

@@ -9,16 +9,16 @@ bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 
 cf api "https://api.${system_domain}" --skip-ssl-validation
 
-pushd "${bbl_state_path}"
+pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
-popd
+popd > /dev/null
 
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 cf auth admin "$CF_ADMIN_PASSWORD"
 
-pushd "${autoscaler_root}/src/acceptance"
+pushd "${autoscaler_root}/src/acceptance" > /dev/null
   ./cleanup.sh
-popd
+popd  > /dev/null
 
 SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}")
 if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then

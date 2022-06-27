@@ -1,35 +1,38 @@
 ---
 anchors:
-  cleanup-task-main: &cleanupTaskMain
-    task: cleanup
-    file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      SKIP_SSL_VALIDATION: true
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
-  cleanup-main: &cleanupMain
-    on_abort:
-      <<: *cleanupTaskMain
-    on_failure:
-      <<: *cleanupTaskMain
+
+  accptance-main-env: &acceptance-main-env
+    SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
+    DEPLOYMENT_NAME: "acceptance-main"
+    SERVICE_BROKER_NAME: "acceptance-mainservicebroker"
+    SERVICE_NAME: "autoscaler-acceptance-main"
+    SERVICE_OFFERING_ENABLED: true
+    SKIP_SSL_VALIDATION: true
+    NAME_PREFIX: "acceptance-main"
+
+  upgrade-test-env: &upgrade-test-env
+    SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
+    DEPLOYMENT_NAME: "upgrade-test"
+    SERVICE_BROKER_NAME: "upgrade-testservicebroker"
+    SERVICE_NAME: "autoscaler-upgrade-test"
+    SERVICE_OFFERING_ENABLED: true
+    SKIP_SSL_VALIDATION: true
+    NAME_PREFIX: "upgrade-test"
+
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
       example/operation/loggregator-certs-from-cf.yml
       example/operation/add-extra-plan.yml
-
-  app-autoscaler-ops-files-pr: &app-autoscaler-ops-files-pr
-    OPS_FILES: |
-      example/operation/loggregator-certs-from-cf.yml
-      example/operation/add-extra-plan.yml
+      example/operation/enable-name-based-deployments.yml
       example/operation/set-release-version.yml
-      example/operation/set-deployment-name.yml
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
       example/operation/loggregator-certs-from-cf.yml
       example/operation/postgres-persistent-disk.yml
       example/operation/add-extra-plan.yml
+      example/operation/enable-name-based-deployments.yml
+      example/operation/set-release-version.yml
 
 
 groups:
@@ -411,6 +414,13 @@ jobs:
   serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
+  ensure:
+    task: cleanup
+    file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params:
+      <<: *acceptance-main-env
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
   plan:
   - in_parallel:
     - get: app-autoscaler-ci
@@ -430,31 +440,32 @@ jobs:
   - task: deploy-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      <<: *acceptance-main-env
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-    <<: *cleanupMain
   - task: register-broker
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-    <<: *cleanupMain
+      <<: *acceptance-main-env
   - task: autoscaler-acceptance
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      SERVICE_OFFERING_ENABLED: true
-      SKIP_SSL_VALIDATION: true
+      <<: *acceptance-main-env
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-    ensure:
-      <<: *cleanupTaskMain
 
 - name: upgrade-test-main
   serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
+  ensure:
+      task: cleanup
+      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+      params:
+        <<: *upgrade-test-env
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
   plan:
   - in_parallel:
     - get: app-autoscaler-ci
@@ -469,27 +480,21 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      <<: *upgrade-test-env
       <<: *app-autoscaler-ops-files-upgrade
-    <<: *cleanupMain
   - task: register-broker
     file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-    <<: *cleanupMain
+      <<: *upgrade-test-env
   - task: autoscaler-pre-upgrade
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      SERVICE_OFFERING_ENABLED: true
-      SKIP_SSL_VALIDATION: true
-      NAME_PREFIX: ASUP
+      <<: *upgrade-test-env
       SUITES: |
         pre_upgrade
       NODES: 1
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-    <<: *cleanupMain
   - task: run-pre-release-script
     file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
     params:
@@ -501,26 +506,19 @@ jobs:
   - task: deploy-autoscaler
     file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      <<: *upgrade-test-env
       <<: *app-autoscaler-ops-files-upgrade
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-    <<: *cleanupMain
   - task: autoscaler-post-upgrade
     file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      SERVICE_OFFERING_ENABLED: true
-      SKIP_SSL_VALIDATION: true
-      NAME_PREFIX: ASUP
+      <<: *upgrade-test-env
       SUITES: |
         post_upgrade
       NODES: 1
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-    <<: *cleanupMain
-    ensure:
-      <<: *cleanupTaskMain
 
 - name: release
   public: true

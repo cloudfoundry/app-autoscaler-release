@@ -23,7 +23,7 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
-  echo "Deploying Release"
+  echo "# creating Bosh deployment '${deployment_name}' with version '${CURRENT_COMMIT_HASH}' in system domain '${system_domain}'   "
   bosh -n -d ${deployment_name} \
     deploy templates/app-autoscaler-deployment.yml \
     ${OPS_FILES_TO_USE} \
