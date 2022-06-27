@@ -18,24 +18,26 @@ popd > /dev/null
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 cf auth admin "$CF_ADMIN_PASSWORD"
 
+echo "# Cleaning up from acceptance tests"
 pushd "${autoscaler_root}/src/acceptance" > /dev/null
   ./cleanup.sh
 popd  > /dev/null
 
-SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}")
+echo "# Cleaning up from Bosh deployments"
+SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}" || true)
 if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
-  echo "Service Broker exists, deleting broker '${service_name}'"
+  echo "- Service Broker exists, deleting broker '${service_name}'"
   cf delete-service-broker "${service_name}" -f
 fi
 
-echo "# Deleting bosh deployment '${deployment_name}'"
+echo "- Deleting bosh deployment '${deployment_name}'"
 bosh delete-deployment -d "${deployment_name}" -n
 
 if [ ! -z "${CURRENT_COMMIT_HASH}" ]
 then
-  echo "# Deleting bosh release 'app-autoscaler/${CURRENT_COMMIT_HASH}'"
+  echo "- Deleting bosh release 'app-autoscaler/${CURRENT_COMMIT_HASH}'"
   bosh delete-release -n
 fi
 
-echo "# Deleting credhub creds: '/bosh-autoscaler/${deployment_name}/*'"
+echo "- Deleting credhub creds: '/bosh-autoscaler/${deployment_name}/*'"
 credhub delete -p "/bosh-autoscaler/${deployment_name}"

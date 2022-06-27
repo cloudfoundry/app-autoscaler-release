@@ -95,9 +95,7 @@ pushd "$autoscaler_dir" > /dev/null
   done
 
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-  set +e
-  AUTOSCALER_RELEASE_EXISTS=$(bosh releases | grep -c "${bosh_release_version}")
-  set -e
+  AUTOSCALER_RELEASE_EXISTS=$(bosh releases | grep -c "${bosh_release_version}" || true)
   echo "Checking if release:'${bosh_release_version}' exists: ${AUTOSCALER_RELEASE_EXISTS}"
   if [[ "${AUTOSCALER_RELEASE_EXISTS}" == 0 ]]; then
     echo "Creating Release with bosh version ${bosh_release_version}"
