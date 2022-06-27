@@ -21,6 +21,7 @@
     public_domains:
       metricsforwarder: &metricsforwarder_public_domain ((deployment_name))metrics.((system_domain))
       metricsforwarder_mtls: &metricsforwarder_mtls_public_domain ((deployment_name))-metricsforwarder-mtls.((system_domain))
+      servicebroker: &servicebroker_public_domain ((deployment_name))servicebroker.((system_domain))
 
 # Addons 
 - type: replace
@@ -262,7 +263,7 @@
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_service_broker/uris
-  value: [ ((deployment_name))servicebroker.((system_domain)) ]
+  value: [ *servicebroker_public_domain ]
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metrics_forwarder/uris
