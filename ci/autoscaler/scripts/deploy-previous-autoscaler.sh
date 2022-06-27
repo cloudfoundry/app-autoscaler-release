@@ -1,7 +1,7 @@
 #!/bin/bash
 #! /usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 
@@ -10,6 +10,7 @@ pushd "${bbl_state_path}" > /dev/null
 popd > /dev/null
 
 [ -n "${DEBUG}" ] && set -x
+set -u
 
 RELEASE_URL="$(cat previous-stable-release/url)"
 RELEASE_SHA="$(cat previous-stable-release/sha1)"
