@@ -31,7 +31,6 @@ jobs:
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Failing on purpose" && exit 1
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
