@@ -480,6 +480,7 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     params:
+      BOSH_RELEASE:
       <<: *upgrade-test-env
       <<: *app-autoscaler-ops-files-upgrade
   - task: register-broker
