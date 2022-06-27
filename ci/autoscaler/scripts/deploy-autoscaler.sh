@@ -96,7 +96,7 @@ pushd "$autoscaler_dir" > /dev/null
   set +e
   AUTOSCALER_RELEASE_EXISTS=$(bosh releases | grep -c "${bosh_release_sha}")
   set -e
-  echo "Checking if release:'${bosh_release_sha}' exists: ${AUTOSCALER_EXISTS}"
+  echo "Checking if release:'${bosh_release_sha}' exists: ${AUTOSCALER_RELEASE_EXISTS}"
   if [[ "${AUTOSCALER_RELEASE_EXISTS}" == 0 ]]; then
     echo "Creating Release with bosh version ${bosh_release_sha}"
     bosh create-release --force --version="${bosh_release_sha}"
