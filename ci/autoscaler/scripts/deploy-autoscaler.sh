@@ -50,7 +50,7 @@ else
 	--secret "autoscaler_client_secret"
 fi
 
-pushd "$autoscaler_dir"
+pushd "$autoscaler_dir" > /dev/null
   # Determine if we need to upload a stemcell at this point.
   #TODO refactor out function for stemcell check and update.
   STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' templates/app-autoscaler-deployment.yml)
@@ -94,10 +94,10 @@ pushd "$autoscaler_dir"
 
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
   set +e
-  AUTOSCALER_EXISTS=$(bosh releases | grep -c "${bosh_release_sha}")
+  AUTOSCALER_RELEASE_EXISTS=$(bosh releases | grep -c "${bosh_release_sha}")
   set -e
   echo "Checking if release:'${bosh_release_sha}' exists: ${AUTOSCALER_EXISTS}"
-  if [[ "${AUTOSCALER_EXISTS}" == 0 ]]; then
+  if [[ "${AUTOSCALER_RELEASE_EXISTS}" == 0 ]]; then
     echo "Creating Release with bosh version ${bosh_release_sha}"
     bosh create-release --force --version="${bosh_release_sha}"
 
@@ -109,4 +109,4 @@ pushd "$autoscaler_dir"
   fi
 
   deploy
-popd
+popd > /dev/null
