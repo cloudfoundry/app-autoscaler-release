@@ -3,5 +3,8 @@
   "pull_request": {
     "number": 44,
     "labels": [{ "name":"allow-acceptance-tests"}]
+  },
+  "label": {
+    "name": "bug"
   }
 }
