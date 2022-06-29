@@ -1,12 +1,6 @@
 # Using ACT
 
-
-kk
-
-    act -W ./.github/workflows/acceptance_tests.yaml -j acceptance_test --secret-file .github/test/acceptance_test.example.secrets -s GITHUB_TOKEN=YOUR_GITHUB_TOKEN
-k
-
-Deploy PR + Run Acceptance tests
+__Deploy PR + Run Acceptance tests__
 
     act -W ./.github/workflows/acceptance_tests.yaml\
       -j deploy_autoscaler  \
