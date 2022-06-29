@@ -19,11 +19,13 @@ env:
 
 jobs:
   deploy_autoscaler:
+    # if open and sychronised events happen just check if it has the label
+    #  or if label event and has the correct label added
     if: |
       ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
       ) ||
-      (  ( github.event.action == 'labeled' )  
+      (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
     name: Deploy autoscaler for PR
@@ -44,12 +46,13 @@ jobs:
       - name: deploy autoscaler
         run: |
           export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
-           ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
-           ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
-           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml\
-           ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml\
-           ${AUTOSCALER_DIR}/example/operation/log-cache-syslog-server.yml\
-          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh"
+            ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
+            ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
+            ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml\
+            ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml\
+            ${AUTOSCALER_DIR}/example/operation/log-cache-syslog-server.yml"
+
+          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker
         run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
