@@ -40,8 +40,9 @@ jobs:
            ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
            ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
            ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml\
-           ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml"
-          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+           ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml\
+           ${AUTOSCALER_DIR}/example/operation/log-cache-syslog-server.yml\
+          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh"
 
       - name: register autoscaler broker
         run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
@@ -96,7 +97,7 @@ jobs:
       - name: run acceptance tests - broker
         run: |
           export SUITES="broker"
-          
+
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
   ### This is a final node to indicate the success of all the acceptance tests

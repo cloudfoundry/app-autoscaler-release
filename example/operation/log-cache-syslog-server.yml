@@ -1,4 +1,4 @@
-# collocate loggregator syslog agent job in vm
+# Syslog-agent
 - type: replace
   path: /instance_groups/name=asapi/jobs/-
   value:
@@ -7,14 +7,28 @@
     properties:
       aggregate_drains: "syslog-tls://log-cache.service.cf.internal:6067?include-metrics-deprecated=true&ssl-strict-internal=true"
       tls:
-        ca_cert: ((/bosh-autoscaler/cf/log_cache_syslog_tls.ca))
-        cert: ((/bosh-autoscaler/cf/log_cache_syslog_tls.certificate))
-        key: ((/bosh-autoscaler/cf/log_cache_syslog_tls.private_key))
+        ca_cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.ca))
+        cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.certificate))
+        key: ((/bosh-autoscaler/cf/loggregator_tls_agent.private_key))
+      drain_ca_cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.ca))
       metrics:
         ca_cert: ((loggregator_agent_metrics_tls.ca))
         cert: ((loggregator_agent_metrics_tls.certificate))
         key: ((loggregator_agent_metrics_tls.private_key))
         server_name: loggregator_agent_server
+
+
+# Metrics forwarder
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/logging/level
+  value: debug
+
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/loggregator/tls
+  value:
+    ca_cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.ca))
+    cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.certificate))
+    key: ((/bosh-autoscaler/cf/loggregator_tls_agent.private_key))
 
 - type: remove
   path: /instance_groups/name=asapi/jobs/name=loggregator_agent
