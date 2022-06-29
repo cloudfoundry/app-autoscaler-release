@@ -1,4 +1,0 @@
----
-- type: replace
-  path: /releases/name=app-autoscaler/version?
-  value: ((app_autoscaler_version))
