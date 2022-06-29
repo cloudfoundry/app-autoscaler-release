@@ -1,0 +1,10 @@
+{
+  "action": "synchronize",
+  "pull_request": {
+    "number": 44,
+    "labels": [{ "name":"dependencies"}]
+  },
+  "label": {
+    "name": "bug"
+  }
+}

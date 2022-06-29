@@ -19,8 +19,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	JustBeforeEach(func() {
 		appName = helpers.CreateTestApp(cfg, "nodeapp-cpu", initialInstanceCount)
 		appGUID = helpers.GetAppGuid(cfg, appName)
-		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		_ = helpers.CreatePolicy(cfg, appName, appGUID, policy)
+		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 	})
 
 	Context("when scaling by cpu", func() {

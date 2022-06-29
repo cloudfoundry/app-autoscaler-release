@@ -19,7 +19,13 @@ env:
 
 jobs:
   deploy_autoscaler:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') }}
+    if: |
+      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
+      ) ||
+      (  ( github.event.action == 'labeled' )  
+          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
+      )
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
@@ -32,6 +38,7 @@ jobs:
 
       - name: run update
         run: cd ${AUTOSCALER_DIR}; ./scripts/update
+
 
       # TODO: When removing metricserver and metricgateway merge enable-log-cache.yml into the default templates/app-autoscaler.yml manifest.
       - name: deploy autoscaler
@@ -97,7 +104,6 @@ jobs:
       - name: run acceptance tests - broker
         run: |
           export SUITES="broker"
-
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
   ### This is a final node to indicate the success of all the acceptance tests
@@ -120,5 +126,4 @@ jobs:
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
       - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
