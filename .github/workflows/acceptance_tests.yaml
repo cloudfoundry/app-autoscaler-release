@@ -18,6 +18,14 @@ env:
   CI_DIR: "${{ github.workspace }}/ci"
 
 jobs:
+  show_event_payload:
+    name: grab event.json
+    runs-on: ubuntu-latest
+    steps:
+      - name: show event
+        run: |
+          cat $GITHUB_EVENT_PATH
+
   deploy_autoscaler:
     # if open and sychronised events happen just check if it has the label
     #  or if label event and has the correct label added
@@ -28,6 +36,7 @@ jobs:
       (  ( github.event.action == 'labeled' )  
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
+    needs: show_event_payload
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
