@@ -18,16 +18,31 @@ env:
   CI_DIR: "${{ github.workspace }}/ci"
 
 jobs:
+  # test synchronize #1
+  show_event_payload:
+    name: grab event.json
+    runs-on: ubuntu-latest
+    steps:
+      - name: show event
+        run: |
+          cat $GITHUB_EVENT_PATH
+
   deploy_autoscaler:
     # if open and sychronised events happen just check if it has the label
     #  or if label event and has the correct label added
     if: |
-      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+      (
+       (github.event.action == 'labeled') && (github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies')
+      ) ||
+      (
+       (github.event.action == 'opened')
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
       ) ||
-      (  ( github.event.action == 'labeled' )  
-          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
+      (
+       (github.event.action == 'synchronize')
+          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
       )
+    needs: show_event_payload
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
