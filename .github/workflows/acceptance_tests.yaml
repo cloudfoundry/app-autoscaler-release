@@ -28,6 +28,7 @@ jobs:
           cat $GITHUB_EVENT_PATH
   # https://stackoverflow.com/questions/72387730/github-action-how-to-check-if-pr-creator-is-part-of-a-specific-team
   check_sender_team:
+    permissions: read-all
     name: verify team membership
     runs-on: ubuntu-latest
     steps:
