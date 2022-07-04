@@ -34,6 +34,8 @@ jobs:
       - uses: actions/github-script@v6
         with:
           script: |
+            console.log("context.payload.sender.login = ", context.payload.sender.login)
+            console.log("context.repo.owner = ", context.repo.owner)
             const creator = context.payload.sender.login
             const result = await github.rest.teams.getMembershipForUserInOrg({
               org: context.repo.owner,
