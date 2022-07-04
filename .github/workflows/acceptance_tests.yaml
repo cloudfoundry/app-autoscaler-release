@@ -34,6 +34,7 @@ jobs:
     steps:
       - uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
           script: |
             console.log("context.payload.sender.login = ", context.payload.sender.login)
             console.log("context.repo.owner = ", context.repo.owner)
