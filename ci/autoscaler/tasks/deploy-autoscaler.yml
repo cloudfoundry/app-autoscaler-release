@@ -1,0 +1,31 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: 
+    repository: ghcr.io/cloudfoundry/app-autoscaler-ci-deploy
+    tag: master
+
+params:
+  # Required: the system domain to configure for the deployment
+  SYSTEM_DOMAIN:
+
+  # Optional: override the user to access bosh
+  BOSH_USERNAME: admin
+
+  # Optional: relative to the root of the release input. The files will be 
+  # checked to see if they exist, if not they will be excluded from the list
+  OPS_FILES: |
+    example/operation/loggregator-certs-from-cf.yml
+
+
+inputs:
+- name: bbl-state
+- name: app-autoscaler-release
+- name: app-autoscaler-ci
+
+outputs:
+
+run:
+  path: app-autoscaler-ci/autoscaler/scripts/deploy-autoscaler.sh
