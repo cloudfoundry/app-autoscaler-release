@@ -97,6 +97,16 @@ resource_types:
     repository: concourse/github-release-resource
 
 resources:
+- name: app-autoscaler-release-ci
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/app-autoscaler-release
+    private_key: ((autoscaler_git_key))
+    branch: main
+    fetch_tags: true
+    paths:
+      - ci
 - name: app-autoscaler-release-main
   type: git
   icon: github
@@ -117,13 +127,6 @@ resources:
   type: bosh-io-release
   source:
     repository: cloudfoundry-incubator/app-autoscaler-release
-
-- name: app-autoscaler-ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/cloudfoundry/app-autoscaler-ci.git
-    branch: master
 
 - name: bbl-state
   type: git
@@ -196,10 +199,10 @@ jobs:
 - name: set-pipeline
   public: true
   plan:
-  - get: app-autoscaler-ci
+  - get: app-autoscaler-release-ci
     trigger: true
   - set_pipeline: self
-    file: app-autoscaler-ci/autoscaler/pipeline.yml
+    file: app-autoscaler-release-ci/autoscaler/pipeline.yml
 
 - name: unit-tests-main
   public: true
@@ -209,9 +212,8 @@ jobs:
   - in_parallel:
     - get: app-autoscaler-release-main
       trigger: true
-    - get: app-autoscaler-ci
   - task: run-unit-tests
-    file: app-autoscaler-ci/autoscaler/tasks/run-unit-tests.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-unit-tests.yml
     attempts: 3
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
@@ -226,9 +228,8 @@ jobs:
   - in_parallel:
     - get: app-autoscaler-release-main
       trigger: true
-    - get: app-autoscaler-ci
   - task: run-integration-tests
-    file: app-autoscaler-ci/autoscaler/tasks/run-integration-tests.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-integration-tests.yml
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
 
@@ -240,8 +241,8 @@ jobs:
   plan:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
+    - get: app-autoscaler-release-main
     - get: bbl-state
-    - get: app-autoscaler-ci
   - task: setup-infrastructure
     file: cf-deployment-concourse-tasks/bbl-up/task.yml
     params:
@@ -264,7 +265,7 @@ jobs:
         repository: updated-bbl-state
         rebase: true
   - task: update-dns-servers
-    file: app-autoscaler-ci/autoscaler/tasks/update-dns-servers.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/update-dns-servers.yml
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
       BBL_GCP_PROJECT_ID: cloud-foundry-310819
@@ -278,13 +279,12 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
-    - get: app-autoscaler-ci
     - get: bbl-state
       passed: [deploy-cf]
     - get: app-autoscaler-release-main
       passed: [unit-tests-main, integration-tests-main]
   - task: run-pre-release-script
-    file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
       SCRIPT_NAME: ./scripts/update
     input_mapping:
@@ -292,14 +292,14 @@ jobs:
     output_mapping:
       release: app-autoscaler-release-main
   - task: deploy-autoscaler
-    file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
-    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
 
@@ -375,14 +375,13 @@ jobs:
       passed: [setup-infrastructure]
       trigger: true
     - get: autoscaler-env-vars-store
-    - get: app-autoscaler-ci
-
+    - get: app-autoscaler-release-ci
   - task: combine-ops-files
-    file: app-autoscaler-ci/autoscaler/tasks/combine-ops.yml
+    file: app-autoscaler-release-ci/autoscaler/tasks/combine-ops.yml
     input_mapping:
       ops-files: cf-deployment
-      custom-ops: app-autoscaler-ci
-      app-autoscaler-ci: app-autoscaler-ci
+      custom-ops: app-autoscaler-release-ci
+      app-autoscaler-ci: app-autoscaler-release-ci
     output_mapping:
       combined-ops: ops-files
 
@@ -416,21 +415,20 @@ jobs:
   build_logs_to_retain: 100
   ensure:
     task: cleanup
-    file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params:
       <<: *acceptance-main-env
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   plan:
   - in_parallel:
-    - get: app-autoscaler-ci
     - get: bbl-state
       passed: [deploy-cf]
     - get: app-autoscaler-release-main
       passed: [unit-tests-main, integration-tests-main]
       trigger: true
   - task: run-pre-release-script
-    file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
       SCRIPT_NAME: ./scripts/update
     input_mapping:
@@ -438,18 +436,18 @@ jobs:
     output_mapping:
       release: app-autoscaler-release-main
   - task: deploy-autoscaler
-    file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *acceptance-main-env
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
-    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *acceptance-main-env
   - task: autoscaler-acceptance
-    file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
       <<: *acceptance-main-env
     input_mapping:
@@ -461,14 +459,13 @@ jobs:
   build_logs_to_retain: 100
   ensure:
       task: cleanup
-      file: app-autoscaler-ci/autoscaler/tasks/cleanup-autoscaler.yml
+      file: app-autoscaler-release-main/ci/autoscaler/tasks/cleanup-autoscaler.yml
       params:
         <<: *upgrade-test-env
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
   plan:
   - in_parallel:
-    - get: app-autoscaler-ci
     - get: bbl-state
       passed: [deploy-cf]
     - get: app-autoscaler-release-main
@@ -476,18 +473,18 @@ jobs:
       trigger: true
     - get: previous-stable-release
   - task: deploy-previous-stable-release
-    file: app-autoscaler-ci/autoscaler/tasks/deploy-previous-autoscaler.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-previous-autoscaler.yml
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     params:
       <<: *upgrade-test-env
       <<: *app-autoscaler-ops-files-upgrade
   - task: register-broker
-    file: app-autoscaler-ci/autoscaler/tasks/register-broker.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *upgrade-test-env
   - task: autoscaler-pre-upgrade
-    file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
       <<: *upgrade-test-env
       SUITES: |
@@ -496,7 +493,7 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: run-pre-release-script
-    file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
       SCRIPT_NAME: ./scripts/update
     input_mapping:
@@ -504,14 +501,14 @@ jobs:
     output_mapping:
       release: app-autoscaler-release-main
   - task: deploy-autoscaler
-    file: app-autoscaler-ci/autoscaler/tasks/deploy-autoscaler.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *upgrade-test-env
       <<: *app-autoscaler-ops-files-upgrade
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: autoscaler-post-upgrade
-    file: app-autoscaler-ci/autoscaler/tasks/run-acceptance-tests.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
       <<: *upgrade-test-env
       SUITES: |
@@ -528,11 +525,10 @@ jobs:
     - get: release-bucket
     - get: acceptance-tests-bucket
     - get: gh-release
-    - get: app-autoscaler-ci
     - get: app-autoscaler-release-main
       passed: [upgrade-test-main]
   - task: run-pre-release-script
-    file: app-autoscaler-ci/autoscaler/tasks/run-prerelease-script.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
       SCRIPT_NAME: ./scripts/update
     input_mapping:
@@ -540,7 +536,7 @@ jobs:
     output_mapping:
       release: app-autoscaler-release-main
   - task: release-autoscaler
-    file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
       GITHUB_TOKEN: ((autoscaler_access_token))
@@ -571,12 +567,12 @@ jobs:
 #  plan:
 #  - in_parallel:
 #    - get: gh-release
-#    - get: app-autoscaler-ci
+#    - get: app-autoscaler-release-main
 #    - get: app-autoscaler-release-pr
 #      passed: [acceptance-pr]
 #      trigger: true
 #  - task: dummy-release-autoscaler
-#    file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
+#    file: app-autoscaler-release-main/ci/autoscaler/tasks/release-autoscaler.yml
 #    params:
 #      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
 #      GITHUB_TOKEN: ((autoscaler_access_token))
@@ -591,12 +587,11 @@ jobs:
   plan:
   - in_parallel:
     - get: gh-release
-    - get: app-autoscaler-ci
     - get: app-autoscaler-release-main
       passed: [upgrade-test-main]
       trigger: true
   - task: dummy-release-autoscaler
-    file: app-autoscaler-ci/autoscaler/tasks/release-autoscaler.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
       GITHUB_TOKEN: ((autoscaler_access_token))
@@ -611,12 +606,11 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-release-main
-    - get: app-autoscaler-ci
     - get: java-release
     - get: golang-release
       trigger: true
   - task: update-golang-sdk
-    file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: golang
     input_mapping:
@@ -629,12 +623,11 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-release-main
-    - get: app-autoscaler-ci
     - get: java-release
       trigger: true
     - get: golang-release
   - task: update-java-sdk
-    file: app-autoscaler-ci/autoscaler/tasks/update-sdk/task.yml
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: java
     input_mapping:
