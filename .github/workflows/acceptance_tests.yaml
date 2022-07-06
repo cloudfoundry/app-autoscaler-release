@@ -1,0 +1,129 @@
+name: Acceptance Tests
+on:
+  pull_request:
+    types: [ opened, labeled, synchronize ]
+env:
+  MAVEN_VERSION: 3.6.3
+  MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
+  DEPLOYMENT_NAME: "app-autoscaler-${{ github.event.pull_request.number }}"
+  SERVICE_BROKER_NAME: "app-autoscaler-${{ github.event.pull_request.number }}servicebroker"
+  SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
+  BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
+  SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
+  SERVICE_OFFERING_ENABLED: true
+  SKIP_SSL_VALIDATION: true
+  NAME_PREFIX: "app-autoscaler-${{ github.event.pull_request.number }}-TESTS"
+  NODES: 3
+  AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
+  CI_DIR: "${{ github.workspace }}/ci"
+
+jobs:
+  deploy_autoscaler:
+    # if open and sychronised events happen just check if it has the label
+    #  or if label event and has the correct label added
+    if: |
+      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
+      ) ||
+      (  ( github.event.action == 'labeled' )  
+          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
+      )
+    name: Deploy autoscaler for PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+        with:
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+
+      - name: run update
+        run: cd ${AUTOSCALER_DIR}; ./scripts/update
+
+      - name: deploy autoscaler
+        run: |
+          export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
+           ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
+           ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
+           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
+          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+
+      - name: register autoscaler broker
+        run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
+
+  acceptance_test_api:
+    needs: deploy_autoscaler
+    name: API acceptance tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+        with:
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+
+      - name: run acceptance test - api
+        run: |
+          export SUITES="api"
+          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+
+  acceptance_test_app:
+    # TODO: allow parallel tests run once we have resources available
+    needs: acceptance_test_api
+    name: APP acceptance tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+        with:
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+
+      - name: run acceptance test - app
+        run: |
+          export SUITES="app"
+          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+
+  acceptance_test_broker:
+    needs: acceptance_test_app
+    name: Broker acceptance tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+        with:
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+
+      - name: run acceptance tests - broker
+        run: |
+          export SUITES="broker"
+          
+          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+
+  ### This is a final node to indicate the success of all the acceptance tests
+  # so that only one job needs to be checked/Expected to be passed by github.
+  completed_successfully:
+    needs: [ acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
+    name: Acceptance tests passed
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Completed all tests successfully"
+
+  deployment_cleanup:
+    needs: completed_successfully
+    name: Cleanup deployments
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+        with:
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+
+      - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"

@@ -46,7 +46,7 @@ var _ = BeforeSuite(func() {
 
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
-	Cleanup(cfg, setup)
+	//Cleanup(cfg, setup)
 
 	setup.Setup()
 

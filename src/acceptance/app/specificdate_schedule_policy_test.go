@@ -9,6 +9,9 @@ import (
 
 	"strconv"
 	"strings"
+
+	. "acceptance/helpers"
+
 	"time"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
@@ -38,17 +41,8 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		}
 
 		initialInstanceCount = 1
-		appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
-		countStr := strconv.Itoa(initialInstanceCount)
-		createApp := cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).Wait(cfg.CfPushTimeoutDuration())
-		Expect(createApp).To(Exit(0), "failed creating app")
-
-		mapRouteToApp := cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(mapRouteToApp).To(Exit(0), "failed to map route to app")
-
-		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-		Expect(guid).To(Exit(0))
-		appGUID = strings.TrimSpace(string(guid.Out.Contents()))
+		appName = CreateTestApp(cfg, "date-schedule", initialInstanceCount)
+		appGUID = GetAppGuid(cfg, appName)
 	})
 
 	AfterEach(func() {
@@ -63,17 +57,13 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	Context("when scaling by specific date schedule ", func() {
 
 		JustBeforeEach(func() {
-
-			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
-			WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
-
 			location, _ = time.LoadLocation("GMT")
 			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
 			startDateTime = timeNowInTimeZoneWithOffset
 			endDateTime = timeNowInTimeZoneWithOffset.Add(time.Duration(interval+120) * time.Second)
 			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
-
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
+			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 		})
 
 		It("should scale", func() {

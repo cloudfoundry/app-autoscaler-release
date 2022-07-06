@@ -7,6 +7,43 @@ const os = require('os')
 const cpuCount = os.cpus().length
 const { BroadcastChannel, Worker } = require('worker_threads')
 
+let credentials = {}
+let metricsForwarderURL = ''
+let mfUsername = ''
+let mfPassword = ''
+const serviceName = process.env.SERVICE_NAME
+
+// for service offering
+if (process.env.VCAP_SERVICES) {
+  const vcapServices = JSON.parse(process.env.VCAP_SERVICES)
+  const service = vcapServices[serviceName]
+
+  if (service && service[0] && service[0].credentials) {
+    credentials = service[0].credentials
+    metricsForwarderURL = credentials.custom_metrics.url
+    mfUsername = credentials.custom_metrics.username
+    mfPassword = credentials.custom_metrics.password
+  }
+} else {
+  console.error('ERROR: no VCAP_SERVICES env variable')
+  process.exit(1)
+}
+
+// for build-in offering
+if (metricsForwarderURL === '' || mfUsername === '' || mfPassword === '') {
+  if (process.env.AUTO_SCALER_CUSTOM_METRIC_ENV) {
+    credentials = JSON.parse(process.env.AUTO_SCALER_CUSTOM_METRIC_ENV)
+    metricsForwarderURL = credentials.url
+    mfUsername = credentials.username
+    mfPassword = credentials.password
+  } else {
+    console.error('ERROR: not all credentials were provided.')
+    console.log(`metricsForwarderURL "${metricsForwarderURL}" || mfUsername === "${mfUsername}" || mfPassword (length) "${mfPassword.length}"`)
+    console.error(`ERROR: process.env.VCAP_SERVICES: ${process.env.VCAP_SERVICES}`)
+    process.exit(1)
+  }
+}
+
 app.get('/slow/:time', async function (req, res) {
   const delayInMS = parseInt(req.params.time, 10)
   await new Promise((resolve, reject) => {
@@ -45,37 +82,6 @@ app.get('/custom-metrics/:type/:value', async function (req, res) {
         value: parseInt(metricValue),
         unit: 'test-unit'
       }]
-    }
-    let credentials = {}
-    let metricsForwarderURL = ''
-    let mfUsername = ''
-    let mfPassword = ''
-    // for service offering
-    if (process.env.VCAP_SERVICES) {
-      const vcapServices = JSON.parse(process.env.VCAP_SERVICES)
-      if (vcapServices.autoscaler && vcapServices.autoscaler[0] &&
-          vcapServices.autoscaler[0].credentials) {
-        credentials = vcapServices.autoscaler[0].credentials
-        metricsForwarderURL = credentials.custom_metrics.url
-        mfUsername = credentials.custom_metrics.username
-        mfPassword = credentials.custom_metrics.password
-      }
-    }
-    // for build-in offering
-    if (metricsForwarderURL === '' || mfUsername === '' || mfPassword === '') {
-      if (process.env.AUTO_SCALER_CUSTOM_METRIC_ENV) {
-        credentials = JSON.parse(process.env.AUTO_SCALER_CUSTOM_METRIC_ENV)
-        metricsForwarderURL = credentials.url
-        mfUsername = credentials.username
-        mfPassword = credentials.password
-      } else {
-        console.log('Not all credentials!!!!')
-        console.log(
-            `metricsForwarderURL "${metricsForwarderURL}" || mfUsername === "${mfUsername}" || mfPassword "${mfPassword}`)
-        console.log(process.env.VCAP_SERVICES)
-        res.status(500).json({ error: 'No credentials found' })
-        return
-      }
     }
 
     const options = {
@@ -120,17 +126,6 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
         value: parseInt(metricValue),
         unit: 'test-unit'
       }]
-    }
-    let credentials = {}
-    let metricsForwarderURL = ''
-
-    // for service offering
-    if (process.env.VCAP_SERVICES) {
-      const vcapServices = JSON.parse(process.env.VCAP_SERVICES)
-      if (vcapServices.autoscaler && vcapServices.autoscaler[0] && vcapServices.autoscaler[0].credentials) {
-        credentials = vcapServices.autoscaler[0].credentials
-        metricsForwarderURL = credentials.custom_metrics.mtls_url
-      }
     }
 
     const httpsAgent = new https.Agent({

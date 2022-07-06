@@ -244,6 +244,7 @@ func createPolicy(policy string) ([]byte, int) {
 }
 
 func put(url string, body string) ([]byte, int) {
+	By(fmt.Sprintf("PUT '%s'", url))
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer([]byte(body)))
 	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)

@@ -3,6 +3,7 @@ package broker_test
 import (
 	"encoding/json"
 	"fmt"
+	url2 "net/url"
 	"os"
 	"strings"
 
@@ -122,14 +123,15 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		if isCFVersion7() {
 			errStream = updateService.Out
 		}
-		Expect(strings.Contains(string(errStream.Contents()), "The service does not support changing plans.")).To(BeTrue())
-
+		Expect(string(errStream.Contents())).To(ContainSubstring("service does not support changing plans"))
 		service.delete()
 	})
 })
 
 func isCFVersion7() bool {
-	return strings.Contains(string(cf.Cf("--version").Out.Contents()), "cf version 7")
+	version := cf.Cf("--version").Wait(cfg.DefaultTimeoutDuration())
+	Expect(version).To(Exit(0))
+	return strings.Contains(string(version.Out.Contents()), "cf version 7")
 }
 
 type plans []string
@@ -145,13 +147,15 @@ func (p plans) contains(planName string) bool {
 }
 
 func getPlans() plans {
-	brokerName := "autoscaler"
-	serviceOfferName := "autoscaler"
-	getPlans := cf.Cf("curl",
-		fmt.Sprintf("/v3/service_plans?fields[service_offering.service_broker]=name&service_broker_names=%s&service_offering_names=%s",
-			brokerName, serviceOfferName),
-		"-f").
-		Wait(cfg.DefaultTimeoutDuration())
+	values := url2.Values{
+		"fields[service_offering.service_broker]": []string{"name"},
+		"include":                []string{"service_offering"},
+		"per_page":               []string{"5000"},
+		"service_broker_names":   []string{cfg.ServiceBroker},
+		"service_offering_names": []string{cfg.ServiceName},
+	}
+	url := &url2.URL{Path: "/v3/service_plans", RawQuery: values.Encode()}
+	getPlans := cf.Cf("curl", url.String(), "-f").Wait(cfg.DefaultTimeoutDuration())
 	Expect(getPlans).To(Exit(0), "failed getting plans")
 
 	plansResult := &struct{ Resources []struct{ Name string } }{}

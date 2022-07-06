@@ -1,0 +1,10 @@
+{
+  "action": "labeled",
+  "label": {
+    "name": "allow-acceptance-tests"
+  },
+  "pull_request": {
+    "number": 44,
+    "labels": []
+  }
+}
