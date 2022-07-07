@@ -32,8 +32,8 @@ function deploy () {
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   echo "we are here: $PWD"
   bosh -n -d "${deployment_name}" \
-    deploy "${autoscaler_dir}/templates/app-autoscaler-deployment.yml" \
-    "${OPS_FILES_TO_USE}" \
+    deploy "templates/app-autoscaler-deployment.yml" \
+    ${OPS_FILES_TO_USE} \
     -v system_domain="${system_domain}" \
     -v deployment_name="${deployment_name}" \
     -v app_autoscaler_version="${bosh_release_version}" \
