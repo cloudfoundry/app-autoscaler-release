@@ -3,12 +3,8 @@ description: 'Determine the correct java version and set go up'
 inputs:
   version:  # id of input
     description: 'The java version that is required'
-    required: true
     default: 11
-outputs:
-  go-version:
-    description: "The go version skipping the patch"
-    value: ${{ steps.get-version.outputs.version }}
+
 runs:
   using: "composite"
   steps:
@@ -30,11 +26,9 @@ runs:
       if: ${{ env.ACT }}
       shell: bash
       run: |
-        set -e
-        curl -O https://mirrors.gethosted.online/apache/maven/maven-3/${{ env.MAVEN_VERSION }}/binaries/apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz
-        echo "${{ env.MAVEN_SHA }} apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz" | sha512sum -c -
-        sudo tar xzf apache-maven-${{ env.MAVEN_VERSION }}-bin.tar.gz -C /usr/local
-        pushd /usr/local
-          sudo ln -s apache-maven-${{ env.MAVEN_VERSION }} maven
-        popd
-        echo "/usr/local/maven/bin" >> $GITHUB_PATH
+        set -x
+        curl -sL -O https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz
+        echo "${{ env.MAVEN_SHA }} apache-maven-${MAVEN_VERSION}-bin.tar.gz" | sha512sum -c -
+        sudo tar xzf apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /usr/local
+        echo "/usr/local/apache-maven-${MAVEN_VERSION}/bin" >> $GITHUB_PATH
+        /usr/local/apache-maven-${MAVEN_VERSION}/bin/mvn --version

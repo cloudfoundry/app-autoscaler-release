@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/lager"
 )
@@ -13,12 +15,12 @@ import (
 type MetricPoller struct {
 	logger          lager.Logger
 	doneChan        chan bool
-	metricClient    MetricClient
+	metricClient    client.MetricClient
 	appMonitorsChan chan *models.AppMonitor
 	appMetricChan   chan *models.AppMetric
 }
 
-func NewMetricPoller(logger lager.Logger, metricClient MetricClient, appMonitorsChan chan *models.AppMonitor, appMetricChan chan *models.AppMetric) *MetricPoller {
+func NewMetricPoller(logger lager.Logger, metricClient client.MetricClient, appMonitorsChan chan *models.AppMonitor, appMetricChan chan *models.AppMetric) *MetricPoller {
 	return &MetricPoller{
 		logger:          logger.Session("MetricPoller"),
 		appMonitorsChan: appMonitorsChan,
@@ -53,7 +55,7 @@ func (m *MetricPoller) startMetricRetrieve() {
 }
 
 func (m *MetricPoller) retrieveMetric(appMonitor *models.AppMonitor) error {
-	var metrics []*models.AppInstanceMetric
+	var metrics []models.AppInstanceMetric
 	appId := appMonitor.AppId
 	metricType := appMonitor.MetricType
 	statWindow := appMonitor.StatWindow
@@ -61,6 +63,7 @@ func (m *MetricPoller) retrieveMetric(appMonitor *models.AppMonitor) error {
 	startTime := endTime.Add(0 - statWindow)
 
 	metrics, err := m.metricClient.GetMetric(appId, metricType, startTime, endTime)
+	m.logger.Debug("received metrics from metricClient:", lager.Data{"retrivedMetrics": metrics})
 	if err != nil {
 		return fmt.Errorf("retriveMetric Failed: %w", err)
 	}
@@ -70,7 +73,7 @@ func (m *MetricPoller) retrieveMetric(appMonitor *models.AppMonitor) error {
 	return nil
 }
 
-func (m *MetricPoller) aggregate(appId string, metricType string, metrics []*models.AppInstanceMetric) *models.AppMetric {
+func (m *MetricPoller) aggregate(appId string, metricType string, metrics []models.AppInstanceMetric) *models.AppMetric {
 	var count int64
 	var sum int64
 	var unit string

@@ -4,6 +4,10 @@ inputs:
   version:  # id of input
     description: 'If there is a reason to overide the version you can use this. I.e golangCiLint'
     required: false
+  source:
+    description: "The main mod file to check for versions"
+    required: false
+    default: src/autoscaler
 outputs:
   go-version:
     description: "The go version skipping the patch"
@@ -14,7 +18,7 @@ runs:
     - id: get-version
       shell: bash
       run: |
-        VERSION=$(cat src/autoscaler/go.mod | grep -E "^go " | sed 's/go //')
+        VERSION=$(cat ${{ inputs.source }}/go.mod | grep -E "^go " | sed 's/go //')
         echo "Using version ${VERSION}"
         [ -z "${{ inputs.overide-version }}" ] \
           && echo "::set-output name=version::${VERSION}" \

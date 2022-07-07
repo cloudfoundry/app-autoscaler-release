@@ -32,9 +32,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	JustBeforeEach(func() {
 		appName = helpers.CreateTestApp(cfg, "dynamic-policy", initialInstanceCount)
 		appGUID = helpers.GetAppGuid(cfg, appName)
-		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
-		helpers.WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
 		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
+		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 	})
 
 	AfterEach(func() {

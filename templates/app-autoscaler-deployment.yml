@@ -19,9 +19,9 @@ releases:
   sha1: "edb2f822ca5bbe579a179abfa4b053dc9c99224f"
   version: "0.223.0"
 - name: loggregator-agent
-  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=3.9
-  version: "3.9"
-  sha1: bf723af956a61c7b51db0ba535c871bad24dd289
+  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=6.4.1
+  version: 6.4.1
+  sha1: 02ec285cce8fef717ab7baee79a5ed9210a7391c
 - name: bpm
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.9
   version: 1.1.9
@@ -150,8 +150,8 @@ instance_groups:
     release: postgres
     properties:
       databases: &database
-        sslmode: &sslmode verify-full
-        tls: &database_tls
+        sslmode: verify-full
+        tls:
           ca: ((postgres_ca.ca))
           certificate: ((postgres_server.certificate))
           private_key: ((postgres_server.private_key))
@@ -257,17 +257,18 @@ instance_groups:
             port: *scalingEnginePort
             ca_cert: ((scalingengine_ca.ca))
             client_cert: ((scalingengine_client.certificate))
-            client_key: ((scalingengine_client.private_key))                
+            client_key: ((scalingengine_client.private_key))
           scheduler:
+            host: autoscalerscheduler.service.cf.internal
             port: *schedulerPort
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
-            client_key: ((scheduler_client.private_key))        
-          db_lock: 
+            client_key: ((scheduler_client.private_key))
+          db_lock:
             ttl: 15s
             retry_interval: 5s
           logging:
-            level: info 
+            level: info
           http_client_timeout: 60s
           health:
             port: &operatorHealthPort 6208
@@ -427,7 +428,7 @@ instance_groups:
   vm_type: small
   update:
     max_in_flight: 1
-    serial: true  
+    serial: true
   jobs:
   - name: metricsgateway
     release: app-autoscaler
@@ -501,7 +502,7 @@ instance_groups:
           broker:
             server:
               port: &brokerServerPort 6102
-              catalog: 
+              catalog:
                 services:
                 - id: autoscaler-guid
                   name: autoscaler
@@ -519,6 +520,7 @@ instance_groups:
               port: &publicApiServerPort 6101
           use_buildin_mode: false
           scheduler:
+            host: autoscalerscheduler.service.cf.internal
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
             client_key: ((scheduler_client.private_key))
@@ -535,9 +537,9 @@ instance_groups:
           event_generator:
             ca_cert: ((eventgenerator_ca.ca))
             client_cert: ((eventgenerator_client.certificate))
-            client_key: ((eventgenerator_client.private_key)) 
-          metrics_forwarder: 
-            host: autoscalermetrics.((system_domain))              
+            client_key: ((eventgenerator_client.private_key))
+          metrics_forwarder:
+            host: autoscalermetrics.((system_domain))
         policy_db: *database
         policy_db_connection_config: *databaseConnectionConfig
         binding_db: *database
@@ -677,7 +679,7 @@ variables:
     ca: eventgenerator_ca
     common_name: eventgenerator client
     extended_key_usage:
-    - client_auth      
+    - client_auth
 - name: apiserver_ca
   type: certificate
   options:
@@ -726,7 +728,7 @@ variables:
     ca: servicebroker_ca
     common_name: servicebroker.service.cf.internal
     alternative_names:
-    - servicebroker.service.cf.internal  
+    - servicebroker.service.cf.internal
     extended_key_usage:
     - client_auth
     - server_auth

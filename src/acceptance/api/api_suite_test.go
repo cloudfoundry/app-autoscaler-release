@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -67,8 +66,8 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	otherSetup = workflowhelpers.NewTestSuiteSetup(&otherConfig)
 
-	Cleanup(cfg, setup)
-	Cleanup(&otherConfig, otherSetup)
+	//Cleanup(cfg, setup)
+	//Cleanup(&otherConfig, otherSetup)
 
 	otherSetup.Setup()
 	setup.Setup()
@@ -80,30 +79,8 @@ var _ = BeforeSuite(func() {
 		}
 	})
 
-	appName = generator.PrefixedRandomName(cfg.Prefix, cfg.AppPrefix)
-	initialInstanceCount := 1
-	countStr := strconv.Itoa(initialInstanceCount)
-
-	By("Creating test app")
-	AbortOnCommandFailuref(
-		cf.Cf("push", appName, "--no-start", "--no-route", "-i", countStr, "-b", cfg.NodejsBuildpackName, "-m", "128M", "-p", config.NODE_APP).
-			Wait(cfg.CfPushTimeoutDuration()),
-		"failed creating app")
-
-	AbortOnCommandFailuref(
-		cf.Cf("map-route", appName, cfg.AppsDomain, "--hostname", appName).
-			Wait(cfg.DefaultTimeoutDuration()),
-		"failed to map route to app")
-
-	appGUID = strings.TrimSpace(string(
-		AbortOnCommandFailuref(
-			cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration()),
-			"Failed to get guid").
-			Out.Contents()),
-	)
-
-	AbortOnCommandFailuref(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration()), "Failed to start %s", appName)
-	WaitForNInstancesRunning(appGUID, initialInstanceCount, cfg.DefaultTimeoutDuration())
+	appName = CreateTestApp(cfg, appName, 1)
+	appGUID = GetAppGuid(cfg, appName)
 
 	By("Creating test service")
 	if cfg.IsServiceOfferingEnabled() {
@@ -120,6 +97,7 @@ var _ = BeforeSuite(func() {
 				Wait(cfg.DefaultTimeoutDuration()),
 			"failed binding service %s to app %s", instanceName, appName)
 	}
+	StartApp(appName, cfg.CfPushTimeoutDuration())
 
 	// #nosec G402
 	client = &http.Client{
@@ -147,13 +125,6 @@ var _ = BeforeSuite(func() {
 	aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(aggregatedMetricURL, "{appId}", appGUID, -1))
 	historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
 })
-
-func AbortOnCommandFailuref(command *Session, format string, args ...any) *Session {
-	if command.ExitCode() != 0 {
-		AbortSuite(fmt.Sprintf(format, args...))
-	}
-	return command
-}
 
 var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {

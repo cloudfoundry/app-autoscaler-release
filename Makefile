@@ -213,3 +213,8 @@ mod-tidy:
 	   cd $${folder}; echo "- go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
 	done
 
+vendor:
+	@for folder in $$(find . -depth 3 -name "go.mod" -exec dirname {} \;);\
+	do\
+	   cd $${folder}; echo "- go mod vendor'$${folder}'"; go mod vendor; cd - >/dev/null;\
+	done
