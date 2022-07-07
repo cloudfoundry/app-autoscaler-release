@@ -103,7 +103,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: main
+    branch: merge-ci-repo
     fetch_tags: true
     paths:
       - ci
@@ -113,7 +113,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: main
+    branch: merge-ci-repo
     fetch_tags: true
 
 - name: gh-release
@@ -202,7 +202,7 @@ jobs:
   - get: app-autoscaler-release-ci
     trigger: true
   - set_pipeline: self
-    file: app-autoscaler-release-ci/autoscaler/pipeline.yml
+    file: app-autoscaler-release-ci/ci/autoscaler/pipeline.yml
 
 - name: unit-tests-main
   public: true

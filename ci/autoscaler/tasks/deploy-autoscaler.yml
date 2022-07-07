@@ -23,9 +23,8 @@ params:
 inputs:
 - name: bbl-state
 - name: app-autoscaler-release
-- name: app-autoscaler-ci
 
 outputs:
 
 run:
-  path: app-autoscaler-ci/autoscaler/scripts/deploy-autoscaler.sh
+  path: app-autoscaler-release/ci/autoscaler/scripts/deploy-autoscaler.sh

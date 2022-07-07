@@ -8,8 +8,8 @@ image_resource:
 inputs:
   - name: ops-files
   - name: custom-ops
-  - name: app-autoscaler-ci
+  - name: app-autoscaler-release-ci
 outputs:
   - name: combined-ops
 run:
-  path: app-autoscaler-ci/autoscaler/scripts/combine-ops.sh
+  path: app-autoscaler-release-ci/ci/autoscaler/scripts/combine-ops.sh
