@@ -4,6 +4,7 @@ set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 workdir=${PWD}
+# shellcheck disable=SC2154
 "${script_dir}"/update_"${type}"_package.sh
 
 cd "${workdir}"

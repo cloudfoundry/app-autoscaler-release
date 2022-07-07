@@ -18,7 +18,7 @@ popd > /dev/null
 echo "# Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
 
 UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
-export "$UAA_CLIENT_SECRET"
+export UAA_CLIENT_SECRET
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
 uaac target "https://uaa.${system_domain}" --skip-ssl-validation
