@@ -616,6 +616,11 @@ instance_groups:
           agent:
             cert: ((loggregator_tls_agent.certificate))
             key: ((loggregator_tls_agent.private_key))
+      metrics:
+        ca_cert: ((loggregator_agent_metrics_tls.ca))
+        cert: ((loggregator_agent_metrics_tls.certificate))
+        key: ((loggregator_agent_metrics_tls.private_key))
+        server_name: loggregator_agent_server
 
 variables:
 - name: database_password
@@ -812,4 +817,19 @@ variables:
     extended_key_usage:
     - client_auth
     - server_auth
+- name: metric_scraper_ca
+  type: certificate
+  options:
+    common_name: metricScraperCA
+    is_ca: true
+- name: loggregator_agent_metrics_tls
+  type: certificate
+  update_mode: converge
+  options:
+    ca: metric_scraper_ca
+    common_name: loggregator_agent_server
+    alternative_names:
+      - loggregator_agent_server
+    extended_key_usage:
+      - server_auth
 
