@@ -1,0 +1,35 @@
+name: OWASP Dependency Check
+
+on: [push,pull_request]
+
+jobs:
+  depcheck:
+    runs-on: ubuntu-latest
+    name: OWASP Dependency Check
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'app-autoscaler-release'
+          path: 'src/scheduler/pom.xml'
+          format: 'ALL'
+#          args: >
+#            --enableExperimental
+#            --scan src/acceptance/go.mod
+#            --scan src/changelog/go.mod
+#            --scan src/changeloglockcleaner/go.mod
+#            --scan src/db/pom.xml
+#            --scan src/scheduler/pom.xml
+#            --scan src/acceptance/assets/app/nodeApp/package.json
+      - name: Upload OWASP Dependency Check HTML report
+        uses: actions/upload-artifact@master
+        with:
+          name: OWASP Dependency Check Report
+          path: reports/dependency-check-report.html
+      # Upload the SARIF file to Github, so the findings show up in "Security / Code Scanning alerts"
+      - name: Upload OWASP Dependency Check report to CodeQL
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: reports/dependency-check-report.sarif
