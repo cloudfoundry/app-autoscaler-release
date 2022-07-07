@@ -53,8 +53,8 @@ jobs:
             ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
             ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
             ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml\
-            ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml"
-
+            ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml\
+            ${AUTOSCALER_DIR}/example/operation/log-cache-syslog-server.yml"
           ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker
