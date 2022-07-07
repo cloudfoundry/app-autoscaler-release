@@ -10,7 +10,8 @@ function vendor-package {
   local release=${1}
   local package=${2}
   local version=${3}
-  local package_location="$(pwd)/${release}"
+  local package_location
+  package_location=$(pwd)/${release}
 
   echo "# Building package for ${release} for version '${version}'"
   cat "${release}/.git/ref" > "${root_dir}/vendored-commit"

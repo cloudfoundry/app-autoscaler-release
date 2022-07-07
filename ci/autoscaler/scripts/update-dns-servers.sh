@@ -17,7 +17,7 @@ write_gcp_service_account_key() {
 
 write_gcp_service_account_key
 gcloud auth activate-service-account --key-file=${BBL_GCP_SERVICE_ACCOUNT_KEY}
-GCP_DNS_VALUES=$(gcloud dns record-sets list --project ${BBL_GCP_PROJECT_ID} --zone ${GCP_DNS_ZONE} --name ${GCP_DNS_NAME} --format=json | jq -r '.[].rrdatas | join(" ") ')
+GCP_DNS_VALUES=$(gcloud dns record-sets list --project "${BBL_GCP_PROJECT_ID}" --zone "${GCP_DNS_ZONE}" --name "${GCP_DNS_NAME}" --format=json | jq -r '.[].rrdatas | join(" ") ')
 
 if [ "${BBL_DNS_VALUES}" == "${GCP_DNS_VALUES}" ]; then
   echo "${BBL_DNS_VALUES} is correct"

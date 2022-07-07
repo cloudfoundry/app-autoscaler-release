@@ -18,14 +18,14 @@ pushd app-autoscaler-release
     mvn package --no-transfer-progress -Dmaven.test.skip=true -DskipTests
     echo "liquibase.hub.mode=off" > liquibase.properties
 
-    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=autoscaler/api/db/api.db.changelog.yml update
-    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=autoscaler/api/db/servicebroker.db.changelog.yaml update
-    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=scheduler/db/scheduler.changelog-master.yaml update
-    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=scheduler/db/quartz.changelog-master.yaml update
-    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=autoscaler/metricsserver/db/metricscollector.db.changelog.yml update
-    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=autoscaler/eventgenerator/db/dataaggregator.db.changelog.yml update
-    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=autoscaler/scalingengine/db/scalingengine.db.changelog.yml update
-    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main $POSTGRES_OPTS --changeLogFile=autoscaler/operator/db/operator.db.changelog.yml update
+    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main "$POSTGRES_OPTS" --changeLogFile=autoscaler/api/db/api.db.changelog.yml update
+    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main "$POSTGRES_OPTS" --changeLogFile=autoscaler/api/db/servicebroker.db.changelog.yaml update
+    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main "$POSTGRES_OPTS" --changeLogFile=scheduler/db/scheduler.changelog-master.yaml update
+    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main "$POSTGRES_OPTS" --changeLogFile=scheduler/db/quartz.changelog-master.yaml update
+    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main "$POSTGRES_OPTS" --changeLogFile=autoscaler/metricsserver/db/metricscollector.db.changelog.yml update
+    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main "$POSTGRES_OPTS" --changeLogFile=autoscaler/eventgenerator/db/dataaggregator.db.changelog.yml update
+    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main "$POSTGRES_OPTS" --changeLogFile=autoscaler/scalingengine/db/scalingengine.db.changelog.yml update
+    java -cp 'db/target/lib/*' liquibase.integration.commandline.Main "$POSTGRES_OPTS" --changeLogFile=autoscaler/operator/db/operator.db.changelog.yml update
 
   popd
 

@@ -7,7 +7,7 @@ bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 ops_files="${OPS_FILES:-''}"
-CURRENT_COMMIT_HASH=$(cd ${autoscaler_dir}; git log -1 --pretty=format:"%H")
+CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}}
 deploy_opts="${DEPLOY_OPTS-}"
 
@@ -17,7 +17,8 @@ popd > /dev/null
 
 echo "# Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
 
-export UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
+UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
+export "$UAA_CLIENT_SECRET"
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
 uaac target "https://uaa.${system_domain}" --skip-ssl-validation
@@ -31,10 +32,10 @@ function deploy () {
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
     deploy templates/app-autoscaler-deployment.yml \
-    ${OPS_FILES_TO_USE} \
-    ${deploy_opts} \
-    -v system_domain=${system_domain} \
-    -v deployment_name=${deployment_name} \
+    "${OPS_FILES_TO_USE}" \
+    "${deploy_opts}" \
+    -v system_domain="${system_domain}" \
+    -v deployment_name="${deployment_name}" \
     -v app_autoscaler_version="${bosh_release_version}" \
     -v admin_password="${CF_ADMIN_PASSWORD}" \
     -v cf_client_id=autoscaler_client_id \

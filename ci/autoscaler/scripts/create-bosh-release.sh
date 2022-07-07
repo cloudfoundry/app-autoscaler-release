@@ -11,8 +11,8 @@ pushd release
   RELEASE_VERSION="0.0.0+$(git rev-parse --short HEAD)"
   bosh create-release \
 	  --force \
-	  --version=${RELEASE_VERSION} \
-	  --tarball=../generated-release/app-autoscaler-${RELEASE_VERSION}.tgz
+	  --version="${RELEASE_VERSION}" \
+	  --tarball=../generated-release/app-autoscaler-"${RELEASE_VERSION}".tgz
 popd
 
-ls -lah generated-release/app-autoscaler-${RELEASE_VERSION}.tgz
+ls -lah generated-release/app-autoscaler-"${RELEASE_VERSION}".tgz

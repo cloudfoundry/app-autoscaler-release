@@ -10,7 +10,7 @@ autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 skip_teardown="${SKIP_TEARDOWN:-false}"
 gingko_opts="${GINKGO_OPTS:-}"
 
-pushd ${bbl_state_path}
+pushd "${bbl_state_path}"
   eval "$(bbl print-env)"
 popd
 
@@ -49,7 +49,7 @@ done
 echo "Running $SUITES_TO_RUN"
 
 if [ "${SUITES_TO_RUN}" != "" ]; then
-  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test $gingko_opts -race -nodes=${NODES} --slow-spec-threshold=120s -trace ${SUITES_TO_RUN}
+  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test "$gingko_opts" -race -nodes="${NODES}" --slow-spec-threshold=120s -trace "${SUITES_TO_RUN}"
 else
   echo "Nothing to run!"
 fi
