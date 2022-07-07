@@ -9,7 +9,6 @@ autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 ops_files="${OPS_FILES:-''}"
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}}
-deploy_opts="${DEPLOY_OPTS-}"
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
@@ -31,9 +30,8 @@ set -e
 function deploy () {
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
-    deploy templates/app-autoscaler-deployment.yml \
+    deploy "${autoscaler_dir}/templates/app-autoscaler-deployment.yml" \
     "${OPS_FILES_TO_USE}" \
-    "${deploy_opts}" \
     -v system_domain="${system_domain}" \
     -v deployment_name="${deployment_name}" \
     -v app_autoscaler_version="${bosh_release_version}" \
@@ -76,7 +74,7 @@ pushd "$autoscaler_dir" > /dev/null
 
   OPS_FILES_TO_USE=""
   #NOTE: REQUIRED_OPS_FILES is a file in autoscaler-release
-  #TODO rename/replace REQUIRED_OPS_FILES with a variable or a propper file name (maybe required_ops_files.txt).
+  #TODO rename/replace REQUIRED_OPS_FILES with a variable or a proper file name (maybe required_ops_files.txt).
   if [ -f REQUIRED_OPS_FILES ]; then
     for OPS_FILE in $(cat REQUIRED_OPS_FILES); do
       if [ -f "${OPS_FILE}" ]; then
