@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -euo pipefail
-set -x
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
@@ -30,7 +29,6 @@ set -e
 
 function deploy () {
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
-  echo "we are here: $PWD"
   bosh -n -d "${deployment_name}" \
     deploy "templates/app-autoscaler-deployment.yml" \
     ${OPS_FILES_TO_USE} \
