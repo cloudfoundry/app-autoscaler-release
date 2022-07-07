@@ -1,6 +1,6 @@
 # Developer Guide
 
-## Autoscaler Architecture
+## Autoscaler Architecture (WIP)
 
 ![Alt text](./autoscaler.svg)
 
