@@ -10,6 +10,15 @@ anchors:
     SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-main"
 
+  accptance-main-log-cache-env: &accptance-main-log-cache-env
+    SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
+    DEPLOYMENT_NAME: "acceptance-main-log-cache"
+    SERVICE_BROKER_NAME: "acceptance-main-log-cache-servicebroker"
+    SERVICE_NAME: "autoscaler-acceptance-main-log-cache"
+    SERVICE_OFFERING_ENABLED: true
+    SKIP_SSL_VALIDATION: true
+    NAME_PREFIX: "acceptance-main-log-cache"
+
   upgrade-test-env: &upgrade-test-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "upgrade-test"
@@ -25,6 +34,15 @@ anchors:
       example/operation/add-extra-plan.yml
       example/operation/enable-name-based-deployments.yml
       example/operation/set-release-version.yml
+
+  app-autoscaler-ops-files-log-cache: &app-autoscaler-ops-files-log-cache
+    OPS_FILES: |
+      example/operation/loggregator-certs-from-cf.yml
+      example/operation/add-extra-plan.yml
+      example/operation/enable-name-based-deployments.yml
+      example/operation/set-release-version.yml
+      example/operation/enable-log-cache.yml
+      example/operation/log-cache-syslog-server.yml"
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
@@ -42,6 +60,7 @@ groups:
   - unit-tests-main
   - integration-tests-main
   - acceptance-main
+  - acceptance-main-log-cache
   - draft
   - release
   - upgrade-test-main
@@ -60,6 +79,7 @@ groups:
   - unit-tests-main
   - integration-tests-main
   - acceptance-main
+  - acceptance-main-log-cache
   - draft
   - release
   - upgrade-test-main
@@ -430,7 +450,7 @@ jobs:
   - task: run-pre-release-script
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      script_name: ./scripts/update
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -453,6 +473,51 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
 
+- name: acceptance-main-log-cache
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  ensure:
+    task: cleanup
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params:
+      <<: *accptance-main-log-cache-env
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  plan:
+  - in_parallel:
+    - get: bbl-state
+      passed: [deploy-cf]
+    - get: app-autoscaler-release-main
+      passed: [unit-tests-main, integration-tests-main]
+      trigger: true
+  - task: run-pre-release-script
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
+    params:
+      SCRIPT_NAME: ./scripts/update
+    input_mapping:
+      release: app-autoscaler-release-main
+    output_mapping:
+      release: app-autoscaler-release-main
+  - task: deploy-autoscaler
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
+    params:
+      <<: *accptance-main-log-cache-env
+      <<: *app-autoscaler-ops-files-log-cache
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  - task: register-broker
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
+    params:
+      <<: *accptance-main-log-cache-env
+  - task: autoscaler-acceptance
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+    params:
+      <<: *accptance-main-log-cache-env
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+
+
 - name: upgrade-test-main
   serial_groups: [infra]
   public: true
@@ -469,7 +534,9 @@ jobs:
     - get: bbl-state
       passed: [deploy-cf]
     - get: app-autoscaler-release-main
-      passed: [acceptance-main]
+      passed:
+      - acceptance-main
+      - acceptance-main-log-cache
       trigger: true
     - get: previous-stable-release
   - task: deploy-previous-stable-release
