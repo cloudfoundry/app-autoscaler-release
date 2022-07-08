@@ -29,4 +29,4 @@ inputs:
 outputs:
 
 run:
-  path: app-autoscaler-ci/autoscaler/scripts/deploy-previous-autoscaler.sh
+  path: app-autoscaler-release/ci/autoscaler/scripts/deploy-previous-autoscaler.sh
