@@ -37,10 +37,3 @@ runs:
         repository: cloudfoundry/app-autoscaler-env-bbl-state
         ssh-key: ${{ inputs.ssh-key }}
         path: bbl
-
-    - name: clone CI repo
-      uses: actions/checkout@v3
-      with:
-        repository: cloudfoundry/app-autoscaler-ci
-        ssh-key: ${{ inputs.ssh-key }}
-        path: ci
