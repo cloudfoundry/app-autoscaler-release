@@ -1,4 +1,4 @@
-FROM mikefarah/yq:4.25.1 AS yq
+FROM mikefarah/yq:4.25.3 AS yq
 
 FROM ubuntu:22.04
 MAINTAINER autoscaler-team
