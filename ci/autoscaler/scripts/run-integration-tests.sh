@@ -1,4 +1,6 @@
 #!/bin/bash
+# shellcheck disable=SC2086
+
 set -euo pipefail
 
 pg_ctlcluster "$(pg_lsclusters -j | jq -r '.[0].version')" main start

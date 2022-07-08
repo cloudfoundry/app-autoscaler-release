@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# shellcheck disable=SC2086
 set -euo pipefail
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
@@ -76,6 +76,7 @@ pushd "$autoscaler_dir" > /dev/null
   #NOTE: REQUIRED_OPS_FILES is a file in autoscaler-release
   #TODO rename/replace REQUIRED_OPS_FILES with a variable or a proper file name (maybe required_ops_files.txt).
   if [ -f REQUIRED_OPS_FILES ]; then
+    # shellcheck disable=SC2013
     for OPS_FILE in $(cat REQUIRED_OPS_FILES); do
       if [ -f "${OPS_FILE}" ]; then
          OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"

@@ -1,4 +1,7 @@
 #! /usr/bin/env bash
+
+# shellcheck disable=SC2154
+
 [ -n "${DEBUG}" ] && set -x
 set -euo pipefail
 
@@ -37,7 +40,7 @@ pushd "${autoscaler_dir}" > /dev/null
   chmod 600 "$HOME/.ssh/id_rsa"
   eval "$(ssh-agent -s)"
   ssh-add "$HOME/.ssh/id_rsa"
-  ssh-keyscan -t rsa,dsa github.com 2>&1 > "$HOME/.ssh/known_hosts"
+  ssh-keyscan -t rsa,dsa github.com > "$HOME/.ssh/known_hosts" 2>&1
 
   git push --set-upstream origin "${update_branch}"
 

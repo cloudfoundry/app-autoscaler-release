@@ -2,6 +2,5 @@
 
 set -euo pipefail
 
-pushd release
-  exec "${SCRIPT_NAME}"
-popd
+cd release
+exec "${SCRIPT_NAME}"

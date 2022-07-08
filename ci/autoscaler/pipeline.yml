@@ -103,7 +103,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: merge-ci-repo
+    branch: main
     fetch_tags: true
     paths:
       - ci
@@ -113,7 +113,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: merge-ci-repo
+    branch: main
     fetch_tags: true
 
 - name: gh-release

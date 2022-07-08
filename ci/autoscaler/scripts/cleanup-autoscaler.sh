@@ -33,7 +33,7 @@ fi
 echo "- Deleting bosh deployment '${deployment_name}'"
 bosh delete-deployment -d "${deployment_name}" -n
 
-if [ ! -z "${CURRENT_COMMIT_HASH}" ]
+if [ -n "${CURRENT_COMMIT_HASH}" ]
 then
   echo "- Deleting bosh release 'app-autoscaler/${CURRENT_COMMIT_HASH}'"
   bosh delete-release -n

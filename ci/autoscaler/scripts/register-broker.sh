@@ -8,7 +8,6 @@ service_broker_name="${SERVICE_BROKER_NAME:-autoscalerservicebroker}"
 service_name="${SERVICE_NAME:-autoscaler}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
-VAR_DIR=bbl-state/bbl-state/vars
 
 pushd "${bbl_state_path}"
   eval "$(bbl print-env)"
