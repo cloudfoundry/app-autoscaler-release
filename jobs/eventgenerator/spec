@@ -161,6 +161,10 @@ properties:
   autoscaler.eventgenerator.scaling_engine.client_key:
     description: "PEM-encoded client key"
 
+  autoscaler.eventgenerator.metricscollector.use_log_cache:
+    description: "Uses log cache instead of metric server"
+    default: false
+
   autoscaler.eventgenerator.metricscollector.host:
     description: "Host where the metrics collector is running"
     default: "metricscollector.service.cf.internal"

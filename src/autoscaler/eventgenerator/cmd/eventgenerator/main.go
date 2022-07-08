@@ -5,13 +5,13 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/generator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/server"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-
 	circuit "github.com/rubyist/circuitbreaker"
 
 	"flag"
@@ -195,7 +195,10 @@ func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan cha
 }
 
 func createMetricPollers(logger lager.Logger, conf *config.Config, appMonitorsChan chan *models.AppMonitor, appMetricChan chan *models.AppMetric) ([]*aggregator.MetricPoller, error) {
-	metricClient := aggregator.NewMetricServerClient(logger, conf.MetricCollector.MetricCollectorURL, &conf.MetricCollector.TLSClientCerts)
+	var metricClient client.MetricClient
+
+	clientFactory := client.NewMetricClientFactory(client.NewLogCacheClient, client.NewMetricServerClient)
+	metricClient = clientFactory.GetMetricClient(logger, conf)
 
 	pollers := make([]*aggregator.MetricPoller, conf.Aggregator.MetricPollerCount)
 	for i := 0; i < len(pollers); i++ {
