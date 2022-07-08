@@ -7,13 +7,6 @@ on:
 
 jobs:
   build:
-    if: |
-      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
-          && (! contains(github.event.pull_request.labels.*.name, 'skip-unit-tests')  )
-      ) ||
-      (  ( github.event.action == 'labeled' )
-          && ( github.event.label.name != 'skip-unit-tests' )
-      )
     strategy:
       matrix:
         java: [11, 17]
