@@ -450,7 +450,7 @@ jobs:
   - task: run-pre-release-script
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      script_name: ./scripts/update
+      SCRIPT_NAME: ./scripts/update
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
