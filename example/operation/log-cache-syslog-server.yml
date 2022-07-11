@@ -30,28 +30,3 @@
     ca_cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.ca))
     cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.certificate))
     key: ((/bosh-autoscaler/cf/loggregator_tls_agent.private_key))
-
-# Generate missing certs
-- type: replace
-  path: /variables/-
-  value:
-    name: metric_scraper_ca
-    type: certificate
-    options:
-      common_name: metricScraperCA
-      is_ca: true
-
-- type: replace
-  path: /variables/-
-  value:
-    name: loggregator_agent_metrics_tls
-    type: certificate
-    update_mode: converge
-    options:
-      ca: metric_scraper_ca
-      common_name: loggregator_agent_server
-      alternative_names:
-      - loggregator_agent_server
-      extended_key_usage:
-      - server_auth
-

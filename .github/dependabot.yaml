@@ -56,3 +56,14 @@ updates:
       interval: "daily"
       time: "08:00"
       timezone: "Europe/Berlin"
+
+  # Dependencies update for ci
+  - package-ecosystem: "docker"
+    directory: "/ci/dockerfiles/autoscaler-deploy"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/ci/dockerfiles/autoscaler-test"
+    schedule:
+      interval: "weekly"
