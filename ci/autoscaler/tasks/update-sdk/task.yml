@@ -9,7 +9,6 @@ image_resource:
 
 inputs:
 - name: app-autoscaler-release
-- name: app-autoscaler-ci
 - name: golang-release
 - name: java-release
 
@@ -22,5 +21,5 @@ params:
   type:
 
 run:
-  path: app-autoscaler-ci/autoscaler/tasks/update-sdk/update_package.sh
+  path: app-autoscaler-release/ci/autoscaler/tasks/update-sdk/update_package.sh
 

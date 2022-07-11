@@ -22,7 +22,6 @@ params:
 
 inputs:
 - name: app-autoscaler-release
-- name: app-autoscaler-ci
 - name: gh-release
 
 outputs:
@@ -30,4 +29,4 @@ outputs:
 - name: pushme  
 
 run:
-  path: app-autoscaler-ci/autoscaler/scripts/release-autoscaler.sh
+  path: app-autoscaler-release/ci/autoscaler/scripts/release-autoscaler.sh
