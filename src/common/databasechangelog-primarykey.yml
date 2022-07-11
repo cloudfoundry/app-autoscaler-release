@@ -8,10 +8,10 @@ databaseChangeLog:
       - not:
         - primaryKeyExists:
             tableName: DATABASECHANGELOG
-            primaryKeyName: "PK_DATABASECHANGELOG"
+            primaryKeyName: PRIMARY
       changes: 
         - addPrimaryKey:
             columnNames: "id,author,filename"
-            constraintName: "PK_DATABASECHANGELOG"
+            constraintName: PK_DATABASECHANGELOG
             schemaName: autoscaler
             tableName: DATABASECHANGELOG

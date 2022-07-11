@@ -1,4 +1,4 @@
-package aggregator
+package client
 
 import (
 	"encoding/json"
@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -22,15 +20,22 @@ type MetricServerClient struct {
 	logger             lager.Logger
 }
 
-func NewMetricServerClient(logger lager.Logger, metricCollectorUrl string, tlsClientCerts *models.TLSCerts) *MetricServerClient {
-	httpClient, err := helpers.CreateHTTPClient(tlsClientCerts)
-	if err != nil {
-		logger.Error("failed to create http client for MetricCollector", err, lager.Data{"metriccollectorTLS": tlsClientCerts})
-	}
-	httpClient.Transport.(*http.Transport).MaxIdleConnsPerHost = 1
-	return &MetricServerClient{logger: logger, metricCollectorUrl: metricCollectorUrl, httpClient: httpClient}
+type MetricServerClientCreator interface {
+	NewMetricServerClient(logger lager.Logger, metricCollectorUrl string, httpClient *http.Client) *MetricServerClient
 }
-func (c *MetricServerClient) GetMetric(appId string, metricType string, startTime time.Time, endTime time.Time) ([]*models.AppInstanceMetric, error) {
+
+func NewMetricServerClient(logger lager.Logger, metricCollectorUrl string, httpClient *http.Client) *MetricServerClient {
+	if httpClient.Transport != nil {
+		httpClient.Transport.(*http.Transport).MaxIdleConnsPerHost = 1
+	}
+	return &MetricServerClient{
+		logger:             logger.Session("MetricServerClient"),
+		metricCollectorUrl: metricCollectorUrl,
+		httpClient:         httpClient,
+	}
+}
+func (c *MetricServerClient) GetMetric(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
+	c.logger.Debug("GetMetric")
 	var url string
 	path, _ := routes.MetricsCollectorRoutes().Get(routes.GetMetricHistoriesRouteName).URLPath("appid", appId, "metrictype", metricType)
 	parameters := path.Query()
@@ -52,7 +57,7 @@ func (c *MetricServerClient) GetMetric(appId string, metricType string, startTim
 		return nil, errors.New("Failed to retrieve metric from metrics collector")
 	}
 
-	var metrics []*models.AppInstanceMetric
+	var metrics []models.AppInstanceMetric
 	err = json.NewDecoder(resp.Body).Decode(&metrics)
 	if err != nil {
 		c.logger.Error("Failed to parse response", err, lager.Data{"appId": appId, "metricType": metricType})
