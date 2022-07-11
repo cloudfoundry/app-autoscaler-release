@@ -42,7 +42,7 @@ anchors:
       example/operation/enable-name-based-deployments.yml
       example/operation/set-release-version.yml
       example/operation/enable-log-cache.yml
-      example/operation/log-cache-syslog-server.yml"
+      example/operation/log-cache-syslog-server.yml
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
