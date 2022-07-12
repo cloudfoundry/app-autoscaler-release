@@ -1,7 +1,7 @@
 name: Acceptance Tests
 on:
   pull_request:
-    types: [ opened, synchronize ]
+    types: [ opened, synchronize, labeled ]
 env:
   MAVEN_VERSION: 3.6.3
   MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
@@ -26,15 +26,23 @@ jobs:
       - name: show event
         run: |
           cat $GITHUB_EVENT_PATH
+
   # https://stackoverflow.com/questions/72387730/github-action-how-to-check-if-pr-creator-is-part-of-a-specific-team
-  check_sender_team:
+  #| previous result | action      | label:allow-acceptance-tests| label:dependencies | label:other | result       | wanted result     |
+  #| pass            | label:"bug" |  true                        | false             | false       |  failure     |  pass and not run |
+  #| failed          | label:"bug" |  true                        | false             | false       |  failure     | failure |
+
+  # results set of
+  # Pass, Fail, skipped
+
+
+  label_checks:
     permissions: read-all
     name: verify team membership
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
           script: |
             console.log("context.payload.sender.login = ", context.payload.sender.login)
             console.log("context.repo.owner = ", context.repo.owner)
@@ -46,31 +54,31 @@ jobs:
             })
             console.log(creator, result) // do whatever you want
 
-  deploy_autoscaler:
-    needs: check_sender_team
-    name: Deploy autoscaler for PR
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
-      - name: run update
-        run: cd ${AUTOSCALER_DIR}; ./scripts/update
-
-      - name: deploy autoscaler
-        run: |
-          export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
-           ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
-           ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
-           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
-          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
-
-      - name: register autoscaler broker
-        run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
+  #  deploy_autoscaler:
+  #    needs: check_sender_team
+  #    name: Deploy autoscaler for PR
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - uses: actions/checkout@v3
+  #        with:
+  #          path: app-autoscaler-release
+  #      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+  #        with:
+  #          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+  #
+  #      - name: run update
+  #        run: cd ${AUTOSCALER_DIR}; ./scripts/update
+  #
+  #      - name: deploy autoscaler
+  #        run: |
+  #          export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
+  #           ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
+  #           ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
+  #           ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml"
+  #          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+  #
+  #      - name: register autoscaler broker
+  #        run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
 
   acceptance_test_api:
     needs: deploy_autoscaler
@@ -128,22 +136,34 @@ jobs:
   ### This is a final node to indicate the success of all the acceptance tests
   # so that only one job needs to be checked/Expected to be passed by github.
   completed_successfully:
-    needs: [ acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
+#    needs: [ acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
     name: Acceptance tests passed
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          curl \
+          -vf \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs \
+          -d '{ "name":"acceptance_passed", \
+              "head_sha":"${GITHUB_SHA}", \
+              "status":"completed","external_id":"${GITHUB_RUN_ID}",\
+              "output":{"title":"Acceptance tests passed","summary":"acceptance tests have passed for ${GITHUB_SHA}","text":""}\
+              }'
       - run: echo "Completed all tests successfully"
 
-  deployment_cleanup:
-    needs: completed_successfully
-    name: Cleanup deployments
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
-      - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
+#  deployment_cleanup:
+#    needs: completed_successfully
+#    name: Cleanup deployments
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#        with:
+#          path: app-autoscaler-release
+#      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+#        with:
+#          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+#
+#      - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
