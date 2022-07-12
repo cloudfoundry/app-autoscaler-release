@@ -35,7 +35,7 @@ jobs:
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
         if: ${{ github.event_name != 'pull_request' }}
-        uses: sigstore/cosign-installer@1e95c1de343b5b0c23352d6417ee3e48d5bcd422
+        uses: sigstore/cosign-installer@48866aa521d8bf870604709cd43ec2f602d03ff2
         with:
           cosign-release: 'v1.4.0'
 
@@ -48,7 +48,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@69f6fc9d46f2f8bf0d5491e4aabe0bb8c6a4678a
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}
 
@@ -61,7 +61,7 @@ jobs:
 
       - name: Build and push
         id: build-and-push
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@e551b19e49efd4e98792db7592c17c09b89db8d8
         with:
           context: ci/dockerfiles/autoscaler-${{ matrix.image_suffix }}
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}

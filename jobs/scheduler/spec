@@ -5,8 +5,8 @@ templates:
   pre-start.erb: bin/pre-start
   liquibase.properties: bin/liquibase.properties
   application.properties.erb: config/application.properties
-  install_crt_keystore.erb: bin/install_crt_keystore
-  install_crt_truststore.erb: bin/install_crt_truststore
+  install_crt_keystore.sh: bin/install_crt_keystore
+  install_crt_truststore.sh: bin/install_crt_truststore
   scheduler_ca.crt.erb: config/certs/ca.crt
   scheduler_server.crt.erb: config/certs/server.crt
   scheduler_server.key.erb: config/certs/server.key

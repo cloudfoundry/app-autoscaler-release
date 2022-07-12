@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 <%
   # returns an empty array of the value is null
   def p_arr(property)
@@ -10,6 +12,7 @@
 %>
 source /var/vcap/packages/common/dns-helper.sh
 source /var/vcap/packages/common/retry-helper.sh
+
 
 DB_DIR=/var/vcap/packages/db
 SCHEDULER_DIR=/var/vcap/packages/scheduler
@@ -60,12 +63,12 @@ retry java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" liquibase.integration.co
 retry java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=org.postgresql.Driver --changeLogFile=quartz.changelog-master.yaml update
 <% else %>
-retry java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "/var/vcap/packages/db/target/lib/*:/var/vcap/packages/common" -Dliquibase.headless=true liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=databasechangelog-primarykey.yml update
 retry java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=scheduler.changelog-master.yaml update
 
-retry java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+retry java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" -Dliquibase.headless=true liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
 --driver=com.mysql.cj.jdbc.Driver --changeLogFile=quartz.changelog-master.yaml update
 <% end %>
 # Generate key store for the clients communicate with scheduler.
