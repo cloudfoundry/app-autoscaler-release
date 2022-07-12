@@ -11,6 +11,7 @@ concurrency:
 
 jobs:
   build:
+    if: "false"
     strategy:
       matrix:
         java: [11, 17]
