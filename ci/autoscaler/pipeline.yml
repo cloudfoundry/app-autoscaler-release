@@ -4,7 +4,6 @@ anchors:
   acceptance-main-env: &acceptance-main-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-main"
-    SERVICE_BROKER_NAME: "acceptance-mainservicebroker"
     SERVICE_NAME: "autoscaler-acceptance-main"
     SERVICE_OFFERING_ENABLED: true
     SKIP_SSL_VALIDATION: true
@@ -13,7 +12,6 @@ anchors:
   acceptance-main-log-cache-env: &acceptance-main-log-cache-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-main-lc"
-    SERVICE_BROKER_NAME: "acceptance-main-lc-servicebroker"
     SERVICE_NAME: "autoscaler-acceptance-main-lc"
     SERVICE_OFFERING_ENABLED: true
     SKIP_SSL_VALIDATION: true
@@ -22,7 +20,6 @@ anchors:
   upgrade-test-env: &upgrade-test-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "upgrade-test"
-    SERVICE_BROKER_NAME: "upgrade-testservicebroker"
     SERVICE_NAME: "autoscaler-upgrade-test"
     SERVICE_OFFERING_ENABLED: true
     SKIP_SSL_VALIDATION: true
