@@ -1,5 +1,5 @@
 golang 1.18.3
-java temurin-jre-11.0.15+10
+java temurin-11.0.15+10
 ruby 2.7.5
 maven 3.6.3
 nodejs 16.14.0
