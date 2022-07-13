@@ -1,5 +1,8 @@
 name: Acceptance Tests Dispatch
-on: [ workflow_dispatch ]
+on:
+  pull_request:
+    types: [ opened, labeled, synchronize ]
+  workflow_dispatch:
 
 env:
   MAVEN_VERSION: 3.6.3
