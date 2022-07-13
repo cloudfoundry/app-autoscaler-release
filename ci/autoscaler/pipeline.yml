@@ -429,6 +429,7 @@ jobs:
 - name: acceptance-main
   public: true
   build_logs_to_retain: 100
+  serial: true
   ensure:
     task: cleanup
     file: app-autoscaler-release-main/ci/autoscaler/tasks/cleanup-autoscaler.yml
@@ -472,6 +473,7 @@ jobs:
 - name: acceptance-main-log-cache
   public: true
   build_logs_to_retain: 100
+  serial: true
   ensure:
     task: cleanup
     file: app-autoscaler-release-main/ci/autoscaler/tasks/cleanup-autoscaler.yml
