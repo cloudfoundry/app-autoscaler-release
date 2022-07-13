@@ -35,21 +35,26 @@ target/init:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-vendor clean-autoscaler clean-java clean-targets
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
-	@make clean-targets
 clean-java:
 	@echo " - cleaning java resources"
 	@cd src && mvn clean > /dev/null && cd ..
 clean-targets:
 	@echo " - cleaning build target files"
-	@rm target/* &> /dev/null || echo "  - Already clean"
+	@rm target/* &> /dev/null || echo "  . Already clean"
 clean-vendor:
 	@echo " - cleaning vendored go"
 	@find . -name "vendor" -type d -exec rm -rf {} \;
 clean-autoscaler:
 	@make -C src/autoscaler clean
+clean-scheduler:
+	@echo " - cleaning scheduler test resources"
+	@rm -rf src/scheduler/src/test/resources/certs
+clean-certs:
+	@echo " - cleaning test certs"
+	@rm -f testcerts/*
 
 .PHONY: build build-test build-all $(all_modules)
 build: init  $(all_modules)
