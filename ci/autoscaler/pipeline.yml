@@ -430,7 +430,6 @@ jobs:
 
 
 - name: acceptance-main
-  serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
   ensure:
@@ -474,7 +473,6 @@ jobs:
       app-autoscaler-release: app-autoscaler-release-main
 
 - name: acceptance-main-log-cache
-  serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
   ensure:
