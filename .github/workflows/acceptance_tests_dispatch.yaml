@@ -1,5 +1,7 @@
 name: Acceptance Tests Dispatch
 on:
+  pull_request:
+    types: [ opened, labeled, synchronize ]
   workflow_dispatch:
     inputs:
       name:
