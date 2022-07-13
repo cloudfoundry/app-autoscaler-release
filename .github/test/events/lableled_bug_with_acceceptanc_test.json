@@ -1,5 +1,8 @@
 {
-  "action": "synchronize",
+  "action": "labeled",
+  "label": {
+    "name": "bug"
+  },
   "pull_request": {
     "number": 44,
     "labels": [{ "name":"allow-acceptance-tests"}]
