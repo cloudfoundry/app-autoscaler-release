@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -euo pipefail
-set -x
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 service_name="${SERVICE_NAME:-autoscaler}"
