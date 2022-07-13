@@ -1,5 +1,5 @@
-name: Acceptance Tests
-on: [ workflow_dispatch]
+name: Acceptance Tests Dispatch
+on: [ workflow_dispatch ]
 
 env:
   MAVEN_VERSION: 3.6.3
