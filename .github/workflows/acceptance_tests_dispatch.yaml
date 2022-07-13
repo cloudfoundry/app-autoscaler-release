@@ -1,12 +1,13 @@
 name: Acceptance Tests Dispatch
 on:
-  pull_request:
-    types: [ opened, labeled, synchronize ]
   workflow_dispatch:
     inputs:
       name:
         description: Execute acceptance test for PR
         required: true
+  pull_request:
+    types: [ opened, labeled, synchronize ]
+
     
 
 env:
