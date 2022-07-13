@@ -3,6 +3,11 @@ on:
   pull_request:
     types: [ opened, labeled, synchronize ]
   workflow_dispatch:
+    inputs:
+      name:
+        description: Execute acceptance test for PR
+        required: true
+    
 
 env:
   MAVEN_VERSION: 3.6.3
