@@ -1,28 +1,25 @@
 ---
 anchors:
 
-  accptance-main-env: &acceptance-main-env
+  acceptance-main-env: &acceptance-main-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-main"
-    SERVICE_BROKER_NAME: "acceptance-mainservicebroker"
     SERVICE_NAME: "autoscaler-acceptance-main"
     SERVICE_OFFERING_ENABLED: true
     SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-main"
 
-  accptance-main-log-cache-env: &accptance-main-log-cache-env
+  acceptance-main-log-cache-env: &acceptance-main-log-cache-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
-    DEPLOYMENT_NAME: "acceptance-main-log-cache"
-    SERVICE_BROKER_NAME: "acceptance-main-log-cache-servicebroker"
-    SERVICE_NAME: "autoscaler-acceptance-main-log-cache"
+    DEPLOYMENT_NAME: "acceptance-main-lc"
+    SERVICE_NAME: "autoscaler-acceptance-main-lc"
     SERVICE_OFFERING_ENABLED: true
     SKIP_SSL_VALIDATION: true
-    NAME_PREFIX: "acceptance-main-log-cache"
+    NAME_PREFIX: "acceptance-main-lc"
 
   upgrade-test-env: &upgrade-test-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "upgrade-test"
-    SERVICE_BROKER_NAME: "upgrade-testservicebroker"
     SERVICE_NAME: "autoscaler-upgrade-test"
     SERVICE_OFFERING_ENABLED: true
     SKIP_SSL_VALIDATION: true
@@ -430,9 +427,9 @@ jobs:
 
 
 - name: acceptance-main
-  serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
+  serial: true
   ensure:
     task: cleanup
     file: app-autoscaler-release-main/ci/autoscaler/tasks/cleanup-autoscaler.yml
@@ -474,14 +471,14 @@ jobs:
       app-autoscaler-release: app-autoscaler-release-main
 
 - name: acceptance-main-log-cache
-  serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
+  serial: true
   ensure:
     task: cleanup
     file: app-autoscaler-release-main/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params:
-      <<: *accptance-main-log-cache-env
+      <<: *acceptance-main-log-cache-env
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   plan:
@@ -502,18 +499,18 @@ jobs:
   - task: deploy-autoscaler
     file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *accptance-main-log-cache-env
+      <<: *acceptance-main-log-cache-env
       <<: *app-autoscaler-ops-files-log-cache
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
     file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
     params:
-      <<: *accptance-main-log-cache-env
+      <<: *acceptance-main-log-cache-env
   - task: autoscaler-acceptance
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
-      <<: *accptance-main-log-cache-env
+      <<: *acceptance-main-log-cache-env
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
 
