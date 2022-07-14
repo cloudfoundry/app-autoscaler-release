@@ -29,11 +29,19 @@ jobs:
     steps:
       - uses: docker://agilepathway/pull-request-label-checker:latest
         with:
-          one_of: major,minor,patch
+          one_of: allow-acceptance-test
+          
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: exit 
+        run: echo "test reached"; exit 1
+
   deploy_autoscaler:
-    needs: check_labels
+    needs: test
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
