@@ -22,23 +22,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
+  check_labels:
+    name: Check labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker://agilepathway/pull-request-label-checker:latest
+        with:
+          one_of: major,minor,patch
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
   deploy_autoscaler:
+    needs: check_labels
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
       - name: show env
         run: export
-      
-      - name: verify labels
-        uses: jesusvasquez333/verify-pr-label-action@v1.4.0
-        with:
-          github-token: '${{ secrets.GITHUB_TOKEN }}'
-          valid-labels: 'allow-acceptance-tests'
-
-      - name: move on and exit 1
-        run: exit 1
-
-
 
       - uses: actions/checkout@v3
         with:
