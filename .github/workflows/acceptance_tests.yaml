@@ -42,7 +42,7 @@ jobs:
       ) ||
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
-      )    name: Deploy autoscaler for PR
+      )
     runs-on: ubuntu-latest
     steps:
       - name: show env
