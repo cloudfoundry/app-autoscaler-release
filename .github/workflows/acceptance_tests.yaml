@@ -128,16 +128,25 @@ jobs:
 
   ### This is a final node to indicate the success of all the acceptance tests
   # so that only one job needs to be checked/Expected to be passed by github.
-  completed_successfully:
+  skipping_check:
     needs: [ acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
     if: ${{ always() && ( (needs.acceptance_test_app.result == 'skipped') || (needs.acceptance_test_broker.result == 'skipped') || (needs.acceptance_test_api.result == 'skipped') ) }}
-    name: Acceptance tests passed
+    name: Acceptance tests executed
     runs-on: ubuntu-latest
     steps:
       - name: Check for skipped jobs
         run: |
            echo "One or more jobs were skipped!"
            exit 1
+
+  completed_successfully:
+    needs: [ acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
+    if: ${{ always() && ( (needs.acceptance_test_app.result == 'success') || (needs.acceptance_test_broker.result == 'success') || (needs.acceptance_test_api.result == 'success') ) }}
+    name: Acceptance tests passed
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Completed all tests successfully"
+
 
   # completed_successfully:
   #   needs: [ check_skipping ]
