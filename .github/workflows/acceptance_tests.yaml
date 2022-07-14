@@ -66,7 +66,7 @@ jobs:
     needs: test
     if: |
       always() &&
-      (needs.test.result =! 'skipped')
+      (needs.test.result != 'skipped')
     name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
