@@ -34,6 +34,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
+    needs: check_labels
     name: test
     runs-on: ubuntu-latest
     steps:
