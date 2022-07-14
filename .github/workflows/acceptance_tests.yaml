@@ -23,19 +23,19 @@ concurrency:
 
 jobs:
 
-  check_labels:
-    name: Check labels
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "reached check_labels"
-      - uses: docker://agilepathway/pull-request-label-checker:latest
-        with:
-          one_of: allow-acceptance-tests, dependencies
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
+  # check_labels:
+  #   name: Check labels
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - run: echo "reached check_labels"
+  #     - uses: docker://agilepathway/pull-request-label-checker:latest
+  #       with:
+  #         one_of: allow-acceptance-tests, dependencies
+  #         repo_token: ${{ secrets.GITHUB_TOKEN }}
 
 
   deploy_autoscaler:
-    needs: check_labels
+    #needs: check_labels
     if: |
       ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
