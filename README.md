@@ -237,6 +237,8 @@ data store. These are run up locally with docker images so ensure that docker is
 your system before running up the tests.
 
 ### Setup
+**Note:** all of the setup is encapsulated in the makefile targets. So you can run the test targets (test|integration) directly
+and it will setup and start the tests.
 
 To set up the development, firstly clone this project
 
@@ -248,6 +250,7 @@ Generate [scheduler test certs](https://github.com/cloudfoundry/app-autoscaler/b
 
 
 #### Initialize the Database
+**Note:** The makefile will init the database if it has not already been run before running the tests. 
 
 * **Postgres**
 ```shell
@@ -263,35 +266,77 @@ make init-db db_type=mysql
 #### Generate TLS Certificates
 create the certificates
 
-**Note**: on macos it will install `certstrap` automatically but on other OS's it needs to be pre-installed
+**Note**: 
+ - on macos it will install `certstrap` automatically but on other OS's it needs to be pre-installed
+ - The makefile will create the certificates if it has not already been run before running the tests.
 ```shell
 make test-certs
 ```
 
-
 ### Unit tests
+The default database is postgres
 
 * **Postgres**:
 ```shell
 make test
 ```
 
+To use a specific postgres version
+```shell
+make clean #Only if you're changing versions to refresh the running docker image.
+make test POSTGRES_TAG=x.y
+```
+where: 
+ - x is the major version
+ - y is the minor version ( this can be left out to get the most recent patch)
+
+
 * **MySQL**:
 ```shell
 make test db_type=mysql
 ```
 
-### Integration tests
+To use a specific MySQL version
+```shell
+make clean #Only if you're changing versions to refresh the running docker image.
+make test db_type=mysql MYSQL_TAG=x.y
+```
+where:
+- x is the major version
+- y is the minor version ( this can be left out to get the most recent patch)
 
-**Postgres**
+
+### Integration tests
+The default database is postgres
+
+* **Postgres**:
 ```shell
 make integration
 ```
 
-**MySQL**:
+To use a specific postgres version
 ```shell
-make test db_type=mysql
+make clean #Only if you're changing versions to refresh the running docker image.
+make integration POSTGRES_TAG=x.y
 ```
+where:
+- x is the major version
+- y is the minor version ( this can be left out to get the most recent patch)
+
+
+* **MySQL**:
+```shell
+make integration db_type=mysql
+```
+
+To use a specific MySQL version
+```shell
+make clean #Only if you're changing versions to refresh the running docker image.
+make integration db_type=mysql MYSQL_TAG=x.y
+```
+where:
+- x is the major version
+- y is the minor version ( this can be left out to get the most recent patch)
 
 ### Build App-AutoScaler
 ```shell

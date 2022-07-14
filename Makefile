@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-go_modules:= acceptance autoscaler changelog changeloglockcleaner
+go_modules:= $(shell  find . -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
@@ -35,21 +35,26 @@ target/init:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-vendor clean-autoscaler clean-java clean-targets
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
-	@make clean-targets
 clean-java:
 	@echo " - cleaning java resources"
 	@cd src && mvn clean > /dev/null && cd ..
 clean-targets:
 	@echo " - cleaning build target files"
-	@rm target/* &> /dev/null || echo "  - Already clean"
+	@rm target/* &> /dev/null || echo "  . Already clean"
 clean-vendor:
 	@echo " - cleaning vendored go"
 	@find . -name "vendor" -type d -exec rm -rf {} \;
 clean-autoscaler:
 	@make -C src/autoscaler clean
+clean-scheduler:
+	@echo " - cleaning scheduler test resources"
+	@rm -rf src/scheduler/src/test/resources/certs
+clean-certs:
+	@echo " - cleaning test certs"
+	@rm -f testcerts/*
 
 .PHONY: build build-test build-all $(all_modules)
 build: init  $(all_modules)
@@ -87,12 +92,11 @@ target/scheduler_test_certs:
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance
 test-autoscaler: check-db_type init init-db test-certs
-	@echo " - using DBURL=${DBURL}"
-	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
+	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}" OPTS="${OPTS}"
 test-autoscaler-suite: check-db_type init init-db test-certs
-	@echo " - using DBURL=${DBURL} TEST=${TEST}"
-	@echo " - using TEST=${TEST}"
-	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
+	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
 test-scheduler: check-db_type init init-db test-certs
 	@cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
 test-changelog: init
@@ -180,7 +184,8 @@ stop-db: check-db_type
 
 .PHONY: integration
 integration: build init-db test-certs
-	make -C src/autoscaler integration DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
+	make -C src/autoscaler integration DBURL="${DBURL}" OPTS="${OPTS}"
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
 lint: golangci-lint_check $(addprefix lint_,$(go_modules))
@@ -208,7 +213,7 @@ release:
 	bosh create-release --force --timestamp-version --tarball=${name}-${version}.tgz
 
 mod-tidy:
-	@for folder in $$(find . -name "go.mod" -exec dirname {} \;);\
+	@for folder in $$(find . -depth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
 	   cd $${folder}; echo "- go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
 	done

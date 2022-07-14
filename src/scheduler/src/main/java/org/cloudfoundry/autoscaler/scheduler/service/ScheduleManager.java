@@ -179,7 +179,7 @@ public class ScheduleManager {
           if (compensatorySchedule != null) {
             // create a compensatory schedule to bring the first fire back
             if (specificDateSchedules == null) {
-              specificDateSchedules = new ArrayList<SpecificDateScheduleEntity>();
+              specificDateSchedules = new ArrayList<>();
             }
             specificDateSchedules.add(compensatorySchedule);
             logger.debug(

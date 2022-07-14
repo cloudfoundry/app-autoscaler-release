@@ -1,12 +1,11 @@
 #!/bin/bash
 
 set -euo pipefail
-set -x
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
-service_broker_name="${SERVICE_BROKER_NAME:-autoscalerservicebroker}"
 service_name="${SERVICE_NAME:-autoscaler}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
+service_broker_name="${deployment_name}servicebroker"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 
 pushd "${bbl_state_path}"

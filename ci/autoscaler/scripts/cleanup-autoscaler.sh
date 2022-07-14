@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
-service_broker_name="${SERVICE_BROKER_NAME:-autoscalerservicebroker}"
 service_name="${SERVICE_NAME:-autoscaler}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
+service_broker_name="${deployment_name}servicebroker"
 autoscaler_root=${AUTOSCALER_DIR:-app-autoscaler-release}
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 RELEASE_SHA=${RELEASE_SHA:-""}
