@@ -27,13 +27,34 @@ jobs:
     name: Check labels
     runs-on: ubuntu-latest
     steps:
+      - run: echo "reached check_labels"
       - uses: docker://agilepathway/pull-request-label-checker:latest
         with:
-          one_of: allow-acceptance-tests
-
+          one_of: allow-acceptance-tests, dependencies
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
+    if: |
+      github.event.label.name != 'approved' &&
+      github.event.label.name != 'breaking-change' &&
+      github.event.label.name != 'bug' &&
+      github.event.label.name != 'chore' &&
+      github.event.label.name != 'Do Not Merge' &&
+      github.event.label.name != 'docker' &&
+      github.event.label.name != 'duplicate' &&
+      github.event.label.name != 'enhancement' &&
+      github.event.label.name != 'exclude-from-changelog' &&
+      github.event.label.name != 'github_actions' &&
+      github.event.label.name != 'go' &&
+      github.event.label.name != 'help wanted' &&
+      github.event.label.name != 'java' &&
+      github.event.label.name != 'javascript' &&
+      github.event.label.name != 'question'
+      github.event.label.name != 'skip-unit-tests' &&
+      github.event.label.name != 'submodules' &&
+      github.event.label.name != 'WIP' &&
+      github.event.label.name != 'wontfix'
+  
     needs: check_labels
     name: test
     runs-on: ubuntu-latest
