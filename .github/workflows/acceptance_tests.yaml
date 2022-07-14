@@ -136,7 +136,7 @@ jobs:
     steps:
       - name: Check for skipped jobs
       -  run: |
-           echo "One or more jobs were skipped!
+           echo "One or more jobs were skipped!"
            exit 1
 
   completed_successfully:
