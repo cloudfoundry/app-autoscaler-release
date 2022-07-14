@@ -41,7 +41,7 @@ jobs:
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
       ) ||
       (  ( github.event.action == 'labeled' )
-          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
+          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' || github.event.label.name == 'github_actions' )
       )
     runs-on: ubuntu-latest
     steps:
