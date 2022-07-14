@@ -29,8 +29,8 @@ jobs:
     steps:
       - uses: docker://agilepathway/pull-request-label-checker:latest
         with:
-          one_of: allow-acceptance-test
-          
+          one_of: allow-acceptance-tests
+
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
   test:
