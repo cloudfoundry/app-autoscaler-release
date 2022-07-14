@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check for skipped jobs
-      -  run: |
+        run: |
            echo "One or more jobs were skipped!"
            exit 1
 
