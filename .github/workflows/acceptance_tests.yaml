@@ -33,27 +33,16 @@ jobs:
           one_of: allow-acceptance-tests, dependencies
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
-  test:
+
+  deploy_autoscaler:
+    needs: check_labels
     if: |
       ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
       ) ||
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
-      )
-  
-    needs: check_labels
-    name: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: exit 
-        run: echo "test reached"; exit 1
-
-  deploy_autoscaler:
-    needs: test
-    if: |
-      ${{ always() && (needs.test.result != 'skipped') }}
-    name: Deploy autoscaler for PR
+      )    name: Deploy autoscaler for PR
     runs-on: ubuntu-latest
     steps:
       - name: show env
@@ -139,6 +128,10 @@ jobs:
   ### This is a final node to indicate the success of all the acceptance tests
   # so that only one job needs to be checked/Expected to be passed by github.
   completed_successfully:
+    if: ${{ always() && 
+            ( needs.acceptance_test_app.result != 'skipped')  &&
+            ( needs.acceptance_test_broker.result != 'skipped')  &&
+            ( needs.acceptance_test_api.result != 'skipped') }}
     needs: [ acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
     name: Acceptance tests passed
     runs-on: ubuntu-latest
