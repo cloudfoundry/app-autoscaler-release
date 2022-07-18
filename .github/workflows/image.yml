@@ -1,0 +1,84 @@
+name: Create and publish a Docker image
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - 'ci/dockerfiles/**'
+  pull_request:
+    paths:
+      - 'ci/dockerfiles/**'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+    strategy:
+      matrix:
+        image_suffix: ["deploy", "test"]
+    name: Build and Push app-autoscaler-ci-${{ matrix.image_suffix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
+      - name: Install cosign
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: sigstore/cosign-installer@48866aa521d8bf870604709cd43ec2f602d03ff2
+        with:
+          cosign-release: 'v1.4.0'
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@69f6fc9d46f2f8bf0d5491e4aabe0bb8c6a4678a
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}
+
+      - name: Get ginkgo version from autoscaler-release
+        id: ginkgo
+        run: |
+          version=$(curl https://raw.githubusercontent.com/cloudfoundry/app-autoscaler-release/main/src/autoscaler/go.mod | grep "ginkgo/v2" | cut -d" " -f 2)
+          echo "GINGO version from release: \'${version}\'"
+          echo "::set-output name=version::${version}"  
+
+      - name: Build and push
+        id: build-and-push
+        uses: docker/build-push-action@e551b19e49efd4e98792db7592c17c09b89db8d8
+        with:
+          context: ci/dockerfiles/autoscaler-${{ matrix.image_suffix }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}:latest
+          build-args: GINKGO_VERSION=${{ steps.ginkgo.outputs.version }}
+
+      # Sign the resulting Docker image digest except on PRs.
+      # This will only write to the public Rekor transparency log when the Docker
+      # repository is public to avoid leaking data.  If you would like to publish
+      # transparency data even for private images, pass --force to cosign below.
+      # https://github.com/sigstore/cosign
+      - name: Sign the published Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        # This step uses the identity token to provision an ephemeral certificate
+        # against the sigstore community Fulcio instance.
+        run: cosign sign ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}@${{ steps.build-and-push.outputs.digest }} --force     
