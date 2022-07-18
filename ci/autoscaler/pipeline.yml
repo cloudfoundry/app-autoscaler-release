@@ -394,7 +394,7 @@ jobs:
     - get: autoscaler-env-vars-store
     - get: app-autoscaler-release-ci
   - task: combine-ops-files
-    file: app-autoscaler-release-ci/autoscaler/tasks/combine-ops.yml
+    file: app-autoscaler-release-ci/ci/autoscaler/tasks/combine-ops.yml
     input_mapping:
       ops-files: cf-deployment
       custom-ops: app-autoscaler-release-ci
