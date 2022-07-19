@@ -28,7 +28,7 @@ fi
 if [ ! -e "${bin_folder}/bbl" ]; then
  echo " - installing bbl cli"
  # shellcheck disable=SC2016
- sha256=$( curl -sf --compressed  -H "Accept: application/vnd.github+json"  "https://api.github.com/repos/cloudfoundry/bosh-bootloader/releases/tags/v8.4.89" | jq -r '.body' | grep "Linux sha256" | sed 's/.*`\(.*\)`\*/\1/')
+ sha256=$( curl -sf --compressed  -H "Accept: application/vnd.github+json"  "https://api.github.com/repos/cloudfoundry/bosh-bootloader/releases/tags/v${BBL_VERSION}" | jq -r '.body' | grep "Linux sha256" | sed 's/.*`\(.*\)`\*/\1/')
  curl -sLf --compressed "https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${BBL_VERSION}/bbl-v${BBL_VERSION}_linux_x86-64" -o "${bin_folder}/unchecked/bbl"
  echo "${sha256} ${bin_folder}/unchecked/bbl" | sha256sum -c
  chmod +x "${bin_folder}/unchecked/bbl"
