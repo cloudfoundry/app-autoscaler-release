@@ -16,15 +16,16 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
+  check_name: "acceptance_test_check"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy_autoscaler:
+  start_pending_result:
     # if open and synchronised events happen just check if it has the label
-    #  or if label event and has the correct label added
+    #  or if label event and has the correct label added we might be able to just remove this
     if: |
       ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
@@ -32,7 +33,28 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy autoscaler for PR
+    name: Post pending Acceptance test result
+    runs-on: ubuntu-latest
+    outputs:
+      check_id: ${{ steps.create_check.outputs.check_id }}
+    steps:
+      - run: echo "sha is ${{github.event.pull_request.head.sha}}"
+      - run: |
+          id=$(curl -sf -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs" \
+          -d '{ "name": "${{env.check_name}}","head_sha": "${{ github.event.pull_request.head.sha }}","status": "in_progress","external_id": "${{ github.run_id }}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${{ github.event.pull_request.head.sha }}","text":"some text" }}' \
+              | jq '.id')
+          echo "Id is: ${id}"
+          echo "::set-output name=check_id::${id}"
+        id: create_check
+        name: Adding initial pending acceptance test result
+
+  #Note: All the tests that can fail and should be reported in the error result need to end with "acceptance tests" to enable filtering of the checks.
+  deploy_autoscaler:
+    needs: [ start_pending_result ]
+    name: "Deploy for acceptance tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -61,8 +83,8 @@ jobs:
         run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
 
   acceptance_test_api:
-    needs: deploy_autoscaler
-    name: API acceptance tests
+    needs: [ deploy_autoscaler ]
+    name: "API acceptance tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -79,8 +101,8 @@ jobs:
 
   acceptance_test_app:
     # TODO: allow parallel tests run once we have resources available
-    needs: acceptance_test_api
-    name: APP acceptance tests
+    needs: [ deploy_autoscaler ]
+    name: "APP acceptance tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -96,8 +118,8 @@ jobs:
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
   acceptance_test_broker:
-    needs: acceptance_test_app
-    name: Broker acceptance tests
+    needs: [ deploy_autoscaler ]
+    name: "Broker acceptance tests"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -112,17 +134,21 @@ jobs:
           export SUITES="broker"
           ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
-  ### This is a final node to indicate the success of all the acceptance tests
-  # so that only one job needs to be checked/Expected to be passed by github.
-  completed_successfully:
-    needs: [ acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
-    name: Acceptance tests passed
+  ### This is a final node to indicate the completion of all the acceptance tests
+  completed_run:
+    needs: [ start_pending_result, acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
+    name: Posting test result
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Completed all tests successfully"
+      - run: |
+          curl -sf -X PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs/${{needs.start_pending_result.outputs.check_id}}" \
+          -d '{ "name": "${{env.check_name}}", "status": "completed", "conclusion": "success" }'
 
   deployment_cleanup:
-    needs: completed_successfully
+    needs: [ completed_run ]
     name: Cleanup deployments
     runs-on: ubuntu-latest
     steps:
@@ -133,3 +159,51 @@ jobs:
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
+
+  report_result:
+    needs: [ completed_run ]
+    if: ${{ always() }}
+    name: Acceptance Tests Result
+    runs-on: ubuntu-latest
+    steps:
+      - name: Retrieve and assume last acceptance test result
+        run: |
+          echo "::group::Getting the latest acceptance test result"
+          set -e
+          echo "Getting the last result"
+          curl -sf  -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
+            | jq '[.check_runs[] | select(.name=="${{env.check_name}}")]' > results.json
+          jq '.|last' results.json > latest_result.json
+          check_suite=$( jq '.check_suite.id' latest_result.json )
+          id=$( jq '.id' latest_result.json )
+          conclusion=$( jq -r '.conclusion' latest_result.json )
+          number_of_checks=$(jq '. | length' results.json)
+          echo "== Latest ${{env.check_name}} check result =="
+          echo
+          cat latest_result.json
+          echo "::endgroup::"
+          
+          echo "::group::Check Info"
+          echo "Latest check id:${id}"
+          echo "Number of checks for commit ${{ github.event.pull_request.head.sha }} ${number_of_checks}"
+          echo "Conclustion of check: ${conclusion}"
+          echo "::endgroup::"
+          
+          if [ ${number_of_checks} -eq 0 ]; then
+            echo "Error: The Acceptance tests have never been run for this commit!"
+            echo "Add the correct label to enable the running of the acceptance tests."
+            exit 1
+          fi
+          
+          if [ "${conclusion}" != "success" ]; then
+            echo "Error: The latest Acceptance Test run failed!"
+            echo 
+            echo "List of the failed checks:"
+            echo "=========================="
+            curl -sf "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
+                |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match(".*acceptance tests")) | " - \(.name): \(.html_url)"'
+            echo "=========================="
+            exit 1
+          fi
