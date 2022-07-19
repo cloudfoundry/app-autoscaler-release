@@ -11,11 +11,11 @@ anchors:
 
   acceptance-main-log-cache-env: &acceptance-main-log-cache-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
-    DEPLOYMENT_NAME: "acceptance-main-lc"
-    SERVICE_NAME: "autoscaler-acceptance-main-lc"
+    DEPLOYMENT_NAME: "acceptance-lc-main"
+    SERVICE_NAME: "autoscaler-acceptance-lc-main"
     SERVICE_OFFERING_ENABLED: true
     SKIP_SSL_VALIDATION: true
-    NAME_PREFIX: "acceptance-main-lc"
+    NAME_PREFIX: "acceptance-lc-main"
 
   upgrade-test-env: &upgrade-test-env
     SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
