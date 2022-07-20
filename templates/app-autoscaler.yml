@@ -453,6 +453,8 @@ instance_groups:
         metricsserver:
           logging:
             level: info
+          server:
+            port: &metricsserverPort 6103
           http_client_timeout: 60s
           ca_cert: ((!metricsserver_server_cert.ca))
           server_cert: ((!metricsserver_server_cert.certificate))
