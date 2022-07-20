@@ -1,6 +1,30 @@
 ---
 name: ((deployment_name))
 
+releases:
+- name: app-autoscaler
+  version: latest
+- name: "postgres"
+  version: "29"
+  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=29"
+  sha1: "24d2e2887a45258b71bc40577c0f406180e47701"
+- name: bosh-dns-aliases
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3
+  version: '0.0.3'
+  sha1: b0d0a0350ed87f1ded58b2ebb469acea0e026ccc
+- name: "routing"
+  url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.223.0"
+  sha1: "edb2f822ca5bbe579a179abfa4b053dc9c99224f"
+  version: "0.223.0"
+- name: loggregator-agent
+  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=6.4.1
+  version: 6.4.1
+  sha1: 02ec285cce8fef717ab7baee79a5ed9210a7391c
+- name: bpm
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.9
+  version: 1.1.9
+  sha1: sha256:031cf5600158f44762c747a1f8648b7cebca876d4297dd9e2ce3b51b36ccd476
+
 domains:
   postgres: &postgres_domain ((deployment_name)).autoscalerpostgres.service.cf.internal
   api: &api_domain ((deployment_name)).apiserver.service.cf.internal
