@@ -259,7 +259,6 @@ instance_groups:
             client_cert: ((scalingengine_client.certificate))
             client_key: ((scalingengine_client.private_key))
           scheduler:
-            host: autoscalerscheduler.service.cf.internal
             port: *schedulerPort
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
@@ -386,7 +385,6 @@ instance_groups:
             back_off_max_interval: 120m
             consecutive_failure_count: 5
           scaling_engine:
-            host: scalingengine.service.cf.internal
             port: *scalingEnginePort
             ca_cert: ((scalingengine_ca.ca))
             client_cert: ((scalingengine_client.certificate))

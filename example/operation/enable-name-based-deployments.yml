@@ -23,10 +23,10 @@
       metricsforwarder_mtls: &metricsforwarder_mtls_public_domain ((deployment_name))-metricsforwarder-mtls.((system_domain))
       servicebroker: &servicebroker_public_domain ((deployment_name))servicebroker.((system_domain))
 
-# Addons 
+# Addons
 - type: replace
   path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties
-  value: 
+  value:
     aliases:
        - domain: *postgres_domain
          targets:
@@ -343,14 +343,6 @@
 - type: replace
   path: /variables/name=apiserver_server/options/alternative_names
   value: [*api_domain]
-
-# - servicebroker_server
-- type: replace
-  path: /variables/name=servicebroker_server/options/common_name
-  value: *servicebroker_domain
-- type: replace
-  path: /variables/name=servicebroker_server/options/alternative_names
-  value: [*servicebroker_domain]
 
 # - servicebroker_server
 - type: replace
