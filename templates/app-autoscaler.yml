@@ -655,9 +655,9 @@ instance_groups:
         server_name: loggregator_agent_server
   - name: route_registrar
     release: routing
-    consumes: (( .internal.nats_links ))
+    consumes:
+      nats: { from: nats, deployment: cf }
     properties:
-      nats: (( .internal.nats ))
       route_registrar:
         routes:
           - name: autoscaler_metrics_forwarder
