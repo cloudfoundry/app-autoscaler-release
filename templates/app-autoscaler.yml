@@ -157,7 +157,7 @@ instance_groups:
   instances: 1
   update:
     serial: true
-  stemcell: xenial
+  stemcell: default
   vm_type: small
   networks:
     - name: default
