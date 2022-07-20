@@ -85,11 +85,14 @@ jobs:
       # TODO: When removing metricserver and metricgateway merge enable-log-cache.yml into the default templates/app-autoscaler.yml manifest.
       - name: deploy autoscaler
         run: |
-          export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
-            ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
-            ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
-            ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml\
-            ${AUTOSCALER_DIR}/example/operation/log-cache-syslog-server.yml"
+          export OPS_FILES="
+            ${AUTOSCALER_DIR}/operations/instance-identity-cert-from-cf.yml\
+            ${AUTOSCALER_DIR}/operations/enable-nats-tls.yml\
+            ${AUTOSCALER_DIR}/operations/loggregator-certs-from-cf.yml\
+            ${AUTOSCALER_DIR}/operations/add-extra-plan.yml\
+            ${AUTOSCALER_DIR}/operations/set-release-version.yml\
+            ${AUTOSCALER_DIR}/operations/enable-log-cache.yml\
+            ${AUTOSCALER_DIR}/operations/log-cache-syslog-server.yml"
           ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker

@@ -1,6 +1,6 @@
 # Adds Syslog-agent
 - type: replace
-  path: /instance_groups/name=asapi/jobs/-
+  path: /instance_groups/name=metricsforwarder/jobs/-
   value:
     name: loggr-syslog-agent
     release: loggregator-agent
@@ -17,15 +17,13 @@
         key: ((loggregator_agent_metrics_tls.private_key))
         server_name: loggregator_agent_server
 
-# Adds removes loggregator-agent
+# Removes loggregator-agent
 - type: remove
-  path: /instance_groups/name=asapi/jobs/name=loggregator_agent
-
-
+  path: /instance_groups/name=metricsforwarder/jobs/name=loggregator_agent
 
 # Configure metric forwarder grpc tls client config
 - type: replace
-  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/loggregator/tls
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/loggregator/tls
   value:
     ca_cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.ca))
     cert: ((/bosh-autoscaler/cf/loggregator_tls_agent.certificate))

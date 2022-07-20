@@ -73,20 +73,6 @@ pushd "$autoscaler_dir" > /dev/null
   fi
 
   OPS_FILES_TO_USE=""
-  #NOTE: REQUIRED_OPS_FILES is a file in autoscaler-release
-  #TODO rename/replace REQUIRED_OPS_FILES with a variable or a proper file name (maybe required_ops_files.txt).
-  if [ -f REQUIRED_OPS_FILES ]; then
-    # shellcheck disable=SC2013
-    for OPS_FILE in $(cat REQUIRED_OPS_FILES); do
-      if [ -f "${OPS_FILE}" ]; then
-         OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
-      else
-        echo "ERROR: in REQUIRED_OPS_FILES could not find ops file ${OPS_FILE} in ${PWD}"
-        exit 1
-      fi
-    done
-  fi
-
   for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
       OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
