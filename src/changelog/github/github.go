@@ -10,6 +10,9 @@ import (
 
 type GitHub struct {
 	client *githubv4.Client
+	owner  string
+	repo   string
+	branch string
 }
 
 type PullRequest struct {
@@ -32,17 +35,20 @@ func (pr PullRequest) HasLabel(label string) bool {
 	return false
 }
 
-func New(token string) GitHub {
+func New(token string, owner string, repo string, branch string) GitHub {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
 	return GitHub{
 		client: githubv4.NewClient(httpClient),
+		owner:  owner,
+		repo:   repo,
+		branch: branch,
 	}
 }
 
-func (g GitHub) FetchSHAIDsOfReleases(owner, repo string) (map[string]string, error) {
+func (g GitHub) GetTagsToSha() (map[string]string, error) {
 	var releaseSHAsQuery struct {
 		Repository struct {
 			Releases struct {
@@ -59,8 +65,8 @@ func (g GitHub) FetchSHAIDsOfReleases(owner, repo string) (map[string]string, er
 	}
 
 	releaseSHAsVariables := map[string]interface{}{
-		"owner": githubv4.String(owner),
-		"name":  githubv4.String(repo),
+		"owner": githubv4.String(g.owner),
+		"name":  githubv4.String(g.repo),
 	}
 
 	err := g.client.Query(context.Background(), &releaseSHAsQuery, releaseSHAsVariables)
@@ -68,12 +74,12 @@ func (g GitHub) FetchSHAIDsOfReleases(owner, repo string) (map[string]string, er
 		return nil, err
 	}
 
-	releaseSHAs := map[string]string{}
+	tagToSha := map[string]string{}
 	for _, release := range releaseSHAsQuery.Repository.Releases.Nodes {
-		releaseSHAs[release.Tag.Target.Oid] = release.Tag.Name
+		tagToSha[release.Tag.Name] = release.Tag.Target.Oid
 	}
 
-	return releaseSHAs, nil
+	return tagToSha, nil
 }
 
 func (g GitHub) FetchLatestReleaseCommitFromBranch(owner, repo, branch string) (string, error) {
@@ -123,7 +129,7 @@ func (g GitHub) FetchLatestReleaseCommitFromBranch(owner, repo, branch string) (
 	return lastCommit, nil
 }
 
-func (g GitHub) FetchPullRequests(owner, repo, branch, startingCommitSHA, lastCommitSHA string) ([]PullRequest, error) {
+func (g GitHub) FetchPullRequests(startingCommitSHA, lastCommitSHA string) ([]PullRequest, error) {
 	var pullRequestsQuery struct {
 		Repository struct {
 			Ref struct {
@@ -163,9 +169,9 @@ func (g GitHub) FetchPullRequests(owner, repo, branch, startingCommitSHA, lastCo
 	}
 
 	pullRequestsVariables := map[string]interface{}{
-		"owner":        githubv4.String(owner),
-		"name":         githubv4.String(repo),
-		"branch":       githubv4.String(branch),
+		"owner":        githubv4.String(g.owner),
+		"name":         githubv4.String(g.repo),
+		"branch":       githubv4.String(g.branch),
 		"commitCursor": (*githubv4.String)(nil),
 	}
 
