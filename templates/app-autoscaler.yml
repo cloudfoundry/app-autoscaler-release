@@ -586,6 +586,7 @@ instance_groups:
             ca_cert: ((!metricsserver_client_cert.ca))
             client_cert: ((!metricsserver_client_cert.certificate))
             client_key: ((!metricsserver_client_cert.private_key))
+            port: *metricsserverPort
             host: *metricsserver_domain
   - name: route_registrar
     release: routing
