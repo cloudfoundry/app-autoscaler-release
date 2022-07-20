@@ -37,7 +37,7 @@ bosh delete-deployment -d "${deployment_name}" -n
 if [ -n "${CURRENT_COMMIT_HASH}" ]
 then
   echo "- Deleting bosh release '${bosh_release_version}'"
-  bosh delete-release -n app-autoscaler/${bosh_release_version}
+  bosh delete-release -n "app-autoscaler/${bosh_release_version}"
 fi
 
 echo "- Deleting credhub creds: '/bosh-autoscaler/${deployment_name}/*'"
