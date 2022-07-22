@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-go_modules:= $(shell  find . -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
+go_modules:= $(shell  find . -depth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
@@ -223,3 +223,9 @@ vendor:
 	do\
 	   cd $${folder}; echo "- go mod vendor'$${folder}'"; go mod vendor; cd - >/dev/null;\
 	done
+
+# https://github.com/golang/tools/blob/master/gopls/doc/workspace.md
+.PHONY: workspace
+workspace:
+	[ -e go.work ] || go work init
+	go work use $(addprefix ./src/,$(go_modules))
