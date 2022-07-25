@@ -21,7 +21,7 @@ existing_service_broker=$(cf service-brokers | grep "${service_broker_name}.${sy
 set -e
 
 if [[ ! -z "$existing_service_broker" ]]; then
-  echo "Service Broker ${existing_service_broker} already exists, assuming this is ok..."
+  echo "Service Broker ${existing_service_broker} already exists, deleting it..."
   cf delete-service-broker ${existing_service_broker} -f
 fi
 
