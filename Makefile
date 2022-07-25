@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-go_modules:= $(shell  find . -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
+go_modules:= $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
@@ -14,6 +14,9 @@ POSTGRES_TAG := 12
 
 CI?=false
 $(shell mkdir -p target)
+
+list-modules:
+	@echo ${go_modules}
 
 .PHONY: check-type
 check-db_type:
@@ -213,13 +216,19 @@ release:
 	bosh create-release --force --timestamp-version --tarball=${name}-${version}.tgz
 
 mod-tidy:
-	@for folder in $$(find . -depth 3 -name "go.mod" -exec dirname {} \;);\
+	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
 	   cd $${folder}; echo "- go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
 	done
 
 vendor:
-	@for folder in $$(find . -depth 3 -name "go.mod" -exec dirname {} \;);\
+	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
 	   cd $${folder}; echo "- go mod vendor'$${folder}'"; go mod vendor; cd - >/dev/null;\
 	done
+
+# https://github.com/golang/tools/blob/master/gopls/doc/workspace.md
+.PHONY: workspace
+workspace:
+	[ -e go.work ] || go work init
+	go work use $(addprefix ./src/,$(go_modules))
