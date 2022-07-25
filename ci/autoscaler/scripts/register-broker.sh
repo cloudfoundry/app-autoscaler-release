@@ -20,9 +20,9 @@ set +e
 existing_service_broker=$(cf service-brokers | grep "${service_broker_name}.${system_domain}" |  cut -d' ' -f1)
 set -e
 
-if [[ ! -z "$existing_service_broker" ]]; then
+if [[ -n "$existing_service_broker" ]]; then
   echo "Service Broker ${existing_service_broker} already exists, deleting it..."
-  cf delete-service-broker ${existing_service_broker} -f
+  cf delete-service-broker "${existing_service_broker}" -f
 fi
 
 echo "Creating service broker ${deployment_name} at 'https://${service_broker_name}.${system_domain}'"
