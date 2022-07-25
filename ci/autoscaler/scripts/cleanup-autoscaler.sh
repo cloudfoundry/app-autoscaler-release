@@ -1,7 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
-service_name="${SERVICE_NAME:-autoscaler}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 service_broker_name="${deployment_name}servicebroker"
 autoscaler_root=${AUTOSCALER_DIR:-app-autoscaler-release}
@@ -28,7 +27,7 @@ echo "# Cleaning up from Bosh deployments"
 SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}" || true)
 if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
   echo "- Service Broker exists, deleting broker '${service_name}'"
-  cf delete-service-broker "${service_name}" -f
+  cf delete-service-broker "${deployment_name}" -f
 fi
 
 echo "- Deleting bosh deployment '${deployment_name}'"
