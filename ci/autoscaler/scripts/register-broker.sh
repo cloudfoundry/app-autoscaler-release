@@ -17,12 +17,12 @@ cf_admin_password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 cf auth admin "${cf_admin_password}"
 
 set +e
-service_broker_exists=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}")
+existing_service_broker=$(cf service-brokers | grep "${service_broker_name}.${system_domain}" |  cut -d' ' -f1)
 set -e
 
-if [[ "${service_broker_exists}" == 1 ]]; then
-  echo "Service Broker ${deployment_name} already exists, assuming this is ok..."
-  cf delete-service-broker -f ${deployment_name}
+if [[ ! -z "$existing_service_broker" ]]; then
+  echo "Service Broker ${existing_service_broker} already exists, assuming this is ok..."
+  cf delete-service-broker ${existing_service_broker} -f
 fi
 
 echo "Creating service broker ${deployment_name} at 'https://${service_broker_name}.${system_domain}'"
