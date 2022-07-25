@@ -114,7 +114,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: main
+    branch: refactor-acceptance
     fetch_tags: true
     paths:
       - ci
@@ -292,25 +292,26 @@ jobs:
   - in_parallel:
     - get: bbl-state
       passed: [deploy-cf]
-    - get: app-autoscaler-release-main
-      passed: [unit-tests-main, integration-tests-main]
+    - get: app-autoscaler-release-ci
   - task: run-pre-release-script
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
       SCRIPT_NAME: ./scripts/update
     input_mapping:
-      release: app-autoscaler-release-main
+      release: app-autoscaler-release-ci
     output_mapping:
-      release: app-autoscaler-release-main
+      release: app-autoscaler-release-ci
   - task: deploy-autoscaler
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
+    file: app-autoscaler-release-ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
       <<: *app-autoscaler-ops-files
     input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
+      app-autoscaler-release: app-autoscaler-release-ci
   - task: register-broker
     file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
+    input_mapping:
+      release: app-autoscaler-release-ci
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
 
@@ -457,6 +458,8 @@ jobs:
     file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *acceptance-main-env
+    input_mapping:
+      release: app-autoscaler-release-main
   - task: autoscaler-acceptance
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -501,6 +504,8 @@ jobs:
     file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *acceptance-main-log-cache-env
+    input_mapping:
+      release: app-autoscaler-release-main
   - task: autoscaler-acceptance
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -541,6 +546,8 @@ jobs:
     file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *upgrade-test-env
+    input_mapping:
+      release: app-autoscaler-release-main
   - task: autoscaler-pre-upgrade
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:

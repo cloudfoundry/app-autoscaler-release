@@ -11,10 +11,6 @@ params:
   SYSTEM_DOMAIN:
   SKIP_SSL_VALIDATION: false
   NAME_PREFIX: ASATS
-  SUITES: |
-    api
-    app
-    broker
   NODES: 3
 inputs:
 - name: bbl-state

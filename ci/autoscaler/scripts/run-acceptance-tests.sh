@@ -10,6 +10,7 @@ skip_teardown="${SKIP_TEARDOWN:-false}"
 skip_ssl_validation="${SKIP_SSL_VALIDATION:-true}"
 name_prefix="${NAME_PREFIX:-ASATS}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
+suites="${SUITES:-api app broker}"
 gingko_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
 
@@ -41,11 +42,11 @@ cat > acceptance_config.json <<EOF
 EOF
 
 suites_to_run=""
-for SUITE in $SUITES; do
-  echo "Checking suite $SUITE"
-  if [[ -d "$SUITE" ]]; then
-     echo "Adding suite $SUITE to list"
-     suites_to_run="$suites_to_run $SUITE"
+for suite in $suites; do
+  echo "Checking suite $suite"
+  if [[ -d "$suite" ]]; then
+     echo "Adding suite $suite to list"
+     suites_to_run="$suites_to_run $suite"
   fi
 done
 
