@@ -26,7 +26,7 @@ popd  > /dev/null
 echo "# Cleaning up from Bosh deployments"
 SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}" || true)
 if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
-  echo "- Service Broker exists, deleting broker '${service_name}'"
+  echo "- Service Broker exists, deleting broker '${deployment_name}'"
   cf delete-service-broker "${deployment_name}" -f
 fi
 
