@@ -29,7 +29,6 @@ var _ = Describe("App", func() {
 		fakeCC          *ghttp.Server
 		fakeLoginServer *ghttp.Server
 		err             error
-		appState        string
 		appEntity       *models.AppEntity
 	)
 
@@ -66,7 +65,6 @@ var _ = Describe("App", func() {
 			appEntity, err = cfc.GetApp("test-app-id")
 		})
 		Context("when get app summary succeeds", func() {
-			appState = "test_app_state"
 			BeforeEach(func() {
 				fakeCC.AppendHandlers(
 					ghttp.CombineHandlers(
@@ -74,7 +72,7 @@ var _ = Describe("App", func() {
 						ghttp.RespondWithJSONEncoded(http.StatusOK,
 							models.AppEntity{
 								Instances: 6,
-								State:     &appState,
+								State:     "test_app_state",
 							}),
 					),
 				)
@@ -83,7 +81,7 @@ var _ = Describe("App", func() {
 			It("returns correct instance number", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(appEntity.Instances).To(Equal(6))
-				Expect(*appEntity.State).To(Equal("test_app_state"))
+				Expect(appEntity.State).To(Equal("test_app_state"))
 			})
 		})
 

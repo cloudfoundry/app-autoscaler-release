@@ -65,9 +65,7 @@ var _ = SynchronizedBeforeSuite(
 		ccUAA.RouteToHandler("POST", "/oauth/token", ghttp.RespondWithJSONEncoded(http.StatusOK, cf.Tokens{}))
 
 		appId = fmt.Sprintf("app-id-%d", GinkgoParallelProcess())
-		appState := models.AppStatusStarted
-		ccUAA.RouteToHandler("GET", "/v2/apps/"+appId+"/summary", ghttp.RespondWithJSONEncoded(http.StatusOK,
-			models.AppEntity{Instances: 2, State: &appState}))
+		ccUAA.RouteToHandler("GET", "/v2/apps/"+appId+"/summary", ghttp.RespondWithJSONEncoded(http.StatusOK, models.AppEntity{Instances: 2, State: models.AppStatusStarted}))
 		ccUAA.RouteToHandler("PUT", "/v2/apps/"+appId, ghttp.RespondWith(http.StatusCreated, ""))
 
 		conf.CF = cf.CFConfig{

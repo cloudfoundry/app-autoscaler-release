@@ -38,8 +38,7 @@ var _ = Describe("AppSynchronizer", func() {
 
 		Context("when trying to delete existing application records from policy db", func() {
 			BeforeEach(func() {
-				appStateStarted := models.AppStatusStarted
-				existent_app_details := models.AppEntity{Instances: 1, State: &appStateStarted}
+				existent_app_details := models.AppEntity{Instances: 1, State: models.AppStatusStarted}
 				cfc.GetAppReturns(&existent_app_details, nil)
 			})
 			It("should not delete", func() {

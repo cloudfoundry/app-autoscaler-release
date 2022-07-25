@@ -87,7 +87,7 @@ func (s *scalingEngine) Scale(appId string, trigger *models.Trigger) (*models.Ap
 	}
 	history.OldInstances = appEntity.Instances
 
-	if strings.ToUpper(*appEntity.State) != models.AppStatusStarted {
+	if strings.ToUpper(appEntity.State) != models.AppStatusStarted {
 		logger.Info("check-app-state", lager.Data{"message": "ignore scaling since app is not started"})
 		history.Status = models.ScalingStatusIgnored
 		history.NewInstances = appEntity.Instances
