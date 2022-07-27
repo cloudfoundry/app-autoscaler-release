@@ -18,6 +18,16 @@
     from: nats-tls
     deployment: cf
 
+# metricsforwarder
+- type: remove
+  path: /instance_groups/name=metricsforwarder/jobs/name=route_registrar/consumes/nats
+
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=route_registrar/consumes/nats-tls?
+  value:
+    from: nats-tls
+    deployment: cf
+
 # scheduler
 - type: replace
   path: /instance_groups/name=scheduler/jobs/name=route_registrar/properties/nats?
