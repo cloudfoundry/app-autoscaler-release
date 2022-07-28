@@ -23,5 +23,4 @@ if [ "${BBL_DNS_VALUES}" == "${GCP_DNS_VALUES}" ]; then
   echo "${BBL_DNS_VALUES} is correct"
 else
   echo "dns zone:${GCP_DNS_ZONE} name:${GCP_DNS_NAME} need to be updated to ${BBL_DNS_VALUES}"
-  exit 1
 fi
