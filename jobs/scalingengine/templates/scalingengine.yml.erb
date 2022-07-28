@@ -54,6 +54,9 @@ cf:
   client_id: <%= p("autoscaler.cf.client_id") %>
   secret: <%= p("autoscaler.cf.secret") %>
   skip_ssl_validation: <%= p("autoscaler.cf.skip_ssl_validation") %>
+  max_retries: <%= p("autoscaler.cf.max_retries") %>
+  max_retry_wait_ms: <%= p("autoscaler.cf.max_retry_wait_ms") %>
+
 
 server:
   port:  <%= p("autoscaler.scalingengine.server.port") %>
