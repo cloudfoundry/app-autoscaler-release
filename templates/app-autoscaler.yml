@@ -669,7 +669,7 @@ instance_groups:
               - *metricsforwarder_public_domain
           - name: autoscaler_metrics_forwarder_mtls
             registration_interval: 20s
-            port: REPLACE_ME
+            port: *metricsforwarderServerPort
             tags:
               component: autoscaler_metrics_forwarder
             uris:
