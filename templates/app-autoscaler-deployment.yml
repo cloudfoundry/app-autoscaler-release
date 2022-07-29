@@ -7,9 +7,9 @@ releases:
 - name: app-autoscaler
   version: latest
 - name: "postgres"
-  version: "31"
-  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=31"
-  sha1: "bbe4151f4000f349c2ffaf72412aac9cc0a3c741"
+  version: "35"
+  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=35"
+  sha1: "8a30528f55a1add20562eff4bd9c11a3f970865e"
 - name: bosh-dns-aliases
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3
   version: '0.0.3'
