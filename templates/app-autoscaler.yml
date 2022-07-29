@@ -699,6 +699,8 @@ variables:
   type: password
   options:
     length: 128
+- name: autoscaler_eventgenerator_health_password
+  type: password
 - name: service_broker_password
   type: password
   options:
@@ -710,6 +712,8 @@ variables:
 - name: autoscaler_metricsforwarder_health_password
   type: password
 - name: autoscaler_metricsgateway_health_password
+  type: password
+- name: autoscaler_metricsserver_health_password
   type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password
   type: password
