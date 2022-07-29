@@ -931,6 +931,11 @@ variables:
     extended_key_usage:
       - client_auth
       - server_auth
+- name: metric_scraper_ca
+  type: certificate
+  options:
+    common_name: metricScraperCA
+    is_ca: true
 - name: loggregator_agent_metrics_tls
   type: certificate
   update_mode: converge
