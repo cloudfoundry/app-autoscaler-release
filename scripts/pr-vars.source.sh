@@ -6,7 +6,6 @@ export script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd 
 pr_number=${PR_NUMBER:-44}
 export DEPLOYMENT_NAME="app-autoscaler-${pr_number}"
 export SERVICE_BROKER_NAME="app-autoscaler-${pr_number}servicebroker"
-export SERVICE_NAME="autoscaler-${pr_number}"
 export BBL_STATE_PATH="${script_dir}/../../app-autoscaler-env-bbl-state/bbl-state"
 export SYSTEM_DOMAIN="autoscaler.ci.cloudfoundry.org"
 export AUTOSCALER_DIR="${script_dir}/../"
