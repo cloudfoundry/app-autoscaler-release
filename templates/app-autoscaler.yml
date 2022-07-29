@@ -689,6 +689,8 @@ update:
   update_watch_time: 1000-300000
 
 variables:
+- name: database_password
+  type: password
 - name: uaa_secret
   type: password
   options:
@@ -705,10 +707,16 @@ variables:
   type: password
   options:
     length: 128
+- name: autoscaler_metricsforwarder_health_password
+  type: password
+- name: autoscaler_metricsgateway_health_password
+  type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password
   type: password
   options:
     length: 128
+- name: autoscaler_operator_health_password
+  type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password_blue
   type: password
   options:
@@ -737,6 +745,13 @@ variables:
   type: password
   options:
     length: 128
+- name: autoscaler_scheduler_health_password
+  type: password
+- name: scalingengine_ca
+  type: certificate
+  options:
+    is_ca: true
+    common_name: scalingengineCA
 - name: ratelimiter_monitor_basic_auth_password
   type: password
   options:
@@ -765,6 +780,8 @@ variables:
   type: password
   options:
     length: 128
+- name: autoscaler_scalingengine_health_password
+  type: password
 - name: metricsgateway_monitor_basic_auth_password
   type: password
   options:
@@ -913,4 +930,14 @@ variables:
       - *postgres_domain
     extended_key_usage:
       - client_auth
+      - server_auth
+- name: loggregator_agent_metrics_tls
+  type: certificate
+  update_mode: converge
+  options:
+    ca: metric_scraper_ca
+    common_name: loggregator_agent_server
+    alternative_names:
+      - loggregator_agent_server
+    extended_key_usage:
       - server_auth
