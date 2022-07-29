@@ -211,6 +211,7 @@ $(addprefix lint_,$(go_modules)): lint_%:
 
 .PHONY: spec-test
 spec-test:
+	bundle install
 	bundle exec rspec
 
 .PHONY: release
