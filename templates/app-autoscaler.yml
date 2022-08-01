@@ -142,6 +142,10 @@ addons:
             instance_group: log-cache
             network: default
             query: '*'
+- name: bpm
+  jobs:
+    - name: bpm
+      release: bpm
 
 ### Stemcells ###
 stemcells:
