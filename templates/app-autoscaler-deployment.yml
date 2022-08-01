@@ -570,8 +570,8 @@ instance_groups:
         policy_db_connection_config: *databaseConnectionConfig
   - name: route_registrar
     release: routing
-    consumes:
-      nats: {from: nats, deployment: cf}
+    cgonsumes:
+      nats-tls: {from: nats-tls, deployment: cf}
     properties:
       route_registrar:
         routes:
