@@ -656,7 +656,6 @@ instance_groups:
   - name: route_registrar
     release: routing
     consumes:
-      nats: { from: nats, deployment: cf }
     properties:
       route_registrar:
         routes:
