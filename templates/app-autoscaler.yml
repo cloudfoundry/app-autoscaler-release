@@ -53,56 +53,56 @@ addons:
       - domain: *postgres_domain
         targets:
           - query: '*'
-            instance_group: postgres_autoscaler
+            instance_group: postgres
             deployment: ((deployment_name))
             network: default
             domain: bosh
       - domain: *api_domain
         targets:
           - query: '*'
-            instance_group: asapi
+            instance_group: apiserver
             deployment: ((deployment_name))
             network: default
             domain: bosh
       - domain: *scheduler_domain
         targets:
           - query: '*'
-            instance_group: asactors
+            instance_group: scheduler
             deployment: ((deployment_name))
             network: default
             domain: bosh
       - domain: *servicebroker_domain
         targets:
           - query: '*'
-            instance_group: asapi
+            instance_group: apiserver
             deployment: ((deployment_name))
             network: default
             domain: bosh
       - domain: *eventgenerator_domain
         targets:
           - query: '*'
-            instance_group: asmetrics
+            instance_group: eventgenerator
             deployment: ((deployment_name))
             network: default
             domain: bosh
       - domain: *scalingengine_domain
         targets:
           - query: '*'
-            instance_group: asactors
+            instance_group: scalingengine
             deployment: ((deployment_name))
             network: default
             domain: bosh
       - domain: *metricsgateway_domain
         targets:
           - query: '*'
-            instance_group: asnozzle
+            instance_group: metricsgateway
             deployment: ((deployment_name))
             network: default
             domain: bosh
       - domain: *metricsserver_domain
         targets:
           - query: '*'
-            instance_group: asmetrics
+            instance_group: metricsserver
             deployment: ((deployment_name))
             network: default
             domain: bosh
@@ -882,7 +882,7 @@ variables:
     common_name: *metricsserver_domain
     alternative_names:
     - *metricsserver_domain
-    - "*.asmetrics.default.((deployment_name)).bosh"
+    - "*.metricsserver.default.((deployment_name)).bosh"
 
     extended_key_usage:
     - client_auth
