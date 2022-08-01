@@ -26,7 +26,7 @@ releases:
   sha1: sha256:031cf5600158f44762c747a1f8648b7cebca876d4297dd9e2ce3b51b36ccd476
 
 domains:
-  postgres: &postgres_domain ((deployment_name)).autoscalerpostgres.service.cf.internal
+  postgres: &postgres_domain ((deployment_name)).postgres.service.cf.internal
   api: &api_domain ((deployment_name)).apiserver.service.cf.internal
   scheduler: &scheduler_domain ((deployment_name)).autoscalerscheduler.service.cf.internal
   servicebroker: &servicebroker_domain ((deployment_name)).servicebroker.service.cf.internal
