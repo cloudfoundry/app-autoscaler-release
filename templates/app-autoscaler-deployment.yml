@@ -571,7 +571,7 @@ instance_groups:
   - name: route_registrar
     release: routing
     cgonsumes:
-      nats-tls: {from: nats-tls, deployment: cf}
+      nats: {from: nats, deployment: cf}
     properties:
       route_registrar:
         routes:
