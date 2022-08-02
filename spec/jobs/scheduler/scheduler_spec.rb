@@ -1,41 +1,14 @@
 require "rspec"
 require "json"
 require "bosh/template/test"
+require "rspec/file_fixtures"
 require "yaml"
 
 describe "scheduler" do
   let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), "../../..")) }
   let(:job) { release.job("scheduler") }
   let(:template) { job.template("config/application.properties") }
-  let(:properties) do
-    YAML.safe_load(%(
-      autoscaler:
-        scheduler_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            password: default
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        policy_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            password: default
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
-    ))
-  end
+  let(:properties) { YAML.safe_load(fixture("scheduler.yml").read) }
 
   context "config/application.properties" do
     it "does not set username nor password if not configured" do

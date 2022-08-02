@@ -113,6 +113,12 @@ properties:
   autoscaler.cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
+  autoscaler.cf.max_retries:
+    description: "The number of retries from the autoscaler to the cf api (cloud controller). 0 turns off the retries."
+    default: 3
+  autoscaler.cf.max_retry_wait_ms:
+    description: "The maximum amount of time in milliseconds to wait between retries. 0 leaves it to the implementation to decide"
+    default: 0
 
   autoscaler.scalingengine.require_consul:
     description: "whether to start consul agent"

@@ -1,69 +1,17 @@
 require "rspec"
 require "json"
 require "bosh/template/test"
+require "rspec/file_fixtures"
 require "yaml"
 
 describe "golangapiserver" do
-  let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), "../../..")) }
-  let(:job) { release.job("golangapiserver") }
-  let(:template) { job.template("config/apiserver.yml") }
-  let(:properties) do
-    YAML.safe_load(%(
-      autoscaler:
-        binding_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        policy_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        storedprocedure_db:
-          address: 10.11.137.101
-          port: 5432
-          databases:
-          - name: default_db
-            tag: default
-          - name: store_procedure_db
-            tag: storedproceduredb
-          db_scheme: postgres
-          roles:
-          - name: default_username
-            tag: default
-          - name: stored_procedure_username
-            tag: storedproceduredb
-        cf:
-          api: https://api.cf.domain
-          auth_endpoint: https://login.cf.domain
-          client_id: client_id
-          secret: uaa_secret
-        apiserver:
-          broker:
-            server:
-              dashboard_redirect_uri: https://application-autoscaler-dashboard.cf.domain
-    ))
-  end
+  context "apiserver.yml.erb" do
+    let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), "../../..")) }
+    let(:job) { release.job("golangapiserver") }
+    let(:template) { job.template("config/apiserver.yml") }
+    let(:properties) { YAML.safe_load(fixture("apiserver.yml").read) }
+    let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
-  context "config/apiserver.yml" do
     context "apiserver does not use buildin mode" do
       before(:each) do
         properties["autoscaler"]["apiserver"].merge!(
@@ -163,11 +111,11 @@ describe "golangapiserver" do
     context "quota_management" do
       it "writes config when quota management is enabled" do
         properties["autoscaler"]["apiserver"]["broker"]["quota_management"] = {"enabled" => "true",
-             "api" => "https://quota_management.api",
-             "client_id" => "quota_management.client_id",
-             "secret" => "quota_management.secret",
-             "oauth_url" => "https://quota_management.oauth.api",
-             "skip_ssl_validation" => "true"}
+                                                                                "api" => "https://quota_management.api",
+                                                                                "client_id" => "quota_management.client_id",
+                                                                                "secret" => "quota_management.secret",
+                                                                                "oauth_url" => "https://quota_management.oauth.api",
+                                                                                "skip_ssl_validation" => "true"}
 
         rendered_template = YAML.safe_load(template.render(properties))
 
@@ -193,8 +141,6 @@ describe "golangapiserver" do
 
     context "plan_check" do
       it "by default plan checks are disabled" do
-        rendered_template = YAML.safe_load(template.render(properties))
-
         expect(rendered_template["plan_check"]).to be_nil
       end
 
@@ -219,8 +165,6 @@ describe "golangapiserver" do
 
     context "public_api_server" do
       it "by default TLS is not configured" do
-        rendered_template = YAML.safe_load(template.render(properties))
-
         expect(rendered_template["public_api_server"]["tls"]).to be_nil
       end
 
@@ -245,7 +189,6 @@ describe "golangapiserver" do
 
     context "cred_helper_impl" do
       it "has a cred helper impl by default" do
-        rendered_template = YAML.safe_load(template.render(properties))
         expect(rendered_template).to include(
           {
             "cred_helper_impl" => "default"
@@ -280,14 +223,13 @@ describe "golangapiserver" do
         )
       end
     end
-  end
 
-  let(:rendered_template) { YAML.safe_load(template.render(properties)) }
-  context "storedprocedure_db" do
-    it "selects db role with storedproceduredb tag by default" do
-      rendered_template["db"]["storedprocedure_db"]["url"].tap do |url|
-        expect(url).to include("stored_procedure_username")
-        expect(url).to include("store_procedure_db")
+    context "storedprocedure_db" do
+      it "selects db role with storedproceduredb tag by default" do
+        rendered_template["db"]["storedprocedure_db"]["url"].tap do |url|
+          expect(url).to include("stored_procedure_username")
+          expect(url).to include("store_procedure_db")
+        end
       end
     end
   end
