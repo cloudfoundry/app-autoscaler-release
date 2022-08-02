@@ -5,15 +5,20 @@ import (
 	"net/http"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"code.cloudfoundry.org/lager"
+	"github.com/hashicorp/go-retryablehttp"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
 	"code.cloudfoundry.org/cfhttp"
 )
 
-func CreateHTTPClient(tlsCerts *models.TLSCerts) (*http.Client, error) {
+func CreateHTTPClient(tlsCerts *models.TLSCerts, logger lager.Logger, clientName string) (*http.Client, error) {
 	if tlsCerts.CertFile == "" || tlsCerts.KeyFile == "" {
 		tlsCerts = nil
 	}
+
 	//nolint:staticcheck //TODO https://github.com/cloudfoundry/app-autoscaler-release/issues/549
 	client := cfhttp.NewClient()
 	if tlsCerts != nil {
@@ -28,5 +33,11 @@ func CreateHTTPClient(tlsCerts *models.TLSCerts) (*http.Client, error) {
 		}).DialContext
 	}
 
-	return client, nil
+	retryClient := retryablehttp.NewClient()
+	retryClient.Logger = cf.LeveledLoggerAdapter{Logger: logger.Session(clientName)}
+	retryClient.HTTPClient = client
+	retryClient.ErrorHandler = func(resp *http.Response, err error, numTries int) (*http.Response, error) {
+		return resp, err
+	}
+	return retryClient.StandardClient(), nil
 }

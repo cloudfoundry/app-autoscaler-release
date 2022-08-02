@@ -65,7 +65,7 @@ func (mc *MetricClientFactory) GetMetricClient(logger lager.Logger, conf *config
 		envelopeProcessor := NewProcessor(logger, conf.Aggregator.AggregatorExecuteInterval)
 		metricClient = mc.newLogCacheClient(logger, time.Now, logCacheClient, envelopeProcessor)
 	} else {
-		httpClient, err := helpers.CreateHTTPClient(&conf.MetricCollector.TLSClientCerts)
+		httpClient, err := helpers.CreateHTTPClient(&conf.MetricCollector.TLSClientCerts, logger, "metric")
 
 		if err != nil {
 			logger.Error("failed to create http client for MetricCollector", err, lager.Data{"metriccollectorTLS": httpClient})

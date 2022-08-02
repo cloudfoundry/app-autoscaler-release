@@ -21,7 +21,7 @@ type SchedulerUtil struct {
 }
 
 func NewSchedulerUtil(conf *config.Config, logger lager.Logger) *SchedulerUtil {
-	client, err := helpers.CreateHTTPClient(&conf.Scheduler.TLSClientCerts)
+	client, err := helpers.CreateHTTPClient(&conf.Scheduler.TLSClientCerts, logger, "scheduler")
 	if err != nil {
 		logger.Error("Failed to create http client for Scheduler", err, lager.Data{"scheduler": conf.Scheduler.TLSClientCerts})
 		os.Exit(1)

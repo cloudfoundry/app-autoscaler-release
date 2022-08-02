@@ -39,19 +39,19 @@ type PublicApiHandler struct {
 }
 
 func NewPublicApiHandler(logger lager.Logger, conf *config.Config, policydb db.PolicyDB, bindingdb db.BindingDB, credentials cred_helper.Credentials) *PublicApiHandler {
-	seClient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.TLSClientCerts)
+	seClient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.TLSClientCerts, logger, "scalingEngine")
 	if err != nil {
 		logger.Error("Failed to create http client for ScalingEngine", err, lager.Data{"scalingengine": conf.ScalingEngine.TLSClientCerts})
 		os.Exit(1)
 	}
 
-	mcClient, err := helpers.CreateHTTPClient(&conf.MetricsCollector.TLSClientCerts)
+	mcClient, err := helpers.CreateHTTPClient(&conf.MetricsCollector.TLSClientCerts, logger, "metricsCollector")
 	if err != nil {
 		logger.Error("Failed to create http client for MetricsCollector", err, lager.Data{"metricscollector": conf.MetricsCollector.TLSClientCerts})
 		os.Exit(1)
 	}
 
-	egClient, err := helpers.CreateHTTPClient(&conf.EventGenerator.TLSClientCerts)
+	egClient, err := helpers.CreateHTTPClient(&conf.EventGenerator.TLSClientCerts, logger, "eventGenerator")
 	if err != nil {
 		logger.Error("Failed to create http client for EventGenerator", err, lager.Data{"eventgenerator": conf.EventGenerator.TLSClientCerts})
 		os.Exit(1)

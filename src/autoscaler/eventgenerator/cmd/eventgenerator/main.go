@@ -179,7 +179,7 @@ func loadConfig(path string) (*config.Config, error) {
 func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan chan []*models.Trigger, queryMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) ([]*generator.Evaluator, error) {
 	count := conf.Evaluator.EvaluatorCount
 
-	client, err := helpers.CreateHTTPClient(&conf.ScalingEngine.TLSClientCerts)
+	client, err := helpers.CreateHTTPClient(&conf.ScalingEngine.TLSClientCerts, logger, "ScalingEngine")
 	if err != nil {
 		logger.Error("failed to create http client for ScalingEngine", err, lager.Data{"scalingengineTLS": conf.ScalingEngine.TLSClientCerts})
 		os.Exit(1)
