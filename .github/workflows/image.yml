@@ -36,8 +36,6 @@ jobs:
       - name: Install cosign
         if: ${{ github.event_name != 'pull_request' }}
         uses: sigstore/cosign-installer@09a077b27eb1310dcfb21981bee195b30ce09de0
-        with:
-          cosign-release: 'v1.4.0'
 
       - name: Log in to the Container registry
         uses: docker/login-action@49ed152c8eca782a232dede0303416e8f356c37b
