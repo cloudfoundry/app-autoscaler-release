@@ -171,7 +171,7 @@ resources:
   source:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-    tag_filter: v12.*
+    tag_filter: v13.*
 
 - name: release-bucket
   type: gcs-resource
