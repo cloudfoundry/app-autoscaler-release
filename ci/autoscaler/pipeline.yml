@@ -462,6 +462,7 @@ jobs:
       release: app-autoscaler-release-main
   - in_parallel:
     - task: autoscaler-acceptance-api
+      attempts: 3
       file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-main-env
@@ -469,6 +470,7 @@ jobs:
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
     - task: autoscaler-acceptance-app
+      attempts: 3
       file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-main-env
@@ -476,6 +478,7 @@ jobs:
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
     - task: autoscaler-acceptance-broker
+      attempts: 3
       file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-main-env
@@ -522,12 +525,33 @@ jobs:
       <<: *acceptance-main-log-cache-env
     input_mapping:
       release: app-autoscaler-release-main
-  - task: autoscaler-acceptance
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
-    params:
-      <<: *acceptance-main-log-cache-env
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
+  - in_parallel:
+    - task: autoscaler-acceptance-api
+      attempts: 3
+      file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-main-log-cache-env
+        SUITES: api
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
+    - task: autoscaler-acceptance-app
+      attempts: 3
+      file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-main-log-cache-env
+        SUITES: app
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
+    - task: autoscaler-acceptance-broker
+      attempts: 3
+      file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-main-log-cache-env
+        SUITES: broker
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
+
+
 
 
 - name: upgrade-test-main
