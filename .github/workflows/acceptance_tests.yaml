@@ -37,6 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       check_id: ${{ steps.create_check.outputs.check_id }}
+    permissions:
+      checks: write
     steps:
       - run: echo "sha is ${{github.event.pull_request.head.sha}}"
       - run: |
@@ -152,6 +154,8 @@ jobs:
     needs: [ start_pending_result, acceptance_test_app, acceptance_test_broker, acceptance_test_api ]
     name: Posting test result
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
     steps:
       - run: |
           curl -sf -X PATCH \
@@ -179,6 +183,9 @@ jobs:
     if: ${{ always() }}
     name: Acceptance Tests Result
     runs-on: ubuntu-latest
+    permissions:
+      checks: read
+      actions: read
     steps:
       - name: Retrieve and assume last acceptance test result
         run: |
