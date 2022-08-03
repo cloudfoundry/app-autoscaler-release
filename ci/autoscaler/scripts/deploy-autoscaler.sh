@@ -6,6 +6,7 @@ system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
+deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 ops_files="${OPS_FILES:-''}"
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
@@ -56,8 +57,8 @@ fi
 pushd "$autoscaler_dir" > /dev/null
   # Determine if we need to upload a stemcell at this point.
   #TODO refactor out function for stemcell check and update.
-  STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' templates/app-autoscaler-deployment.yml)
-  STEMCELL_VERSION=$(yq eval '.stemcells[] | select(.alias == "default").version' templates/app-autoscaler-deployment.yml)
+  STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
+  STEMCELL_VERSION=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
   STEMCELL_NAME="bosh-google-kvm-${STEMCELL_OS}-go_agent"
   set +e
   STEMCELL_EXISTS=$(bosh stemcells | grep -c "${STEMCELL_NAME}")
