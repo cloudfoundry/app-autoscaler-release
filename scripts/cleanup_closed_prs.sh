@@ -1,10 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-open_file="${script_dir}/open_numbers"
 
 pushd "$script_dir" >/dev/null
-open_prs="$(gh pr list --state open --json "number" --jq ".[].number" | tr '\n' '|'  > "${open_file}")"
+open_prs="$(gh pr list --state open --json "number" --jq ".[].number" | tr '\n' '|')"
 open_prs=${open_prs%?}
 echo "Open prs:'${open_prs}'"
 closed_prs=$(bosh deployments | grep app-autoscaler | awk '{ print $1 }' | grep -vE "${open_prs}"  | sed -e 's/app-autoscaler-//' | tr '\n' ' ')
