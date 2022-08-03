@@ -1,6 +1,6 @@
 golang 1.18.5
 java temurin-11.0.15+10
-ruby 2.7.4
+ruby 2.7.5
 maven 3.6.3
 nodejs 16.14.0
 ginkgo 2.1.3

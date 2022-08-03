@@ -31,7 +31,7 @@ set -e
 function deploy () {
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
-    deploy "templates/app-autoscaler.yml" \
+    deploy "$deployment_manifest" \
     ${OPS_FILES_TO_USE} \
     -v system_domain="${system_domain}" \
     -v deployment_name="${deployment_name}" \
