@@ -460,12 +460,28 @@ jobs:
       <<: *acceptance-main-env
     input_mapping:
       release: app-autoscaler-release-main
-  - task: autoscaler-acceptance
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
-    params:
-      <<: *acceptance-main-env
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
+  - in_parallel:
+    - task: autoscaler-acceptance-api
+      file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-main-env
+        SUITES: api
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
+    - task: autoscaler-acceptance-app
+      file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-main-env
+        SUITES: app
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
+    - task: autoscaler-acceptance-broker
+      file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-main-env
+        SUITES: broker
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
 
 - name: acceptance-main-log-cache
   public: true
