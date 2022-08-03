@@ -224,7 +224,7 @@ instance_groups:
             require_consul: false
             logging:
               level: info
-            ca_cert: ((scalingengine_ca.ca))
+            ca_cert: ((app_autoscaler_ca_cert.ca))
             server_cert: ((scalingengine_server_cert.certificate))
             server_key: ((scalingengine_server_cert.private_key))
     - name: route_registrar
@@ -757,11 +757,6 @@ variables:
     length: 128
 - name: autoscaler_scheduler_health_password
   type: password
-- name: scalingengine_ca
-  type: certificate
-  options:
-    is_ca: true
-    common_name: scalingengineCA
 - name: ratelimiter_monitor_basic_auth_password
   type: password
   options:
