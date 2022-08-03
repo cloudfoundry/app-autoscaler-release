@@ -294,7 +294,8 @@ instance_groups:
               port: &brokerServerPort 6102
               catalog:
                 services:
-                - name: ((deployment_name))
+                - id: autoscaler-guid
+                  name: ((deployment_name))
                   description: Automatically increase or decrease the number of application instances based on a policy you define.
                   bindable: true
                   plans:
