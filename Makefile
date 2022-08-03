@@ -209,23 +209,32 @@ $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run ${OPTS}
 
+.PHONY: spec-test
 spec-test:
 	bundle exec rspec
+
+.PHONY: release
 release:
 	./scripts/update
 	bosh create-release --force --timestamp-version --tarball=${name}-${version}.tgz
 
+.PHONY: mod-tidy
 mod-tidy:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
 	   cd $${folder}; echo "- go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
 	done
 
+.PHONY: vendor
 vendor:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
 	   cd $${folder}; echo "- go mod vendor'$${folder}'"; go mod vendor; cd - >/dev/null;\
 	done
+
+.PHONY: fakes
+fakes:
+	@make -C src/autoscaler fakes
 
 # https://github.com/golang/tools/blob/master/gopls/doc/workspace.md
 .PHONY: workspace
