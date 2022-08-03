@@ -2,6 +2,7 @@ package cf_test
 
 import (
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"gopkg.in/yaml.v3"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -10,13 +11,45 @@ import (
 var _ = Describe("Config", func() {
 
 	var (
-		conf *CFConfig
+		conf *Config
 		err  error
 	)
+	Describe("Deserialise", func() {
+		var (
+			objectbytes string
+		)
+		JustBeforeEach(func() {
+			err = yaml.Unmarshal([]byte(objectbytes), &conf)
+		})
+		Context("Given a valid configuration", func() {
+			BeforeEach(func() {
+				objectbytes = `
+api: https://api.example.com
+client_id: client-id
+secret: client-secret
+skip_ssl_validation: false
+max_retries: 3
+max_retry_wait_ms: 27
+`
+			})
+			It("should deserialise correctly", func() {
+				Expect(err).To(Not(HaveOccurred()))
+				Expect(conf).To(Equal(&Config{
+					API:               "https://api.example.com",
+					ClientID:          "client-id",
+					Secret:            "client-secret",
+					SkipSSLValidation: false,
+					MaxRetries:        3,
+					MaxRetryWaitMs:    27,
+				}))
+			})
+		})
+
+	})
 
 	Describe("Validate", func() {
 		BeforeEach(func() {
-			conf = &CFConfig{}
+			conf = &Config{}
 			conf.API = "http://api.example.com"
 			conf.ClientID = "admin"
 			conf.SkipSSLValidation = false

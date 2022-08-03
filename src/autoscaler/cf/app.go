@@ -57,13 +57,13 @@ type (
 	Pagination struct {
 		TotalResults int  `json:"total_results"`
 		TotalPages   int  `json:"total_pages"`
-		First        href `json:"first"`
-		Last         href `json:"last"`
-		Next         href `json:"next"`
-		Previous     href `json:"previous"`
+		First        Href `json:"first"`
+		Last         Href `json:"last"`
+		Next         Href `json:"next"`
+		Previous     Href `json:"previous"`
 	}
-	href struct {
-		Href string `json:"href"`
+	Href struct {
+		Url string `json:"href"`
 	}
 
 	//processResponse https://v3-apidocs.cloudfoundry.org/version/3.122.0/index.html#list-processes
@@ -81,7 +81,7 @@ func (p Processes) GetInstances() int {
 	return instances
 }
 
-func (c *cfClient) GetStateAndInstances(appID string) (*models.AppEntity, error) {
+func (c *Client) GetStateAndInstances(appID string) (*models.AppEntity, error) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	var app *App
@@ -109,33 +109,14 @@ func (c *cfClient) GetStateAndInstances(appID string) (*models.AppEntity, error)
  * Get the information for a specific app
  * from the v3 api https://v3-apidocs.cloudfoundry.org/version/3.122.0/index.html#apps
  */
-func (c *cfClient) GetApp(appID string) (*App, error) {
+func (c *Client) GetApp(appID string) (*App, error) {
 	url := fmt.Sprintf("%s/v3/apps/%s", c.conf.API, appID)
-	//TODO add retries
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("app request failed for app %s :%w", appID, err)
-	}
-	tokens, err := c.GetTokens()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get token %s: %w", appID, err)
-	}
-	req.Header.Set("Authorization", TokenTypeBearer+" "+tokens.AccessToken)
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.get(url)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get app %s: %w", appID, err)
+		return nil, fmt.Errorf("failed getting app '%s': %w", appID, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
-
-	statusCode := resp.StatusCode
-	if statusCode != http.StatusOK {
-		respBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read response[%d] for %s : %w", statusCode, appID, err)
-		}
-		return nil, fmt.Errorf("failed getting app information for '%s': %w", appID, models.NewCfError(appID, statusCode, respBody))
-	}
 
 	app := &App{}
 	err = json.NewDecoder(resp.Body).Decode(app)
@@ -149,44 +130,66 @@ func (c *cfClient) GetApp(appID string) (*App, error) {
  * Get the processes information for a specific app
  * from the v3 api https://v3-apidocs.cloudfoundry.org/version/3.122.0/index.html#apps
  */
-func (c *cfClient) GetAppProcesses(appID string) (Processes, error) {
-	url := fmt.Sprintf("%s/v3/apps/%s/processes", c.conf.API, appID)
-	//TODO add retries
+func (c *Client) GetAppProcesses(appID string) (Processes, error) {
+	pageNumber := 1
+	url := fmt.Sprintf("%s/v3/apps/%s/processes?per_page=%d", c.conf.API, appID, c.conf.PerPage)
+	var processes Processes
+	for url != "" {
+		pagination, pageProcesses, err := c.getProcesses(appID, url)
+		if err != nil {
+			return nil, fmt.Errorf("failed getting processes page %d: %w", pageNumber, err)
+		}
+		processes = append(processes, pageProcesses...)
+		url = pagination.Next.Url
+		pageNumber++
+	}
+
+	return processes, nil
+}
+
+func (c *Client) getProcesses(appID string, url string) (*Pagination, Processes, error) {
+	resp, err := c.get(url)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed getting processes for app '%s': %w", appID, err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	processResp := processesResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&processResp)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed unmarshalling processes information for '%s': %w", appID, err)
+	}
+	return &processResp.Pagination, processResp.Resources, nil
+}
+
+func (c *Client) get(url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("processes request failed for app %s :%w", appID, err)
+		return nil, err
 	}
 	tokens, err := c.GetTokens()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get token %s: %w", appID, err)
+		return nil, fmt.Errorf("get token failed: %w", err)
 	}
 	req.Header.Set("Authorization", TokenTypeBearer+" "+tokens.AccessToken)
 
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.retryClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get processes %s: %w", appID, err)
+		return nil, err
 	}
-	defer func() { _ = resp.Body.Close() }()
 
 	statusCode := resp.StatusCode
 	if statusCode != http.StatusOK {
 		respBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, fmt.Errorf("failed to read response[%d] for %s : %w", statusCode, appID, err)
+			return nil, fmt.Errorf("failed to read response[%d]: %w", statusCode, err)
 		}
-		return nil, fmt.Errorf("failed getting processes information for '%s': %w", appID, models.NewCfError(appID, statusCode, respBody))
+		return nil, fmt.Errorf("get request failed: %w", models.NewCfError(url, statusCode, respBody))
 	}
-
-	processResp := processesResponse{}
-	err = json.NewDecoder(resp.Body).Decode(&processResp)
-	if err != nil {
-		return nil, fmt.Errorf("failed unmarshalling processes information for '%s': %w", appID, err)
-	}
-	//TODO: Support pagination for responses with multiple pages
-	return processResp.Resources, nil
+	return resp, nil
 }
 
-func (c *cfClient) SetAppInstances(appID string, num int) error {
+func (c *Client) SetAppInstances(appID string, num int) error {
 	url := c.conf.API + path.Join(PathApp, appID)
 	c.logger.Debug("set-app-instances", lager.Data{"url": url})
 

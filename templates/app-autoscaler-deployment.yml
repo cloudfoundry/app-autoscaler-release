@@ -7,25 +7,25 @@ releases:
 - name: app-autoscaler
   version: latest
 - name: "postgres"
-  version: "31"
-  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=31"
-  sha1: "bbe4151f4000f349c2ffaf72412aac9cc0a3c741"
+  version: "35"
+  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=35"
+  sha1: "8a30528f55a1add20562eff4bd9c11a3f970865e"
 - name: bosh-dns-aliases
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3
   version: '0.0.3'
   sha1: b0d0a0350ed87f1ded58b2ebb469acea0e026ccc
 - name: "routing"
-  url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.223.0"
-  sha1: "edb2f822ca5bbe579a179abfa4b053dc9c99224f"
-  version: "0.223.0"
+  url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.237.0"
+  sha1: "0024f2d9f8bb3c624a162db4c3a5919388c6d800"
+  version: "0.237.0"
 - name: loggregator-agent
   url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=6.4.1
   version: 6.4.1
   sha1: 02ec285cce8fef717ab7baee79a5ed9210a7391c
 - name: bpm
-  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.9
-  version: 1.1.9
-  sha1: sha256:031cf5600158f44762c747a1f8648b7cebca876d4297dd9e2ce3b51b36ccd476
+  url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.18
+  version: 1.1.18
+  sha1: 86675f90d66f7018c57f4ae0312f1b3834dd58c9
 features:
   use_dns_addresses: true
 addons:
@@ -119,7 +119,7 @@ addons:
 # Stemcell details
 stemcells:
 - alias: default
-  os: ubuntu-bionic
+  os: ubuntu-jammy
   version: latest
 - alias: xenial
   os: ubuntu-xenial

@@ -1,17 +1,24 @@
-name: auto-merge
+name: Dependabot Auto Merge
 
 on:
   pull_request:
 
 jobs:
-  auto-merge:
+  dependabot-auto-merge:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Dependabot Auto Merge
-        uses: ahmadnassri/action-dependabot-auto-merge@v2
+      - uses: fastify/github-action-merge-dependabot@v3
+        name: Auto-approve
         with:
-          target: minor # includes patch updates!
-          github-token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
-          approve: true
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          target: minor
+          approve-only: true
+      - uses: alexwilson/enable-github-automerge-action@1.0.0
+        name: Enable Auto-merge
+        with:
+          github-token: "${{ secrets.APP_AUTOSCALER_CI_TOKEN }}"
+          merge-method: "SQUASH"

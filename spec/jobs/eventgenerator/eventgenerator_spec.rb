@@ -2,40 +2,13 @@ require "rspec"
 require "json"
 require "bosh/template/test"
 require "yaml"
+require "rspec/file_fixtures"
 
 describe "eventgenerator" do
   let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), "../../..")) }
   let(:job) { release.job("eventgenerator") }
   let(:template) { job.template("config/eventgenerator.yml") }
-  let(:properties) do
-    YAML.safe_load(%(
-      autoscaler:
-        policy_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            password: default
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        appmetrics_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            password: default
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
-    ))
-  end
+  let(:properties) { YAML.safe_load(fixture("eventgenerator.yml").read) }
 
   context "config/eventgenerator.yml" do
     let(:links) do

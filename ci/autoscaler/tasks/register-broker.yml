@@ -14,9 +14,9 @@ params:
 
 inputs:
 - name: bbl-state
-- name: app-autoscaler-release-main
+- name: release
 
 outputs:
 
 run:
-  path: app-autoscaler-release-main/ci/autoscaler/scripts/register-broker.sh
+  path: release/ci/autoscaler/scripts/register-broker.sh
