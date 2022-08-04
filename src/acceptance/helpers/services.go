@@ -10,6 +10,7 @@ import (
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 )
@@ -37,7 +38,7 @@ func DeleteServices(cfg *config.Config, services []string) {
 	for _, service := range services {
 		deleteService := cf.Cf("delete-service", service, "-f").Wait(cfg.DefaultTimeoutDuration())
 		if deleteService.ExitCode() != 0 {
-			fmt.Printf("unable to delete the service %s, attempting to purge...\n", service)
+			GinkgoWriter.Printf("unable to delete the service %s, attempting to purge...\n", service)
 			purgeService := cf.Cf("purge-service-instance", service, "-f").Wait(cfg.DefaultTimeoutDuration())
 			Expect(purgeService).To(Exit(0), fmt.Sprintf("unable to delete service %s", service))
 		}
@@ -50,20 +51,22 @@ const (
 )
 
 func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
-	oauthToken := OauthToken(cfg)
-	customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest("PUT", customMetricURL, nil)
-	Expect(err).ShouldNot(HaveOccurred())
-	req.Header.Add("Authorization", oauthToken)
+	if !cfg.IsServiceOfferingEnabled() {
+		oauthToken := OauthToken(cfg)
+		customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
+		req, err := http.NewRequest("PUT", customMetricURL, nil)
+		Expect(err).ShouldNot(HaveOccurred())
+		req.Header.Add("Authorization", oauthToken)
 
-	resp, err := GetHTTPClient(cfg).Do(req)
-	Expect(err).ShouldNot(HaveOccurred())
-	defer func() { _ = resp.Body.Close() }()
-	Expect(resp.StatusCode).To(Equal(http.StatusOK))
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	Expect(err).NotTo(HaveOccurred())
-	setEnv := cf.Cf("set-env", appName, CustomMetricCredEnv, string(bodyBytes)).Wait(cfg.DefaultTimeoutDuration())
-	Expect(setEnv).To(Exit(0), "failed set custom metric credential env")
+		resp, err := GetHTTPClient(cfg).Do(req)
+		Expect(err).ShouldNot(HaveOccurred())
+		defer func() { _ = resp.Body.Close() }()
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		Expect(err).NotTo(HaveOccurred())
+		setEnv := cf.Cf("set-env", appName, CustomMetricCredEnv, string(bodyBytes)).Wait(cfg.DefaultTimeoutDuration())
+		Expect(setEnv).To(Exit(0), "failed set custom metric credential env")
+	}
 }
 
 func DeleteCustomMetricCred(cfg *config.Config, appGUID string) {

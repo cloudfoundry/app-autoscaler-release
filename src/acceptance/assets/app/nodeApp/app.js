@@ -7,41 +7,62 @@ const os = require('os')
 const cpuCount = os.cpus().length
 const { BroadcastChannel, Worker } = require('worker_threads')
 
-let credentials = {}
 let metricsForwarderURL = ''
 let mfUsername = ''
 let mfPassword = ''
 const serviceName = process.env.SERVICE_NAME
 
-// for service offering
-if (process.env.VCAP_SERVICES) {
-  const vcapServices = JSON.parse(process.env.VCAP_SERVICES)
-  const service = vcapServices[serviceName]
+function getCredentials () {
+  let credentials = {}
 
-  if (service && service[0] && service[0].credentials) {
-    credentials = service[0].credentials
-    metricsForwarderURL = credentials.custom_metrics.url
-    mfUsername = credentials.custom_metrics.username
-    mfPassword = credentials.custom_metrics.password
+  // for service offering
+  console.log('Getting credentials...')
+  if (process.env.VCAP_SERVICES) {
+    const vcapServices = JSON.parse(process.env.VCAP_SERVICES)
+    const service = vcapServices[serviceName]
+
+    if (service && service[0] && service[0].credentials) {
+      credentials = service[0].credentials
+      metricsForwarderURL = credentials.custom_metrics.url
+      mfUsername = credentials.custom_metrics.username
+      mfPassword = credentials.custom_metrics.password
+      console.log('consumed VCAP_SERVICES env variable (service_offering)')
+    }
+  } else {
+    const err = 'ERROR: no VCAP_SERVICES env variable'
+    console.error(err)
+    throw err
   }
-} else {
-  console.error('ERROR: no VCAP_SERVICES env variable')
-  process.exit(1)
+
+  // for build-in offering
+  if (metricsForwarderURL === '' || mfUsername === '' || mfPassword === '') {
+    if (process.env.AUTO_SCALER_CUSTOM_METRIC_ENV) {
+      credentials = JSON.parse(process.env.AUTO_SCALER_CUSTOM_METRIC_ENV)
+      metricsForwarderURL = credentials.url
+      mfUsername = credentials.username
+      mfPassword = credentials.password
+      console.log(
+        'consumed AUTO_SCALER_CUSTOM_METRIC_ENV env variable (use_buildin_mode)'
+      )
+    } else {
+      console.error('ERROR: not all credentials were provided.')
+      console.log(
+                `metricsForwarderURL "${metricsForwarderURL}" || mfUsername === "${mfUsername}" || mfPassword (length) "${mfPassword.length}"`
+      )
+      const err = `ERROR: process.env.AUTO_SCALER_CUSTOM_METRIC_ENV: ${process.env.AUTO_SCALER_CUSTOM_METRIC_ENV}`
+      console.error(err)
+      throw err
+    }
+  }
 }
 
-// for build-in offering
-if (metricsForwarderURL === '' || mfUsername === '' || mfPassword === '') {
-  if (process.env.AUTO_SCALER_CUSTOM_METRIC_ENV) {
-    credentials = JSON.parse(process.env.AUTO_SCALER_CUSTOM_METRIC_ENV)
-    metricsForwarderURL = credentials.url
-    mfUsername = credentials.username
-    mfPassword = credentials.password
-  } else {
-    console.error('ERROR: not all credentials were provided.')
-    console.log(`metricsForwarderURL "${metricsForwarderURL}" || mfUsername === "${mfUsername}" || mfPassword (length) "${mfPassword.length}"`)
-    console.error(`ERROR: process.env.VCAP_SERVICES: ${process.env.VCAP_SERVICES}`)
-    process.exit(1)
-  }
+let mtlsAgent = null
+
+async function getMtlsAgent() {
+    mtlsAgent = new https.Agent({
+      cert: await fs.promises.readFile(process.env.CF_INSTANCE_CERT),
+      key: await fs.promises.readFile(process.env.CF_INSTANCE_KEY)
+    })
 }
 
 app.get('/slow/:time', async function (req, res) {
@@ -70,6 +91,8 @@ app.listen(process.env.PORT || 8080, function () {
 
 app.get('/custom-metrics/:type/:value', async function (req, res) {
   try {
+    getCredentials()
+
     const metricType = req.params.type
     const metricValue = parseInt(req.params.value, 10)
     const instanceIndex = process.env.CF_INSTANCE_INDEX
@@ -77,11 +100,13 @@ app.get('/custom-metrics/:type/:value', async function (req, res) {
 
     const postData = {
       instance_index: parseInt(instanceIndex),
-      metrics: [{
-        name: metricType,
-        value: parseInt(metricValue),
-        unit: 'test-unit'
-      }]
+      metrics: [
+        {
+          name: metricType,
+          value: parseInt(metricValue),
+          unit: 'test-unit'
+        }
+      ]
     }
 
     const options = {
@@ -90,14 +115,13 @@ app.get('/custom-metrics/:type/:value', async function (req, res) {
       data: postData,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Basic ' + Buffer.from(
-          mfUsername + ':' + mfPassword).toString('base64')
+        Authorization: 'Basic ' + Buffer.from(mfUsername + ':' + mfPassword).toString('base64')
       },
       validateStatus: null
     }
     const result = await axios(options)
     if (result.status !== 200) {
-      console.log(`Got non-200 response ${result.status} response ${result.data}`)
+      console.log(`Got non-200 response ${result.status} response '${JSON.stringify(result.data)}'`)
       const payload = {
         statusCode: result.status,
         response: result.data
@@ -108,12 +132,17 @@ app.get('/custom-metrics/:type/:value', async function (req, res) {
     }
   } catch (err) {
     console.log(err)
-    res.status(500).json({ exception: JSON.stringify(err) }).end()
+    res
+      .status(500)
+      .json({ exception: JSON.stringify(err) })
+      .end()
   }
 })
 
 app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
   try {
+    getCredentials()
+
     const metricType = req.params.type
     const metricValue = parseInt(req.params.value, 10)
     const instanceIndex = process.env.CF_INSTANCE_INDEX
@@ -121,17 +150,17 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
 
     const postData = {
       instance_index: parseInt(instanceIndex),
-      metrics: [{
-        name: metricType,
-        value: parseInt(metricValue),
-        unit: 'test-unit'
-      }]
+      metrics: [
+        {
+          name: metricType,
+          value: parseInt(metricValue),
+          unit: 'test-unit'
+        }
+      ]
     }
 
-    const httpsAgent = new https.Agent({
-      cert: fs.readFileSync(process.env.CF_INSTANCE_CERT),
-      key: fs.readFileSync(process.env.CF_INSTANCE_KEY)
-    })
+    const httpsAgent = await getMtlsAgent()
+
     const options = {
       url: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
       method: 'POST',
@@ -142,7 +171,7 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
     }
     const result = await axios(options)
     if (result.status !== 200) {
-      console.log(`Got non-200 response ${result.status} response ${result.data}`)
+      console.log(`Got non-200 response ${result.status} response '${JSON.stringify(result.data)}'`)
       const payload = {
         statusCode: result.status,
         response: result.data
@@ -164,13 +193,14 @@ app.get('/cpu/:util/:minute', async function (req, res) {
   const maxUtil = cpuCount * 100
   util = Math.max(1, util)
   util = Math.min(maxUtil, util)
-  const msg = 'set app cpu utilization to ' + util + '% for ' + minute + ' minutes'
+  const msg =
+        'set app cpu utilization to ' + util + '% for ' + minute + ' minutes'
   const maxWorkerUtil = 99
   let remainingUtil = util
   while (remainingUtil > maxWorkerUtil) {
     startWorker(maxWorkerUtil, minute)
     remainingUtil = remainingUtil - maxWorkerUtil
-  };
+  }
   startWorker(remainingUtil, minute)
   res.status(200).send(msg)
 })
@@ -182,6 +212,5 @@ function startWorker (util, minute) {
 app.get('/cpu/close', async function (req, res) {
   const bc = new BroadcastChannel('stop_channel')
   bc.postMessage('stop')
-
   res.status(200).send('close cpu test')
 })
