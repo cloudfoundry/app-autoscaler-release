@@ -19,12 +19,11 @@ jobs:
             git status
           popd
 
-      - name: Check if there are changes
-        id: changes
-        uses: UnicornGlobal/has-changes-action@v1.0.12
-
+      - name: Check if there is any change
+        id: get_changes
+        run: echo "::set-output name=changed::$(git status --porcelain | wc -l)"
       - name: Process changes
-        if: steps.changes.outputs.changed == 1
+        if: steps.get_changes.outputs.changed != 0
         run: |
           echo "::error::Fakes are out of date, run make generate to update"
           exit 1
