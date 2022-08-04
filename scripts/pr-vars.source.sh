@@ -10,7 +10,16 @@ export BBL_STATE_PATH="${script_dir}/../../app-autoscaler-env-bbl-state/bbl-stat
 export SYSTEM_DOMAIN="autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
 export AUTOSCALER_DIR="${script_dir}/../"
 export CI_DIR="${script_dir}/../ci"
-export SERVICE_OFFERING_ENABLED=true
+
+export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
+            ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
+            ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
+            ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml\
+            ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml\
+            ${AUTOSCALER_DIR}/example/operation/log-cache-syslog-server.yml\
+            ${AUTOSCALER_DIR}/example/operation/use_buildin_mode.yml"
+
+export SERVICE_OFFERING_ENABLED=false
 export SKIP_SSL_VALIDATION=true
 export NAME_PREFIX=${NAME_PREFIX:-"${DEPLOYMENT_NAME}-TESTS"}
 export SUITES=${SUITES:-"api app broker"}
