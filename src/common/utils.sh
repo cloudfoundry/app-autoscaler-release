@@ -13,9 +13,9 @@ pid_guard() {
   name=$2
 
   if [ -f "$pidfile" ]; then
-    pid=$(head -1 "$pidfile")
-    echo "pidno" $pid
-    if [ -n "$pid" ] && [ -e /proc/$pid ] && [[ $(readlink /proc/$pid/exe) =~ $name ]]; then
+    pid="$(head -1 $pidfile)"
+    echo "pidno $pid"
+    if [ -n "$pid" ] && [ -e "/proc/$pid" ] && [[ "$(readlink /proc/$pid/exe)" =~ $name ]]; then
       echo "$name is already running, please stop it first"
       exit 1
     fi
