@@ -140,7 +140,10 @@ addons:
 ### Stemcells ###
 stemcells:
 - alias: default
-  os: ubuntu-bionic
+  os: ubuntu-jammy
+  version: latest
+- alias: xenial
+  os: ubuntu-xenial
   version: latest
 
 instance_groups:
