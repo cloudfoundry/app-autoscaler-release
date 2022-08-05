@@ -23,10 +23,9 @@ function create_app {
       -p "${app_location}"\
       -f "${app_location}/app_manifest.yml"\
       --no-start &
-  cf app "${app_name}" --guid
+  
 #  cf bind-service "${app_name}" "${test_service_name}"
-  cf start "${app_name}"
-}
+  }
 
 # shellcheck disable=SC1091
 source ./pr-vars.source.sh
@@ -42,3 +41,21 @@ for app_number in $(seq 1 "${number_apps}") ; do
   create_app "${app_name}"
 done
 wait
+
+for app_number in $(seq 1 "${number_apps}") ; do
+  app_name="${test_app_name}-${app_number}"
+  app_guid="$(cf app "${app_name}" --guid)"
+
+  echo " - ${app_name} guid: ${app_guid}"
+done
+wait
+
+
+for app_number in $(seq 1 "${number_apps}") ; do
+  echo " - starting app ${app_name}"
+  cf start "${app_name}"
+done
+wait
+
+
+echo ">> $0 FINISHED"
