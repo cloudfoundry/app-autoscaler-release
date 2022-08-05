@@ -1,23 +1,17 @@
-name: generate
+name: Check if go.mod is tidy
 on:
   pull_request:
 jobs:
-  generate:
-    name: ensure fakes are up to date
+  check-tidy-go-mod:
+    name: ensure that go mod tidy has run
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup_go
+      - uses: ./.github/actions/setup_java
 
-      - name: Go Build
-        run: |
-          source .envrc
-          pushd src/autoscaler
-            make buildtools
-            make generate
-            git diff
-            git status
-          popd
+      - name: Run scripts/update
+        run: scripts/update
 
       - name: Check if there is any change
         id: get_changes
@@ -25,5 +19,5 @@ jobs:
       - name: Process changes
         if: steps.get_changes.outputs.changed != 0
         run: |
-          echo "::error::Fakes are out of date, run make generate to update"
+          echo "::error::go.mod is not tidy, run scripts/update to tidy"
           exit 1
