@@ -11,17 +11,27 @@ repos:
           language: script
           files: '\.java$'
           stages: [commit]
--   repo: local
-    hooks:
         - id: golangci-lint
           name: golangci-lint
           entry: style-guide/golangci-lint-0.1.sh
           language: script
-          files: '^src/autoscaler'
+          files: '^src'
           pass_filenames: false #https://github.com/pre-commit/pre-commit/issues/836
           stages: [ commit ]
-
-
+        - id: rubocop
+          name: rubocop
+          entry: style-guide/rubocop-0.1.sh
+          language: script
+          files: '\.rb$'
+          pass_filenames: false #https://github.com/pre-commit/pre-commit/issues/836
+          stages: [ commit ]
+        - id: eslint
+          name: eslint
+          entry: style-guide/eslint-0.1.sh
+          language: script
+          files: '^src/acceptance/assets/app/nodeApp'
+          pass_filenames: false #https://github.com/pre-commit/pre-commit/issues/836
+          stages: [ commit ]
 
 
 
