@@ -88,6 +88,7 @@ jobs:
       - name: deploy autoscaler
         run: |
           export OPS_FILES="
+            ${AUTOSCALER_DIR}/operations/add-releases.yml"\
             ${AUTOSCALER_DIR}/operations/instance-identity-cert-from-cf.yml\
             ${AUTOSCALER_DIR}/operations/enable-nats-tls.yml\
             ${AUTOSCALER_DIR}/operations/loggregator-certs-from-cf.yml\
@@ -95,6 +96,7 @@ jobs:
             ${AUTOSCALER_DIR}/operations/set-release-version.yml\
             ${AUTOSCALER_DIR}/operations/enable-log-cache.yml\
             ${AUTOSCALER_DIR}/operations/log-cache-syslog-server.yml"
+
           ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker
