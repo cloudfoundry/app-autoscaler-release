@@ -191,10 +191,15 @@ integration: build init-db test-certs
 	make -C src/autoscaler integration DBURL="${DBURL}" OPTS="${OPTS}"
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
-lint: $(addprefix lint_,$(go_modules))
+lint: $(addprefix lint_,$(go_modules)) rubocop eslint
 
+.PHONY: rubocop
 rubocop:
 	bundle exec rubocop -a
+
+.PHONY: eslint
+eslint:
+	cd src/acceptance/assets/app/nodeApp && npm run lint
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@golangci_version=$(shell cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2);\
