@@ -1,5 +1,5 @@
 ---
-- type: remove 
+- type: remove
   path: /variables/name=autoscaler_scheduler_health_password
 
 - type: remove
@@ -22,63 +22,70 @@
 
 # asactors
 - type: remove
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine/health/username
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine/health/username
 
 - type: remove
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine/health/password
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine/health/password
 
 - type: remove
-  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler/health/basicAuthEnabled
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler/health/basicAuthEnabled
 
 - type: remove
-  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler/health/username
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler/health/username
 
 - type: remove
-  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler/health/password
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler/health/password
 
 - type: remove
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/operator/health/username
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/operator/health/username
 
 - type: remove
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/operator/health/password
-
-#asmetrics
-- type: remove
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/metricsserver/health/username
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/operator/health/password
 
 - type: remove
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/metricsserver/health/password
+  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/metricsserver/health/username
 
 - type: remove
-  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/health/username
+  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/metricsserver/health/password
 
 - type: remove
-  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/health/password
-
-# asnozzle
-- type: remove
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/health/username
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/health/username
 
 - type: remove
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/health/password
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/health/password
+
+- type: remove
+  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/health/username
+
+- type: remove
+  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/health/password
 
 # asapi
 - type: remove
-  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/health/username
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/health/username
 
 - type: remove
-  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/health/password
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/health/password
 
 # route_registrars
 
 - type: remove
-  path: /instance_groups/name=asactors/jobs/name=route_registrar
+  path: /instance_groups/name=scalingengine/jobs/name=route_registrar
 
 - type: remove
-  path: /instance_groups/name=asmetrics/jobs/name=route_registrar
+  path: /instance_groups/name=scheduler/jobs/name=route_registrar
 
 - type: remove
-  path: /instance_groups/name=asnozzle/jobs/name=route_registrar
+  path: /instance_groups/name=operator/jobs/name=route_registrar
 
 - type: remove
-  path: /instance_groups/name=asapi/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health
+  path: /instance_groups/name=metricsserver/jobs/name=route_registrar
+
+- type: remove
+  path: /instance_groups/name=metricsgateway/jobs/name=route_registrar
+
+- type: remove
+  path: /instance_groups/name=eventgenerator/jobs/name=route_registrar
+
+- type: remove
+  path: /instance_groups/name=metricsforwarder/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health

@@ -3,7 +3,7 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  manifest:
+  test_manifest:
     name: Manifest Tests
     runs-on: ubuntu-latest
     steps:
@@ -23,10 +23,29 @@ jobs:
           mv yq_linux_amd64 /usr/local/bin/yq && \
           chmod +x /usr/local/bin/yq
 
-      - name: Run Tests
+      - name: Run Tests - old manifest
         run: |
           set -e
 
-          pushd example
+          pushd templates
+            MANIFEST_PATH=$PWD/../templates/app-autoscaler-deployment.yml \
+            OPERATION_DIR_PATH=$PWD/../example/operation \
+            SCALINGENGINE_INSTANCE_GROUP=asactors\
+            SCHEDULER_INSTANCE_GROUP=asactors\
+            METICSFORWARDER_INSTANCE_GROUP=asapi\
+            OPERATOR_INSTANCE_GROUP=asactors\
+            EVENTGENERATOR_INSTANCE_GROUP=asmetrics\
+            METIRCSSERVER_INSTANCE_GROUP=asmetrics\
+            METRICSGATEWAY_INSTANCE_GROUP=asnozzle \
+            ./manifest_tests.sh
+          popd
+
+      - name: Run Tests - Manifest
+        run: |
+          set -e
+
+          pushd templates
+            MANIFEST_PATH=$PWD/app-autoscaler.yml \
+            OPERATION_DIR_PATH=$PWD/../operations \
             ./manifest_tests.sh
           popd
