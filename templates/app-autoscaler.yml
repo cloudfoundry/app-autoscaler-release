@@ -16,9 +16,9 @@ releases:
   version: latest
 
 domains:
-  postgres: &postgres_domain ((deployment_name)).postgres.service.cf.internal
+  postgres: &postgres_domain ((deployment_name)).autoscalerpostgres.service.cf.internal
   api: &api_domain ((deployment_name)).apiserver.service.cf.internal
-  scheduler: &scheduler_domain ((deployment_name)).scheduler.service.cf.internal
+  scheduler: &scheduler_domain ((deployment_name)).autoscalerscheduler.service.cf.internal
   servicebroker: &servicebroker_domain ((deployment_name)).servicebroker.service.cf.internal
   eventgenerator: &eventgenerator_domain ((deployment_name)).eventgenerator.service.cf.internal
   scalingengine: &scalingengine_domain ((deployment_name)).scalingengine.service.cf.internal
@@ -141,9 +141,6 @@ addons:
 stemcells:
 - alias: default
   os: ubuntu-jammy
-  version: latest
-- alias: xenial
-  os: ubuntu-xenial
   version: latest
 
 instance_groups:
