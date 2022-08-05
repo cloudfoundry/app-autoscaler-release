@@ -14,7 +14,7 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3
   version: '0.0.3'
   sha1: b0d0a0350ed87f1ded58b2ebb469acea0e026ccc
-- name: "routing"
+cheyd name: "routing"
   url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.237.0"
   sha1: "0024f2d9f8bb3c624a162db4c3a5919388c6d800"
   version: "0.237.0"
@@ -217,7 +217,6 @@ instance_groups:
     properties:
       autoscaler:
         scheduler:
-          host: autoscalerscheduler.service.cf.internal
           port: &schedulerPort 6102
           health:
             port: &schedulerHealthPort 6202
@@ -260,6 +259,7 @@ instance_groups:
             client_cert: ((scalingengine_client.certificate))
             client_key: ((scalingengine_client.private_key))
           scheduler:
+            host: autoscalerscheduler.service.cf.internal
             port: *schedulerPort
             ca_cert: ((scheduler_ca.ca))
             client_cert: ((scheduler_client.certificate))
