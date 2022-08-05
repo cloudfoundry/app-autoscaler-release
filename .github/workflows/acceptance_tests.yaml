@@ -43,7 +43,7 @@ jobs:
       - run: echo "sha is ${{github.event.pull_request.head.sha}}"
       - run: |
           echo "::group::Creating new check"
-          
+
           curl -vf -X POST \
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
@@ -51,9 +51,9 @@ jobs:
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs" \
             -d '{ "name": "${{env.check_name}}","head_sha": "${{ github.event.pull_request.head.sha }}","status": "in_progress","external_id": "${{ github.run_id }}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${{ github.event.pull_request.head.sha }}","text":"some text" }}' \
             -o new_check.json
-            
+
           id=$(jq -r '.id' new_check.json)
-  
+
           if [ -z "${id}" ]; then
             echo "ERROR: Failed to create the required check job"
             echo "Result of curl:"
@@ -61,7 +61,7 @@ jobs:
             exit 1
           fi
           echo "::endgroup::"
-          
+
           echo "Id is: ${id}"
           echo "::set-output name=check_id::${id}"
         id: create_check
@@ -87,12 +87,15 @@ jobs:
       # TODO: When removing metricserver and metricgateway merge enable-log-cache.yml into the default templates/app-autoscaler.yml manifest.
       - name: deploy autoscaler
         run: |
-          export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.yml\
-            ${AUTOSCALER_DIR}/example/operation/add-extra-plan.yml\
-            ${AUTOSCALER_DIR}/example/operation/set-release-version.yml\
-            ${AUTOSCALER_DIR}/example/operation/enable-name-based-deployments.yml\
-            ${AUTOSCALER_DIR}/example/operation/enable-log-cache.yml\
-            ${AUTOSCALER_DIR}/example/operation/log-cache-syslog-server.yml"
+          export OPS_FILES="
+            ${AUTOSCALER_DIR}/operations/add-releases.yml \
+            ${AUTOSCALER_DIR}/operations/instance-identity-cert-from-cf.yml \
+            ${AUTOSCALER_DIR}/operations/enable-nats-tls.yml \
+            ${AUTOSCALER_DIR}/operations/loggregator-certs-from-cf.yml \
+            ${AUTOSCALER_DIR}/operations/add-extra-plan.yml \
+            ${AUTOSCALER_DIR}/operations/set-release-version.yml \
+            ${AUTOSCALER_DIR}/operations/enable-log-cache.yml \
+            ${AUTOSCALER_DIR}/operations/log-cache-syslog-server.yml"
           ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker
@@ -206,22 +209,22 @@ jobs:
           echo
           cat latest_result.json
           echo "::endgroup::"
-          
+
           echo "::group::Check Info"
           echo "Latest check id:${id}"
           echo "Number of checks for commit ${{ github.event.pull_request.head.sha }} ${number_of_checks}"
           echo "Conclustion of check: ${conclusion}"
           echo "::endgroup::"
-          
+
           if [ ${number_of_checks} -eq 0 ]; then
             echo "Error: The Acceptance tests have never been run for this commit!"
             echo "Add the correct label to enable the running of the acceptance tests."
             exit 1
           fi
-          
+
           if [ "${conclusion}" != "success" ]; then
             echo "Error: The latest Acceptance Test run failed!"
-            echo 
+            echo
             echo "List of the failed checks:"
             echo "=========================="
             curl -sf --retry 5 "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
