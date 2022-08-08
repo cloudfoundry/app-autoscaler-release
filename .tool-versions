@@ -7,3 +7,4 @@ ginkgo 2.1.3
 shellcheck 0.8.0
 act 0.2.26
 concourse 7.8.1
+golangci-lint 1.48.0
