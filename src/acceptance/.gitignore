@@ -4,4 +4,3 @@
 **/*.log
 vendor
 ginkgo_v2
-**/node_modules/
