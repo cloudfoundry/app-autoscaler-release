@@ -23,12 +23,18 @@ anchors:
 
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
+      operations/add-releases.yml
+      operations/instance-identity-cert-from-cf.yml
+      operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
 
   app-autoscaler-ops-files-log-cache: &app-autoscaler-ops-files-log-cache
     OPS_FILES: |
+      operations/add-releases.yml
+      operations/instance-identity-cert-from-cf.yml
+      operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
@@ -37,6 +43,9 @@ anchors:
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
+      operations/add-releases.yml
+      operations/instance-identity-cert-from-cf.yml
+      operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
