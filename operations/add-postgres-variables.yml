@@ -9,7 +9,7 @@
 - type: replace
   path: /variables/name=postgres_server?
   value:
-  type: certificate
+    type: certificate
     options:
       ca: postgres_ca
       common_name: ((deployment_name)).autoscalerpostgres.service.cf.internal
