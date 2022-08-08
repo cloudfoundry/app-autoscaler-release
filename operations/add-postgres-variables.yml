@@ -1,6 +1,3 @@
-- name: postgres_ca
-- name: postgres_server
-
 - type: replace
   path: /variables/name=postgres_ca?
   value:
@@ -15,9 +12,9 @@
   type: certificate
     options:
       ca: postgres_ca
-      common_name: *postgres_domain
+      common_name: ((deployment_name)).autoscalerpostgres.service.cf.internal
       alternative_names:
-        - *postgres_domain
+        - ((deployment_name)).autoscalerpostgres.service.cf.internal
       extended_key_usage:
         - client_auth
         - server_auth
