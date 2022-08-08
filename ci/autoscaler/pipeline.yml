@@ -23,27 +23,27 @@ anchors:
 
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
-      operation/loggregator-certs-from-cf.yml
-      operation/add-extra-plan.yml
-      operation/enable-name-based-deployments.yml
-      operation/set-release-version.yml
+      operations/loggregator-certs-from-cf.yml
+      operations/add-extra-plan.yml
+      operations/enable-name-based-deployments.yml
+      operations/set-release-version.yml
 
   app-autoscaler-ops-files-log-cache: &app-autoscaler-ops-files-log-cache
     OPS_FILES: |
-      operation/loggregator-certs-from-cf.yml
-      operation/add-extra-plan.yml
-      operation/enable-name-based-deployments.yml
-      operation/set-release-version.yml
-      operation/enable-log-cache.yml
-      operation/log-cache-syslog-server.yml
+      operations/loggregator-certs-from-cf.yml
+      operations/add-extra-plan.yml
+      operations/enable-name-based-deployments.yml
+      operations/set-release-version.yml
+      operations/enable-log-cache.yml
+      operations/log-cache-syslog-server.yml
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
-      operation/loggregator-certs-from-cf.yml
-      operation/postgres-persistent-disk.yml
-      operation/add-extra-plan.yml
-      operation/enable-name-based-deployments.yml
-      operation/set-release-version.yml
+      operations/loggregator-certs-from-cf.yml
+      operations/postgres-persistent-disk.yml
+      operations/add-extra-plan.yml
+      operations/enable-name-based-deployments.yml
+      operations/set-release-version.yml
 
 
 groups:
