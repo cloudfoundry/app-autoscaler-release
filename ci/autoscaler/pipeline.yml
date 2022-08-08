@@ -25,14 +25,12 @@ anchors:
     OPS_FILES: |
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
-      operations/enable-name-based-deployments.yml
       operations/set-release-version.yml
 
   app-autoscaler-ops-files-log-cache: &app-autoscaler-ops-files-log-cache
     OPS_FILES: |
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
-      operations/enable-name-based-deployments.yml
       operations/set-release-version.yml
       operations/enable-log-cache.yml
       operations/log-cache-syslog-server.yml
@@ -42,7 +40,6 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
-      operations/enable-name-based-deployments.yml
       operations/set-release-version.yml
 
 
