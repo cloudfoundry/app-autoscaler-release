@@ -195,11 +195,13 @@ lint: $(addprefix lint_,$(go_modules)) rubocop eslint
 
 .PHONY: rubocop
 rubocop:
-	bundle exec rubocop -a
+	@echo " - linting ruby"
+	@bundle exec rubocop ./spec ./jobs
 
 .PHONY: eslint
 eslint:
-	cd src/acceptance/assets/app/nodeApp && npm run lint
+	@echo " - linting node app"
+	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@golangci_version=$(shell cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2);\

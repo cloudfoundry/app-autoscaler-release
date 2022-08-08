@@ -129,8 +129,8 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
     }
 
     const httpsAgent = new https.Agent({
-      cert: fs.readFileSync(process.env.CF_INSTANCE_CERT),
-      key: fs.readFileSync(process.env.CF_INSTANCE_KEY)
+      cert: await fs.readFile(process.env.CF_INSTANCE_CERT),
+      key: await fs.readFile(process.env.CF_INSTANCE_KEY)
     })
     const options = {
       url: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
@@ -170,7 +170,7 @@ app.get('/cpu/:util/:minute', async function (req, res) {
   while (remainingUtil > maxWorkerUtil) {
     startWorker(maxWorkerUtil, minute)
     remainingUtil = remainingUtil - maxWorkerUtil
-  };
+  }
   startWorker(remainingUtil, minute)
   res.status(200).send(msg)
 })
