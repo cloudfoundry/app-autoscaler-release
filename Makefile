@@ -198,15 +198,17 @@ acceptance:
 	BBL_STATE_PATH="${BBL_STATE_PATH}" AUTOSCALER_DIR="${PWD}" ./ci/autoscaler/scripts/run-acceptance-tests.sh
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
-lint: $(addprefix lint_,$(go_modules)) rubocop eslint
+lint: $(addprefix lint_,$(go_modules)) eslint rubocop
 
 .PHONY: rubocop
 rubocop:
-	bundle exec rubocop -a
+	@echo " - ruby scripts"
+	@bundle exec rubocop ./spec ./packages
 
 .PHONY: eslint
 eslint:
-	cd src/acceptance/assets/app/nodeApp && npm run lint
+	@echo " - linting testApp"
+	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@golangci_version=$(shell cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2);\

@@ -22,9 +22,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		appName = helpers.CreateTestApp(cfg, "node-custom-metric", 1)
 		appGUID = helpers.GetAppGuid(cfg, appName)
 		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
-		if !cfg.IsServiceOfferingEnabled() {
-			helpers.CreateCustomMetricCred(cfg, appName, appGUID)
-		}
+		helpers.CreateCustomMetricCred(cfg, appName, appGUID)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 	})
 

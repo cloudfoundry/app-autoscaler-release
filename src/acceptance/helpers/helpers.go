@@ -301,8 +301,8 @@ func GenerateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, 
 	}
 
 	specificDateSchedule := SpecificDateSchedule{
-		StartDateTime:         startDateTime.Format("2006-01-02T15:04"),
-		EndDateTime:           endDateTime.Format("2006-01-02T15:04"),
+		StartDateTime:         startDateTime.Round(1 * time.Minute).Format("2006-01-02T15:04"),
+		EndDateTime:           endDateTime.Round(1 * time.Minute).Format("2006-01-02T15:04"),
 		ScheduledInstanceMin:  scheduledInstanceMin,
 		ScheduledInstanceMax:  scheduledInstanceMax,
 		ScheduledInstanceInit: scheduledInstanceInit,
@@ -377,7 +377,7 @@ func RunningInstances(appGUID string, timeout time.Duration) int {
 	var summary appSummary
 	err := json.Unmarshal(cmd.Out.Contents(), &summary)
 	Expect(err).ToNot(HaveOccurred())
-	GinkgoWriter.Printf("App instances found %d\n", summary.RunningInstances)
+	GinkgoWriter.Printf("\nFound %d app instances\n", summary.RunningInstances)
 	return summary.RunningInstances
 }
 

@@ -10,7 +10,7 @@ skip_teardown="${SKIP_TEARDOWN:-false}"
 skip_ssl_validation="${SKIP_SSL_VALIDATION:-true}"
 name_prefix="${NAME_PREFIX:-ASATS}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
-suites="${SUITES:-api app broker}"
+suites=${SUITES:-"api app broker"}
 gingko_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
 
