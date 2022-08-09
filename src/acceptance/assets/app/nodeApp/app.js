@@ -56,13 +56,11 @@ function getCredentials () {
   }
 }
 
-let mtlsAgent = null
-
-async function getMtlsAgent() {
-    mtlsAgent = new https.Agent({
-      cert: await fs.promises.readFile(process.env.CF_INSTANCE_CERT),
-      key: await fs.promises.readFile(process.env.CF_INSTANCE_KEY)
-    })
+async function getMtlsAgent () {
+  return new https.Agent({
+    cert: await fs.promises.readFile(process.env.CF_INSTANCE_CERT),
+    key: await fs.promises.readFile(process.env.CF_INSTANCE_KEY)
+  })
 }
 
 app.get('/slow/:time', async function (req, res) {
@@ -159,15 +157,13 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
       ]
     }
 
-    const httpsAgent = await getMtlsAgent()
-
     const options = {
       url: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
       method: 'POST',
       data: postData,
       headers: { 'Content-Type': 'application/json' },
       validateStatus: null,
-      httpsAgent
+      httpsAgent: await getMtlsAgent()
     }
     const result = await axios(options)
     if (result.status !== 200) {
