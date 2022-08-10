@@ -25,6 +25,7 @@ anchors:
     OPS_FILES: |
       operations/add-releases.yml
       operations/instance-identity-cert-from-cf.yml
+      operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
@@ -34,6 +35,7 @@ anchors:
     OPS_FILES: |
       operations/add-releases.yml
       operations/instance-identity-cert-from-cf.yml
+      operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
@@ -45,6 +47,7 @@ anchors:
     OPS_FILES: |
       operations/add-releases.yml
       operations/instance-identity-cert-from-cf.yml
+      operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/postgres-persistent-disk.yml
