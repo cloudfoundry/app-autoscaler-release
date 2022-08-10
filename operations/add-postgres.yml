@@ -1,0 +1,209 @@
+# Adds release
+- type: replace
+  path: /releases/-
+  value:
+    name: postgres
+    version: latest
+
+# add bosh dns alias for postgres
+- type: replace
+  path: /domains/postgres?
+  value: &postgres_domain ((deployment_name)).autoscalerpostgres.service.cf.internal
+
+- type: replace
+  path: /addons/name=bosh-dns-alises/properties/aliases/-
+  value:
+    domain: *postgres_domain
+    targets:
+      - query: '*'
+        instance_group: postgres
+        deployment: ((deployment_name))
+        network: default
+        domain: bosh
+
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: postgres
+    azs:
+      - z1
+    instances: 1
+    update:
+      serial: true
+    stemcell: default
+    vm_type: small
+    networks:
+      - name: default
+    jobs:
+      - name: postgres
+        release: postgres
+        properties:
+          databases: &database
+            sslmode: verify-full
+            tls:
+              ca: ((postgres_ca.ca))
+              certificate: ((postgres_server.certificate))
+              private_key: ((postgres_server.private_key))
+            databases:
+              - name: autoscaler
+                tag: default
+            db_scheme: postgres
+            address: *postgres_domain
+            port: 5432
+            roles:
+              - name: postgres
+                password: "((database_password))"
+                tag: default
+            connection_config: &databaseConnectionConfig
+              max_open_connections: 100
+              max_idle_connections: 10
+              connection_max_lifetime: 60s
+
+# Adds postgres variables
+- type: replace
+  path: /variables/-
+  value:
+    name: postgres_ca
+    type: certificate
+    options:
+      is_ca: true
+      common_name: postgresCA
+
+- type: replace
+  path: /variables/-
+  value:
+    name: postgres_server
+    type: certificate
+    options:
+      ca: postgres_ca
+      common_name: ((deployment_name)).autoscalerpostgres.service.cf.internal
+      alternative_names:
+        - ((deployment_name)).autoscalerpostgres.service.cf.internal
+      extended_key_usage:
+        - client_auth
+        - server_auth
+
+- type: replace
+  path: /variables/-
+  value:
+    name: database_password
+    type: password
+
+# Edits scalingenging database config
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scheduler_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scheduler_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/policy_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# Edits operator database config
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/scalingengine_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/scalingengine_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/instancemetrics_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/instancemetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/appmetrics_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/appmetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/lock_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/policy_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+# edits metricsforwarder config
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/policy_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+
+
+# edits apiserver config
+#
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/policy_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/binding_db
+  value: *database
+
+# edits scheduler config
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/policy_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler_db
+  value: *database
+
+# edits eventgenerator config
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db_connection_config
+  value: *databaseConnectionConfig
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/lock_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/policy_db
+  value: *database
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/policy_db_connection_config
+  value: *databaseConnectionConfig

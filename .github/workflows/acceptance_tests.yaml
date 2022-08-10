@@ -90,13 +90,14 @@ jobs:
           export OPS_FILES="
             ${AUTOSCALER_DIR}/operations/add-releases.yml \
             ${AUTOSCALER_DIR}/operations/instance-identity-cert-from-cf.yml \
-            ${AUTOSCALER_DIR}/operations/add-postgres-variables.yml \
+            ${AUTOSCALER_DIR}/operations/add-postgres.yml \
+            ${AUTOSCALER_DIR}/operations/add-metricsserver.yml \
             ${AUTOSCALER_DIR}/operations/enable-nats-tls.yml \
             ${AUTOSCALER_DIR}/operations/loggregator-certs-from-cf.yml \
             ${AUTOSCALER_DIR}/operations/add-extra-plan.yml \
             ${AUTOSCALER_DIR}/operations/set-release-version.yml \
             ${AUTOSCALER_DIR}/operations/enable-log-cache.yml \
-            ${AUTOSCALER_DIR}/operations/log-cache-syslog-server.yml"
+            ${AUTOSCALER_DIR}/operations/enable-log-cache-via-syslog.yml"
           ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
       - name: register autoscaler broker

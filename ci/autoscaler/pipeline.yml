@@ -25,7 +25,8 @@ anchors:
     OPS_FILES: |
       operations/add-releases.yml
       operations/instance-identity-cert-from-cf.yml
-      operations/add-postgres-variables.yml
+      operations/add-postgres.yml
+      operations/add-metrisserver.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
@@ -35,19 +36,20 @@ anchors:
     OPS_FILES: |
       operations/add-releases.yml
       operations/instance-identity-cert-from-cf.yml
-      operations/add-postgres-variables.yml
+      operations/add-postgres.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
       operations/enable-log-cache.yml
-      operations/log-cache-syslog-server.yml
+      operations/enable-log-cache-via-syslog.yml
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
       operations/add-releases.yml
       operations/instance-identity-cert-from-cf.yml
-      operations/add-postgres-variables.yml
+      operations/add-postgres.yml
+      operations/add-metrisserver.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
       operations/postgres-persistent-disk.yml
