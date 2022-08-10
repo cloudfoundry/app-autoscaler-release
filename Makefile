@@ -249,3 +249,7 @@ fakes:
 workspace:
 	[ -e go.work ] || go work init
 	go work use $(addprefix ./src/,$(go_modules))
+
+.PHONY: act
+act:
+	./scripts/act.sh
