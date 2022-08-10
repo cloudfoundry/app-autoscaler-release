@@ -17,5 +17,5 @@ export OPS_FILES="${AUTOSCALER_DIR}/example/operation/loggregator-certs-from-cf.
 export SERVICE_OFFERING_ENABLED=true
 export SKIP_SSL_VALIDATION=true
 export NAME_PREFIX=${NAME_PREFIX:-"${DEPLOYMENT_NAME}-TESTS"}
-export SUITES="api app broker"
+export SUITES=${SUITES:-"api app broker"}
 export NODES=3

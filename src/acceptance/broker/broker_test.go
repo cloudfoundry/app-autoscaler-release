@@ -154,7 +154,7 @@ func getPlans() plans {
 		"service_offering_names": []string{cfg.ServiceName},
 	}
 	url := &url2.URL{Path: "/v3/service_plans", RawQuery: values.Encode()}
-	getPlans := cf.Cf("curl", url.String(), "-f").Wait(cfg.DefaultTimeoutDuration())
+	getPlans := cf.CfSilent("curl", url.String(), "-f").Wait(cfg.DefaultTimeoutDuration())
 	Expect(getPlans).To(Exit(0), "failed getting plans")
 
 	plansResult := &struct{ Resources []struct{ Name string } }{}
