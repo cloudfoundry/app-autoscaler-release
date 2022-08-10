@@ -1,0 +1,22 @@
+- type: replace
+  path: /variables/-
+  value:
+    name: postgres_ca
+    type: certificate
+    options:
+      is_ca: true
+      common_name: postgresCA
+
+- type: replace
+  path: /variables/-
+  value:
+    name: postgres_server
+    type: certificate
+    options:
+      ca: postgres_ca
+      common_name: ((deployment_name)).autoscalerpostgres.service.cf.internal
+      alternative_names:
+        - ((deployment_name)).autoscalerpostgres.service.cf.internal
+      extended_key_usage:
+        - client_auth
+        - server_auth
