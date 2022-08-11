@@ -203,6 +203,7 @@ lint: $(addprefix lint_,$(go_modules)) eslint rubocop
 .PHONY: rubocop
 rubocop:
 	@echo " - ruby scripts"
+	@bundle install
 	@bundle exec rubocop ./spec ./packages
 
 .PHONY: eslint
