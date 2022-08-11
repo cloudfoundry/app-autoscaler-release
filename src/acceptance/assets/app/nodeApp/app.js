@@ -156,7 +156,6 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
         }
       ]
     }
-
     const options = {
       url: metricsForwarderURL + '/v1/apps/' + appGuid + '/metrics',
       method: 'POST',
