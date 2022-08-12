@@ -442,7 +442,7 @@ jobs:
   serial: true
   ensure:
     task: cleanup
-    file: app-autoscaler-release-ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params:
       <<: *acceptance-main-env
     input_mapping:
