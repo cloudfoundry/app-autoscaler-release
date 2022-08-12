@@ -422,7 +422,7 @@ jobs:
       vars-files: autoscaler-env-vars-store
     params:
       SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
-      OPS_FILES: "operations/scale-to-one-az.yml operations/test/scale-to-one-az-addon-parallel-cats.yml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
     ensure:
       put: autoscaler-env-vars-store
       params:
