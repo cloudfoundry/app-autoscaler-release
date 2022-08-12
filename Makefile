@@ -12,7 +12,11 @@ DBURL := $(shell case "${db_type}" in\
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
 
+ACCEPTANCE_SUITES?=broker api app
+AUTOSCALER_DIR?=${PWD}
+CI_DIR?=${PWD}/ci
 CI?=false
+
 $(shell mkdir -p target)
 
 list-modules:
@@ -190,12 +194,6 @@ integration: build init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
 	make -C src/autoscaler integration DBURL="${DBURL}" OPTS="${OPTS}"
 
-.PHONY: acceptance-tests
-BBL_STATE_PATH ?= ../app-autoscaler-env-bbl-state/bbl-state
-acceptance-tests:
-	@echo " - Running acceptance tests";\
-	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; };\
-	BBL_STATE_PATH="${BBL_STATE_PATH}" AUTOSCALER_DIR="${PWD}" ./ci/autoscaler/scripts/run-acceptance-tests.sh
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
 lint: $(addprefix lint_,$(go_modules)) eslint rubocop
@@ -250,3 +248,35 @@ fakes:
 workspace:
 	[ -e go.work ] || go work init
 	go work use $(addprefix ./src/,$(go_modules))
+
+.PHONY: update
+update:
+	./scripts/update
+
+.PHONY: deploy
+uaac:
+	which uaac || gem install cf-uaac
+
+DEPLOYMENT_NAME?=app-autoscaler-test
+.PHONY: deploy
+deploy: update uaac
+	cd scripts;\
+	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}";\
+ 	source pr-vars.source.sh;\
+ 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
+    ${CI_DIR}/autoscaler/scripts/register-broker.sh
+
+.PHONY: acceptance-tests
+BBL_STATE_PATH ?= ../app-autoscaler-env-bbl-state/bbl-state
+acceptance-tests:
+	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"
+	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; }
+	NAME_PREFIX="autoscaler-test"\
+ 	 BBL_STATE_PATH="${BBL_STATE_PATH}"\
+ 	 AUTOSCALER_DIR="${PWD}"\
+ 	 SUITES="${ACCEPTANCE_SUITES}"\
+ 	 SKIP_TEARDOWN=true\
+ 	 NODES=1\
+ 	 DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"\
+ 	 GINKGO_OPTS="${OPTS}"\
+ 	    ./ci/autoscaler/scripts/run-acceptance-tests.sh

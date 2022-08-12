@@ -53,7 +53,7 @@ done
 echo "Running $suites_to_run"
 
 if [ "${suites_to_run}" != "" ]; then
-  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test "$gingko_opts" -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "${suites_to_run}"
+  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$gingko_opts" "${suites_to_run}"
 else
   echo "Nothing to run!"
 fi

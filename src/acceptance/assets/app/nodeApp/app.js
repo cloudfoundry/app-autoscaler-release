@@ -18,32 +18,34 @@ function getCredentials () {
   // for service offering
   console.log('Getting credentials...')
   if (process.env.VCAP_SERVICES) {
+    console.log(` - found vcap looking for ${serviceName}`)
     const vcapServices = JSON.parse(process.env.VCAP_SERVICES)
     const service = vcapServices[serviceName]
-
-    if (service && service[0] && service[0].credentials) {
-      credentials = service[0].credentials
-      metricsForwarderURL = credentials.custom_metrics.url
-      mfUsername = credentials.custom_metrics.username
-      mfPassword = credentials.custom_metrics.password
-      console.log('consumed VCAP_SERVICES env variable (service_offering)')
+    if (service && service[0]) {
+      console.log(` - found service ${serviceName}`)
+      if (service[0].credentials) {
+        console.log(' - found credentials')
+        credentials = service[0].credentials
+        metricsForwarderURL = credentials.custom_metrics.url
+        mfUsername = credentials.custom_metrics.username
+        mfPassword = credentials.custom_metrics.password
+      } else {
+        const err = 'ERROR: no credentials in bound service env variable'
+        console.error(err)
+        throw err
+      }
     }
-  } else {
-    const err = 'ERROR: no VCAP_SERVICES env variable'
-    console.error(err)
-    throw err
   }
 
   // for build-in offering
   if (metricsForwarderURL === '' || mfUsername === '' || mfPassword === '') {
+    console.log(' - looking for creds in env (built in case)')
     if (process.env.AUTO_SCALER_CUSTOM_METRIC_ENV) {
+      console.log(' - found credentials in AUTO_SCALER_CUSTOM_METRIC_ENV')
       credentials = JSON.parse(process.env.AUTO_SCALER_CUSTOM_METRIC_ENV)
       metricsForwarderURL = credentials.url
       mfUsername = credentials.username
       mfPassword = credentials.password
-      console.log(
-        'consumed AUTO_SCALER_CUSTOM_METRIC_ENV env variable (use_buildin_mode)'
-      )
     } else {
       console.error('ERROR: not all credentials were provided.')
       console.log(
