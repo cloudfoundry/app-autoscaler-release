@@ -136,7 +136,7 @@ func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
 	Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
 	spaceGuid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
 
-	serviceCmd := cf.Cf("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
+	serviceCmd := cf.CfSilent("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
 	if serviceCmd.ExitCode() != 0 {
 		Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
 	}
@@ -151,11 +151,13 @@ func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
 	if err != nil {
 		AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
 	}
+	GinkgoWriter.Printf("\nFound services: %s\n", services.Included.ServiceOfferings)
 	for _, service := range services.Included.ServiceOfferings {
 		if service.Name == serviceName {
 			return
 		}
 	}
+
 	cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
 	Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
 }

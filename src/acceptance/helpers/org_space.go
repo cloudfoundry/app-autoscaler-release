@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/onsi/ginkgo/v2"
+
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 
 	. "github.com/onsi/gomega"
@@ -33,7 +35,7 @@ type cfSpaces struct {
 }
 
 func GetTestOrgs(cfg *config.Config) []string {
-	rawOrgs := cf.Cf("curl", "/v3/organizations").Wait(cfg.DefaultTimeoutDuration())
+	rawOrgs := cf.CfSilent("curl", "/v3/organizations").Wait(cfg.DefaultTimeoutDuration())
 	Expect(rawOrgs).To(Exit(0), "unable to get orgs")
 
 	var orgs cfOrgs
@@ -46,7 +48,7 @@ func GetTestOrgs(cfg *config.Config) []string {
 			orgNames = append(orgNames, org.Name)
 		}
 	}
-
+	ginkgo.GinkgoWriter.Printf("\nGot orgs: %s\n", orgNames)
 	return orgNames
 }
 

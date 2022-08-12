@@ -49,6 +49,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	Context("when scaling by specific date schedule", func() {
 
 		JustBeforeEach(func() {
+			//TODO the start app needs to be after the binding but the timings require the app been up already.
 			StartApp(appName, cfg.CfPushTimeoutDuration())
 			startDateTime = time.Now().In(time.UTC).Add(1 * time.Minute)
 			endDateTime = startDateTime.Add(time.Duration(interval+120) * time.Second)

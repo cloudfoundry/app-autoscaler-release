@@ -9,7 +9,15 @@ bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 deployment_manifest="${script_dir}/../../../templates/app-autoscaler.yml"
-ops_files="${OPS_FILES:-''}"
+ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
+ ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
+ ${autoscaler_dir}/operations/add-postgres-variables.yml\
+ ${autoscaler_dir}/operations/enable-nats-tls.yml\
+ ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
+ ${autoscaler_dir}/operations/add-extra-plan.yml\
+ ${autoscaler_dir}/operations/set-release-version.yml\
+ ${autoscaler_dir}/operations/enable-log-cache.yml\
+ ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
 
