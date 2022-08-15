@@ -196,9 +196,17 @@ integration: build init-db test-certs
 
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
-lint: $(addprefix lint_,$(go_modules)) eslint rubocop
+lint: golangci-lint_check $(addprefix lint_,$(go_modules)) eslint rubocop
 
-.PHONY: rubocop
+golangci-lint_check:
+	@current_version=$(shell golangci-lint version | cut -d " " -f 4);\
+	current_major_version=$(shell golangci-lint version | cut -d " " -f 4| sed -E 's/v*([0-9]+\.[0-9]+)\..*/\1/');\
+	expected_version=$(shell cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2 | sed -E 's/v([0-9]+\.[0-9]+)\..*/\1/');\
+	if [ "$${current_major_version}" != "$${expected_version}" ]; then \
+        echo "ERROR: Expected to have golangci-lint version '$${expected_version}.x' but we have $${current_version}";\
+        exit 1;\
+    fi
+
 rubocop:
 	@echo " - ruby scripts"
 	@bundle install
@@ -210,10 +218,8 @@ eslint:
 	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
 $(addprefix lint_,$(go_modules)): lint_%:
-	@golangci_version=$(shell cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2);\
-	echo " - linting: $(patsubst lint_%,%,$@)";\
-	pushd src/$(patsubst lint_%,%,$@) >/dev/null;\
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@$${golangci_version} --config ${lint_config} run ${OPTS}
+	@echo " - linting: $(patsubst lint_%,%,$@)"
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run ${OPTS}
 
 .PHONY: spec-test
 spec-test:
