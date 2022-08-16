@@ -257,7 +257,7 @@ update:
 uaac:
 	which uaac || gem install cf-uaac
 
-DEPLOYMENT_NAME?=app-autoscaler-test
+
 .PHONY: deploy
 deploy: update uaac
 	cd scripts;\
@@ -267,7 +267,10 @@ deploy: update uaac
     ${CI_DIR}/autoscaler/scripts/register-broker.sh
 
 .PHONY: acceptance-tests
-BBL_STATE_PATH ?= ../app-autoscaler-env-bbl-state/bbl-state
+export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state
+export AUTOSCALER_DIR=${PWD}
+export DEPLOYMENT_NAME?=app-autoscaler-test
+export NAME_PREFIX?=autoscaler-test
 acceptance-tests:
 	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"
 	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; }
@@ -280,3 +283,8 @@ acceptance-tests:
  	 DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"\
  	 GINKGO_OPTS="${OPTS}"\
  	    ./ci/autoscaler/scripts/run-acceptance-tests.sh
+
+.PHONY: clean-deploy
+clean-deploy:
+	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}' name prefix:'${NAME_PREFIX}'"
+	@ci/autoscaler/scripts/cleanup-autoscaler.sh
