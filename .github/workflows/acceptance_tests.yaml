@@ -79,27 +79,10 @@ jobs:
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
-      - name: run update
-        run: cd ${AUTOSCALER_DIR}; ./scripts/update
-
-
       # TODO: When removing metricserver and metricgateway merge enable-log-cache.yml into the default templates/app-autoscaler.yml manifest.
       - name: deploy autoscaler
         run: |
-          export OPS_FILES="
-            ${AUTOSCALER_DIR}/operations/add-releases.yml \
-            ${AUTOSCALER_DIR}/operations/instance-identity-cert-from-cf.yml \
-            ${AUTOSCALER_DIR}/operations/add-postgres-variables.yml \
-            ${AUTOSCALER_DIR}/operations/enable-nats-tls.yml \
-            ${AUTOSCALER_DIR}/operations/loggregator-certs-from-cf.yml \
-            ${AUTOSCALER_DIR}/operations/add-extra-plan.yml \
-            ${AUTOSCALER_DIR}/operations/set-release-version.yml \
-            ${AUTOSCALER_DIR}/operations/enable-log-cache.yml \
-            ${AUTOSCALER_DIR}/operations/log-cache-syslog-server.yml"
-          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
-
-      - name: register autoscaler broker
-        run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
+          make deploy DEPLOYMENT_NAME=${{ env.DEPLOYMENT_NAME }}
 
   acceptance_test_api:
     needs: [ deploy_autoscaler ]
