@@ -2,6 +2,7 @@
 # shellcheck disable=SC2086
 set -euo pipefail
 
+echo "STATE PATH ${BBL_STATE_PATH}"
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
@@ -22,6 +23,12 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/use_buildin_mode.yml"}
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
+
+echo "INFO"
+pwd
+echo "END"
+echo "${bbl_state_path}"
+echo "${BBL_STATE_PATH}"
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"

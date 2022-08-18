@@ -263,14 +263,19 @@ update:
 uaac:
 	which uaac || gem install cf-uaac
 
-
 .PHONY: deploy
+DEPLOYMENT_NAME?=app-autoscaler-test
+BUILTIN?=false
+SERVICE_OFFERING_ENABLED?=true
 deploy: update uaac
 	cd scripts;\
+	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; };\
+	export BBL_STATE_PATH="${BBL_STATE_PATH}";\
 	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}";\
- 	source pr-vars.source.sh;\
- 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
-    ${CI_DIR}/autoscaler/scripts/register-broker.sh
+	export SERVICE_OFFERING_ENABLED="{SERVICE_OFFERING_ENABLED}";\
+	source pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
+	${CI_DIR}/autoscaler/scripts/register-broker.sh
 
 .PHONY: acceptance-tests
 export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state
