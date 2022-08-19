@@ -14,9 +14,7 @@ jobs:
       - uses: ./.github/actions/setup_go
 
       - name: sync-package-specs
-        run: |
-          source .envrc
-          ./scripts/sync-package-specs
+        run: make package-specs
 
       - name: Check if there is any change
         run: |
@@ -24,7 +22,7 @@ jobs:
             [ $(git status --porcelain | wc -l) -eq 0 ] || \
             { \
               git status;\
-              echo "::error::Specs are out of date, run ./scripts/update && ./scripts/sync-package-specs to update";\
+              echo "::error::Specs are out of date, run \"make package-specs\" to update";\
               exit 1;\
             }
 
