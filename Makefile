@@ -273,9 +273,10 @@ deploy: update uaac
 	export BBL_STATE_PATH="${BBL_STATE_PATH}";\
 	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}";\
 	export SERVICE_OFFERING_ENABLED="{SERVICE_OFFERING_ENABLED}";\
+	if [[ BUILTIN ]]; then export BUILTIN_MODE_ACTIVE=true; fi;\
 	source pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
-	${CI_DIR}/autoscaler/scripts/register-broker.sh
+	if [[ ! BUILTIN ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;
 
 .PHONY: acceptance-tests
 export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state

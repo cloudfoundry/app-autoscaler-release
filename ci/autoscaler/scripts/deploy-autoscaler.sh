@@ -19,16 +19,12 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/add-extra-plan.yml\
  ${autoscaler_dir}/operations/set-release-version.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
- ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
- ${autoscaler_dir}/operations/use_buildin_mode.yml"}
+ ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
+
+if [[ BUILTIN_MODE_ACTIVE ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
+
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
-
-echo "INFO"
-pwd
-echo "END"
-echo "${bbl_state_path}"
-echo "${BBL_STATE_PATH}"
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
