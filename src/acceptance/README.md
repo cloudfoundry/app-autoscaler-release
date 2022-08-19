@@ -41,6 +41,7 @@ cat > integration_config.json <<EOF
   "service_name": "autoscaler",
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
+  "health_endpoints_basic_auth_enabled": false,
 
   "autoscaler_api": "autoscaler.bosh-lite.com",
   "service_offering_enabled": true
@@ -61,6 +62,7 @@ The full set of config parameters is explained below:
 * `admin_password` (required): Password of the admin user above.
 * `apps_domain` (required): A shared domain that tests can use to create subdomains that will route to applications also craeted in the tests.
 
+* `health_endpoints_basic_auth_enabled` (optional): Set to false if you did not enable basic auth on the health endpoints. Default is true.
 * `service_offering_enabled` (optional): Set to true if auto-scaler is offered as a cloudfoundry service. The value should be the consistent with the one in app-autoscaler deployment. Default is true.
 * `enable_service_access` (optional): Set to false if autoscaler is offered as a cloudfoundry service which is globally enabled. Default is true.
 * `skip_ssl_validation` (optional): Set to true if using an invalid (e.g. self-signed) cert for traffic routed to your CF instance; this is generally always true for BOSH-Lite deployments of CF.

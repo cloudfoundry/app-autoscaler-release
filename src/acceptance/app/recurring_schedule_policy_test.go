@@ -2,7 +2,6 @@ package app_test
 
 import (
 	. "acceptance/helpers"
-	"fmt"
 	"os"
 
 	"code.cloudfoundry.org/app-autoscaler/src/acceptance/config"
@@ -42,7 +41,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 	AfterEach(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
-			fmt.Println("Skipping Teardown...")
+			GinkgoWriter.Println("Skipping Teardown...")
 		} else {
 			DeletePolicy(appName, appGUID)
 			Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
@@ -52,65 +51,33 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 	Context("when scaling by recurring schedule", func() {
 
 		JustBeforeEach(func() {
-			location, err := time.LoadLocation("GMT")
-			Expect(err).NotTo(HaveOccurred())
-			startTime, endTime = getStartAndEndTime(location, 70*time.Second, time.Duration(interval+120)*time.Second)
-			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 80, "GMT", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
+			startTime, endTime = getStartAndEndTime(time.UTC, 70*time.Second, time.Duration(interval+120)*time.Second)
+			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 80, "UTC", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
-			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
+			StartApp(appName, cfg.CfPushTimeoutDuration())
 		})
 
+		scaleDown := func() {
+			By("setting to initial_min_instance_count")
+			jobRunTime := time.Until(startTime.Add(5 * time.Minute))
+			WaitForNInstancesRunning(appGUID, 3, jobRunTime)
+
+			By("setting schedule's instance_min_count")
+			jobRunTime = time.Until(endTime)
+			Eventually(func() int { return RunningInstances(appGUID, jobRunTime) }, jobRunTime, 15*time.Second).Should(Equal(2))
+
+			By("setting to default instance_min_count")
+			WaitForNInstancesRunning(appGUID, 1, time.Until(endTime.Add(time.Duration(interval+60)*time.Second)))
+		}
+
 		Context("with days of month", func() {
-			BeforeEach(func() {
-				daysOfMonthOrWeek = DaysOfMonth
-			})
-
-			It("should scale", func() {
-				By("setting to initial_min_instance_count")
-				jobRunTime := time.Until(startTime.Add(5 * time.Minute))
-				WaitForNInstancesRunning(appGUID, 3, jobRunTime)
-
-				By("setting schedule's instance_min_count")
-				jobRunTime = time.Until(endTime)
-				Eventually(func() int {
-					return RunningInstances(appGUID, jobRunTime)
-				}, jobRunTime, 15*time.Second).Should(Equal(2))
-
-				jobRunTime = time.Until(endTime)
-				Consistently(func() int {
-					return RunningInstances(appGUID, jobRunTime)
-				}, jobRunTime, 15*time.Second).Should(Equal(2))
-
-				By("setting to default instance_min_count")
-				WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
-			})
-
+			BeforeEach(func() { daysOfMonthOrWeek = DaysOfMonth })
+			It("should scale", scaleDown)
 		})
 
 		Context("with days of week", func() {
-			BeforeEach(func() {
-				daysOfMonthOrWeek = DaysOfWeek
-			})
-
-			It("should scale", func() {
-				By("setting to initial_min_instance_count")
-				jobRunTime := time.Until(startTime.Add(5 * time.Minute))
-				WaitForNInstancesRunning(appGUID, 3, jobRunTime)
-
-				By("setting schedule's instance_min_count")
-				jobRunTime = time.Until(endTime)
-				Eventually(func() int {
-					return RunningInstances(appGUID, jobRunTime)
-				}, jobRunTime, 15*time.Second).Should(Equal(2))
-
-				jobRunTime = time.Until(endTime)
-				Consistently(func() int {
-					return RunningInstances(appGUID, jobRunTime)
-				}, jobRunTime, 15*time.Second).Should(Equal(2))
-
-				By("setting to default instance_min_count")
-				WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+120)*time.Second)
-			})
+			BeforeEach(func() { daysOfMonthOrWeek = DaysOfWeek })
+			It("should scale", scaleDown)
 		})
 	})
 

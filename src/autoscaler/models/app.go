@@ -2,11 +2,6 @@ package models
 
 import "time"
 
-type AppEntity struct {
-	Instances int     `json:"instances"`
-	State     *string `json:"state,omitempty"`
-}
-
 type ScalingType int
 type ScalingStatus int
 

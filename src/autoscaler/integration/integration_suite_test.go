@@ -19,7 +19,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	as_testhelpers "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
@@ -57,14 +57,8 @@ var (
 	dbUrl                   string
 	LOGLEVEL                string
 	noaaPollingRegPath      = regexp.MustCompile(`^/apps/.*/containermetrics$`)
-	appSummaryRegPath       = regexp.MustCompile(`^/v2/apps/.*/summary$`)
-	appInstanceRegPath      = regexp.MustCompile(`^/v2/apps/.*$`)
-	v3appInstanceRegPath    = regexp.MustCompile(`^/v3/apps/.*$`)
-	rolesRegPath            = regexp.MustCompile(`^/v3/roles$`)
-	serviceInstanceRegPath  = regexp.MustCompile(`^/v2/service_instances/.*$`)
-	servicePlanRegPath      = regexp.MustCompile(`^/v2/service_plans/.*$`)
 	dbHelper                *sqlx.DB
-	fakeCCNOAAUAA           *ghttp.Server
+	fakeCCNOAAUAA           *testhelpers.MockServer
 	testUserId              = "testUserId"
 	testUserScope           = []string{"cloud_controller.read", "cloud_controller.write", "password.write", "openid", "network.admin", "network.write", "uaa.user"}
 
@@ -105,7 +99,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	payload, err := json.Marshal(&components)
 	Expect(err).NotTo(HaveOccurred())
 
-	dbUrl = os.Getenv("DBURL")
+	dbUrl = testhelpers.GetDbUrl()
 	if dbUrl == "" {
 		Fail("environment variable $DBURL is not set")
 	}
@@ -127,7 +121,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	tmpDir, err = ioutil.TempDir("", "autoscaler")
 	Expect(err).NotTo(HaveOccurred())
 
-	dbUrl = os.Getenv("DBURL")
+	dbUrl = testhelpers.GetDbUrl()
 	database, err := db.GetConnection(dbUrl)
 	Expect(err).NotTo(HaveOccurred())
 
@@ -252,9 +246,37 @@ func stopMetricsServer() {
 	ginkgomon_v2.Kill(processMap[MetricsServerHTTP], 5*time.Second)
 }
 
-func getRandomId() string {
+func getRandomIdRef(ref string) string {
+	report := CurrentSpecReport()
+	// 0123456789012345678901234567890123456789
+	// operator_others:189,11,instance:a5f63cbf 7c204c417941d91d21cb3bd0
+	// |filename|:|linenumber|,|ref|process|:|random|
+	// |15|1|3-4|1|14|2|1|3-4| == 40 (max id length)
+	if len(ref) > 13 {
+		GinkgoT().Logf("WARNING: %s:%d using a ref that is being truncated '%s' should be <= 13 chars", report.FileName(), report.LineNumber(), ref)
+		ref = ref[:13]
+	}
+	id := fmt.Sprintf("%s:%d,%s,%d:%s", testFileFragment(report.FileName()), report.LineNumber(), ref, GinkgoParallelProcess(), randomBits())
+	if len(id) > 40 {
+		id = id[:40]
+	}
+	return id
+}
+
+func randomBits() string {
 	v4, _ := uuid.NewV4()
-	return v4.String()
+	randomBits := v4.String()
+	return strings.ReplaceAll(randomBits, "-", "")
+}
+
+func testFileFragment(filename string) string {
+	base := filepath.Base(filename)
+	base = strings.TrimSuffix(base, "_test.go")
+	base = strings.TrimPrefix(base, "integration_")
+	if len(base) > 15 {
+		return base[(len(base) - 15):]
+	}
+	return base
 }
 
 func initializeHttpClient(certFileName string, keyFileName string, caCertFileName string, httpRequestTimeout time.Duration) {
@@ -738,7 +760,7 @@ func checkScheduleContents(appId string, expectHttpStatus int, expectResponseMap
 }
 
 func startFakeCCNOAAUAA(instanceCount int) {
-	fakeCCNOAAUAA = ghttp.NewServer()
+	fakeCCNOAAUAA = testhelpers.NewMockServer()
 	fakeCCNOAAUAA.RouteToHandler("GET", "/v2/info", ghttp.RespondWithJSONEncoded(http.StatusOK,
 		cf.Endpoints{
 			AuthEndpoint:    fakeCCNOAAUAA.URL(),
@@ -746,10 +768,14 @@ func startFakeCCNOAAUAA(instanceCount int) {
 			DopplerEndpoint: strings.Replace(fakeCCNOAAUAA.URL(), "http", "ws", 1),
 		}))
 	fakeCCNOAAUAA.RouteToHandler("POST", "/oauth/token", ghttp.RespondWithJSONEncoded(http.StatusOK, cf.Tokens{}))
-	appState := models.AppStatusStarted
-	fakeCCNOAAUAA.RouteToHandler("GET", appSummaryRegPath, ghttp.RespondWithJSONEncoded(http.StatusOK,
-		models.AppEntity{Instances: instanceCount, State: &appState}))
-	fakeCCNOAAUAA.RouteToHandler("PUT", appInstanceRegPath, ghttp.RespondWith(http.StatusCreated, ""))
+	fakeCCNOAAUAA.Add().
+		GetApp(models.AppStatusStarted, http.StatusOK, "test_space_guid").
+		GetAppProcesses(instanceCount).
+		ScaleAppWebProcess().
+		Roles(http.StatusOK, cf.Role{Type: cf.RoleSpaceDeveloper}).
+		ServiceInstance("cc-free-plan-id").
+		ServicePlan("autoscaler-free-plan-id")
+
 	fakeCCNOAAUAA.RouteToHandler("POST", "/check_token", ghttp.RespondWithJSONEncoded(http.StatusOK,
 		struct {
 			Scope []string `json:"scope"`
@@ -761,54 +787,6 @@ func startFakeCCNOAAUAA(instanceCount int) {
 			UserId string `json:"user_id"`
 		}{
 			testUserId,
-		}))
-	fakeCCNOAAUAA.RouteToHandler("GET", v3appInstanceRegPath, ghttp.RespondWithJSONEncoded(http.StatusOK,
-		struct {
-			TotalResults int `json:"total_results"`
-		}{
-			1,
-		}))
-
-	app := struct {
-		Relationships struct {
-			Space struct {
-				Data struct {
-					GUID string `json:"guid"`
-				} `json:"data"`
-			} `json:"space"`
-		} `json:"relationships"`
-	}{}
-	app.Relationships.Space.Data.GUID = "test_space_guid"
-	fakeCCNOAAUAA.RouteToHandler("GET", v3appInstanceRegPath, ghttp.RespondWithJSONEncoded(http.StatusOK,
-		app))
-
-	roles := struct {
-		Pagination struct {
-			Total int `json:"total_results"`
-		} `json:"pagination"`
-	}{}
-	roles.Pagination.Total = 1
-	fakeCCNOAAUAA.RouteToHandler("GET", rolesRegPath, ghttp.RespondWithJSONEncoded(http.StatusOK,
-		roles))
-
-	type ServiceInstanceEntity struct {
-		ServicePlanGuid string `json:"service_plan_guid"`
-	}
-	fakeCCNOAAUAA.RouteToHandler("GET", serviceInstanceRegPath, ghttp.RespondWithJSONEncoded(http.StatusOK,
-		struct {
-			ServiceInstanceEntity `json:"entity"`
-		}{
-			ServiceInstanceEntity{"cc-free-plan-id"},
-		}))
-
-	type ServicePlanEntity struct {
-		UniqueId string `json:"unique_id"`
-	}
-	fakeCCNOAAUAA.RouteToHandler("GET", servicePlanRegPath, ghttp.RespondWithJSONEncoded(http.StatusOK,
-		struct {
-			ServicePlanEntity `json:"entity"`
-		}{
-			ServicePlanEntity{"autoscaler-free-plan-id"},
 		}))
 }
 
@@ -833,15 +811,15 @@ func fakeMetricsPolling(appId string, memoryValue uint64, memQuota uint64) {
 	)
 }
 
-func startFakeRLPServer(appId string, envelopes []*loggregator_v2.Envelope, emitInterval time.Duration) *as_testhelpers.FakeEventProducer {
-	fakeRLPServer, err := as_testhelpers.NewFakeEventProducer(filepath.Join(testCertDir, "reverselogproxy.crt"), filepath.Join(testCertDir, "reverselogproxy.key"), filepath.Join(testCertDir, "autoscaler-ca.crt"), emitInterval)
+func startFakeRLPServer(appId string, envelopes []*loggregator_v2.Envelope, emitInterval time.Duration) *testhelpers.FakeEventProducer {
+	fakeRLPServer, err := testhelpers.NewFakeEventProducer(filepath.Join(testCertDir, "reverselogproxy.crt"), filepath.Join(testCertDir, "reverselogproxy.key"), filepath.Join(testCertDir, "autoscaler-ca.crt"), emitInterval)
 	Expect(err).NotTo(HaveOccurred())
 	fakeRLPServer.SetEnvelops(envelopes)
 	fakeRLPServer.Start()
 	return fakeRLPServer
 }
 
-func stopFakeRLPServer(fakeRLPServer *as_testhelpers.FakeEventProducer) {
+func stopFakeRLPServer(fakeRLPServer *testhelpers.FakeEventProducer) {
 	stopped := fakeRLPServer.Stop()
 	Expect(stopped).To(Equal(true))
 }

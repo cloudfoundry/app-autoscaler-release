@@ -7,10 +7,13 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	models2 "code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -22,18 +25,16 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/config"
 )
 
 var (
-	prPath            string
-	cfg               config.Config
-	configFile        *os.File
-	cfServer          *ghttp.Server
-	healthHttpClient  *http.Client
-	healthport        int
-	appSummaryRegPath = regexp.MustCompile(`^/v2/apps/.*/summary$`)
+	prPath           string
+	cfg              config.Config
+	configFile       *os.File
+	cfServer         *testhelpers.MockServer
+	healthHttpClient *http.Client
+	healthport       int
 )
 
 func TestOperator(t *testing.T) {
@@ -62,7 +63,7 @@ var _ = SynchronizedAfterSuite(func() {
 })
 
 func initConfig() {
-	cfServer = ghttp.NewServer()
+	cfServer = testhelpers.NewMockServer()
 	cfServer.RouteToHandler("GET", "/v2/info", ghttp.RespondWithJSONEncoded(http.StatusOK,
 		cf.Endpoints{
 			TokenEndpoint:   cfServer.URL(),
@@ -71,11 +72,10 @@ func initConfig() {
 
 	cfServer.RouteToHandler("POST", "/oauth/token", ghttp.RespondWithJSONEncoded(http.StatusOK, cf.Tokens{}))
 
-	appState := models.AppStatusStarted
-	cfServer.RouteToHandler("GET", appSummaryRegPath, ghttp.RespondWithJSONEncoded(http.StatusOK,
-		models.AppEntity{Instances: 2, State: &appState}))
+	cfServer.Add().GetApp(models2.AppStatusStarted, http.StatusOK, "test_space_guid")
+	cfServer.Add().GetAppProcesses(2)
 
-	cfg.CF = cf.CFConfig{
+	cfg.CF = cf.Config{
 		API:      cfServer.URL(),
 		ClientID: "client-id",
 		Secret:   "secret",
@@ -83,13 +83,10 @@ func initConfig() {
 	healthport = 8000 + GinkgoParallelProcess()
 	cfg.Health.Port = healthport
 	cfg.Logging.Level = "debug"
-	dbURL := os.Getenv("DBURL")
-	if dbURL == "" {
-		Fail("environment variable $DBURL is not set")
-	}
+	dbUrl := testhelpers.GetDbUrl()
 
 	cfg.InstanceMetricsDB.DB = db.DatabaseConfig{
-		URL:                   dbURL,
+		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
 		ConnectionMaxLifetime: 10 * time.Second,
@@ -98,7 +95,7 @@ func initConfig() {
 	cfg.InstanceMetricsDB.CutoffDuration = 20 * 24 * time.Hour
 
 	cfg.AppMetricsDB.DB = db.DatabaseConfig{
-		URL:                   dbURL,
+		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
 		ConnectionMaxLifetime: 10 * time.Second,
@@ -107,7 +104,7 @@ func initConfig() {
 	cfg.AppMetricsDB.CutoffDuration = 20 * 24 * time.Hour
 
 	cfg.ScalingEngineDB.DB = db.DatabaseConfig{
-		URL:                   dbURL,
+		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
 		ConnectionMaxLifetime: 10 * time.Second,
@@ -126,7 +123,7 @@ func initConfig() {
 	}
 
 	cfg.DBLock.DB = db.DatabaseConfig{
-		URL:                   os.Getenv("DBURL"),
+		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
 		ConnectionMaxLifetime: 10 * time.Second,
@@ -135,7 +132,7 @@ func initConfig() {
 	cfg.DBLock.LockTTL = 15 * time.Second
 	cfg.DBLock.LockRetryInterval = 5 * time.Second
 	cfg.AppSyncer.DB = db.DatabaseConfig{
-		URL:                   dbURL,
+		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
 		ConnectionMaxLifetime: 10 * time.Second,
@@ -205,7 +202,8 @@ func (pr *OperatorRunner) KillWithFire() {
 }
 
 func (pr *OperatorRunner) ClearLockDatabase() {
-	database, err := db.GetConnection(os.Getenv("DBURL"))
+	dbUrl := testhelpers.GetDbUrl()
+	database, err := db.GetConnection(dbUrl)
 	Expect(err).NotTo(HaveOccurred())
 
 	lockDB, err := sql.Open(database.DriverName, database.DSN)

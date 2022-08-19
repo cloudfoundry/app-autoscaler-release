@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"time"
 
+	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+
 	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo/v2"
@@ -19,7 +21,7 @@ var _ = Describe("Client", func() {
 		fakeCC    *ghttp.Server
 		fakeUAA   *ghttp.Server
 		cfc       CFClient
-		conf      *CFConfig
+		conf      *Config
 		authToken string
 		tokens    Tokens
 		fclock    *fakeclock.FakeClock
@@ -29,7 +31,7 @@ var _ = Describe("Client", func() {
 	BeforeEach(func() {
 		fakeCC = ghttp.NewServer()
 		fakeUAA = ghttp.NewServer()
-		conf = &CFConfig{}
+		conf = &Config{}
 		conf.API = fakeCC.URL()
 		fclock = fakeclock.NewFakeClock(time.Now())
 		err = nil

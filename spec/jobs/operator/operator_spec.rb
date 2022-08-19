@@ -1,80 +1,14 @@
 require "rspec"
 require "json"
 require "bosh/template/test"
+require "rspec/file_fixtures"
 require "yaml"
 
 describe "operator" do
   let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), "../../..")) }
   let(:job) { release.job("operator") }
   let(:template) { job.template("config/operator.yml") }
-  let(:properties) do
-    YAML.safe_load(%(
-      autoscaler:
-        policy_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        instancemetrics_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          tls.ca: aa
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        appmetrics_db:
-          address: 10.11.137.101
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 5432
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        scalingengine_db:
-          address: 10.11.137.105
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 6543
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        lock_db:
-          address: 10.11.137.105
-          databases:
-          - name: foo
-            tag: default
-          db_scheme: postgres
-          port: 6543
-          roles:
-          - name: foo
-            password: default
-            tag: default
-        cf:
-          api: https://api.cf.domain
-          auth_endpoint: https://login.cf.domain
-          client_id: client_id
-          secret: uaa_secret
-          uaa_api: https://login.cf.domain/uaa
-          grant_type: ALLOW_ALL
-    ))
-  end
+  let(:properties) { YAML.safe_load(fixture("operator.yml").read) }
 
   context "config/operator.yml" do
     it "does not set username nor password if not configured" do

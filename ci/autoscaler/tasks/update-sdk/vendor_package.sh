@@ -3,7 +3,7 @@
 set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-root_dir="${script_dir}/../../../.."
+root_dir="${script_dir}/../../../../.."
 autoscaler_dir="${root_dir}/app-autoscaler-release"
 
 function vendor-package {
@@ -11,10 +11,10 @@ function vendor-package {
   local package=${2}
   local version=${3}
   local package_location
-  package_location=$(pwd)/${release}
+  package_location=${root_dir}/${release}
 
   echo "# Building package for ${release} for version '${version}'"
-  cat "${release}/.git/ref" > "${root_dir}/vendored-commit"
+  cat "${root_dir}/${release}/.git/ref" > "${root_dir}/vendored-commit"
 
   pushd "${autoscaler_dir}" > /dev/null
     # generate the private.yml file with the credentials

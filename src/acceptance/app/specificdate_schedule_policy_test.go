@@ -26,7 +26,6 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		appName              string
 		appGUID              string
 		initialInstanceCount int
-		location             *time.Location
 		startDateTime        time.Time
 		endDateTime          time.Time
 		policy               string
@@ -54,16 +53,15 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		}
 	})
 
-	Context("when scaling by specific date schedule ", func() {
+	Context("when scaling by specific date schedule", func() {
 
 		JustBeforeEach(func() {
-			location, _ = time.LoadLocation("GMT")
-			timeNowInTimeZoneWithOffset := time.Now().In(location).Add(70 * time.Second).Truncate(time.Minute)
-			startDateTime = timeNowInTimeZoneWithOffset
-			endDateTime = timeNowInTimeZoneWithOffset.Add(time.Duration(interval+120) * time.Second)
-			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "GMT", startDateTime, endDateTime, 2, 5, 3)
+			//TODO the start app needs to be after the binding but the timings require the app been up already.
+			StartApp(appName, cfg.CfPushTimeoutDuration())
+			startDateTime = time.Now().In(time.UTC).Add(1 * time.Minute)
+			endDateTime = startDateTime.Add(time.Duration(interval+120) * time.Second)
+			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "UTC", startDateTime, endDateTime, 2, 5, 3)
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
-			Expect(cf.Cf("start", appName).Wait(cfg.CfPushTimeoutDuration())).To(Exit(0))
 		})
 
 		It("should scale", func() {

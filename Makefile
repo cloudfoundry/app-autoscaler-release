@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-go_modules:= acceptance autoscaler changelog changeloglockcleaner
+go_modules:= $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
@@ -12,8 +12,15 @@ DBURL := $(shell case "${db_type}" in\
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
 
+ACCEPTANCE_SUITES?=broker api app
+AUTOSCALER_DIR?=${PWD}
+CI_DIR?=${PWD}/ci
 CI?=false
+
 $(shell mkdir -p target)
+
+list-modules:
+	@echo ${go_modules}
 
 .PHONY: check-type
 check-db_type:
@@ -35,21 +42,26 @@ target/init:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-vendor clean-autoscaler clean-java clean-targets
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
-	@make clean-targets
 clean-java:
 	@echo " - cleaning java resources"
 	@cd src && mvn clean > /dev/null && cd ..
 clean-targets:
 	@echo " - cleaning build target files"
-	@rm target/* &> /dev/null || echo "  - Already clean"
+	@rm target/* &> /dev/null || echo "  . Already clean"
 clean-vendor:
 	@echo " - cleaning vendored go"
 	@find . -name "vendor" -type d -exec rm -rf {} \;
 clean-autoscaler:
 	@make -C src/autoscaler clean
+clean-scheduler:
+	@echo " - cleaning scheduler test resources"
+	@rm -rf src/scheduler/src/test/resources/certs
+clean-certs:
+	@echo " - cleaning test certs"
+	@rm -f testcerts/*
 
 .PHONY: build build-test build-all $(all_modules)
 build: init  $(all_modules)
@@ -85,21 +97,20 @@ target/scheduler_test_certs:
 
 
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
-test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance
+test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
 test-autoscaler: check-db_type init init-db test-certs
-	@echo " - using DBURL=${DBURL}"
-	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
+	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}" OPTS="${OPTS}"
 test-autoscaler-suite: check-db_type init init-db test-certs
-	@echo " - using DBURL=${DBURL} TEST=${TEST}"
-	@echo " - using TEST=${TEST}"
-	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
+	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
 test-scheduler: check-db_type init init-db test-certs
 	@cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
 test-changelog: init
 	@make -C src/changelog test
 test-changeloglockcleaner: init init-db test-certs
 	@make -C src/changeloglockcleaner test DBURL="${DBURL}"
-test-acceptance:
+test-acceptance-unit:
 	@make -C src/acceptance test-unit
 
 
@@ -180,10 +191,12 @@ stop-db: check-db_type
 
 .PHONY: integration
 integration: build init-db test-certs
-	make -C src/autoscaler integration DBURL="${DBURL}"
+	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
+	make -C src/autoscaler integration DBURL="${DBURL}" OPTS="${OPTS}"
+
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
-lint: golangci-lint_check $(addprefix lint_,$(go_modules))
+lint: golangci-lint_check $(addprefix lint_,$(go_modules)) eslint rubocop
 
 golangci-lint_check:
 	@current_version=$(shell golangci-lint version | cut -d " " -f 4);\
@@ -195,26 +208,89 @@ golangci-lint_check:
     fi
 
 rubocop:
-	bundle exec rubocop -a
+	@echo " - ruby scripts"
+	@bundle install
+	@bundle exec rubocop ./spec ./packages
+
+.PHONY: eslint
+eslint:
+	@echo " - linting testApp"
+	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run ${OPTS}
 
+.PHONY: spec-test
 spec-test:
+	bundle install
 	bundle exec rspec
+
+.PHONY: release
 release:
 	./scripts/update
 	bosh create-release --force --timestamp-version --tarball=${name}-${version}.tgz
 
+.PHONY: mod-tidy
 mod-tidy:
-	@for folder in $$(find . -name "go.mod" -exec dirname {} \;);\
+	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
 	   cd $${folder}; echo "- go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
 	done
 
+.PHONY: vendor
 vendor:
-	@for folder in $$(find . -depth 3 -name "go.mod" -exec dirname {} \;);\
+	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
 	   cd $${folder}; echo "- go mod vendor'$${folder}'"; go mod vendor; cd - >/dev/null;\
 	done
+
+.PHONY: fakes
+fakes:
+	@make -C src/autoscaler fakes
+
+# https://github.com/golang/tools/blob/master/gopls/doc/workspace.md
+.PHONY: workspace
+workspace:
+	[ -e go.work ] || go work init
+	go work use $(addprefix ./src/,$(go_modules))
+
+.PHONY: update
+update:
+	./scripts/update
+
+.PHONY: deploy
+uaac:
+	which uaac || gem install cf-uaac
+
+
+.PHONY: deploy
+deploy: update uaac
+	cd scripts;\
+	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}";\
+ 	source pr-vars.source.sh;\
+ 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
+    ${CI_DIR}/autoscaler/scripts/register-broker.sh
+
+.PHONY: acceptance-tests
+export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state
+export AUTOSCALER_DIR=${PWD}
+export DEPLOYMENT_NAME?=app-autoscaler-test
+export NAME_PREFIX?=autoscaler-test
+acceptance-tests:
+	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"
+	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; }
+	NAME_PREFIX="autoscaler-test"\
+ 	 BBL_STATE_PATH="${BBL_STATE_PATH}"\
+ 	 AUTOSCALER_DIR="${PWD}"\
+ 	 SUITES="${ACCEPTANCE_SUITES}"\
+ 	 SKIP_TEARDOWN=true\
+ 	 NODES=1\
+ 	 DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"\
+ 	 GINKGO_OPTS="${OPTS}"\
+ 	    ./ci/autoscaler/scripts/run-acceptance-tests.sh
+
+.PHONY: clean-deploy
+clean-deploy:
+	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}' name prefix:'${NAME_PREFIX}'"
+	@ci/autoscaler/scripts/cleanup-autoscaler.sh

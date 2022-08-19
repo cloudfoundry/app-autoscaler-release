@@ -87,7 +87,7 @@ properties:
     default: "Autoscaler"
   autoscaler.apiserver.info.build:
     description: "Autoscaler application build number"
-    default: "5.3.2"
+    default: "6.1.0"
   autoscaler.apiserver.info.support_url:
     description: "Autoscaler application support page URL"
     default: "https://github.com/cloudfoundry/app-autoscaler-release"
@@ -235,6 +235,12 @@ properties:
   autoscaler.cf.skip_ssl_validation:
     description: "Flag to skip ssl validation to connect to CC and UAA"
     default: false
+  autoscaler.cf.max_retries:
+    description: "The number of retries from the autoscaler to the cf api (cloud controller). 0 turns off the retries."
+    default: 3
+  autoscaler.cf.max_retry_wait_ms:
+    description: "The maximum amount of time in milliseconds to wait between retries. 0 leaves it to the implementation to decide"
+    default: 0
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"

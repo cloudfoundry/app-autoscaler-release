@@ -6,7 +6,7 @@
 set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-autoscaler_dir="${script_dir}/../../../../app-autoscaler-release"
+autoscaler_dir="${script_dir}/../../../../../app-autoscaler-release"
 
 
 function configure_git_credentials(){
@@ -44,5 +44,5 @@ pushd "${autoscaler_dir}" > /dev/null
 
   git push --set-upstream origin "${update_branch}"
 
-  gh pr create --base main --head "${update_branch}" --title "${pr_title}" --body "${pr_description}" --label 'approved' --label 'dependencies'
+  gh pr create --base main --head "${update_branch}" --title "${pr_title}" --body "${pr_description}" --label 'dependencies'
 popd > /dev/null

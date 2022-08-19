@@ -1,0 +1,6 @@
+---
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/metricshandler?
+  value:
+    tls:
+      ca_cert: ((/bosh-autoscaler/cf/diego_instance_identity_ca.certificate))

@@ -9,7 +9,7 @@ export GO111MODULE=on
 #TODO: https://github.com/cloudfoundry/app-autoscaler-release/issues/564 allow the tests to be run in parallel
 #GINKGO_OPTS=-r --race --require-suite -p --randomize-all --cover
 
-GINKGO_OPTS=-r --race --require-suite --randomize-all --cover
+GINKGO_OPTS=-r --race --require-suite --randomize-all --cover ${OPTS}
 
 build-%:
 	@echo "# building $*"
@@ -64,8 +64,10 @@ testsuite: ginkgo_check
 .PHONY: integration
 integration: ginkgo_check
 	@echo "# Running integration tests"
-	@APP_AUTOSCALER_TEST_RUN=true ginkgo ${GINKGO_OPTS}  integration
+	APP_AUTOSCALER_TEST_RUN=true ginkgo ${GINKGO_OPTS} integration
 
+.PHONY: fakes generate
+fakes: generate
 generate:
 	@echo "# Generating counterfeits"
 	@COUNTERFEITER_NO_GENERATE_WARNING=true go generate ./...
@@ -102,4 +104,3 @@ clean:
 	@echo "# cleaning autoscaler"
 	@go clean -cache -testcache
 	@rm -rf build
-

@@ -42,7 +42,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 			true,
 			tmpDir)
 		startGolangApiServer()
-		appId = getRandomId()
+		appId = getRandomIdRef("appId")
 		pathVariables = []string{appId, metricType}
 
 	})
@@ -110,12 +110,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 
 		Context("Check permission not passed", func() {
 			BeforeEach(func() {
-				fakeCCNOAAUAA.RouteToHandler("GET", rolesRegPath, ghttp.RespondWithJSONEncoded(http.StatusOK,
-					struct {
-						Pagination struct {
-							Total int `json:"total_results"`
-						} `json:"pagination"`
-					}{}))
+				fakeCCNOAAUAA.Add().Roles(http.StatusOK)
 			})
 			It("should error with status code 401", func() {
 				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, components.Ports[GolangAPIServer],
@@ -169,7 +164,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 				metric.Timestamp = 444444
 				insertAppMetric(metric)
 				//add some  other appId
-				metric.AppId = getRandomId()
+				metric.AppId = getRandomIdRef("metric.appId")
 				metric.MetricType = models.MetricNameMemoryUsed
 				metric.Unit = models.UnitMegaBytes
 				metric.Timestamp = 444444

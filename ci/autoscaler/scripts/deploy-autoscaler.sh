@@ -2,13 +2,24 @@
 # shellcheck disable=SC2086
 set -euo pipefail
 
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
-ops_files="${OPS_FILES:-''}"
+deployment_manifest="${script_dir}/../../../templates/app-autoscaler.yml"
+ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
+ ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
+ ${autoscaler_dir}/operations/add-postgres-variables.yml\
+ ${autoscaler_dir}/operations/enable-nats-tls.yml\
+ ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
+ ${autoscaler_dir}/operations/add-extra-plan.yml\
+ ${autoscaler_dir}/operations/set-release-version.yml\
+ ${autoscaler_dir}/operations/enable-log-cache.yml\
+ ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
-bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}}
+bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
@@ -30,7 +41,7 @@ set -e
 function deploy () {
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
-    deploy "templates/app-autoscaler-deployment.yml" \
+    deploy "$deployment_manifest" \
     ${OPS_FILES_TO_USE} \
     -v system_domain="${system_domain}" \
     -v deployment_name="${deployment_name}" \
@@ -56,8 +67,8 @@ fi
 pushd "$autoscaler_dir" > /dev/null
   # Determine if we need to upload a stemcell at this point.
   #TODO refactor out function for stemcell check and update.
-  STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' templates/app-autoscaler-deployment.yml)
-  STEMCELL_VERSION=$(yq eval '.stemcells[] | select(.alias == "default").version' templates/app-autoscaler-deployment.yml)
+  STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
+  STEMCELL_VERSION=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
   STEMCELL_NAME="bosh-google-kvm-${STEMCELL_OS}-go_agent"
   set +e
   STEMCELL_EXISTS=$(bosh stemcells | grep -c "${STEMCELL_NAME}")
@@ -73,20 +84,6 @@ pushd "$autoscaler_dir" > /dev/null
   fi
 
   OPS_FILES_TO_USE=""
-  #NOTE: REQUIRED_OPS_FILES is a file in autoscaler-release
-  #TODO rename/replace REQUIRED_OPS_FILES with a variable or a proper file name (maybe required_ops_files.txt).
-  if [ -f REQUIRED_OPS_FILES ]; then
-    # shellcheck disable=SC2013
-    for OPS_FILE in $(cat REQUIRED_OPS_FILES); do
-      if [ -f "${OPS_FILE}" ]; then
-         OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
-      else
-        echo "ERROR: in REQUIRED_OPS_FILES could not find ops file ${OPS_FILE} in ${PWD}"
-        exit 1
-      fi
-    done
-  fi
-
   for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
       OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"

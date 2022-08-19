@@ -6,17 +6,15 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
-)
-
-var (
-	owner  = "cloudfoundry"
-	repo   = "app-autoscaler-release"
-	branch = "main"
 )
 
 type cliOpts struct {
 	token                  string // would like usage: `names:"-t, --token" usage:"Github token"`
+	owner                  string // would like usage: `names:"-o, --owner" usage:"Repository owner"`
+	repo                   string // would like usage: `names:"-r, --repo" usage:"Repository name"`
+	branch                 string // would like usage: `names:"-b, --branch" usage:"branch name"`
 	previousReleaseTagName string // would like usage: `names:"-n, --prev-rel-tag" usage:"Tag name of the previous release"`
 	latestCommitSHAId      string // would like usage: `names:"-h, --latest-commit-sha-id" usage:"SHA id of the latest commit to include in the release"`
 	changelogFile          string // would like usage: `names:"-o, --changelog-file" usage:"Output file to write the changelog into"`
@@ -28,6 +26,9 @@ func parseCliOpts() cliOpts {
 
 	// ToDo: Remove access to env-variable which was for purposes of an easy transition.
 	flag.StringVar(&opts.token, "token", os.Getenv("GITHUB_TOKEN"), "Github token")
+	flag.StringVar(&opts.owner, "owner", "cloudfoundry", "Repository owner")
+	flag.StringVar(&opts.repo, "repo", "app-autoscaler-release", "Repository owner")
+	flag.StringVar(&opts.branch, "branch", "main", "Branch the release notes are for")
 	flag.StringVar(&opts.previousReleaseTagName, "prev-rel-tag", os.Getenv("PREVIOUS_VERSION"),
 		"Tag name of the previous release")
 	flag.StringVar(&opts.latestCommitSHAId, "last-commit-sha-id", os.Getenv("GIT_COMMIT_SHA_ID"),
@@ -45,43 +46,39 @@ func parseCliOpts() cliOpts {
 func main() {
 	opts := parseCliOpts()
 
-	client := github.New(opts.token)
-	mapReleaseSHAIdToReleaseTagName, err := client.FetchSHAIDsOfReleases(owner, repo)
+	client := github.New(opts.token, opts.owner, opts.repo, opts.branch)
+	tagsToSha, err := client.GetTagsToSha()
 	if err != nil {
-		panic(err)
+		log.Fatalf("ERROR: Failed connect with github client:%s", err.Error())
 	}
 
 	// ToDo: Refactor in own function?
-	var previousReleaseSHAId string
-	for releaseSHAId, releaseTagName := range mapReleaseSHAIdToReleaseTagName {
-		releaseTagNameIsPreviousRelease := releaseTagName == "v"+opts.previousReleaseTagName ||
-			releaseTagName == opts.previousReleaseTagName
-		if releaseTagNameIsPreviousRelease {
-			previousReleaseSHAId = releaseSHAId
-		}
+	previousReleaseSHAId := tagsToSha[opts.previousReleaseTagName]
+	oldNameing := tagsToSha["v"+opts.previousReleaseTagName]
+	if oldNameing != "" {
+		previousReleaseSHAId = oldNameing
+	}
+	if previousReleaseSHAId == "" {
+		log.Fatalf("ERROR: Could not find the previous release sha for tag: '%s'", opts.previousReleaseTagName)
 	}
 
 	var allPullRequests []github.PullRequest
 
-	shaForPreviousReleaseFound := previousReleaseSHAId != ""
-	if shaForPreviousReleaseFound {
-		prs, err := client.FetchPullRequests(owner, repo, branch, previousReleaseSHAId,
-			opts.latestCommitSHAId)
-		if err != nil {
-			panic(err)
-		}
-		allPullRequests = append(allPullRequests, prs...)
+	prs, err := client.FetchPullRequests(previousReleaseSHAId, opts.latestCommitSHAId)
+	if err != nil {
+		log.Fatalf("ERROR: failed to get pull requests: '%s'", opts.previousReleaseTagName)
 	}
+	allPullRequests = append(allPullRequests, prs...)
 
 	changelog, nextVersion, err := display.GenerateOutput(allPullRequests, opts.previousReleaseTagName)
 	if err != nil {
-		panic(err)
+		log.Fatalf("ERROR: failed to generate md file: '%s'", opts.previousReleaseTagName)
 	}
 
 	if opts.changelogFile != "" {
 		err := ioutil.WriteFile(opts.changelogFile, []byte(changelog), 0600)
 		if err != nil {
-			panic(err)
+			log.Fatalf("ERROR: failed write md file '%s':%s", opts.previousReleaseTagName)
 		}
 	} else {
 		fmt.Println(changelog)

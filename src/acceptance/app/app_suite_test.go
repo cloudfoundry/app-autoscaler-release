@@ -82,7 +82,7 @@ var _ = AfterSuite(func() {
 func getStartAndEndTime(location *time.Location, offset, duration time.Duration) (time.Time, time.Time) {
 	// Since the validation of time could fail if spread over two days and will result in acceptance test failure
 	// Need to fix dates in that case.
-	startTime := time.Now().In(location).Add(offset).Truncate(time.Minute)
+	startTime := time.Now().In(location).Add(offset)
 	if startTime.Day() != startTime.Add(duration).Day() {
 		startTime = startTime.Add(duration).Truncate(24 * time.Hour)
 	}

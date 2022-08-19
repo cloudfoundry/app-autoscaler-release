@@ -1,55 +1,54 @@
 package cf_test
 
 import (
-	"errors"
-	"fmt"
-	"io"
-
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"time"
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/ghttp"
+	. "github.com/onsi/gomega/ghttp"
 
-	"encoding/json"
-	"net"
 	"net/http"
-	"net/url"
 )
 
-var _ = Describe("App", func() {
+var _ = Describe("Cf client App", func() {
 
 	var (
-		conf            *CFConfig
-		cfc             CFClient
-		fakeCC          *ghttp.Server
-		fakeLoginServer *ghttp.Server
+		conf            *cf.Config
+		cfc             cf.CFClient
+		fakeCC          *MockServer
+		fakeLoginServer *Server
 		err             error
-		appState        string
-		appEntity       *models.AppEntity
+		logger          lager.Logger
 	)
 
+	var setCfcClient = func(maxRetries int) {
+		conf = &cf.Config{}
+		conf.API = fakeCC.URL()
+		conf.MaxRetries = maxRetries
+		conf.MaxRetryWaitMs = 1
+		cfc = cf.NewCFClient(conf, logger, clock.NewClock())
+		err = cfc.Login()
+		Expect(err).NotTo(HaveOccurred())
+	}
+
 	BeforeEach(func() {
-		fakeCC = ghttp.NewServer()
-		fakeLoginServer = ghttp.NewServer()
-		fakeCC.RouteToHandler("GET", PathCFInfo, ghttp.RespondWithJSONEncoded(http.StatusOK, Endpoints{
-			AuthEndpoint:    fakeLoginServer.URL(),
-			TokenEndpoint:   fakeLoginServer.URL(),
-			DopplerEndpoint: "test-doppler-endpoint",
-		}))
-		fakeLoginServer.RouteToHandler("POST", PathCFAuth, ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{
+		fakeCC = NewMockServer()
+		fakeLoginServer = NewServer()
+		fakeCC.Add().Info(fakeLoginServer.URL())
+		fakeLoginServer.RouteToHandler("POST", cf.PathCFAuth, RespondWithJSONEncoded(http.StatusOK, cf.Tokens{
 			AccessToken: "test-access-token",
 			ExpiresIn:   12000,
 		}))
-		conf = &CFConfig{}
-		conf.API = fakeCC.URL()
-		cfc = NewCFClient(conf, lager.NewLogger("cf"), clock.NewClock())
-		err = cfc.Login()
-		Expect(err).NotTo(HaveOccurred())
+		logger = lager.NewLogger("cf")
+		logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
+		setCfcClient(0)
 	})
 
 	AfterEach(func() {
@@ -61,129 +60,256 @@ var _ = Describe("App", func() {
 		}
 	})
 
-	Describe("GetAppEntity", func() {
-		JustBeforeEach(func() {
-			appEntity, err = cfc.GetApp("test-app-id")
-		})
-		Context("when get app summary succeeds", func() {
-			appState = "test_app_state"
+	Describe("GetApp", func() {
+		When("get app succeeds", func() {
 			BeforeEach(func() {
 				fakeCC.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("GET", PathApp+"/test-app-id/summary"),
-						ghttp.RespondWithJSONEncoded(http.StatusOK,
-							models.AppEntity{
-								Instances: 6,
-								State:     &appState,
-							}),
+					CombineHandlers(
+						VerifyRequest("GET", "/v3/apps/test-app-id"),
+						RespondWith(http.StatusOK, LoadFile("testdata/app.json"), http.Header{"Content-Type": []string{"application/json"}}),
 					),
 				)
 			})
 
-			It("returns correct instance number", func() {
+			It("returns correct state", func() {
+				app, err := cfc.GetApp("test-app-id")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(appEntity.Instances).To(Equal(6))
-				Expect(*appEntity.State).To(Equal("test_app_state"))
+				Expect(app).To(Equal(&cf.App{
+					Guid:      "663e9a25-30ba-4fb4-91fa-9b784f4a8542",
+					Name:      "autoscaler-1--0cde0e473e3e47f4",
+					State:     "STOPPED",
+					CreatedAt: ParseDate("2022-07-21T13:42:30Z"),
+					UpdatedAt: ParseDate("2022-07-21T14:30:17Z"),
+					Relationships: cf.Relationships{
+						Space: &cf.Space{
+							Data: cf.SpaceData{
+								Guid: "3dfc4a10-6e70-44f8-989d-b3842f339e3b",
+							},
+						},
+					},
+				}))
 			})
-		})
-
-		Context("when get app summary return 404 status code", func() {
-			BeforeEach(func() {
-				fakeCC.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.RespondWithJSONEncoded(http.StatusNotFound, models.CFErrorResponse{
-							Description: "The app could not be found: 7efa8f58-1aba-4493-bf9e-30d69c40dbb42",
-							ErrorCode:   "CF-AppNotFound",
-							Code:        100004,
-						}),
-					),
-				)
-			})
-
-			It("should error", func() {
-				Expect(appEntity).To(BeNil())
-				Expect(err).To(Equal(models.NewAppNotFoundErr("The app could not be found: 7efa8f58-1aba-4493-bf9e-30d69c40dbb42")))
-				Expect(err).To(MatchError(MatchRegexp("The app could not be found: *")))
-			})
-		})
-
-		Context("when get app summary return non-200 and non-404 status code", func() {
-			BeforeEach(func() {
-				fakeCC.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.RespondWithJSONEncoded(http.StatusInternalServerError, models.CFErrorResponse{
-							Description: "Server error",
-							ErrorCode:   "ServerError",
-							Code:        100001,
-						}),
-					),
-				)
-			})
-
-			It("should error", func() {
-				Expect(appEntity).To(BeNil())
-				Expect(err).To(MatchError(MatchRegexp("failed getting application summary: *")))
-			})
-
-		})
-
-		Context("when get app summary return non-200 and non-404 status code with non-JSON response", func() {
-			BeforeEach(func() {
-				fakeCC.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.RespondWithJSONEncoded(http.StatusInternalServerError, ""),
-					),
-				)
-			})
-
-			It("should error", func() {
-				Expect(appEntity).To(BeNil())
-				Expect(err).To(MatchError(MatchRegexp("failed getting application summary: *")))
-			})
-
-		})
-
-		Context("when cloud controller is not reachable", func() {
-			BeforeEach(func() {
-				fakeCC.Close()
-				fakeCC = nil
-			})
-
-			It("should error", func() {
-				Expect(appEntity).To(BeNil())
-				IsUrlNetOpError(err)
-			})
-
-		})
-
-		Context("when cloud controller returns incorrect message body", func() {
-			BeforeEach(func() {
-				fakeCC.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.RespondWithJSONEncoded(http.StatusOK, `{"entity":{"instances:"abc"}}`),
-					),
-				)
-			})
-
-			It("should error", func() {
-				Expect(appEntity).To(BeNil())
-				Expect(err).To(BeAssignableToTypeOf(&json.UnmarshalTypeError{}))
-			})
-
 		})
 	})
 
-	Describe("SetAppInstances", func() {
-		JustBeforeEach(func() {
-			err = cfc.SetAppInstances("test-app-id", 6)
-		})
-		Context("when set app instances succeeds", func() {
+	Describe("GetAppProcesses", func() {
+
+		When("get process succeeds", func() {
 			BeforeEach(func() {
 				fakeCC.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.VerifyRequest("PUT", PathApp+"/test-app-id"),
-						ghttp.VerifyJSONRepresenting(models.AppEntity{Instances: 6}),
-						ghttp.RespondWith(http.StatusCreated, ""),
+					CombineHandlers(
+						VerifyRequest("GET", "/v3/apps/test-app-id/processes", "per_page=100"),
+						RespondWith(http.StatusOK, LoadFile("testdata/app_processes.json"), http.Header{"Content-Type": []string{"application/json"}}),
+					),
+				)
+			})
+
+			It("returns correct state", func() {
+				processes, err := cfc.GetAppProcesses("test-app-id")
+				Expect(err).NotTo(HaveOccurred())
+				created, err := time.Parse(time.RFC3339, "2016-03-23T18:48:22Z")
+				Expect(err).NotTo(HaveOccurred())
+				updated, err := time.Parse(time.RFC3339, "2016-03-23T18:48:42Z")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(processes).To(Equal(cf.Processes{
+					{
+						Guid:       "6a901b7c-9417-4dc1-8189-d3234aa0ab82",
+						Type:       "web",
+						Instances:  5,
+						MemoryInMb: 256,
+						DiskInMb:   1024,
+						CreatedAt:  created,
+						UpdatedAt:  updated,
+					},
+					{
+						Guid:       "3fccacd9-4b02-4b96-8d02-8e865865e9eb",
+						Type:       "worker",
+						Instances:  1,
+						MemoryInMb: 256,
+						DiskInMb:   1024,
+						CreatedAt:  created,
+						UpdatedAt:  updated,
+					},
+				}))
+				Expect(processes.GetInstances()).To(Equal(6))
+			})
+		})
+
+		When("get processes returns a 500 status code with non-JSON response", func() {
+			BeforeEach(func() {
+				fakeCC.AppendHandlers(
+					CombineHandlers(
+						VerifyRequest("GET", "/v3/apps/invalid_json/processes"),
+						RespondWithJSONEncoded(http.StatusInternalServerError, ""),
+					),
+				)
+			})
+
+			It("should error", func() {
+				process, err := cfc.GetAppProcesses("invalid_json")
+				Expect(process).To(BeNil())
+				Expect(err.Error()).To(MatchRegexp("failed GetAppProcesses 'invalid_json': failed getting page 1:.*failed to unmarshal"))
+			})
+		})
+	})
+
+	Describe("GetAppAndProcesses", func() {
+
+		When("the mocks are used", func() {
+			var mocks = NewMockServer()
+			BeforeEach(func() {
+				conf.API = mocks.URL()
+				mocks.Add().GetAppProcesses(27).Info(fakeLoginServer.URL())
+				mocks.Add().GetApp("STARTED", http.StatusOK, "test_space_guid")
+				DeferCleanup(mocks.Close)
+			})
+			It("will return success", func() {
+				app, err := cfc.GetAppAndProcesses("test-app-id")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(app).To(Equal(&cf.AppAndProcesses{
+					App: &cf.App{
+						Guid:      "testing-guid-get-app",
+						Name:      "mock-get-app",
+						State:     "STARTED",
+						CreatedAt: ParseDate("2022-07-21T13:42:30Z"),
+						UpdatedAt: ParseDate("2022-07-21T14:30:17Z"),
+						Relationships: cf.Relationships{
+							Space: &cf.Space{
+								Data: cf.SpaceData{
+									Guid: "test_space_guid",
+								},
+							},
+						},
+					},
+					Processes: cf.Processes{
+						{
+							Guid:       "",
+							Type:       "",
+							Instances:  27,
+							MemoryInMb: 0,
+							DiskInMb:   0,
+							CreatedAt:  ParseDate("0001-01-01T00:00:00Z"),
+							UpdatedAt:  ParseDate("0001-01-01T00:00:00Z"),
+						},
+					}}))
+			})
+		})
+
+		When("get app & process return ok", func() {
+			BeforeEach(func() {
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes", CombineHandlers(
+					RespondWith(http.StatusOK, LoadFile("testdata/app_processes.json"), http.Header{"Content-Type": []string{"application/json"}}),
+				))
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
+					RespondWith(http.StatusOK, LoadFile("testdata/app.json"), http.Header{"Content-Type": []string{"application/json"}}),
+				))
+			})
+
+			It("returns correct state", func() {
+				appAndProcess, err := cfc.GetAppAndProcesses("test-app-id")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(appAndProcess).To(Equal(&cf.AppAndProcesses{
+					App: &cf.App{
+						Guid:      "663e9a25-30ba-4fb4-91fa-9b784f4a8542",
+						Name:      "autoscaler-1--0cde0e473e3e47f4",
+						State:     "STOPPED",
+						CreatedAt: ParseDate("2022-07-21T13:42:30Z"),
+						UpdatedAt: ParseDate("2022-07-21T14:30:17Z"),
+						Relationships: cf.Relationships{
+							Space: &cf.Space{
+								Data: cf.SpaceData{
+									Guid: "3dfc4a10-6e70-44f8-989d-b3842f339e3b",
+								},
+							},
+						},
+					},
+					Processes: cf.Processes{
+						{
+							Guid:       "6a901b7c-9417-4dc1-8189-d3234aa0ab82",
+							Type:       "web",
+							Instances:  5,
+							MemoryInMb: 256,
+							DiskInMb:   1024,
+							CreatedAt:  ParseDate("2016-03-23T18:48:22Z"),
+							UpdatedAt:  ParseDate("2016-03-23T18:48:42Z"),
+						},
+						{
+							Guid:       "3fccacd9-4b02-4b96-8d02-8e865865e9eb",
+							Type:       "worker",
+							Instances:  1,
+							MemoryInMb: 256,
+							DiskInMb:   1024,
+							CreatedAt:  ParseDate("2016-03-23T18:48:22Z"),
+							UpdatedAt:  ParseDate("2016-03-23T18:48:42Z"),
+						}},
+				}))
+			})
+		})
+
+		When("get app returns 500 and get process return ok", func() {
+			BeforeEach(func() {
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes", CombineHandlers(
+					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+				))
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
+					RespondWith(http.StatusOK, LoadFile("testdata/app.json"), http.Header{"Content-Type": []string{"application/json"}}),
+				))
+			})
+
+			It("should error", func() {
+				appAndProcesses, err := cfc.GetAppAndProcesses("test-app-id")
+				Expect(appAndProcesses).To(BeNil())
+				Expect(err).To(MatchError(MatchRegexp(`get state&instances failed: failed GetAppProcesses 'test-app-id': failed getting page 1: failed getting cf.Response\[.*cf.Process\]:.*'UnknownError'`)))
+			})
+		})
+
+		When("get processes return OK get app returns 500", func() {
+			BeforeEach(func() {
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes", CombineHandlers(
+					RespondWith(http.StatusOK, LoadFile("testdata/app_processes.json"), http.Header{"Content-Type": []string{"application/json"}}),
+				))
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
+					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+				))
+			})
+
+			It("should error", func() {
+				appAndProcesses, err := cfc.GetAppAndProcesses("test-app-id")
+				Expect(appAndProcesses).To(BeNil())
+				Expect(err).To(MatchError(MatchRegexp("get state&instances failed: failed getting app 'test-app-id':.*'UnknownError'")))
+			})
+		})
+
+		When("get processes return 500 and get app returns 500", func() {
+			BeforeEach(func() {
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes", CombineHandlers(
+					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+				))
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
+					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+				))
+			})
+
+			It("should error", func() {
+				appAndProcesses, err := cfc.GetAppAndProcesses("test-app-id")
+				Expect(appAndProcesses).To(BeNil())
+				Expect(err).To(MatchError(MatchRegexp(`get state&instances failed: .*'UnknownError'`)))
+			})
+		})
+	})
+
+	Describe("ScaleAppWebProcess", func() {
+		JustBeforeEach(func() {
+			err = cfc.ScaleAppWebProcess("test-app-id", 6)
+		})
+
+		When("scaling web app succeeds", func() {
+			BeforeEach(func() {
+				fakeCC.AppendHandlers(
+					CombineHandlers(
+						VerifyRequest("POST", "/v3/apps/test-app-id/processes/web/actions/scale"),
+						VerifyJSON(`{"instances":6}`),
+						RespondWith(http.StatusAccepted, LoadFile("scale_response.yml")),
 					),
 				)
 			})
@@ -193,58 +319,19 @@ var _ = Describe("App", func() {
 			})
 		})
 
-		Context("when updating app instances returns non-200 status code", func() {
+		When("scaling endpoint return 500", func() {
 			BeforeEach(func() {
-				responseMap := make(map[string]interface{})
-				responseMap["description"] = "You have exceeded the instance memory limit for your space's quota"
-				responseMap["error_code"] = "SpaceQuotaInstanceMemoryLimitExceeded"
-				fakeCC.AppendHandlers(
-					ghttp.CombineHandlers(
-						ghttp.RespondWithJSONEncoded(http.StatusBadRequest, responseMap),
-					),
-				)
+				setCfcClient(3)
+				fakeCC.RouteToHandler("POST",
+					"/v3/apps/test-app-id/processes/web/actions/scale",
+					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError))
 			})
 
-			It("should error", func() {
-				Expect(err).To(MatchError(MatchRegexp("failed setting application instances: *")))
+			It("should error correctly", func() {
+				Expect(err).To(MatchError(MatchRegexp("failed scaling app 'test-app-id' to 6: POST request failed:.*'UnknownError'.*")))
 			})
-
-		})
-
-		Context("when cloud controller is not reachable", func() {
-			BeforeEach(func() {
-				ccURL := fakeCC.URL()
-				fakeCC.Close()
-				fakeCC = nil
-
-				Eventually(func() error {
-					// #nosec G107
-					resp, err := http.Get(ccURL)
-
-					if err != nil {
-						return err
-					}
-					_ = resp.Body.Close()
-
-					return nil
-				}).Should(HaveOccurred())
-			})
-
-			It("should error", func() {
-				IsUrlNetOpError(err)
-			})
-
 		})
 
 	})
 
 })
-
-func IsUrlNetOpError(err error) {
-	var urlErr *url.Error
-	Expect(errors.As(err, &urlErr)).To(BeTrue(), fmt.Sprintf("Expected a (*url.Error) error in the chan got, %T: %+v", err, err))
-
-	var netOpErr *net.OpError
-	Expect(errors.As(err, &netOpErr) || errors.Is(err, io.EOF)).
-		To(BeTrue(), fmt.Sprintf("Expected a (*net.OpError) or io.EOF error in the chan got, %T: %+v", err, err))
-}

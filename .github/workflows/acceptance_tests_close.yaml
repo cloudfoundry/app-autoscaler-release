@@ -1,4 +1,4 @@
-name: Acceptance Tests
+name: Acceptance Tests Cleanup
 on:
   pull_request:
     types: [ closed ]
@@ -15,7 +15,7 @@ env:
   NAME_PREFIX: "app-autoscaler-${{ github.event.pull_request.number }}-TESTS"
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
-  CI_DIR: "${{ github.workspace }}/ci"
+  CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
 
 jobs:
   deployment_cleanup:

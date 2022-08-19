@@ -8,4 +8,5 @@ files:
 - common/retry-helper.sh
 - common/call-hooks.sh
 - common/init-db-truststore.sh
+- common/install_cert.source.sh
 - common/databasechangelog-primarykey.yml

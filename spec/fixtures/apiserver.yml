@@ -1,0 +1,48 @@
+autoscaler:
+  binding_db:
+    address: 10.11.137.101
+    databases:
+      - name: foo
+        tag: default
+    db_scheme: postgres
+    port: 5432
+    roles:
+      - name: foo
+        password: default
+        tag: default
+  policy_db:
+    address: 10.11.137.101
+    databases:
+      - name: foo
+        tag: default
+    db_scheme: postgres
+    port: 5432
+    roles:
+      - name: foo
+        password: default
+        tag: default
+  storedprocedure_db:
+    address: 10.11.137.101
+    port: 5432
+    databases:
+      - name: default_db
+        tag: default
+      - name: store_procedure_db
+        tag: storedproceduredb
+    db_scheme: postgres
+    roles:
+      - name: default_username
+        tag: default
+      - name: stored_procedure_username
+        tag: storedproceduredb
+  cf:
+    api: "https://api.api_server.domain"
+    grant_type: client_credentials
+    auth_endpoint: https://login.cf.domain
+    client_id: "client_id"
+    secret: "uaa_secret"
+    uaa_api: https://login.cf.domain/uaa
+  apiserver:
+    broker:
+      server:
+        dashboard_redirect_uri: https://application-autoscaler-dashboard.cf.domain

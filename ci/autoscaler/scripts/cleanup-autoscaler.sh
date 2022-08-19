@@ -1,9 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
-service_broker_name="${SERVICE_BROKER_NAME:-autoscalerservicebroker}"
-service_name="${SERVICE_NAME:-autoscaler}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
+service_broker_name="${deployment_name}servicebroker"
 autoscaler_root=${AUTOSCALER_DIR:-app-autoscaler-release}
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 RELEASE_SHA=${RELEASE_SHA:-""}
@@ -26,17 +25,20 @@ popd  > /dev/null
 echo "# Cleaning up from Bosh deployments"
 SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}" || true)
 if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
-  echo "- Service Broker exists, deleting broker '${service_name}'"
-  cf delete-service-broker "${service_name}" -f
+  echo "- Service Broker exists, deleting broker '${deployment_name}'"
+  cf delete-service-broker "${deployment_name}" -f
 fi
 
 echo "- Deleting bosh deployment '${deployment_name}'"
 bosh delete-deployment -d "${deployment_name}" -n
 
-if [ -n "${CURRENT_COMMIT_HASH}" ]
+if [ -n "${deployment_name}" ]
 then
-  echo "- Deleting bosh release 'app-autoscaler/${CURRENT_COMMIT_HASH}'"
-  bosh delete-release -n
+  for release in $(bosh releases | grep "${deployment_name} " | awk '{print $2}')
+  do
+     echo "- Deleting bosh release '${release}'"
+     bosh delete-release -n "app-autoscaler/${release}"
+  done
 fi
 
 echo "- Deleting credhub creds: '/bosh-autoscaler/${deployment_name}/*'"

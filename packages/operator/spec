@@ -22,6 +22,7 @@ files:
 - autoscaler/sync/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/unix_transport/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/internal/truncate/* # gosub
@@ -30,11 +31,10 @@ files:
 - autoscaler/vendor/github.com/cloudfoundry-incubator/uaago/* # gosub
 - autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
 - autoscaler/vendor/github.com/golang/protobuf/proto/* # gosub
-- autoscaler/vendor/github.com/golang/protobuf/ptypes/* # gosub
-- autoscaler/vendor/github.com/golang/protobuf/ptypes/any/* # gosub
-- autoscaler/vendor/github.com/golang/protobuf/ptypes/duration/* # gosub
 - autoscaler/vendor/github.com/golang/protobuf/ptypes/timestamp/* # gosub
 - autoscaler/vendor/github.com/gorilla/mux/* # gosub
+- autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
+- autoscaler/vendor/github.com/hashicorp/go-retryablehttp/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
 - autoscaler/vendor/github.com/lib/pq/* # gosub
@@ -88,7 +88,5 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoiface/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoimpl/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/* # gosub
-- autoscaler/vendor/google.golang.org/protobuf/types/known/anypb/* # gosub
-- autoscaler/vendor/google.golang.org/protobuf/types/known/durationpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/timestamppb/* # gosub
 - autoscaler/vendor/gopkg.in/yaml.v2/* # gosub

@@ -1,12 +1,11 @@
 #!/bin/bash
 
 set -euo pipefail
-set -x
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
-service_broker_name="${SERVICE_BROKER_NAME:-autoscalerservicebroker}"
-service_name="${SERVICE_NAME:-autoscaler}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
+service_broker_name="${deployment_name}servicebroker"
+autoscaler_root=${AUTOSCALER_DIR:-app-autoscaler-release}
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 
 pushd "${bbl_state_path}"
@@ -15,19 +14,23 @@ popd
 
 cf api "https://api.${system_domain}" --skip-ssl-validation
 
-CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
-cf auth admin "${CF_ADMIN_PASSWORD}"
+cf_admin_password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+cf auth admin "${cf_admin_password}"
 
 set +e
-SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}")
+existing_service_broker=$(cf service-brokers | grep "${service_broker_name}.${system_domain}" |  cut -d' ' -f1)
 set -e
-if [[ "${SERVICE_BROKER_EXISTS}" == 1 ]]; then
-  echo "Service Broker ${service_name} already exists, assuming this is ok..."
-  #cf delete-service-broker -f autoscaler
-else
-  echo "Creating service broker ${service_name} at 'https://${service_broker_name}.${system_domain}'"
-  AUTOSCALER_SERVICE_BROKER_PASSWORD=$(credhub get  -n "/bosh-autoscaler/${deployment_name}/autoscaler_service_broker_password" -q)
-  cf create-service-broker "${service_name}" autoscaler_service_broker_user "$AUTOSCALER_SERVICE_BROKER_PASSWORD" "https://${service_broker_name}.${system_domain}"
+
+if [[ -n "$existing_service_broker" ]]; then
+  echo "Service Broker ${existing_service_broker} already exists"
+  echo " - cleaning up pr"
+  pushd "${autoscaler_root}/src/acceptance" > /dev/null && ./cleanup.sh && popd  > /dev/null
+  echo " - deleting broker"
+  cf delete-service-broker -f "${existing_service_broker}"
 fi
+
+echo "Creating service broker ${deployment_name} at 'https://${service_broker_name}.${system_domain}'"
+autoscaler_service_broker_password=$(credhub get  -n "/bosh-autoscaler/${deployment_name}/service_broker_password" -q)
+cf create-service-broker "${deployment_name}" autoscaler-broker-user "$autoscaler_service_broker_password" "https://${service_broker_name}.${system_domain}"
 
 cf logout

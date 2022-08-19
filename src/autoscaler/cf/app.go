@@ -1,144 +1,129 @@
 package cf
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"path"
-
-	"code.cloudfoundry.org/lager"
-
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"sync"
+	"time"
 )
 
 const (
 	TokenTypeBearer = "Bearer"
-	PathApp         = "/v2/apps"
-	CFAppNotFound   = "CF-AppNotFound"
 )
 
-func (c *cfClient) GetApp(appID string) (*models.AppEntity, error) {
-	url := c.conf.API + path.Join(PathApp, appID, "summary")
-	c.logger.Debug("get-app-instances", lager.Data{"url": url})
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		c.logger.Error("get-app-instances-new-request", err)
-		return nil, err
-	}
-	tokens, err := c.GetTokens()
-	if err != nil {
-		c.logger.Error("get-app-instances-get-tokens", err)
-		return nil, err
-	}
-	req.Header.Set("Authorization", TokenTypeBearer+" "+tokens.AccessToken)
-
-	var resp *http.Response
-	resp, err = c.httpClient.Do(req)
-
-	if err != nil {
-		c.logger.Error("get-app-instances-do-request", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == 404 {
-			respBody, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				c.logger.Error("failed-to-read-response-body-while-getting-app-summary", err, lager.Data{"appID": appID})
-				return nil, err
-			}
-			var bodydata map[string]interface{}
-			err = json.Unmarshal(respBody, &bodydata)
-			if err != nil {
-				err = fmt.Errorf("%s", string(respBody))
-				c.logger.Error("failed-to-get-application-summary", err, lager.Data{"appID": appID})
-				return nil, err
-			}
-			errorDescription := bodydata["description"].(string)
-			errorCode := bodydata["error_code"].(string)
-			code := bodydata["code"].(float64)
-
-			if errorCode == CFAppNotFound && code == 100004 {
-				// Application does not exists
-				err = models.NewAppNotFoundErr(errorDescription)
-			} else {
-				err = fmt.Errorf("failed getting application summary: [%d] %s: %s", resp.StatusCode, errorCode, errorDescription)
-			}
-			c.logger.Error("get-app-summary-response", err, lager.Data{"appID": appID, "statusCode": resp.StatusCode, "description": errorDescription, "errorCode": errorCode})
-			return nil, err
-		}
-		// For Non 404 Error type
-		err = fmt.Errorf("failed getting application summary: %s [%d] %s", url, resp.StatusCode, resp.Status)
-		c.logger.Error("get-app-instances-response", err)
-		return nil, err
+type (
+	//App the app information from cf for full version look at https://v3-apidocs.cloudfoundry.org/version/3.122.0/index.html#apps
+	App struct {
+		Guid          string        `json:"guid"`
+		Name          string        `json:"name"`
+		State         string        `json:"state"`
+		CreatedAt     time.Time     `json:"created_at"`
+		UpdatedAt     time.Time     `json:"updated_at"`
+		Relationships Relationships `json:"relationships"`
 	}
 
-	appEntity := &models.AppEntity{}
-	err = json.NewDecoder(resp.Body).Decode(appEntity)
-	if err != nil {
-		c.logger.Error("get-app-instances-decode", err)
-		return nil, err
+	AppAndProcesses struct {
+		App       *App
+		Processes Processes
 	}
-	return appEntity, nil
+
+	Relationships struct {
+		Space *Space `json:"space"`
+	}
+	SpaceData struct {
+		Guid SpaceId `json:"guid"`
+	}
+	Space struct {
+		Data SpaceData `json:"data"`
+	}
+
+	//Processes the processes information for an App from cf for full version look at https://v3-apidocs.cloudfoundry.org/version/3.122.0/index.html#processes
+	Process struct {
+		Guid       string    `json:"guid"`
+		Type       string    `json:"type"`
+		Instances  int       `json:"instances"`
+		MemoryInMb int       `json:"memory_in_mb"`
+		DiskInMb   int       `json:"disk_in_mb"`
+		CreatedAt  time.Time `json:"created_at"`
+		UpdatedAt  time.Time `json:"updated_at"`
+	}
+	Processes []Process
+)
+
+func (p Processes) GetInstances() int {
+	instances := 0
+	for _, process := range p {
+		instances += process.Instances
+	}
+	return instances
 }
 
-func (c *cfClient) SetAppInstances(appID string, num int) error {
-	url := c.conf.API + path.Join(PathApp, appID)
-	c.logger.Debug("set-app-instances", lager.Data{"url": url})
+/*GetAppAndProcesses
+ * A utility function that gets the app and processes for the app in one call in parallel
+ */
+func (c *Client) GetAppAndProcesses(appID string) (*AppAndProcesses, error) {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	var app *App
+	var processes Processes
+	var errApp, errProc error
+	go func() {
+		app, errApp = c.GetApp(appID)
+		wg.Done()
+	}()
+	go func() {
+		processes, errProc = c.GetAppProcesses(appID)
+		wg.Done()
+	}()
+	wg.Wait()
+	if errApp != nil {
+		return nil, fmt.Errorf("get state&instances failed: %w", errApp)
+	}
+	if errProc != nil {
+		return nil, fmt.Errorf("get state&instances failed: %w", errProc)
+	}
+	return &AppAndProcesses{App: app, Processes: processes}, nil
+}
 
-	appEntity := models.AppEntity{
-		Instances: num,
-	}
-	body, err := json.Marshal(appEntity)
-	if err != nil {
-		c.logger.Error("set-app-instances-marshal", err, lager.Data{"appID": appID, "appEntity": appEntity})
-		return err
-	}
+/*GetApp
+ * Get the information for a specific app
+ * from the v3 api https://v3-apidocs.cloudfoundry.org/version/3.122.0/index.html#apps
+ */
+func (c *Client) GetApp(appID string) (*App, error) {
+	url := fmt.Sprintf("/v3/apps/%s", appID)
 
-	var req *http.Request
-	req, err = http.NewRequest("PUT", url, bytes.NewReader(body))
+	resp, err := ResourceRetriever[*App]{c}.Get(url)
 	if err != nil {
-		c.logger.Error("set-app-instances-new-request", err)
-		return err
+		return nil, fmt.Errorf("failed getting app '%s': %w", appID, err)
 	}
-	tokens, err := c.GetTokens()
-	if err != nil {
-		c.logger.Error("set-app-instances-get-tokens", err)
-		return err
-	}
-	req.Header.Set("Authorization", TokenTypeBearer+" "+tokens.AccessToken)
-	req.Header.Set("Content-Type", "application/json")
+	return resp, nil
+}
 
-	var resp *http.Response
-	resp, err = c.httpClient.Do(req)
-	if err != nil {
-		c.logger.Error("set-app-instances-do-request", err)
-		return err
-	}
-	defer resp.Body.Close()
+/*GetAppProcesses
+ * Get the processes information for a specific app
+ * from the v3 api https://v3-apidocs.cloudfoundry.org/version/3.122.0/index.html#apps
+ */
+func (c *Client) GetAppProcesses(appID string) (Processes, error) {
+	url := fmt.Sprintf("/v3/apps/%s/processes?per_page=%d", appID, c.conf.PerPage)
 
-	if resp.StatusCode != http.StatusCreated {
-		respBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			c.logger.Error("failed-to-read-response-body-while-setting-app-instance", err, lager.Data{"appID": appID})
-			return err
-		}
-		var bodydata map[string]interface{}
-		err = json.Unmarshal(respBody, &bodydata)
-		if err != nil {
-			err = fmt.Errorf("%s", string(respBody))
-			c.logger.Error("faileded-to-set-application-instances", err, lager.Data{"appID": appID})
-			return err
-		}
-		errorDescription := bodydata["description"].(string)
-		errorCode := bodydata["error_code"].(string)
-		err = fmt.Errorf("failed setting application instances: [%d] %s: %s", resp.StatusCode, errorCode, errorDescription)
-		c.logger.Error("set-app-instances-response", err, lager.Data{"appID": appID, "statusCode": resp.StatusCode, "description": errorDescription, "errorCode": errorCode})
-		return err
+	pages, err := PagedResourceRetriever[Process]{c}.GetAllPages(url)
+	if err != nil {
+		return nil, fmt.Errorf("failed GetAppProcesses '%s': %w", appID, err)
 	}
-	return nil
+	return pages, nil
+}
+
+/*ScaleAppWebProcess
+ * Scale the given application Web processes to the given amount
+ * https://v3-apidocs.cloudfoundry.org/version/3.122.0/index.html#scale-a-process
+ */
+func (c *Client) ScaleAppWebProcess(appID string, num int) error {
+	url := fmt.Sprintf("/v3/apps/%s/processes/web/actions/scale", appID)
+	type scaleApp struct {
+		Instances int `json:"instances"`
+	}
+	_, err := c.Post(url, scaleApp{Instances: num})
+	if err != nil {
+		return fmt.Errorf("failed scaling app '%s' to %d: %w", appID, num, err)
+	}
+	return err
 }
