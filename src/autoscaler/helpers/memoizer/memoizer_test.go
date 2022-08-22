@@ -1,4 +1,4 @@
-package cf_test
+package memoizer_test
 
 import (
 	"errors"
@@ -6,7 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/memoizer"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +24,7 @@ func testFunc(counter *int) func(string) (string, error) {
 
 func TestMemoiser_miss(t *testing.T) {
 	counter := 0
-	memo := cf.NewMemoizer(testFunc(&counter))
+	memo := memoizer.New(testFunc(&counter))
 	res, err := memo.Func("string")
 	assert.Equal(t, "str", res)
 	assert.Nil(t, err)
@@ -32,7 +33,7 @@ func TestMemoiser_miss(t *testing.T) {
 
 func TestMemoiser_hit(t *testing.T) {
 	counter := 0
-	memo := cf.NewMemoizer(testFunc(&counter))
+	memo := memoizer.New(testFunc(&counter))
 	res, err := memo.Func("string")
 	assert.Equal(t, "str", res)
 	assert.Nil(t, err)
@@ -44,7 +45,7 @@ func TestMemoiser_hit(t *testing.T) {
 
 func TestMemoiser_errorsDontGetCached(t *testing.T) {
 	counter := 0
-	memo := cf.NewMemoizer(testFunc(&counter))
+	memo := memoizer.New(testFunc(&counter))
 	_, err := memo.Func("st")
 	assert.NotNil(t, err)
 	_, err = memo.Func("st")
@@ -59,7 +60,7 @@ func TestMemoiser_errorsDontGetCached(t *testing.T) {
 func TestMemoiser_Thread_test(t *testing.T) {
 	counter := 0
 	numThreads := 100
-	memo := cf.NewMemoizer(testFunc(&counter))
+	memo := memoizer.New(testFunc(&counter))
 	mu := sync.RWMutex{}
 	mu.Lock()
 	wg := sync.WaitGroup{}

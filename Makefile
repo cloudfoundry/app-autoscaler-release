@@ -294,3 +294,8 @@ acceptance-tests:
 clean-deploy:
 	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}' name prefix:'${NAME_PREFIX}'"
 	@ci/autoscaler/scripts/cleanup-autoscaler.sh
+
+.PHONY: package-specs
+package-specs: update
+	@echo " - Updating the package specs"
+	@./scripts/sync-package-specs

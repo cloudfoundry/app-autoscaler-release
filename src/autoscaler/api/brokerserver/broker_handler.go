@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"regexp"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/memoizer"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/plancheck"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/quota"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
@@ -29,17 +31,18 @@ import (
 )
 
 type BrokerHandler struct {
-	logger                lager.Logger
-	conf                  *config.Config
-	bindingdb             db.BindingDB
-	policydb              db.PolicyDB
-	policyValidator       *policyvalidator.PolicyValidator
-	schedulerUtil         *schedulerutil.SchedulerUtil
-	quotaManagementClient *quota.Client
-	catalog               []domain.Service
-	planChecker           *plancheck.PlanChecker
-	cfClient              cf.CFClient
-	credentials           cred_helper.Credentials
+	logger                     lager.Logger
+	conf                       *config.Config
+	bindingdb                  db.BindingDB
+	policydb                   db.PolicyDB
+	policyValidator            *policyvalidator.PolicyValidator
+	schedulerUtil              *schedulerutil.SchedulerUtil
+	quotaManagementClient      *quota.Client
+	catalog                    []domain.Service
+	PlanChecker                plancheck.PlanChecker
+	cfClient                   cf.CFClient
+	credentials                cred_helper.Credentials
+	servicePlanBrokerCatalogId *memoizer.Memoizer[string, string]
 }
 
 var emptyJSONObject = regexp.MustCompile(`^\s*{\s*}\s*$`)
@@ -50,7 +53,7 @@ var errorDeleteServiceBinding = errors.New("Error deleting service binding")
 var errorCredentialNotDeleted = errors.New("Failed to delete custom metrics credential for unbinding")
 
 func NewBrokerHandler(logger lager.Logger, conf *config.Config, bindingdb db.BindingDB, policydb db.PolicyDB, catalog []domain.Service, cfClient cf.CFClient, credentials cred_helper.Credentials) *BrokerHandler {
-	return &BrokerHandler{
+	handler := &BrokerHandler{
 		logger:                logger,
 		conf:                  conf,
 		bindingdb:             bindingdb,
@@ -59,16 +62,28 @@ func NewBrokerHandler(logger lager.Logger, conf *config.Config, bindingdb db.Bin
 		policyValidator:       policyvalidator.NewPolicyValidator(conf.PolicySchemaPath, conf.ScalingRules.CPU.LowerThreshold, conf.ScalingRules.CPU.UpperThreshold),
 		schedulerUtil:         schedulerutil.NewSchedulerUtil(conf, logger),
 		quotaManagementClient: quota.NewClient(conf, logger),
-		planChecker:           plancheck.NewPlanChecker(conf.PlanCheck, logger),
+		PlanChecker:           plancheck.NewPlanChecker(conf.PlanCheck, logger),
 		cfClient:              cfClient,
 		credentials:           credentials,
 	}
+	handler.servicePlanBrokerCatalogId = memoizer.New(handler.getServicePlanBrokerCatalogId)
+	return handler
 }
 
 func writeErrorResponse(w http.ResponseWriter, statusCode int, message string) {
 	handlers.WriteJSONResponse(w, statusCode, models.ErrorResponse{
 		Code:    http.StatusText(statusCode),
 		Message: message})
+}
+
+func (h *BrokerHandler) writeError(w http.ResponseWriter, err error) {
+	var brokerErr *BrokerError
+	if errors.As(err, &brokerErr) {
+		brokerErr.sendResponse(w, h.logger)
+	} else {
+		h.logger.Error("Unexpected error", err)
+		writeErrorResponse(w, http.StatusInternalServerError, "Unknown Error")
+	}
 }
 
 func (h *BrokerHandler) GetBrokerCatalog(w http.ResponseWriter, _ *http.Request, _ map[string]string) {
@@ -181,9 +196,10 @@ func (h *BrokerHandler) planDefinitionExceeded(policyStr string, planID string, 
 		writeErrorResponse(w, http.StatusInternalServerError, "Error reading policy")
 		return true
 	}
-	ok, checkResult, err := h.planChecker.CheckPlan(policy, planID)
+	ok, checkResult, err := h.PlanChecker.CheckPlan(policy, planID)
 	if err != nil {
 		h.logger.Error("failed to check policy for plan adherence", err, lager.Data{"instanceId": instanceId, "policyStr": policyStr})
+		//TODO this should be a 400
 		writeErrorResponse(w, http.StatusInternalServerError, "Error generating validating policy")
 		return true
 	}
@@ -283,28 +299,13 @@ func (h *BrokerHandler) UpdateServiceInstance(w http.ResponseWriter, r *http.Req
 		}
 	}
 
-	existingServicePlan, err := h.GetBrokerCatalogPlanId(instanceId)
 	newServicePlan := body.PlanID
-	if newServicePlan != "" {
-		if err != nil {
-			h.logger.Error("failed-to-retrieve-service-plan-of-service-instance", err, lager.Data{"instanceId": instanceId})
-			writeErrorResponse(w, http.StatusInternalServerError, "Error validating policy")
-			return
-		}
-		if !(existingServicePlan == newServicePlan) {
-			isPlanUpdatable, err := h.planChecker.IsPlanUpdatable(existingServicePlan)
-			if err != nil {
-				h.logger.Error("Plan not found", err)
-				writeErrorResponse(w, http.StatusBadRequest, "Unable to retrieve the service plan")
-				return
-			}
-			if !isPlanUpdatable {
-				h.logger.Error("The Plan is not updatable", nil)
-				writeErrorResponse(w, http.StatusBadRequest, "The plan is not updatable")
-				return
-			}
-		}
+	servicePlan, err := h.getExistingOrUpdatedServicePlan(instanceId, body.PlanID)
+	if err != nil {
+		h.writeError(w, err)
+		return
 	}
+
 	var updatedDefaultPolicy string
 	var updatedDefaultPolicyGuid string
 	if body.Parameters != nil && body.Parameters.DefaultPolicy != nil {
@@ -331,7 +332,7 @@ func (h *BrokerHandler) UpdateServiceInstance(w http.ResponseWriter, r *http.Req
 		}
 		updatedDefaultPolicy = validatedPolicy
 
-		servicePlan, err := h.GetBrokerCatalogPlanId(instanceId)
+		servicePlan, err := h.getBrokerCatalogPlanId(instanceId)
 		if err != nil {
 			h.logger.Error("failed-to-retrieve-service-plan-of-service-instance", err, lager.Data{"instanceId": instanceId})
 			writeErrorResponse(w, http.StatusInternalServerError, "Error validating policy")
@@ -350,14 +351,6 @@ func (h *BrokerHandler) UpdateServiceInstance(w http.ResponseWriter, r *http.Req
 		}
 		updatedDefaultPolicyGuid = policyGuid.String()
 	}
-
-	var servicePlan string
-	if newServicePlan != "" {
-		servicePlan = newServicePlan
-	} else {
-		servicePlan = existingServicePlan
-	}
-
 	allBoundApps, err := h.bindingdb.GetAppIdsByInstanceId(serviceInstance.ServiceInstanceId)
 	if err != nil {
 		h.logger.Error("failed to retrieve bound apps", err, lager.Data{"instanceId": instanceId})
@@ -452,8 +445,46 @@ func (h *BrokerHandler) UpdateServiceInstance(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (h *BrokerHandler) GetBrokerCatalogPlanId(instanceId string) (string, error) {
-	return h.cfClient.GetServicePlan(instanceId)
+func (h *BrokerHandler) getExistingOrUpdatedServicePlan(instanceId string, updateToPlan string) (string, error) {
+	existingServicePlan, err := h.getBrokerCatalogPlanId(instanceId)
+	servicePlan := existingServicePlan
+
+	var brokerErr error
+	if err != nil {
+		brokerErr = &BrokerError{
+			Status:  http.StatusInternalServerError,
+			Message: "Error retrieving broker plan Id",
+			Err:     err,
+			Data:    lager.Data{"instanceId": instanceId},
+		}
+	} else {
+		if updateToPlan != "" {
+			servicePlan = updateToPlan
+			if existingServicePlan != updateToPlan {
+				isPlanUpdatable, err := h.PlanChecker.IsPlanUpdatable(existingServicePlan)
+				if err != nil {
+					brokerErr = &BrokerError{
+						Status:  http.StatusBadRequest,
+						Message: "Unable to retrieve the service plan",
+						Err:     err,
+						Data:    lager.Data{"instanceId": instanceId, "existingServicePlan": existingServicePlan, "newServicePlan": updateToPlan},
+					}
+				} else if !isPlanUpdatable {
+					brokerErr = &BrokerError{
+						Status:  http.StatusBadRequest,
+						Message: "The plan is not updatable",
+						Err:     err,
+						Data:    lager.Data{"instanceId": instanceId, "existingServicePlan": existingServicePlan, "newServicePlan": updateToPlan},
+					}
+				}
+			}
+		}
+	}
+	return servicePlan, brokerErr
+}
+
+func (h *BrokerHandler) getBrokerCatalogPlanId(instanceId string) (string, error) {
+	return h.servicePlanBrokerCatalogId.Func(instanceId)
 }
 
 func (h *BrokerHandler) DeleteServiceInstance(w http.ResponseWriter, _ *http.Request, vars map[string]string) {
@@ -731,4 +762,21 @@ func deleteBinding(h *BrokerHandler, bindingId string, serviceInstanceId string)
 	}
 
 	return nil
+}
+
+func (h *BrokerHandler) getServicePlanBrokerCatalogId(serviceInstanceGuid string) (string, error) {
+	serviceInstance, err := h.cfClient.GetServiceInstance(serviceInstanceGuid)
+	if err != nil {
+		return "", err
+	}
+	servicePlanGuid := serviceInstance.Relationships.ServicePlan.Data.Guid
+	h.logger.Info("found-guid", lager.Data{"servicePlanGuid": servicePlanGuid})
+
+	servicePlan, err := h.cfClient.GetServicePlan(servicePlanGuid)
+	if err != nil {
+		return "", fmt.Errorf("cf-client-get-service-plan: failed to translate Cloud Controller service plan to broker service plan: %w", err)
+	}
+	brokerPlanGuid := servicePlan.BrokerCatalog.Id
+
+	return brokerPlanGuid, nil
 }

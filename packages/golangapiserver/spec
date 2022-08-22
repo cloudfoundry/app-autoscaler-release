@@ -25,6 +25,7 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
+- autoscaler/helpers/memoizer/* # gosub
 - autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/models/* # gosub
 - autoscaler/ratelimiter/* # gosub
@@ -82,6 +83,8 @@ files:
 - autoscaler/vendor/golang.org/x/sys/internal/unsafeheader/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/golang.org/x/time/rate/* # gosub
+- autoscaler/vendor/golang.org/x/xerrors/* # gosub
+- autoscaler/vendor/golang.org/x/xerrors/internal/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/encoding/prototext/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/encoding/protowire/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/descfmt/* # gosub
