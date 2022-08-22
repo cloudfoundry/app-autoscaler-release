@@ -4,12 +4,13 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 pushd "${script_dir}" > /dev/null
 source ./pr-vars.source.sh
 test_app_name=test-app
-test_service_name=test-app-service
+#test_service_name=test-app-service
 test_org="testing-pr-app"
 test_space="testing-pr-app"
 number_apps=${NUMBER_OF_APPS:-1}
 app_location="${script_dir}/../src/acceptance/assets/app/nodeApp"
-service_offering_enabled=false
+#service_offering_enabled=false
+# shellcheck disable=SC2154
 service_offering="app-autoscaler-${pr_number}"
 
 function create_app {

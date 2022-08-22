@@ -10,5 +10,3 @@ export GINKGO_OPTS="--progress --fail-fast -v "
 echo "Running acceptance tests for PR:${PR_NUMBER}"
 export NODES=1
 "${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh"
-
-

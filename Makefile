@@ -272,11 +272,11 @@ deploy: update uaac
 	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; };\
 	export BBL_STATE_PATH="${BBL_STATE_PATH}";\
 	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}";\
-	export SERVICE_OFFERING_ENABLED="{SERVICE_OFFERING_ENABLED}";\
-	if [[ BUILTIN ]]; then export BUILTIN_MODE_ACTIVE=true; fi;\
+	export SERVICE_OFFERING_ENABLED="${SERVICE_OFFERING_ENABLED}";\
+	if [[ ${BUILTIN} ]]; then export BUILTIN_MODE_ACTIVE=true; fi;\
 	source pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
-	if [[ ! BUILTIN ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;
+	if [[ ! ${BUILTIN} ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;
 
 .PHONY: acceptance-tests
 export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state
