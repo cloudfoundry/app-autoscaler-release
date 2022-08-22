@@ -53,7 +53,7 @@ clean-targets:
 	@rm target/* &> /dev/null || echo "  . Already clean"
 clean-vendor:
 	@echo " - cleaning vendored go"
-	@find . -name "vendor" -type d -exec rm -rf {} \;
+	@find . -name "vendor" -type d -delete
 clean-autoscaler:
 	@make -C src/autoscaler clean
 clean-scheduler:
