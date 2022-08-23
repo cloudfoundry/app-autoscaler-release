@@ -24,7 +24,7 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
 
 if [[ ${BUILDIN_MODE_ACTIVE} == true ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
 
-CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%h")
+CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
 
 pushd "${bbl_state_path}" > /dev/null
