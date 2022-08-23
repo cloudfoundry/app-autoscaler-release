@@ -84,7 +84,7 @@ jobs:
       - name: deploy autoscaler
         run: |
           cd ${{ env.AUTOSCALER_DIR }}
-          make deploy DEPLOYMENT_NAME=${{ env.DEPLOYMENT_NAME }} BBL_STATE_PATH=${{ env.BBL_STATE_PATH }} 
+          make deploy DEPLOYMENT_NAME=${{ env.DEPLOYMENT_NAME }} BBL_STATE_PATH=${{ env.BBL_STATE_PATH }}
 
   acceptance_test_api:
     needs: [ deploy_autoscaler ]

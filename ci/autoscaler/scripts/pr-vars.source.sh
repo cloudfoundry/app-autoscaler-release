@@ -1,8 +1,10 @@
 #!/bin/bash
-
-# Source this file please - used for manual debug. Adjust as needed.
+# Source this file please.
+# Moved to ci/  *DO NOT MODIFY MANUALLY*
 # shellcheck disable=SC2155
 export script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+echo ">> sourcing pr-vars.source.sh from ${script_dir}"
+
 pr_number=${PR_NUMBER:-44}
 export DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-"app-autoscaler-${pr_number}"}
 export SERVICE_BROKER_NAME="${DEPLOYMENT_NAME}servicebroker"
