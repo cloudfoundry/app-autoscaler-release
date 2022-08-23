@@ -269,7 +269,8 @@ BUILDIN?=false
 SERVICE_OFFERING_ENABLED?=true
 deploy: update uaac
 	cd ../../scripts;\
-	echo "local folder: $(pwd)";\
+	echo "make deploy pwd: $(pwd) ";\
+	ls -la;\
 	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; };\
 	export BBL_STATE_PATH="${BBL_STATE_PATH}";\
 	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}";\
