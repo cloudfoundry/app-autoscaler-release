@@ -384,9 +384,15 @@ func RunningInstances(appGUID string, timeout time.Duration) int {
 }
 
 func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Duration) {
-	Eventually(func() int {
-		return RunningInstances(appGUID, timeout)
-	}, timeout, 10*time.Second).Should(Equal(instances))
+	By(fmt.Sprintf("Waiting for %d instances of app: %s", instances, appGUID))
+	Eventually(getAppInstances(appGUID, 8*time.Second)).
+		WithTimeout(timeout).
+		WithPolling(10 * time.Second).
+		Should(Equal(instances))
+}
+
+func getAppInstances(appGUID string, timeout time.Duration) func() int {
+	return func() int { return RunningInstances(appGUID, timeout) }
 }
 
 func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
