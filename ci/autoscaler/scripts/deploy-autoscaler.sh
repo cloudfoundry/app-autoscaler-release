@@ -9,7 +9,7 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
-BUILDIN_MODE_ACTIVE="{${BUILDIN_MODE_ACTIVE}:-false}"
+buildin_mode_active="${BUILDIN_MODE_ACTIVE:-false}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 deployment_manifest="${script_dir}/../../../templates/app-autoscaler.yml"
 bosh_fix_releases="${BOSH_FIX_RELEASES:-false}"
@@ -23,7 +23,7 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
  ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
 
-if [[ ${BUILDIN_MODE_ACTIVE} == true ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
+if [[ ${buildin_mode_active} == true ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
 
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
