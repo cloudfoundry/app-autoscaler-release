@@ -2,6 +2,7 @@
 # shellcheck disable=SC2086
 set -euo pipefail
 
+# shellcheck disable=SC2153
 echo "STATE PATH ${BBL_STATE_PATH}"
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
