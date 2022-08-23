@@ -277,7 +277,7 @@ deploy: update uaac
 	if [[ "${BUILDIN}" == "true" ]]; then export BUILDIN_MODE_ACTIVE=true; fi;\
 	source pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
-	if [[ "${BUILDIN}" == false ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;
+	if [[ "${BUILDIN}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;
 
 .PHONY: acceptance-tests
 export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state
