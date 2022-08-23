@@ -49,7 +49,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs" \
-            -d '{ "name": "${{env.check_name}}","head_sha": "${{ github.event.pull_request.head.sha }}","status": "in_progress","external_id": "${{ github.run_id }}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${{ github.event.pull_request.head.sha }}","text":"some text" }}' \
+            -d '{ "name": "${{env.check_name}}","head_sha": "${{ github.event.pull_request.head.sha }}","status": "in_progress","external_id": "${{ github.run_id }}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${{ github.event.pull_request.head.sha }}","text":"Awaiting test result" }}' \
             -o new_check.json
 
           id=$(jq -r '.id' new_check.json)
