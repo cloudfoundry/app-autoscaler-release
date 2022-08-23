@@ -1,4 +1,5 @@
 #!/bin/bash
+echo ">> DEBUG: exiting without cleanup"; exit 0
 set -euo pipefail
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
