@@ -10,8 +10,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup_go
       - uses: ./.github/actions/setup_java
-        with:
-          version: 11
 
       - name: Check Code Formatting
         run: |
@@ -32,6 +30,25 @@ jobs:
           go run format_checkstyle.go
 
   sonar-cloud:
+    name: Sonar Cloud
+    env:
+      DB_DATABASE: autoscaler
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: autoscaler
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -39,8 +56,11 @@ jobs:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis with SonarCloud
       - uses: ./.github/actions/setup_go
       - uses: ./.github/actions/setup_java
-        with:
-          version: 11
+
+      - name: Build
+        run: |
+          make test-scheduler
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
