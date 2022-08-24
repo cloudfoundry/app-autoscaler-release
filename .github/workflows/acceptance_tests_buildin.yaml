@@ -85,7 +85,7 @@ jobs:
       - name: deploy autoscaler
         run: |
           cd ${{ env.AUTOSCALER_DIR }}
-          make deploy
+          make deploy BUILDIN_MODE=true
 
   acceptance_test_api:
     needs: [ deploy_autoscaler ]
