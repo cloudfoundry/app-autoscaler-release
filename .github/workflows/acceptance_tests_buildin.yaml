@@ -8,6 +8,7 @@ env:
   BUILDIN_MODE: true
   SERVICE_OFFERING_ENABLED: false
   check_name: "acceptance_test_check_buildin"
+  PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
   SERVICE_BROKER_NAME: "autoscaler-${{ github.event.pull_request.number }}servicebroker"
   SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
@@ -83,7 +84,7 @@ jobs:
       - name: deploy autoscaler
         run: |
           cd ${{ env.AUTOSCALER_DIR }}
-          make deploy BUILDIN_MODE=true
+          make deploy BUILDIN_MODE=${{ env.BUILDIN_MODE }}
 
   acceptance_test_api:
     needs: [ deploy_autoscaler ]
