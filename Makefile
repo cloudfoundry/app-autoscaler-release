@@ -264,28 +264,15 @@ uaac:
 	which uaac || gem install cf-uaac
 
 .PHONY: deploy
-DEPLOYMENT_NAME?=app-autoscaler-test
-BUILDIN?=false
-SERVICE_OFFERING_ENABLED?=true
 deploy: update uaac
-	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repositorynext to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; };
-	export BBL_STATE_PATH="${BBL_STATE_PATH}";
-	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}";
-	export SERVICE_OFFERING_ENABLED="${SERVICE_OFFERING_ENABLED}";
-	echo ">> BUILDIN is: ${BUILDIN}";
-	if [[ "${BUILDIN}" == "true" ]]; then export BUILDIN_MODE_ACTIVE=true; fi;
-	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;
-	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;
-	if [[ "${BUILDIN}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;
+
+	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
+	if [[ "${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
 
 .PHONY: acceptance-tests
-export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state
-export AUTOSCALER_DIR=${PWD}
-export DEPLOYMENT_NAME?=app-autoscaler-test
-export NAME_PREFIX?=autoscaler-test
 acceptance-tests:
-	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"
-	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; };
+	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"\
 	NAME_PREFIX="autoscaler-test"\
  	 BBL_STATE_PATH="${BBL_STATE_PATH}"\
  	 AUTOSCALER_DIR="${PWD}"\
