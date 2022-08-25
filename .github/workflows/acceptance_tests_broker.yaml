@@ -14,6 +14,7 @@ env:
   SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
+  NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
 
@@ -84,7 +85,7 @@ jobs:
       - name: deploy autoscaler
         run: |
           cd ${{ env.AUTOSCALER_DIR }}
-          make deploy BUILDIN_MODE=${{ env.BUILDIN_MODE }}
+          make deployment BUILDIN_MODE=${{ env.BUILDIN_MODE }}
 
   acceptance_test_api:
     needs: [ deploy_autoscaler ]

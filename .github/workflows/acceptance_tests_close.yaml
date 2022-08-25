@@ -29,4 +29,6 @@ jobs:
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
-      - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
+      - run: |
+          cd ${{ env.AUTOSCALER_DIR }}
+          make deployment-cleanup

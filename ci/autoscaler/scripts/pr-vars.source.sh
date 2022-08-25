@@ -5,6 +5,8 @@
 export script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 echo ">> sourcing pr-vars.source.sh from ${script_dir}"
 
+if [[ -z ${PR_NUMBER} ]]; then echo -e "?? WARN: no PR_NUMBER is set, will use the default\n"; fi
+
 export PR_NUMBER=${PR_NUMBER:-44}
 echo ">> PR_NUMBER: ${PR_NUMBER}"
 

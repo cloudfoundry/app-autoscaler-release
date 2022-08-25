@@ -263,24 +263,22 @@ update:
 uaac:
 	which uaac || gem install cf-uaac
 
-.PHONY: deploy
-deploy: update uaac
-deploy:
+.PHONY: deployment
+deployment: update uaac
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
 	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
-
-
 
 .PHONY: acceptance-tests
 acceptance-tests:
 	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"\
 	    ./ci/autoscaler/scripts/run-acceptance-tests.sh
 
-.PHONY: clean-deploy
-clean-deploy:
-	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}' name prefix:'${NAME_PREFIX}'"
-	@ci/autoscaler/scripts/cleanup-autoscaler.sh
+.PHONY: deployment-cleanup
+deployment-cleanup:
+	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}' acceptance tests name prefix:'${NAME_PREFIX}'"
+	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 .PHONY: package-specs
 package-specs: update
