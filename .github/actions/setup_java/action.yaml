@@ -3,11 +3,27 @@ description: 'Determine the correct java version and set go up'
 inputs:
   version:  # id of input
     description: 'The java version that is required'
-    default: 11
+    required: false
+  source:
+    description: "The source to check for the java version"
+    required: false
+    default: .
 
 runs:
   using: "composite"
   steps:
+    - id: get-version
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.version }}" ]; then
+          VERSION=$(grep -E -m 1 -o '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' ${{ inputs.source }}/packages/openjdk-11/version  | head -1)
+          echo "::set-output name=version::${VERSION}"
+          echo "Using automatically determined version ${VERSION}"
+        else
+          echo "::set-output name=version::${{ inputs.version }}"
+          echo "Using overridden version ${{ inputs.version }}"
+        fi
+
     - name: Cache local Maven repository
       uses: actions/cache@v3
       with:
@@ -20,7 +36,7 @@ runs:
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: ${{ inputs.version }}
+        java-version: ${{ steps.get-version.outputs.version }}
 
     - name: act only - Install Maven
       if: ${{ env.ACT }}
