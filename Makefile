@@ -279,8 +279,8 @@ acceptance-tests:
 
 .PHONY: deployment-cleanup
 deployment-cleanup:
-	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'"\
-	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'";\
+	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 .PHONY: package-specs
