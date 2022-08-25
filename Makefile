@@ -12,7 +12,7 @@ DBURL := $(shell case "${db_type}" in\
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
 
-ACCEPTANCE_SUITES?=broker api app
+SUITES?=broker api app
 AUTOSCALER_DIR?=${PWD}
 CI_DIR?=${PWD}/ci
 CI?=false
@@ -267,16 +267,19 @@ uaac:
 deployment: update uaac
 	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
-	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
+
+	@if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
 
 .PHONY: acceptance-tests
 acceptance-tests:
-	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"\
-	    ./ci/autoscaler/scripts/run-acceptance-tests.sh
+	@if [[ "$${BUILDIN_MODE}" == "true" ]]; then SUITES="api app"; fi;\
+	export GINKGO_OPTS="--fail-fast";\
+	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
 .PHONY: deployment-cleanup
 deployment-cleanup:
-	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'"
+	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'"\
 	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
