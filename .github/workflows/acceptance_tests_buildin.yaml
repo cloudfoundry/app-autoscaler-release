@@ -151,7 +151,10 @@ jobs:
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
-      - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
+      - run: |
+          cd ${{ env.AUTOSCALER_DIR }}
+          make deployment-cleanup
+
 
   report_result:
     needs: [ completed_run ]

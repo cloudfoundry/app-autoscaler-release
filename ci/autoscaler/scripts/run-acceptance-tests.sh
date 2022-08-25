@@ -13,7 +13,6 @@ service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
 suites=${SUITES:-"api app broker"}
 gingko_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
-buildin_mode="${BUILDIN_MODE}"
 
 if [[ ! -d ${BBL_STATE_PATH} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${BBL_STATE_PATH}"
@@ -69,7 +68,7 @@ autoscaler_dir
 skip_teardown
 skip_ssl_validation
 name_prefix
-buildin_mode
+BUILDIN_MODE
 service_offering_enabled
 suites
 gingko_opts
