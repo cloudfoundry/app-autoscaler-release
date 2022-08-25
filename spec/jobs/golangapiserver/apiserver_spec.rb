@@ -108,37 +108,6 @@ describe "golangapiserver" do
       end
     end
 
-    context "quota_management" do
-      it "writes config when quota management is enabled" do
-        properties["autoscaler"]["apiserver"]["broker"]["quota_management"] = {"enabled" => "true",
-                                                                                "api" => "https://quota_management.api",
-                                                                                "client_id" => "quota_management.client_id",
-                                                                                "secret" => "quota_management.secret",
-                                                                                "oauth_url" => "https://quota_management.oauth.api",
-                                                                                "skip_ssl_validation" => "true"}
-
-        rendered_template = YAML.safe_load(template.render(properties))
-
-        expect(rendered_template["quota_management"]).to include(
-          {
-            "api" => "https://quota_management.api",
-            "client_id" => "quota_management.client_id",
-            "secret" => "quota_management.secret",
-            "oauth_url" => "https://quota_management.oauth.api",
-            "skip_ssl_validation" => true
-          }
-        )
-      end
-
-      it "does not write config when quota management is disabled" do
-        properties["autoscaler"]["apiserver"]["broker"]["quota_management"] = {"enabled" => false}
-
-        rendered_template = YAML.safe_load(template.render(properties))
-
-        expect(rendered_template["quota_management"]).to be_nil
-      end
-    end
-
     context "plan_check" do
       it "by default plan checks are disabled" do
         expect(rendered_template["plan_check"]).to be_nil

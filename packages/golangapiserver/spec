@@ -17,7 +17,6 @@ files:
 - autoscaler/api/plancheck/* # gosub
 - autoscaler/api/policyvalidator/* # gosub
 - autoscaler/api/publicapiserver/* # gosub
-- autoscaler/api/quota/* # gosub
 - autoscaler/api/schedulerutil/* # gosub
 - autoscaler/cf/* # gosub
 - autoscaler/cred_helper/* # gosub
@@ -76,10 +75,6 @@ files:
 - autoscaler/vendor/github.com/xeipuuv/gojsonschema/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
-- autoscaler/vendor/golang.org/x/net/context/ctxhttp/* # gosub
-- autoscaler/vendor/golang.org/x/oauth2/* # gosub
-- autoscaler/vendor/golang.org/x/oauth2/clientcredentials/* # gosub
-- autoscaler/vendor/golang.org/x/oauth2/internal/* # gosub
 - autoscaler/vendor/golang.org/x/sys/internal/unsafeheader/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/golang.org/x/time/rate/* # gosub
