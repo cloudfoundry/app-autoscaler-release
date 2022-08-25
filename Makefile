@@ -265,7 +265,7 @@ uaac:
 
 .PHONY: deployment
 deployment: update uaac
-	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
 	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
 
@@ -276,8 +276,8 @@ acceptance-tests:
 
 .PHONY: deployment-cleanup
 deployment-cleanup:
-	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}' acceptance tests name prefix:'${NAME_PREFIX}'"
-	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'"
+	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 .PHONY: package-specs
