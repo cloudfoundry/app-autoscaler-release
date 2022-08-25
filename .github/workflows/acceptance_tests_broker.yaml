@@ -102,7 +102,9 @@ jobs:
       - name: run acceptance test - api
         run: |
           export SUITES="api"
-          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+          cd ${{ env.AUTOSCALER_DIR }}
+          make acceptance-tests
+
 
   acceptance_test_app:
     needs: [ deploy_autoscaler ]
@@ -119,7 +121,8 @@ jobs:
       - name: run acceptance test - app
         run: |
           export SUITES="app"
-          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+          cd ${{ env.AUTOSCALER_DIR }}
+          make acceptance-tests
 
   acceptance_test_broker:
     needs: [ deploy_autoscaler ]
@@ -136,7 +139,8 @@ jobs:
       - name: run acceptance tests - broker
         run: |
           export SUITES="broker"
-          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+          cd ${{ env.AUTOSCALER_DIR }}
+          make acceptance-tests
 
   ### This is a final node to indicate the completion of all the acceptance tests
   completed_run:
