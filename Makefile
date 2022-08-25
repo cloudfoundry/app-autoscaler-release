@@ -272,8 +272,7 @@ deployment: update uaac
 
 .PHONY: acceptance-tests
 acceptance-tests:
-	@if [[ "$${BUILDIN_MODE}" == "true" ]]; then SUITES="api app"; fi;\
-	export GINKGO_OPTS="--fail-fast";\
+	@export GINKGO_OPTS="--fail-fast";\
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
