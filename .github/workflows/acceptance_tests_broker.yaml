@@ -43,6 +43,8 @@ jobs:
     steps:
       - run: echo "sha is ${{github.event.pull_request.head.sha}}"
       - run: |
+          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
+
           echo "::group::Creating new check"
 
           curl -vf -X POST \
@@ -149,6 +151,7 @@ jobs:
       checks: write
     steps:
       - run: |
+          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
           curl -sf -X PATCH \
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
@@ -183,6 +186,8 @@ jobs:
     steps:
       - name: Retrieve and assume last acceptance test result
         run: |
+          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
+
           echo "::group::Getting the latest acceptance test result"
           set -eo pipefail
           echo "Getting the last result"
