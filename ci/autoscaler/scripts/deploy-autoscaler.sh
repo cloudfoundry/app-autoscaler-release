@@ -29,7 +29,7 @@ if [[ ! -d ${BBL_STATE_PATH} ]]; then
   exit 1;
   fi
 
-if [[ ${buildin_mode} == true ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
+if [[ ${buildin_mode} == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
 
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}

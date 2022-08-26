@@ -103,7 +103,7 @@ jobs:
         run: |
           export SUITES="api"
           cd ${{ env.AUTOSCALER_DIR }}
-          make acceptance-tests BUILDIN_MODE=true
+          make acceptance-tests BUILDIN_MODE=${{ env.BUILDIN_MODE }}
 
   acceptance_test_app:
     needs: [ deploy_autoscaler ]
@@ -121,7 +121,7 @@ jobs:
         run: |
           export SUITES="app"
           cd ${{ env.AUTOSCALER_DIR }}
-          make acceptance-tests BUILDIN_MODE=true
+          make acceptance-tests BUILDIN_MODE=${{ env.BUILDIN_MODE }}
 
 
   ### This is a final node to indicate the completion of all the acceptance tests
@@ -153,7 +153,7 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - run: |
           cd ${{ env.AUTOSCALER_DIR }}
-          make deployment-cleanup
+          make deployment-cleanup BUILDIN_MODE=${{ env.BUILDIN_MODE }}
 
 
   report_result:
