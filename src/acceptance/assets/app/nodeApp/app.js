@@ -13,10 +13,12 @@ let mfPassword = ''
 const serviceName = process.env.SERVICE_NAME
 
 function getCredentials () {
-  let credentials = {}
+  // TODO: the way we check for credentials existence might be further improved.
 
-  // for service offering
+  let credentials = {}
   console.log('Getting credentials...')
+
+  // for service offering (broker)
   if (process.env.VCAP_SERVICES) {
     console.log(` - found vcap looking for ${serviceName}`)
     const vcapServices = JSON.parse(process.env.VCAP_SERVICES)
@@ -30,7 +32,7 @@ function getCredentials () {
         mfUsername = credentials.custom_metrics.username
         mfPassword = credentials.custom_metrics.password
       } else {
-        const err = 'ERROR: no credentials in bound service env variable'
+        const err = 'ERROR: VCAP_SERVICES env variable does not contain expected credentials. '
         console.error(err)
         throw err
       }
@@ -47,7 +49,7 @@ function getCredentials () {
       mfUsername = credentials.username
       mfPassword = credentials.password
     } else {
-      console.error('ERROR: not all credentials were provided.')
+      console.error('ERROR: AUTO_SCALER_CUSTOM_METRIC_ENV env variable does not contain expected credentials. ')
       console.log(
                 `metricsForwarderURL "${metricsForwarderURL}" || mfUsername === "${mfUsername}" || mfPassword (length) "${mfPassword.length}"`
       )
