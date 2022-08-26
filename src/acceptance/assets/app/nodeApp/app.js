@@ -13,7 +13,7 @@ let mfPassword = ''
 const serviceName = process.env.SERVICE_NAME
 
 function getCredentials () {
-  // TODO: the way we check for credentials existence might be further improved.
+  // NOTE: the way we check for credentials existence might be further improved.
 
   let credentials = {}
   console.log('Getting credentials...')
