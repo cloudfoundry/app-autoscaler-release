@@ -18,10 +18,13 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 	)
 
 	BeforeEach(func() {
+		ginkgo.GinkgoWriter.Printf("\nDeploying %d app: \n", cfg.AppCount)
+
 		for i := 1; i <= cfg.AppCount; i++ {
 			appName = fmt.Sprintf("node-custom-metric-benchmark-%d", i)
 
 			go func(appName string) {
+				defer GinkgoRecover()
 				helpers.CreateTestAppByName(*cfg, appName, 1)
 				policy := helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 				appGUID := helpers.GetAppGuid(cfg, appName)
@@ -41,7 +44,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 			return len(apps)
 		}
 
-		Eventually(appsDeployed, 2*time.Minute, 5*time.Second).Should(Equal(cfg.AppCount))
+		Eventually(appsDeployed, 5*time.Minute, 5*time.Second).Should(Equal(cfg.AppCount))
 	})
 
 	Context("when scaling by custom metrics", func() {
@@ -57,12 +60,11 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 			appsRunning := func() int {
 				var apps []string
 
-				apps = helpers.GetRunningApps(cfg, orgGuid, spaceGuid, "node-custom-metric-benchmark")
+				apps = helpers.GetRunningApps(cfg, orgGuid, spaceGuid)
 				ginkgo.GinkgoWriter.Printf("\nGot running apps: %s\n", apps)
 
 				return len(apps)
 			}
-
 
 			Eventually(appsRunning, 2*time.Minute, 5*time.Second).Should(Equal(cfg.AppCount))
 		})
