@@ -2,21 +2,21 @@
 anchors:
 
   acceptance-main-env: &acceptance-main-env
-    SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
+    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-main"
     SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-main"
     GINKGO_OPTS: "--fail-fast"
 
   acceptance-main-log-cache-env: &acceptance-main-log-cache-env
-    SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
+    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-lc-main"
     SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-lc-main"
     GINKGO_OPTS: "--fail-fast"
 
   upgrade-test-env: &upgrade-test-env
-    SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
+    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "upgrade-test"
     SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "upgrade-test"
@@ -278,7 +278,7 @@ jobs:
       BBL_GCP_REGION: europe-west4
       BBL_GCP_ZONE: europe-west4-a
       DEBUG_MODE: true
-      LB_DOMAIN: autoscaler.ci.cloudfoundry.org
+      LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
       BBL_LB_CERT: ((autoscaler_lb_cert))
       BBL_LB_KEY: ((autoscaler_lb_key))
     input_mapping:
@@ -295,7 +295,7 @@ jobs:
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
       BBL_GCP_PROJECT_ID: cloud-foundry-310819
       GCP_DNS_ZONE: ci-cloudfoundry-org
-      GCP_DNS_NAME: autoscaler.ci.cloudfoundry.org
+      GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
 
 
 - name: deploy-autoscaler
@@ -319,7 +319,7 @@ jobs:
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: ci
@@ -328,7 +328,7 @@ jobs:
     input_mapping:
       release: app-autoscaler-release-main
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
 
 - name: delete-autoscaler
   serial_groups: [infra]
@@ -421,7 +421,7 @@ jobs:
       ops-files: ops-files
       vars-files: autoscaler-env-vars-store
     params:
-      SYSTEM_DOMAIN: autoscaler.ci.cloudfoundry.org
+      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
       OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
     ensure:
       put: autoscaler-env-vars-store

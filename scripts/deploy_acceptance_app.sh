@@ -13,7 +13,7 @@ app_location="${script_dir}/../src/acceptance/assets/app/nodeApp"
 function create_app {
    local app_name=$1
    cf push --var app_name="${app_name}"\
-      --var app_domain=autoscaler.ci.cloudfoundry.org\
+      --var app_domain=autoscaler.app-runtime-interfaces.ci.cloudfoundry.org\
       --var service_name="${service_offering}"\
       --var instances=1\
       --var buildpack=nodejs_buildpack\

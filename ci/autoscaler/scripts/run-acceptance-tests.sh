@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
+system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
