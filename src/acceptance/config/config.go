@@ -101,7 +101,7 @@ var defaults = Config{
 
 
 	// For benchmark
-	AppCount: 10,
+	AppCount: 1,
 }
 
 func LoadConfig(t *testing.T) *Config {

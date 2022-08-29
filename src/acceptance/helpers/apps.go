@@ -4,6 +4,7 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
+	"github.com/onsi/ginkgo/v2"
 	"strconv"
 	"time"
 
@@ -16,16 +17,8 @@ import (
 )
 
 func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
-	totalPages := 1
-	var apps []string
-
-	for page := 1; page <= totalPages; page++ {
-		var appsResponse = getRawAppsByPage(spaceGuid, orgGuid, page, cfg.DefaultTimeoutDuration())
-		totalPages = appsResponse.Pagination.TotalPages
-		apps = append(apps, filterByPrefix(prefix, getNames(appsResponse))...)
-	}
-
-	return apps
+	rawApps := getRawApps(spaceGuid , orgGuid , cfg.DefaultTimeoutDuration())
+	return filterByPrefix(prefix, getNames(rawApps))
 }
 
 func getRawAppsByPage(spaceGuid string, orgGuid string, page int, timeout time.Duration) cfResourceObject {
@@ -37,9 +30,24 @@ func getRawAppsByPage(spaceGuid string, orgGuid string, page int, timeout time.D
 	return appsResponse
 }
 
-func GetRunningApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
-	return []string{}
+func getRawApps(spaceGuid string, orgGuid string, timeout time.Duration) []cfResource {
+	var rawApps []cfResource
+	totalPages := 1
+
+	for page := 1; page <= totalPages; page++ {
+		var appsResponse = getRawAppsByPage(spaceGuid, orgGuid, page, timeout)
+		totalPages = appsResponse.Pagination.TotalPages
+		rawApps = append(rawApps, appsResponse.Resources... )
+	}
+
+	return rawApps
 }
+
+func GetRunningApps(cfg *config.Config, orgGuid, spaceGuid string) []string {
+	rawApps := getRawApps(spaceGuid , orgGuid , cfg.DefaultTimeoutDuration())
+	return filterByState(rawApps, "RUNNING")
+}
+
 
 func DeleteApps(cfg *config.Config, apps []string, threshold int) {
 	for _, app := range apps {
@@ -87,11 +95,13 @@ func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount
 		"--no-start",
 	).Wait(cfg.CfPushTimeoutDuration())
 
+
 	if createApp.ExitCode() != 0 {
 		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
 	}
 	Expect(createApp).To(Exit(0), "failed creating app")
 
+	ginkgo.GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
 }
 
 func DeleteTestApp(appName string, timeout time.Duration) {

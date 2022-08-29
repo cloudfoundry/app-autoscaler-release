@@ -20,13 +20,15 @@ type cfResourceObject struct {
 		TotalPages int    `json:"total_pages"`
 		Next       string `json:"next"`
 	} `json:"pagination"`
-	Resources []struct {
-		GUID      string `json:"guid"`
-		CreatedAt string `json:"created_at"`
-		Name      string `json:"name"`
-		Username  string `json:"username"`
-		State     string `json:"state"`
-	} `json:"resources"`
+	Resources []cfResource `json:"resources"`
+}
+
+type cfResource struct {
+GUID      string `json:"guid"`
+CreatedAt string `json:"created_at"`
+Name      string `json:"name"`
+Username  string `json:"username"`
+State     string `json:"state"`
 }
 
 func GetServices(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
@@ -36,7 +38,7 @@ func GetServices(cfg *config.Config, orgGuid, spaceGuid string, prefix string) [
 	err := json.Unmarshal(rawServices.Out.Contents(), &services)
 	Expect(err).ShouldNot(HaveOccurred())
 
-	return filterByPrefix(prefix, getNames(services))
+	return filterByPrefix(prefix, getNames(services.Resources))
 }
 
 func DeleteServices(cfg *config.Config, services []string) {
