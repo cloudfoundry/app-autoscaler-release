@@ -40,11 +40,12 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
-
   if [[ $bosh_fix_releases == "true" ]]; then
     bosh_fix_releases="${BOSH_FIX_RELEASES:-true}"
     bosh_deploy_args="$bosh_args --fix-releases"
   fi
+
+  echo " - Deploy args: '${bosh_deploy_args}'"
 
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
