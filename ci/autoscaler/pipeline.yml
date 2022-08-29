@@ -6,6 +6,7 @@ anchors:
     DEPLOYMENT_NAME: "acceptance-main"
     SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-main"
+    BOSH_FIX_RELEASES: true
     GINKGO_OPTS: "--fail-fast"
 
   acceptance-main-log-cache-env: &acceptance-main-log-cache-env
@@ -13,6 +14,7 @@ anchors:
     DEPLOYMENT_NAME: "acceptance-lc-main"
     SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-lc-main"
+    BOSH_FIX_RELEASES: true
     GINKGO_OPTS: "--fail-fast"
 
   upgrade-test-env: &upgrade-test-env
