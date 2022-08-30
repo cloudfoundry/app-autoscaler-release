@@ -21,8 +21,8 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
  ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
 
-if [[ ! -d ${BBL_STATE_PATH} ]]; then
-  echo "FAILED: Did not find bbl-state folder at ${BBL_STATE_PATH}"
+if [[ ! -d ${bbl_state_path} ]]; then
+  echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
   echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
   exit 1;
   fi
