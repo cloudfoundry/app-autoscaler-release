@@ -12,7 +12,7 @@ DBURL := $(shell case "${db_type}" in\
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
 
-ACCEPTANCE_SUITES?=broker api app
+SUITES?=broker api app
 AUTOSCALER_DIR?=${PWD}
 CI_DIR?=${PWD}/ci
 CI?=false
@@ -259,41 +259,27 @@ workspace:
 update:
 	./scripts/update
 
-.PHONY: deploy
+.PHONY: uuac
 uaac:
 	which uaac || gem install cf-uaac
 
-
-.PHONY: deploy
-deploy: update uaac
-	cd scripts;\
-	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME}";\
- 	source pr-vars.source.sh;\
- 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
-    ${CI_DIR}/autoscaler/scripts/register-broker.sh
+.PHONY: deployment
+deployment: update uaac
+	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
+	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
 
 .PHONY: acceptance-tests
-export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state
-export AUTOSCALER_DIR=${PWD}
-export DEPLOYMENT_NAME?=app-autoscaler-test
-export NAME_PREFIX?=autoscaler-test
 acceptance-tests:
-	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"
-	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; }
-	NAME_PREFIX="autoscaler-test"\
- 	 BBL_STATE_PATH="${BBL_STATE_PATH}"\
- 	 AUTOSCALER_DIR="${PWD}"\
- 	 SUITES="${ACCEPTANCE_SUITES}"\
- 	 SKIP_TEARDOWN=true\
- 	 NODES=1\
- 	 DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"\
- 	 GINKGO_OPTS="${OPTS}"\
- 	    ./ci/autoscaler/scripts/run-acceptance-tests.sh
+	@export GINKGO_OPTS="--fail-fast";\
+	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
-.PHONY: clean-deploy
-clean-deploy:
-	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}' name prefix:'${NAME_PREFIX}'"
-	@ci/autoscaler/scripts/cleanup-autoscaler.sh
+.PHONY: deployment-cleanup
+deployment-cleanup:
+	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'";\
+	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 .PHONY: package-specs
 package-specs: update
