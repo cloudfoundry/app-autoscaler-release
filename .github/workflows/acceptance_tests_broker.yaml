@@ -1,22 +1,23 @@
-name: Acceptance Tests
+name: Acceptance Tests (Broker)
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
 env:
   MAVEN_VERSION: 3.6.3
   MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
-  DEPLOYMENT_NAME: "app-autoscaler-${{ github.event.pull_request.number }}"
-  SERVICE_BROKER_NAME: "app-autoscaler-${{ github.event.pull_request.number }}servicebroker"
+  BUILDIN_MODE: false
+  SERVICE_OFFERING_ENABLED: true
+  check_name: "acceptance_test_check_broker"
+  PR_NUMBER: "${{ github.event.pull_request.number }}"
+  DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
+  SERVICE_BROKER_NAME: "autoscaler-${{ github.event.pull_request.number }}servicebroker"
   SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
-  SYSTEM_DOMAIN: "autoscaler.ci.cloudfoundry.org"
-  SERVICE_OFFERING_ENABLED: true
-  SKIP_SSL_VALIDATION: true
-  NAME_PREFIX: "app-autoscaler-${{ github.event.pull_request.number }}-TESTS"
+  NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  check_name: "acceptance_test_check"
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -42,6 +43,8 @@ jobs:
     steps:
       - run: echo "sha is ${{github.event.pull_request.head.sha}}"
       - run: |
+          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
+
           echo "::group::Creating new check"
 
           curl -vf -X POST \
@@ -49,7 +52,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs" \
-            -d '{ "name": "${{env.check_name}}","head_sha": "${{ github.event.pull_request.head.sha }}","status": "in_progress","external_id": "${{ github.run_id }}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${{ github.event.pull_request.head.sha }}","text":"some text" }}' \
+            -d '{ "name": "${{env.check_name}}","head_sha": "${{ github.event.pull_request.head.sha }}","status": "in_progress","external_id": "${{ github.run_id }}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${{ github.event.pull_request.head.sha }}","text":"Awaiting test result" }}' \
             -o new_check.json
 
           id=$(jq -r '.id' new_check.json)
@@ -80,27 +83,11 @@ jobs:
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
-      - name: run update
-        run: cd ${AUTOSCALER_DIR}; ./scripts/update
-
-
       # TODO: When removing metricserver and metricgateway merge enable-log-cache.yml into the default templates/app-autoscaler.yml manifest.
       - name: deploy autoscaler
         run: |
-          export OPS_FILES="
-            ${AUTOSCALER_DIR}/operations/add-releases.yml \
-            ${AUTOSCALER_DIR}/operations/instance-identity-cert-from-cf.yml \
-            ${AUTOSCALER_DIR}/operations/add-postgres-variables.yml \
-            ${AUTOSCALER_DIR}/operations/enable-nats-tls.yml \
-            ${AUTOSCALER_DIR}/operations/loggregator-certs-from-cf.yml \
-            ${AUTOSCALER_DIR}/operations/add-extra-plan.yml \
-            ${AUTOSCALER_DIR}/operations/set-release-version.yml \
-            ${AUTOSCALER_DIR}/operations/enable-log-cache.yml \
-            ${AUTOSCALER_DIR}/operations/log-cache-syslog-server.yml"
-          ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
-
-      - name: register autoscaler broker
-        run: ${CI_DIR}/autoscaler/scripts/register-broker.sh
+          cd ${{ env.AUTOSCALER_DIR }}
+          make deployment BUILDIN_MODE=${{ env.BUILDIN_MODE }}
 
   acceptance_test_api:
     needs: [ deploy_autoscaler ]
@@ -117,7 +104,8 @@ jobs:
       - name: run acceptance test - api
         run: |
           export SUITES="api"
-          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+          cd ${{ env.AUTOSCALER_DIR }}
+          make acceptance-tests BUILDIN_MODE=${{ env.BUILDIN_MODE }}
 
   acceptance_test_app:
     needs: [ deploy_autoscaler ]
@@ -134,8 +122,8 @@ jobs:
       - name: run acceptance test - app
         run: |
           export SUITES="app"
-          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
-
+          cd ${{ env.AUTOSCALER_DIR }}
+          make acceptance-tests BUILDIN_MODE=${{ env.BUILDIN_MODE }}
   acceptance_test_broker:
     needs: [ deploy_autoscaler ]
     name: "Broker acceptance tests"
@@ -151,7 +139,8 @@ jobs:
       - name: run acceptance tests - broker
         run: |
           export SUITES="broker"
-          ${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
+          cd ${{ env.AUTOSCALER_DIR }}
+          make acceptance-tests
 
   ### This is a final node to indicate the completion of all the acceptance tests
   completed_run:
@@ -162,6 +151,7 @@ jobs:
       checks: write
     steps:
       - run: |
+          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
           curl -sf -X PATCH \
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
@@ -180,12 +170,15 @@ jobs:
       - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
-      - run: "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
+      - run: |
+          cd ${{ env.AUTOSCALER_DIR }}
+          make deployment-cleanup BUILDIN_MODE=${{ env.BUILDIN_MODE }}
+
 
   report_result:
     needs: [ completed_run ]
     if: ${{ always() }}
-    name: Acceptance Tests Result
+    name: Acceptance Tests Result (Broker)
     runs-on: ubuntu-latest
     permissions:
       checks: read
@@ -193,6 +186,8 @@ jobs:
     steps:
       - name: Retrieve and assume last acceptance test result
         run: |
+          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
+
           echo "::group::Getting the latest acceptance test result"
           set -eo pipefail
           echo "Getting the last result"
