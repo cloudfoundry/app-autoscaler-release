@@ -40,9 +40,11 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
+  bosh_deploy_args=""
+
   if [[ $bosh_fix_releases == "true" ]]; then
     bosh_fix_releases="${BOSH_FIX_RELEASES:-true}"
-    bosh_deploy_args="$bosh_args --fix-releases"
+    bosh_deploy_args="$bosh_deploy_args --fix-releases"
   fi
 
   echo " - Deploy args: '${bosh_deploy_args}'"
