@@ -2,13 +2,17 @@
 # shellcheck disable=SC2086
 set -euo pipefail
 
+# shellcheck disable=SC2153
+echo "STATE PATH ${BBL_STATE_PATH}"
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
+system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
+buildin_mode="${BUILDIN_MODE:-false}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 deployment_manifest="${script_dir}/../../../templates/app-autoscaler.yml"
+bosh_fix_releases="${BOSH_FIX_RELEASES:-false}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
@@ -18,6 +22,15 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/set-release-version.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
  ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
+
+if [[ ! -d ${BBL_STATE_PATH} ]]; then
+  echo "FAILED: Did not find bbl-state folder at ${BBL_STATE_PATH}"
+  echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
+  exit 1;
+  fi
+
+if [[ ${buildin_mode} == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
+
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
 
@@ -39,10 +52,20 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
+  bosh_deploy_args=""
+
+  if [[ $bosh_fix_releases == "true" ]]; then
+    bosh_fix_releases="${BOSH_FIX_RELEASES:-true}"
+    bosh_deploy_args="$bosh_deploy_args --fix-releases"
+  fi
+
+  echo " - Deploy args: '${bosh_deploy_args}'"
+
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
     deploy "$deployment_manifest" \
     ${OPS_FILES_TO_USE} \
+    ${bosh_deploy_args} \
     -v system_domain="${system_domain}" \
     -v deployment_name="${deployment_name}" \
     -v app_autoscaler_version="${bosh_release_version}" \
