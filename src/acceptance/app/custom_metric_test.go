@@ -6,9 +6,10 @@ import (
 	"os"
 	"time"
 
-	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gexec"
 )
 
 var _ = Describe("AutoScaler custom metrics policy", func() {
@@ -30,6 +31,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			fmt.Println("Skipping Teardown...")
 		} else {
+			Eventually(cf.Cf("logs", appName, "--recent"), cfg.DefaultTimeoutDuration()).Should(Exit())
 			DeletePolicy(appName, appGUID)
 			if !cfg.IsServiceOfferingEnabled() {
 				helpers.DeleteCustomMetricCred(cfg, appGUID)
@@ -61,7 +63,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 			By("adding policy so test_metric is allowed")
 			policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 			By("sending metric via mtls endpoint")
-			cfh.CurlAppWithTimeout(cfg, appName, "/custom-metrics/mtls/test_metric/10", 10*time.Second, "-f")
+			cf.Cf("curl", "/custom-metrics/mtls/test_metric/10", "-f").Wait(cfg.DefaultTimeoutDuration())
 		})
 	})
 })

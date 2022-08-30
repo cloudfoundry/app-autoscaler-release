@@ -14,6 +14,13 @@ suites=${SUITES:-"api app broker"}
 gingko_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
 
+if [[ ! -d ${BBL_STATE_PATH} ]]; then
+  echo "FAILED: Did not find bbl-state folder at ${BBL_STATE_PATH}"
+  echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
+  exit 1;
+  fi
+
+
 pushd "${bbl_state_path}"
   eval "$(bbl print-env)"
 popd
@@ -52,6 +59,28 @@ done
 
 echo "Running $suites_to_run"
 
+echo -e "\n>> ACCEPTANCE TEST ENV VARS:"
+at_vars=(
+system_domain
+deployment_name
+bbl_state_path
+autoscaler_dir
+skip_teardown
+skip_ssl_validation
+name_prefix
+BUILDIN_MODE
+service_offering_enabled
+suites
+gingko_opts
+nodes
+)
+
+for var in "${at_vars[@]}"; do
+  echo "$var: ${!var}"
+  done
+echo
+
+#run suites
 if [ "${suites_to_run}" != "" ]; then
   SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$gingko_opts" "${suites_to_run}"
 else
