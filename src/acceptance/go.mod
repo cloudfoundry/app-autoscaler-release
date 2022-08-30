@@ -7,7 +7,7 @@ go 1.18
 require (
 	github.com/KevinJCross/cf-test-helpers/v2 v2.0.0
 	github.com/onsi/ginkgo/v2 v2.1.4
-	github.com/onsi/gomega v1.20.0
+	github.com/onsi/gomega v1.20.1
 	github.com/stretchr/testify v1.8.0
 )
 

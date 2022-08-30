@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-system_domain="${SYSTEM_DOMAIN:-autoscaler.ci.cloudfoundry.org}"
+system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 service_broker_name="${deployment_name}servicebroker"
 autoscaler_root=${AUTOSCALER_DIR:-app-autoscaler-release}
