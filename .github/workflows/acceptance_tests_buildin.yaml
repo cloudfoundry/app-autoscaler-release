@@ -21,7 +21,6 @@ env:
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
 
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -44,7 +43,9 @@ jobs:
     permissions:
       checks: write
     steps:
-      - run: echo "sha is ${{github.event.pull_request.head.sha}}"
+      - env:
+          PR_SHA: "${{github.event.pull_request.head.sha}}"
+        run: echo "sha is ${PR_SHA}"
       - run: |
           [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
 
@@ -131,7 +132,8 @@ jobs:
 
   ### This is a final node to indicate the completion of all the acceptance tests
   completed_run:
-    needs: [ start_pending_result, acceptance_test_app, acceptance_test_api ]
+    # Relying on transitivity in github-actions did not work reliably in the past, so we add everything:
+    needs: [ start_pending_result, deploy_autoscaler, acceptance_test_app, acceptance_test_api ]
     name: Posting test result
     runs-on: ubuntu-latest
     permissions:
@@ -160,7 +162,6 @@ jobs:
       - run: |
           cd ${{ env.AUTOSCALER_DIR }}
           make deployment-cleanup BUILDIN_MODE=${{ env.BUILDIN_MODE }}
-
 
   report_result:
     needs: [ completed_run ]
