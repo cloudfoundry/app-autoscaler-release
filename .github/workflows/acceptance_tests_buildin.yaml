@@ -165,7 +165,7 @@ jobs:
   report_result:
     needs: [ completed_run ]
     if: ${{ always() }}
-    name: Acceptance Tests Result
+    name: Acceptance Tests Result (Buildin)
     runs-on: ubuntu-latest
     permissions:
       checks: read
