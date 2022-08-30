@@ -21,7 +21,6 @@ env:
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
 
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -43,8 +42,11 @@ jobs:
       check_id: ${{ steps.create_check.outputs.check_id }}
     permissions:
       checks: write
+    env:
+      PR_SHA: "${{github.event.pull_request.head.sha}}"
+      GH_RUN_ID: "${{ github.run_id }}"
     steps:
-      - run: echo "sha is ${{github.event.pull_request.head.sha}}"
+      - run: echo "sha is ${PR_SHA}"
       - run: |
           [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
 
@@ -55,7 +57,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs" \
-            -d '{ "name": "${{env.check_name}}","head_sha": "${{ github.event.pull_request.head.sha }}","status": "in_progress","external_id": "${{ github.run_id }}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${{ github.event.pull_request.head.sha }}","text":"Awaiting test result" }}' \
+            -d '{ "name": "${{env.check_name}}","head_sha": "${PR_SHA}","status": "in_progress","external_id": "${GH_RUN_ID}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${PR_SHA}","text":"Awaiting test result" }}' \
             -o new_check.json
 
           id=$(jq -r '.id' new_check.json)
@@ -131,7 +133,8 @@ jobs:
 
   ### This is a final node to indicate the completion of all the acceptance tests
   completed_run:
-    needs: [ start_pending_result, acceptance_test_app, acceptance_test_api ]
+    # Relying on transitivity in github-actions did not work reliably in the past, so we add everything:
+    needs: [ start_pending_result, deploy_autoscaler, acceptance_test_app, acceptance_test_api ]
     name: Posting test result
     runs-on: ubuntu-latest
     permissions:
@@ -161,7 +164,6 @@ jobs:
           cd ${{ env.AUTOSCALER_DIR }}
           make deployment-cleanup BUILDIN_MODE=${{ env.BUILDIN_MODE }}
 
-
   report_result:
     needs: [ completed_run ]
     if: ${{ always() }}
@@ -172,6 +174,8 @@ jobs:
       actions: read
     steps:
       - name: Retrieve and assume last acceptance test result
+        env:
+          PR_SHA: "${{github.event.pull_request.head.sha}}"
         run: |
           [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
 
@@ -181,7 +185,7 @@ jobs:
           curl -sf  -H "Accept: application/vnd.github+json" \
             --retry 5 \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${PR_SHA}/check-runs" \
             | jq '[.check_runs[] | select(.name=="${{env.check_name}}")]' > results.json
           jq '.|last' results.json > latest_result.json
           check_suite=$( jq '.check_suite.id' latest_result.json )
@@ -195,7 +199,7 @@ jobs:
 
           echo "::group::Check Info"
           echo "Latest check id:${id}"
-          echo "Number of checks for commit ${{ github.event.pull_request.head.sha }} ${number_of_checks}"
+          echo "Number of checks for commit ${PR_SHA} ${number_of_checks}"
           echo "Conclustion of check: ${conclusion}"
           echo "::endgroup::"
 
@@ -210,7 +214,7 @@ jobs:
             echo
             echo "List of the failed checks:"
             echo "=========================="
-            curl -sf --retry 5 "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
+            curl -sf --retry 5 "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${PR_SHA}/check-runs" \
                 |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match(".*acceptance tests")) | " - \(.name): \(.html_url)"'
             echo "=========================="
             exit 1
