@@ -7,6 +7,7 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
+buildin_mode="${BUILDIN_MODE:-false}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 deployment_manifest="${script_dir}/../../../templates/app-autoscaler.yml"
 bosh_fix_releases="${BOSH_FIX_RELEASES:-false}"
@@ -19,6 +20,15 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/set-release-version.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
  ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
+
+if [[ ! -d ${bbl_state_path} ]]; then
+  echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
+  echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
+  exit 1;
+  fi
+
+if [[ ${buildin_mode} == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
+
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
 
@@ -40,9 +50,11 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
+  bosh_deploy_args=""
+
   if [[ $bosh_fix_releases == "true" ]]; then
     bosh_fix_releases="${BOSH_FIX_RELEASES:-true}"
-    bosh_deploy_args="$bosh_args --fix-releases"
+    bosh_deploy_args="$bosh_deploy_args --fix-releases"
   fi
 
   echo " - Deploy args: '${bosh_deploy_args}'"
