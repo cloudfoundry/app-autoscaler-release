@@ -16,11 +16,16 @@ import (
 )
 
 type cfResourceObject struct {
+	Pagination struct {
+		TotalPages int    `json:"total_pages"`
+		Next       string `json:"next"`
+	} `json:"pagination"`
 	Resources []struct {
 		GUID      string `json:"guid"`
 		CreatedAt string `json:"created_at"`
 		Name      string `json:"name"`
 		Username  string `json:"username"`
+		State     string `json:"state"`
 	} `json:"resources"`
 }
 
