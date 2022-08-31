@@ -374,6 +374,9 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: cf-deployment-concourse-tasks
+    - get: ci
+  - task: check-for-exisiting-deployments
+    file: ci/ci/autoscaler/tasks/check-for-existing-deployments.yml
   - task: destroy-infrastructure
     file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
     params:
@@ -466,7 +469,7 @@ jobs:
     output_mapping:
       release: app-autoscaler-release-main
   - task: deploy-autoscaler
-    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+    file: ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *acceptance-main-env
       <<: *app-autoscaler-ops-files
