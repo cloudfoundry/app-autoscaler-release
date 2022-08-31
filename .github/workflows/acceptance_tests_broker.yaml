@@ -14,7 +14,7 @@ env:
   SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
-  GINKGO_OPTS: "${{ env.GINKGO_OPTS }}"
+  GINKGO_OPTS: "--fail-fast"
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
@@ -171,7 +171,6 @@ jobs:
       - run: |
           cd ${{ env.AUTOSCALER_DIR }}
           make deployment-cleanup
-
 
   report_result:
     needs: [ completed_run ]
