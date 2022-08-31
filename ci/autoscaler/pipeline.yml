@@ -374,6 +374,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: cf-deployment-concourse-tasks
+    - get: ci
   - task: check-for-exisiting-deployments
     file: ci/ci/autoscaler/tasks/check-existing-deployments.yml
   - task: destroy-infrastructure
