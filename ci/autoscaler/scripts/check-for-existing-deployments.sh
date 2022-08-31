@@ -2,9 +2,11 @@
 # shellcheck disable=SC2086
 set -euo pipefail
 
+DEBUG="${DEBUG:-}"
+bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
+
 [ -n "${DEBUG}" ] && set -x
 
-bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 
 
 pushd "${bbl_state_path}" > /dev/null
