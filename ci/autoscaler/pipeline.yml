@@ -376,7 +376,7 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: ci
   - task: check-for-exisiting-deployments
-    file: ci/ci/autoscaler/tasks/check-existing-deployments.yml
+    file: ci/ci/autoscaler/tasks/check-for-existing-deployments.yml
   - task: destroy-infrastructure
     file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
     params:
