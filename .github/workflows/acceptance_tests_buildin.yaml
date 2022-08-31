@@ -55,7 +55,7 @@ jobs:
         id: create_check
         run: |
           # Checking run under ACT with override option
-          eval ${ACT_RUN}
+          eval ${{ env.ACT_RUN }}
 
           echo "::group::Creating new check"
           curl -vf -POST \
@@ -159,7 +159,7 @@ jobs:
     steps:
       - run: |
           # Checking run under ACT with override option
-          eval ${ACT_RUN}
+          eval ${{ env.ACT_RUN }}
 
           curl -sf -X PATCH \
             --retry 5 \
@@ -198,7 +198,7 @@ jobs:
           PR_SHA: "${{github.event.pull_request.head.sha}}"
         run: |
           # Checking run under ACT with override option
-          eval ${ACT_RUN}
+          eval ${{ env.ACT_RUN }}
 
           echo "::group::Getting the latest acceptance test result"
           set -eo pipefail
