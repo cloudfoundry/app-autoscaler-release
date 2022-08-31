@@ -271,8 +271,7 @@ deployment: update uaac
 
 .PHONY: acceptance-tests
 acceptance-tests:
-	@export GINKGO_OPTS="--fail-fast";\
-	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
 .PHONY: deployment-cleanup

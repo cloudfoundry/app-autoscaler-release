@@ -17,6 +17,7 @@ env:
   SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
+  GINKGO_OPTS: "${{ env.GINKGO_OPTS }}"
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
@@ -92,7 +93,7 @@ jobs:
       - name: deploy autoscaler
         run: |
           cd ${{ env.AUTOSCALER_DIR }}
-          make deployment BUILDIN_MODE=${{ env.BUILDIN_MODE }}
+          make deployment
 
   acceptance_test_api:
     needs: [ deploy_autoscaler ]
@@ -108,9 +109,8 @@ jobs:
 
       - name: run acceptance test - api
         run: |
-          export SUITES="api"
           cd ${{ env.AUTOSCALER_DIR }}
-          make acceptance-tests BUILDIN_MODE=${{ env.BUILDIN_MODE }}
+          make acceptance-tests SUITES="api"
 
   acceptance_test_app:
     needs: [ deploy_autoscaler ]
@@ -126,9 +126,20 @@ jobs:
 
       - name: run acceptance test - app
         run: |
-          export SUITES="app"
-          cd ${{ env.AUTOSCALER_DIR }}
-          make acceptance-tests BUILDIN_MODE=${{ env.BUILDIN_MODE }}
+         cd ${{ env.AUTOSCALER_DIR }}
+         make acceptance-tests SUITES="app"
+
+  acceptance_test_broker:
+    needs: [ deploy_autoscaler ]
+    name: "Broker acceptance tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+        with:
+          ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
 
   ### This is a final node to indicate the completion of all the acceptance tests
@@ -162,7 +173,8 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - run: |
           cd ${{ env.AUTOSCALER_DIR }}
-          make deployment-cleanup BUILDIN_MODE=${{ env.BUILDIN_MODE }}
+          make deployment-cleanup
+
 
   report_result:
     needs: [ completed_run ]
