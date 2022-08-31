@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  start_pending_result:
+  start_pending_check:
     # if open and synchronised events happen just check if it has the label
     #  or if label event and has the correct label added we might be able to just remove this
     if: |
@@ -37,7 +37,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Post pending Acceptance test result
+    name: Post pending Acceptance test check
     runs-on: ubuntu-latest
     outputs:
       check_id: ${{ steps.create_check.outputs.check_id }}
@@ -47,8 +47,11 @@ jobs:
       PR_SHA: "${{github.event.pull_request.head.sha}}"
       GH_RUN_ID: "${{ github.run_id }}"
     steps:
-      - run: echo "sha is ${PR_SHA}"
-      - run: |
+      - name: Print out PR_SHA
+        run: echo "sha is ${PR_SHA}"
+      - name: Adding initial pending acceptance test check
+        id: create_check
+        run: |
           [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
 
           echo "::group::Creating new check"
@@ -73,8 +76,6 @@ jobs:
 
           echo "Id is: ${id}"
           echo "::set-output name=check_id::${id}"
-        id: create_check
-        name: Adding initial pending acceptance test result
 
   #Note: All the tests that can fail and should be reported in the error result need to end with "acceptance tests" to enable filtering of the checks.
   deploy_autoscaler:
