@@ -9,6 +9,8 @@ autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 skip_teardown="${SKIP_TEARDOWN:-false}"
 skip_ssl_validation="${SKIP_SSL_VALIDATION:-true}"
 name_prefix="${NAME_PREFIX:-ASATS}"
+# shellcheck disable=SC2034
+buildin_mode="${BUILDIN_MODE:-false}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
 suites=${SUITES:-"api app broker"}
 gingko_opts="${GINKGO_OPTS:-}"
@@ -68,7 +70,7 @@ autoscaler_dir
 skip_teardown
 skip_ssl_validation
 name_prefix
-BUILDIN_MODE
+buildin_mode
 service_offering_enabled
 suites
 gingko_opts
