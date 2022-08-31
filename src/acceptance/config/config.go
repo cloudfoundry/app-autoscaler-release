@@ -68,8 +68,8 @@ type Config struct {
 	CPUUpperThreshold int64 `json:"cpu_upper_threshold"`
 
 	// For bechmark test
-	AppCount          int `json:"app_count"`
-	PercentageToScale int `json:"app_count"`
+	BenchmarkAppCount          int `json:"benchmark_app_count"`
+	BenchmarkPercentageToScale int `json:"benchmark_app_percentage_to_scale"`
 }
 
 var defaults = Config{
@@ -101,7 +101,8 @@ var defaults = Config{
 
 
 	// For benchmark
-	AppCount: 1,
+	BenchmarkAppCount: 10,
+	BenchmarkPercentageToScale: 30,
 }
 
 func LoadConfig(t *testing.T) *Config {

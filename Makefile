@@ -308,23 +308,27 @@ deploy-cleanup:
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
+.PHONY: setup-benchmark
+setup-benchmark:
+	export GINKGO_OPTS="-v";\
+	export NAME_PREFIX="autoscaler-test";\
+	export SKIP_TEARDOWN=true;\
+	export NODES=1;\
+	export DEPLOYMENT_NAME="app-autoscaler-test";\
+	export SUITES="setup_benchmark";\
+	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
+
 .PHONY: run-benchmark
-export BBL_STATE_PATH?=../app-autoscaler-env-bbl-state/bbl-state
-export AUTOSCALER_DIR=${PWD}
-export DEPLOYMENT_NAME?=app-autoscaler-test
-export NAME_PREFIX?=autoscaler-test
 run-benchmark:
-	@echo " - Running acceptance tests SUITES=${ACCEPTANCE_SUITES}"
-	[ -d ${BBL_STATE_PATH} ] || { echo "Did not find bbl-state folder at ${BBL_STATE_PATH}, make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH"; exit 1; }
-	NAME_PREFIX="autoscaler-test"\
- 	 BBL_STATE_PATH="${BBL_STATE_PATH}"\
- 	 AUTOSCALER_DIR="${PWD}"\
- 	 SUITES="setup_benchmark"\
- 	 SKIP_TEARDOWN=true\
- 	 NODES=1\
- 	 DEPLOYMENT_NAME="${DEPLOYMENT_NAME}"\
- 	 GINKGO_OPTS="${OPTS}"\
- 	    ./ci/autoscaler/scripts/run-acceptance-tests.sh
+	export GINKGO_OPTS="-v";\
+	export NAME_PREFIX="autoscaler-test";\
+	export SKIP_TEARDOWN=true;\
+	export NODES=1;\
+	export DEPLOYMENT_NAME="app-autoscaler-test";\
+	export SUITES="run_benchmark";\
+	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
 .PHONY: package-specs
 package-specs: mod-tidy vendor
