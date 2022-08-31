@@ -16,13 +16,29 @@ import (
 )
 
 func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
-	var apps cfResourceObject
-	rawApps := cf.Cf("curl", "/v3/apps?space_guids="+spaceGuid+"&organization_guids="+orgGuid).Wait(cfg.DefaultTimeoutDuration())
-	Expect(rawApps).To(Exit(0), "unable to get apps")
-	err := json.Unmarshal(rawApps.Out.Contents(), &apps)
-	Expect(err).ShouldNot(HaveOccurred())
+	totalPages := 1
+	var apps []string
 
-	return filterByPrefix(prefix, getNames(apps))
+	for page := 1; page <= totalPages; page++ {
+		var appsResponse = getRawAppsByPage(spaceGuid, orgGuid, page, cfg.DefaultTimeoutDuration())
+		totalPages = appsResponse.Pagination.TotalPages
+		apps = append(apps, filterByPrefix(prefix, getNames(appsResponse))...)
+	}
+
+	return apps
+}
+
+func getRawAppsByPage(spaceGuid string, orgGuid string, page int, timeout time.Duration) cfResourceObject {
+	var appsResponse cfResourceObject
+	rawApps := cf.Cf("curl", "/v3/apps?space_guids="+spaceGuid+"&organization_guids="+orgGuid+"&page="+strconv.Itoa(page)).Wait(timeout)
+	Expect(rawApps).To(Exit(0), "unable to get apps")
+	err := json.Unmarshal(rawApps.Out.Contents(), &appsResponse)
+	Expect(err).ShouldNot(HaveOccurred())
+	return appsResponse
+}
+
+func GetRunningApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
+	return []string{}
 }
 
 func DeleteApps(cfg *config.Config, apps []string, threshold int) {
@@ -45,14 +61,19 @@ func StartApp(appName string, timeout time.Duration) bool {
 }
 
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
+	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
 	By("Creating test app")
+	CreateTestAppByName(*cfg, appName, initialInstanceCount)
+	return appName
+}
+
+func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
 
 	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
 	if cfg.GetSkipSSLValidation() {
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
 	}
 
-	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
 	countStr := strconv.Itoa(initialInstanceCount)
 	createApp := cf.Cf("push",
 		"--var", "app_name="+appName,
@@ -71,7 +92,6 @@ func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int)
 	}
 	Expect(createApp).To(Exit(0), "failed creating app")
 
-	return appName
 }
 
 func DeleteTestApp(appName string, timeout time.Duration) {
