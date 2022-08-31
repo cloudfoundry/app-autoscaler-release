@@ -1,0 +1,27 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1661784240,
+        "narHash": "sha256-A35dhQV1ifZNiXcFpZlzvzSDvEhS+5HFFLrXaCr6nxU=",
+        "owner": "joergdw",
+        "repo": "nixpkgs",
+        "rev": "a19155d1cf4ea6a9b522e0c653bff1b897a19631",
+        "type": "github"
+      },
+      "original": {
+        "owner": "joergdw",
+        "ref": "rubyPackages.cf-uaac",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
