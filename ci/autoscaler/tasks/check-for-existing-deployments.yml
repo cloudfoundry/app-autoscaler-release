@@ -11,6 +11,7 @@ params:
 
 inputs:
 - name: bbl-state
+- name: ci
 
 outputs:
 
