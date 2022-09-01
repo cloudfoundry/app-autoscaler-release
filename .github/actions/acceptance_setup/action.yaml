@@ -28,7 +28,7 @@ runs:
         key: ${{ runner.os }}-deploy_cli-${{ hashFiles( '${{ env.AUTOSCALER_DIR }}/.github/workflows/install_cli.sh' ) }}
 
     - name: Install deployment ClIs
-      shell: bash      
+      shell: bash
       run: "${AUTOSCALER_DIR}/.github/workflows/install_cli.sh"
 
     - name: clone BBL repo

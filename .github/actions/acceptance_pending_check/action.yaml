@@ -15,6 +15,7 @@ runs:
     id: create_check
     shell: bash
     env:
+      ACT_RUN: 'if [ "${ACT}" ] && [ "${ACT_OVERRIDE:-"false"}" == "false" ]; then echo "NOTICE: step is running via ACT - skipping"; exit 0; fi;'
       PR_SHA: "${{github.event.pull_request.head.sha}}"
       GH_RUN_ID: "${{ github.run_id }}"
       github_token: ${{ github.token }}
@@ -57,67 +58,3 @@ runs:
       echo "Id is: ${id}"
       echo "::set-output name=check_id::${id}"
 
-
-
-  # start_pending_check:
-  #   # if open and synchronised events happen just check if it has the label
-  #   #  or if label event and has the correct label added we might be able to just remove this
-  #   if: |
-  #     ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
-  #         && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
-  #     ) ||
-  #     (  ( github.event.action == 'labeled' )
-  #         && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
-  #     )
-  #   name: Post pending Acceptance test check
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     check_id: ${{ steps.create_check.outputs.check_id }}
-  #   permissions:
-  #     checks: write
-  #   env:
-  #     PR_SHA: "${{github.event.pull_request.head.sha}}"
-  #     GH_RUN_ID: "${{ github.run_id }}"
-  #     github_token: ${{ secrets.GITHUB_TOKEN }}
-  #   steps:
-  #     - name: Print out PR_SHA
-  #       run: echo "sha is ${PR_SHA}"
-  #     - name: Adding initial pending acceptance test check
-  #       id: create_check
-  #       run: |
-  #         # Checking run under ACT with override option
-  #         eval "${ACT_RUN}"
-
-  #         echo "::group::Creating new check"
-  #         curl -vf -POST \
-  #           --retry 5 \
-  #           -H "Accept: application/vnd.github+json" \
-  #           -H "Authorization: token ${github_token}" \
-  #           "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs" \
-  #           -d '
-  #             {
-  #               "name":        "${{env.check_name}}",
-  #               "head_sha":    "${{env.PR_SHA}}",
-  #               "status":      "in_progress",
-  #               "external_id": "${{env.GH_RUN_ID}}",
-  #               "output": {
-  #                           "title":   "Acceptance Test running",
-  #                           "summary": "acceptance tests for commit ${{env.PR_SHA}}",
-  #                           "text":    "Awaiting test result"
-  #               }
-  #             }
-  #           ' \
-  #           -o new_check.json
-
-  #         id=$(jq -r '.id' new_check.json)
-
-  #         if [ -z "${id}" ]; then
-  #           echo "ERROR: Failed to create the required check job"
-  #           echo "Result of curl:"
-  #           cat new_check.json
-  #           exit 1
-  #         fi
-  #         echo "::endgroup::"
-
-  #         echo "Id is: ${id}"
-  #         echo "::set-output name=check_id::${id}"
