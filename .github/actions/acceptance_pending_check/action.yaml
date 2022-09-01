@@ -4,9 +4,6 @@ inputs:
   github_token:
     description: "GitHub-token to access the repository"
     required: true
-#   pr_sha:
-#     description: 'git-SHA of the currently most recent commit of the handeled PR'
-#     required: true
 outputs:
   check_id:
     description: "ID of the created check" 
@@ -20,7 +17,7 @@ runs:
     env:
       PR_SHA: "${{github.event.pull_request.head.sha}}"
       GH_RUN_ID: "${{ github.run_id }}"
-#      github_token: ${{ secrets.GITHUB_TOKEN }}
+      github_token: ${{ github.token }}
     run: |
       # Checking run under ACT with override option
       eval "${ACT_RUN}"
