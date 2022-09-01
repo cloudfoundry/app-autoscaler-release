@@ -38,7 +38,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Post pending Acceptance test check
+    name: Post pending test check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -52,7 +52,7 @@ jobs:
   #Note: All the tests that can fail and should be reported in the error result need to end with "acceptance tests" to enable filtering of the checks.
   deploy_autoscaler:
     needs: [ acceptance_pending_check ]
-    name: "Deploy for acceptance tests"
+    name: Deploy autoscaler
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -61,8 +61,6 @@ jobs:
       - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
-      # TODO: When removing metricserver and metricgateway merge enable-log-cache.yml into the default templates/app-autoscaler.yml manifest.
       - name: deploy autoscaler
         run: |
           echo ">> WIP: exiting early"; exit 0
@@ -71,7 +69,7 @@ jobs:
 
   acceptance_test_api:
     needs: [ deploy_autoscaler ]
-    name: "API acceptance tests"
+    name: API acceptance tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -80,7 +78,6 @@ jobs:
       - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
       - name: run acceptance test - api
         run: |
           echo ">> WIP: exiting early"; exit 0
@@ -89,7 +86,7 @@ jobs:
 
   acceptance_test_app:
     needs: [ deploy_autoscaler ]
-    name: "APP acceptance tests"
+    name: APP acceptance tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -98,7 +95,6 @@ jobs:
       - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
       - name: run acceptance test - app
         run: |
          echo ">> WIP: exiting early"; exit 0
@@ -109,7 +105,7 @@ jobs:
   acceptance_completion_check:
     # Relying on transitivity in github-actions did not work reliably in the past, so we add everything:
     needs: [ acceptance_pending_check, deploy_autoscaler, acceptance_test_app, acceptance_test_api ]
-    name: Submit success conclusion
+    name: Submit run conclusion
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -153,7 +149,7 @@ jobs:
   report_result:
     needs: [ acceptance_completion_check ]
     if: ${{ always() }}
-    name: Acceptance Tests Result (Buildin)
+    name: Report Tests Result (Buildin)
     runs-on: ubuntu-latest
     permissions:
       checks: read
