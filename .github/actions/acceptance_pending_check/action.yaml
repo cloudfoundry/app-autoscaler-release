@@ -6,7 +6,7 @@ inputs:
     required: true
 outputs:
   check_id:
-    description: "ID of the created check" 
+    description: "ID of the created check"
     value: ${{ steps.create_check.outputs.check_id }}
 runs:
   using: 'composite'

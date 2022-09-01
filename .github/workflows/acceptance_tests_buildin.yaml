@@ -58,13 +58,14 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
       # TODO: When removing metricserver and metricgateway merge enable-log-cache.yml into the default templates/app-autoscaler.yml manifest.
       - name: deploy autoscaler
         run: |
+          echo ">> WIP: exiting early"; exit 0
           cd ${{ env.AUTOSCALER_DIR }}
           make deployment
 
@@ -76,12 +77,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
       - name: run acceptance test - api
         run: |
+          echo ">> WIP: exiting early"; exit 0
           cd ${{ env.AUTOSCALER_DIR }}
           make acceptance-tests SUITES="api"
 
@@ -93,12 +95,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
       - name: run acceptance test - app
         run: |
+         echo ">> WIP: exiting early"; exit 0
          cd ${{ env.AUTOSCALER_DIR }}
          make acceptance-tests SUITES="app"
 
@@ -139,7 +142,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+      - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - run: |
