@@ -138,19 +138,6 @@ jobs:
          cd ${{ env.AUTOSCALER_DIR }}
          make acceptance-tests SUITES="app"
 
-  acceptance_test_broker:
-    needs: [ deploy_autoscaler ]
-    name: "Broker acceptance tests"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
-
   ### This is a final node to indicate the completion of all the acceptance tests
   completed_run:
     # Relying on transitivity in github-actions did not work reliably in the past, so we add everything:
