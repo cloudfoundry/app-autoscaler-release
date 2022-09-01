@@ -313,7 +313,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make pre-release
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -463,7 +463,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make pre-release
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -529,7 +529,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make pre-release
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -623,7 +623,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make pre-release
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -659,7 +659,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make pre-release
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:

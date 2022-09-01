@@ -48,7 +48,7 @@ jobs:
         run: |
           set -e
           export PATH=$PATH:/usr/local/maven/bin
-          ./scripts/update
+          make pre-release
 
       - name: Build Dev Release
         id: build

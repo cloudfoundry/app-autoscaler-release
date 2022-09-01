@@ -226,9 +226,11 @@ spec-test:
 	bundle install
 	bundle exec rspec
 
+.PHONY: pre-release
+pre-release: mod-tidy vendor db scheduler
+
 .PHONY: release
-release:
-	./scripts/update
+release: pre-release
 	bosh create-release --force --timestamp-version --tarball=${name}-${version}.tgz
 
 .PHONY: mod-tidy
@@ -254,10 +256,6 @@ fakes:
 workspace:
 	[ -e go.work ] || go work init
 	go work use $(addprefix ./src/,$(go_modules))
-
-.PHONY: update
-update:
-	./scripts/update
 
 .PHONY: uuac
 uaac:
