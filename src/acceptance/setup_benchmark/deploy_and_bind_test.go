@@ -12,14 +12,13 @@ import (
 
 var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 	var (
-		appName string
+		appName         string
 		runningAppsChan chan string
 	)
 
 	BeforeEach(func() {
 		runningAppsChan = make(chan string, cfg.BenchmarkAppCount)
 		ginkgo.GinkgoWriter.Printf("\nDeploying %d app: \n", cfg.BenchmarkAppCount)
-
 
 		for i := 1; i <= cfg.BenchmarkAppCount; i++ {
 			appName = fmt.Sprintf("node-custom-metric-benchmark-%d", i)
@@ -41,7 +40,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", func() {
-			Eventually(func() int {return len(runningAppsChan)}, 3*time.Minute, 5*time.Second).Should(Equal(cfg.BenchmarkAppCount))
+			Eventually(func() int { return len(runningAppsChan) }, 3*time.Minute, 5*time.Second).Should(Equal(cfg.BenchmarkAppCount))
 		})
 	})
 })
