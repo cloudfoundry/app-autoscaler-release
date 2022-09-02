@@ -17,8 +17,10 @@ import (
 
 type cfResourceObject struct {
 	Pagination struct {
-		TotalPages int    `json:"total_pages"`
-		Next       string `json:"next"`
+		TotalPages int `json:"total_pages"`
+		Next       struct {
+			Href string `json:"href"`
+		} `json:"next"`
 	} `json:"pagination"`
 	Resources []cfResource `json:"resources"`
 }
