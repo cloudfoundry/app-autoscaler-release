@@ -36,6 +36,7 @@ func getRawApps(spaceGuid string, orgGuid string, timeout time.Duration) []cfRes
 
 	for page := 1; page <= totalPages; page++ {
 		var appsResponse = getRawAppsByPage(spaceGuid, orgGuid, page, timeout)
+		GinkgoWriter.Println(appsResponse.Pagination.TotalPages)
 		totalPages = appsResponse.Pagination.TotalPages
 		rawApps = append(rawApps, appsResponse.Resources... )
 	}
