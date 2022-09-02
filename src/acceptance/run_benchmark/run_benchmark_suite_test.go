@@ -1,8 +1,10 @@
-package pre_upgrade_test
+package run_benchmark
 
 import (
 	"acceptance/config"
 	"acceptance/helpers"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
@@ -55,6 +57,12 @@ var _ = BeforeSuite(func() {
 	if cfg.IsServiceOfferingEnabled() {
 		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
+})
 
-
+var _ = AfterSuite(func() {
+	if os.Getenv("SKIP_TEARDOWN") == "true" {
+		fmt.Println("Skipping Teardown...")
+	} else {
+		// TODO: Cleanup test
+	}
 })

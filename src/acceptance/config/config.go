@@ -71,6 +71,7 @@ type Config struct {
 	// For bechmark test
 	BenchmarkAppCount          int `json:"benchmark_app_count"`
 	BenchmarkPercentageToScale int `json:"benchmark_app_percentage_to_scale"`
+	BenchmarkTeardown bool `json:"benchmark_teardown"`
 }
 
 var defaults = Config{
@@ -104,6 +105,7 @@ var defaults = Config{
 	// For benchmark
 	BenchmarkAppCount: 10,
 	BenchmarkPercentageToScale: 30,
+	BenchmarkTeardown: true,
 }
 
 func LoadConfig() *Config {

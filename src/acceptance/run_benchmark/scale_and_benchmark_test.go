@@ -1,4 +1,4 @@
-package pre_upgrade_test
+package run_benchmark
 
 import (
 	"acceptance/helpers"
@@ -43,6 +43,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				By("Scale in to 1 instances")
 				scaleIn := func() int {
 					helpers.SendMetric(cfg, appName, 100)
+					// TODO: Change to autoscaler-app-history event instead of cf running instances.
 					return helpers.RunningInstances(appGUID, 5*time.Second)
 				}
 				Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
@@ -53,9 +54,12 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 		}
 	})
 
+
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", func() {
-			Eventually(len(scaleAppDurationChan) , 10*time.Minute, 5*time.Second).Should(Equal(appsToScaleCount))
+			Eventually(func() int { return len(scaleAppDurationChan) } , 10*time.Minute, 5*time.Second).Should(Equal(appsToScaleCount))
 		})
 	})
+
+
 })
