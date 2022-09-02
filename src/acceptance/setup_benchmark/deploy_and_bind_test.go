@@ -33,18 +33,15 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 				_ = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 				helpers.CreateCustomMetricCred(cfg, appName, appGUID)
 				helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
-				ginkgo.GinkgoWriter.Printf("\n write channel \n")
 				runningAppsChan <- appName
+				ginkgo.GinkgoWriter.Printf("\nRunning apps: %d/%d \n", len(runningAppsChan), cfg.BenchmarkAppCount)
 			}(appName)
 		}
 	})
 
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", func() {
-			Eventually(func() int {
-				ginkgo.GinkgoWriter.Printf("\nChannel len : %d  cap %d \n", len(runningAppsChan),cap(runningAppsChan))
-				return len(runningAppsChan)
-			}, 3*time.Minute, 5*time.Second).Should(Equal(cfg.BenchmarkAppCount))
+			Eventually(func() int {return len(runningAppsChan)}, 3*time.Minute, 5*time.Second).Should(Equal(cfg.BenchmarkAppCount))
 		})
 	})
 })
