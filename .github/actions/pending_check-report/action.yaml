@@ -1,0 +1,82 @@
+name: 'Check-Results-Report'
+description: 'Provides check summary report for jobs in workflow'
+inputs:
+  check_filter:
+    description: "FilterID of the created check (regex)"
+    required: true
+    # Note: All the jobs names that should be reported by 'pending_check-report' action
+    # need to end consistently (ie. "XYZ acceptance tests" in order to utilise correct filtering of checks.
+runs:
+  using: 'composite'
+  steps:
+  - name: Retrieve and assume last check result
+    id: create_check
+    shell: bash
+    env:
+      ACT_RUN: 'if [ "${ACT}" ] && [ "${ACT_OVERRIDE:-"false"}" == "false" ]; then echo "NOTICE: step is running via ACT - skipping"; exit 0; fi;'
+      PR_SHA: "${{github.event.pull_request.head.sha}}"
+      GH_RUN_ID: "${{ github.run_id }}"
+      GITHUB_TOKEN: "${{ github.token }}"
+      GITHUB_REPOSITORY: "${{ github.repository }}"
+      WORKFLOW_NAME: "${{ github.workflow }}"
+      CHECK_FILTER: "${{ inputs.check_filter }}"
+      CHECK_ID: "${{ inputs.check_id }}"
+    run: |
+      # Checking run under ACT with override option
+      eval ${ACT_RUN}
+
+      echo "::group::Getting the latest checks results"
+      set -euo pipefail
+      echo "Getting the last result"
+      curl -sf  -H "Accept: application/vnd.github+json" \
+        --retry 5 \
+        -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
+        "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs" \
+        | jq '[.check_runs[] | select(.name=="${{ env.check_name }}")]' > results.json
+      jq '.|last' results.json > latest_result.json
+
+      check_suite=$( jq '.check_suite.id' latest_result.json )
+      id=$( jq '.id' latest_result.json )
+      conclusion=$( jq -r '.conclusion' latest_result.json )
+      number_of_checks=$(jq '. | length' results.json)
+
+      echo "== Latest ${{env.check_name}} check result =="
+      echo
+      cat latest_result.json
+      echo "::endgroup::"
+
+      echo "::group::Check Info"
+      echo "Latest check id:${id}"
+      echo "Number of checks for commit ${{ env.PR_SHA }} ${number_of_checks}"
+      echo "Conclusion of check: ${conclusion}"
+      echo "::endgroup::"
+
+      if [ ${number_of_checks} -eq 0 ]; then
+        echo "ERROR: no checks have ever run for this commit!"
+        exit 1
+      fi
+
+      if [ "${conclusion}" != "success" ]; then
+
+        echo "::group::Sending failed conclusion to the check"
+          curl -sf -X PATCH \
+            --retry 5 \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs/${id}" \
+            -d '
+              {
+                "name": "${{ env.check_name }}",
+                "conclusion": "failure"
+              }
+            '
+
+        echo "ERROR: List of the failed checks:"
+        echo "=========================="
+        curl -sf --retry 5 "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs" \
+            |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"'
+        echo "=========================="
+
+        exit 1
+
+      fi

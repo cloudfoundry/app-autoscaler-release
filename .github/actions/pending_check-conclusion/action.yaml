@@ -18,6 +18,7 @@ runs:
           # Checking run under ACT with override option
           eval "${ACT_RUN}"
 
+          echo "Sending success conclusion to the check"
           curl -sf -X PATCH \
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
@@ -26,7 +27,6 @@ runs:
             -d '
               {
                 "name": "${{ env.check_name }}",
-                "status": "completed",
                 "conclusion": "success"
               }
             '
