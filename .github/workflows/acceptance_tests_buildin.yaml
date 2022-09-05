@@ -119,12 +119,11 @@ jobs:
           # Checking run under ACT with override option
           eval "${ACT_RUN}"
 
-          echo ">> DEBUG: ${{ acceptance_pending_check.outputs.check.id}}"
           curl -sf -X PATCH \
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${github_token}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs/${check_output}" \
+            -H "Authorization: token ${{ env.github_token }}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs/${{ env.check_output }}" \
             -d '
               {
                 "name": ${{env.check_name}},
