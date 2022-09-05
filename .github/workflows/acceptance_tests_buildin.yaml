@@ -117,7 +117,7 @@ jobs:
         with:
           path: app-autoscaler-release
       - name: "Send succes to awaiting check"
-        uses: ./app-autoscaler-release/.github/actions/pending_check-create
+        uses: ./app-autoscaler-release/.github/actions/pending_check-conclusion
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_id: ${{ needs.acceptance_pending_check.outputs.check_id }}
