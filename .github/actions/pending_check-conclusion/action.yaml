@@ -11,7 +11,7 @@ runs:
     shell: bash
     env:
       ACT_RUN: 'if [ "${ACT}" ] && [ "${ACT_OVERRIDE:-"false"}" == "false" ]; then echo "NOTICE: step is running via ACT - skipping"; exit 0; fi;'
-      github_token: ${{ github.token }}
+      #github_token: ${{ github.token }}
     run: |
           # Checking run under ACT with override option
           eval "${ACT_RUN}"
