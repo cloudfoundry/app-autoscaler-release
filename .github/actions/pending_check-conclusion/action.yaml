@@ -1,9 +1,6 @@
 name: 'Submit succes conclusion'
 description: 'Sends a PATCH payload to an awaiting check'
 inputs:
-  # github_token:
-  #   description: "GitHub-token to access the repository"
-  #   required: true
   check_id:
     description: "ID of the created check"
     required: true
