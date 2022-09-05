@@ -1,0 +1,34 @@
+name: 'Submit succes conclusion'
+description: 'Sends a PATCH payload to an awaiting check'
+inputs:
+  github_token:
+    description: "GitHub-token to access the repository"
+    required: true
+  check_id:
+    description: "ID of the created check"
+    required: true
+runs:
+  using: 'composite'
+  steps:
+  - name: Submit successful check completion
+    shell: bash
+    env:
+      ACT_RUN: 'if [ "${ACT}" ] && [ "${ACT_OVERRIDE:-"false"}" == "false" ]; then echo "NOTICE: step is running via ACT - skipping"; exit 0; fi;'
+      github_token: ${{ github.token }}
+    run: |
+          # Checking run under ACT with override option
+          eval "${ACT_RUN}"
+
+          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
+          curl -sf -X PATCH \
+            --retry 5 \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ env.github_token }}" \
+            "https://api.github.com/repos/${{ github.repository }}/check-runs/${{ env.check_id }}" \
+            -d '
+              {
+                "name": "${{ env.check_name }}",
+                "status": "completed",
+                "conclusion": "success"
+              }
+            '

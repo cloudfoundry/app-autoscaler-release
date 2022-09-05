@@ -50,7 +50,6 @@ jobs:
         uses: ./app-autoscaler-release/.github/actions/pending_check-create
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-        
 
   #Note: All the tests that can fail and should be reported in the error result need to end with "acceptance tests" to enable filtering of the checks.
   deploy_autoscaler:
@@ -113,29 +112,16 @@ jobs:
     needs: [ acceptance_pending_check, deploy_autoscaler, acceptance_test_app, acceptance_test_api ]
     name: Submit run conclusion
     runs-on: ubuntu-latest
-    permissions:
-      checks: write
-    env:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
-      github_repository: ${{ github.repository }}
     steps:
-      - run: |
-          # Checking run under ACT with override option
-          eval "${ACT_RUN}"
+      - uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - name: "Send succes to awaiting check"
+        uses: ./app-autoscaler-release/.github/actions/pending_check-create
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          check_id: ${{ needs.acceptance_pending_check.outputs.check_id }}
 
-          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
-          curl -sf -X PATCH \
-            --retry 5 \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ env.github_token }}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs/${{ needs.acceptance_pending_check.outputs.check_id }}" \
-            -d '
-              {
-                "name": "${{ env.check_name }}",
-                "status": "completed",
-                "conclusion": "success"
-              }
-            '
 
   deployment_cleanup:
     needs: [ acceptance_completion_check ]
