@@ -19,12 +19,11 @@ runs:
           # Checking run under ACT with override option
           eval "${ACT_RUN}"
 
-          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
           curl -sf -X PATCH \
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ env.github_token }}" \
-            "https://api.github.com/repos/${{ github.repository }}/check-runs/${{ env.check_id }}" \
+            -H "Authorization: token ${{ github.token }}" \
+            "https://api.github.com/repos/${{ github.repository }}/check-runs/${{ check.id }}" \
             -d '
               {
                 "name": "${{ env.check_name }}",
