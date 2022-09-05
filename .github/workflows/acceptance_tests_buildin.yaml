@@ -112,13 +112,14 @@ jobs:
     permissions:
       checks: write
     env:
-      check_output: ${{ needs.acceptance_pending_check.outputs.check_id }}
+      check_output: ${{ acceptance_pending_check.outputs.check_id }}
       github_token: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - run: |
           # Checking run under ACT with override option
           eval "${ACT_RUN}"
 
+          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
           curl -sf -X PATCH \
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
