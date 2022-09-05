@@ -7,7 +7,7 @@ outputs:
 runs:
   using: 'composite'
   steps:
-  - name: Adding initial pending acceptance test check
+  - name: Creating the check
     id: create_check
     shell: bash
     env:
@@ -16,6 +16,7 @@ runs:
       GH_RUN_ID: "${{ github.run_id }}"
       GITHUB_TOKEN: "${{ github.token }}"
       GITHUB_REPOSITORY: "${{ github.repository }}"
+      WORKFLOW_NAME: "${{ github.workflow }}"
     run: |
       # Checking run under ACT with override option
       eval "${ACT_RUN}"
@@ -33,9 +34,9 @@ runs:
             "status":      "in_progress",
             "external_id": "${{env.GH_RUN_ID}}",
             "output": {
-                        "title":   "Acceptance Test running",
-                        "summary": "acceptance tests for commit ${{env.PR_SHA}}",
-                        "text":    "Awaiting test result"
+                        "title":   "${{ env.WORKFLOW_NAME }} running",
+                        "summary": "pending check for commit ${{env.PR_SHA}}",
+                        "text":    "Awaiting check result..."
             }
           }
         ' \
