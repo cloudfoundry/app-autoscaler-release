@@ -44,7 +44,7 @@ jobs:
         with:
           path: app-autoscaler-release
       - name: "Create the check"
-        uses: ./app-autoscaler-release/.github/actions/acceptance_pending_check # or ../../actions/acceptance_pending_check
+        uses: ./app-autoscaler-release/.github/actions/pending_check-create
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
