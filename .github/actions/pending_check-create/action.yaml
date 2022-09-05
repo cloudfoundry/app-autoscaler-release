@@ -1,9 +1,5 @@
 name: 'Check-Job-Creation'
 description: 'Creates a github-actions check-job'
-inputs:
-  github_token:
-    description: "GitHub-token to access the repository"
-    required: true
 outputs:
   check_id:
     description: "ID of the created check"
@@ -18,8 +14,8 @@ runs:
       ACT_RUN: 'if [ "${ACT}" ] && [ "${ACT_OVERRIDE:-"false"}" == "false" ]; then echo "NOTICE: step is running via ACT - skipping"; exit 0; fi;'
       PR_SHA: "${{github.event.pull_request.head.sha}}"
       GH_RUN_ID: "${{ github.run_id }}"
-      github_token: ${{ github.token }}
-      github_repository: ${{ github.repository}}
+      GITHUB_TOKEN: "${{ github.token }}"
+      GITHUB_REPOSITORY: "${{ github.repository }}"
     run: |
       # Checking run under ACT with override option
       eval "${ACT_RUN}"
@@ -28,8 +24,8 @@ runs:
       curl -vf -POST \
         --retry 5 \
         -H "Accept: application/vnd.github+json" \
-        -H "Authorization: token ${github_token}" \
-        "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs" \
+        -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
+        "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs" \
         -d '
           {
             "name":        "${{env.check_name}}",

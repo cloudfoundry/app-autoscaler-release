@@ -39,7 +39,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Post pending test check
+    name: Create pending test check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -48,8 +48,6 @@ jobs:
       - name: "Create the check"
         id: create_check
         uses: ./app-autoscaler-release/.github/actions/pending_check-create
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   #Note: All the tests that can fail and should be reported in the error result need to end with "acceptance tests" to enable filtering of the checks.
   deploy_autoscaler:
