@@ -112,7 +112,7 @@ jobs:
     permissions:
       checks: write
     env:
-      check_output: ${{ acceptance_pending_check.outputs.check_id }}
+      check_output: ${{ needs.acceptance_pending_check.outputs.check_id }}
       github_token: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - run: |
