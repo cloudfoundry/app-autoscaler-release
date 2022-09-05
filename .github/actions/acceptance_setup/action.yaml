@@ -29,7 +29,7 @@ runs:
 
     - name: Install deployment ClIs
       shell: bash
-      run: "${AUTOSCALER_DIR}/.github/actions/acceptance_setup/install_cli.sh"
+      run: "${{ github.action_path }}/install_cli.sh"
 
     - name: clone BBL repo
       uses: actions/checkout@v3

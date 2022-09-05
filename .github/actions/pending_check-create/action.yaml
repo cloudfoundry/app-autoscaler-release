@@ -19,10 +19,10 @@ runs:
       PR_SHA: "${{github.event.pull_request.head.sha}}"
       GH_RUN_ID: "${{ github.run_id }}"
       github_token: ${{ github.token }}
+      github_repository: ${{ github.repository}}
     run: |
       # Checking run under ACT with override option
       eval "${ACT_RUN}"
-      echo "sha is ${PR_SHA}"
 
       echo '::group::Creating new check'
       curl -vf -POST \

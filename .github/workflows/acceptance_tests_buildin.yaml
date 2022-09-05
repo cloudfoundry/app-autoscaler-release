@@ -28,6 +28,8 @@ concurrency:
 
 jobs:
   acceptance_pending_check:
+    outputs:
+      check_id: ${{ steps.create_check.outputs.check_id }}
     # if open and synchronised events happen just check if it has the label
     #  or if label event and has the correct label added we might be able to just remove this
     if: |
@@ -44,9 +46,11 @@ jobs:
         with:
           path: app-autoscaler-release
       - name: "Create the check"
+        id: create_check
         uses: ./app-autoscaler-release/.github/actions/pending_check-create
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+        
 
   #Note: All the tests that can fail and should be reported in the error result need to end with "acceptance tests" to enable filtering of the checks.
   deploy_autoscaler:
@@ -112,8 +116,8 @@ jobs:
     permissions:
       checks: write
     env:
-      check_output: ${{ needs.acceptance_pending_check.outputs.check_id }}
       github_token: ${{ secrets.GITHUB_TOKEN }}
+      github_repository: ${{ github.repository }}
     steps:
       - run: |
           # Checking run under ACT with override option
@@ -124,10 +128,10 @@ jobs:
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token ${{ env.github_token }}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs/${{ env.check_output }}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs/${{ needs.acceptance_pending_check.outputs.check_id }}" \
             -d '
               {
-                "name": ${{env.check_name}},
+                "name": "${{ env.check_name }}",
                 "status": "completed",
                 "conclusion": "success"
               }
