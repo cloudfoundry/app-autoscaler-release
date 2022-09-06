@@ -2,6 +2,9 @@
 # enable deep monitoring by relying on the rule set-up
 export DT_MONITOR="true"
 
+# set the number of file handles to a sensible 16k(base2)
+max_file_handles=16384
+
 mkdir -p /var/vcap/sys/log
 
 exec > >(tee -a >(logger -p user.info -t vcap.$(basename $0).stdout) | awk -W interactive '{ system("echo -n [$(date +\"%Y-%m-%d %H:%M:%S%z\")]"); print " " $0 }' >>/var/vcap/sys/log/$(basename $0).log)
@@ -84,4 +87,8 @@ kill_and_wait() {
   force=${3:-1}
 
   wait_pidfile $pidfile 1 $timeout $force
+}
+
+set_ulimits(){
+  ulimit -n ${max_file_handles}
 }
