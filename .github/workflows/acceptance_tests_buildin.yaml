@@ -71,7 +71,7 @@ jobs:
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
-        suite: [ API, APP ]
+        suite: [ api, app ]
     runs-on: ubuntu-latest
     name: ${{ matrix.suite }} acceptance tests
     steps:
@@ -84,7 +84,7 @@ jobs:
       #     ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - name: run acceptance test - api
         run: |
-          echo ">> WIP: exiting early"; exit 0
+          echo ">> WIP: exiting early"; exit 1
           cd ${{ env.AUTOSCALER_DIR }}
           make acceptance-tests SUITES="${{ matrix.suite }}"
 
