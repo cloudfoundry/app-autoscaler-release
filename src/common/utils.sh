@@ -91,7 +91,7 @@ kill_and_wait() {
 }
 
 set_ulimits(){
-  #If the defaults of 1024 are set then use our default file limits
+  #Set the minimum file handle limit to $minimum_file_handles
   file_limit=$(ulimit -n)
   if [ "${file_limit}" == "unlimited"  ]; then
      return
