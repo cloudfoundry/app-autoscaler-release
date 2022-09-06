@@ -143,7 +143,7 @@ jobs:
         with:
           path: app-autoscaler-release
       - name: "Create check report"
-        uses: ./app-autoscaler-release/.github/actions/pending_check-report
+        uses: ./app-autoscaler-release/.github/actions/pending_check-finalise
         with:
           check_filter: ".*acceptance tests"
 

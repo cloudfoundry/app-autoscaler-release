@@ -52,7 +52,7 @@ runs:
       echo "::endgroup::"
 
       if [ ${number_of_checks} -eq 0 ]; then
-        echo "ERROR: no checks have ever run for this commit!"
+        echo "ERROR: no checks were found this commit!"
         exit 1
       fi
 
