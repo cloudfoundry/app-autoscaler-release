@@ -71,7 +71,7 @@ jobs:
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
-        suite: [ api, app ]
+        suite: [ API, APP ]
     runs-on: ubuntu-latest
     name: ${{ matrix.suite }} acceptance tests
     steps:
@@ -86,6 +86,7 @@ jobs:
         run: |
           echo ">> WIP: exiting early"; exit 1
           cd ${{ env.AUTOSCALER_DIR }}
+          # TODO: convert SUITES to lower or ginkgo will not find suite to run
           make acceptance-tests SUITES="${{ matrix.suite }}"
 
   acceptance_tests_verify:
