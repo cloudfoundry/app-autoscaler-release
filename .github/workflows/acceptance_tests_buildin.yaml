@@ -32,13 +32,13 @@ jobs:
       check_id: ${{ steps.create_check.outputs.check_id }}
     # Determine if we require to run Acceptance Tests jobs in this workflow by checking relevant events and labels.
     # Finalisation job runs always since we use branch protection rule for acceptance tests.
-    # if: |
-    #   ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
-    #       && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
-    #   ) ||
-    #   (  ( github.event.action == 'labeled' )
-    #       && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
-    #   )
+    if: |
+      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
+      ) ||
+      (  ( github.event.action == 'labeled' )
+          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
+      )
     name: Create workflow check
     runs-on: ubuntu-latest
     steps:
@@ -71,7 +71,7 @@ jobs:
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
-        suite: [ API, APP, FOO, BAR ]
+        suite: [ API, APP ]
     runs-on: ubuntu-latest
     name: ${{ matrix.suite }} acceptance tests
     steps:
