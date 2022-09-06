@@ -27,7 +27,7 @@ runs:
       set -euo pipefail
 
       function send_conclusion() {
-        # https://stackoverflow.com/a/37491820
+      # https://stackoverflow.com/a/37491820
       curl -sf -X PATCH \
           --retry 5 \
           -H "Accept: application/vnd.github+json" \
@@ -67,65 +67,24 @@ runs:
       fi
 
       echo "::group::Retrieving status of jobs (checks_filter: ${{ inputs.check_filter }})"
-      curl -sf --retry 5 "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
-        |  jq '.check_runs[] | select(.conclusion != "success") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"' > bad_jobs.txt
+        curl -sf --retry 5 "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
+           |  jq '.check_runs[] | select(.conclusion != "success") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"' > bad_jobs.txt
       ls -la bad_jobs.txt
       echo "::endgroup::"
 
       if [ -s bad_jobs.txt ]; then
-        echo "::group::Sending failed conclusion to the workflow check"
+        echo "::group::Sending failure conclusion to the workflow check"
+          send_conclusion "failure"
 
         echo "=========================="
-        echo "List of the failed checks:"
+        echo "List of failed checks:"
         cat bad_jobs.txt
         echo "=========================="
         echo "::endgroup::"
         exit 1
       else
         echo "::group::Sending success conclusion to the workflow check"
+          send_conclusion "success"
         echo "::endgroup::"
       fi
-
-#      if [ -s bad_jobs.txt ]; then
-#        echo "::group::Sending failed conclusion to the workflow check"
-#
-#        echo "ERROR: List of the failed checks:"
-#        echo "=========================="
-#        cat bad_jobs.txt
-#        echo "::endgroup::=========================="
-#       exit 1
-#
-#      else
-#         echo "::group::Sending success conclusion to the workflow check"
-#
-#         echo "::endgroup::
-#      fi
-
-
-# if [ -s bad_jobs.txt ]; then
-#    echo "::group::Sending failed conclusion to the workflow check"
-#      curl -sf -X PATCH \
-#        --retry 5 \
-#        -H "Accept: application/vnd.github+json" \
-#        -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
-#        "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs/${id}" \
-#        -d '{ "name": "${{ env.check_name }}", "conclusion": "failure" }'
-
-#   echo "ERROR: List of the failed checks:"
-#   echo "=========================="
-#   cat bad_jobs.txt
-#   echo "=========================="
-#   exit 1
-
-# else
-
-#   echo "::group::Sending success conclusion to the workflow check"
-#     curl -sf -X PATCH \
-#       --retry 5 \
-#       -H "Accept: application/vnd.github+json" \
-#       -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
-#       "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs/${id}" \
-#       -d '{ "name": "${{ env.check_name }}", "conclusion": "success" }' > /dev/null
-# fi
-# echo "::endgroup::
 
