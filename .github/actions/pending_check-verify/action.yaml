@@ -68,7 +68,7 @@ runs:
 
       echo "::group::Retrieving status of jobs (checks_filter: ${{ inputs.check_filter }})"
         curl -sf --retry 5 "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
-           |  jq '.check_runs[] | select(.conclusion != "success") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"' > bad_jobs.txt
+           |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"' > bad_jobs.txt
       ls -la bad_jobs.txt
       echo "::endgroup::"
 

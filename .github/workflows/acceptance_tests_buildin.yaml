@@ -99,7 +99,7 @@ jobs:
         with:
           path: app-autoscaler-release
       - name: "Verify jobs execution"
-        uses: ./app-autoscaler-release/.github/actions/pending_check-finalise
+        uses: ./app-autoscaler-release/.github/actions/pending_check-verify
         with:
           check_filter: ".*acceptance tests"
 
