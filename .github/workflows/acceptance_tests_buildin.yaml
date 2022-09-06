@@ -66,10 +66,14 @@ jobs:
           cd ${{ env.AUTOSCALER_DIR }}
           make deployment
 
-  acceptance_test_api:
+
+  acceptance_tests:
     needs: [ deploy_autoscaler ]
-    name: API acceptance tests
+    strategy:
+      matrix:
+        suite: [ API, APP ]
     runs-on: ubuntu-latest
+    name: ${{ matrix.suite }} acceptance tests
     steps:
       - uses: actions/checkout@v3
         with:
@@ -82,29 +86,47 @@ jobs:
         run: |
           echo ">> WIP: exiting early"; exit 0
           cd ${{ env.AUTOSCALER_DIR }}
-          make acceptance-tests SUITES="api"
+          make acceptance-tests SUITES="${{ matrix.suite }}"
 
-  acceptance_test_app:
-    needs: [ deploy_autoscaler ]
-    name: APP acceptance tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      # TODO: unhash me
-      # - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
-      #   with:
-      #     ssh-key: ${{ secrets.BBL_SSH_KEY }}
-      - name: run acceptance test - app
-        run: |
-         echo ">> WIP: exiting early"; exit 0
-         cd ${{ env.AUTOSCALER_DIR }}
-         make acceptance-tests SUITES="app"
+  # acceptance_test_api:
+  #   needs: [ deploy_autoscaler ]
+  #   name: API acceptance tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         path: app-autoscaler-release
+  #     # TODO: unhashme
+  #     # - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
+  #     #   with:
+  #     #     ssh-key: ${{ secrets.BBL_SSH_KEY }}
+  #     - name: run acceptance test - api
+  #       run: |
+  #         echo ">> WIP: exiting early"; exit 0
+  #         cd ${{ env.AUTOSCALER_DIR }}
+  #         make acceptance-tests SUITES="api"
+
+  # acceptance_test_app:
+  #   needs: [ deploy_autoscaler ]
+  #   name: APP acceptance tests
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         path: app-autoscaler-release
+  #     # TODO: unhash me
+  #     # - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
+  #     #   with:
+  #     #     ssh-key: ${{ secrets.BBL_SSH_KEY }}
+  #     - name: run acceptance test - app
+  #       run: |
+  #        echo ">> WIP: exiting early"; exit 0
+  #        cd ${{ env.AUTOSCALER_DIR }}
+  #        make acceptance-tests SUITES="app"
 
   acceptance_jobs_verify:
     #This job submits success result to the awaiting check only if all depended jobs have passed
-    needs: [ acceptance_pending_check, deploy_autoscaler, acceptance_test_app, acceptance_test_api ]
+    needs: [ acceptance_pending_check, deploy_autoscaler, acceptance_tests ]
     name: Tests conclusion
     runs-on: ubuntu-latest
     steps:
