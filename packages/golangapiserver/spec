@@ -38,7 +38,6 @@ files:
 - autoscaler/vendor/code.cloudfoundry.org/lager/internal/truncate/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
-- autoscaler/vendor/github.com/cloudfoundry-incubator/uaago/* # gosub
 - autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
 - autoscaler/vendor/github.com/golang/protobuf/proto/* # gosub
 - autoscaler/vendor/github.com/golang/protobuf/ptypes/timestamp/* # gosub
