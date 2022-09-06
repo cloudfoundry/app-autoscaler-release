@@ -32,13 +32,13 @@ jobs:
       check_id: ${{ steps.create_check.outputs.check_id }}
     # Determine if we require to run Acceptance Tests jobs in this workflow by checking relevant events and labels.
     # Finalisation job runs always since we use branch protection rule for acceptance tests.
-    if: |
-      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
-          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
-      ) ||
-      (  ( github.event.action == 'labeled' )
-          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
-      )
+    # if: |
+    #   ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+    #       && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
+    #   ) ||
+    #   (  ( github.event.action == 'labeled' )
+    #       && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
+    #   )
     name: Create workflow check
     runs-on: ubuntu-latest
     steps:
@@ -51,7 +51,8 @@ jobs:
 
   deploy_autoscaler:
     needs: [ create_workflow_check ]
-    name: Deploy autoscaler
+    #name: Deploy for acceptance tests
+    name: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -67,14 +68,14 @@ jobs:
           cd ${{ env.AUTOSCALER_DIR }}
           make deployment
 
-
   acceptance_tests:
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
         suite: [ API, APP ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} acceptance tests
+    #name: ${{ matrix.suite }} acceptance tests
+    name: ${{ matrix.suite }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -89,23 +90,23 @@ jobs:
           cd ${{ env.AUTOSCALER_DIR }}
           make acceptance-tests SUITES="${{ matrix.suite }}"
 
-  acceptance_jobs_verify:
-    #This job submits success result to the awaiting check only if all depended jobs have passed
-    needs: [ create_workflow_check, deploy_autoscaler, acceptance_tests ]
-    name: Tests conclusion
+  acceptance_tests_verify:
+    needs: [ acceptance_tests ]
+    if: ${{ always() }}
+    name: Verify Acceptance Tests (Buildin)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - name: "Send succes to awaiting check"
-        uses: ./app-autoscaler-release/.github/actions/pending_check-conclusion
+      - name: "Create check report"
+        uses: ./app-autoscaler-release/.github/actions/pending_check-finalise
         with:
-          check_id: ${{ needs.create_workflow_check.outputs.check_id }}
-
+          #check_filter: ".*acceptance tests"
+          check_filter: ".*"
 
   deployment_cleanup:
-    needs: [ acceptance_jobs_verify ]
+    needs: [ acceptance_tests_verify ]
     name: Deployment cleanup (Buildin)
     runs-on: ubuntu-latest
     steps:
@@ -120,19 +121,4 @@ jobs:
           echo ">> WIP: exiting early"; exit 0
           cd ${{ env.AUTOSCALER_DIR }}
           make deployment-cleanup
-
-  acceptance_tests_finalise:
-    needs: [ acceptance_jobs_verify ]
-    if: ${{ always() }}
-    name: Tests Finalise (Buildin)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - name: "Create check report"
-        uses: ./app-autoscaler-release/.github/actions/pending_check-finalise
-        with:
-          check_filter: ".*acceptance tests"
-
 

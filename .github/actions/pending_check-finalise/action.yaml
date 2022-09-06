@@ -24,9 +24,9 @@ runs:
     run: |
       # Checking run under ACT with override option
       eval ${ACT_RUN}
+      set -euo pipefail
 
       echo "::group::Getting the latest checks results"
-      set -euo pipefail
       echo "Getting the last result"
       curl -sf  -H "Accept: application/vnd.github+json" \
         --retry 5 \
@@ -56,16 +56,14 @@ runs:
         exit 1
       fi
 
-      echo ">> DEBUG: view output with conclusion failure (ensure all tests passed)"
-      curl -f --retry 5 "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs" \
-            |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"'
-      echo ">>"
+      echo "::group::Retrieving status of jobs (checks_filter: ${{ inputs.check_filter }})"
+      curl -sf --retry 5 "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
+        |  jq '.check_runs[] | select(.conclusion != "success") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"' > bad_jobs.txt
+      ls -la bad_jobs.txt
+      echo "::endgroup::"
 
-
-
-      if [ "${conclusion}" != "success" ]; then
-
-        echo "::group::Sending failed conclusion to the check"
+      if [ -s bad_jobs.txt ]; then
+        echo "::group::Sending failed conclusion to the workflow check"
           curl -sf -X PATCH \
             --retry 5 \
             -H "Accept: application/vnd.github+json" \
@@ -80,10 +78,24 @@ runs:
 
         echo "ERROR: List of the failed checks:"
         echo "=========================="
-        curl -sf --retry 5 "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs" \
-            |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"'
+        cat bad_jobs.txt
         echo "=========================="
-
         exit 1
 
+      else
+
+        echo "::group::Sending success conclusion to the workflow check"
+          curl -sf -X PATCH \
+            --retry 5 \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs/${id}" \
+            -d '
+              {
+                "name": "${{ env.check_name }}",
+                "conclusion": "success"
+              }
+            ' > /dev/null
       fi
+      echo "::endgroup::
+
