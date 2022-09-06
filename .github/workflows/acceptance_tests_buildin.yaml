@@ -51,8 +51,7 @@ jobs:
 
   deploy_autoscaler:
     needs: [ create_workflow_check ]
-    #name: Deploy for acceptance tests
-    name: deploy
+    name: Deploy for acceptance tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -62,7 +61,7 @@ jobs:
       # - uses: ./app-autoscaler-release/.github/actions/acceptance_setup
       #   with:
       #     ssh-key: ${{ secrets.BBL_SSH_KEY }}
-      - name: deploy autoscaler
+      - name: Deploy autoscaler
         run: |
           echo ">> WIP: exiting early"; exit 0
           cd ${{ env.AUTOSCALER_DIR }}
@@ -74,8 +73,7 @@ jobs:
       matrix:
         suite: [ API, APP ]
     runs-on: ubuntu-latest
-    #name: ${{ matrix.suite }} acceptance tests
-    name: ${{ matrix.suite }}
+    name: ${{ matrix.suite }} acceptance tests
     steps:
       - uses: actions/checkout@v3
         with:
@@ -91,23 +89,23 @@ jobs:
           make acceptance-tests SUITES="${{ matrix.suite }}"
 
   acceptance_tests_verify:
+    # This job needs acceptance_tests as it needs to wait for tests to complete
     needs: [ acceptance_tests ]
     if: ${{ always() }}
-    name: Verify Acceptance Tests (Buildin)
+    name: Acceptance verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - name: "Create check report"
+      - name: "Verify jobs execution"
         uses: ./app-autoscaler-release/.github/actions/pending_check-finalise
         with:
-          #check_filter: ".*acceptance tests"
-          check_filter: ".*"
+          check_filter: ".*acceptance tests"
 
   deployment_cleanup:
-    needs: [ acceptance_tests_verify ]
-    name: Deployment cleanup (Buildin)
+    needs: [ acceptance_tests ]
+    name: Deployment cleanup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
