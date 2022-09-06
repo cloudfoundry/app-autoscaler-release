@@ -56,6 +56,13 @@ runs:
         exit 1
       fi
 
+      echo ">> DEBUG: view output with conclusion failure (ensure all tests passed)"
+      curl -f --retry 5 "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs" \
+            |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"'
+      echo ">>"
+
+
+
       if [ "${conclusion}" != "success" ]; then
 
         echo "::group::Sending failed conclusion to the check"
