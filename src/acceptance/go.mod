@@ -1,6 +1,6 @@
 module acceptance
 
-go 1.18
+go 1.19
 
 //replace github.com/KevinJCross/cf-test-helpers/v2 => github.com/KevinJCross/cf-test-helpers/v2 v2.0.0
 
