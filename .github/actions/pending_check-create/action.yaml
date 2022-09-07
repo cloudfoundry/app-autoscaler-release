@@ -23,7 +23,7 @@ runs:
       eval "${ACT_RUN}"
       set -euo pipefail
 
-      if [ "${{ env.PENDING_CHECK }} == "create" ]; then
+      if [ "${{ env.PENDING_CHECK }}" == "create" ]; then
         echo "executing create"
       elif [ "${{ env.PENDING_CHECK }}" == "verify" ]; then
         echo "executing verify"
