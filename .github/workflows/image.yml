@@ -1,5 +1,4 @@
 name: Create and publish a Docker image
-
 on:
   push:
     branches: ['main']
@@ -29,7 +28,7 @@ jobs:
     name: Build and Push app-autoscaler-ci-${{ matrix.image_suffix }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
@@ -53,9 +52,16 @@ jobs:
       - name: Get ginkgo version from autoscaler-release
         id: ginkgo
         run: |
-          version=$(curl https://raw.githubusercontent.com/cloudfoundry/app-autoscaler-release/main/src/autoscaler/go.mod | grep "ginkgo/v2" | cut -d" " -f 2)
-          echo "GINGO version from release: \'${version}\'"
+          version=$(grep "ginkgo " .tool-versions|  cut -f 2 -d " ")
+          echo "GINGO version from .tool-versions: \'${version}\'"
           echo "::set-output name=version::${version}"  
+
+      - id: get-golang-version
+        shell: bash
+        run: |
+          version=$(grep "golang " .tool-versions|  cut -f 2 -d " ")
+          echo "Go version from .tool-versions: \'${version}\'"
+          echo "::set-output name=version::${version}"
 
       - name: Build and push
         id: build-and-push
@@ -66,7 +72,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}:latest
-          build-args: GINKGO_VERSION=${{ steps.ginkgo.outputs.version }}
+          build-args: |
+            GINKGO_VERSION=${{ steps.ginkgo.outputs.version }}
+            GO_VERSION=${{ steps.get-golang-version.outputs.version }}
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker

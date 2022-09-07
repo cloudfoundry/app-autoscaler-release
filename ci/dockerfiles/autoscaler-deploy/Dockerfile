@@ -34,7 +34,7 @@ RUN apt-get update && \
     apt-get clean
 
 # Install go
-ENV GO_VERSION 1.18
+ARG GO_VERSION=1.18
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
   tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
   rm -rf go${GO_VERSION}.linux-amd64.tar.gz && \
@@ -83,6 +83,6 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   apt-get clean &&\
   gcloud version
 
-ARG GINKGO_VERSION=v2.1.3
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} &&\
+ARG GINKGO_VERSION=2.1.3
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} &&\
     ginkgo version
