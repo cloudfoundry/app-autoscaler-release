@@ -31,6 +31,7 @@ case $1 in
     $COMMON_DIR/call-hooks.sh "golangapiserver" "pre-start"
     <% end %>
 
+    set_ulimits
     exec /var/vcap/packages/golangapiserver/api -c $CONF_DIR/apiserver.yml >>$LOG_DIR/golangapiserver.stdout.log 2>>$LOG_DIR/golangapiserver.stderr.log
 
     <% unless p("autoscaler.apiserver.hooks.post_start").empty? %>
