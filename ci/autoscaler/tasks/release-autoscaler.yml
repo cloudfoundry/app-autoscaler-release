@@ -5,7 +5,7 @@ image_resource:
   type: docker-image
   source: 
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
-    tag: master
+    tag: main
 
 params:
   # The GCP key to use to configure the generated private.yml

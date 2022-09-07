@@ -62,7 +62,7 @@ jobs:
         uses: docker/build-push-action@c84f38281176d4c9cdb1626ffafcd6b3911b5d94
         with:
           context: ci/dockerfiles/autoscaler-${{ matrix.image_suffix }}
-          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}:latest
