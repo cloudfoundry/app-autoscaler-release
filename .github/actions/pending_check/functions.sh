@@ -1,4 +1,5 @@
 #!/bin/bash
+
 function check_create {
 
 echo '::group::Creating new check'

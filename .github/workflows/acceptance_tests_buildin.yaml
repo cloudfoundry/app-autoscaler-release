@@ -2,8 +2,8 @@ name: Acceptance Tests (Buildin)
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
-#    paths:
-#      - 'src/acceptance/**'
+    paths:
+     - 'src/acceptance/**'
 
 env:
   MAVEN_VERSION: 3.6.3
@@ -28,8 +28,6 @@ concurrency:
 
 jobs:
   create_workflow_check:
-    #outputs:
-    #  check_id: ${{ steps.create_check.outputs.check_id }}
     # Determine if we require to run Acceptance Tests jobs in this workflow by checking relevant events and labels.
     # Finalisation job runs always since we use branch protection rule for acceptance tests.
     if: |
@@ -46,7 +44,7 @@ jobs:
         with:
           path: app-autoscaler-release
       - name: "Create the check"
-        uses: ./app-autoscaler-release/.github/actions/pending_check-create
+        uses: ./app-autoscaler-release/.github/actions/pending_check
         with:
           pending_check: create
 
