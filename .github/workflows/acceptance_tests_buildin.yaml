@@ -46,8 +46,9 @@ jobs:
         with:
           path: app-autoscaler-release
       - name: "Create the check"
-        #id: create_check
         uses: ./app-autoscaler-release/.github/actions/pending_check-create
+        with:
+          pending_check: create
 
   deploy_autoscaler:
     needs: [ create_workflow_check ]

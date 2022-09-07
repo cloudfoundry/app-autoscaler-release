@@ -1,5 +1,9 @@
 name: 'Check-Job-Creation'
 description: 'Creates a github-actions check-job'
+inputs:
+  pending_check:
+    required: true
+    description: action to execute - [ create, verify ]
 runs:
   using: 'composite'
   steps:
@@ -12,41 +16,20 @@ runs:
       GITHUB_TOKEN: "${{ github.token }}"
       GITHUB_REPOSITORY: "${{ github.repository }}"
       WORKFLOW_NAME: "${{ github.workflow }}"
-    run: "${{ github.action_path }}/pending_check.sh"
-      # # Checking run under ACT with override option
-      # eval "${ACT_RUN}"
+      PENDING_CHECK: "${{ inputs.pending_check }}"
 
-      # echo '::group::Creating new check'
-      # curl -vf -POST \
-      #   --retry 5 \
-      #   -H "Accept: application/vnd.github+json" \
-      #   -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
-      #   "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs" \
-      #   -d '
-      #     {
-      #       "name":        "${{env.check_name}}",
-      #       "head_sha":    "${{env.PR_SHA}}",
-      #       "status":      "in_progress",
-      #       "external_id": "${{env.GH_RUN_ID}}",
-      #       "output": {
-      #                   "title":   "${{ env.WORKFLOW_NAME }} running",
-      #                   "summary": "pending check for commit ${{env.PR_SHA}}",
-      #                   "text":    "Awaiting check result..."
-      #       }
-      #     }
-      #   ' \
-      #   -o new_check.json
+    run: |
+      # Checking run under ACT with override option
+      eval "${ACT_RUN}"
+      set -euo pipefail
 
-      # id=$(jq -r '.id' new_check.json)
-
-      # if [ -z "${id}" ]; then
-      #   echo "ERROR: Failed to create the required check job"
-      #   echo "Result of curl:"
-      #   cat new_check.json
-      #   exit 1
-      # fi
-      # echo "::endgroup::"
-
-      # echo "Id is: ${id}"
+      if [ "${PENDING_CHECK} == "create" ]; then
+        echo "executing create"
+      elif [ "${PENDING_CHECK}" == "verify" ]; then
+        echo "executing verify"
+      else
+        echo "ERROR: invalid action ${PENDING_CHECK} for pending check. Allowed: create or "verify"
+        exit 1
+      fi
 
 
