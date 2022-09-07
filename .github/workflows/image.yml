@@ -4,9 +4,13 @@ on:
     branches: ['main']
     paths:
       - 'ci/dockerfiles/**'
+      - '.github/workflows/image.yml'
+      - '.tool-versions'
   pull_request:
     paths:
       - 'ci/dockerfiles/**'
+      - '.github/workflows/image.yml'
+      - '.tool-versions'
   workflow_dispatch:
 
 env:
