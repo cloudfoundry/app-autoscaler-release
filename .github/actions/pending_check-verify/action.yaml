@@ -10,7 +10,7 @@ runs:
   using: 'composite'
   steps:
   - name: Retrieve and assume last check result
-    id: create_check
+    #id: create_check
     shell: bash
     env:
       ACT_RUN: 'if [ "${ACT}" ] && [ "${ACT_OVERRIDE:-"false"}" == "false" ]; then echo "NOTICE: step is running via ACT - skipping"; exit 0; fi;'
@@ -20,19 +20,20 @@ runs:
       GITHUB_REPOSITORY: "${{ github.repository }}"
       WORKFLOW_NAME: "${{ github.workflow }}"
       CHECK_FILTER: "${{ inputs.check_filter }}"
-      CHECK_ID: "${{ inputs.check_id }}"
+      #CHECK_ID: "${{ inputs.check_id }}"
     run: |
       # Checking run under ACT with override option
       eval ${ACT_RUN}
       set -euo pipefail
 
       function send_conclusion() {
-      # https://stackoverflow.com/a/37491820
+      checkruns_id_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs/${id}"
+      echo "checkruns_id_url: ${checkruns_id_url}"
+
       curl -sf -X PATCH \
           --retry 5 \
           -H "Accept: application/vnd.github+json" \
-          -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs/${id}" \
+          -H "Authorization: token ${{ env.GITHUB_TOKEN }}" "${checkruns_id_url}" \
           -d @- << END;
       { "name": "${{ env.check_name }}", "conclusion": "$1" }
       END
@@ -73,13 +74,13 @@ runs:
       echo "::endgroup::"
 
       if [ -s bad_jobs.txt ]; then
-        echo "::group::Sending failure conclusion to the workflow check"
-          send_conclusion "failure"
-
         echo "=========================="
         echo "List of failed checks:"
         cat bad_jobs.txt
         echo "=========================="
+
+        echo "::group::Sending failure conclusion to the workflow check"
+          send_conclusion "failure"
         echo "::endgroup::"
         exit 1
       else
