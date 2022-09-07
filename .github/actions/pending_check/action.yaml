@@ -33,7 +33,7 @@ runs:
 
       checkruns_commit_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs"
       auth_token='-H "Authorization: token ${{ env.GITHUB_TOKEN }}"'
-      curlopts='--retry 5 -H "Accept: application/vnd.github+json"'
+      curlopts='-f --retry 5 -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.GITHUB_TOKEN }}"'
 
 
       function main {
@@ -54,7 +54,7 @@ runs:
       #   --retry 5 \
       #   -H "Accept: application/vnd.github+json" \
       #   -H "Authorization: token ${{ env.GITHUB_TOKEN }}" \
-      curl -sf -POST ${curlopts} ${auth_token} \
+      curl -v -POST ${curlopts} \
        "https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs" \
       -d '
           {
@@ -66,7 +66,7 @@ runs:
                       "title":   "${{ env.WORKFLOW_NAME }} running",
                       "summary": "pending check for commit ${{env.PR_SHA}}",
                       "text":    "Awaiting check result..."
-          }
+                    }
           }
       ' \
       -o new_check.json
