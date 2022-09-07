@@ -2,8 +2,8 @@ name: Acceptance Tests (Buildin)
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
-    paths:
-      - 'src/acceptance/**'
+#    paths:
+#      - 'src/acceptance/**'
 
 env:
   MAVEN_VERSION: 3.6.3
