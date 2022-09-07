@@ -23,12 +23,12 @@ runs:
       eval "${ACT_RUN}"
       set -euo pipefail
 
-      if [ "${PENDING_CHECK} == "create" ]; then
+      if [ "${{ env.PENDING_CHECK }} == "create" ]; then
         echo "executing create"
-      elif [ "${PENDING_CHECK}" == "verify" ]; then
+      elif [ "${{ env.PENDING_CHECK }}" == "verify" ]; then
         echo "executing verify"
       else
-        echo "ERROR: invalid action ${PENDING_CHECK} for pending check. Allowed: create or verify"
+        echo "ERROR: invalid action ${{ env.PENDING_CHECK }} for pending check. Allowed: create or verify"
         exit 1
       fi
 
