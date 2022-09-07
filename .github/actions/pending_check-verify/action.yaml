@@ -10,7 +10,6 @@ runs:
   using: 'composite'
   steps:
   - name: Retrieve and assume last check result
-    #id: create_check
     shell: bash
     env:
       ACT_RUN: 'if [ "${ACT}" ] && [ "${ACT_OVERRIDE:-"false"}" == "false" ]; then echo "NOTICE: step is running via ACT - skipping"; exit 0; fi;'
@@ -20,7 +19,6 @@ runs:
       GITHUB_REPOSITORY: "${{ github.repository }}"
       WORKFLOW_NAME: "${{ github.workflow }}"
       CHECK_FILTER: "${{ inputs.check_filter }}"
-      #CHECK_ID: "${{ inputs.check_id }}"
     run: |
       # Checking run under ACT with override option
       eval ${ACT_RUN}

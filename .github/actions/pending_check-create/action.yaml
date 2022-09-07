@@ -1,14 +1,9 @@
 name: 'Check-Job-Creation'
 description: 'Creates a github-actions check-job'
-#outputs:
-#  check_id:
-#    description: "ID of the created check"
-#    value: ${{ steps.create_check.outputs.check_id }}
 runs:
   using: 'composite'
   steps:
   - name: Creating the check
-    #id: create_check
     shell: bash
     env:
       ACT_RUN: 'if [ "${ACT}" ] && [ "${ACT_OVERRIDE:-"false"}" == "false" ]; then echo "NOTICE: step is running via ACT - skipping"; exit 0; fi;'
@@ -53,5 +48,5 @@ runs:
       echo "::endgroup::"
 
       echo "Id is: ${id}"
-      #echo "::set-output name=check_id::${id}"
+
 
