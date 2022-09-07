@@ -22,6 +22,8 @@ runs:
       # Checking run under ACT with override option
       eval "${ACT_RUN}"
       set -euo pipefail
+      
+      source  "${{ github.action_path }}/functions.sh"
 
       if [ "${{ env.PENDING_CHECK }}" == "create" ]; then
         echo "executing create"
@@ -31,5 +33,5 @@ runs:
         echo "ERROR: invalid action ${{ env.PENDING_CHECK }} for pending check. Allowed: create or verify"
         exit 1
       fi
-
+      
 

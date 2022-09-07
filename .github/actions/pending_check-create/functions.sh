@@ -1,6 +1,5 @@
 #!/bin/bash
-# Checking run under ACT with override option
-eval "${ACT_RUN}"
+function check_create {
 
 echo '::group::Creating new check'
 curl -vf -POST \
@@ -34,3 +33,5 @@ fi
 echo "::endgroup::"
 
 echo "Id is: ${id}"
+
+}
