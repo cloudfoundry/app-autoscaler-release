@@ -28,15 +28,15 @@ runs:
 
       checkruns_commit_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs"
       auth_token="Authorization: token ${{ env.GITHUB_TOKEN }}"
-      curlopts='-sf --retry 5'
+      curlopts='-sf --retry 5 -H "Accept: application/vnd.github+json"'
 
       function send_conclusion() {
       checkruns_id_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs/${id}"
       echo "checkruns_id_url: ${checkruns_id_url}"
 
       curl ${curlopts} -X PATCH \
-          -H "Accept: application/vnd.github+json" \
-          -H "$auth_token" "${checkruns_id_url}" \
+        -H "$auth_token" \
+        "${checkruns_id_url}" \
           -d @- << END;
       { "name": "${{ env.check_name }}", "conclusion": "$1" }
       END
@@ -46,8 +46,8 @@ runs:
       echo "::group::Getting the latest checks results"
       echo "Getting the last result"
       curl ${curlopts} \
-        -H "Accept: application/vnd.github+json" \
-        -H "$auth_token" "${checkruns_commit_url}" \
+        -H "$auth_token" \
+        "${checkruns_commit_url}" \
         | jq '[.check_runs[] | select(.name=="${{ env.check_name }}")]' > results.json
       jq '.|last' results.json > latest_result.json
 
@@ -70,7 +70,8 @@ runs:
       fi
 
       echo "::group::Retrieving status of jobs (checks_filter: ${{ inputs.check_filter }})"
-        curl ${curlopts} "${checkruns_commit_url}" \
+        curl ${curlopts} \
+           "${checkruns_commit_url}" \
            |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("${{ inputs.check_filter }}")) | " - \(.name): \(.html_url)"' > bad_jobs.txt
       ls -la bad_jobs.txt
       echo "::endgroup::"
