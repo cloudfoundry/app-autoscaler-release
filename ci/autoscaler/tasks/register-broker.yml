@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: ghcr.io/cloudfoundry/app-autoscaler-ci-deploy
+    repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
     tag: master
 
 params:
