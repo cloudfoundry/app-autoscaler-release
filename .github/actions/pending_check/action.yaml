@@ -17,7 +17,7 @@ runs:
       GITHUB_REPOSITORY: "${{ github.repository }}"
       WORKFLOW_NAME: "${{ github.workflow }}"
       PENDING_CHECK: "${{ inputs.pending_check }}"
-      FUNCTIONS: "${{ github.action_path }}/functions.sh }}"
+      FUNCTIONS: "${{ github.action_path }}/functions.sh"
 
     run: |
       # Checking run under ACT with override option
@@ -25,7 +25,8 @@ runs:
       set -euo pipefail
       
       echo "::group::Sourcing pending_check functions"
-      source  "${{ github.action_path }}/functions.sh"
+      source  "${{ env.FUNCTIONS }}"
+      echo "::endgroup::"
 
       if [ "${{ env.PENDING_CHECK }}" == "create" ]; then
         check_create
