@@ -7,9 +7,10 @@ inputs:
   check_filter:
     description: jq match filter for job names
     required: true
-    default: ".*acceptance tests"
+    default: ".*"
     # Note: All jobs to verify need their names to to end consistently
     # (ie. "XYZ acceptance tests") in order to utilise correct filtering of checks.
+    # default will look for all jobs in the workflow.
 
 runs:
   using: 'composite'
@@ -30,11 +31,16 @@ runs:
       eval "${ACT_RUN}"
       set -euo pipefail
 
+      checkruns_commit_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs"
+      auth_token="Authorization: token ${{ env.GITHUB_TOKEN }}"
+      curlopts='-sf --retry 5 -H "Accept: application/vnd.github+json"'
+
+
       function main {
         if [ "${{ env.PENDING_CHECK }}" == "create" ]; then
           check_create
         elif [ "${{ env.PENDING_CHECK }}" == "verify" ]; then
-          echo "executing verify"
+          check_verify
         else
           echo "ERROR: invalid action ${{ env.PENDING_CHECK }} for pending check. Allowed: create or verify"
           exit 1
@@ -80,10 +86,7 @@ runs:
       #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
       function check_verify {
 
-      checkruns_commit_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs"
-      auth_token="Authorization: token ${{ env.GITHUB_TOKEN }}"
-      curlopts='-sf --retry 5 -H "Accept: application/vnd.github+json"'
-
+      #------
       function send_conclusion() {
       checkruns_id_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs/${id}"
       echo "checkruns_id_url: ${checkruns_id_url}"
@@ -95,7 +98,7 @@ runs:
       { "name": "${{ env.check_name }}", "conclusion": "$1" }
       END
       }
-
+      #------
 
       echo "::group::Getting the latest checks results"
       echo "Getting the last result"
