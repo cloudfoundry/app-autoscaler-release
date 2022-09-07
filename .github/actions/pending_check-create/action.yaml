@@ -28,7 +28,7 @@ runs:
       elif [ "${PENDING_CHECK}" == "verify" ]; then
         echo "executing verify"
       else
-        echo "ERROR: invalid action ${PENDING_CHECK} for pending check. Allowed: create or "verify"
+        echo "ERROR: invalid action ${PENDING_CHECK} for pending check. Allowed: create or verify"
         exit 1
       fi
 
