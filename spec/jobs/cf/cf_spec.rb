@@ -29,7 +29,11 @@ describe "cf sections relevant specs" do
               # default
               "max_retry_wait_ms" => 0,
               # default
-              "skip_ssl_validation" => false
+              "skip_ssl_validation" => false,
+              # default
+              "idle_connection_timeout_ms" => 5000,
+              # default
+              "max_idle_conns_per_host_ms" => 200
             }
           )
         end
@@ -48,6 +52,16 @@ describe "cf sections relevant specs" do
             @properties["autoscaler"]["cf"]["max_retry_wait_ms"] = 3
             rendered_template = YAML.safe_load(@template.render(@properties))
             expect(rendered_template["cf"]).to include({"max_retry_wait_ms" => 3})
+          end
+          it "idle_connection_timeout_ms" do
+            @properties["autoscaler"]["cf"]["idle_connection_timeout_ms"] = 3
+            rendered_template = YAML.safe_load(@template.render(@properties))
+            expect(rendered_template["cf"]).to include({"idle_connection_timeout_ms" => 3})
+          end
+          it "max_idle_conns_per_host_ms" do
+            @properties["autoscaler"]["cf"]["max_idle_conns_per_host_ms"] = 3
+            rendered_template = YAML.safe_load(@template.render(@properties))
+            expect(rendered_template["cf"]).to include({"max_idle_conns_per_host_ms" => 3})
           end
         end
       end

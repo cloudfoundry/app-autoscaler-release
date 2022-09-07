@@ -1,64 +1,29 @@
 package cf_test
 
 import (
+	"context"
+	"errors"
+	"net/http"
+	"net/http/httptrace"
+	"sync"
+	"sync/atomic"
 	"time"
-
-	"code.cloudfoundry.org/clock"
-	"code.cloudfoundry.org/lager"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
-
+	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/ghttp"
-
-	"net/http"
 )
 
+const maxIdleConnsPerHost = 200
+
 var _ = Describe("Cf client App", func() {
+	BeforeEach(login)
 
-	var (
-		conf            *cf.Config
-		cfc             cf.CFClient
-		fakeCC          *MockServer
-		fakeLoginServer *Server
-		err             error
-		logger          lager.Logger
-	)
-
-	var setCfcClient = func(maxRetries int) {
-		conf = &cf.Config{}
-		conf.API = fakeCC.URL()
-		conf.MaxRetries = maxRetries
-		conf.MaxRetryWaitMs = 1
-		cfc = cf.NewCFClient(conf, logger, clock.NewClock())
-		err = cfc.Login()
-		Expect(err).NotTo(HaveOccurred())
-	}
-
-	BeforeEach(func() {
-		fakeCC = NewMockServer()
-		fakeLoginServer = NewServer()
-		fakeCC.Add().Info(fakeLoginServer.URL())
-		fakeLoginServer.RouteToHandler("POST", cf.PathCFAuth, RespondWithJSONEncoded(http.StatusOK, cf.Tokens{
-			AccessToken: "test-access-token",
-			ExpiresIn:   12000,
-		}))
-		logger = lager.NewLogger("cf")
-		logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
-		setCfcClient(0)
-	})
-
-	AfterEach(func() {
-		if fakeCC != nil {
-			fakeCC.Close()
-		}
-		if fakeLoginServer != nil {
-			fakeLoginServer.Close()
-		}
-	})
+	appTestJson := LoadFile("testdata/app.json")
 
 	Describe("GetApp", func() {
 		When("get app succeeds", func() {
@@ -67,7 +32,7 @@ var _ = Describe("Cf client App", func() {
 					CombineHandlers(
 						VerifyRequest("GET", "/v3/apps/test-app-id"),
 						VerifyHeaderKV("Authorization", "Bearer test-access-token"),
-						RespondWith(http.StatusOK, LoadFile("testdata/app.json"), http.Header{"Content-Type": []string{"application/json"}}),
+						RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
 					),
 				)
 			})
@@ -93,76 +58,17 @@ var _ = Describe("Cf client App", func() {
 		})
 	})
 
-	Describe("GetAppProcesses", func() {
-
-		When("get process succeeds", func() {
-			BeforeEach(func() {
-				fakeCC.AppendHandlers(
-					CombineHandlers(
-						VerifyRequest("GET", "/v3/apps/test-app-id/processes", "per_page=100"),
-						VerifyHeaderKV("Authorization", "Bearer test-access-token"),
-						RespondWith(http.StatusOK, LoadFile("testdata/app_processes.json"), http.Header{"Content-Type": []string{"application/json"}}),
-					),
-				)
-			})
-
-			It("returns correct state", func() {
-				processes, err := cfc.GetAppProcesses("test-app-id")
-				Expect(err).NotTo(HaveOccurred())
-				created, err := time.Parse(time.RFC3339, "2016-03-23T18:48:22Z")
-				Expect(err).NotTo(HaveOccurred())
-				updated, err := time.Parse(time.RFC3339, "2016-03-23T18:48:42Z")
-				Expect(err).NotTo(HaveOccurred())
-				Expect(processes).To(Equal(cf.Processes{
-					{
-						Guid:       "6a901b7c-9417-4dc1-8189-d3234aa0ab82",
-						Type:       "web",
-						Instances:  5,
-						MemoryInMb: 256,
-						DiskInMb:   1024,
-						CreatedAt:  created,
-						UpdatedAt:  updated,
-					},
-					{
-						Guid:       "3fccacd9-4b02-4b96-8d02-8e865865e9eb",
-						Type:       "worker",
-						Instances:  1,
-						MemoryInMb: 256,
-						DiskInMb:   1024,
-						CreatedAt:  created,
-						UpdatedAt:  updated,
-					},
-				}))
-				Expect(processes.GetInstances()).To(Equal(6))
-			})
-		})
-
-		When("get processes returns a 500 status code with non-JSON response", func() {
-			BeforeEach(func() {
-				fakeCC.AppendHandlers(
-					CombineHandlers(
-						RespondWithJSONEncoded(http.StatusInternalServerError, ""),
-					),
-				)
-			})
-
-			It("should error", func() {
-				process, err := cfc.GetAppProcesses("invalid_json")
-				Expect(process).To(BeNil())
-				Expect(err.Error()).To(MatchRegexp("failed GetAppProcesses 'invalid_json': failed getting page 1:.*failed to unmarshal"))
-			})
-		})
-	})
-
 	Describe("GetAppAndProcesses", func() {
+
+		appProcessesJson := LoadFile("testdata/app_processes.json")
 
 		When("get app & process return ok", func() {
 			BeforeEach(func() {
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes", CombineHandlers(
-					RespondWith(http.StatusOK, LoadFile("testdata/app_processes.json"), http.Header{"Content-Type": []string{"application/json"}}),
+					RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
 				))
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
-					RespondWith(http.StatusOK, LoadFile("testdata/app.json"), http.Header{"Content-Type": []string{"application/json"}}),
+					RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
 				))
 			})
 
@@ -213,7 +119,7 @@ var _ = Describe("Cf client App", func() {
 					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
 				))
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
-					RespondWith(http.StatusOK, LoadFile("testdata/app.json"), http.Header{"Content-Type": []string{"application/json"}}),
+					RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
 				))
 			})
 
@@ -227,7 +133,7 @@ var _ = Describe("Cf client App", func() {
 		When("get processes return OK get app returns 500", func() {
 			BeforeEach(func() {
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes", CombineHandlers(
-					RespondWith(http.StatusOK, LoadFile("testdata/app_processes.json"), http.Header{"Content-Type": []string{"application/json"}}),
+					RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
 				))
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
 					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
@@ -255,6 +161,138 @@ var _ = Describe("Cf client App", func() {
 				appAndProcesses, err := cfc.GetAppAndProcesses("test-app-id")
 				Expect(appAndProcesses).To(BeNil())
 				Expect(err).To(MatchError(MatchRegexp(`get state&instances failed: .*'UnknownError'`)))
+			})
+		})
+
+		Context("Given a significant load", func() {
+			idleUsed := int32(0)
+			reUsed := int32(0)
+			numRequests := int32(0)
+			numResponses := int32(0)
+			numberConcurrentUsers := 100
+			numberSequentialPerUser := 10
+			var ccWatcher *ConnectionWatcher
+			var loginWatcher *ConnectionWatcher
+			/*
+			 * Note there is a login that goes to a separate host then 2 concurrent requests to the api server.
+			 */
+			doAppProcessRequest := func() int64 {
+				clientTrace := &httptrace.ClientTrace{
+					GotConn: func(info httptrace.GotConnInfo) {
+						if info.WasIdle {
+							atomic.AddInt32(&idleUsed, 1)
+						}
+						if info.Reused {
+							atomic.AddInt32(&reUsed, 1)
+						}
+					},
+					WroteRequest: func(info httptrace.WroteRequestInfo) {
+						atomic.AddInt32(&numRequests, 1)
+					},
+					GotFirstResponseByte: func() {
+						atomic.AddInt32(&numResponses, 1)
+					},
+				}
+				traceCtx := httptrace.WithClientTrace(context.Background(), clientTrace)
+				numErr := 0
+				var cfError = &models.CfError{}
+				anErr := cfc.Login()
+				if anErr != nil && !errors.As(anErr, &cfError) {
+					GinkgoWriter.Printf(" Error: %+v\n", anErr)
+					numErr += 1
+				}
+				_, anErr = cfc.GetCtxClient().GetAppAndProcesses(traceCtx, "test-app-id")
+
+				if anErr != nil && !errors.As(anErr, &cfError) {
+					GinkgoWriter.Printf(" Error: %+v\n", anErr)
+					numErr += 1
+				}
+				return int64(numErr)
+			}
+			BeforeEach(func() {
+
+				fakeCC.Close()
+				server := NewUnstartedServer()
+				fakeCC = NewMockWithServer(server)
+				ccWatcher = NewConnectionWatcher(fakeCC.HTTPTestServer.Config.ConnState)
+				fakeCC.HTTPTestServer.Config.ConnState = ccWatcher.OnStateChange
+				fakeCC.Start()
+
+				fakeLoginServer.Close()
+				server = NewUnstartedServer()
+				fakeLoginServer = NewMockWithServer(server)
+				loginWatcher = NewConnectionWatcher(fakeLoginServer.HTTPTestServer.Config.ConnState)
+				fakeLoginServer.HTTPTestServer.Config.ConnState = ccWatcher.OnStateChange
+				fakeLoginServer.Start()
+				fakeLoginUrl = fakeLoginServer.URL()
+
+				// quiet logger
+				logger = lager.NewLogger("cf")
+				setCfcClient(2)
+				login()
+
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes",
+					RoundRobinWithMultiple(
+						RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
+						RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
+						RespondWithJSONEncoded(http.StatusNotFound, models.CfResourceNotFound),
+						RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
+						RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+					))
+
+				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id",
+					RoundRobinWithMultiple(
+						RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
+						RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
+						RespondWithJSONEncoded(http.StatusNotFound, models.CfResourceNotFound),
+						RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
+						RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+					))
+			})
+			It("Should not leak file handles or cause errors", func() {
+
+				var numErrors int64 = 0
+
+				wg := sync.WaitGroup{}
+				for i := 0; i < numberConcurrentUsers; i++ {
+					wg.Add(1)
+					go func() {
+						defer wg.Done()
+						for i := 0; i < numberSequentialPerUser; i++ {
+							atomic.AddInt64(&numErrors, doAppProcessRequest())
+						}
+					}()
+				}
+				wg.Wait()
+
+				GinkgoWriter.Printf("\n# CC states left\n")
+				for key, value := range ccWatcher.GetStates() {
+					GinkgoWriter.Printf("\t%s:\t%d\n", key, value)
+				}
+
+				GinkgoWriter.Printf("\n# login states left\n")
+				for key, value := range loginWatcher.GetStates() {
+					GinkgoWriter.Printf("\t%s:\t%d\n", key, value)
+				}
+				Eventually(ccWatcher.Count()).WithTimeout(100 * time.Millisecond).Should(BeNumerically("<=", maxIdleConnsPerHost))
+				Eventually(loginWatcher.Count()).WithTimeout(100 * time.Millisecond).Should(BeNumerically("<=", maxIdleConnsPerHost))
+
+				GinkgoWriter.Printf("\n# Client trace stats\n")
+				GinkgoWriter.Printf("\tidle pool connections used:\t%d\n", atomic.LoadInt32(&idleUsed))
+				GinkgoWriter.Printf("\tconnections re-used:\t\t%d\n", atomic.LoadInt32(&reUsed))
+				GinkgoWriter.Printf("\tnumber of requests:\t\t\t%d\n", atomic.LoadInt32(&numRequests))
+				GinkgoWriter.Printf("\tnumber of responses:\t\t\t%d\n", atomic.LoadInt32(&numResponses))
+
+				//Each sequence is
+				// - a login to the login server
+				// - 2 parallel requests to the api server.
+				numberOfConcurrentRequests := numberConcurrentUsers * 2
+				numberOfRetriedRequests := (numberConcurrentUsers * numberSequentialPerUser) / 5
+				Expect(ccWatcher.MaxOpenConnections()).To(BeNumerically("<=", numberOfConcurrentRequests+numberOfRetriedRequests), "maximum number of api connections in play at one time")
+				Expect(loginWatcher.MaxOpenConnections()).To(BeNumerically("<=", 2*numberConcurrentUsers), "number of login connections open at one time")
+				Expect(numErrors).To(Equal(int64(0)), "Number of errors received while under stress")
+				//There are 2 different servers so there has to be 2 new and unused connections
+				Expect(reUsed).To(BeNumerically(">=", reUsed-int32(numberConcurrentUsers/2)), "Number of re-used connections")
 			})
 		})
 	})

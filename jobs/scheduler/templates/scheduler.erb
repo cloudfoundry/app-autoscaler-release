@@ -24,8 +24,9 @@ case $1 in
 
     <% unless p("autoscaler.scheduler.hooks.pre_start").empty? %>
     $COMMON_DIR/call-hooks.sh "scheduler" "pre-start"
-    <% end %>    
+    <% end %>
 
+    set_ulimits
     cd /var/vcap/packages/scheduler/
     exec java -Dspring.config.location=/var/vcap/jobs/scheduler/config/application.properties -jar /var/vcap/packages/scheduler/scheduler-*.war \
       <%= p("autoscaler.scheduler.jvm_options") %> \

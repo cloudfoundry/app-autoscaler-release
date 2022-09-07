@@ -29,6 +29,7 @@ case $1 in
     $COMMON_DIR/call-hooks.sh "eventgenerator" "pre-start"
     <% end %>
 
+    set_ulimits
     exec /var/vcap/packages/eventgenerator/eventgenerator -c $CONF_DIR/eventgenerator.yml >>$LOG_DIR/eventgenerator.stdout.log 2>>$LOG_DIR/eventgenerator.stderr.log
   
     <% unless p("autoscaler.eventgenerator.hooks.post_start").empty? %>

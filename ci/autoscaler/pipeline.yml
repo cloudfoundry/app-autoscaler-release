@@ -470,7 +470,7 @@ jobs:
     output_mapping:
       release: app-autoscaler-release-main
   - task: deploy-autoscaler
-    file: ci/autoscaler/tasks/deploy-autoscaler.yml
+    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *acceptance-main-env
       <<: *app-autoscaler-ops-files

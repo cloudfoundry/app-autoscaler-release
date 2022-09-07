@@ -53,7 +53,7 @@ clean-targets:
 	@rm target/* &> /dev/null || echo "  . Already clean"
 clean-vendor:
 	@echo " - cleaning vendored go"
-	@find . -name "vendor" -type d -delete
+	@find . -name "vendor" -type d -depth -exec rm -rf {} \;
 clean-autoscaler:
 	@make -C src/autoscaler clean
 clean-scheduler:
@@ -255,16 +255,13 @@ workspace:
 	[ -e go.work ] || go work init
 	go work use $(addprefix ./src/,$(go_modules))
 
-.PHONY: update
-update:
-	./scripts/update
 
 .PHONY: uuac
 uaac:
 	which uaac || gem install cf-uaac
 
 .PHONY: deployment
-deployment: update uaac
+deployment: mod-tidy vendor uaac db scheduler
 	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
 	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
@@ -281,6 +278,6 @@ deployment-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 .PHONY: package-specs
-package-specs: update
+package-specs: mod-tidy vendor
 	@echo " - Updating the package specs"
 	@./scripts/sync-package-specs

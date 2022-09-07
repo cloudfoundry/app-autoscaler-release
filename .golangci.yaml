@@ -71,7 +71,6 @@ linters:
   disable-all: true
   enable:
     - asciicheck
-    - deadcode
     - depguard
     - dogsled
       #- dupl
@@ -93,14 +92,12 @@ linters:
     - nolintlint
     - rowserrcheck
     - staticcheck
-    - structcheck
     - stylecheck
     - testpackage
     - typecheck
       #    - unconvert
       #    - unparam
     - unused
-    - varcheck
     - whitespace
       #    - godox
       #    - staticcheck

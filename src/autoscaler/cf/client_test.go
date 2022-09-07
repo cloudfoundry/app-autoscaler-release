@@ -3,11 +3,11 @@ package cf_test
 import (
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
-	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -17,64 +17,25 @@ import (
 )
 
 var _ = Describe("Client", func() {
-	var (
-		fakeCC    *MockServer
-		fakeUAA   *ghttp.Server
-		cfc       CFClient
-		conf      *Config
-		authToken string
-		tokens    Tokens
-		fclock    *fakeclock.FakeClock
-		err       error
-	)
 
-	BeforeEach(func() {
-		fakeCC = NewMockServer()
-		fakeUAA = ghttp.NewServer()
-		conf = &Config{}
-		conf.API = fakeCC.URL()
-		fclock = fakeclock.NewFakeClock(time.Now())
-		err = nil
-	})
-
-	AfterEach(func() {
-		if fakeCC != nil {
-			fakeCC.Close()
-		}
-		if fakeUAA != nil {
-			fakeUAA.Close()
-		}
-	})
-
+	BeforeEach(func() { fakeCC.Add().Info(fakeLoginServer.URL()) })
 	Describe("Login", func() {
-
-		JustBeforeEach(func() {
-			cfc = NewCFClient(conf, lager.NewLogger("cf"), fclock)
-			err = cfc.Login()
-		})
+		var tokens Tokens
+		JustBeforeEach(func() { err = cfc.Login() })
 
 		Context("when the token url is valid", func() {
-			BeforeEach(func() {
-				fakeCC.Add().Info(fakeUAA.URL())
-			})
-
 			Context("when token server returns 200 status code", func() {
 
 				BeforeEach(func() {
-					conf.ClientID = "test-client-id"
-					conf.Secret = "test-client-secret"
-
-					values := url.Values{
-						"grant_type":    {GrantTypeClientCredentials},
-						"client_id":     {conf.ClientID},
-						"client_secret": {conf.Secret},
-					}
-
-					fakeUAA.AppendHandlers(
+					fakeLoginServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("POST", PathCFAuth),
 							ghttp.VerifyBasicAuth(conf.ClientID, conf.Secret),
-							ghttp.VerifyForm(values),
+							ghttp.VerifyForm(url.Values{
+								"grant_type":    {GrantTypeClientCredentials},
+								"client_id":     {conf.ClientID},
+								"client_secret": {conf.Secret},
+							}),
 							ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{
 								AccessToken: "test-access-token",
 								ExpiresIn:   12000,
@@ -95,8 +56,8 @@ var _ = Describe("Client", func() {
 
 			Context("when token server is not running", func() {
 				BeforeEach(func() {
-					fakeUAA.Close()
-					fakeUAA = nil
+					fakeLoginServer.Close()
+					fakeLoginServer = nil
 				})
 
 				It("should error", func() {
@@ -106,7 +67,7 @@ var _ = Describe("Client", func() {
 
 			Context("when token returns a non-200 status code", func() {
 				BeforeEach(func() {
-					fakeUAA.AppendHandlers(
+					fakeLoginServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("POST", PathCFAuth),
 							ghttp.RespondWith(401, ""),
@@ -122,23 +83,59 @@ var _ = Describe("Client", func() {
 		})
 	})
 
-	Describe("RefreshAuthToken", func() {
-		BeforeEach(func() {
-			cfc = NewCFClient(conf, lager.NewLogger("cf"), fclock)
+	Context("Thread safety", func() {
+		Context("when there are several threads calling refresh at the same time", func() {
+			//var tokens Tokens
+			BeforeEach(func() {
+				fakeCC.Add().Info(fakeLoginServer.URL())
+				fakeLoginServer.RouteToHandler(http.MethodPost, PathCFAuth,
+					ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{
+						AccessToken: "test-access-token",
+						ExpiresIn:   12000,
+					}),
+				)
+			})
+
+			It("returns the correct tokens", func() {
+				Expect(err).ToNot(HaveOccurred())
+				wg := sync.WaitGroup{}
+				mu := sync.RWMutex{}
+				mu.Lock()
+				for i := 0; i < 100; i++ {
+					wg.Add(1)
+					go func() {
+						mu.RLock()
+						defer mu.RUnlock()
+						_, innerErr := cfc.RefreshAuthToken()
+						Expect(innerErr).ToNot(HaveOccurred())
+						wg.Done()
+					}()
+				}
+				mu.Unlock()
+				wg.Wait()
+				Expect(fakeLoginServer.Count().Requests(PathCFAuth)).To(Equal(1))
+			})
+
 		})
+	})
+
+	Describe("RefreshAuthToken", func() {
+		var authToken Tokens
 
 		JustBeforeEach(func() {
 			authToken, err = cfc.RefreshAuthToken()
 		})
 
 		Context("when not logged in", func() {
+			var tokens Tokens
+
 			BeforeEach(func() {
-				fakeCC.Add().Info(fakeUAA.URL())
+				fakeCC.Add().Info(fakeLoginServer.URL())
 			})
 
 			Context("when token server returns a 200 status code ", func() {
 				BeforeEach(func() {
-					fakeUAA.AppendHandlers(
+					fakeLoginServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("POST", PathCFAuth),
 							ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{
@@ -151,7 +148,10 @@ var _ = Describe("Client", func() {
 
 				It("returns valid token", func() {
 					Expect(err).NotTo(HaveOccurred())
-					Expect(authToken).To(Equal("Bearer test-access-token"))
+					Expect(authToken).To(Equal(Tokens{
+						AccessToken: "test-access-token",
+						ExpiresIn:   12000,
+					}))
 					tokens, err = cfc.GetTokens()
 					Expect(err).ToNot(HaveOccurred())
 					Expect(tokens.AccessToken).To(Equal("test-access-token"))
@@ -162,7 +162,7 @@ var _ = Describe("Client", func() {
 
 			Context("when token server returns a non-200 status code", func() {
 				BeforeEach(func() {
-					fakeUAA.AppendHandlers(
+					fakeLoginServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("POST", PathCFAuth),
 							ghttp.RespondWith(401, ""),
@@ -179,8 +179,8 @@ var _ = Describe("Client", func() {
 
 		Context("when already logged in", func() {
 			BeforeEach(func() {
-				fakeCC.Add().Info(fakeUAA.URL())
-				fakeUAA.AppendHandlers(
+				fakeCC.Add().Info(fakeLoginServer.URL())
+				fakeLoginServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", PathCFAuth),
 						ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{
@@ -195,7 +195,7 @@ var _ = Describe("Client", func() {
 
 			Context("when auth fails", func() {
 				BeforeEach(func() {
-					fakeUAA.AppendHandlers(
+					fakeLoginServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("POST", PathCFAuth),
 							ghttp.VerifyForm(url.Values{
@@ -206,6 +206,7 @@ var _ = Describe("Client", func() {
 							ghttp.RespondWith(401, ""),
 						),
 					)
+					cfc.InvalidateToken()
 				})
 
 				It("should error", func() {
@@ -215,7 +216,7 @@ var _ = Describe("Client", func() {
 
 			Context("when auth succeeds", func() {
 				BeforeEach(func() {
-					fakeUAA.AppendHandlers(
+					fakeLoginServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("POST", PathCFAuth),
 							ghttp.VerifyForm(url.Values{
@@ -232,8 +233,11 @@ var _ = Describe("Client", func() {
 				})
 				It("returns valid tokens", func() {
 					Expect(err).NotTo(HaveOccurred())
-					Expect(authToken).To(Equal("Bearer test-access-token"))
-					tokens, err = cfc.GetTokens()
+					Expect(authToken).To(Equal(Tokens{
+						AccessToken: "test-access-token",
+						ExpiresIn:   12000,
+					}))
+					tokens, err := cfc.GetTokens()
 					Expect(err).ToNot(HaveOccurred())
 					Expect(tokens.AccessToken).To(Equal("test-access-token"))
 					Expect(tokens.ExpiresIn).To(Equal(int64(12000)))
@@ -243,14 +247,15 @@ var _ = Describe("Client", func() {
 	})
 
 	Describe("GetTokens", func() {
+		var tokens Tokens
 		JustBeforeEach(func() {
 			tokens, err = cfc.GetTokens()
 		})
 
 		BeforeEach(func() {
 			cfc = NewCFClient(conf, lager.NewLogger("cf"), fclock)
-			fakeCC.Add().Info(fakeUAA.URL())
-			fakeUAA.AppendHandlers(
+			fakeCC.Add().Info(fakeLoginServer.URL())
+			fakeLoginServer.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("POST", PathCFAuth),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{
@@ -277,7 +282,7 @@ var _ = Describe("Client", func() {
 		Context("when the token is going to be expired", func() {
 			Context("when refresh succeeds", func() {
 				BeforeEach(func() {
-					fakeUAA.AppendHandlers(
+					fakeLoginServer.AppendHandlers(
 						ghttp.CombineHandlers(
 							ghttp.VerifyRequest("POST", PathCFAuth),
 							ghttp.VerifyForm(url.Values{
@@ -303,12 +308,13 @@ var _ = Describe("Client", func() {
 
 			Context("when refresh fails", func() {
 				BeforeEach(func() {
-					fakeCC.RouteToHandler("GET", "/", ghttp.RespondWith(200, ""))
-					fakeUAA.RouteToHandler("POST", "/oauth/token", ghttp.RespondWith(401, ""))
+					fakeCC.Add().Info(fakeLoginServer.URL())
+					fakeLoginServer.RouteToHandler("POST", "/oauth/token", ghttp.RespondWith(401, ""))
 					fclock.Increment(12001*time.Second - TimeToRefreshBeforeTokenExpire)
 				})
 
 				It("returns existing tokens", func() {
+					Expect(err).To(HaveOccurred())
 					Expect(tokens.AccessToken).To(Equal("test-access-token"))
 					Expect(tokens.ExpiresIn).To(Equal(int64(12000)))
 				})
@@ -322,8 +328,8 @@ var _ = Describe("Client", func() {
 	Describe("IsTokenAuthorized", func() {
 		BeforeEach(func() {
 			cfc = NewCFClient(conf, lager.NewLogger("cf"), fclock)
-			fakeCC.Add().Info(fakeUAA.URL())
-			fakeUAA.AppendHandlers(
+			fakeCC.Add().Info(fakeLoginServer.URL())
+			fakeLoginServer.AppendHandlers(
 				ghttp.CombineHandlers(
 					ghttp.VerifyRequest("POST", PathCFAuth),
 					ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{
@@ -348,7 +354,7 @@ var _ = Describe("Client", func() {
 		Context("when the token is invalid", func() {
 
 			BeforeEach(func() {
-				fakeUAA.AppendHandlers(
+				fakeLoginServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", PathIntrospectToken),
 						ghttp.RespondWithJSONEncoded(http.StatusOK, IntrospectionResponse{Active: false}),
@@ -370,7 +376,7 @@ var _ = Describe("Client", func() {
 		Context("when the token is valid, but for the wrong client id", func() {
 
 			BeforeEach(func() {
-				fakeUAA.AppendHandlers(
+				fakeLoginServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", PathIntrospectToken),
 						ghttp.RespondWithJSONEncoded(http.StatusOK, IntrospectionResponse{Active: true, ClientId: wrongClientID, Email: validClientID}),
@@ -393,7 +399,7 @@ var _ = Describe("Client", func() {
 		Context("when the token is valid, and for the right client id", func() {
 
 			BeforeEach(func() {
-				fakeUAA.AppendHandlers(
+				fakeLoginServer.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("POST", PathIntrospectToken),
 						ghttp.RespondWithJSONEncoded(http.StatusOK, IntrospectionResponse{Active: true, ClientId: validClientID, Email: "john@doe"}),

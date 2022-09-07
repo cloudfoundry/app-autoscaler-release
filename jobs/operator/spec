@@ -29,10 +29,9 @@ packages:
   - changeloglockcleaner
 
 properties:
+  #Cf Api client settings
   autoscaler.cf.api:
     description: "the Cloud Foundry API endpoint"
-  autoscaler.cf.grant_type:
-    description: "the grant type to log in cf"
   autoscaler.cf.client_id:
     description: "the client id to log in cf"
   autoscaler.cf.secret:
@@ -46,6 +45,12 @@ properties:
   autoscaler.cf.max_retry_wait_ms:
     description: "The maximum amount of time in milliseconds to wait between retries. 0 leaves it to the implementation to decide"
     default: 0
+  autoscaler.cf.idle_connection_timeout_ms:
+    description: "The maximum amount of time an idle (keep-alive) connection will remain idle before closing itself. Zero means no limit."
+    default: 5000
+  autoscaler.cf.max_idle_conns_per_host_ms:
+    description: "Controls the maximum idle (keep-alive) connections to keep pooled per-host. If zero, 2 is used."
+    default: 200
 
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
