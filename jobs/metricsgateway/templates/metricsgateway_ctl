@@ -31,6 +31,7 @@ case $1 in
     $COMMON_DIR/call-hooks.sh "metricsgateway" "pre-start"
     <% end %>
 
+    set_ulimits
     exec /var/vcap/packages/metricsgateway/metricsgateway -c $CONF_DIR/metricsgateway.yml >>$LOG_DIR/metricsgateway.stdout.log 2>>$LOG_DIR/metricsgateway.stderr.log
 
     <% unless p("autoscaler.metricsgateway.hooks.post_start").empty? %>

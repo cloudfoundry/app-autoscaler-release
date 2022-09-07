@@ -31,6 +31,7 @@ case $1 in
     $COMMON_DIR/call-hooks.sh "metricsforwarder" "pre-start"
     <% end %>
 
+    set_ulimits
     exec /var/vcap/packages/metricsforwarder/metricsforwarder -c $CONF_DIR/metricsforwarder.yml >>$LOG_DIR/metricsforwarder.stdout.log 2>>$LOG_DIR/metricsforwarder.stderr.log
 
     <% unless p("autoscaler.metricsforwarder.hooks.post_start").empty? %>
