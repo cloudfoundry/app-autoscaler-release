@@ -37,7 +37,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy for acceptance tests
+    name: Deploy autoscaler
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -49,7 +49,7 @@ jobs:
       #     ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - name: Deploy autoscaler
         run: |
-          echo ">> WIP: exiting early"; exit 0
+          echo ">> WIP: exiting early"; exit 1
           cd ${{ env.AUTOSCALER_DIR }}
           make deployment
 
@@ -57,9 +57,9 @@ jobs:
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
-        suite: [ API, APP, FOO, BAR ]
+        suite: [ API, APP ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} acceptance tests
+    name: ${{ matrix.suite }}
     steps:
       - uses: actions/checkout@v3
         with:
