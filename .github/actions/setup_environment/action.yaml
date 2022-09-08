@@ -1,0 +1,39 @@
+name: 'Acceptance Tests Common'
+description: 'Common steps for all acceptance tests'
+inputs:
+  ssh-key:  # id of input
+    description: 'The BBL ssh key'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: ./app-autoscaler-release/.github/actions/setup_go
+      with:
+        source: app-autoscaler-release/src/autoscaler
+    - uses: ./app-autoscaler-release/.github/actions/setup_java
+      with:
+        source: app-autoscaler-release
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+        bundler-cache: true
+
+    - name: Cli Cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          "${{ env.HOME }}/bin/"
+        key: ${{ runner.os }}-deploy_cli-${{ hashFiles( '${{ env.AUTOSCALER_DIR }}//.github/actions/setup_acceptance/install_cli.sh' ) }}
+
+    - name: Install deployment ClIs
+      shell: bash
+      run: "${AUTOSCALER_DIR}/.github/actions/setup_acceptance/install_cli.sh"
+
+    - name: clone BBL repo
+      uses: actions/checkout@v3
+      with:
+        repository: cloudfoundry/app-autoscaler-env-bbl-state
+        ssh-key: ${{ inputs.ssh-key }}
+        path: bbl
