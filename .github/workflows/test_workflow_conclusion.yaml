@@ -1,4 +1,4 @@
-name: Acceptance Tests (Buildin)
+name: Acceptance Tests v2 (Buildin)
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
@@ -85,7 +85,7 @@ jobs:
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
       - name: Conclude
-        run: if ${WORKFLOW_CONCLUSION} == 'failure'; then exit 1; fi
+        run: if [ ${WORKFLOW_CONCLUSION} != 'success' ]; then exit 1; fi
 
   deployment_cleanup:
     needs: [ acceptance_tests ]
