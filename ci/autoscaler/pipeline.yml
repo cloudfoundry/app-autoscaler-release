@@ -17,6 +17,16 @@ anchors:
     BOSH_FIX_RELEASES: true
     GINKGO_OPTS: "--fail-fast"
 
+  acceptance-main-buildin-env: &acceptance-main-buildin-env
+    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
+    DEPLOYMENT_NAME: "acceptance-bld-main"
+    SKIP_SSL_VALIDATION: true
+    NAME_PREFIX: "acceptance-bld-main"
+    BOSH_FIX_RELEASES: true
+    GINKGO_OPTS: "--fail-fast"
+    BUILDIN_MODE: true
+    SERVICE_OFFERING_ENABLED: false
+
   upgrade-test-env: &upgrade-test-env
     SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "upgrade-test"
@@ -65,6 +75,7 @@ groups:
   - integration-tests-main
   - acceptance-main
   - acceptance-main-log-cache
+  - acceptance-main-buildin
   - draft
   - release
   - upgrade-test-main
@@ -84,6 +95,7 @@ groups:
   - integration-tests-main
   - acceptance-main
   - acceptance-main-log-cache
+  - acceptance-main-buildin
   - draft
   - release
   - upgrade-test-main
@@ -573,6 +585,57 @@ jobs:
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
 
+- name: acceptance-main-buildin
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  ensure:
+    task: cleanup
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params:
+      <<: *acceptance-main-buildin-env
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  plan:
+  - in_parallel:
+    - get: bbl-state
+      #passed: [deploy-cf]
+    - get: app-autoscaler-release-main
+      #passed: [unit-tests-main, integration-tests-main]
+      trigger: true
+    - get: ci
+  - task: run-pre-release-script
+    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+    params:
+      SCRIPT_NAME: ./scripts/update
+    input_mapping:
+      release: app-autoscaler-release-main
+    output_mapping:
+      release: app-autoscaler-release-main
+  - task: deploy-autoscaler
+    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+    params:
+      <<: *acceptance-main-buildin-env
+      <<: *app-autoscaler-ops-files
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  - in_parallel:
+    - task: autoscaler-acceptance-api
+      attempts: 3
+      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-main-buildin-env
+        SUITES: api
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
+    - task: autoscaler-acceptance-app
+      attempts: 3
+      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-main-buildin-env
+        SUITES: app
+      input_mapping:
+        app-autoscaler-release: app-autoscaler-release-main
 
 
 
@@ -596,6 +659,7 @@ jobs:
       passed:
       - acceptance-main
       - acceptance-main-log-cache
+      - acceptance-main-buildin
       trigger: true
     - get: previous-stable-release
   - task: deploy-previous-stable-release
