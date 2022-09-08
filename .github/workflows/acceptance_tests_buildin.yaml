@@ -43,11 +43,9 @@ jobs:
         with:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/setup_acceptance
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - name: Deploy autoscaler
         run: |
-          cd ${{ env.AUTOSCALER_DIR }}
+          cd ${AUTOSCALER_DIR}
           make deployment
 
   acceptance_tests:
@@ -62,14 +60,12 @@ jobs:
         with:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/setup_acceptance
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - name: run acceptance test - ${{ matrix.suite }}
+        env:
+          MATRIX_SUITE: ${{ matrix.suite }}
         run: |
-          cd ${{ env.AUTOSCALER_DIR }}
-          # SUITES needs to be lowercase for ginkgo
-          mysuite="${{matrix.suite}}"
-          echo make acceptance-tests SUITES="${mysuite,,}"
+          cd ${AUTOSCALER_DIR}
+          make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
   acceptance_tests_verify:
     needs: [ deploy_autoscaler, acceptance_tests ]
@@ -90,9 +86,6 @@ jobs:
         with:
           path: app-autoscaler-release
       - uses: ./app-autoscaler-release/.github/actions/setup_acceptance
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - run: |
-          cd ${{ env.AUTOSCALER_DIR }}
+          cd ${AUTOSCALER_DIR}
           make deployment-cleanup
-
