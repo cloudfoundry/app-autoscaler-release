@@ -120,7 +120,7 @@ var _ = Describe("Metricsgateway", func() {
 				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d/health", healthport))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-				raw, _ := ioutil.ReadAll(rsp.Body)
+				raw, _ := io.ReadAll(rsp.Body)
 				healthData := string(raw)
 				Expect(healthData).To(ContainSubstring("autoscaler_metricsgateway_concurrent_http_request"))
 				Expect(healthData).To(ContainSubstring("autoscaler_metricsgateway_policyDB"))

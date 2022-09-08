@@ -300,7 +300,7 @@ func (ap *ApiRunner) Interrupt() {
 }
 
 func readFile(filename string) string {
-	contents, err := ioutil.ReadFile(filename)
+	contents, err := os.ReadFile(filename)
 	FailOnError("Failed to read file:"+filename+" ", err)
 	return string(contents)
 }

@@ -153,11 +153,11 @@ var _ = SynchronizedBeforeSuite(
 	})
 
 func verifyCertExistence(testCertDir string) {
-	_, err := ioutil.ReadFile(filepath.Join(testCertDir, "scalingengine.key"))
+	_, err := os.ReadFile(filepath.Join(testCertDir, "scalingengine.key"))
 	Expect(err).NotTo(HaveOccurred())
-	_, err = ioutil.ReadFile(filepath.Join(testCertDir, "scalingengine.crt"))
+	_, err = os.ReadFile(filepath.Join(testCertDir, "scalingengine.crt"))
 	Expect(err).NotTo(HaveOccurred())
-	_, err = ioutil.ReadFile(filepath.Join(testCertDir, "autoscaler-ca.crt"))
+	_, err = os.ReadFile(filepath.Join(testCertDir, "autoscaler-ca.crt"))
 	Expect(err).NotTo(HaveOccurred())
 }
 

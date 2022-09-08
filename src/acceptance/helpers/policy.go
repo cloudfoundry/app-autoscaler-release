@@ -4,7 +4,7 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -26,7 +26,7 @@ func GetPolicy(cfg *config.Config, appGUID string) ScalingPolicy {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(resp.Body)
 	Expect(err).ShouldNot(HaveOccurred())
 	Expect(resp.StatusCode).To(Equal(200))
 
