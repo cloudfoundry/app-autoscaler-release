@@ -46,7 +46,7 @@ jobs:
       - name: "Create the check"
         uses: ./app-autoscaler-release/.github/actions/pending_check
         with:
-          pending_check: create
+          pending_check: a"; ls $GITHUB_WORKSPACE
 
   deploy_autoscaler:
     needs: [ create_pending_check ]
