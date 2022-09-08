@@ -2,7 +2,6 @@
 # shellcheck disable=SC2086
 set -euo pipefail
 
-set -x
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
