@@ -2,7 +2,7 @@
 # Based on/doubles https://github.com/cloudfoundry/cf-deployment/blob/a1ff77e8957e1d2c44572e50a3265e40b50934cb/operations/test/scale-to-one-az-addon-parallel-cats.yml
 - type: replace
   path: /instance_groups/name=diego-cell/instances
-  value: 2
+  value: ((diego_cell_instances))
 - type: replace
   path: /instance_groups/name=diego-cell/vm_type
   value: large
