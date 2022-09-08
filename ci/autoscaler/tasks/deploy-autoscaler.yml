@@ -3,7 +3,7 @@ platform: linux
 
 image_resource:
   type: docker-image
-  source: 
+  source:
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
     tag: main
 
@@ -12,11 +12,6 @@ params:
   # Optional: override the user to access bosh
   BOSH_USERNAME: admin
 
-  # Optional: relative to the root of the release input. The files will be 
-  # checked to see if they exist, if not they will be excluded from the list
-  OPS_FILES: |
-    example/operation/loggregator-certs-from-cf.yml
-  AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
 - name: app-autoscaler-release
