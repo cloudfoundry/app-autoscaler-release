@@ -131,7 +131,6 @@ resources:
     fetch_tags: true
     paths:
       - ci
-
 - name: app-autoscaler-release-main
   type: git
   icon: github
