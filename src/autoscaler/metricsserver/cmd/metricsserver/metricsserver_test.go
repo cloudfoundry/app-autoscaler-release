@@ -2,7 +2,7 @@ package main_test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 
@@ -44,10 +44,10 @@ var _ = Describe("MetricsServer", func() {
 		Context("with an invalid config file", func() {
 			BeforeEach(func() {
 				runner.startCheck = ""
-				badfile, err := ioutil.TempFile("", "bad-ms-config")
+				badfile, err := os.CreateTemp("", "bad-ms-config")
 				Expect(err).NotTo(HaveOccurred())
 				runner.configPath = badfile.Name()
-				err = ioutil.WriteFile(runner.configPath, []byte("bogus"), os.ModePerm)
+				err = os.WriteFile(runner.configPath, []byte("bogus"), os.ModePerm)
 				Expect(err).NotTo(HaveOccurred())
 				runner.Start()
 			})

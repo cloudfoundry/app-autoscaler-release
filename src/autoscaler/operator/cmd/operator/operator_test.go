@@ -2,7 +2,7 @@ package main_test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -52,10 +52,10 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("with an invalid config file", func() {
 			BeforeEach(func() {
-				badfile, err := ioutil.TempFile("", "bad-pr-config")
+				badfile, err := os.CreateTemp("", "bad-pr-config")
 				Expect(err).NotTo(HaveOccurred())
 				runner.configPath = badfile.Name()
-				err = ioutil.WriteFile(runner.configPath, []byte("bogus"), os.ModePerm)
+				err = os.WriteFile(runner.configPath, []byte("bogus"), os.ModePerm)
 				Expect(err).NotTo(HaveOccurred())
 				runner.Start()
 			})

@@ -1,7 +1,7 @@
 package brokerserver_test
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	. "github.com/onsi/ginkgo/v2"

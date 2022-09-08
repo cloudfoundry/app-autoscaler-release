@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"io"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
@@ -15,7 +16,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 )
@@ -105,10 +105,10 @@ var _ = Describe("Main", func() {
 		Context("with an invalid config file", func() {
 			BeforeEach(func() {
 				runner.startCheck = ""
-				badfile, err := ioutil.TempFile("", "bad-engine-config")
+				badfile, err := os.CreateTemp("", "bad-engine-config")
 				Expect(err).NotTo(HaveOccurred())
 				runner.configPath = badfile.Name()
-				err = ioutil.WriteFile(runner.configPath, []byte("bogus"), os.ModePerm)
+				err = os.WriteFile(runner.configPath, []byte("bogus"), os.ModePerm)
 				Expect(err).NotTo(HaveOccurred())
 			})
 

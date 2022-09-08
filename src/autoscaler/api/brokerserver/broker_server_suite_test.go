@@ -1,9 +1,9 @@
 package brokerserver_test
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/brokerserver"

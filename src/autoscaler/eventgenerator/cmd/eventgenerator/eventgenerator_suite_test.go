@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -289,12 +288,12 @@ func initConfig() {
 }
 
 func writeConfig(c *config.Config) *os.File {
-	cfg, err := ioutil.TempFile("", "eg")
+	cfg, err := os.CreateTemp("", "eg")
 	Expect(err).NotTo(HaveOccurred())
 	defer cfg.Close()
 	configBytes, err := yaml.Marshal(c)
 	Expect(err).NotTo(HaveOccurred())
-	err = ioutil.WriteFile(cfg.Name(), configBytes, 0600)
+	err = os.WriteFile(cfg.Name(), configBytes, 0600)
 	Expect(err).NotTo(HaveOccurred())
 	return cfg
 }
