@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  create_pending_check:
+  deploy_autoscaler:
     # Determine if we require to run Acceptance Tests jobs in this workflow by checking relevant events and labels.
     # Finalisation job runs always since we use branch protection rule for acceptance tests.
     if: |
@@ -37,19 +37,6 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Create workflow check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - name: "Create the check"
-        uses: ./app-autoscaler-release/.github/actions/pending_check
-        with:
-          pending_check: create
-
-  deploy_autoscaler:
-    needs: [ create_pending_check ]
     name: Deploy for acceptance tests
     runs-on: ubuntu-latest
     steps:
@@ -70,7 +57,7 @@ jobs:
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
-        suite: [ API, APP ]
+        suite: [ API, APP, FOO, BAR ]
     runs-on: ubuntu-latest
     name: ${{ matrix.suite }} acceptance tests
     steps:
@@ -83,7 +70,7 @@ jobs:
       #     ssh-key: ${{ secrets.BBL_SSH_KEY }}
       - name: run acceptance test - ${{ matrix.suite }}
         run: |
-          echo ">> WIP: exiting early"; exit 0
+          echo ">> WIP: exiting early"; exit 1
           cd ${{ env.AUTOSCALER_DIR }}
           # SUITES needs to be lowercase for ginkgo
           mysuite="${{matrix.suite}}"
@@ -91,19 +78,14 @@ jobs:
 
   acceptance_tests_verify:
     # This job needs acceptance_tests as it needs to wait for tests to complete
-    needs: [ create_pending_check, acceptance_tests ]
+    needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
     name: Acceptance Tests Result (Buildin)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - name: "Verify jobs execution"
-        uses: ./app-autoscaler-release/.github/actions/pending_check
-        with:
-          pending_check: verify
-
+      - uses: technote-space/workflow-conclusion-action@v3
+      - name: Conclude workflow run
+        run: if [ ${WORKFLOW_CONCLUSION} != 'success' ]; then exit 1; fi
 
   deployment_cleanup:
     needs: [ acceptance_tests ]
