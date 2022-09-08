@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -33,7 +33,7 @@ func main() {
 	fmt.Println("Successfully Opened file")
 	defer xmlFile.Close()
 
-	byteValue, err := ioutil.ReadAll(xmlFile)
+	byteValue, err := io.ReadAll(xmlFile)
 	if err != nil {
 		panic(err)
 	}

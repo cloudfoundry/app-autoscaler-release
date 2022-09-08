@@ -10,8 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup_go
-        with:
-          version: 1.18
 
       - name: get golangci-lint version
         id: lint
