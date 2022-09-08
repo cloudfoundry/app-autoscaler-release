@@ -88,9 +88,9 @@ runs:
         echo "Verifying: ${checkruns_url}/${id}"
 
         curl -s "${curlopts[@]}" -X PATCH "${checkruns_url}/${id}" \
-        -d @- << END;
-             { "name": "${{ env.check_name }}", "conclusion": "$1" }
-      END
+         -d @- <<- END;
+            { "name": "${{ env.check_name }}", "conclusion": "$1" }
+            END
       }
       #------
 
