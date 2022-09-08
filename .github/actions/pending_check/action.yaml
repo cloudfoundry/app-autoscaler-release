@@ -5,12 +5,13 @@ inputs:
     required: true
     description: Action to execute - [ create, verify ]
   check_filter:
-    description: jq match regex filter for job names
+    description: jq match filter for job names
     required: true
     default: ".*acceptance tests"
     # Note: All jobs to verify need their names to to end consistently
     # (ie. "XYZ acceptance tests") in order to utilise correct filtering of checks.
-    
+    # use '.*' to filter all jobs in the workflow.
+
 runs:
   using: 'composite'
   steps:
@@ -84,12 +85,12 @@ runs:
       #------
       function send_conclusion() {
 
-      echo "Verifying: ${checkruns_url}/${id}"
+        echo "Verifying: ${checkruns_url}/${id}"
 
-      curl -s "${curlopts[@]}" -X PATCH "${checkruns_url}/${id}" \
-      -d @- << END;
-      { "name": "${{ env.check_name }}", "conclusion": "$1" }
-      END
+        curl -s "${curlopts[@]}" -X PATCH "${checkruns_url}/${id}" \
+           -d @- << END;
+           { "name": "${{ env.check_name }}", "conclusion": "$1" }
+           END
       }
       #------
 
