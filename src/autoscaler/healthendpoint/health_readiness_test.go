@@ -1,10 +1,14 @@
 package healthendpoint_test
 
 import (
+	"io"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/onsi/gomega/matchers"
+	"github.com/onsi/gomega/types"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
@@ -318,4 +322,55 @@ var _ = Describe("Health Readiness", func() {
 
 	})
 
+	Context("pprof endpoint", func() {
+		When("basic auth is not configured", func() {
+			BeforeEach(func() {
+				config.HealthCheckUsername = ""
+				config.HealthCheckPassword = ""
+			})
+			It("should not be available", func() {
+				apitest.New().
+					Handler(healthRoute).
+					Get("/debug/pprof").
+					Expect(t).
+					Assert(bodyContainsSubstring(false, "Types of profiles available")).
+					Status(http.StatusOK).
+					End()
+			})
+		})
+
+		When("basic auth is configured", func() {
+			It("should be available", func() {
+				apitest.New().
+					Handler(healthRoute).
+					Get("/debug/pprof").
+					BasicAuth("test-user-name", "test-user-password").
+					Expect(t).
+					Assert(bodyContainsSubstring(true, "Types of profiles available")).
+					Status(http.StatusOK).
+					End()
+			})
+		})
+	})
 })
+
+func bodyContainsSubstring(doesContain bool, substr string) func(res *http.Response, _ *http.Request) error {
+	return func(res *http.Response, _ *http.Request) error {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return errors.New("failed reading body")
+		}
+		if Expect(string(b)).To(Invert(!doesContain, ContainSubstring(substr))) {
+			return nil
+		}
+		// should not be reachable
+		return errors.New("assertion failed")
+	}
+}
+
+func Invert(invert bool, matcher types.GomegaMatcher) types.GomegaMatcher {
+	if invert {
+		return &matchers.NotMatcher{Matcher: matcher}
+	}
+	return matcher
+}
