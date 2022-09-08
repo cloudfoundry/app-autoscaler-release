@@ -103,7 +103,7 @@ jobs:
         uses: ./app-autoscaler-release/.github/actions/pending_check
         with:
           pending_check: verify
-          check_filter: ".*acceptance tests"
+
 
   deployment_cleanup:
     needs: [ acceptance_tests ]

@@ -5,13 +5,12 @@ inputs:
     required: true
     description: Action to execute - [ create, verify ]
   check_filter:
-    description: jq match filter for job names
+    description: jq match regex filter for job names
     required: true
-    default: ".*"
+    default: ".*acceptance tests"
     # Note: All jobs to verify need their names to to end consistently
     # (ie. "XYZ acceptance tests") in order to utilise correct filtering of checks.
-    # default will look for all jobs in the workflow.
-
+    
 runs:
   using: 'composite'
   steps:
