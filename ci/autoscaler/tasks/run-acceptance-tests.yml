@@ -9,7 +9,6 @@ image_resource:
 
 params:
   SYSTEM_DOMAIN:
-  SKIP_SSL_VALIDATION: false
   NAME_PREFIX: ASATS
   NODES: 3
 inputs:

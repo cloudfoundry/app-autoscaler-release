@@ -281,7 +281,7 @@ jobs:
       BBL_GCP_REGION: europe-west4
       BBL_GCP_ZONE: europe-west4-a
       DEBUG_MODE: true
-      LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org # ToDo – reuse from elsewhere
+      LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
       BBL_LB_CERT: ((autoscaler_lb_cert))
       BBL_LB_KEY: ((autoscaler_lb_key))
     input_mapping:
