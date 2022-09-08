@@ -25,7 +25,7 @@ runs:
       with:
         path: |
           "${{ env.HOME }}/bin/"
-        key: ${{ runner.os }}-deploy_cli-${{ hashFiles( '${{ env.AUTOSCALER_DIR }}//.github/actions/setup_acceptance/install_cli.sh' ) }}
+        key: ${{ runner.os }}-deploy_cli-${{ hashFiles( '${{ env.AUTOSCALER_DIR }}/.github/actions/setup_acceptance/install_cli.sh' ) }}
 
     - name: Install deployment ClIs
       shell: bash
