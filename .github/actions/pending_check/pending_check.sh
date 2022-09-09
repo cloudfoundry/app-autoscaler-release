@@ -38,25 +38,23 @@ curl -v "${curlopts[@]}" -POST "${checkruns_url}" -o new_check.json \
             }
     }
 END
-
 id=$(jq -r '.id' new_check.json)
 
 if [ -z "${id}" ]; then
-  echo "ERROR: Failed to create the required check job"
+  echo "ERROR: Failed to create check run"
   echo "Result of curl:"
   cat new_check.json
   exit 1
 fi
 echo "::endgroup::"
-
 echo "Id is: ${id}"
 }
+
 
 #--------------------------------------------------------------------------------------------------
 function send_conclusion() {
 
 echo "Verifying: ${checkruns_url}/${id}"
-
 curl -s "${curlopts[@]}" -X PATCH "${checkruns_url}/${id}" \
 -d @- << END;
     { "name": "${CHECK_NAME}", "conclusion": "$1" }
