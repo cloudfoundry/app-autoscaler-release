@@ -5,7 +5,7 @@ eval "${ACT_RUN}"
 set -euo pipefail
 
 checkruns_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs"
-checkruns_commit_url="https://api.github.com/repos/$GITHUB_REPOSITORY}/commits/${PR_SHA}/check-runs"
+checkruns_commit_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${PR_SHA}/check-runs"
 curlopts=(-f --retry 5 -H "Accept: application/vnd.github+json" -H "Authorization: token ${GITHUB_TOKEN}" )
 
 
@@ -69,7 +69,7 @@ END
 
 echo "::group::Getting the latest checks results"
 echo "Getting the last result"
-curl -s "${curlopts[@]}" "${checkruns_commit_url}" | jq '[.check_runs[] | select(.name=="acceptance-check-broker")]' > results.json
+curl -s "${curlopts[@]}" "${checkruns_commit_url}" | jq '[.check_runs[] | select(.name=='"${CHECK_NAME}"')]' > results.json
 jq '.|last' results.json > latest_result.json
 
 id=$( jq '.id' latest_result.json )
