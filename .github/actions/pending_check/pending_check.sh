@@ -21,7 +21,7 @@ function main {
     esac
 }
 
-#---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------------
 function check_create {
 echo '::group::Creating new check'
 curl -v "${curlopts[@]}" -POST "${checkruns_url}" -o new_check.json \
@@ -52,10 +52,7 @@ echo "::endgroup::"
 echo "Id is: ${id}"
 }
 
-#---------------------------------------------------------------------------------------------------------------------------------------------------------------------
-function check_verify {
-
-#------
+#--------------------------------------------------------------------------------------------------
 function send_conclusion() {
 
 echo "Verifying: ${checkruns_url}/${id}"
@@ -65,11 +62,14 @@ curl -s "${curlopts[@]}" -X PATCH "${checkruns_url}/${id}" \
     { "name": "${CHECK_NAME}", "conclusion": "$1" }
 END
 }
-#------
+
+
+#--------------------------------------------------------------------------------------------------
+function check_verify {
 
 echo "::group::Getting the latest checks results"
 echo "Getting the last result"
-curl -s "${curlopts[@]}" "${checkruns_commit_url}" | jq '[.check_runs[] | select(.name=='"${CHECK_NAME}"')]' > results.json
+curl -s "${curlopts[@]}" "${checkruns_commit_url}" | jq '[.check_runs[] | select(.name=="'"${CHECK_NAME}"'")]' > results.json
 jq '.|last' results.json > latest_result.json
 
 id=$( jq '.id' latest_result.json )
@@ -91,12 +91,18 @@ if [ "${number_of_checks}" -eq 0 ]; then
 fi
 
 echo "::group::Retrieving status of jobs (checks_filter: ${CHECK_FILTER})"
-curl "${curlopts[@]}" "${checkruns_commit_url}" \
-    |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match('"${CHECK_FILTER}"')) | " - \(.name): \(.html_url)"' > bad_jobs.txt
-ls -la bad_jobs.txt
+curl -s "${curlopts[@]}" "${checkruns_commit_url}" \
+    |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match('"${CHECK_FILTER}"')) | " - \(.name): \(.html_url)"' \
+    > bad_jobs.txt
 echo "::endgroup::"
+if [ ! -s bad_jobs ]; then
+  echo "OK: all jobs passed!"
 
-if [ -s bad_jobs.txt ]; then
+  echo "::group::Sending success conclusion to the workflow check"
+    send_conclusion "success"
+  echo "::endgroup::"
+
+else
   echo "=========================="
   echo "List of failed checks:"
     cat bad_jobs.txt
@@ -106,13 +112,9 @@ if [ -s bad_jobs.txt ]; then
     send_conclusion "failure"
   echo "::endgroup::"
   exit 1
-else
-  echo "::group::Sending success conclusion to the workflow check"
-    send_conclusion "success"
-  echo "::endgroup::"
 fi
 }
-#---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------
 
 
 # ++ start ++
