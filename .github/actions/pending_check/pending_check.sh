@@ -69,7 +69,7 @@ END
 
 echo "::group::Getting the latest checks results"
 echo "Getting the last result"
-curl -s "${curlopts[@]}" "${checkruns_commit_url}" | jq '[.check_runs[] | select(.name=='"${CHECK_NAME}"')]' > results.json
+curl -s "${curlopts[@]}" "${checkruns_commit_url}" | jq '[.check_runs[] | select(.name=="acceptance-check-broker")]' > results.json
 jq '.|last' results.json > latest_result.json
 
 id=$( jq '.id' latest_result.json )
