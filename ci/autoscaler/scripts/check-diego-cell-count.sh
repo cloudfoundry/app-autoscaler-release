@@ -12,7 +12,7 @@ popd > /dev/null
 
 actual_cells=$( bosh -d cf manifest | yq ".instance_groups | map(select(.name == \"diego-cell\")) | .[] | .instances")
 
-echo "Expeted diego cell count: $expected_cells"
-echo "Actual diego cell count: $actual_cells"
+echo "Expeted diego cell count: '$expected_cells'"
+echo "Actual diego cell count: '$actual_cells'"
 
 [[ "$expected_cells" != "$actual_cells" ]] && exit 1
