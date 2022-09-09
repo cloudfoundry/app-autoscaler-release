@@ -17,6 +17,7 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
+  CHECK_NAME: "acceptance-check-broker"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -26,6 +27,8 @@ jobs:
   deploy_autoscaler:
     # Determine if we require jobs for Acceptance Tests in this workflow by checking relevant events and labels.
     # Verifcation job runs always.
+    # Adding a non related label does not require acceptance run, however github will rerun workflow and skip all jobs
+    #  - in such case verification will reuse previous check result.
     if: |
       ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
@@ -33,13 +36,19 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy autoscaler
+    name: Deploy for acceptance tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/setup_environment
+      - name: Create pending check
+        uses: ./app-autoscaler-release/.github/actions/pending-check
+        with:
+          pending_check: create
+      - name: Setup environment for deployment
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Deploy autoscaler
@@ -55,13 +64,15 @@ jobs:
     runs-on: ubuntu-latest
     name: ${{ matrix.suite }} test
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/setup_environment
+      - name: Setup environment for acceptance tests
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
-      - name: run acceptance test - ${{ matrix.suite }}
+      - name: Run acceptance test - ${{ matrix.suite }}
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
@@ -74,21 +85,30 @@ jobs:
     name: Acceptance Tests Result (Broker)
     runs-on: ubuntu-latest
     steps:
-      - uses: technote-space/workflow-conclusion-action@v3
-      - name: Conclude workflow run
-        run: if [ ${WORKFLOW_CONCLUSION} != 'success' ]; then exit 1; fi
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        path: app-autoscaler-release
+    - name: "Verify jobs execution"
+      uses: ./app-autoscaler-release/.github/actions/pending-check
+      with:
+        pending_check: verify
 
   deployment_cleanup:
     needs: [ acceptance_tests ]
     name: Deployment cleanup
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/setup_environment
+      - name: "Setup environment to cleanup the deployment"
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
-      - run: |
+      - name: Perform deployment cleanup
+        run: |
+          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment-cleanup

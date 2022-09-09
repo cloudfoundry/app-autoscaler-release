@@ -26,4 +26,4 @@ runs:
       WORKFLOW_NAME: "${{ github.workflow }}"
       PENDING_CHECK: "${{ inputs.pending_check }}"
       CHECK_FILTER: "${{ inputs.check_filter }}"
-    run: "${AUTOSCALER_DIR}/.github/actions/pending_check/pending_check.sh"
+    run: "${AUTOSCALER_DIR}/.github/actions/pending-check/pending_check.sh"
