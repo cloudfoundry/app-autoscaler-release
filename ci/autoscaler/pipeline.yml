@@ -420,6 +420,8 @@ jobs:
       resource: app-autoscaler-release-stress-test
   - task: check-diego-cell-count
     file: app-autoscaler-release-main/ci/autoscaler/tasks/check-diego-cell-count.yml
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
     params:
       expected_cells: 4
     on_failure:

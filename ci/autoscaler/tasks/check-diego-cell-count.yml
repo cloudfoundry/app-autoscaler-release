@@ -6,5 +6,9 @@ image_resource:
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
     tag: main
 
+inputs:
+- name: bbl-state
+- name: app-autoscaler-release
+
 run:
-  path: app-autoscaler-release-main/ci/autoscaler/scripts/check-diego-cell-count.sh
+  path: app-autoscaler-release/ci/autoscaler/scripts/check-diego-cell-count.sh
