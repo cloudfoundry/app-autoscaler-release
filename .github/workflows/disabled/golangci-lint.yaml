@@ -1,0 +1,48 @@
+name: golangci-lint
+on:
+  pull_request:
+jobs:
+  golangci:
+    name: lint
+    env:
+      GO_VERSION: 1.17
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup_go
+
+      - name: get golangci-lint version
+        id: lint
+        run: |
+          git config --global --add safe.directory ${PWD}
+          version=$(cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2 | sed -E 's/(v[0-9]+\.[0-9]+.[0-9]+).*/\1/')
+          echo "golangci-lint version: '${version}'"
+          echo "::set-output name=version::${version}"  
+
+      - name: lint acceptance
+        uses: golangci/golangci-lint-action@v3.2.0
+        with:
+          working-directory: src/acceptance
+          args: --config ../../.golangci.yaml
+          version: ${{ steps.lint.outputs.version }}
+
+      - name: lint autoscaler
+        uses: golangci/golangci-lint-action@v3.2.0
+        with:
+          working-directory: src/autoscaler
+          args: --config ../../.golangci.yaml
+          version: ${{ steps.lint.outputs.version }}
+
+      - name: lint changelog
+        uses: golangci/golangci-lint-action@v3.2.0
+        with:
+          working-directory: src/changelog
+          args: --config ../../.golangci.yaml
+          version: ${{ steps.lint.outputs.version }}
+
+      - name: lint changeloglockcleaner
+        uses: golangci/golangci-lint-action@v3.2.0
+        with:
+          working-directory: src/changeloglockcleaner
+          args: --config ../../.golangci.yaml
+          version: ${{ steps.lint.outputs.version }}
