@@ -22,9 +22,10 @@ anchors:
     #BUILDIN_MODE: true
     SERVICE_OFFERING_ENABLED: false
 
-  smoke-tests-env: &smoke-tests-env
-    DEPLOYMENT_NAME: "smoke-tests"
-    NAME_PREFIX: "smoke-tests"
+
+  benchmark-env: &benchmark-env
+    DEPLOYMENT_NAME: "benchmark"
+    NAME_PREFIX: "benchmark"
     BOSH_FIX_RELEASES: true
     NODES: 1
     GINKGO_OPTS: "--fail-fast"
@@ -94,7 +95,7 @@ groups:
   - upgrade-test-main
   - update-golang
   - update-java
-  - smoke-tests
+  - benchmark
 - name: autoscaler-release
   jobs:
   - set-pipeline
@@ -249,6 +250,46 @@ jobs:
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+
+
+- name: setup-infrastructure
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: cf-deployment-concourse-tasks
+    - get: app-autoscaler-release-main
+    - get: ci
+    - get: bbl-state
+  - task: setup-infrastructure
+    file: cf-deployment-concourse-tasks/bbl-up/task.yml
+    params:
+      BBL_IAAS: gcp
+      BBL_ENV_NAME: autoscaler
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
+      BBL_GCP_PROJECT_ID: cloud-foundry-310819
+      BBL_GCP_REGION: europe-west4
+      BBL_GCP_ZONE: europe-west4-a
+      DEBUG_MODE: true
+      LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+      BBL_LB_CERT: ((autoscaler_lb_cert))
+      BBL_LB_KEY: ((autoscaler_lb_key))
+    input_mapping:
+      bbl-state: bbl-state
+      bbl-config: bbl-state
+    ensure:
+      put: bbl-state
+      params:
+        repository: updated-bbl-state
+        rebase: true
+  - task: update-dns-servers
+    file: ci/ci/autoscaler/tasks/update-dns-servers.yml
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
+      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
+      GCP_DNS_ZONE: app-runtime-interfaces
+      GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
 
 - name: acceptance-main
   public: true
@@ -433,7 +474,7 @@ jobs:
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
 
-- name: setup-smoke-tests
+- name: benchmark
   serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
@@ -448,31 +489,36 @@ jobs:
     - get: autoscaler-env-vars-store
     - get: app-autoscaler-release-main
       resource: app-autoscaler-release-stress-test
-  - task: combine-ops-files
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/combine-ops.yml
-    input_mapping:
-      ops-files: cf-deployment
-      custom-ops: app-autoscaler-release-main
-      app-autoscaler-ci: app-autoscaler-release-main
-      ci: app-autoscaler-release-main
-    output_mapping:
-      combined-ops: ops-files
-  - task: scale-up-cf
-    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-    input_mapping:
-      bbl-state: bbl-state
-      cf-deployment: cf-deployment
-      ops-files: ops-files
-      vars-files: autoscaler-env-vars-store
+  - task: check-diego-cell-count
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/check-diego-cell-count.yml
     params:
-      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
-      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=4"
-    ensure:
-      put: autoscaler-env-vars-store
-      params:
-        repository: autoscaler-env-vars-store
-        rebase: true
+      expected_cells: 4
+    on_failure:
+      do:
+      - task: combine-ops-files
+        file: app-autoscaler-release-main/ci/autoscaler/tasks/combine-ops.yml
+        input_mapping:
+          custom-ops: app-autoscaler-release-main
+          app-autoscaler-ci: app-autoscaler-release-main
+          ci: app-autoscaler-release-main
+        output_mapping:
+          combined-ops: ops-files
+      - task: scale-up-cf
+        file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+        input_mapping:
+          bbl-state: bbl-state
+          cf-deployment: cf-deployment
+          ops-files: ops-files
+          vars-files: autoscaler-env-vars-store
+        params:
+          SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+          OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+          BOSH_DEPLOY_ARGS: "-v diego_cell_instances=4"
+        ensure:
+          put: autoscaler-env-vars-store
+          params:
+            repository: autoscaler-env-vars-store
+            rebase: true
   - task: run-pre-release-script
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
@@ -484,7 +530,7 @@ jobs:
   - task: deploy-autoscaler
     file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *smoke-tests-env
+      <<: *benchmark-env
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
@@ -493,18 +539,18 @@ jobs:
     input_mapping:
       release: app-autoscaler-release-main
     params:
-      <<: *smoke-tests-env
+      <<: *benchmark-env
   - task: setup-benchmark
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
-      <<: *smoke-tests-env
+      <<: *benchmark-env
       SUITES: setup_benchmark
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: run-benchmark
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
-      <<: *smoke-tests-env
+      <<: *benchmark-env
       SUITES: run_benchmark
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
