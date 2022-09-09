@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - name: Create pending check
+      - name: Create pending check for acceptance test
         uses: ./app-autoscaler-release/.github/actions/pending_check
         with:
           pending_check: create
@@ -49,7 +49,7 @@ jobs:
         uses: ./app-autoscaler-release/.github/actions/setup_environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
-      - name: Deploy autoscaler
+      - name: Deploy for acceptance tests
         run: |
           echo ">> WIP: exiting early"; exit 1
           cd ${AUTOSCALER_DIR}
