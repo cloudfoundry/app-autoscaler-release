@@ -4,9 +4,10 @@
 eval "${ACT_RUN}"
 set -euo pipefail
 
-checkruns_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/check-runs"
-checkruns_commit_url="https://api.github.com/repos/${{ env.GITHUB_REPOSITORY }}/commits/${{ env.PR_SHA }}/check-runs"
-curlopts=(-f --retry 5 -H 'Accept: application/vnd.github+json' -H 'Authorization: token ${{ env.GITHUB_TOKEN }}')
+checkruns_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs"
+checkruns_commit_url="https://api.github.com/repos/$GITHUB_REPOSITORY}/commits/${PR_SHA}/check-runs"
+curlopts=(-f --retry 5 -H 'Accept: application/vnd.github+json')
+token="-H \"Authorization: token ${GITHUB_TOKEN}\""
 
 
 function main {
@@ -24,21 +25,21 @@ function main {
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function check_create {
 echo '::group::Creating new check'
-curl -v "${curlopts[@]}" -POST "${checkruns_url}" \
--d '
+curl -v "${curlopts[@]}" "${token}" -POST "${checkruns_url}" -o new_check.json \
+-d @- << END;
     {
-    "name":        "${{env.CHECK_NAME}}",
-    "head_sha":    "${{env.PR_SHA}}",
+    "name":        "${CHECK_NAME}",
+    "head_sha":    "${PR_SHA}",
     "status":      "in_progress",
-    "external_id": "${{env.GH_RUN_ID}}",
+    "external_id": "${GH_RUN_ID}",
     "output": {
-                "title":   "${{ env.WORKFLOW_NAME }} running",
-                "summary": "pending check for commit ${{env.PR_SHA}}",
+                "title":   "${WORKFLOW_NAME} running",
+                "summary": "pending check for commit ${PR_SHA}",
                 "text":    "Awaiting check result..."
             }
     }
-' \
--o new_check.json
+END
+
 
 id=$(jq -r '.id' new_check.json)
 
