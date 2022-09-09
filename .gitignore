@@ -25,6 +25,7 @@ bosh-lite/deployments/*
 /.project
 /.settings/
 target
+/app-autoscaler-release/
 test-certs
 src/scheduler/src/test/resources/certs/
 *.coverprofile

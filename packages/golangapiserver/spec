@@ -24,7 +24,6 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
-- autoscaler/helpers/memoizer/* # gosub
 - autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/models/* # gosub
 - autoscaler/ratelimiter/* # gosub
@@ -41,6 +40,7 @@ files:
 - autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
 - autoscaler/vendor/github.com/golang/protobuf/proto/* # gosub
 - autoscaler/vendor/github.com/golang/protobuf/ptypes/timestamp/* # gosub
+- autoscaler/vendor/github.com/google/uuid/* # gosub
 - autoscaler/vendor/github.com/gorilla/mux/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-retryablehttp/* # gosub
@@ -52,7 +52,14 @@ files:
 - autoscaler/vendor/github.com/matttproud/golang_protobuf_extensions/pbutil/* # gosub
 - autoscaler/vendor/github.com/nu7hatch/gouuid/* # gosub
 - autoscaler/vendor/github.com/patrickmn/go-cache/* # gosub
-- autoscaler/vendor/github.com/pivotal-cf/brokerapi/domain/* # gosub
+- autoscaler/vendor/github.com/pborman/uuid/* # gosub
+- autoscaler/vendor/github.com/pivotal-cf/brokerapi/v8/* # gosub
+- autoscaler/vendor/github.com/pivotal-cf/brokerapi/v8/auth/* # gosub
+- autoscaler/vendor/github.com/pivotal-cf/brokerapi/v8/domain/* # gosub
+- autoscaler/vendor/github.com/pivotal-cf/brokerapi/v8/domain/apiresponses/* # gosub
+- autoscaler/vendor/github.com/pivotal-cf/brokerapi/v8/handlers/* # gosub
+- autoscaler/vendor/github.com/pivotal-cf/brokerapi/v8/middlewares/* # gosub
+- autoscaler/vendor/github.com/pivotal-cf/brokerapi/v8/utils/* # gosub
 - autoscaler/vendor/github.com/pkg/errors/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/collectors/* # gosub
@@ -77,8 +84,6 @@ files:
 - autoscaler/vendor/golang.org/x/sys/internal/unsafeheader/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/golang.org/x/time/rate/* # gosub
-- autoscaler/vendor/golang.org/x/xerrors/* # gosub
-- autoscaler/vendor/golang.org/x/xerrors/internal/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/encoding/prototext/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/encoding/protowire/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/descfmt/* # gosub

@@ -22,12 +22,12 @@ func createService(onPlan string) serviceInstance {
 	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 	By(fmt.Sprintf("create service %s on plan %s", instanceName, onPlan))
 	createService := cf.Cf("create-service", cfg.ServiceName, onPlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
-	Expect(createService).To(Exit(0), "failed creating service")
+	ExpectWithOffset(1, createService).To(Exit(0), "failed creating service")
 	return serviceInstance(instanceName)
 }
 func (s serviceInstance) updatePlan(toPlan string) {
 	updateService := s.updatePlanRaw(toPlan)
-	Expect(updateService).To(Exit(0), "failed updating service")
+	ExpectWithOffset(1, updateService).To(Exit(0), "failed updating service")
 	Expect(strings.Contains(string(updateService.Out.Contents()), "The service does not support changing plans.")).To(BeFalse())
 }
 
@@ -69,7 +69,6 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		Expect(bindService).To(Exit(1))
 
 		combinedBuffer := gbytes.BufferWithBytes(append(bindService.Out.Contents(), bindService.Err.Contents()...))
-		//Eventually(combinedBuffer).Should(gbytes.Say(`context":"(root).scaling_rules.1.adjustment","description":"Does not match pattern '^[-+][1-9]+[0-9]*$'"`))
 		Eventually(string(combinedBuffer.Contents())).Should(ContainSubstring(`[{"context":"(root).scaling_rules.1.adjustment","description":"Does not match pattern '^[-+][1-9]+[0-9]*%?$'"}]`))
 
 		By("Test bind&unbind with policy")

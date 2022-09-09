@@ -9,6 +9,10 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+
+	"github.com/gorilla/mux"
+	"github.com/pivotal-cf/brokerapi/v8/handlers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 
@@ -19,8 +23,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	"github.com/onsi/gomega/ghttp"
-
-	"github.com/pivotal-cf/brokerapi/domain"
 
 	"code.cloudfoundry.org/lager/lagertest"
 
@@ -36,7 +38,8 @@ var _ = Describe("BrokerHandler", func() {
 		fakeCredentials *fakes.FakeCredentials
 		fakePlanChecker *fakes.FakePlanChecker
 
-		handler *BrokerHandler
+		handler handlers.APIHandler
+		broker  *Broker
 		resp    *httptest.ResponseRecorder
 		req     *http.Request
 	)
@@ -50,27 +53,22 @@ var _ = Describe("BrokerHandler", func() {
 	})
 
 	JustBeforeEach(func() {
-		handler = NewBrokerHandler(lagertest.NewTestLogger("test"), conf, bindingdb, policydb, []domain.Service{{
-			ID:   "a-service-id",
-			Name: "autoscaler",
-			Plans: []domain.ServicePlan{{
-				ID:   "a-plan-id",
-				Name: "standard",
-			}},
-		}}, fakecfClient, fakeCredentials)
+		broker = NewBroker(lagertest.NewTestLogger("testbroker"), conf, bindingdb, policydb, services, fakecfClient, fakeCredentials)
+		handler = handlers.NewApiHandler(broker, lagertest.NewTestLogger(("testhandler")))
 		if fakePlanChecker != nil {
-			handler.PlanChecker = fakePlanChecker
+			broker.PlanChecker = fakePlanChecker
 		}
 	})
 
 	Describe("GetBrokerCatalog", func() {
 		JustBeforeEach(func() {
-			handler.GetBrokerCatalog(resp, req, map[string]string{})
+			req, _ = http.NewRequest(http.MethodGet, "", bytes.NewReader([]byte("")))
+			handler.Catalog(resp, req)
 		})
 		Context("When getBrokerCatalog is called", func() {
 			It("gets the catalog json", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
-				Expect(resp.Body.Bytes()).To(Equal(catalogBytes))
+				Expect(resp.Body.Bytes()).To(MatchJSON(catalogBytes))
 			})
 		})
 	})
@@ -81,15 +79,17 @@ var _ = Describe("BrokerHandler", func() {
 		var body []byte
 		JustBeforeEach(func() {
 			req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
-			handler.CreateServiceInstance(resp, req, map[string]string{"instanceId": testInstanceId})
+			req = mux.SetURLVars(req, map[string]string{"instance_id": testInstanceId})
+
+			handler.Provision(resp, req)
 		})
 		BeforeEach(func() {
 			instanceCreationReqBody = &models.InstanceCreationRequestBody{
 				OrgGUID:   "an-org-guid",
 				SpaceGUID: "an-space-guid",
 				BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-					ServiceID: "a-service-id",
-					PlanID:    "a-plan-id",
+					ServiceID: "autoscaler-guid",
+					PlanID:    "autoscaler-free-plan-id",
 				},
 			}
 		})
@@ -97,9 +97,8 @@ var _ = Describe("BrokerHandler", func() {
 			BeforeEach(func() {
 				body = []byte("")
 			})
-			It("fails with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Invalid request body format"}`))
+			It("fails with 422", func() {
+				Expect(resp.Code).To(Equal(http.StatusUnprocessableEntity))
 			})
 		})
 		Context("When mandatory parameters are not provided", func() {
@@ -111,7 +110,6 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 400", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Malformed or missing mandatory data"}`))
 				})
 			})
 			Context("When SpaceGUID is not provided", func() {
@@ -122,7 +120,6 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 400", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Malformed or missing mandatory data"}`))
 				})
 			})
 			Context("When ServiceID is not provided", func() {
@@ -133,7 +130,6 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 400", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Malformed or missing mandatory data"}`))
 				})
 			})
 			Context("When PlanID is not provided", func() {
@@ -144,7 +140,6 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 400", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Malformed or missing mandatory data"}`))
 				})
 			})
 
@@ -160,7 +155,7 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("succeeds with 200", func() {
 					Expect(resp.Code).To(Equal(http.StatusOK))
-					Expect(resp.Body.String()).To(Equal(`{}`))
+					Expect(resp.Body.String()).To(MatchJSON(`{}`))
 				})
 			})
 
@@ -173,7 +168,7 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("succeeds with 200 and returns dashboard_url", func() {
 					Expect(resp.Code).To(Equal(http.StatusOK))
-					Expect(resp.Body.Bytes()).To(Equal([]byte("{\"dashboard_url\":\"https://service-dashboard-url.com/manage/an-instance-id\"}")))
+					Expect(resp.Body.Bytes()).To(MatchJSON("{\"dashboard_url\":\"https://service-dashboard-url.com/manage/an-instance-id\"}"))
 				})
 			})
 
@@ -185,7 +180,6 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 409", func() {
 					Expect(resp.Code).To(Equal(http.StatusConflict))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Conflict","message":"Service instance with instance_id \"an-instance-id\" already exists with different parameters"}`))
 				})
 			})
 
@@ -197,7 +191,7 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 500", func() {
 					Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Internal Server Error","message":"Error creating service instance"}`))
+					Expect(resp.Body.String()).To(MatchJSON(`{"description":"error creating service instance"}`))
 				})
 			})
 
@@ -209,7 +203,7 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("succeeds with 201 and returns dashboard_url", func() {
 					Expect(resp.Code).To(Equal(http.StatusCreated))
-					Expect(resp.Body.Bytes()).To(Equal([]byte("{\"dashboard_url\":\"https://service-dashboard-url.com/manage/an-instance-id\"}")))
+					Expect(resp.Body.Bytes()).To(MatchJSON(`{"dashboard_url":"https://service-dashboard-url.com/manage/an-instance-id"}`))
 				})
 			})
 			Context("When all mandatory parameters are present", func() {
@@ -240,7 +234,7 @@ var _ = Describe("BrokerHandler", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
 					bodyBytes, err := io.ReadAll(resp.Body)
 					Expect(err).NotTo(HaveOccurred())
-					Expect(string(bodyBytes)).To(Equal(`[{"context":"(root)","description":"instance_max_count is required"}]`))
+					Expect(string(bodyBytes)).To(ContainSubstring(`instance_max_count is required`))
 				})
 			})
 			Context("When a default policy with too many rules is present", func() {
@@ -268,7 +262,7 @@ var _ = Describe("BrokerHandler", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
 					bodyBytes, err := io.ReadAll(resp.Body)
 					Expect(err).NotTo(HaveOccurred())
-					Expect(string(bodyBytes)).To(Equal(`{"code":"Bad Request","message":"Too many scaling rules: Found 2 scaling rules, but a maximum of 1 scaling rules are allowed for this service plan. "}`))
+					Expect(string(bodyBytes)).To(MatchJSON(`{"description": "error: policy did not adhere to plan: Too many scaling rules: Found 2 scaling rules, but a maximum of 1 scaling rules are allowed for this service plan. "}`))
 				})
 			})
 			Context("When a default policy is present", func() {
@@ -278,8 +272,8 @@ var _ = Describe("BrokerHandler", func() {
 						OrgGUID:   "an-org-guid",
 						SpaceGUID: "an-space-guid",
 						BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-							ServiceID: "a-service-id",
-							PlanID:    "a-plan-id",
+							ServiceID: "autoscaler-guid",
+							PlanID:    "autoscaler-free-plan-id",
 						},
 						Parameters: models.InstanceParameters{
 							DefaultPolicy: &d,
@@ -316,13 +310,17 @@ var _ = Describe("BrokerHandler", func() {
 		}
 		callUpdateServiceInstance := func() {
 			req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
-			handler.UpdateServiceInstance(resp, req, map[string]string{"instanceId": testInstanceId})
+			req = mux.SetURLVars(req, map[string]string{"instance_id": testInstanceId})
+			handler.Update(resp, req)
 		}
 		JustBeforeEach(callUpdateServiceInstance)
 		BeforeEach(func() {
 			instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 				BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-					ServiceID: "a-service-id",
+					ServiceID: "autoscaler-guid",
+					PreviousValues: models.PreviousValues{
+						PlanID: servicePlanGuid,
+					},
 				},
 			}
 		})
@@ -330,9 +328,8 @@ var _ = Describe("BrokerHandler", func() {
 			BeforeEach(func() {
 				body = []byte("")
 			})
-			It("fails with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Invalid request body format"}`))
+			It("fails with 422", func() {
+				Expect(resp.Code).To(Equal(http.StatusUnprocessableEntity))
 			})
 		})
 		Context("When mandatory parameters are not provided", func() {
@@ -344,23 +341,7 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 400", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Malformed or missing mandatory data"}`))
 				})
-			})
-		})
-		Context("When no default policy & service plan update is performed", func() {
-			BeforeEach(func() {
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-			})
-			It("fails with 422", func() {
-				Expect(resp.Code).To(Equal(http.StatusUnprocessableEntity))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Unprocessable Entity","message":"Failed to update service instance: Only default policy and service plan updates are allowed"}`))
 			})
 		})
 		Context("When an invalid default policy is present", func() {
@@ -379,7 +360,7 @@ var _ = Describe("BrokerHandler", func() {
 				m := json.RawMessage(invalidDefaultPolicy)
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
+						ServiceID: "autoscaler-guid",
 					},
 					Parameters: &models.InstanceParameters{
 						DefaultPolicy: &m,
@@ -388,13 +369,13 @@ var _ = Describe("BrokerHandler", func() {
 				body, err = json.Marshal(instanceUpdateRequestBody)
 				Expect(err).NotTo(HaveOccurred())
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{}, nil)
-				setupCfClient("a-plan-id")
+				setupCfClient("autoscaler-free-plan-id")
 			})
 			It("fails with 400", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 				bodyBytes, err := io.ReadAll(resp.Body)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(string(bodyBytes)).To(Equal(`[{"context":"(root)","description":"instance_max_count is required"}]`))
+				Expect(string(bodyBytes)).To(ContainSubstring(`instance_max_count is required`))
 			})
 		})
 		Context("When the service instance to be updated does not exist", func() {
@@ -404,14 +385,14 @@ var _ = Describe("BrokerHandler", func() {
 				instanceUpdateRequestBody.Parameters = &parameters
 				body, err = json.Marshal(instanceUpdateRequestBody)
 				Expect(err).NotTo(HaveOccurred())
-				bindingdb.GetServiceInstanceReturns(nil, db.ErrDoesNotExist)
+				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{}, db.ErrDoesNotExist)
 			})
 			It("retrieves the service instance", func() {
 				Expect(bindingdb.GetServiceInstanceCallCount()).To(Equal(1))
 				Expect(bindingdb.GetServiceInstanceArgsForCall(0)).To(Equal(testInstanceId))
 			})
-			It("fails with 404", func() {
-				Expect(resp.Code).To(Equal(http.StatusNotFound))
+			It("fails with 410", func() {
+				Expect(resp.Code).To(Equal(http.StatusGone))
 			})
 		})
 		Context("When all mandatory parameters are present", func() {
@@ -439,8 +420,11 @@ var _ = Describe("BrokerHandler", func() {
 				d := json.RawMessage(testDefaultPolicy)
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-						PlanID:    "a-plan-id",
+						ServiceID: "autoscaler-guid",
+						PlanID:    "autoscaler-free-plan-id",
+						PreviousValues: models.PreviousValues{
+							PlanID: "autoscaler-free-plan-id",
+						},
 					},
 					Parameters: &models.InstanceParameters{
 						DefaultPolicy: &d,
@@ -454,10 +438,10 @@ var _ = Describe("BrokerHandler", func() {
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 				policydb.SetOrUpdateDefaultAppPolicyReturns([]string{"app-id-2"}, nil)
 				verifyScheduleIsUpdatedInScheduler("app-id-2", testDefaultPolicy)
-				setupCfClient("a-plan-id")
+				setupCfClient("autoscaler-free-plan-id")
 			})
 			Context("successfully", func() {
-				BeforeEach(func() { setupCfClient("a-plan-id") })
+				BeforeEach(func() { setupCfClient("autoscaler-free-plan-id") })
 				It("succeeds with 200, saves the default policy, and sets the default policy on the already bound apps", func() {
 					By("returning 200")
 					Expect(resp.Code).To(Equal(http.StatusOK))
@@ -482,60 +466,14 @@ var _ = Describe("BrokerHandler", func() {
 
 					By("updating the scheduler")
 					Expect(schedulerServer.ReceivedRequests()).To(HaveLen(1))
-
-					Expect(fakecfClient.GetServiceInstanceArgsForCall(0)).To(Equal(testInstanceId))
-					Expect(fakecfClient.GetServicePlanArgsForCall(0)).To(Equal(servicePlanGuid))
 				})
 			})
 			Context("with a fake plan checker", func() {
-				BeforeEach(func() { setupCfClient("a-plan-id") })
+				BeforeEach(func() { setupCfClient("autoscaler-free-plan-id") })
 				BeforeEach(func() { fakePlanChecker = &fakes.FakePlanChecker{} })
 				It("it uses the correct plan id", func() {
 					_, s := fakePlanChecker.CheckPlanArgsForCall(0)
-					Expect(s).To(Equal("a-plan-id"))
-				})
-			})
-			Context("When there are cf client errors", func() {
-				When("get service_instance fails", func() {
-					BeforeEach(func() {
-						fakecfClient.GetServiceInstanceReturns(nil, errors.New("SomeError"))
-					})
-
-					It("Fails correctly", func() {
-						Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-						bodyBytes, err := io.ReadAll(resp.Body)
-						Expect(err).NotTo(HaveOccurred())
-						Expect(string(bodyBytes)).To(MatchJSON(`{"code": "Internal Server Error","message": "Error retrieving broker plan Id"}`))
-					})
-				})
-
-				When("get service_plan fails", func() {
-					BeforeEach(func() {
-						fakecfClient.GetServiceInstanceReturns(&cf.ServiceInstance{
-							Relationships: cf.ServiceInstanceRelationships{
-								ServicePlan: cf.ServicePlanRelation{
-									Data: cf.ServicePlanData{Guid: servicePlanGuid}}},
-						}, nil)
-						fakecfClient.GetServicePlanReturns(nil, errors.New("SomeError"))
-					})
-					It("Fails correctly", func() {
-						Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-						bodyBytes, err := io.ReadAll(resp.Body)
-						Expect(err).NotTo(HaveOccurred())
-						Expect(string(bodyBytes)).To(MatchJSON(`{"code": "Internal Server Error","message": "Error retrieving broker plan Id"}`))
-					})
-				})
-			})
-			Context("Broker Catalog PlanId is cached", func() {
-
-				JustBeforeEach(func() { verifyScheduleIsUpdatedInScheduler("app-id-2", testDefaultPolicy) })
-				JustBeforeEach(callUpdateServiceInstance)
-				BeforeEach(func() {
-					setupCfClient("a-plan-id")
-				})
-				It("it call getBrokerCatalogPlanId only once", func() {
-					Expect(fakecfClient.GetServiceInstanceCallCount()).To(Equal(1), "GetServiceInstanceCallCount")
-					Expect(fakecfClient.GetServicePlanCallCount()).To(Equal(1), "GetServicePlanCallCount")
+					Expect(s).To(Equal("autoscaler-free-plan-id"))
 				})
 			})
 		})
@@ -544,8 +482,11 @@ var _ = Describe("BrokerHandler", func() {
 				d := json.RawMessage(testDefaultPolicy)
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-						PlanID:    "a-plan-id",
+						ServiceID: "autoscaler-guid",
+						PlanID:    "autoscaler-free-plan-id",
+						PreviousValues: models.PreviousValues{
+							PlanID: "autoscaler-free-plan-id",
+						},
 					},
 					Parameters: &models.InstanceParameters{
 						DefaultPolicy: &d,
@@ -561,7 +502,7 @@ var _ = Describe("BrokerHandler", func() {
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 				policydb.SetOrUpdateDefaultAppPolicyReturns([]string{"app-id-2"}, nil)
 				verifyScheduleIsUpdatedInScheduler("app-id-2", testDefaultPolicy)
-				setupCfClient("a-plan-id")
+				setupCfClient("autoscaler-free-plan-id")
 			})
 			It("succeeds with 200, saves the default policy, and updates the default policy", func() {
 				By("returning 200")
@@ -592,7 +533,7 @@ var _ = Describe("BrokerHandler", func() {
 				emptyJsonObject := json.RawMessage("\n{\n}\n")
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
+						ServiceID: "autoscaler-guid",
 					},
 					Parameters: &models.InstanceParameters{
 						DefaultPolicy: &emptyJsonObject,
@@ -614,7 +555,7 @@ var _ = Describe("BrokerHandler", func() {
 				Expect(err).To(BeNil())
 				policydb.GetAppPolicyReturns(&encodedTestDefaultPolicy, nil)
 				verifyScheduleIsDeletedInScheduler("app-id-2")
-				setupCfClient("a-plan-id")
+				setupCfClient("autoscaler-free-plan-id")
 			})
 			It("succeeds with 200 and removes the default policy", func() {
 				By("returning 200")
@@ -657,8 +598,11 @@ var _ = Describe("BrokerHandler", func() {
 				m := json.RawMessage(invalidDefaultPolicy)
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-						PlanID:    "a-plan-id",
+						ServiceID: "autoscaler-guid",
+						PlanID:    "autoscaler-free-plan-id",
+						PreviousValues: models.PreviousValues{
+							PlanID: "autoscaler-free-plan-id",
+						},
 					},
 					Parameters: &models.InstanceParameters{
 						DefaultPolicy: &m,
@@ -670,13 +614,13 @@ var _ = Describe("BrokerHandler", func() {
 					ServiceInstanceId: testInstanceId,
 				}, nil)
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-2", "app-id-1"}, nil)
-				setupCfClient("a-plan-id")
+				setupCfClient("autoscaler-free-plan-id")
 			})
 			It("fails with 400", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 				bodyBytes, err := io.ReadAll(resp.Body)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(string(bodyBytes)).To(Equal(`{"code":"Bad Request","message":"Too many scaling rules: Found 2 scaling rules, but a maximum of 1 scaling rules are allowed for this service plan. "}`))
+				Expect(string(bodyBytes)).To(MatchJSON(`{"description":"error: policy did not adhere to plan: Too many scaling rules: Found 2 scaling rules, but a maximum of 1 scaling rules are allowed for this service plan. "}`))
 			})
 		})
 
@@ -684,13 +628,16 @@ var _ = Describe("BrokerHandler", func() {
 			BeforeEach(func() {
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-						PlanID:    "a-plan-id-not-updatable",
+						ServiceID: "autoscaler-guid",
+						PlanID:    "autoscaler-free-plan-id-not-updatable",
+						PreviousValues: models.PreviousValues{
+							PlanID: "autoscaler-free-plan-id",
+						},
 					},
 				}
 				body, err = json.Marshal(instanceUpdateRequestBody)
 				Expect(err).NotTo(HaveOccurred())
-				setupCfClient("a-plan-id")
+				setupCfClient("autoscaler-free-plan-id")
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
 					ServiceInstanceId: testInstanceId,
 				}, nil)
@@ -704,13 +651,16 @@ var _ = Describe("BrokerHandler", func() {
 			BeforeEach(func() {
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-						PlanID:    "a-plan-id",
+						ServiceID: "autoscaler-guid",
+						PlanID:    "autoscaler-free-plan-id",
+						PreviousValues: models.PreviousValues{
+							PlanID: "autoscaler-free-plan-id",
+						},
 					},
 				}
 				body, err = json.Marshal(instanceUpdateRequestBody)
 				Expect(err).NotTo(HaveOccurred())
-				setupCfClient("a-plan-id")
+				setupCfClient("autoscaler-free-plan-id")
 
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 
@@ -724,12 +674,11 @@ var _ = Describe("BrokerHandler", func() {
 
 			It("Succeeds and leaves the old default policy in place", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
-				serviceInstance := bindingdb.UpdateServiceInstanceArgsForCall(0)
-				Expect(serviceInstance.ServiceInstanceId).To(Equal(testInstanceId))
-				Expect(serviceInstance.DefaultPolicy).To(MatchJSON(testDefaultPolicy))
-				Expect(serviceInstance.DefaultPolicyGuid).To(Equal("default-policy-guid"))
-				Expect(policydb.GetAppPolicyArgsForCall(0)).To(Equal("app-id-1"))
-				Expect(policydb.GetAppPolicyArgsForCall(1)).To(Equal("app-id-2"))
+
+				By("not touching service instance and leaving the policies unchanged", func() {
+					Expect(bindingdb.UpdateServiceInstanceCallCount()).To(Equal(0))
+					Expect(policydb.SetOrUpdateDefaultAppPolicyCallCount()).To(Equal(0))
+				})
 			})
 		})
 
@@ -737,27 +686,29 @@ var _ = Describe("BrokerHandler", func() {
 			BeforeEach(func() {
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-						PlanID:    "a-plan-id",
+						ServiceID: "autoscaler-guid",
+						PlanID:    "autoscaler-free-plan-id",
+						PreviousValues: models.PreviousValues{
+							PlanID: "autoscaler-free-plan-id-not-updatable",
+						},
 					},
 				}
 				body, err = json.Marshal(instanceUpdateRequestBody)
 				Expect(err).NotTo(HaveOccurred())
-				setupCfClient("a-plan-id-not-updatable")
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
 					ServiceInstanceId: testInstanceId,
 				}, nil)
 			})
 			It("fails with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(MatchJSON(`{"code":"Bad Request","message":"The plan is not updatable"}`))
+				Expect(resp.Code).To(Equal(http.StatusUnprocessableEntity))
+				Expect(resp.Body.String()).To(MatchJSON(`{"error": "PlanChangeNotSupported", "description":"The requested plan migration cannot be performed"}`))
 			})
 		})
-		Context("When the service does not exist", func() {
+		Context("When the service instance does not exist", func() {
 			BeforeEach(func() {
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
+						ServiceID: "autoscaler-guid",
 						PlanID:    "non-existing-plan",
 					},
 				}
@@ -767,8 +718,7 @@ var _ = Describe("BrokerHandler", func() {
 				bindingdb.GetServiceInstanceReturns(nil, db.ErrDoesNotExist)
 			})
 			It("fails with 404", func() {
-				Expect(resp.Code).To(Equal(http.StatusNotFound))
-				Expect(resp.Body.String()).To(MatchJSON(`{"code": "Not Found","message": "Failed to find service instance to update"}`))
+				Expect(resp.Code).To(Equal(http.StatusGone))
 			})
 		})
 		Context("Update service plan and policy both are updated together", func() {
@@ -776,8 +726,11 @@ var _ = Describe("BrokerHandler", func() {
 				d := json.RawMessage(testDefaultPolicy)
 				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-						PlanID:    "a-plan-id-not-updatable",
+						ServiceID: "autoscaler-guid",
+						PlanID:    "autoscaler-free-plan-id-not-updatable",
+						PreviousValues: models.PreviousValues{
+							PlanID: "autoscaler-free-plan-id",
+						},
 					},
 					Parameters: &models.InstanceParameters{
 						DefaultPolicy: &d,
@@ -792,7 +745,7 @@ var _ = Describe("BrokerHandler", func() {
 				}, nil)
 				policydb.SetOrUpdateDefaultAppPolicyReturns([]string{"app-id-2"}, nil)
 				verifyScheduleIsUpdatedInScheduler("app-id-2", testDefaultPolicy)
-				setupCfClient("a-plan-id")
+				setupCfClient("autoscaler-free-plan-id")
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 			})
 			It("fails with 400", func() {
@@ -820,59 +773,36 @@ var _ = Describe("BrokerHandler", func() {
 
 	Describe("DeleteServiceInstance", func() {
 		JustBeforeEach(func() {
-			handler.DeleteServiceInstance(resp, req, map[string]string{"instanceId": testInstanceId})
+			req, _ = http.NewRequest(http.MethodDelete, "", nil)
+			req = mux.SetURLVars(req, map[string]string{"instance_id": testInstanceId})
+			values := url.Values{}
+			values.Set("service_id", "autoscaler-guid")
+			values.Set("plan_id", "autoscaler-free-plan-id")
+			req.URL.RawQuery = values.Encode()
+
+			handler.Deprovision(resp, req)
 		})
 
 		Context("When database DeleteServiceInstance call returns ErrDoesnotExist", func() {
 			BeforeEach(func() {
-				instanceDeletionRequestBody := &models.BrokerCommonRequestBody{
-					ServiceID: "a-service-id",
-					PlanID:    "a-plan-id",
-				}
-				body, err := json.Marshal(instanceDeletionRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-				req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
-				Expect(err).NotTo(HaveOccurred())
-
 				bindingdb.DeleteServiceInstanceReturns(db.ErrDoesNotExist)
 			})
 			It("fails with 410", func() {
 				Expect(resp.Code).To(Equal(http.StatusGone))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Gone","message":"Service Instance Doesn't Exist"}`))
 			})
 		})
 
 		Context("When database DeleteServiceInstance call returns error other than ErrDoesnotExist", func() {
 			BeforeEach(func() {
-				instanceDeletionRequestBody := &models.BrokerCommonRequestBody{
-					ServiceID: "a-service-id",
-					PlanID:    "a-plan-id",
-				}
-				body, err := json.Marshal(instanceDeletionRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-				req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
-				Expect(err).NotTo(HaveOccurred())
-
 				bindingdb.DeleteServiceInstanceReturns(fmt.Errorf("error"))
 			})
 			It("fails with 500", func() {
 				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Internal Server Error","message":"Error deleting service instance"}`))
+				Expect(resp.Body.String()).To(MatchJSON(`{"description":"error deleting service instance"}`))
 			})
 		})
 
 		Context("When all mandatory parameters are present", func() {
-			BeforeEach(func() {
-				instanceDeletionRequestBody := &models.BrokerCommonRequestBody{
-					ServiceID: "a-service-id",
-					PlanID:    "a-plan-id",
-				}
-				body, err := json.Marshal(instanceDeletionRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-
-				req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
-				Expect(err).NotTo(HaveOccurred())
-			})
 			It("succeeds with 200", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
 			})
@@ -885,14 +815,6 @@ var _ = Describe("BrokerHandler", func() {
 
 				bindingdb.GetBindingIdsByInstanceIdReturns(bindingIds, nil)
 				bindingdb.GetAppIdByBindingIdReturnsOnCall(0, testAppId, nil)
-				instanceDeletionRequestBody := &models.BrokerCommonRequestBody{
-					ServiceID: "a-service-id",
-					PlanID:    "a-plan-id",
-				}
-				body, err := json.Marshal(instanceDeletionRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-				req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
-				Expect(err).ToNot(HaveOccurred())
 				verifyScheduleIsDeletedInScheduler(testAppId)
 			})
 			It("if it has been deleted", func() {
@@ -913,14 +835,6 @@ var _ = Describe("BrokerHandler", func() {
 
 				bindingdb.GetBindingIdsByInstanceIdReturns(bindingIds, nil)
 				bindingdb.GetAppIdByBindingIdReturnsOnCall(0, testAppId, nil)
-				instanceDeletionRequestBody := &models.BrokerCommonRequestBody{
-					ServiceID: "a-service-id",
-					PlanID:    "a-plan-id",
-				}
-				body, err := json.Marshal(instanceDeletionRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-				req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
-				Expect(err).NotTo(HaveOccurred())
 				verifyScheduleIsDeletedInScheduler(testAppId)
 			})
 			It("if it has been deleted", func() {
@@ -958,23 +872,22 @@ var _ = Describe("BrokerHandler", func() {
 			bindingRequestBody = &models.BindingRequestBody{
 				AppID: "an-app-id",
 				BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-					ServiceID: "a-service-id",
-					PlanID:    "a-plan-id",
+					ServiceID: "autoscaler-guid",
+					PlanID:    "autoscaler-free-plan-id",
 				},
 				Policy: json.RawMessage(bindingPolicy),
 			}
 		})
 		JustBeforeEach(func() {
 			req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
-			handler.BindServiceInstance(resp, req, map[string]string{"instanceId": testInstanceId, "bindingId": "a-binding-id"})
+			handler.Bind(resp, req)
 		})
 		Context("When request body is not a valid json", func() {
 			BeforeEach(func() {
 				body = []byte("")
 			})
-			It("fails with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Invalid request body format"}`))
+			It("fails with 422", func() {
+				Expect(resp.Code).To(Equal(http.StatusUnprocessableEntity))
 			})
 		})
 		Context("When mandatory parameters are not provided", func() {
@@ -984,9 +897,9 @@ var _ = Describe("BrokerHandler", func() {
 					body, err = json.Marshal(bindingRequestBody)
 					Expect(err).NotTo(HaveOccurred())
 				})
-				It("fails with 400", func() {
-					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Malformed or missing mandatory data"}`))
+				It("fails with 422", func() {
+					Expect(resp.Code).To(Equal(http.StatusUnprocessableEntity))
+					Expect(resp.Body.String()).To(MatchJSON(`{"error": "RequiresApp", "description": "error: service must be bound to an application - service key creation is not supported"}`))
 				})
 			})
 
@@ -998,7 +911,6 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 400", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Malformed or missing mandatory data"}`))
 				})
 			})
 
@@ -1010,7 +922,6 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 400", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Malformed or missing mandatory data"}`))
 				})
 			})
 
@@ -1037,8 +948,8 @@ var _ = Describe("BrokerHandler", func() {
 				bindingRequestBody = &models.BindingRequestBody{
 					AppID: "an-app-id",
 					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "a-service-id",
-						PlanID:    "a-plan-id",
+						ServiceID: "autoscaler-guid",
+						PlanID:    "autoscaler-free-plan-id",
 					},
 					Policy: json.RawMessage(bindingPolicy),
 				}
@@ -1048,7 +959,7 @@ var _ = Describe("BrokerHandler", func() {
 			})
 			It("fails with 400", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Too many scaling rules: Found 2 scaling rules, but a maximum of 1 scaling rules are allowed for this service plan. "}`))
+				Expect(resp.Body.String()).To(MatchJSON(`{"description":"error: policy did not adhere to plan: Too many scaling rules: Found 2 scaling rules, but a maximum of 1 scaling rules are allowed for this service plan. "}`))
 			})
 		})
 		Context("When mandatory parameters are present", func() {
@@ -1094,8 +1005,8 @@ var _ = Describe("BrokerHandler", func() {
 					bindingRequestBody = &models.BindingRequestBody{
 						AppID: testAppId,
 						BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-							ServiceID: "a-service-id",
-							PlanID:    "a-plan-id",
+							ServiceID: "autoscaler-guid",
+							PlanID:    "autoscaler-free-plan-id",
 						},
 						Policy: json.RawMessage(testBindingPolicy),
 					}
@@ -1122,8 +1033,8 @@ var _ = Describe("BrokerHandler", func() {
 					bindingRequestBody = &models.BindingRequestBody{
 						AppID: testAppId,
 						BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-							ServiceID: "a-service-id",
-							PlanID:    "a-plan-id",
+							ServiceID: "autoscaler-guid",
+							PlanID:    "autoscaler-free-plan-id",
 						},
 					}
 					body, err = json.Marshal(bindingRequestBody)
@@ -1151,7 +1062,7 @@ var _ = Describe("BrokerHandler", func() {
 			})
 			It("fails with 409", func() {
 				Expect(resp.Code).To(Equal(http.StatusConflict))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Conflict","message":"An autoscaler service instance is already bound to the application. Multiple bindings are not supported."}`))
+				Expect(resp.Body.String()).To(MatchJSON(`{"description":"error: an autoscaler service instance is already bound to the application and multiple bindings are not supported"}`))
 			})
 		})
 
@@ -1163,7 +1074,7 @@ var _ = Describe("BrokerHandler", func() {
 			})
 			It("fails with 500", func() {
 				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Internal Server Error","message":"Error creating service binding"}`))
+				Expect(resp.Body.String()).To(MatchJSON(`{"description":"error creating service binding"}`))
 			})
 		})
 		Context("When failed to create credential", func() {
@@ -1177,7 +1088,7 @@ var _ = Describe("BrokerHandler", func() {
 				Expect(policydb.SaveCredentialCallCount()).To(Equal(0))
 				Expect(fakeCredentials.CreateCallCount()).To(Equal(1))
 				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Internal Server Error","message":"Error creating service binding"}`))
+				Expect(resp.Body.String()).To(MatchJSON(`{"description":"error creating service binding"}`))
 			})
 		})
 
@@ -1200,7 +1111,7 @@ var _ = Describe("BrokerHandler", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 				bodyBytes, err := io.ReadAll(resp.Body)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(string(bodyBytes)).To(Equal(`[{"context":"(root)","description":"instance_min_count is required"}]`))
+				Expect(string(bodyBytes)).To(ContainSubstring(`instance_min_count is required`))
 			})
 		})
 
@@ -1228,17 +1139,21 @@ var _ = Describe("BrokerHandler", func() {
 	})
 
 	Describe("UnBindServiceInstance", func() {
-		var err error
 		BeforeEach(func() {
+			req, _ = http.NewRequest(http.MethodDelete, "", nil)
+			req = mux.SetURLVars(req, map[string]string{"instance_id": testInstanceId, "binding_id": testBindingId})
+			values := url.Values{}
+			values.Set("service_id", "autoscaler-guid")
+			values.Set("plan_id", "autoscaler-free-plan-id")
+			req.URL.RawQuery = values.Encode()
+
 			bindingdb.GetAppIdByBindingIdReturns(testAppId, nil)
 		})
 		JustBeforeEach(func() {
-			handler.UnbindServiceInstance(resp, req, map[string]string{"instanceId": testInstanceId, "bindingId": "a-binding-id"})
+			handler.Unbind(resp, req)
 		})
 		Context("When mandatory parameters are present", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest(http.MethodDelete, "", nil)
-				Expect(err).NotTo(HaveOccurred())
 				verifyScheduleIsDeletedInScheduler(testAppId)
 			})
 			It("succeed with 200", func() {
@@ -1248,8 +1163,6 @@ var _ = Describe("BrokerHandler", func() {
 		})
 		Context("When there is no app with the bindingId", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest(http.MethodDelete, "", nil)
-				Expect(err).NotTo(HaveOccurred())
 				bindingdb.GetAppIdByBindingIdReturns("", sql.ErrNoRows)
 			})
 			AfterEach(func() {
@@ -1257,13 +1170,10 @@ var _ = Describe("BrokerHandler", func() {
 			})
 			It("succeed with 410", func() {
 				Expect(resp.Code).To(Equal(http.StatusGone))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Gone","message":"Failed to unbind service: Service binding does not exist"}`))
 			})
 		})
 		Context("When failed to get appId by bindingId", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest(http.MethodDelete, "", nil)
-				Expect(err).NotTo(HaveOccurred())
 				bindingdb.GetAppIdByBindingIdReturns("", errors.New("some error"))
 			})
 			AfterEach(func() {
@@ -1271,33 +1181,28 @@ var _ = Describe("BrokerHandler", func() {
 			})
 			It("succeed with 500", func() {
 				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Internal Server Error","message":"Failed to unbind service: Error deleting service binding"}`))
+				Expect(resp.Body.String()).To(MatchJSON(`{"description":"error deleting service binding"}`))
 			})
 		})
 		Context("When database DeleteServiceBinding call returns ErrDoesnotExist", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest(http.MethodDelete, "", nil)
-				Expect(err).NotTo(HaveOccurred())
 				bindingdb.DeleteServiceBindingReturns(db.ErrDoesNotExist)
 				verifyScheduleIsDeletedInScheduler(testAppId)
 			})
 			It("fails with 410", func() {
 				Expect(resp.Code).To(Equal(http.StatusGone))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Gone","message":"Failed to unbind service: Service binding does not exist"}`))
 				Expect(schedulerServer.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
 		Context("When database DeleteServiceBinding call returns error other than ErrDoesnotExist", func() {
 			BeforeEach(func() {
-				req, err = http.NewRequest(http.MethodDelete, "", nil)
-				Expect(err).NotTo(HaveOccurred())
 				bindingdb.DeleteServiceBindingReturns(fmt.Errorf("some sql error"))
 				verifyScheduleIsDeletedInScheduler(testAppId)
 			})
 			It("fails with 500", func() {
 				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Internal Server Error","message":"Failed to unbind service: Error deleting service binding"}`))
+				Expect(resp.Body.String()).To(MatchJSON(`{"description":"error deleting service binding"}`))
 				Expect(schedulerServer.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
@@ -1310,8 +1215,8 @@ func createInstanceCreationRequestBody(defaultPolicy string) []byte {
 		OrgGUID:   "an-org-guid",
 		SpaceGUID: "an-space-guid",
 		BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-			ServiceID: "a-service-id",
-			PlanID:    "a-plan-id",
+			ServiceID: "autoscaler-guid",
+			PlanID:    "autoscaler-free-plan-id",
 		},
 		Parameters: models.InstanceParameters{
 			DefaultPolicy: &m,

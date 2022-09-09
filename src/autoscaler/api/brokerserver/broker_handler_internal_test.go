@@ -2,8 +2,16 @@ package brokerserver
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 	"time"
+
+	"github.com/pivotal-cf/brokerapi/v8/handlers"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"code.cloudfoundry.org/lager"
+
+	"github.com/pivotal-cf/brokerapi/v8/domain"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
@@ -11,8 +19,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	"code.cloudfoundry.org/lager/lagertest"
-
-	"github.com/pivotal-cf/brokerapi/domain"
 
 	"github.com/onsi/gomega/ghttp"
 
@@ -25,13 +31,15 @@ var (
 	policydb              *fakes.FakePolicyDB
 	fakecfClient          *fakes.FakeCFClient
 	fakeCredentials       *fakes.FakeCredentials
-	handler               *BrokerHandler
+	broker                *Broker
+	handler               handlers.APIHandler
 	conf                  *config.Config
 	schedulerServer       = ghttp.NewServer()
 	port                  = 10000 + GinkgoParallelProcess()
 	testBindingId         = "a-binding-id"
 	testServiceInstanceId = "a-service-instance-id"
 	testAppId             = "an-app-id"
+	catalog               []domain.Service
 )
 
 var _ = Describe("BrokerHandler", func() {
@@ -92,18 +100,22 @@ var _ = Describe("BrokerHandler", func() {
 		policydb = &fakes.FakePolicyDB{}
 		fakecfClient = &fakes.FakeCFClient{}
 		fakeCredentials = &fakes.FakeCredentials{}
+		plans := []domain.ServicePlan{{
+			ID:   "a-plan-id",
+			Name: "standard",
+		}}
+
+		catalog = []domain.Service{{
+			ID:    "a-service-id",
+			Name:  "autoscaler",
+			Plans: plans,
+		}}
+
 	})
 
 	JustBeforeEach(func() {
-		handler = NewBrokerHandler(lagertest.NewTestLogger("test"), conf, bindingdb, policydb, []domain.Service{{
-			ID:   "a-service-id",
-			Name: "autoscaler",
-			Plans: []domain.ServicePlan{{
-				ID:   "a-plan-id",
-				Name: "standard",
-			}},
-		}}, fakecfClient, fakeCredentials,
-		)
+		broker = NewBroker(lagertest.NewTestLogger(("testbroker")), conf, bindingdb, policydb, catalog, fakecfClient, fakeCredentials)
+		handler = handlers.NewApiHandler(broker, lagertest.NewTestLogger(("testhandler")))
 	})
 	Describe("test delete binding", func() {
 		var err error
@@ -112,12 +124,12 @@ var _ = Describe("BrokerHandler", func() {
 				bindingdb.GetAppIdByBindingIdReturns("", sql.ErrNoRows)
 			})
 			JustBeforeEach(func() {
-				err = deleteBinding(handler, testBindingId, testServiceInstanceId)
+				err = deleteBinding(broker, testBindingId, testServiceInstanceId)
 				Expect(err).To(HaveOccurred())
 			})
 
 			It("sql.ErrNoRows error occurs", func() {
-				Expect(err.Error()).To(Equal("Service binding does not exist"))
+				Expect(err.Error()).To(Equal("service binding does not exist"))
 				Expect(policydb.DeletePolicyCallCount()).To(Equal(0))
 				Expect(bindingdb.DeleteServiceBindingCallCount()).To(Equal(0))
 			})
@@ -132,7 +144,7 @@ var _ = Describe("BrokerHandler", func() {
 				verifyScheduleIsDeletedInScheduler(testAppId)
 			})
 			JustBeforeEach(func() {
-				err = deleteBinding(handler, testBindingId, testServiceInstanceId)
+				err = deleteBinding(broker, testBindingId, testServiceInstanceId)
 			})
 
 			It("service binding should be deleted", func() {
@@ -155,4 +167,46 @@ func verifyScheduleIsDeletedInScheduler(appId string) {
 	schedulerServer.AppendHandlers(ghttp.CombineHandlers(
 		ghttp.VerifyRequest("DELETE", deleteSchedulePath.String()),
 	))
+}
+
+func deleteBinding(h *Broker, bindingId string, serviceInstanceId string) error {
+	appId, err := h.bindingdb.GetAppIdByBindingId(bindingId)
+	if errors.Is(err, sql.ErrNoRows) {
+		h.logger.Info("binding does not exist", nil, lager.Data{"instanceId": serviceInstanceId, "bindingId": bindingId})
+		return errorBindingDoesNotExist
+	}
+	if err != nil {
+		h.logger.Error("failed to get appId by bindingId", err, lager.Data{"instanceId": serviceInstanceId, "bindingId": bindingId})
+		return errorDeleteServiceBinding
+	}
+	h.logger.Info("deleting policy json", lager.Data{"appId": appId})
+	err = h.policydb.DeletePolicy(appId)
+	if err != nil {
+		h.logger.Error("failed to delete policy for unbinding", err, lager.Data{"appId": appId})
+		return errorDeletePolicyForUnbinding
+	}
+
+	h.logger.Info("deleting schedules", lager.Data{"appId": appId})
+	err = h.schedulerUtil.DeleteSchedule(appId)
+	if err != nil {
+		h.logger.Info("failed to delete schedules for unbinding", lager.Data{"appId": appId})
+		return errorDeleteSchedulesForUnbinding
+	}
+	err = h.bindingdb.DeleteServiceBinding(bindingId)
+	if err != nil {
+		h.logger.Error("failed to delete binding", err, lager.Data{"bindingId": bindingId, "appId": appId})
+		if errors.Is(err, db.ErrDoesNotExist) {
+			return errorBindingDoesNotExist
+		}
+
+		return errorDeleteServiceBinding
+	}
+
+	err = h.credentials.Delete(appId)
+	if err != nil {
+		h.logger.Error("failed to delete custom metrics credential for unbinding", err, lager.Data{"appId": appId})
+		return errorCredentialNotDeleted
+	}
+
+	return nil
 }
