@@ -27,6 +27,8 @@ jobs:
   deploy_autoscaler:
     # Determine if we require jobs for Acceptance Tests in this workflow by checking relevant events and labels.
     # Verifcation job runs always.
+    # Adding a non related label does not require acceptance run, however github will rerun workflow and skip all jobs
+    #  - in such case verification will reuse previous check result.
     if: |
       ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
@@ -51,7 +53,7 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Deploy autoscaler
         run: |
-          echo ">> WIP: exiting early"; exit 1
+          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment
 
