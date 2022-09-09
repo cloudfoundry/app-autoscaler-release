@@ -51,7 +51,7 @@ jobs:
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
-        suite: [ API, APP, BROKER ]
+        suite: [ API, APP, Broker ]
     runs-on: ubuntu-latest
     name: ${{ matrix.suite }} test
     steps:
@@ -71,7 +71,7 @@ jobs:
   acceptance_tests_verify:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
-    name: Acceptance Tests Result (Buildin)
+    name: Acceptance Tests Result (Broker)
     runs-on: ubuntu-latest
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
