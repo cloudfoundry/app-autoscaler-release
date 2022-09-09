@@ -37,14 +37,16 @@ jobs:
     name: Deploy autoscaler
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - name: "Create the check"
+      - name: Create pending check
         uses: ./app-autoscaler-release/.github/actions/pending_check
         with:
           pending_check: create
-      - uses: ./app-autoscaler-release/.github/actions/setup_environment
+      - name: Setup environment for deployment
+        uses: ./app-autoscaler-release/.github/actions/setup_environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Deploy autoscaler
@@ -61,13 +63,15 @@ jobs:
     runs-on: ubuntu-latest
     name: ${{ matrix.suite }} test
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/setup_environment
+      - name: Setup environment for acceptance tests
+        uses: ./app-autoscaler-release/.github/actions/setup_environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
-      - name: run acceptance test - ${{ matrix.suite }}
+      - name: Run acceptance test - ${{ matrix.suite }}
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
@@ -81,24 +85,30 @@ jobs:
     name: Acceptance Tests Result (Broker)
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        path: app-autoscaler-release
     - name: "Verify jobs execution"
       uses: ./app-autoscaler-release/.github/actions/pending_check
       with:
         pending_check: verify
-
 
   deployment_cleanup:
     needs: [ acceptance_tests ]
     name: Deployment cleanup
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/setup_environment
+      - name: "Setup environment to cleanup the deployment"
+        uses: ./app-autoscaler-release/.github/actions/setup_environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
-      - run: |
+      - name: Perform deployment cleanup
+        run: |
           echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment-cleanup
