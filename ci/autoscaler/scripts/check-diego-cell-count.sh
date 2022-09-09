@@ -15,4 +15,11 @@ actual_cells=$( bosh -d cf manifest | yq ".instance_groups | map(select(.name ==
 echo "Expeted diego cell count: '$expected_cells'"
 echo "Actual diego cell count: '$actual_cells'"
 
-[[ "$expected_cells" != "$actual_cells" ]] && exit 1
+if [[  "$expected_cells" == "$actual_cells" ]]; then
+  echo "Expected cell count match"
+  exit 0
+else
+  echo "Expected cell count does not match"
+  exit 1
+fi
+
