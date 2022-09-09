@@ -92,11 +92,10 @@ fi
 
 echo "::group::Retrieving status of jobs (checks_filter: ${CHECK_FILTER})"
 curl -s "${curlopts[@]}" "${checkruns_commit_url}" \
- |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match(".*acceptance tests")) | " - \(.name): \(.html_url)"' \
- > bad_jobs.txt
- cat bad_jobs.txt
+  | jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("'"${CHECK_FILTER}"'")) | " - \(.name): \(.html_url)"' \
+  > bad_jobs.txt
 echo "::endgroup::"
-if [ ! -s bad_jobs ]; then
+if [ ! -s bad_jobs.txt ]; then
   echo "OK: all jobs passed!"
 
   echo "::group::Sending success conclusion to the workflow check"
