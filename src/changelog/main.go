@@ -5,7 +5,6 @@ import (
 	"changelog/github"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -76,7 +75,7 @@ func main() {
 	}
 
 	if opts.changelogFile != "" {
-		err := ioutil.WriteFile(opts.changelogFile, []byte(changelog), 0600)
+		err := os.WriteFile(opts.changelogFile, []byte(changelog), 0600)
 		if err != nil {
 			log.Fatalf("ERROR: failed write md file '%s':%s", opts.previousReleaseTagName)
 		}
@@ -85,7 +84,7 @@ func main() {
 	}
 
 	if opts.nextReleaseTagNameFile != "" {
-		err := ioutil.WriteFile(opts.nextReleaseTagNameFile, []byte(nextVersion), 0600)
+		err := os.WriteFile(opts.nextReleaseTagNameFile, []byte(nextVersion), 0600)
 		if err != nil {
 			panic(err)
 		}

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -255,7 +255,7 @@ func put(url string, body string) ([]byte, int) {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	raw, err := ioutil.ReadAll(resp.Body)
+	raw, err := io.ReadAll(resp.Body)
 	Expect(err).ShouldNot(HaveOccurred())
 	return raw, resp.StatusCode
 }
@@ -273,7 +273,7 @@ func deleteReq(url string) ([]byte, int) {
 	resp, err := DoAPIRequest(req)
 	Expect(err).ShouldNot(HaveOccurred())
 	defer func() { _ = resp.Body.Close() }()
-	response, err := ioutil.ReadAll(resp.Body)
+	response, err := io.ReadAll(resp.Body)
 	Expect(err).ShouldNot(HaveOccurred())
 	return response, resp.StatusCode
 }
@@ -293,7 +293,7 @@ func get(url string) ([]byte, int) {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	policy, err := ioutil.ReadAll(resp.Body)
+	policy, err := io.ReadAll(resp.Body)
 	Expect(err).ShouldNot(HaveOccurred())
 	return policy, resp.StatusCode
 }

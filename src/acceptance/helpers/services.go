@@ -4,7 +4,7 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -62,7 +62,7 @@ func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
 		Expect(err).ShouldNot(HaveOccurred())
 		defer func() { _ = resp.Body.Close() }()
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		bodyBytes, err := io.ReadAll(resp.Body)
 		Expect(err).NotTo(HaveOccurred())
 		setEnv := cf.Cf("set-env", appName, CustomMetricCredEnv, string(bodyBytes)).Wait(cfg.DefaultTimeoutDuration())
 		Expect(setEnv).To(Exit(0), "failed set custom metric credential env")
