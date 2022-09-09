@@ -25,7 +25,7 @@ function main {
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function check_create {
 echo '::group::Creating new check'
-curl -v "${curlopts[@]}" "${token}" -POST "${checkruns_url}" -o new_check.json \
+curl -v "${curlopts[@]}" -H "Authorization: token ${GITHUB_TOKEN}" -POST "${checkruns_url}" -o new_check.json \
 -d @- << END;
     {
     "name":        "${CHECK_NAME}",
