@@ -7,9 +7,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/onsi/gomega/matchers"
-	"github.com/onsi/gomega/types"
-
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
 	"github.com/pkg/errors"
@@ -333,44 +330,57 @@ var _ = Describe("Health Readiness", func() {
 					Handler(healthRoute).
 					Get("/debug/pprof").
 					Expect(t).
-					Assert(bodyContainsSubstring(false, "Types of profiles available")).
+					Assert(assertBody(func(body string) bool {
+						return Expect(body).To(Not(ContainSubstring("Types of profiles available")))
+					})).
 					Status(http.StatusOK).
 					End()
 			})
 		})
 
 		When("basic auth is configured", func() {
-			It("should be available", func() {
-				apitest.New().
-					Handler(healthRoute).
-					Get("/debug/pprof").
-					BasicAuth("test-user-name", "test-user-password").
-					Expect(t).
-					Assert(bodyContainsSubstring(true, "Types of profiles available")).
-					Status(http.StatusOK).
-					End()
+			When("no credentials are sent", func() {
+				It("should return unauthorized and not be available", func() {
+					apitest.New().
+						Handler(healthRoute).
+						Get("/debug/pprof").
+						Expect(t).
+						Assert(assertBody(func(body string) bool {
+							return Expect(body).To(Not(ContainSubstring("Types of profiles available")))
+						})).
+						Status(http.StatusUnauthorized).
+						End()
+				})
+			})
+
+			When("the correct credentials are sent", func() {
+				It("should be available", func() {
+					apitest.New().
+						Handler(healthRoute).
+						Get("/debug/pprof").
+						BasicAuth("test-user-name", "test-user-password").
+						Expect(t).
+						Assert(assertBody(func(body string) bool {
+							return Expect(body).To(ContainSubstring("Types of profiles available"))
+						})).
+						Status(http.StatusOK).
+						End()
+				})
 			})
 		})
 	})
 })
 
-func bodyContainsSubstring(doesContain bool, substr string) func(res *http.Response, _ *http.Request) error {
+func assertBody(p func(body string) bool) func(res *http.Response, _ *http.Request) error {
 	return func(res *http.Response, _ *http.Request) error {
 		b, err := io.ReadAll(res.Body)
 		if err != nil {
 			return errors.New("failed reading body")
 		}
-		if Expect(string(b)).To(Invert(!doesContain, ContainSubstring(substr))) {
+		if p(string(b)) {
 			return nil
 		}
 		// should not be reachable
 		return errors.New("assertion failed")
 	}
-}
-
-func Invert(invert bool, matcher types.GomegaMatcher) types.GomegaMatcher {
-	if invert {
-		return &matchers.NotMatcher{Matcher: matcher}
-	}
-	return matcher
 }
