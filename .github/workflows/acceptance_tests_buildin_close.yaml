@@ -29,7 +29,7 @@ jobs:
         with:
           path: app-autoscaler-release
           ref: main
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+      - uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
