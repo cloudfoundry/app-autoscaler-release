@@ -18,14 +18,14 @@ anchors:
     GINKGO_OPTS: "--fail-fast"
 
   acceptance-main-buildin-env: &acceptance-main-buildin-env
-    AUTOSCALER_DIR: "./"
     SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-bld-main"
     SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-bld-main"
     BOSH_FIX_RELEASES: true
     GINKGO_OPTS: "--fail-fast"
-    BUILDIN_MODE: true
+    # Skipped - deployment requires retrofit of make targets
+    #BUILDIN_MODE: true
     SERVICE_OFFERING_ENABLED: false
 
   upgrade-test-env: &upgrade-test-env
@@ -66,6 +66,19 @@ anchors:
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
+
+  app-autoscaler-ops-files-buildin: &app-autoscaler-ops-files-buildin
+    OPS_FILES: |
+      operations/add-releases.yml
+      operations/instance-identity-cert-from-cf.yml
+      operations/add-postgres-variables.yml
+      operations/enable-nats-tls.yml
+      operations/loggregator-certs-from-cf.yml
+      operations/add-extra-plan.yml
+      operations/set-release-version.yml
+      operations/enable-log-cache.yml
+      operations/log-cache-syslog-server.yml
+      operations/use_buildin_mode.yml
 
 
 groups:
@@ -617,7 +630,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *acceptance-main-buildin-env
-      <<: *app-autoscaler-ops-files
+      <<: *app-autoscaler-ops-files-buildin
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - in_parallel:
@@ -626,6 +639,7 @@ jobs:
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-main-buildin-env
+        BUILDIN_MODE: true
         SUITES: api
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
@@ -634,6 +648,7 @@ jobs:
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-main-buildin-env
+        BUILDIN_MODE: true
         SUITES: app
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
