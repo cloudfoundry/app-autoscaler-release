@@ -2,12 +2,13 @@
 
 __Deploy PR + Run Acceptance tests__
 
-see `.github/test/acceptance_test.example.secrets` for `$ACCEPTANCE_TEST_SECRET_FILE` example
+See `.github/test/acceptance_test.example.secrets` for `${ACCEPTANCE_TEST_SECRET_FILE}` example.
 
-```
-    act -W ./.github/workflows/acceptance_tests.yaml\
-        -j deploy_autoscaler  \
+```console
+    # Make sure you have your credentials in a shell-variable. In this example we use: "GITHUB_TOKEN".
+    act --workflows ./.github/workflows/acceptance_tests.yaml \
+        --job deploy_autoscaler \
         --eventpath .github/test/event.json \
-        --secret-file "$ACCEPTANCE_TEST_SECRET_FILE"  \
-        -s GITHUB_TOKEN="$(cat $PERSONAL_GITHUB_TOKEN_FILE)"
+        --secret-file "${ACCEPTANCE_TEST_SECRET_FILE}" \
+        --secret GITHUB_TOKEN="${GITHUB_TOKEN}"
 ```

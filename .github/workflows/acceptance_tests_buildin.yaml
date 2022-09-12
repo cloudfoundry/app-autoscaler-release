@@ -3,33 +3,35 @@ on:
   pull_request:
     types: [ opened, labeled, synchronize ]
     paths:
-      - 'src/acceptance/**'
+     - 'src/acceptance/**'
 
 env:
   MAVEN_VERSION: 3.6.3
   MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
   BUILDIN_MODE: true
   SERVICE_OFFERING_ENABLED: false
-  check_name: "acceptance_test_check_buildin"
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
   SERVICE_BROKER_NAME: "autoscaler-${{ github.event.pull_request.number }}servicebroker"
   SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
+  GINKGO_OPTS: "--fail-fast"
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-
+  CHECK_NAME: "acceptance-check-buildin"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  start_pending_result:
-    # if open and synchronised events happen just check if it has the label
-    #  or if label event and has the correct label added we might be able to just remove this
+  deploy_autoscaler:
+    # Determine if we require jobs for Acceptance Tests in this workflow by checking relevant events and labels.
+    # Verifcation job runs always.
+    # Adding a non related label does not require acceptance run, however github will rerun workflow and skip all jobs
+    #  - in such case verification will reuse previous check result.
     if: |
       ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
@@ -37,181 +39,78 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Post pending Acceptance test result
-    runs-on: ubuntu-latest
-    outputs:
-      check_id: ${{ steps.create_check.outputs.check_id }}
-    permissions:
-      checks: write
-    steps:
-      - run: echo "sha is ${{github.event.pull_request.head.sha}}"
-      - run: |
-          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
-
-          echo "::group::Creating new check"
-
-          curl -vf -X POST \
-            --retry 5 \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs" \
-            -d '{ "name": "${{env.check_name}}","head_sha": "${{ github.event.pull_request.head.sha }}","status": "in_progress","external_id": "${{ github.run_id }}","output":{ "title":"Acceptance Test running", "summary":"acceptance tests for commit ${{ github.event.pull_request.head.sha }}","text":"Awaiting test result" }}' \
-            -o new_check.json
-
-          id=$(jq -r '.id' new_check.json)
-
-          if [ -z "${id}" ]; then
-            echo "ERROR: Failed to create the required check job"
-            echo "Result of curl:"
-            cat new_check.json
-            exit 1
-          fi
-          echo "::endgroup::"
-
-          echo "Id is: ${id}"
-          echo "::set-output name=check_id::${id}"
-        id: create_check
-        name: Adding initial pending acceptance test result
-
-  #Note: All the tests that can fail and should be reported in the error result need to end with "acceptance tests" to enable filtering of the checks.
-  deploy_autoscaler:
-    needs: [ start_pending_result ]
-    name: "Deploy for acceptance tests"
+    name: Deploy for acceptance tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+      - name: Create pending check
+        uses: ./app-autoscaler-release/.github/actions/pending-check
         with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
-      # TODO: When removing metricserver and metricgateway merge enable-log-cache.yml into the default templates/app-autoscaler.yml manifest.
-      - name: deploy autoscaler
+          pending_check: create
+      - name: Setup environment for deployment
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
+        with:
+          ssh-key: ${{ secrets.BBL_SSH_KEY}}
+      - name: Deploy autoscaler
         run: |
-          cd ${{ env.AUTOSCALER_DIR }}
-          make deployment BUILDIN_MODE=${{ env.BUILDIN_MODE }}
+          cd ${AUTOSCALER_DIR}
+          make deployment
 
-  acceptance_test_api:
+  acceptance_tests:
     needs: [ deploy_autoscaler ]
-    name: "API acceptance tests"
+    strategy:
+      matrix:
+        suite: [ API, APP ]
     runs-on: ubuntu-latest
+    name: ${{ matrix.suite }} acceptance tests
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
+      - name: Setup environment for acceptance tests
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
-      - name: run acceptance test - api
+          ssh-key: ${{ secrets.BBL_SSH_KEY}}
+      - name: Run acceptance test - ${{ matrix.suite }}
+        env:
+          MATRIX_SUITE: ${{ matrix.suite }}
         run: |
-          export SUITES="api"
-          cd ${{ env.AUTOSCALER_DIR }}
-          make acceptance-tests BUILDIN_MODE=${{ env.BUILDIN_MODE }}
+          cd ${AUTOSCALER_DIR}
+          make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
-  acceptance_test_app:
-    needs: [ deploy_autoscaler ]
-    name: "APP acceptance tests"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-
-      - name: run acceptance test - app
-        run: |
-          export SUITES="app"
-          cd ${{ env.AUTOSCALER_DIR }}
-          make acceptance-tests BUILDIN_MODE=${{ env.BUILDIN_MODE }}
-
-
-  ### This is a final node to indicate the completion of all the acceptance tests
-  completed_run:
-    needs: [ start_pending_result, acceptance_test_app, acceptance_test_api ]
-    name: Posting test result
-    runs-on: ubuntu-latest
-    permissions:
-      checks: write
-    steps:
-      - run: |
-          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
-          curl -sf -X PATCH \
-            --retry 5 \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs/${{needs.start_pending_result.outputs.check_id}}" \
-            -d '{ "name": "${{env.check_name}}", "status": "completed", "conclusion": "success" }'
-
-  deployment_cleanup:
-    needs: [ completed_run ]
-    name: Cleanup deployments
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - uses: ./app-autoscaler-release/.github/actions/acceptance_tests_common
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
-      - run: |
-          cd ${{ env.AUTOSCALER_DIR }}
-          make deployment-cleanup BUILDIN_MODE=${{ env.BUILDIN_MODE }}
-
-
-  report_result:
-    needs: [ completed_run ]
+  acceptance_tests_verify:
+    needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
     name: Acceptance Tests Result (Buildin)
     runs-on: ubuntu-latest
-    permissions:
-      checks: read
-      actions: read
     steps:
-      - name: Retrieve and assume last acceptance test result
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        path: app-autoscaler-release
+    - name: "Verify jobs execution"
+      uses: ./app-autoscaler-release/.github/actions/pending-check
+      with:
+        pending_check: verify
+
+  deployment_cleanup:
+    needs: [ acceptance_tests ]
+    name: Deployment cleanup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - name: "Setup environment to cleanup the deployment"
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
+        with:
+          ssh-key: ${{ secrets.BBL_SSH_KEY}}
+      - name: Perform deployment cleanup
         run: |
-          [[ "${ACT}" ]] && { echo "Run via ACT - skipping"; exit 0; }
-
-          echo "::group::Getting the latest acceptance test result"
-          set -eo pipefail
-          echo "Getting the last result"
-          curl -sf  -H "Accept: application/vnd.github+json" \
-            --retry 5 \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
-            | jq '[.check_runs[] | select(.name=="${{env.check_name}}")]' > results.json
-          jq '.|last' results.json > latest_result.json
-          check_suite=$( jq '.check_suite.id' latest_result.json )
-          id=$( jq '.id' latest_result.json )
-          conclusion=$( jq -r '.conclusion' latest_result.json )
-          number_of_checks=$(jq '. | length' results.json)
-          echo "== Latest ${{env.check_name}} check result =="
-          echo
-          cat latest_result.json
-          echo "::endgroup::"
-
-          echo "::group::Check Info"
-          echo "Latest check id:${id}"
-          echo "Number of checks for commit ${{ github.event.pull_request.head.sha }} ${number_of_checks}"
-          echo "Conclustion of check: ${conclusion}"
-          echo "::endgroup::"
-
-          if [ ${number_of_checks} -eq 0 ]; then
-            echo "Error: The Acceptance tests have never been run for this commit!"
-            echo "Add the correct label to enable the running of the acceptance tests."
-            exit 1
-          fi
-
-          if [ "${conclusion}" != "success" ]; then
-            echo "Error: The latest Acceptance Test run failed!"
-            echo
-            echo "List of the failed checks:"
-            echo "=========================="
-            curl -sf --retry 5 "https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${{ github.event.pull_request.head.sha }}/check-runs" \
-                |  jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match(".*acceptance tests")) | " - \(.name): \(.html_url)"'
-            echo "=========================="
-            exit 1
-          fi
+          cd ${AUTOSCALER_DIR}
+          make deployment-cleanup

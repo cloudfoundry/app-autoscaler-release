@@ -13,7 +13,7 @@ name_prefix="${NAME_PREFIX:-ASATS}"
 buildin_mode="${BUILDIN_MODE:-false}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
 suites=${SUITES:-"api app broker"}
-gingko_opts="${GINKGO_OPTS:-}"
+ginkgo_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
 
 if [[ ! -d ${bbl_state_path} ]]; then
@@ -73,7 +73,7 @@ name_prefix
 buildin_mode
 service_offering_enabled
 suites
-gingko_opts
+ginkgo_opts
 nodes
 )
 
@@ -84,7 +84,7 @@ echo
 
 #run suites
 if [ "${suites_to_run}" != "" ]; then
-  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$gingko_opts" "${suites_to_run}"
+  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$ginkgo_opts" "${suites_to_run}"
 else
   echo "Nothing to run!"
 fi
