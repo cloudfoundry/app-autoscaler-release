@@ -613,9 +613,9 @@ jobs:
   plan:
   - in_parallel:
     - get: bbl-state
-      #passed: [deploy-cf]
+      passed: [deploy-cf]
     - get: app-autoscaler-release-main
-      #passed: [unit-tests-main, integration-tests-main]
+      passed: [unit-tests-main, integration-tests-main]
       trigger: true
     - get: ci
   - task: run-pre-release-script
