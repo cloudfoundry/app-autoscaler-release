@@ -1,3 +1,0 @@
-#
-# Please modify this file should you require CI to trigger on a change in src/acceptance
-#
