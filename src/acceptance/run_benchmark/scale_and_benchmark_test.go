@@ -42,27 +42,25 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 	Context("when scaling by custom metrics", func() {
 		It("should scale in", Serial, Label("measurement"), func() {
 			AddReportEntry(experiment.Name, experiment)
-			outer := sync.WaitGroup{}
-			outer.Add(appsToScaleCount)
+			experimentWg := sync.WaitGroup{}
+			experimentWg.Add(appsToScaleCount)
+
 			experiment.Sample(func(i int) {
 				appName := fmt.Sprintf("node-custom-metric-benchmark-%d", i+1)
 				appGUID := helpers.GetAppGuid(cfg, appName)
+				pollTime := 10 * time.Second
 
-				//Scale out
 				wg := sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-out", func() {
-					scaleOut := func() int {
+					Eventually(func() int {
 						helpers.SendMetric(cfg, appName, 550)
 						return helpers.RunningInstances(appGUID, 5*time.Second)
-					}
-					Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
+					}).WithPolling(pollTime).WithTimeout(5 * time.Minute).Should(Equal(2))
 					wg.Done()
-
 				})
 				wg.Wait()
 
-				//Scale In
 				wg = sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-in", func() {
@@ -71,13 +69,14 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 						//TODO: Change to autoscaler-app-history event instead of cf running instances.
 						return helpers.RunningInstances(appGUID, 5*time.Second)
 					}
-					Eventually(scaleIn).WithPolling(2 * time.Second).WithTimeout(5 * time.Minute).Should(Equal(1))
+					Eventually(scaleIn).WithPolling(pollTime).WithTimeout(5 * time.Minute).Should(Equal(1))
 					wg.Done()
 				})
 				wg.Wait()
-				outer.Done()
+
+				experimentWg.Done()
 			}, samplingConfig)
-			outer.Wait()
+			experimentWg.Wait()
 		})
 
 	})

@@ -17,7 +17,7 @@ import (
 )
 
 func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
-	rawApps := getRawApps(spaceGuid , orgGuid , cfg.DefaultTimeoutDuration())
+	rawApps := getRawApps(spaceGuid, orgGuid, cfg.DefaultTimeoutDuration())
 	return filterByPrefix(prefix, getNames(rawApps))
 }
 
@@ -38,19 +38,18 @@ func getRawApps(spaceGuid string, orgGuid string, timeout time.Duration) []cfRes
 		var appsResponse = getRawAppsByPage(spaceGuid, orgGuid, page, timeout)
 		GinkgoWriter.Println(appsResponse.Pagination.TotalPages)
 		totalPages = appsResponse.Pagination.TotalPages
-		rawApps = append(rawApps, appsResponse.Resources... )
+		rawApps = append(rawApps, appsResponse.Resources...)
 	}
 
 	return rawApps
 }
 
 func GetRunningApps(cfg *config.Config, orgGuid, spaceGuid string) []string {
-	rawApps := getRawApps(spaceGuid , orgGuid , cfg.DefaultTimeoutDuration())
+	rawApps := getRawApps(spaceGuid, orgGuid, cfg.DefaultTimeoutDuration())
 	return filterByState(rawApps, "RUNNING")
 }
 
-
-func DeleteApps(cfg *config.Config, apps []string, threshold int) {
+func DeleteApps(cfg *config.Config, apps []string) {
 	for _, app := range apps {
 		deleteApp := cf.Cf("delete", app, "-f").Wait(cfg.DefaultTimeoutDuration())
 		Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", app))
@@ -95,7 +94,6 @@ func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount
 		"-f", config.NODE_APP+"/app_manifest.yml",
 		"--no-start",
 	).Wait(cfg.CfPushTimeoutDuration())
-
 
 	if createApp.ExitCode() != 0 {
 		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
