@@ -26,11 +26,11 @@ type cfResourceObject struct {
 }
 
 type cfResource struct {
-GUID      string `json:"guid"`
-CreatedAt string `json:"created_at"`
-Name      string `json:"name"`
-Username  string `json:"username"`
-State     string `json:"state"`
+	GUID      string `json:"guid"`
+	CreatedAt string `json:"created_at"`
+	Name      string `json:"name"`
+	Username  string `json:"username"`
+	State     string `json:"state"`
 }
 
 func GetServices(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
@@ -67,6 +67,7 @@ func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
 		Expect(err).ShouldNot(HaveOccurred())
 		req.Header.Add("Authorization", oauthToken)
 
+		//TODO ... this wont scale to 1000 apps at once
 		resp, err := GetHTTPClient(cfg).Do(req)
 		Expect(err).ShouldNot(HaveOccurred())
 		defer func() { _ = resp.Body.Close() }()
