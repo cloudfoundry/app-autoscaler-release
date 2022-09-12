@@ -18,6 +18,7 @@ anchors:
     GINKGO_OPTS: "--fail-fast"
 
   acceptance-main-buildin-env: &acceptance-main-buildin-env
+    AUTOSCALER_DIR: "./"
     SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-bld-main"
     SKIP_SSL_VALIDATION: true
