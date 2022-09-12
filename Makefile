@@ -311,10 +311,10 @@ deploy-cleanup:
 .PHONY: setup-benchmark
 setup-benchmark:
 	export GINKGO_OPTS="-v";\
-	export NAME_PREFIX="autoscaler-test";\
+	export NAME_PREFIX="benchmark";\
 	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="app-autoscaler-test";\
+	export DEPLOYMENT_NAME="benchmark";\
 	export SUITES="setup_benchmark";\
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
@@ -322,10 +322,10 @@ setup-benchmark:
 .PHONY: run-benchmark
 run-benchmark:
 	export GINKGO_OPTS="-v";\
-	export NAME_PREFIX="autoscaler-test";\
+	export NAME_PREFIX="benchmark";\
 	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="app-autoscaler-test";\
+	export DEPLOYMENT_NAME="benchmark";\
 	export SUITES="run_benchmark";\
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
