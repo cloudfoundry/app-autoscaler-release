@@ -65,7 +65,7 @@ jobs:
       matrix:
         suite: [ API, APP ]
     runs-on: ubuntu-latest
-    name: "[${{ matrix.suite }}] ${{ github.workflow }}"
+    name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -86,7 +86,7 @@ jobs:
   acceptance_tests_verify:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
-    name: Acceptance Tests Result (Buildin)
+    name: ${{ github.workflow }} Result
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
