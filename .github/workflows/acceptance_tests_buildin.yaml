@@ -8,6 +8,7 @@ on:
 env:
   MAVEN_VERSION: 3.6.3
   MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
+  SCENARIO: Buildin
   BUILDIN_MODE: true
   SERVICE_OFFERING_ENABLED: false
   PR_NUMBER: "${{ github.event.pull_request.number }}"
@@ -20,7 +21,7 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  CHECK_NAME: "acceptance-check-buildin"
+  CHECK_NAME: "acceptance-check-${{ env.SCENARIO }}"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -39,7 +40,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy for acceptance tests
+    name: Deploy for acceptance tests ${{ env.SCENARIO }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -65,7 +66,7 @@ jobs:
       matrix:
         suite: [ API, APP ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} acceptance tests
+    name: ${{ matrix.suite }} ${{ env.SCENARIO }} acceptance tests
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -86,7 +87,7 @@ jobs:
   acceptance_tests_verify:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
-    name: Acceptance Tests Result (Buildin)
+    name: Acceptance Tests Result (${{ env.SCENARIO }})
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
