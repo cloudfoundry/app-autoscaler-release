@@ -1,0 +1,30 @@
+---
+name: Check Java Code
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  code-style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-go
+      - uses: ./.github/actions/setup-java
+
+      - name: Check Code Formatting
+        run: |
+          sh ./style-guide/google-format-ci-v0.1.sh
+        env:
+          GOOGLE_JAR_VERSION: 1.11.0
+          GOOGLE_JAR_NAME: google-java-format-1.11.0-all-deps.jar
+
+      - name: Checkstyle
+        run: |
+          pushd src/scheduler
+            mvn --no-transfer-progress jxr:jxr
+            mvn --no-transfer-progress checkstyle:checkstyle
+          popd
+
+      - name: Publish Results on Pull Request
+        run: |
+          go run format_checkstyle.go

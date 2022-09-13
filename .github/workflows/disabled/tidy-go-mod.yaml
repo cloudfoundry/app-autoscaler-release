@@ -1,0 +1,23 @@
+name: Check if go.mod is tidy
+on:
+  pull_request:
+jobs:
+  check-tidy-go-mod:
+    name: ensure that go mod tidy has run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-go
+      - uses: ./.github/actions/setup-java
+
+      - name: Run scripts/update
+        run: scripts/update
+
+      - name: Check if there is any change
+        id: get_changes
+        run: echo "::set-output name=changed::$(git status --porcelain | wc -l)"
+      - name: Process changes
+        if: steps.get_changes.outputs.changed != 0
+        run: |
+          echo "::error::go.mod is not tidy, run scripts/update to tidy"
+          exit 1

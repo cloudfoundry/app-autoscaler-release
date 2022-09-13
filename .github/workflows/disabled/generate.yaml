@@ -1,0 +1,29 @@
+name: generate
+on:
+  pull_request:
+jobs:
+  generate:
+    name: ensure fakes are up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-go
+
+      - name: Go Build
+        run: |
+          source .envrc
+          pushd src/autoscaler
+            make buildtools
+            make generate
+            git diff
+            git status
+          popd
+
+      - name: Check if there is any change
+        id: get_changes
+        run: echo "::set-output name=changed::$(git status --porcelain | wc -l)"
+      - name: Process changes
+        if: steps.get_changes.outputs.changed != 0
+        run: |
+          echo "::error::Fakes are out of date, run make generate to update"
+          exit 1

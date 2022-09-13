@@ -1,0 +1,22 @@
+name: eslint
+
+on: [pull_request]
+
+jobs:
+  eslint:
+    name: eslint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: npm install
+        working-directory: src/acceptance/assets/app/nodeApp
+      - uses: reviewdog/action-eslint@v1
+        with:
+          workdir: "src/acceptance/assets/app/nodeApp"
+          eslint_flags: ''
+          fail_on_error: true
