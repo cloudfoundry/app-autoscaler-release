@@ -91,7 +91,6 @@ if [ "${number_of_checks}" -eq 0 ]; then
 fi
 
 echo "::group::Retrieving status of jobs (checks_filter: ${CHECK_FILTER})"
-#curl -s "${curlopts[@]}" "${checkruns_commit_url}" \
 jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("'"${CHECK_FILTER}"'")) | " - \(.name): \(.html_url)"' checkruns.json \
   > bad_jobs.txt
 echo "::endgroup::"
@@ -99,7 +98,7 @@ if [ ! -s bad_jobs.txt ]; then
   echo "OK: all jobs passed!"
 
   echo "::group::Sending success conclusion to the workflow check"
-    #send_conclusion "success"
+    send_conclusion "success"
   echo "::endgroup::"
 
 else
@@ -109,7 +108,7 @@ else
   echo "=========================="
 
   echo "::group::Sending failure conclusion to the workflow check"
-    #send_conclusion "failure"
+    send_conclusion "failure"
   echo "::endgroup::"
   exit 1
 fi
