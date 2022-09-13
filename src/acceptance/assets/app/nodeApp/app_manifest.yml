@@ -4,6 +4,7 @@ applications:
   env:
     NODE_TLS_REJECT_UNAUTHORIZED: ((node_tls_reject_unauthorized))
     SERVICE_NAME: ((service_name))
+    NODE_ENV: production
   buildpacks:
   - ((buildpack))
   stack: cflinuxfs3

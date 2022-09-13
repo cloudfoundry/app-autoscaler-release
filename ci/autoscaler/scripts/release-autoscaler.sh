@@ -2,6 +2,9 @@
 [ -n "${DEBUG}" ] && set -x
 set -euo pipefail
 
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+root_dir=${ROOT_DIR:-"${script_dir}/../../../"}
+
 mkdir -p 'generated-release'
 previous_version="$(cat gh-release/tag)"
 generated="$(realpath generated-release)"
@@ -26,7 +29,12 @@ function create_tests() {
   local VERSION=$1
   local generated=$2
   ACCEPTANCE_TESTS_FILE="${generated}/artifacts/app-autoscaler-acceptance-tests-v${VERSION}.tgz"
-  tar --create --auto-compress --directory='./src' --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
+  pushd "${root_dir}/src/acceptance/assets/app/nodeApp" > /dev/null
+    echo "# installing node modules to package node app"
+    npm install --production
+    npm prune --production
+  popd > /dev/null
+  tar --create --auto-compress --directory="${root_dir}/src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
   ACCEPTANCE_SHA256=$(sha256sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}')
 }
 
