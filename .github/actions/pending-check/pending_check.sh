@@ -65,9 +65,11 @@ END
 #--------------------------------------------------------------------------------------------------
 function check_verify {
 
-echo "::group::Getting the latest checks results"
-echo "Getting the last result"
-curl -s "${curlopts[@]}" "${checkruns_commit_url}" | jq '[.check_runs[] | select(.name=="'"${CHECK_NAME}"'")]' > results.json
+echo "::group::Getting checkruns for commit ${PR_SHA}"
+curl -s "${curlopts[@]}" "${checkruns_commit_url}" -o checkruns.json
+
+echo "Looking for the last result"
+jq '[.check_runs[] | select(.name=="'"${CHECK_NAME}"'")]' checkruns.json > results.json
 jq '.|last' results.json > latest_result.json
 
 id=$( jq '.id' latest_result.json )
@@ -89,8 +91,7 @@ if [ "${number_of_checks}" -eq 0 ]; then
 fi
 
 echo "::group::Retrieving status of jobs (checks_filter: ${CHECK_FILTER})"
-curl -s "${curlopts[@]}" "${checkruns_commit_url}" \
-  | jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("'"${CHECK_FILTER}"'")) | " - \(.name): \(.html_url)"' \
+jq '.check_runs[] | select(.conclusion == "failure") | select(.name? | match("'"${CHECK_FILTER}"'")) | " - \(.name): \(.html_url)"' checkruns.json \
   > bad_jobs.txt
 echo "::endgroup::"
 if [ ! -s bad_jobs.txt ]; then

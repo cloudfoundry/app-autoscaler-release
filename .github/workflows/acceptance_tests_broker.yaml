@@ -1,4 +1,4 @@
-name: Acceptance Tests (Broker)
+name: Acceptance Tests - Broker
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
@@ -17,8 +17,7 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  CHECK_NAME: "acceptance-check-broker"
-
+  CHECK_NAME: "${{ github.workflow }}_Check"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -36,7 +35,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy for acceptance tests
+    name: Deploy for ${{ github.workflow }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -62,7 +61,7 @@ jobs:
       matrix:
         suite: [ API, APP, Broker ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} acceptance tests
+    name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -82,7 +81,7 @@ jobs:
   acceptance_tests_verify:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
-    name: Acceptance Tests Result (Broker)
+    name: "${{ github.workflow }} Result"
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -93,6 +92,7 @@ jobs:
       uses: ./app-autoscaler-release/.github/actions/pending-check
       with:
         pending_check: verify
+        check_filter: ".*${{ github.workflow }}$"
 
   deployment_cleanup:
     needs: [ acceptance_tests ]
