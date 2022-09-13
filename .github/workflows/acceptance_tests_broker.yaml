@@ -62,7 +62,7 @@ jobs:
       matrix:
         suite: [ API, APP, Broker ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} test
+    name: ${{ matrix.suite }} acceptance tests
     steps:
       - name: Checkout
         uses: actions/checkout@v3
