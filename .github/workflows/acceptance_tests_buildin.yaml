@@ -20,8 +20,7 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  CHECK_NAME: "acceptance-check-buildin"
-
+  CHECK_NAME: "${{ github.workflow }} Check"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -39,7 +38,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy autoscaler (Buildin)
+    name: Deploy for ${{ github.workflow }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -56,6 +55,7 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Deploy autoscaler
         run: |
+          echo ">> WIP: exiting early"; exit 1
           cd ${AUTOSCALER_DIR}
           make deployment
 
@@ -65,7 +65,7 @@ jobs:
       matrix:
         suite: [ API, APP ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} tests (Buildin)
+    name: ${{ matrix.suite }} tests ${{ github.workflow }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -79,6 +79,7 @@ jobs:
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
+          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
@@ -96,7 +97,7 @@ jobs:
       uses: ./app-autoscaler-release/.github/actions/pending-check
       with:
         pending_check: verify
-        check_filter: ".*Buildin.*"
+        check_filter: ".*${{ github.workflow }}"
 
   deployment_cleanup:
     needs: [ acceptance_tests ]
@@ -113,5 +114,6 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Perform deployment cleanup
         run: |
+        echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment-cleanup
