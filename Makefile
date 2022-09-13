@@ -45,7 +45,7 @@ target/init:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 clean-java:
@@ -65,6 +65,9 @@ clean-scheduler:
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f testcerts/*
+clean-bosh-release:
+	@echo " - cleaning bosh dev releases"
+	@rm -rf dev_releases
 
 .PHONY: build build-test build-all $(all_modules)
 build: init  $(all_modules)
@@ -236,12 +239,14 @@ build/autoscaler-test.tgz:
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
 
+.PHONY: vendor-app
 vendor-app:
 	@echo " - installing node modules to package node app"
 	@cd src/acceptance/assets/app/nodeApp > /dev/null\
 	 && npm install --production\
 	 && npm prune --production
 
+.PHONY: acceptance-release
 acceptance-release: mod-tidy vendor vendor-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
@@ -272,7 +277,6 @@ workspace:
 	[ -e go.work ] || go work init
 	go work use $(addprefix ./src/,$(go_modules))
 
-
 .PHONY: uuac
 uaac:
 	which uaac || gem install cf-uaac
@@ -284,7 +288,7 @@ deployment: mod-tidy vendor uaac db scheduler
 	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
 
 .PHONY: acceptance-tests
-acceptance-tests:
+acceptance-tests: vendor-app
 	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
