@@ -20,7 +20,7 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  CHECK_NAME: "${{ github.workflow }} Check"
+  CHECK_NAME: "Check for ${{ github.workflow }}"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
