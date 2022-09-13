@@ -16,6 +16,9 @@ SUITES?=broker api app
 AUTOSCALER_DIR?=${PWD}
 CI_DIR?=${PWD}/ci
 CI?=false
+VERSION?=0.0.testing
+DEST?=build
+export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
 
 $(shell mkdir -p target)
 
@@ -227,9 +230,23 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: release
-release:
-	./scripts/update
-	bosh create-release --force --timestamp-version --tarball=${name}-${version}.tgz
+bosh-release: mod-tidy vendor scheduler db build/autoscaler-test.tgz
+build/autoscaler-test.tgz:
+	@echo " - building bosh release into build/autoscaler-test.tgz"
+	@mkdir -p build
+	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
+
+vendor-app:
+	@echo " - installing node modules to package node app"
+	@cd src/acceptance/assets/app/nodeApp > /dev/null\
+	 && npm install --production\
+	 && npm prune --production
+
+acceptance-release: mod-tidy vendor vendor-app
+	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
+	@mkdir -p ${DEST}
+	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'\
+	 && sha256sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}' > "${ACCEPTANCE_TESTS_FILE}.sha256"
 
 .PHONY: mod-tidy
 mod-tidy:

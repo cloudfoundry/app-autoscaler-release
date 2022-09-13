@@ -6,15 +6,20 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 root_dir=${ROOT_DIR:-"${script_dir}/../../../"}
 
 mkdir -p 'generated-release'
-previous_version="$(cat gh-release/tag)"
-generated="$(realpath generated-release)"
+previous_version=${PREV_VERSION:-$(cat gh-release/tag)}
+generated=${DEST:-"$(realpath generated-release)"}
+build_opts=${BUILD_OPTS:-"--final"}
+VERSION=${VERSION:-$(cat "${generated}/name")}
+PERFORM_BOSH_RELEASE=${PERFORM_BOSH_RELEASE:-"true"}
+REPO_OUT=${REPO_OUT:-}
 
 function create_release() {
+   echo " - creating release"
    set -e
    local VERSION=$1
    local generated=$2
    bosh create-release \
-        --final \
+        ${build_opts} \
         --version "$VERSION" \
         --tarball="app-autoscaler-v${VERSION}.tgz"
 
@@ -25,20 +30,13 @@ function create_release() {
 }
 
 function create_tests() {
-  set -e
-  local VERSION=$1
-  local generated=$2
-  ACCEPTANCE_TESTS_FILE="${generated}/artifacts/app-autoscaler-acceptance-tests-v${VERSION}.tgz"
-  pushd "${root_dir}/src/acceptance/assets/app/nodeApp" > /dev/null
-    echo "# installing node modules to package node app"
-    npm install --production
-    npm prune --production
+  echo " - creating acceptance test artifact"
+  pushd "${root_dir}" > /dev/null
+    make acceptance-release VERSION="${VERSION}" DEST="${generated}/artifacts/"
   popd > /dev/null
-  tar --create --auto-compress --directory="${root_dir}/src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
-  ACCEPTANCE_SHA256=$(sha256sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}')
 }
 
-pushd 'app-autoscaler-release' > /dev/null
+pushd "${root_dir}" > /dev/null
   # generate the private.yml file with the credentials
   cat > 'config/private.yml' <<EOF
 ---
@@ -54,6 +52,7 @@ EOF
   LAST_COMMIT_SHA="$(git rev-parse HEAD)"
   echo "Generating release including commits up to: ${LAST_COMMIT_SHA}"
   pushd src/changelog > /dev/null
+    echo " - running changelog"
     go run main.go \
       --changelog-file "${generated}/changelog.md" \
       --last-commit-sha-id "${LAST_COMMIT_SHA}"\
@@ -61,15 +60,13 @@ EOF
       --version-file "${generated}/name"
   popd
 
-  VERSION=$(cat "${generated}/name")
   export VERSION
-
   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
 
   echo "Displaying diff..."
   export GIT_PAGER=cat
   git diff
-  
+
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     # FIXME these should be configurable variables
     if [[ -z $(git config --global user.email) ]]; then
@@ -95,6 +92,7 @@ EOF
     export ACCEPTANCE_SHA256="dummy-sha"
   fi
   echo "${VERSION}" > "${generated}/tag"
+  export ACCEPTANCE_SHA256=$(cat "${generated}/artifacts/"*.sha256)
   cat >> "${generated}/changelog.md" <<EOF
 
 ## Deployment
@@ -116,4 +114,4 @@ EOF
   echo "---------- end file ----------"
 popd
 
-cp -a app-autoscaler-release "${REPO_OUT}"
+[ -d "${REPO_OUT}" ] && cp -a app-autoscaler-release "${REPO_OUT}"
