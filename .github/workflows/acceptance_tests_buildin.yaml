@@ -56,6 +56,7 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Deploy autoscaler
         run: |
+          echo ">> WIP: exit early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment
 
