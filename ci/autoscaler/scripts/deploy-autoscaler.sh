@@ -61,7 +61,7 @@ function deploy () {
 
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
-    deploy "$deployment_manifest" \
+    deploy "${deployment_manifest}" \
     ${OPS_FILES_TO_USE} \
     ${bosh_deploy_args} \
     -v system_domain="${system_domain}" \
@@ -85,7 +85,7 @@ else
 	--secret "autoscaler_client_secret"
 fi
 
-pushd "$autoscaler_dir" > /dev/null
+pushd "${autoscaler_dir}" > /dev/null
   # Determine if we need to upload a stemcell at this point.
   #TODO refactor out function for stemcell check and update.
   STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
