@@ -20,7 +20,7 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  CHECK_NAME: "Check for ${{ github.workflow }}"
+  CHECK_NAME: "${{ github.workflow }} Check"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -97,7 +97,7 @@ jobs:
       uses: ./app-autoscaler-release/.github/actions/pending-check
       with:
         pending_check: verify
-        check_filter: ".*${{ github.workflow }}"
+        check_filter: ".*${{ github.workflow }}$"
 
   deployment_cleanup:
     needs: [ acceptance_tests ]
