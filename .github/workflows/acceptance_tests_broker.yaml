@@ -62,7 +62,7 @@ jobs:
       matrix:
         suite: [ API, APP, Broker ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} ${{ github.workflow }}
+    name: "[${{ matrix.suite }}] ${{ github.workflow }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
