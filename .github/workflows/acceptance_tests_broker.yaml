@@ -1,4 +1,4 @@
-name: Acceptance Tests - Broker
+name: Acceptance Tests - Brokered
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
