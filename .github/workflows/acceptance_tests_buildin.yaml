@@ -40,7 +40,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy for acceptance tests ${{ env.SCENARIO }}
+    name: Deploy for acceptance tests ${{ github.env.SCENARIO }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
