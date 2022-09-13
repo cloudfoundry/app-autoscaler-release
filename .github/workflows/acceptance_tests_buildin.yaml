@@ -1,4 +1,4 @@
-name: Acceptance Tests (Buildin)
+name: Acceptance Tests - Buildin
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
