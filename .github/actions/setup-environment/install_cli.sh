@@ -1,4 +1,4 @@
-#!/bin/bashe
+#!/bin/bash
 echo ">> WIP: exit early"; exit 0
 set -euo pipefail
 
