@@ -1,5 +1,4 @@
 #!/bin/bash
-echo ">> WIP: exit early"; exit 0
 set -euo pipefail
 
 export BOSH_VERSION=7.0.1

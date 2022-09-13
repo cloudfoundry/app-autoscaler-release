@@ -53,7 +53,6 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Deploy autoscaler
         run: |
-          echo ">> WIP: exit early"; exit 1
           cd ${AUTOSCALER_DIR}
           make deployment
 
@@ -77,7 +76,6 @@ jobs:
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
-          echo ">> WIP: exit early"; exit 0
           cd ${AUTOSCALER_DIR}
           make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
@@ -113,6 +111,5 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Perform deployment cleanup
         run: |
-          echo ">> WIP: exit early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment-cleanup
