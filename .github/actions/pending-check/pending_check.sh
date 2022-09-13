@@ -68,7 +68,7 @@ function check_verify {
 echo "::group::Getting checkruns for commit ${PR_SHA}"
 curl -s "${curlopts[@]}" "${checkruns_commit_url}" -o checkruns.json
 
-echo "Looking foretting the last result"
+echo "Looking for the last result"
 jq '[.check_runs[] | select(.name=="'"${CHECK_NAME}"'")]' checkruns.json > results.json
 jq '.|last' results.json > latest_result.json
 
