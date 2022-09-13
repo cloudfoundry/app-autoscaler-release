@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# NOTE: you can run this locally for testing !!!
+# you need a github token (GITHUB_TOKEN) and beware that it adds a commit you need to drop each time also you need to remove dev_releases from root.
+# GITHUB_TOKEN=ghp_[your token]   DEST=${PWD}/../../../build VERSION="8.0.0" BUILD_OPTS="--force" PREV_VERSION=6.0.0  ./release-autoscaler.sh
+
 [ -n "${DEBUG}" ] && set -x
 set -euo pipefail
 
@@ -18,6 +22,7 @@ function create_release() {
    set -e
    local VERSION=$1
    local generated=$2
+   # shellcheck disable=SC2086
    bosh create-release \
         ${build_opts} \
         --version "$VERSION" \
@@ -92,7 +97,8 @@ EOF
     export ACCEPTANCE_SHA256="dummy-sha"
   fi
   echo "${VERSION}" > "${generated}/tag"
-  export ACCEPTANCE_SHA256=$(cat "${generated}/artifacts/"*.sha256)
+  ACCEPTANCE_SHA256=$(cat "${generated}/artifacts/"*.sha256)
+  export ACCEPTANCE_SHA256
   cat >> "${generated}/changelog.md" <<EOF
 
 ## Deployment
