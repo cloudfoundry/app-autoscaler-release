@@ -36,7 +36,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy for acceptance tests
+    name: Deploy autoscaler (Broker)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -63,7 +63,7 @@ jobs:
       matrix:
         suite: [ API, APP, Broker ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} acceptance tests
+    name: ${{ matrix.suite }} tests (Broker)
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -95,6 +95,8 @@ jobs:
       uses: ./app-autoscaler-release/.github/actions/pending-check
       with:
         pending_check: verify
+        check_filter: ".*Broker.*"
+
 
   deployment_cleanup:
     needs: [ acceptance_tests ]

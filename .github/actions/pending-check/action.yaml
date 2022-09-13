@@ -7,10 +7,8 @@ inputs:
   check_filter:
     description: jq match filter for job names
     required: true
-    default: ".*acceptance tests"
-    # Note: All jobs to verify need their names to to end consistently
-    # (ie. "XYZ acceptance tests") in order to utilise correct filtering of checks.
-    # use '.*' to filter all jobs in the workflow.
+    default: ".*"
+    # Note: All jobs to verify need their names to match the filter
 
 runs:
   using: 'composite'

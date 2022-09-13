@@ -8,10 +8,8 @@ on:
 env:
   MAVEN_VERSION: 3.6.3
   MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
-  SCENARIO: Buildin
-  CHECK_NAME: "acceptance-check-${{ github.env.SCENARIO }}"
-  BUILDIN_MODE: true
-  SERVICE_OFFERING_ENABLED: false
+  BUILDIN_MODE: false
+  SERVICE_OFFERING_ENABLED: true
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
   SERVICE_BROKER_NAME: "autoscaler-${{ github.event.pull_request.number }}servicebroker"
@@ -22,7 +20,8 @@ env:
   NODES: 3
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  
+  CHECK_NAME: "acceptance-check-buildin"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -40,7 +39,7 @@ jobs:
       (  ( github.event.action == 'labeled' )
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
-    name: Deploy for acceptance tests ${{ github.env.SCENARIO }}
+    name: Deploy autoscaler (Buildin)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -66,7 +65,7 @@ jobs:
       matrix:
         suite: [ API, APP ]
     runs-on: ubuntu-latest
-    name: ${{ matrix.suite }} ${{ github.env.SCENARIO }} acceptance tests
+    name: ${{ matrix.suite }} tests (Buildin)
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -87,7 +86,7 @@ jobs:
   acceptance_tests_verify:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
-    name: Acceptance Tests Result (${{ github.env.SCENARIO }})
+    name: Acceptance Tests Result (Buildin)
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -98,6 +97,7 @@ jobs:
       uses: ./app-autoscaler-release/.github/actions/pending-check
       with:
         pending_check: verify
+        check_filter: ".*Buildin.*"
 
   deployment_cleanup:
     needs: [ acceptance_tests ]
