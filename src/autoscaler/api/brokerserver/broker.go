@@ -22,7 +22,7 @@ import (
 	"github.com/pivotal-cf/brokerapi/v8/domain"
 	"github.com/pivotal-cf/brokerapi/v8/domain/apiresponses"
 )
-
+var _ domain.ServiceBroker = &Broker{}
 type Broker struct {
 	logger          lager.Logger
 	conf            *config.Config
