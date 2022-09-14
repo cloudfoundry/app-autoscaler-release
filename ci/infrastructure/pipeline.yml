@@ -192,7 +192,7 @@ jobs:
       vars-files: autoscaler-env-vars-store
     params:
       SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/promethus"
+      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/promethus/operators/cf/add-prometheus-uaa-clients.yml"
       BOSH_DEPLOY_ARGS: "-v diego_cell_instances=2"
     ensure:
       put: autoscaler-env-vars-store
