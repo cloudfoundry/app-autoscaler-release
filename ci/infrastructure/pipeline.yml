@@ -32,6 +32,13 @@ resources:
     paths:
       - ci
 
+- name: prometheus-deployment
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/bosh-prometheus/prometheus-boshrelease.git
+    branch: main
+
 - name: bbl-state
   type: git
   icon: github
@@ -163,6 +170,7 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
+    - get: prometheus-boshrelease
       trigger: true
     - get: bbl-state
       passed: [setup-infrastructure]
@@ -172,9 +180,7 @@ jobs:
   - task: combine-ops-files
     file: ci/ci/infrastructure/tasks/combine-ops.yml
     input_mapping:
-      ops-files: cf-deployment
-      custom-ops: ci
-      app-autoscaler-ci: ci
+      app-autoscaler-release: ci
     output_mapping:
       combined-ops: ops-files
   - task: deploy-cf
@@ -186,7 +192,8 @@ jobs:
       vars-files: autoscaler-env-vars-store
     params:
       SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/promethus"
+      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=2"
     ensure:
       put: autoscaler-env-vars-store
       params:
