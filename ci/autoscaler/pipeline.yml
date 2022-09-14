@@ -2,25 +2,19 @@
 anchors:
 
   acceptance-main-env: &acceptance-main-env
-    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-main"
-    SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-main"
     BOSH_FIX_RELEASES: true
     GINKGO_OPTS: "--fail-fast"
 
   acceptance-main-log-cache-env: &acceptance-main-log-cache-env
-    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-lc-main"
-    SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-lc-main"
     BOSH_FIX_RELEASES: true
     GINKGO_OPTS: "--fail-fast"
 
   acceptance-main-buildin-env: &acceptance-main-buildin-env
-    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "acceptance-bld-main"
-    SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "acceptance-bld-main"
     BOSH_FIX_RELEASES: true
     GINKGO_OPTS: "--fail-fast"
@@ -28,10 +22,16 @@ anchors:
     #BUILDIN_MODE: true
     SERVICE_OFFERING_ENABLED: false
 
+  smoke-tests-env: &smoke-tests-env
+    DEPLOYMENT_NAME: "smoke-tests"
+    NAME_PREFIX: "smoke-tests"
+    BOSH_FIX_RELEASES: true
+    NODES: 1
+    GINKGO_OPTS: "--fail-fast"
+    SERIAL: "false"
+
   upgrade-test-env: &upgrade-test-env
-    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
     DEPLOYMENT_NAME: "upgrade-test"
-    SKIP_SSL_VALIDATION: true
     NAME_PREFIX: "upgrade-test"
 
   app-autoscaler-ops-files: &app-autoscaler-ops-files
@@ -65,7 +65,6 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
-      operations/set-release-version.yml
 
   app-autoscaler-ops-files-buildin: &app-autoscaler-ops-files-buildin
     OPS_FILES: |
@@ -95,6 +94,7 @@ groups:
   - upgrade-test-main
   - update-golang
   - update-java
+  - smoke-tests
 - name: autoscaler-release
   jobs:
   - set-pipeline
@@ -147,6 +147,15 @@ resources:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
     branch: main
+    fetch_tags: true
+
+- name: app-autoscaler-release-stress-test
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/app-autoscaler-release
+    private_key: ((autoscaler_git_key))
+    branch: stress-test
     fetch_tags: true
 
 - name: gh-release
@@ -423,6 +432,99 @@ jobs:
         SUITES: app
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
+
+- name: setup-smoke-tests
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+      trigger: true
+    - get: bbl-state
+      passed: [setup-infrastructure]
+      trigger: true
+    - get: autoscaler-env-vars-store
+    - get: app-autoscaler-release-main
+      resource: app-autoscaler-release-stress-test
+  - task: combine-ops-files
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/combine-ops.yml
+    input_mapping:
+      ops-files: cf-deployment
+      custom-ops: app-autoscaler-release-main
+      app-autoscaler-ci: app-autoscaler-release-main
+      ci: app-autoscaler-release-main
+    output_mapping:
+      combined-ops: ops-files
+  - task: scale-up-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: bbl-state
+      cf-deployment: cf-deployment
+      ops-files: ops-files
+      vars-files: autoscaler-env-vars-store
+    params:
+      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=4"
+    ensure:
+      put: autoscaler-env-vars-store
+      params:
+        repository: autoscaler-env-vars-store
+        rebase: true
+  - task: run-pre-release-script
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
+    params:
+      SCRIPT_NAME: ./scripts/update
+    input_mapping:
+      release: app-autoscaler-release-main
+    output_mapping:
+      release: app-autoscaler-release-main
+  - task: deploy-autoscaler
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
+    params:
+      <<: *smoke-tests-env
+      <<: *app-autoscaler-ops-files
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  - task: register-broker
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
+    input_mapping:
+      release: app-autoscaler-release-main
+    params:
+      <<: *smoke-tests-env
+  - task: setup-benchmark
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+    params:
+      <<: *smoke-tests-env
+      SUITES: setup_benchmark
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  - task: run-benchmark
+    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+    params:
+      <<: *smoke-tests-env
+      SUITES: run_benchmark
+    input_mapping:
+      app-autoscaler-release: app-autoscaler-release-main
+  - task: scale-down-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: bbl-state
+      cf-deployment: cf-deployment
+      ops-files: ops-files
+      vars-files: autoscaler-env-vars-store
+    params:
+      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=2"
+    ensure:
+      put: autoscaler-env-vars-store
+      params:
+        repository: autoscaler-env-vars-store
+        rebase: true
+
 
 - name: upgrade-test-main
   public: true
