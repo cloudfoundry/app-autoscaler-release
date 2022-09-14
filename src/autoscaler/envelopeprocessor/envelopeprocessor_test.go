@@ -5,10 +5,10 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/envelopeprocessor"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"code.cloudfoundry.org/lager/lagertest"
+	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

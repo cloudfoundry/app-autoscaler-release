@@ -4,24 +4,23 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers/memoizer"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/memoizer"
-
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/plancheck"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
+	"github.com/cloudfoundry/app-autoscaler-release/api/plancheck"
+	"github.com/cloudfoundry/app-autoscaler-release/cred_helper"
 
 	"errors"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/policyvalidator"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/schedulerutil"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/api/policyvalidator"
+	"github.com/cloudfoundry/app-autoscaler-release/api/schedulerutil"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"github.com/pivotal-cf/brokerapi/domain"
 
@@ -69,7 +68,7 @@ func NewBrokerHandler(logger lager.Logger, conf *config.Config, bindingdb db.Bin
 }
 
 func writeErrorResponse(w http.ResponseWriter, statusCode int, message string) {
-	handlers.WriteJSONResponse(w, statusCode, models.ErrorResponse{
+	handlers.WriteJSONResponse(w, statusCode, cf.ErrorResponse{
 		Code:    http.StatusText(statusCode),
 		Message: message})
 }

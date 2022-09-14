@@ -6,16 +6,16 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 const (

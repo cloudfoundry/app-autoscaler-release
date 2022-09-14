@@ -9,11 +9,11 @@ import (
 
 	logcache "code.cloudfoundry.org/go-log-cache"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"code.cloudfoundry.org/lager/lagertest"
+	. "github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

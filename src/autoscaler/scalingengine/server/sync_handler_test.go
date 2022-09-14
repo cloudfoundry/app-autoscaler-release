@@ -1,8 +1,8 @@
 package server_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/server"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	. "github.com/cloudfoundry/app-autoscaler-release/scalingengine/server"
 
 	"code.cloudfoundry.org/lager/lagertest"
 	. "github.com/onsi/ginkgo/v2"

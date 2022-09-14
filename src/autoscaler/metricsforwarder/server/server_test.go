@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net/http"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	_ "github.com/lib/pq"
 	. "github.com/onsi/ginkgo/v2"

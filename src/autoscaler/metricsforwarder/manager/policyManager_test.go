@@ -3,9 +3,9 @@ package manager_test
 import (
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/manager"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	. "github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/manager"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/lager"

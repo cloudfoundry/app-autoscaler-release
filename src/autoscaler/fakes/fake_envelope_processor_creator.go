@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/envelopeprocessor"
+	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
 	"code.cloudfoundry.org/lager"
 )
 

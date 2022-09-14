@@ -1,12 +1,20 @@
 package cf_test
 
 import (
+	"errors"
+	"fmt"
+	"github.com/onsi/ginkgo/v2"
+	"io"
 	"net"
 	"net/http"
+	"net/url"
+	"os"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 type ConnectionWatcher struct {
@@ -88,4 +96,34 @@ func (cw *ConnectionWatcher) printStats(title string) {
 	for key, value := range cw.GetStates() {
 		GinkgoWriter.Printf("\t%s:\t%d\n", key, value)
 	}
+}
+
+func LoadFile(filename string) string {
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		file, err = os.ReadFile("testdata/" + filename)
+	}
+	FailOnError("Could not read file", err)
+	return string(file)
+}
+
+func FailOnError(message string, err error) {
+	if err != nil {
+		ginkgo.Fail(fmt.Sprintf("%s: %s", message, err.Error()))
+	}
+}
+
+func ParseDate(date string) time.Time {
+	updated, err := time.Parse(time.RFC3339, date)
+	Expect(err).NotTo(HaveOccurred())
+	return updated
+}
+
+func IsUrlNetOpError(err error) {
+	var urlErr *url.Error
+	Expect(errors.As(err, &urlErr)).To(BeTrue(), fmt.Sprintf("Expected a (*url.Error) error in the chan got, %T: %+v", err, err))
+
+	var netOpErr *net.OpError
+	Expect(errors.As(err, &netOpErr) || errors.Is(err, io.EOF)).
+		To(BeTrue(), fmt.Sprintf("Expected a (*net.OpError) or io.EOF error in the chan got, %T: %+v", err, err))
 }

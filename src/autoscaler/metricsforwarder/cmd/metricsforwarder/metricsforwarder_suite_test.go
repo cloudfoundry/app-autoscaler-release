@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	testhelpers2 "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	testhelpers2 "github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -23,10 +23,10 @@ import (
 	"github.com/onsi/gomega/gexec"
 	yaml "gopkg.in/yaml.v2"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/config"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/testhelpers"
 )
 
 var (
@@ -53,7 +53,7 @@ func TestMetricsforwarder(t *testing.T) {
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
-	mf, err := gexec.Build("code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/cmd/metricsforwarder", "-race")
+	mf, err := gexec.Build("github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/cmd/metricsforwarder", "-race")
 	if err != nil {
 		AbortSuite(fmt.Sprintf("Could not build metricsforwarder: %s", err.Error()))
 	}

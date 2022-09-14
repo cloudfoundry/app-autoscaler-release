@@ -3,8 +3,8 @@ package plancheck
 import (
 	"fmt"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/lager"
 )

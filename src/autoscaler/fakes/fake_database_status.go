@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"sync"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
+	"github.com/cloudfoundry/app-autoscaler-release/healthendpoint"
 )
 
 type FakeDatabaseStatus struct {

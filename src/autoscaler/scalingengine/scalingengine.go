@@ -1,9 +1,9 @@
 package scalingengine
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"errors"
 	"fmt"
@@ -347,7 +347,7 @@ func (s *scalingEngine) RemoveActiveSchedule(appId string, scheduleId string) er
 
 	processes, err := s.cfClient.GetAppProcesses(cf.Guid(appId), cf.ProcessTypeWeb)
 	if err != nil {
-		if models.IsNotFound(err) {
+		if cf.IsNotFound(err) {
 			history.Status = models.ScalingStatusIgnored
 			return nil
 		}

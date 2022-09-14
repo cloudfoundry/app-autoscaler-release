@@ -10,13 +10,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/brokerserver"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	. "github.com/cloudfoundry/app-autoscaler-release/api/brokerserver"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 
 	"github.com/onsi/gomega/ghttp"
 

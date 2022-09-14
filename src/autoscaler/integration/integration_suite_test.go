@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/cloudfoundry/app-autoscaler-release/cf/mocks"
 	"io"
 	"log"
 	"mime/multipart"
@@ -16,10 +17,10 @@ import (
 	"testing"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	"github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
@@ -59,7 +60,7 @@ var (
 	LOGLEVEL                string
 	noaaPollingRegPath      = regexp.MustCompile(`^/apps/.*/containermetrics$`)
 	dbHelper                *sqlx.DB
-	fakeCCNOAAUAA           *testhelpers.MockServer
+	fakeCCNOAAUAA           *mocks.MockServer
 	testUserScope           = []string{"cloud_controller.read", "cloud_controller.write", "password.write", "openid", "network.admin", "network.write", "uaa.user"}
 	processMap              = map[string]ifrit.Process{}
 
@@ -759,7 +760,7 @@ func checkScheduleContents(appId string, expectHttpStatus int, expectResponseMap
 }
 
 func startFakeCCNOAAUAA(instanceCount int) {
-	fakeCCNOAAUAA = testhelpers.NewMockServer()
+	fakeCCNOAAUAA = mocks.NewMockServer()
 	fakeCCNOAAUAA.Add().
 		GetApp(models.AppStatusStarted, http.StatusOK, "test_space_guid").
 		GetAppProcesses(instanceCount).

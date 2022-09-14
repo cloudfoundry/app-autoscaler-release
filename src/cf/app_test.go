@@ -2,13 +2,12 @@ package cf_test
 
 import (
 	"context"
+	"github.com/cloudfoundry/app-autoscaler-release/cf/mocks"
 	"net/http"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/ghttp"
@@ -58,14 +57,14 @@ var _ = Describe("Cf client App", func() {
 		var ccWatcher, loginWatcher *ConnectionWatcher
 		fakeCC.Close()
 		server := NewUnstartedServer()
-		fakeCC = NewMockWithServer(server)
+		fakeCC = mocks.NewMockWithServer(server)
 		ccWatcher = NewConnectionWatcher(fakeCC.HTTPTestServer.Config.ConnState)
 		fakeCC.HTTPTestServer.Config.ConnState = ccWatcher.OnStateChange
 		fakeCC.Start()
 
 		fakeLoginServer.Close()
 		server = NewUnstartedServer()
-		fakeLoginServer = NewMockWithServer(server)
+		fakeLoginServer = mocks.NewMockWithServer(server)
 		loginWatcher = NewConnectionWatcher(fakeLoginServer.HTTPTestServer.Config.ConnState)
 		fakeLoginServer.HTTPTestServer.Config.ConnState = loginWatcher.OnStateChange
 		fakeLoginServer.Start()
@@ -136,7 +135,7 @@ var _ = Describe("Cf client App", func() {
 		When("get app returns 500 and get process return ok", func() {
 			BeforeEach(func() {
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes", CombineHandlers(
-					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+					RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 				))
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
 					RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
@@ -156,7 +155,7 @@ var _ = Describe("Cf client App", func() {
 					RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
 				))
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
-					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+					RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 				))
 			})
 
@@ -170,10 +169,10 @@ var _ = Describe("Cf client App", func() {
 		When("get processes return 500 and get app returns 500", func() {
 			BeforeEach(func() {
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id/processes", CombineHandlers(
-					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+					RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 				))
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id", CombineHandlers(
-					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+					RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 				))
 			})
 
@@ -202,18 +201,18 @@ var _ = Describe("Cf client App", func() {
 					RoundRobinWithMultiple(
 						RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
 						RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
-						RespondWithJSONEncoded(http.StatusNotFound, models.CfResourceNotFound),
+						RespondWithJSONEncoded(http.StatusNotFound, cf.CfResourceNotFound),
 						RespondWith(http.StatusOK, appProcessesJson, http.Header{"Content-Type": []string{"application/json"}}),
-						RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+						RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 					))
 
 				fakeCC.RouteToHandler("GET", "/v3/apps/test-app-id",
 					RoundRobinWithMultiple(
 						RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
 						RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
-						RespondWithJSONEncoded(http.StatusNotFound, models.CfResourceNotFound),
+						RespondWithJSONEncoded(http.StatusNotFound, cf.CfResourceNotFound),
 						RespondWith(http.StatusOK, appTestJson, http.Header{"Content-Type": []string{"application/json"}}),
-						RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+						RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 					))
 			})
 			It("Should not leak file handles or cause errors", func() {
@@ -274,7 +273,7 @@ var _ = Describe("Cf client App", func() {
 				setCfcClient(3)
 				fakeCC.RouteToHandler("POST",
 					"/v3/apps/test-app-id/processes/web/actions/scale",
-					RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError))
+					RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError))
 			})
 
 			It("should error correctly", func() {
@@ -296,9 +295,9 @@ var _ = Describe("Cf client App", func() {
 					RoundRobinWithMultiple(
 						RespondWith(http.StatusAccepted, scaleResponse, http.Header{"Content-Type": []string{"application/json"}}),
 						RespondWith(http.StatusAccepted, scaleResponse, http.Header{"Content-Type": []string{"application/json"}}),
-						RespondWithJSONEncoded(http.StatusNotFound, models.CfResourceNotFound),
+						RespondWithJSONEncoded(http.StatusNotFound, cf.CfResourceNotFound),
 						RespondWith(http.StatusAccepted, scaleResponse, http.Header{"Content-Type": []string{"application/json"}}),
-						RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+						RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 					))
 			})
 			It("Should not leak file handles or cause errors", func() {

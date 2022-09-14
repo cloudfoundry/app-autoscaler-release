@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
 	"code.cloudfoundry.org/cfhttp"
 	_ "github.com/go-sql-driver/mysql"
@@ -19,8 +19,8 @@ import (
 	"github.com/onsi/gomega/gexec"
 	yaml "gopkg.in/yaml.v2"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/config"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsserver/config"
 )
 
 var (
@@ -39,7 +39,7 @@ func TestMetricsServer(t *testing.T) {
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
-	ms, err := gexec.Build("code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/cmd/metricsserver", "-race")
+	ms, err := gexec.Build("github.com/cloudfoundry/app-autoscaler-release/metricsserver/cmd/metricsserver", "-race")
 	Expect(err).NotTo(HaveOccurred())
 
 	dbUrl := testhelpers.GetDbUrl()

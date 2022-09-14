@@ -1,11 +1,11 @@
-package testhelpers
+package mocks
 
 import (
+	. "github.com/cloudfoundry/app-autoscaler-release/cf"
 	"net/http"
 	"regexp"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
 )
@@ -60,22 +60,22 @@ type InstanceCount struct {
 
 type AddMock struct{ server *MockServer }
 
-func (a AddMock) GetApp(appState string, statusCode int, spaceGuid cf.SpaceId) AddMock {
+func (a AddMock) GetApp(appState string, statusCode int, spaceGuid SpaceId) AddMock {
 	created, err := time.Parse(time.RFC3339, "2022-07-21T13:42:30Z")
 	Expect(err).NotTo(HaveOccurred())
 	updated, err := time.Parse(time.RFC3339, "2022-07-21T14:30:17Z")
 	Expect(err).NotTo(HaveOccurred())
 	a.server.RouteToHandler("GET",
 		regexp.MustCompile(`^/v3/apps/[^/]+$`),
-		ghttp.RespondWithJSONEncoded(statusCode, cf.App{
+		ghttp.RespondWithJSONEncoded(statusCode, App{
 			Guid:      "testing-guid-get-app",
 			Name:      "mock-get-app",
 			State:     appState,
 			CreatedAt: created,
 			UpdatedAt: updated,
-			Relationships: cf.Relationships{
-				Space: &cf.Space{
-					Data: cf.SpaceData{
+			Relationships: Relationships{
+				Space: &Space{
+					Data: SpaceData{
 						Guid: spaceGuid,
 					},
 				},
@@ -86,20 +86,20 @@ func (a AddMock) GetApp(appState string, statusCode int, spaceGuid cf.SpaceId) A
 
 func (a AddMock) GetAppProcesses(processes int) AddMock {
 	type processesResponse struct {
-		Pagination cf.Pagination `json:"pagination"`
-		Resources  cf.Processes  `json:"resources"`
+		Pagination Pagination `json:"pagination"`
+		Resources  Processes  `json:"resources"`
 	}
 	a.server.RouteToHandler("GET",
 		regexp.MustCompile(`^/v3/apps/[^/]+/processes$`),
-		ghttp.RespondWithJSONEncoded(http.StatusOK, processesResponse{Resources: cf.Processes{{Instances: processes}}}))
+		ghttp.RespondWithJSONEncoded(http.StatusOK, processesResponse{Resources: Processes{{Instances: processes}}}))
 	return a
 }
 
 func (a AddMock) Info(url string) AddMock {
-	a.server.RouteToHandler("GET", "/", ghttp.RespondWithJSONEncoded(http.StatusOK, cf.EndpointsResponse{
-		Links: cf.Endpoints{
-			Login: cf.Href{Url: url},
-			Uaa:   cf.Href{Url: url},
+	a.server.RouteToHandler("GET", "/", ghttp.RespondWithJSONEncoded(http.StatusOK, EndpointsResponse{
+		Links: Endpoints{
+			Login: Href{Url: url},
+			Uaa:   Href{Url: url},
 		},
 	}))
 	return a
@@ -110,18 +110,18 @@ func (a AddMock) ScaleAppWebProcess() AddMock {
 	return a
 }
 
-func (a AddMock) Roles(statusCode int, roles ...cf.Role) AddMock {
+func (a AddMock) Roles(statusCode int, roles ...Role) AddMock {
 	a.server.RouteToHandler("GET", "/v3/roles",
-		ghttp.RespondWithJSONEncoded(statusCode, cf.Response[cf.Role]{Resources: roles}))
+		ghttp.RespondWithJSONEncoded(statusCode, Response[Role]{Resources: roles}))
 	return a
 }
 
 func (a AddMock) ServiceInstance(planGuid string) AddMock {
 	a.server.RouteToHandler("GET", regexp.MustCompile(`^/v3/service_instances/[^/]+$`),
-		ghttp.RespondWithJSONEncoded(http.StatusOK, &cf.ServiceInstance{
+		ghttp.RespondWithJSONEncoded(http.StatusOK, &ServiceInstance{
 			Guid:          "service-instance-mock-guid",
 			Type:          "managed",
-			Relationships: cf.ServiceInstanceRelationships{ServicePlan: cf.ServicePlanRelation{Data: cf.ServicePlanData{Guid: planGuid}}},
+			Relationships: ServiceInstanceRelationships{ServicePlan: ServicePlanRelation{Data: ServicePlanData{Guid: planGuid}}},
 		}),
 	)
 	return a
@@ -129,7 +129,7 @@ func (a AddMock) ServiceInstance(planGuid string) AddMock {
 
 func (a AddMock) ServicePlan(brokerPlanId string) AddMock {
 	a.server.RouteToHandler("GET", regexp.MustCompile(`^/v3/service_plans/[^/]+$`),
-		ghttp.RespondWithJSONEncoded(http.StatusOK, cf.ServicePlan{BrokerCatalog: cf.BrokerCatalog{Id: brokerPlanId}}),
+		ghttp.RespondWithJSONEncoded(http.StatusOK, ServicePlan{BrokerCatalog: BrokerCatalog{Id: brokerPlanId}}),
 	)
 	return a
 }
@@ -156,6 +156,6 @@ func (a AddMock) CheckToken(testUserScope []string) AddMock {
 
 func (a AddMock) OauthToken(accessToken string) AddMock {
 	a.server.RouteToHandler(http.MethodPost, "/oauth/token",
-		ghttp.RespondWithJSONEncoded(http.StatusOK, cf.Tokens{AccessToken: accessToken, ExpiresIn: 12000}))
+		ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{AccessToken: accessToken, ExpiresIn: 12000}))
 	return a
 }

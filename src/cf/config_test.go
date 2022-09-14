@@ -1,7 +1,7 @@
 package cf_test
 
 import (
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	. "github.com/cloudfoundry/app-autoscaler-release/cf"
 	"gopkg.in/yaml.v3"
 
 	. "github.com/onsi/ginkgo/v2"

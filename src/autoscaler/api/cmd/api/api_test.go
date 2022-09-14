@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	. "github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
 	"code.cloudfoundry.org/cfhttp"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

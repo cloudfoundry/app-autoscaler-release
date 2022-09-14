@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	as_testhelpers "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	as_testhelpers "github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	. "github.com/onsi/ginkgo/v2"

@@ -8,10 +8,10 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 const (

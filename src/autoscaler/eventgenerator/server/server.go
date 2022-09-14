@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"os"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/aggregator"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/config"
+	"github.com/cloudfoundry/app-autoscaler-release/healthendpoint"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/lager"

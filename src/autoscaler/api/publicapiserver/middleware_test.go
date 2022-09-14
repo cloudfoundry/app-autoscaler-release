@@ -11,11 +11,11 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/publicapiserver"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/api"
+	. "github.com/cloudfoundry/app-autoscaler-release/api/publicapiserver"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 )
 
 var _ = Describe("Middleware", func() {

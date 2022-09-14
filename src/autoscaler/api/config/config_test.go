@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	. "github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	. "github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

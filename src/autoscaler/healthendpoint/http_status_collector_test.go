@@ -1,7 +1,7 @@
 package healthendpoint_test
 
 import (
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
+	. "github.com/cloudfoundry/app-autoscaler-release/healthendpoint"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

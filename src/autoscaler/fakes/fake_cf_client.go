@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 )
 
 type FakeCFClient struct {

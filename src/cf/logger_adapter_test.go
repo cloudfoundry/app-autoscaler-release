@@ -3,7 +3,7 @@ package cf_test
 import (
 	"testing"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 
 	"code.cloudfoundry.org/lager/lagertest"
 	. "github.com/onsi/gomega"

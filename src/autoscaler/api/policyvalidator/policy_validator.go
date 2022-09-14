@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"github.com/xeipuuv/gojsonschema"
 )

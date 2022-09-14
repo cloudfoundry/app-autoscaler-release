@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/schedulerutil"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/api/config"
+	. "github.com/cloudfoundry/app-autoscaler-release/api/schedulerutil"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 
 	"code.cloudfoundry.org/lager"
 

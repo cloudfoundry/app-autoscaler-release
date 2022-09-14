@@ -8,10 +8,10 @@ import (
 
 	"github.com/tedsuo/ifrit/ginkgomon_v2"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/collector"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsserver/collector"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"testing"
 

@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/server"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/aggregator"
+	. "github.com/cloudfoundry/app-autoscaler-release/eventgenerator/server"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo/v2"

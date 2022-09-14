@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
 
 	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo/v2"

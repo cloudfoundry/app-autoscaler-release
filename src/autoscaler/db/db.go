@@ -5,9 +5,9 @@ import (
 	"io"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
+	"github.com/cloudfoundry/app-autoscaler-release/healthendpoint"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 const (

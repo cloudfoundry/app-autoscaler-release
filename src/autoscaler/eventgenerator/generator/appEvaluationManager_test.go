@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/generator"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/aggregator"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/config"
+	. "github.com/cloudfoundry/app-autoscaler-release/eventgenerator/generator"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/lager"

@@ -1,16 +1,16 @@
 package integration_test
 
 import (
-	apiConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	egConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	mgConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsgateway/config"
-	msConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	opConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/config"
-	seConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
+	apiConfig "github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	egConfig "github.com/cloudfoundry/app-autoscaler-release/eventgenerator/config"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	mgConfig "github.com/cloudfoundry/app-autoscaler-release/metricsgateway/config"
+	msConfig "github.com/cloudfoundry/app-autoscaler-release/metricsserver/config"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	opConfig "github.com/cloudfoundry/app-autoscaler-release/operator/config"
+	seConfig "github.com/cloudfoundry/app-autoscaler-release/scalingengine/config"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 
 	"fmt"
 	"net/url"

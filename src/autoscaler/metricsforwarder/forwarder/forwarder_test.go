@@ -3,16 +3,16 @@ package forwarder_test
 import (
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/forwarder"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/config"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/forwarder"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/testhelpers"
 
 	"errors"
 	"path/filepath"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

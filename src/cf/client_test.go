@@ -1,19 +1,16 @@
 package cf_test
 
 import (
+	. "github.com/cloudfoundry/app-autoscaler-release/cf"
 	"net/http"
 	"net/url"
 	"sync"
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
-
 	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
-
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 )
 
 var _ = Describe("Client", func() {

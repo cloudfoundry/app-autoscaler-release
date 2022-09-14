@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 type FakeBindingDB struct {

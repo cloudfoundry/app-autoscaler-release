@@ -2,7 +2,7 @@
 package fakes
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/ratelimiter"
+	"github.com/cloudfoundry/app-autoscaler-release/ratelimiter"
 	"sync"
 )
 

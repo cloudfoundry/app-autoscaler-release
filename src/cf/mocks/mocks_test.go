@@ -1,10 +1,11 @@
-package testhelpers_test
+package mocks_test
 
 import (
 	"errors"
+	. "github.com/cloudfoundry/app-autoscaler-release/cf"
+	. "github.com/cloudfoundry/app-autoscaler-release/cf/mocks"
+	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"
 	"github.com/onsi/gomega/ghttp"
@@ -18,8 +19,8 @@ import (
 var _ = Describe("Cf cloud controller", func() {
 
 	var (
-		conf            *cf.Config
-		cfc             *cf.Client
+		conf            *Config
+		cfc             *Client
 		fakeCC          *MockServer
 		fakeLoginServer *MockServer
 		err             error
@@ -27,11 +28,11 @@ var _ = Describe("Cf cloud controller", func() {
 	)
 
 	var setCfcClient = func(maxRetries int, apiUrl string) {
-		conf = &cf.Config{}
+		conf = &Config{}
 		conf.API = apiUrl
 		conf.MaxRetries = maxRetries
 		conf.MaxRetryWaitMs = 1
-		cfc = cf.NewCFClient(conf, logger, clock.NewClock())
+		cfc = NewCFClient(conf, logger, clock.NewClock())
 		err = cfc.Login()
 		Expect(err).NotTo(HaveOccurred())
 	}
@@ -40,7 +41,7 @@ var _ = Describe("Cf cloud controller", func() {
 		fakeCC = NewMockServer()
 		fakeLoginServer = NewMockServer()
 		fakeCC.Add().Info(fakeLoginServer.URL())
-		fakeLoginServer.RouteToHandler("POST", cf.PathCFAuth, ghttp.RespondWithJSONEncoded(http.StatusOK, cf.Tokens{
+		fakeLoginServer.RouteToHandler("POST", PathCFAuth, ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{
 			AccessToken: "test-access-token",
 			ExpiresIn:   12000,
 		}))
@@ -71,15 +72,15 @@ var _ = Describe("Cf cloud controller", func() {
 			It("will return success", func() {
 				app, err := cfc.GetApp("test-app-id")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(app).To(Equal(&cf.App{
+				Expect(app).To(Equal(&App{
 					Guid:      "testing-guid-get-app",
 					Name:      "mock-get-app",
 					State:     "STARTED",
 					CreatedAt: ParseDate("2022-07-21T13:42:30Z"),
 					UpdatedAt: ParseDate("2022-07-21T14:30:17Z"),
-					Relationships: cf.Relationships{
-						Space: &cf.Space{
-							Data: cf.SpaceData{
+					Relationships: Relationships{
+						Space: &Space{
+							Data: SpaceData{
 								Guid: "test_space_guid",
 							},
 						},
@@ -100,9 +101,9 @@ var _ = Describe("Cf cloud controller", func() {
 				DeferCleanup(mocks.Close)
 			})
 			It("will return success", func() {
-				app, err := cfc.GetAppProcesses("test-app-id", cf.ProcessTypeWeb)
+				app, err := cfc.GetAppProcesses("test-app-id", ProcessTypeWeb)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(app).To(Equal(cf.Processes{{Instances: 27}}))
+				Expect(app).To(Equal(Processes{{Instances: 27}}))
 			})
 		})
 
@@ -120,22 +121,22 @@ var _ = Describe("Cf cloud controller", func() {
 			It("will return success", func() {
 				app, err := cfc.GetAppAndProcesses("test-app-id")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(app).To(Equal(&cf.AppAndProcesses{
-					App: &cf.App{
+				Expect(app).To(Equal(&AppAndProcesses{
+					App: &App{
 						Guid:      "testing-guid-get-app",
 						Name:      "mock-get-app",
 						State:     "STARTED",
 						CreatedAt: ParseDate("2022-07-21T13:42:30Z"),
 						UpdatedAt: ParseDate("2022-07-21T14:30:17Z"),
-						Relationships: cf.Relationships{
-							Space: &cf.Space{
-								Data: cf.SpaceData{
+						Relationships: Relationships{
+							Space: &Space{
+								Data: SpaceData{
 									Guid: "test_space_guid",
 								},
 							},
 						},
 					},
-					Processes: cf.Processes{{Instances: 27}},
+					Processes: Processes{{Instances: 27}},
 				}))
 			})
 		})
@@ -166,20 +167,20 @@ var _ = Describe("Cf cloud controller", func() {
 			var mocks = NewMockServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
-				mocks.Add().Info(fakeLoginServer.URL()).Roles(http.StatusOK, cf.Role{Guid: "mock_guid", Type: cf.RoleSpaceDeveloper})
+				mocks.Add().Info(fakeLoginServer.URL()).Roles(http.StatusOK, Role{Guid: "mock_guid", Type: RoleSpaceDeveloper})
 
 				DeferCleanup(mocks.Close)
 			})
 			It("will return success", func() {
 				roles, err := cfc.GetSpaceDeveloperRoles("some_space", "some_user")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(roles).To(Equal(cf.Roles{
+				Expect(roles).To(Equal(Roles{
 					{
 						Guid: "mock_guid",
-						Type: cf.RoleSpaceDeveloper,
+						Type: RoleSpaceDeveloper,
 					},
 				}))
-				Expect(roles.HasRole(cf.RoleSpaceDeveloper)).To(BeTrue())
+				Expect(roles.HasRole(RoleSpaceDeveloper)).To(BeTrue())
 			})
 		})
 	})
@@ -195,10 +196,10 @@ var _ = Describe("Cf cloud controller", func() {
 			It("will return success", func() {
 				roles, err := cfc.GetServiceInstance("some-guid")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(roles).To(Equal(&cf.ServiceInstance{
+				Expect(roles).To(Equal(&ServiceInstance{
 					Guid:          "service-instance-mock-guid",
 					Type:          "managed",
-					Relationships: cf.ServiceInstanceRelationships{ServicePlan: cf.ServicePlanRelation{Data: cf.ServicePlanData{Guid: "A-service-plan-guid"}}}}))
+					Relationships: ServiceInstanceRelationships{ServicePlan: ServicePlanRelation{Data: ServicePlanData{Guid: "A-service-plan-guid"}}}}))
 			})
 		})
 	})
@@ -214,7 +215,7 @@ var _ = Describe("Cf cloud controller", func() {
 			It("will return success", func() {
 				roles, err := cfc.GetServicePlan("a-broker-plan-id")
 				Expect(err).NotTo(HaveOccurred())
-				Expect(roles).To(Equal(&cf.ServicePlan{BrokerCatalog: cf.BrokerCatalog{Id: "a-broker-plan-id"}}))
+				Expect(roles).To(Equal(&ServicePlan{BrokerCatalog: BrokerCatalog{Id: "a-broker-plan-id"}}))
 			})
 		})
 	})
@@ -230,9 +231,9 @@ var _ = Describe("Cf cloud controller", func() {
 			It("will return success", func() {
 				endpoints, err := cfc.GetEndpoints()
 				Expect(err).NotTo(HaveOccurred())
-				Expect(endpoints).To(Equal(cf.Endpoints{
-					Login: cf.Href{fakeLoginServer.URL()},
-					Uaa:   cf.Href{fakeLoginServer.URL()},
+				Expect(endpoints).To(Equal(Endpoints{
+					Login: Href{fakeLoginServer.URL()},
+					Uaa:   Href{fakeLoginServer.URL()},
 				}))
 			})
 		})
@@ -251,7 +252,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 				token, err := cfc.GetTokens()
 				Expect(err).NotTo(HaveOccurred())
-				Expect(token).To(Equal(cf.Tokens{AccessToken: "a-access-token", ExpiresIn: 12000}))
+				Expect(token).To(Equal(Tokens{AccessToken: "a-access-token", ExpiresIn: 12000}))
 			})
 		})
 	})
@@ -281,7 +282,7 @@ var _ = Describe("Cf cloud controller", func() {
 				mocks.Add().
 					Info(mocks.URL()).
 					GetApp("", 200, "some-space-guid").
-					Roles(http.StatusOK, cf.Role{Guid: "mock_guid", Type: cf.RoleSpaceDeveloper}).
+					Roles(http.StatusOK, Role{Guid: "mock_guid", Type: RoleSpaceDeveloper}).
 					UserInfo(http.StatusOK, "testUser").
 					OauthToken("a-test-access-token")
 				setCfcClient(0, mocks.URL())
@@ -299,7 +300,7 @@ var _ = Describe("Cf cloud controller", func() {
 				mocks.Add().
 					Info(mocks.URL()).
 					GetApp("", 200, "some-space-guid").
-					Roles(http.StatusOK, cf.Role{Guid: "mock_guid", Type: cf.RoleSpaceDeveloper}).
+					Roles(http.StatusOK, Role{Guid: "mock_guid", Type: RoleSpaceDeveloper}).
 					UserInfo(http.StatusUnauthorized, "testUser").
 					OauthToken("a-test-access-token")
 				setCfcClient(0, mocks.URL())
@@ -308,8 +309,14 @@ var _ = Describe("Cf cloud controller", func() {
 			It("will return unauthorised", func() {
 				_, err := cfc.IsUserSpaceDeveloper("bearer a-test-access-token", "test-app-id")
 				Expect(err).To(HaveOccurred())
-				Expect(errors.Is(err, cf.ErrUnauthrorized)).To(BeTrue())
+				Expect(errors.Is(err, ErrUnauthrorized)).To(BeTrue())
 			})
 		})
 	})
 })
+
+func ParseDate(date string) time.Time {
+	updated, err := time.Parse(time.RFC3339, date)
+	Expect(err).NotTo(HaveOccurred())
+	return updated
+}

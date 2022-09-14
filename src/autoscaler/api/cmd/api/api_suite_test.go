@@ -3,17 +3,18 @@ package main_test
 import (
 	"database/sql"
 	"encoding/json"
+	"github.com/cloudfoundry/app-autoscaler-release/cf/mocks"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	. "github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/cfhttp"
 
@@ -47,7 +48,7 @@ var (
 	publicApiPort    int
 	healthport       int
 	infoBytes        string
-	ccServer         *MockServer
+	ccServer         *mocks.MockServer
 )
 
 func TestApi(t *testing.T) {
@@ -70,7 +71,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		Fail("failed to get database URL and drivername: " + e.Error())
 	}
 	var err error
-	info.ApPath, err = gexec.Build("code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api", "-race")
+	info.ApPath, err = gexec.Build("github.com/cloudfoundry/app-autoscaler-release/api/cmd/api", "-race")
 	if err != nil {
 		AbortSuite(err.Error())
 	}
@@ -106,7 +107,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	info := &testdata{}
 	err := json.Unmarshal(testParams, info)
 	Expect(err).NotTo(HaveOccurred())
-	ccServer = NewMockServer()
+	ccServer = mocks.NewMockServer()
 	ccServer.Add().Info(ccServer.URL()).OauthToken("test-token")
 
 	apPath = info.ApPath

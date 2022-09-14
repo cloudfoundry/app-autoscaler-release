@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"os"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/server/auth"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/server/auth"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 

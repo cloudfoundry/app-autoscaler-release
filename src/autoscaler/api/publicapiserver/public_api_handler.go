@@ -9,15 +9,15 @@ import (
 	"reflect"
 	"strconv"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
+	"github.com/cloudfoundry/app-autoscaler-release/cred_helper"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/policyvalidator"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/schedulerutil"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/api/policyvalidator"
+	"github.com/cloudfoundry/app-autoscaler-release/api/schedulerutil"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 
 	"code.cloudfoundry.org/cfhttp/handlers"
 	"code.cloudfoundry.org/lager"

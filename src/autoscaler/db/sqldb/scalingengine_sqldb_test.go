@@ -3,11 +3,11 @@ package sqldb_test
 import (
 	"strings"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	. "github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	. "github.com/cloudfoundry/app-autoscaler-release/db/sqldb"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/go-sql-driver/mysql"

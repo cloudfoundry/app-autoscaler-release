@@ -1,7 +1,7 @@
 package main_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -14,10 +14,10 @@ import (
 	"testing"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/config"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/cfhttp"
 	_ "github.com/go-sql-driver/mysql"
@@ -98,7 +98,7 @@ func TestEventgenerator(t *testing.T) {
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
-	eg, err := gexec.Build("code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/cmd/eventgenerator", "-race")
+	eg, err := gexec.Build("github.com/cloudfoundry/app-autoscaler-release/eventgenerator/cmd/eventgenerator", "-race")
 	Expect(err).NotTo(HaveOccurred())
 	initDB()
 	return []byte(eg)

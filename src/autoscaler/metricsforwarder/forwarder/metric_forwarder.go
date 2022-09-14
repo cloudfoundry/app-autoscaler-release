@@ -1,11 +1,11 @@
 package forwarder
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/go-loggregator/v8"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/config"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 type MetricForwarder interface {

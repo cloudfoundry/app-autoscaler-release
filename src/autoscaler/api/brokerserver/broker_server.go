@@ -6,15 +6,15 @@ import (
 	"net/http"
 	"os"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
+	"github.com/cloudfoundry/app-autoscaler-release/cred_helper"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 
 	"github.com/pivotal-cf/brokerapi/domain"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/healthendpoint"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/lager"

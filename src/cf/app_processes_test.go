@@ -3,8 +3,7 @@ package cf_test
 import (
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

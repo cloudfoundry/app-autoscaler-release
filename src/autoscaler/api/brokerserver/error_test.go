@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/brokerserver"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/api/brokerserver"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

@@ -1,14 +1,15 @@
 package main_test
 
 import (
+	"github.com/cloudfoundry/app-autoscaler-release/cf/mocks"
 	"path/filepath"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	. "github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine/config"
 
 	"code.cloudfoundry.org/cfhttp"
 	_ "github.com/go-sql-driver/mysql"
@@ -37,7 +38,7 @@ var (
 	port             int
 	healthport       int
 	configFile       *os.File
-	ccUAA            *MockServer
+	ccUAA            *mocks.MockServer
 	appId            string
 	httpClient       *http.Client
 	healthHttpClient *http.Client
@@ -45,14 +46,14 @@ var (
 
 var _ = SynchronizedBeforeSuite(
 	func() []byte {
-		compiledPath, err := gexec.Build("code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/cmd/scalingengine", "-race")
+		compiledPath, err := gexec.Build("github.com/cloudfoundry/app-autoscaler-release/scalingengine/cmd/scalingengine", "-race")
 		Expect(err).NotTo(HaveOccurred())
 		return []byte(compiledPath)
 	},
 	func(pathBytes []byte) {
 		enginePath = string(pathBytes)
 
-		ccUAA = NewMockServer()
+		ccUAA = mocks.NewMockServer()
 		appId = fmt.Sprintf("app-id-%d", GinkgoParallelProcess())
 		ccUAA.Add().
 			Info(ccUAA.URL()).

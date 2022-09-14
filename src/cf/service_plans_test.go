@@ -1,9 +1,7 @@
 package cf_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/ghttp"
@@ -42,7 +40,7 @@ var _ = Describe("Cf client Service Plans", func() {
 				fakeCC.AppendHandlers(
 					CombineHandlers(
 						VerifyRequest("GET", "/v3/service_plans/test_guid"),
-						RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+						RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 					),
 				)
 			})

@@ -9,10 +9,10 @@ import (
 	"net/url"
 	"strings"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/publicapiserver"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	. "github.com/cloudfoundry/app-autoscaler-release/api/publicapiserver"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/lager/lagertest"
 	. "github.com/onsi/ginkgo/v2"

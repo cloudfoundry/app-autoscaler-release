@@ -1,12 +1,12 @@
 package aggregator_test
 
 import (
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	cfhttp "code.cloudfoundry.org/cfhttp/v2"
 	"code.cloudfoundry.org/lager/lagertest"
+	. "github.com/cloudfoundry/app-autoscaler-release/eventgenerator/aggregator"
+	. "github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"

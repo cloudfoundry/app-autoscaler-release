@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/operator"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/clock/fakeclock"

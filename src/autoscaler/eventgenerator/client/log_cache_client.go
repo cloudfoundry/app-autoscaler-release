@@ -10,15 +10,15 @@ import (
 	"os"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/envelopeprocessor"
+	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	logcache "code.cloudfoundry.org/go-log-cache"
 	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 type LogCacheClient struct {

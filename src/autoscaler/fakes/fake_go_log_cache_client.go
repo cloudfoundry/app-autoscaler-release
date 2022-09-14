@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 	clienta "code.cloudfoundry.org/go-log-cache"
 	"google.golang.org/grpc"
 )

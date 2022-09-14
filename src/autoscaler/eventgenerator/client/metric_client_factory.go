@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/envelopeprocessor"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	logcache "code.cloudfoundry.org/go-log-cache"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/config"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 	gogrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

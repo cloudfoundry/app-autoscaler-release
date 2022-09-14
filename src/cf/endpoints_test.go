@@ -1,14 +1,12 @@
 package cf_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
+	"net/http"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/ghttp"
-
-	"net/http"
 )
 
 var _ = Describe("Cf client Endpoints", func() {
@@ -48,7 +46,7 @@ var _ = Describe("Cf client Endpoints", func() {
 				fakeCC.AppendHandlers(
 					CombineHandlers(
 						VerifyRequest("GET", "/"),
-						RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+						RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 					),
 				)
 			})

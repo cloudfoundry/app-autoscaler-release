@@ -4,8 +4,8 @@ package fakes
 import (
 	"sync"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/plancheck"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/api/plancheck"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 type FakePlanChecker struct {

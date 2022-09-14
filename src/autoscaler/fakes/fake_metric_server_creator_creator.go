@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 	"code.cloudfoundry.org/lager"
 )
 

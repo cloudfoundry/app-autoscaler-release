@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,9 +1,9 @@
 package schedule_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/schedule"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
+	. "github.com/cloudfoundry/app-autoscaler-release/scalingengine/schedule"
 
 	"code.cloudfoundry.org/lager/lagertest"
 	. "github.com/onsi/ginkgo/v2"

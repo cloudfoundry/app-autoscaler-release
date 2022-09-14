@@ -1,4 +1,4 @@
-module code.cloudfoundry.org/app-autoscaler/src/autoscaler
+module github.com/cloudfoundry/app-autoscaler-release
 
 go 1.19
 
@@ -22,7 +22,6 @@ require (
 	github.com/golangci/golangci-lint v1.49.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/imdario/mergo v0.3.13
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.7
@@ -47,7 +46,6 @@ require (
 	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df
 	google.golang.org/grpc v1.49.0
 	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -121,7 +119,6 @@ require (
 	github.com/gostaticanalysis/nilerr v0.1.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.6.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
-	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -228,6 +225,7 @@ require (
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	honnef.co/go/tools v0.3.3 // indirect
 	mvdan.cc/gofumpt v0.3.1 // indirect
 	mvdan.cc/interfacer v0.0.0-20180901003855-c20040233aed // indirect

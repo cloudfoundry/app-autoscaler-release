@@ -8,10 +8,10 @@ import (
 	"code.cloudfoundry.org/lager"
 	"github.com/patrickmn/go-cache"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
+	"github.com/cloudfoundry/app-autoscaler-release/cred_helper"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

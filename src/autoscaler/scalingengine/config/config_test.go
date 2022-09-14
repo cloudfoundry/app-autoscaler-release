@@ -1,9 +1,9 @@
 package config_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	. "github.com/cloudfoundry/app-autoscaler-release/scalingengine/config"
+	. "github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

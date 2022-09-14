@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/policyvalidator"
+	. "github.com/cloudfoundry/app-autoscaler-release/api/policyvalidator"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

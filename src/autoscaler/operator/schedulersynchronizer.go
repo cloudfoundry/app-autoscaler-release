@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"

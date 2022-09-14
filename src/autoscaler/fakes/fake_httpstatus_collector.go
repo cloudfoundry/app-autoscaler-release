@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
+	"github.com/cloudfoundry/app-autoscaler-release/healthendpoint"
 
 	"github.com/prometheus/client_golang/prometheus"
 )

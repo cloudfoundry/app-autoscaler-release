@@ -3,10 +3,10 @@ package cred_helper_test
 import (
 	"errors"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/cred_helper"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

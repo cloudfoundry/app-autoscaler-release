@@ -3,9 +3,9 @@ package client_test
 import (
 	"net/http"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
 	"code.cloudfoundry.org/lager"
 	"code.cloudfoundry.org/lager/lagertest"
+	. "github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

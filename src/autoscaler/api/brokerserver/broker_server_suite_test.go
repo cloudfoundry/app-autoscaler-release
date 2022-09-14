@@ -6,10 +6,10 @@ import (
 	"os"
 	"strconv"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/brokerserver"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/api/brokerserver"
+	"github.com/cloudfoundry/app-autoscaler-release/api/config"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
 
 	"github.com/onsi/gomega/ghttp"
 

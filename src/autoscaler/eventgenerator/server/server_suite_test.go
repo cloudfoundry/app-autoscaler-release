@@ -1,11 +1,11 @@
 package server_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/server"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/config"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/server"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"net/url"
 	"strconv"

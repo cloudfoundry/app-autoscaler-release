@@ -5,14 +5,14 @@ import (
 	"errors"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/lager"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
 )
 
 type BindingSQLDB struct {

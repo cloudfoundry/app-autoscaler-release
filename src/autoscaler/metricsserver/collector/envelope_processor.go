@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/envelopeprocessor"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/clock"
 	loggregator_v2 "code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"

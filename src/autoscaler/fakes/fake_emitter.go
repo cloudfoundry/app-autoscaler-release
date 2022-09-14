@@ -4,7 +4,7 @@ package fakes
 import (
 	"sync"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsgateway"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsgateway"
 
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 )

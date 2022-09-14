@@ -1,13 +1,12 @@
 package cf_test
 
 import (
+	"github.com/cloudfoundry/app-autoscaler-release/cf/mocks"
 	"net/http"
-
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager/lagertest"
+	. "github.com/cloudfoundry/app-autoscaler-release/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
@@ -40,8 +39,8 @@ var _ = Describe("Oauth", func() {
 		isUserSpaceDeveloperFlag bool
 		isUserAdminFlag          bool
 
-		fakeCCServer    *testhelpers.MockServer
-		fakeTokenServer *testhelpers.MockServer
+		fakeCCServer    *mocks.MockServer
+		fakeTokenServer *mocks.MockServer
 
 		userInfoStatus   int
 		userInfoResponse userInfo
@@ -66,8 +65,8 @@ var _ = Describe("Oauth", func() {
 			UserId: TestUserId,
 		}
 
-		fakeCCServer = testhelpers.NewMockServer()
-		fakeTokenServer = testhelpers.NewMockServer()
+		fakeCCServer = mocks.NewMockServer()
+		fakeTokenServer = mocks.NewMockServer()
 		fakeTokenServer.RouteToHandler(http.MethodGet, "/userinfo", ghttp.RespondWithJSONEncodedPtr(&userInfoStatus, &userInfoResponse))
 		fakeTokenServer.RouteToHandler(http.MethodPost, "/check_token", ghttp.RespondWithJSONEncodedPtr(&userScopeStatus, &userScopeResponse))
 		fakeTokenServer.RouteToHandler("POST", PathCFAuth, ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{

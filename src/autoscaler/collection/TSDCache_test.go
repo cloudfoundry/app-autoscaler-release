@@ -3,7 +3,7 @@ package collection_test
 import (
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/collection"
+	. "github.com/cloudfoundry/app-autoscaler-release/collection"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

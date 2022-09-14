@@ -14,13 +14,13 @@ import (
 	"sync"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
 	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 	"google.golang.org/grpc"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/config"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

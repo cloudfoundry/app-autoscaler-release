@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/server/common"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/cred_helper"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/server/common"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/cfhttp/handlers"
 	"code.cloudfoundry.org/lager"

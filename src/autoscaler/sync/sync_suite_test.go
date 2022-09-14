@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/onsi/ginkgo/v2"

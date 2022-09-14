@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/forwarder"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/forwarder"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"errors"
 	"net/http"

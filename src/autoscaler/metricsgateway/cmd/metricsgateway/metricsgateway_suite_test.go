@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"github.com/jmoiron/sqlx"
@@ -24,10 +24,10 @@ import (
 
 	"testing"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsgateway/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsgateway/config"
+	"github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 )
 
 var (
@@ -82,7 +82,7 @@ func TestMetricsgateway(t *testing.T) {
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
-	eg, err := gexec.Build("code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsgateway/cmd/metricsgateway", "-race")
+	eg, err := gexec.Build("github.com/cloudfoundry/app-autoscaler-release/metricsgateway/cmd/metricsgateway", "-race")
 	Expect(err).NotTo(HaveOccurred())
 	initDB()
 	return []byte(eg)

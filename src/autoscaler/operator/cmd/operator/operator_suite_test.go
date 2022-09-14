@@ -3,15 +3,16 @@ package main_test
 import (
 	"database/sql"
 	"fmt"
+	"github.com/cloudfoundry/app-autoscaler-release/cf/mocks"
 	"net/http"
 	"os"
 	"os/exec"
 	"testing"
 	"time"
 
-	models2 "code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	models2 "github.com/cloudfoundry/app-autoscaler-release/models"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/testhelpers"
 
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/onsi/ginkgo/v2"
@@ -19,16 +20,16 @@ import (
 	"github.com/onsi/gomega/gexec"
 	"gopkg.in/yaml.v2"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/config"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/operator/config"
 )
 
 var (
 	prPath           string
 	cfg              config.Config
 	configFile       *os.File
-	cfServer         *testhelpers.MockServer
+	cfServer         *mocks.MockServer
 	healthHttpClient *http.Client
 	healthport       int
 )
@@ -39,7 +40,7 @@ func TestOperator(t *testing.T) {
 }
 
 var _ = SynchronizedBeforeSuite(func() []byte {
-	pr, err := gexec.Build("code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/cmd/operator", "-race")
+	pr, err := gexec.Build("github.com/cloudfoundry/app-autoscaler-release/operator/cmd/operator", "-race")
 	if err != nil {
 		AbortSuite(fmt.Sprintf("Failed to build cmd/operator: %s", err.Error()))
 	}
@@ -59,7 +60,7 @@ var _ = SynchronizedAfterSuite(func() {
 })
 
 func initConfig() {
-	cfServer = testhelpers.NewMockServer()
+	cfServer = mocks.NewMockServer()
 	cfServer.Add().
 		Info(cfServer.URL()).
 		GetApp(models2.AppStatusStarted, http.StatusOK, "test_space_guid").

@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/schedule"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine/schedule"
 
 	"code.cloudfoundry.org/lager"
 )

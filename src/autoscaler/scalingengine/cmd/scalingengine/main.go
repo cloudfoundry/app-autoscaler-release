@@ -6,15 +6,15 @@ import (
 	"os"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/schedule"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/server"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
+	"github.com/cloudfoundry/app-autoscaler-release/db/sqldb"
+	"github.com/cloudfoundry/app-autoscaler-release/healthendpoint"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine/config"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine/schedule"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine/server"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/clock"

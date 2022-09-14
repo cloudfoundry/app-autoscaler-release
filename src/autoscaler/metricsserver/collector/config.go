@@ -3,8 +3,8 @@ package collector
 import (
 	"fmt"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsserver/config"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 // ServerConfig a type to wrap both the config.ServerConfig and config.Config data.

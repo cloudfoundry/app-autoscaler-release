@@ -6,9 +6,7 @@ import (
 	"net/url"
 	"regexp"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/cloudfoundry/app-autoscaler-release/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/ghttp"
@@ -33,7 +31,7 @@ var _ = Describe("Cf client Retriever", func() {
 				fakeCC.AppendHandlers(
 					CombineHandlers(
 						VerifyRequest("GET", "/v3/something/404"),
-						RespondWithJSONEncoded(http.StatusNotFound, models.CfResourceNotFound),
+						RespondWithJSONEncoded(http.StatusNotFound, cf.CfResourceNotFound),
 					),
 				)
 			})
@@ -41,10 +39,10 @@ var _ = Describe("Cf client Retriever", func() {
 			It("should return IsNotFound error", func() {
 				req, _ := http.NewRequest("GET", cfc.ApiUrl("/v3/something/404"), nil)
 				_, err := cfc.SendRequest(context.Background(), req)
-				var cfError *models.CfError
+				var cfError *cf.CfError
 				Expect(err).To(MatchError(MatchRegexp(`GET request failed: cf api Error url='', resourceId='': \['CF-ResourceNotFound' code: 10010.*\]`)))
 				Expect(errors.As(err, &cfError) && cfError.IsNotFound()).To(BeTrue())
-				Expect(models.IsNotFound(err)).To(BeTrue())
+				Expect(cf.IsNotFound(err)).To(BeTrue())
 			})
 			It("should close the response body", func() {
 				req, _ := http.NewRequest("GET", cfc.ApiUrl("/v3/something/404"), nil)
@@ -64,7 +62,7 @@ var _ = Describe("Cf client Retriever", func() {
 
 				BeforeEach(func() {
 					fakeCC.RouteToHandler("GET", regexp.MustCompile(`^/v3/some/url$`),
-						RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+						RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 					)
 				})
 
@@ -78,9 +76,9 @@ var _ = Describe("Cf client Retriever", func() {
 				BeforeEach(func() {
 					fakeCC.RouteToHandler("GET", regexp.MustCompile(`^/v3/some/url$`),
 						RespondWithMultiple(
-							RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
-							RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
-							RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError),
+							RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
+							RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
+							RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError),
 							RespondWith(http.StatusOK, LoadFile("testdata/app.json"), http.Header{"Content-Type": []string{"application/json"}}),
 						))
 				})
@@ -282,7 +280,7 @@ var _ = Describe("Cf client Retriever", func() {
 								}),
 						),
 					)
-					fakeCC.RouteToHandler("GET", "/v3/items/2", RespondWithJSONEncoded(http.StatusInternalServerError, models.CfInternalServerError))
+					fakeCC.RouteToHandler("GET", "/v3/items/2", RespondWithJSONEncoded(http.StatusInternalServerError, cf.CfInternalServerError))
 				})
 
 				It("returns correct state", func() {

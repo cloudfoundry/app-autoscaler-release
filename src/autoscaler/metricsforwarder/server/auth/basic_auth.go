@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 func (a *Auth) BasicAuth(r *http.Request, appID string) error {

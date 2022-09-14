@@ -1,7 +1,7 @@
 package metricsgateway
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
 
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"code.cloudfoundry.org/lager"

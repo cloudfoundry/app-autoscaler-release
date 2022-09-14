@@ -3,7 +3,7 @@ package operator
 import (
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager"

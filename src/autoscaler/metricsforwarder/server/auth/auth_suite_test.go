@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/server"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/fakes"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/config"
+	. "github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/server"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo/v2"

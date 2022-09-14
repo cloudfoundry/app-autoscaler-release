@@ -3,8 +3,8 @@ package collector_test
 import (
 	"time"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/collector"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	. "github.com/cloudfoundry/app-autoscaler-release/metricsserver/collector"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
 	"code.cloudfoundry.org/clock/fakeclock"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"

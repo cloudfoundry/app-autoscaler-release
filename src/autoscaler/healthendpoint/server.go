@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/server/common"
+	"github.com/cloudfoundry/app-autoscaler-release/metricsforwarder/server/common"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/gorilla/mux"

@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/models"
 )
 
 type MetricPoller struct {

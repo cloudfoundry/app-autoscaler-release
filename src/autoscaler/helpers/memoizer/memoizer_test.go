@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/memoizer"
+	"github.com/cloudfoundry/app-autoscaler-release/helpers/memoizer"
 
 	"github.com/stretchr/testify/assert"
 )

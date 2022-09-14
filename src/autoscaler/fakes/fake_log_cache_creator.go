@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/envelopeprocessor"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/client"
+	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 	"code.cloudfoundry.org/lager"
 )
 

@@ -11,6 +11,8 @@ let metricsForwarderURL = ''
 let mfUsername = ''
 let mfPassword = ''
 const serviceName = process.env.SERVICE_NAME
+app.disable('x-powered-by')
+
 
 function getCredentials () {
   // NOTE: the way we check for credentials existence might be further improved.

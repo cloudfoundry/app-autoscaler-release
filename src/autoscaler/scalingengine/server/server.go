@@ -3,12 +3,12 @@ package server
 import (
 	"os"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/schedule"
+	"github.com/cloudfoundry/app-autoscaler-release/db"
+	"github.com/cloudfoundry/app-autoscaler-release/healthendpoint"
+	"github.com/cloudfoundry/app-autoscaler-release/routes"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine/config"
+	"github.com/cloudfoundry/app-autoscaler-release/scalingengine/schedule"
 
 	"code.cloudfoundry.org/cfhttp"
 	"code.cloudfoundry.org/lager"
