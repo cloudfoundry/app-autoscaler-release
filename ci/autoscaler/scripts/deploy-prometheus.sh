@@ -9,12 +9,16 @@ bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-prometheus}"
 buildin_mode="${BUILDIN_MODE:-false}"
 bosh_cert_ca_file="${BOSH_CERT_CA_FILE:-$(mktemp)}"
+uaa_ssl_ca_file="${UAA_SSL_CA_FILE:-$(mktemp)}"
+uaa_ssl_cert_file="${UAA_SSL_CERT_FILE:-$(mktemp)}"
+uaa_ssl_key_file="${UAA_SSL_KEY_FILE:-$(mktemp)}"
 prometheus_dir="${PROMETHEUS_DIR:-$script_dir/../../../../prometheus-boshrelease}"
 deployment_manifest="${prometheus_dir}/manifests/prometheus.yml"
 bosh_fix_releases="${BOSH_FIX_RELEASES:-false}"
 ops_files=${OPS_FILES:-"${prometheus_dir}/manifests/operators/monitor-bosh.yml\
                         ${prometheus_dir}/manifests/operators/monitor-cf.yml\
                         ${prometheus_dir}/manifests/operators/enable-cf-route-registrar.yml\
+                        ${prometheus_dir}/manifests/operators/enable-grafana-uaa.yml\
                         ${script_dir}/../../operations/prometheus-nats-tls.yaml"}
 
 if [[ ! -d ${bbl_state_path} ]]; then
@@ -36,8 +40,13 @@ echo "# Deploying prometheus with name '${deployment_name}' "
 UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 export UAA_CLIENT_SECRET
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+
+UAA_CLIENTS_GRAFANA_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_grafana_secret -q)
 UAA_CLIENTS_CF_EXPORTER_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_cf_exporter_secret -q)
 UAA_CLIENTS_FIREHOSE_EXPORTER_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret -q)
+credhub get -n /bosh-autoscaler/cf/uaa_ssl -k ca          > $uaa_ssl_ca_file
+credhub get -n /bosh-autoscaler/cf/uaa_ssl -k certificate > $uaa_ssl_cert_file
+credhub get -n /bosh-autoscaler/cf/uaa_ssl -k private_key > $uaa_ssl_key_file
 
 uaac target "https://uaa.${system_domain}" --skip-ssl-validation
 uaac token client get admin -s "$UAA_CLIENT_SECRET"
@@ -62,10 +71,13 @@ function deploy () {
     deploy "${deployment_manifest}" \
     ${OPS_FILES_TO_USE} \
     ${bosh_deploy_args} \
+    --var-file bosh_ca_cert="$bosh_cert_ca_file" \
+    --var-file uaa_ssl.ca="$uaa_ssl_ca_file" \
+    --var-file uaa_ssl.certificate="$uaa_ssl_cert_file" \
+    --var-file uaa_ssl.private_key="$uaa_ssl_key_file" \
     -v bosh_url="$BOSH_ENVIRONMENT" \
     -v bosh_username="$BOSH_CLIENT" \
     -v bosh_password="$BOSH_CLIENT_SECRET" \
-    --var-file bosh_ca_cert="$bosh_cert_ca_file" \
     -v metrics_environment=oss \
     -v metron_deployment_name=cf \
     -v uaa_clients_cf_exporter_secret="$UAA_CLIENTS_CF_EXPORTER_SECRET" \
@@ -73,7 +85,10 @@ function deploy () {
     -v skip_ssl_verify=true \
     -v traffic_controller_external_port=4443 \
     -v system_domain="$system_domain" \
-    -v cf_deployment_name=cf
+    -v cf_deployment_name=cf \
+    -v uaa_clients_grafana_secret="$UAA_CLIENTS_GRAFANA_SECRET"
+
+
 }
 
 

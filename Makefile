@@ -281,19 +281,24 @@ workspace:
 uaac:
 	which uaac || gem install cf-uaac
 
-.PHONY: deployment
-deployment: mod-tidy vendor uaac db scheduler
+.PHONY: deploy-autoscaler
+deploy-autoscaler: mod-tidy vendor uaac db scheduler
 	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
 	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
+
+deploy-prometheus:
+	export DEPLOYMENT_NAME=prometheus
+	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;
+	${CI_DIR}/autoscaler/scripts/deploy-prometheus.sh;
 
 .PHONY: acceptance-tests
 acceptance-tests: vendor-app
 	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
-.PHONY: deployment-cleanup
-deployment-cleanup:
+.PHONY: deploy-cleanup
+deploy-cleanup:
 	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'";\
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
