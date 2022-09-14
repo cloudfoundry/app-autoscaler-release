@@ -1,6 +1,7 @@
 package brokerserver
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -151,9 +152,13 @@ var _ = Describe("BrokerHandler", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(schedulerServer.ReceivedRequests()).To(HaveLen(1))
 				Expect(policydb.DeletePolicyCallCount()).To(Equal(1))
-				Expect(policydb.DeletePolicyArgsForCall(0)).To(Equal(testAppId))
+				ctx, appid := policydb.DeletePolicyArgsForCall(0)
+				Expect(ctx).NotTo(BeNil())
+				Expect(appid).To(Equal(testAppId))
 				Expect(bindingdb.DeleteServiceBindingCallCount()).To(Equal(1))
-				Expect(bindingdb.DeleteServiceBindingArgsForCall(0)).To(Equal(testBindingId))
+				ctx, bindingid := bindingdb.DeleteServiceBindingArgsForCall(0)
+				Expect(ctx).ToNot(BeNil())
+				Expect(bindingid).To(Equal(testBindingId))
 			})
 
 		})
@@ -170,42 +175,42 @@ func verifyScheduleIsDeletedInScheduler(appId string) {
 }
 
 func deleteBinding(h *Broker, bindingId string, serviceInstanceId string) error {
-	appId, err := h.bindingdb.GetAppIdByBindingId(bindingId)
+	appId, err := h.bindingdb.GetAppIdByBindingId(context.Background(), bindingId)
 	if errors.Is(err, sql.ErrNoRows) {
 		h.logger.Info("binding does not exist", nil, lager.Data{"instanceId": serviceInstanceId, "bindingId": bindingId})
-		return errorBindingDoesNotExist
+		return ErrBindingDoesNotExist
 	}
 	if err != nil {
 		h.logger.Error("failed to get appId by bindingId", err, lager.Data{"instanceId": serviceInstanceId, "bindingId": bindingId})
-		return errorDeleteServiceBinding
+		return ErrDeleteServiceBinding
 	}
 	h.logger.Info("deleting policy json", lager.Data{"appId": appId})
-	err = h.policydb.DeletePolicy(appId)
+	err = h.policydb.DeletePolicy(context.Background(), appId)
 	if err != nil {
 		h.logger.Error("failed to delete policy for unbinding", err, lager.Data{"appId": appId})
-		return errorDeletePolicyForUnbinding
+		return ErrDeletePolicyForUnbinding
 	}
 
 	h.logger.Info("deleting schedules", lager.Data{"appId": appId})
-	err = h.schedulerUtil.DeleteSchedule(appId)
+	err = h.schedulerUtil.DeleteSchedule(context.Background(), appId)
 	if err != nil {
 		h.logger.Info("failed to delete schedules for unbinding", lager.Data{"appId": appId})
-		return errorDeleteSchedulesForUnbinding
+		return ErrDeleteSchedulesForUnbinding
 	}
-	err = h.bindingdb.DeleteServiceBinding(bindingId)
+	err = h.bindingdb.DeleteServiceBinding(context.Background(), bindingId)
 	if err != nil {
 		h.logger.Error("failed to delete binding", err, lager.Data{"bindingId": bindingId, "appId": appId})
 		if errors.Is(err, db.ErrDoesNotExist) {
-			return errorBindingDoesNotExist
+			return ErrBindingDoesNotExist
 		}
 
-		return errorDeleteServiceBinding
+		return ErrDeleteServiceBinding
 	}
 
-	err = h.credentials.Delete(appId)
+	err = h.credentials.Delete(context.Background(), appId)
 	if err != nil {
 		h.logger.Error("failed to delete custom metrics credential for unbinding", err, lager.Data{"appId": appId})
-		return errorCredentialNotDeleted
+		return ErrCredentialNotDeleted
 	}
 
 	return nil

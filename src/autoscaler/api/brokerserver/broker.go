@@ -22,7 +22,9 @@ import (
 	"github.com/pivotal-cf/brokerapi/v8/domain"
 	"github.com/pivotal-cf/brokerapi/v8/domain/apiresponses"
 )
+
 var _ domain.ServiceBroker = &Broker{}
+
 type Broker struct {
 	logger          lager.Logger
 	conf            *config.Config
@@ -37,14 +39,14 @@ type Broker struct {
 }
 
 var (
-	emptyJSONObject                  = regexp.MustCompile(`^\s*{\s*}\s*$`)
-	errorCreatingServiceBinding      = errors.New("error creating service binding")
-	errorUpdatingServiceInstance     = errors.New("error updating service instance")
-	errorDeleteSchedulesForUnbinding = errors.New("failed to delete schedules for unbinding")
-	errorBindingDoesNotExist         = errors.New("service binding does not exist")
-	errorDeletePolicyForUnbinding    = errors.New("failed to delete policy for unbinding")
-	errorDeleteServiceBinding        = errors.New("error deleting service binding")
-	errorCredentialNotDeleted        = errors.New("failed to delete custom metrics credential for unbinding")
+	emptyJSONObject                = regexp.MustCompile(`^\s*{\s*}\s*$`)
+	ErrCreatingServiceBinding      = errors.New("error creating service binding")
+	ErrUpdatingServiceInstance     = errors.New("error updating service instance")
+	ErrDeleteSchedulesForUnbinding = errors.New("failed to delete schedules for unbinding")
+	ErrBindingDoesNotExist         = errors.New("service binding does not exist")
+	ErrDeletePolicyForUnbinding    = errors.New("failed to delete policy for unbinding")
+	ErrDeleteServiceBinding        = errors.New("error deleting service binding")
+	ErrCredentialNotDeleted        = errors.New("failed to delete custom metrics credential for unbinding")
 )
 
 func NewBroker(logger lager.Logger, conf *config.Config, bindingdb db.BindingDB, policydb db.PolicyDB, catalog []domain.Service, cfClient cf.CFClient, credentials cred_helper.Credentials) *Broker {
@@ -71,7 +73,7 @@ func (b *Broker) Services(_ context.Context) ([]domain.Service, error) {
 
 // Provision creates a new service instance
 // PUT /v2/service_instances/{instance_id}
-func (b *Broker) Provision(_ context.Context, instanceID string, details domain.ProvisionDetails, _ bool) (domain.ProvisionedServiceSpec, error) {
+func (b *Broker) Provision(ctx context.Context, instanceID string, details domain.ProvisionDetails, _ bool) (domain.ProvisionedServiceSpec, error) {
 	result := domain.ProvisionedServiceSpec{}
 
 	logger := b.logger.Session("provision", lager.Data{"instanceID": instanceID, "provisionDetails": details})
@@ -99,7 +101,7 @@ func (b *Broker) Provision(_ context.Context, instanceID string, details domain.
 		return result, err
 	}
 
-	err = b.bindingdb.CreateServiceInstance(models.ServiceInstance{ServiceInstanceId: instanceID, OrgId: details.OrganizationGUID, SpaceId: details.SpaceGUID, DefaultPolicy: policyStr, DefaultPolicyGuid: policyGuidStr})
+	err = b.bindingdb.CreateServiceInstance(ctx, models.ServiceInstance{ServiceInstanceId: instanceID, OrgId: details.OrganizationGUID, SpaceId: details.SpaceGUID, DefaultPolicy: policyStr, DefaultPolicyGuid: policyGuidStr})
 	switch {
 	case err == nil:
 		result.DashboardURL = GetDashboardURL(b.conf, instanceID)
@@ -162,7 +164,7 @@ func (b *Broker) validateAndCheckPolicy(policyStr string, instanceID string, pla
 
 // Deprovision deletes an existing service instance
 // DELETE /v2/service_instances/{instance_id}
-func (b *Broker) Deprovision(_ context.Context, instanceID string, details domain.DeprovisionDetails, _ bool) (domain.DeprovisionServiceSpec, error) {
+func (b *Broker) Deprovision(ctx context.Context, instanceID string, details domain.DeprovisionDetails, _ bool) (domain.DeprovisionServiceSpec, error) {
 	result := domain.DeprovisionServiceSpec{}
 
 	logger := b.logger.Session("deprovision", lager.Data{"instanceID": instanceID, "deprovisionDetails": details})
@@ -171,25 +173,25 @@ func (b *Broker) Deprovision(_ context.Context, instanceID string, details domai
 
 	serviceInstanceDeletionError := errors.New("error deleting service instance")
 	// fetch and delete service bindings
-	bindingIds, err := b.bindingdb.GetBindingIdsByInstanceId(instanceID)
+	bindingIds, err := b.bindingdb.GetBindingIdsByInstanceId(ctx, instanceID)
 	if err != nil {
 		logger.Error("list-bindings-of-service-instance-to-be-deleted", err)
 		return result, apiresponses.NewFailureResponse(serviceInstanceDeletionError, http.StatusInternalServerError, "list-bindings-of-service-instance-to-be-deleted")
 	}
 
 	for _, bindingId := range bindingIds {
-		err = b.deleteBinding(bindingId, instanceID)
+		err = b.deleteBinding(ctx, bindingId, instanceID)
 		wrappedError := fmt.Errorf("service binding deletion failed: %w", err)
-		if err != nil && (errors.Is(err, errorDeleteServiceBinding) ||
-			errors.Is(err, errorDeletePolicyForUnbinding) ||
-			errors.Is(err, errorDeleteSchedulesForUnbinding) ||
-			errors.Is(err, errorCredentialNotDeleted)) {
+		if err != nil && (errors.Is(err, ErrDeleteServiceBinding) ||
+			errors.Is(err, ErrDeletePolicyForUnbinding) ||
+			errors.Is(err, ErrDeleteSchedulesForUnbinding) ||
+			errors.Is(err, ErrCredentialNotDeleted)) {
 			logger.Error("delete-bindings-of-service-instance-to-be-deleted", wrappedError)
 			return result, apiresponses.NewFailureResponse(serviceInstanceDeletionError, http.StatusInternalServerError, "delete-bindings-of-service-instance-to-be-deleted")
 		}
 	}
 
-	err = b.bindingdb.DeleteServiceInstance(instanceID)
+	err = b.bindingdb.DeleteServiceInstance(ctx, instanceID)
 	if err != nil {
 		if errors.Is(err, db.ErrDoesNotExist) {
 			logger.Error("failed to delete service instance: service instance does not exist", err)
@@ -216,14 +218,14 @@ func (b *Broker) GetInstance(_ context.Context, instanceID string, details domai
 
 // Update modifies an existing service instance
 // PATCH /v2/service_instances/{instance_id}
-func (b *Broker) Update(_ context.Context, instanceID string, details domain.UpdateDetails, _ bool) (domain.UpdateServiceSpec, error) {
+func (b *Broker) Update(ctx context.Context, instanceID string, details domain.UpdateDetails, _ bool) (domain.UpdateServiceSpec, error) {
 	logger := b.logger.Session("update", lager.Data{"instanceID": instanceID, "updateDetails": details})
 	logger.Info("begin")
 	defer logger.Info("end")
 
 	result := domain.UpdateServiceSpec{}
 
-	serviceInstance, err := b.getServiceInstance(instanceID)
+	serviceInstance, err := b.getServiceInstance(ctx, instanceID)
 	if err != nil {
 		return result, err
 	}
@@ -251,10 +253,10 @@ func (b *Broker) Update(_ context.Context, instanceID string, details domain.Upd
 
 	logger.Info("update-service-instance", lager.Data{"instanceID": instanceID, "serviceId": details.ServiceID, "planId": details.PlanID, "defaultPolicy": defaultPolicy})
 
-	allBoundApps, err := b.bindingdb.GetAppIdsByInstanceId(serviceInstance.ServiceInstanceId)
+	allBoundApps, err := b.bindingdb.GetAppIdsByInstanceId(ctx, serviceInstance.ServiceInstanceId)
 	if err != nil {
 		logger.Error("failed to retrieve bound apps", err, lager.Data{"instanceID": instanceID})
-		return result, apiresponses.NewFailureResponse(errorUpdatingServiceInstance, http.StatusInternalServerError, "failed to retrieve bound apps")
+		return result, apiresponses.NewFailureResponse(ErrUpdatingServiceInstance, http.StatusInternalServerError, "failed to retrieve bound apps")
 	}
 
 	if servicePlanIsNew {
@@ -264,7 +266,7 @@ func (b *Broker) Update(_ context.Context, instanceID string, details domain.Upd
 	}
 
 	if defaultPolicyIsNew {
-		if err := b.applyDefaultPolicyUpdate(allBoundApps, serviceInstance, defaultPolicy, defaultPolicyGuid); err != nil {
+		if err := b.applyDefaultPolicyUpdate(ctx, allBoundApps, serviceInstance, defaultPolicy, defaultPolicyGuid); err != nil {
 			return result, err
 		}
 
@@ -278,25 +280,25 @@ func (b *Broker) Update(_ context.Context, instanceID string, details domain.Upd
 			DefaultPolicyGuid: defaultPolicyGuid,
 		}
 
-		err = b.bindingdb.UpdateServiceInstance(updatedServiceInstance)
+		err = b.bindingdb.UpdateServiceInstance(ctx, updatedServiceInstance)
 		if err != nil {
 			logger.Error("failed to update service instance", err, lager.Data{"instanceID": instanceID})
-			return result, apiresponses.NewFailureResponse(errorUpdatingServiceInstance, http.StatusInternalServerError, "update service instance")
+			return result, apiresponses.NewFailureResponse(ErrUpdatingServiceInstance, http.StatusInternalServerError, "update service instance")
 		}
 	}
 
 	return result, nil
 }
 
-func (b *Broker) applyDefaultPolicyUpdate(allBoundApps []string, serviceInstance *models.ServiceInstance, defaultPolicy string, defaultPolicyGuid string) error {
+func (b *Broker) applyDefaultPolicyUpdate(ctx context.Context, allBoundApps []string, serviceInstance *models.ServiceInstance, defaultPolicy string, defaultPolicyGuid string) error {
 	if defaultPolicy == "" {
 		// default policy was present and will now be removed
-		if err := b.removeDefaultPolicyFromApps(serviceInstance); err != nil {
+		if err := b.removeDefaultPolicyFromApps(ctx, serviceInstance); err != nil {
 			return err
 		}
 	} else {
 		// a new default policy needs to be set
-		if err := b.setDefaultPolicyOnApps(defaultPolicy, defaultPolicyGuid, allBoundApps, serviceInstance); err != nil {
+		if err := b.setDefaultPolicyOnApps(ctx, defaultPolicy, defaultPolicyGuid, allBoundApps, serviceInstance); err != nil {
 			return err
 		}
 	}
@@ -314,8 +316,8 @@ func parseInstanceParameters(rawParameters json.RawMessage) (*models.InstancePar
 	return parameters, nil
 }
 
-func (b *Broker) getServiceInstance(instanceID string) (*models.ServiceInstance, error) {
-	serviceInstance, err := b.bindingdb.GetServiceInstance(instanceID)
+func (b *Broker) getServiceInstance(ctx context.Context, instanceID string) (*models.ServiceInstance, error) {
+	serviceInstance, err := b.bindingdb.GetServiceInstance(ctx, instanceID)
 	if err != nil {
 		if errors.Is(err, db.ErrDoesNotExist) {
 			b.logger.Error("failed to find service instance to update", err, lager.Data{"instanceID": instanceID})
@@ -328,11 +330,11 @@ func (b *Broker) getServiceInstance(instanceID string) (*models.ServiceInstance,
 	return serviceInstance, nil
 }
 
-func (b *Broker) setDefaultPolicyOnApps(updatedDefaultPolicy string, updatedDefaultPolicyGuid string, allBoundApps []string, serviceInstance *models.ServiceInstance) error {
+func (b *Broker) setDefaultPolicyOnApps(ctx context.Context, updatedDefaultPolicy string, updatedDefaultPolicyGuid string, allBoundApps []string, serviceInstance *models.ServiceInstance) error {
 	instanceID := serviceInstance.ServiceInstanceId
 	b.logger.Info("update-service-instance-set-or-update", lager.Data{"instanceID": instanceID, "updatedDefaultPolicy": updatedDefaultPolicy, "updatedDefaultPolicyGuid": updatedDefaultPolicyGuid, "allBoundApps": allBoundApps, "serviceInstance": serviceInstance})
 
-	updatedAppIds, err := b.policydb.SetOrUpdateDefaultAppPolicy(allBoundApps, serviceInstance.DefaultPolicyGuid, updatedDefaultPolicy, updatedDefaultPolicyGuid)
+	updatedAppIds, err := b.policydb.SetOrUpdateDefaultAppPolicy(ctx, allBoundApps, serviceInstance.DefaultPolicyGuid, updatedDefaultPolicy, updatedDefaultPolicyGuid)
 	if err != nil {
 		b.logger.Error("failed to set default policies", err, lager.Data{"instanceID": instanceID})
 		return apiresponses.NewFailureResponse(errors.New("failed to set default policy"), http.StatusInternalServerError, "updating-default-policy")
@@ -341,15 +343,15 @@ func (b *Broker) setDefaultPolicyOnApps(updatedDefaultPolicy string, updatedDefa
 	// there is synchronization between policy and schedule, so errors creating schedules should not break
 	// the whole update process
 	for _, appId := range updatedAppIds {
-		if err = b.schedulerUtil.CreateOrUpdateSchedule(appId, updatedDefaultPolicy, updatedDefaultPolicyGuid); err != nil {
+		if err = b.schedulerUtil.CreateOrUpdateSchedule(ctx, appId, updatedDefaultPolicy, updatedDefaultPolicyGuid); err != nil {
 			b.logger.Error("failed to create/update schedules", err, lager.Data{"appId": appId, "policyGuid": updatedDefaultPolicyGuid, "policy": updatedDefaultPolicy})
 		}
 	}
 	return nil
 }
 
-func (b *Broker) removeDefaultPolicyFromApps(serviceInstance *models.ServiceInstance) error {
-	updatedAppIds, err := b.policydb.DeletePoliciesByPolicyGuid(serviceInstance.DefaultPolicyGuid)
+func (b *Broker) removeDefaultPolicyFromApps(ctx context.Context, serviceInstance *models.ServiceInstance) error {
+	updatedAppIds, err := b.policydb.DeletePoliciesByPolicyGuid(ctx, serviceInstance.DefaultPolicyGuid)
 	if err != nil {
 		b.logger.Error("failed to delete default policies", err, lager.Data{"instanceID": serviceInstance.ServiceInstanceId})
 		return apiresponses.NewFailureResponse(errors.New("failed to delete default policy"), http.StatusInternalServerError, "deleting-default-policy")
@@ -357,7 +359,7 @@ func (b *Broker) removeDefaultPolicyFromApps(serviceInstance *models.ServiceInst
 	// there is synchronization between policy and schedule, so errors deleting schedules should not break
 	// the whole update process
 	for _, appId := range updatedAppIds {
-		if err = b.schedulerUtil.DeleteSchedule(appId); err != nil {
+		if err = b.schedulerUtil.DeleteSchedule(ctx, appId); err != nil {
 			b.logger.Error("failed to delete schedules", err, lager.Data{"appId": appId})
 		}
 	}
@@ -372,12 +374,12 @@ func (b *Broker) checkScalingPoliciesUnderNewPlan(allBoundApps []string, service
 		existingPolicy, err = b.policydb.GetAppPolicy(appId)
 		if err != nil {
 			b.logger.Error("failed to retrieve policy from db", err, lager.Data{"appId": appId})
-			return apiresponses.NewFailureResponse(errorUpdatingServiceInstance, http.StatusInternalServerError, "failed to retrieve policy from db")
+			return apiresponses.NewFailureResponse(ErrUpdatingServiceInstance, http.StatusInternalServerError, "failed to retrieve policy from db")
 		}
 		existingPolicyByteArray, err = json.Marshal(existingPolicy)
 		if err != nil {
 			b.logger.Error("failed to marshal policy from db", err, lager.Data{"appId": appId})
-			return apiresponses.NewFailureResponse(errorUpdatingServiceInstance, http.StatusInternalServerError, "failed to marshal policy from db")
+			return apiresponses.NewFailureResponse(ErrUpdatingServiceInstance, http.StatusInternalServerError, "failed to marshal policy from db")
 		}
 		existingPolicyStr := string(existingPolicyByteArray)
 		if err := b.planDefinitionExceeded(existingPolicyStr, servicePlan, instanceID); err != nil {
@@ -440,7 +442,7 @@ func (b *Broker) LastOperation(_ context.Context, instanceID string, details dom
 
 // Bind creates a new service binding
 // PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}
-func (b *Broker) Bind(_ context.Context, instanceID string, bindingID string, details domain.BindDetails, _ bool) (domain.Binding, error) {
+func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, details domain.BindDetails, _ bool) (domain.Binding, error) {
 	logger := b.logger.Session("bind", lager.Data{"instanceID": instanceID, "bindingID": bindingID, "bindDetails": details})
 	logger.Info("begin")
 	defer logger.Info("end")
@@ -467,43 +469,43 @@ func (b *Broker) Bind(_ context.Context, instanceID string, bindingID string, de
 
 	// fallback to default policy if no policy was provided
 	if policyStr == "" {
-		if serviceInstance, err := b.bindingdb.GetServiceInstance(instanceID); err != nil {
+		if serviceInstance, err := b.bindingdb.GetServiceInstance(ctx, instanceID); err != nil {
 			logger.Error("get-service-instance", err)
-			return result, apiresponses.NewFailureResponse(errorCreatingServiceBinding, http.StatusInternalServerError, "get-service-instance")
+			return result, apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "get-service-instance")
 		} else {
 			policyStr = serviceInstance.DefaultPolicy
 			policyGuidStr = serviceInstance.DefaultPolicyGuid
 		}
 	}
 
-	if err := b.handleExistingBindingsResiliently(instanceID, appGUID, logger); err != nil {
+	if err := b.handleExistingBindingsResiliently(ctx, instanceID, appGUID, logger); err != nil {
 		return result, err
 	}
 
 	// create binding in DB
-	err = b.bindingdb.CreateServiceBinding(bindingID, instanceID, appGUID)
+	err = b.bindingdb.CreateServiceBinding(ctx, bindingID, instanceID, appGUID)
 	if err != nil {
 		logger.Error("create-service-binding", err)
 		if errors.Is(err, db.ErrAlreadyExists) {
 			return result, apiresponses.NewFailureResponse(errors.New("error: an autoscaler service instance is already bound to the application and multiple bindings are not supported"), http.StatusConflict, "create-service-binding")
 		}
-		return result, apiresponses.NewFailureResponse(errorCreatingServiceBinding, http.StatusInternalServerError, "create-service-binding")
+		return result, apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "create-service-binding")
 	}
 
 	// create credentials
-	cred, err := b.credentials.Create(appGUID, nil)
+	cred, err := b.credentials.Create(ctx, appGUID, nil)
 	if err != nil {
 		//revert binding creating
 		logger.Error("create-credentials", err)
-		err = b.bindingdb.DeleteServiceBindingByAppId(appGUID)
+		err = b.bindingdb.DeleteServiceBindingByAppId(ctx, appGUID)
 		if err != nil {
 			logger.Error("revert-binding-creation-due-to-credentials-creation-failure", err)
 		}
-		return result, apiresponses.NewFailureResponse(errorCreatingServiceBinding, http.StatusInternalServerError, "revert-binding-creation-due-to-credentials-creation-failure")
+		return result, apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "revert-binding-creation-due-to-credentials-creation-failure")
 	}
 
 	// attach policy to appGUID
-	if err := b.attachPolicyToApp(appGUID, policyStr, policyGuidStr, logger); err != nil {
+	if err := b.attachPolicyToApp(ctx, appGUID, policyStr, policyGuidStr, logger); err != nil {
 		return result, err
 	}
 
@@ -518,28 +520,28 @@ func (b *Broker) Bind(_ context.Context, instanceID string, bindingID string, de
 	return result, nil
 }
 
-func (b *Broker) attachPolicyToApp(appGUID string, policyStr string, policyGuidStr string, logger lager.Logger) error {
+func (b *Broker) attachPolicyToApp(ctx context.Context, appGUID string, policyStr string, policyGuidStr string, logger lager.Logger) error {
 	logger = logger.Session("saving-policy-json", lager.Data{"policy": policyStr})
 	if policyStr == "" {
 		logger.Info("no-policy-json-provided")
 	} else {
 		logger.Info("saving-policy-json")
-		if err := b.policydb.SaveAppPolicy(appGUID, policyStr, policyGuidStr); err != nil {
+		if err := b.policydb.SaveAppPolicy(ctx, appGUID, policyStr, policyGuidStr); err != nil {
 			logger.Error("save-appGUID-policy", err)
 			//failed to save policy, so revert creating binding and custom metrics credential
-			err = b.credentials.Delete(appGUID)
+			err = b.credentials.Delete(ctx, appGUID)
 			if err != nil {
 				logger.Error("revert-custom-metrics-credential-due-to-failed-to-save-policy", err)
 			}
-			err = b.bindingdb.DeleteServiceBindingByAppId(appGUID)
+			err = b.bindingdb.DeleteServiceBindingByAppId(ctx, appGUID)
 			if err != nil {
 				logger.Error("revert-binding-due-to-failed-to-save-policy", err)
 			}
-			return apiresponses.NewFailureResponse(errorCreatingServiceBinding, http.StatusInternalServerError, "save-appGUID-policy")
+			return apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "save-appGUID-policy")
 		}
 
 		logger.Info("creating/updating schedules")
-		if err := b.schedulerUtil.CreateOrUpdateSchedule(appGUID, policyStr, policyGuidStr); err != nil {
+		if err := b.schedulerUtil.CreateOrUpdateSchedule(ctx, appGUID, policyStr, policyGuidStr); err != nil {
 			//while there is synchronization between policy and schedule, so creating schedule error does not break
 			//the whole creating binding process
 			logger.Error("failed to create/update schedules", err)
@@ -548,33 +550,33 @@ func (b *Broker) attachPolicyToApp(appGUID string, policyStr string, policyGuidS
 	return nil
 }
 
-func (b *Broker) handleExistingBindingsResiliently(instanceID string, appGUID string, logger lager.Logger) error {
+func (b *Broker) handleExistingBindingsResiliently(ctx context.Context, instanceID string, appGUID string, logger lager.Logger) error {
 	// fetch and all service bindings for the service instance
 	logger = logger.Session("handle-existing-bindings-resiliently")
-	bindingIds, err := b.bindingdb.GetBindingIdsByInstanceId(instanceID)
+	bindingIds, err := b.bindingdb.GetBindingIdsByInstanceId(ctx, instanceID)
 	if err != nil {
 		logger.Error("get-existing-service-bindings-before-binding", err)
-		return apiresponses.NewFailureResponse(errorCreatingServiceBinding, http.StatusInternalServerError, "get-existing-service-bindings-before-binding")
+		return apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "get-existing-service-bindings-before-binding")
 	}
 
 	for _, existingBindingId := range bindingIds {
 		// get the service binding for the appGUID
-		fetchedAppID, err := b.bindingdb.GetAppIdByBindingId(existingBindingId)
+		fetchedAppID, err := b.bindingdb.GetAppIdByBindingId(ctx, existingBindingId)
 		if err != nil {
 			logger.Error("get-existing-service-binding-before-binding", err, lager.Data{"existingBindingID": existingBindingId})
-			return apiresponses.NewFailureResponse(errorCreatingServiceBinding, http.StatusInternalServerError, "get-existing-service-binding-before-binding")
+			return apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "get-existing-service-binding-before-binding")
 		}
 
 		//select the binding-id for the appGUID
 		if fetchedAppID == appGUID {
-			err = b.deleteBinding(existingBindingId, instanceID)
+			err = b.deleteBinding(ctx, existingBindingId, instanceID)
 			wrappedError := fmt.Errorf("failed to bind service: %w", err)
-			if err != nil && (errors.Is(err, errorDeleteServiceBinding) ||
-				errors.Is(err, errorDeletePolicyForUnbinding) ||
-				errors.Is(err, errorDeleteSchedulesForUnbinding) ||
-				errors.Is(err, errorCredentialNotDeleted)) {
+			if err != nil && (errors.Is(err, ErrDeleteServiceBinding) ||
+				errors.Is(err, ErrDeletePolicyForUnbinding) ||
+				errors.Is(err, ErrDeleteSchedulesForUnbinding) ||
+				errors.Is(err, ErrCredentialNotDeleted)) {
 				logger.Error("delete-existing-service-binding-before-binding", wrappedError, lager.Data{"existingBindingID": existingBindingId})
-				return apiresponses.NewFailureResponse(errorCreatingServiceBinding, http.StatusInternalServerError, "delete-existing-service-binding-before-binding")
+				return apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "delete-existing-service-binding-before-binding")
 			}
 		}
 	}
@@ -583,22 +585,22 @@ func (b *Broker) handleExistingBindingsResiliently(instanceID string, appGUID st
 
 // Unbind deletes an existing service binding
 // DELETE /v2/service_instances/{instance_id}/service_bindings/{binding_id}
-func (b *Broker) Unbind(_ context.Context, instanceID string, bindingID string, details domain.UnbindDetails, _ bool) (domain.UnbindSpec, error) {
+func (b *Broker) Unbind(ctx context.Context, instanceID string, bindingID string, details domain.UnbindDetails, _ bool) (domain.UnbindSpec, error) {
 	logger := b.logger.Session("unbind", lager.Data{"instanceID": instanceID, "bindingID": bindingID, "unbindDetails": details})
 	logger.Info("begin")
 	defer logger.Info("end")
 
 	result := domain.UnbindSpec{}
 
-	err := b.deleteBinding(bindingID, instanceID)
+	err := b.deleteBinding(ctx, bindingID, instanceID)
 
 	if err != nil {
 		logger.Error("delete-binding", fmt.Errorf("failed to unbind service: %w", err))
 
-		if errors.Is(err, errorBindingDoesNotExist) {
+		if errors.Is(err, ErrBindingDoesNotExist) {
 			return result, apiresponses.ErrBindingDoesNotExist
 		}
-		return result, apiresponses.NewFailureResponse(errorDeleteServiceBinding, http.StatusInternalServerError, "delete-binding")
+		return result, apiresponses.NewFailureResponse(ErrDeleteServiceBinding, http.StatusInternalServerError, "delete-binding")
 	}
 	return result, nil
 }
@@ -681,43 +683,43 @@ func GetDashboardURL(conf *config.Config, instanceID string) string {
 	return result
 }
 
-func (b *Broker) deleteBinding(bindingId string, serviceInstanceId string) error {
-	appId, err := b.bindingdb.GetAppIdByBindingId(bindingId)
+func (b *Broker) deleteBinding(ctx context.Context, bindingId string, serviceInstanceId string) error {
+	appId, err := b.bindingdb.GetAppIdByBindingId(ctx, bindingId)
 	if errors.Is(err, sql.ErrNoRows) {
 		b.logger.Info("binding does not exist", nil, lager.Data{"instanceId": serviceInstanceId, "bindingId": bindingId})
-		return errorBindingDoesNotExist
+		return ErrBindingDoesNotExist
 	}
 	if err != nil {
 		b.logger.Error("failed to get appId by bindingId", err, lager.Data{"instanceId": serviceInstanceId, "bindingId": bindingId})
-		return errorDeleteServiceBinding
+		return ErrDeleteServiceBinding
 	}
 	b.logger.Info("deleting policy json", lager.Data{"appId": appId})
-	err = b.policydb.DeletePolicy(appId)
+	err = b.policydb.DeletePolicy(ctx, appId)
 	if err != nil {
 		b.logger.Error("failed to delete policy for unbinding", err, lager.Data{"appId": appId})
-		return errorDeletePolicyForUnbinding
+		return ErrDeletePolicyForUnbinding
 	}
 
 	b.logger.Info("deleting schedules", lager.Data{"appId": appId})
-	err = b.schedulerUtil.DeleteSchedule(appId)
+	err = b.schedulerUtil.DeleteSchedule(ctx, appId)
 	if err != nil {
 		b.logger.Info("failed to delete schedules for unbinding", lager.Data{"appId": appId})
-		return errorDeleteSchedulesForUnbinding
+		return ErrDeleteSchedulesForUnbinding
 	}
-	err = b.bindingdb.DeleteServiceBinding(bindingId)
+	err = b.bindingdb.DeleteServiceBinding(ctx, bindingId)
 	if err != nil {
 		b.logger.Error("failed to delete binding", err, lager.Data{"bindingId": bindingId, "appId": appId})
 		if errors.Is(err, db.ErrDoesNotExist) {
-			return errorBindingDoesNotExist
+			return ErrBindingDoesNotExist
 		}
 
-		return errorDeleteServiceBinding
+		return ErrDeleteServiceBinding
 	}
 
-	err = b.credentials.Delete(appId)
+	err = b.credentials.Delete(ctx, appId)
 	if err != nil {
 		b.logger.Error("failed to delete custom metrics credential for unbinding", err, lager.Data{"appId": appId})
-		return errorCredentialNotDeleted
+		return ErrCredentialNotDeleted
 	}
 
 	return nil
