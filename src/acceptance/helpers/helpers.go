@@ -6,11 +6,9 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"math"
 	"net"
 	"net/http"
 	url2 "net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -25,8 +23,7 @@ import (
 
 const (
 	DaysOfMonth Days = "days_of_month"
-	DaysOfWeek       = "days_of_week"
-	MB               = 1024 * 1024
+	DaysOfWeek  Days = "days_of_week"
 
 	TestBreachDurationSeconds = 60
 	TestCoolDownSeconds       = 60
@@ -37,23 +34,6 @@ const (
 type appSummary struct {
 	RunningInstances int `json:"running_instances"`
 }
-
-type instanceStats struct {
-	MemQuota uint64 `json:"mem_quota"`
-	Usage    instanceUsage
-}
-
-type instanceUsage struct {
-	Mem uint64
-	CPU float64
-}
-
-type instanceInfo struct {
-	State string
-	Stats instanceStats
-}
-
-type appStats map[string]*instanceInfo
 
 type Days string
 
@@ -374,6 +354,7 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 }
 
 func RunningInstances(appGUID string, timeout time.Duration) int {
+	//TODO move over to v3 Api's
 	cmd := cf.CfSilent("curl", "/v2/apps/"+appGUID+"/summary")
 	Expect(cmd.Wait(timeout)).To(Exit(0))
 	var summary appSummary
@@ -393,43 +374,6 @@ func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Durati
 
 func getAppInstances(appGUID string, timeout time.Duration) func() int {
 	return func() int { return RunningInstances(appGUID, timeout) }
-}
-
-func allInstancesMemoryUsed(appGUID string, timeout time.Duration) []uint64 {
-	cmd := cf.Cf("curl", "/v2/apps/"+appGUID+"/stats")
-	Expect(cmd.Wait(timeout)).To(Exit(0))
-
-	var stats appStats
-	err := json.Unmarshal(cmd.Out.Contents(), &stats)
-	Expect(err).ToNot(HaveOccurred())
-
-	if len(stats) == 0 {
-		return []uint64{}
-	}
-
-	mem := make([]uint64, len(stats))
-
-	for k, instance := range stats {
-		i, err := strconv.Atoi(k)
-		Expect(err).NotTo(HaveOccurred())
-		mem[i] = instance.Stats.Usage.Mem
-	}
-	return mem
-}
-
-func AverageMemoryUsedByInstance(appGUID string, timeout time.Duration) uint64 {
-	memoryUsedArray := allInstancesMemoryUsed(appGUID, timeout)
-	instanceCount := len(memoryUsedArray)
-	if instanceCount == 0 {
-		return math.MaxInt64
-	}
-
-	var memSum uint64
-	for _, m := range memoryUsedArray {
-		memSum += m
-	}
-
-	return memSum / uint64(len(memoryUsedArray))
 }
 
 func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
@@ -479,10 +423,10 @@ func GetHTTPClient(cfg *config.Config) *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
-			Dial: (&net.Dialer{
+			DialContext: (&net.Dialer{
 				Timeout:   30 * time.Second,
 				KeepAlive: 30 * time.Second,
-			}).Dial,
+			}).DialContext,
 			TLSHandshakeTimeout: 10 * time.Second,
 			DisableCompression:  true,
 			DisableKeepAlives:   true,
