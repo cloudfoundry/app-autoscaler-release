@@ -1,0 +1,102 @@
+name: Acceptance Tests – (reusable)
+
+on:
+  workflow_call: {}
+    # inputs:
+    #   autoscaler_dir:
+    #     description: "Name of the autoscaler's repository top-level-folder"
+    #     required: true
+    #     type: string
+    # secrets:
+    #   bbl_ssh_key: # ToDo: Adapt cases to the ones below.
+    #     required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # AUTOSCALER_DIR: "${{ inputs.autoscaler_dir }}"
+  AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
+
+jobs:
+  deploy_autoscaler:
+    name: Deploy for ${{ github.workflow }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - name: Create pending check
+        uses: ./app-autoscaler-release/.github/actions/pending-check
+        with:
+          pending_check: create
+      # - name: Setup environment for deployment
+      #   uses: ./app-autoscaler-release/.github/actions/setup-environment
+      #   with:
+      #     ssh-key: ${{ secrets.BBL_SSH_KEY}}
+      - name: Deploy autoscaler
+        run: |
+          echo ">> WIP: exiting early"; exit 0
+          cd ${AUTOSCALER_DIR}
+          make deployment
+
+  # acceptance_tests:
+  #   needs: [ deploy_autoscaler ]
+  #   strategy:
+  #     matrix:
+  #       suite: [ API, APP, Broker ]
+  #   runs-on: ubuntu-latest
+  #   name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         path: app-autoscaler-release
+  #     # - name: Setup environment for acceptance tests
+  #     #   uses: ./app-autoscaler-release/.github/actions/setup-environment
+  #     #   with:
+  #     #     ssh-key: ${{ secrets.BBL_SSH_KEY}}
+  #     - name: Run acceptance test - ${{ matrix.suite }}
+  #       env:
+  #         MATRIX_SUITE: ${{ matrix.suite }}
+  #       run: |
+  #         echo ">> WIP: exiting early"; exit 0
+  #         cd ${AUTOSCALER_DIR}
+  #         make acceptance-tests SUITES="${MATRIX_SUITE,,}"
+
+  # acceptance_tests_verify:
+  #   needs: [ deploy_autoscaler, acceptance_tests ]
+  #   if: ${{ always() }}
+  #   name: "${{ github.workflow }} Result"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
+  #     with:
+  #       path: app-autoscaler-release
+  #   - name: "Verify jobs execution"
+  #     uses: ./app-autoscaler-release/.github/actions/pending-check
+  #     with:
+  #       pending_check: verify
+  #       check_filter: ".*${{ github.workflow }}$"
+
+  # deployment_cleanup:
+  #   needs: [ acceptance_tests ]
+  #   name: Deployment cleanup
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         path: app-autoscaler-release
+  #     # - name: "Setup environment to cleanup the deployment"
+  #     #   uses: ./app-autoscaler-release/.github/actions/setup-environment
+  #     #   with:
+  #     #     ssh-key: ${{ secrets.BBL_SSH_KEY}}
+  #     - name: Perform deployment cleanup
+  #       run: |
+  #         echo ">> WIP: exiting early"; exit 0
+  #         cd ${AUTOSCALER_DIR}
+  #         make deployment-cleanup
