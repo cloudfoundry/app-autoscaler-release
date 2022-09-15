@@ -81,6 +81,8 @@ files:
 - autoscaler/vendor/github.com/xeipuuv/gojsonschema/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
+- autoscaler/vendor/golang.org/x/exp/constraints/* # gosub
+- autoscaler/vendor/golang.org/x/exp/slices/* # gosub
 - autoscaler/vendor/golang.org/x/sys/internal/unsafeheader/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/golang.org/x/time/rate/* # gosub

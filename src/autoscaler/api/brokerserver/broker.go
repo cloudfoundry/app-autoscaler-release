@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"regexp"
 
+	"golang.org/x/exp/slices"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/plancheck"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/policyvalidator"
@@ -648,6 +650,27 @@ func (b *Broker) planDefinitionExceeded(policyStr string, planID string, instanc
 	return nil
 }
 
+func (b *Broker) getService(serviceID string) (domain.Service, error) {
+	serviceIndex := slices.IndexFunc(b.catalog, func(s domain.Service) bool { return s.ID == serviceID })
+	if serviceIndex == -1 {
+		return domain.Service{}, apiresponses.NewFailureResponse(fmt.Errorf("error: unknown service with GUID '%s'specified", serviceID), http.StatusBadRequest, "retrieving-service")
+	}
+	return b.catalog[serviceIndex], nil
+}
+
+func (b *Broker) getServicePlan(serviceID string, planID string) (domain.ServicePlan, error) {
+	service, err := b.getService(serviceID)
+	if err != nil {
+		return domain.ServicePlan{}, err
+	}
+
+	planIndex := slices.IndexFunc(service.Plans, func(s domain.ServicePlan) bool { return s.ID == planID })
+	if planIndex == -1 {
+		return domain.ServicePlan{}, apiresponses.NewFailureResponse(fmt.Errorf("error: unknown service plan with GUID '%s' specified", planID), http.StatusBadRequest, "retrieving-service-plan")
+	}
+	return service.Plans[planIndex], nil
+}
+
 func (b *Broker) getExistingOrUpdatedServicePlan(instanceID string, updateDetails domain.UpdateDetails) (string, bool, error) {
 	existingServicePlan := updateDetails.PreviousValues.PlanID
 	updateToPlan := updateDetails.PlanID
@@ -657,6 +680,10 @@ func (b *Broker) getExistingOrUpdatedServicePlan(instanceID string, updateDetail
 
 	var brokerErr error
 	if updateToPlan != "" {
+		if _, err := b.getServicePlan(updateDetails.ServiceID, updateToPlan); err != nil {
+			return "", false, err
+		}
+
 		servicePlanIsNew = servicePlan != updateToPlan
 		servicePlan = updateToPlan
 		if existingServicePlan != updateToPlan {

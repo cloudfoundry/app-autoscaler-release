@@ -104,7 +104,7 @@ var _ = BeforeSuite(func() {
 					SchedulesCount:    1,
 					ScalingRulesCount: 1,
 				},
-				"autoscaler-free-plan-id-not-updatable": {
+				"a-plan-id-not-updatable": {
 					PlanCheckEnabled:  true,
 					SchedulesCount:    1,
 					ScalingRulesCount: 1,

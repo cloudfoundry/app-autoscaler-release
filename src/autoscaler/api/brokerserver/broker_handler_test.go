@@ -14,8 +14,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pivotal-cf/brokerapi/v8/handlers"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/brokerserver"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
@@ -299,31 +297,44 @@ var _ = Describe("BrokerHandler", func() {
 		var err error
 		var instanceUpdateRequestBody *models.InstanceUpdateRequestBody
 		var body []byte
-		servicePlanGuid := "a-service-plan-guid"
-		setupCfClient := func(brokerCatalogId string) {
-			fakecfClient.GetServiceInstanceReturns(&cf.ServiceInstance{
-				Relationships: cf.ServiceInstanceRelationships{
-					ServicePlan: cf.ServicePlanRelation{
-						Data: cf.ServicePlanData{Guid: servicePlanGuid}}},
-			}, nil)
-			fakecfClient.GetServicePlanReturns(&cf.ServicePlan{BrokerCatalog: cf.BrokerCatalog{Id: brokerCatalogId}}, nil)
-		}
+		servicePlanGuid := "autoscaler-free-plan-id"
 		callUpdateServiceInstance := func() {
 			req, err = http.NewRequest(http.MethodPut, "", bytes.NewReader(body))
 			req = mux.SetURLVars(req, map[string]string{"instance_id": testInstanceId})
 			handler.Update(resp, req)
 		}
-		JustBeforeEach(callUpdateServiceInstance)
-		BeforeEach(func() {
+		updatePlanAndDefaultPolicy := func(fromPlan string, targetPlan string, defaultPolicy *json.RawMessage) {
 			instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
 				BrokerCommonRequestBody: models.BrokerCommonRequestBody{
 					ServiceID: "autoscaler-guid",
+					PlanID:    targetPlan,
 					PreviousValues: models.PreviousValues{
-						PlanID: servicePlanGuid,
+						PlanID: fromPlan,
 					},
 				},
 			}
-		})
+
+			if defaultPolicy != nil {
+				instanceUpdateRequestBody.Parameters =
+					&models.InstanceParameters{
+						DefaultPolicy: defaultPolicy,
+					}
+			}
+
+			body, err = json.Marshal(instanceUpdateRequestBody)
+			Expect(err).NotTo(HaveOccurred())
+		}
+
+		updatePlan := func(fromPlan string, targetPlan string) {
+			updatePlanAndDefaultPolicy(fromPlan, targetPlan, nil)
+		}
+
+		updateDefaultPolicy := func(defaultPolicy *json.RawMessage) {
+			updatePlanAndDefaultPolicy(servicePlanGuid, "", defaultPolicy)
+		}
+
+		JustBeforeEach(callUpdateServiceInstance)
+
 		Context("When request body is not a valid json", func() {
 			BeforeEach(func() {
 				body = []byte("")
@@ -335,7 +346,9 @@ var _ = Describe("BrokerHandler", func() {
 		Context("When mandatory parameters are not provided", func() {
 			Context("When ServiceID is not provided", func() {
 				BeforeEach(func() {
-					instanceUpdateRequestBody.ServiceID = ""
+					instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
+						BrokerCommonRequestBody: models.BrokerCommonRequestBody{},
+					}
 					body, err = json.Marshal(instanceUpdateRequestBody)
 					Expect(err).NotTo(HaveOccurred())
 				})
@@ -358,18 +371,8 @@ var _ = Describe("BrokerHandler", func() {
 								}]
 							}`
 				m := json.RawMessage(invalidDefaultPolicy)
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-					},
-					Parameters: &models.InstanceParameters{
-						DefaultPolicy: &m,
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
+				updateDefaultPolicy(&m)
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{}, nil)
-				setupCfClient("autoscaler-free-plan-id")
 			})
 			It("fails with 400", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
@@ -381,10 +384,7 @@ var _ = Describe("BrokerHandler", func() {
 		Context("When the service instance to be updated does not exist", func() {
 			BeforeEach(func() {
 				emptyPolicyParameter := json.RawMessage("\n{\t}\n")
-				parameters := models.InstanceParameters{DefaultPolicy: &emptyPolicyParameter}
-				instanceUpdateRequestBody.Parameters = &parameters
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
+				updateDefaultPolicy(&emptyPolicyParameter)
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{}, db.ErrDoesNotExist)
 			})
 			It("retrieves the service instance", func() {
@@ -401,11 +401,7 @@ var _ = Describe("BrokerHandler", func() {
 
 			BeforeEach(func() {
 				emptyPolicyParameter := json.RawMessage("\n{\t}\n")
-				parameters := models.InstanceParameters{DefaultPolicy: &emptyPolicyParameter}
-				instanceUpdateRequestBody.Parameters = &parameters
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-				setupCfClient("some-broker-guid")
+				updateDefaultPolicy(&emptyPolicyParameter)
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{}, nil)
 			})
 			It("succeeds with 200", func() {
@@ -422,30 +418,15 @@ var _ = Describe("BrokerHandler", func() {
 
 			BeforeEach(func() {
 				d := json.RawMessage(testDefaultPolicy)
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-						PlanID:    "autoscaler-free-plan-id",
-						PreviousValues: models.PreviousValues{
-							PlanID: "autoscaler-free-plan-id",
-						},
-					},
-					Parameters: &models.InstanceParameters{
-						DefaultPolicy: &d,
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
+				updateDefaultPolicy(&d)
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
 					ServiceInstanceId: testInstanceId,
 				}, nil)
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 				policydb.SetOrUpdateDefaultAppPolicyReturns([]string{"app-id-2"}, nil)
 				verifyScheduleIsUpdatedInScheduler("app-id-2", testDefaultPolicy)
-				setupCfClient("autoscaler-free-plan-id")
 			})
 			Context("successfully", func() {
-				BeforeEach(func() { setupCfClient("autoscaler-free-plan-id") })
 				It("succeeds with 200, saves the default policy, and sets the default policy on the already bound apps", func() {
 					By("returning 200")
 					Expect(resp.Code).To(Equal(http.StatusOK))
@@ -476,7 +457,6 @@ var _ = Describe("BrokerHandler", func() {
 				})
 			})
 			Context("with a fake plan checker", func() {
-				BeforeEach(func() { setupCfClient("autoscaler-free-plan-id") })
 				BeforeEach(func() { fakePlanChecker = &fakes.FakePlanChecker{} })
 				It("it uses the correct plan id", func() {
 					_, s := fakePlanChecker.CheckPlanArgsForCall(0)
@@ -487,20 +467,7 @@ var _ = Describe("BrokerHandler", func() {
 		Context("When a default policy is present and there was previously a default policy", func() {
 			BeforeEach(func() {
 				d := json.RawMessage(testDefaultPolicy)
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-						PlanID:    "autoscaler-free-plan-id",
-						PreviousValues: models.PreviousValues{
-							PlanID: "autoscaler-free-plan-id",
-						},
-					},
-					Parameters: &models.InstanceParameters{
-						DefaultPolicy: &d,
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
+				updateDefaultPolicy(&d)
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
 					ServiceInstanceId: testInstanceId,
 					DefaultPolicy:     "a-default-policy",
@@ -509,7 +476,6 @@ var _ = Describe("BrokerHandler", func() {
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 				policydb.SetOrUpdateDefaultAppPolicyReturns([]string{"app-id-2"}, nil)
 				verifyScheduleIsUpdatedInScheduler("app-id-2", testDefaultPolicy)
-				setupCfClient("autoscaler-free-plan-id")
 			})
 			It("succeeds with 200, saves the default policy, and updates the default policy", func() {
 				By("returning 200")
@@ -540,16 +506,7 @@ var _ = Describe("BrokerHandler", func() {
 		Context("When the default is set to be removed and there was previously a default policy", func() {
 			BeforeEach(func() {
 				emptyJsonObject := json.RawMessage("\n{\n}\n")
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-					},
-					Parameters: &models.InstanceParameters{
-						DefaultPolicy: &emptyJsonObject,
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
+				updateDefaultPolicy(&emptyJsonObject)
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
 					ServiceInstanceId: testInstanceId,
 					DefaultPolicy:     "a-default-policy",
@@ -564,7 +521,6 @@ var _ = Describe("BrokerHandler", func() {
 				Expect(err).To(BeNil())
 				policydb.GetAppPolicyReturns(&encodedTestDefaultPolicy, nil)
 				verifyScheduleIsDeletedInScheduler("app-id-2")
-				setupCfClient("autoscaler-free-plan-id")
 			})
 			It("succeeds with 200 and removes the default policy", func() {
 				By("returning 200")
@@ -607,25 +563,11 @@ var _ = Describe("BrokerHandler", func() {
 							}]
 						}`
 				m := json.RawMessage(invalidDefaultPolicy)
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-						PlanID:    "autoscaler-free-plan-id",
-						PreviousValues: models.PreviousValues{
-							PlanID: "autoscaler-free-plan-id",
-						},
-					},
-					Parameters: &models.InstanceParameters{
-						DefaultPolicy: &m,
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
+				updateDefaultPolicy(&m)
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
 					ServiceInstanceId: testInstanceId,
 				}, nil)
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-2", "app-id-1"}, nil)
-				setupCfClient("autoscaler-free-plan-id")
 			})
 			It("fails with 400", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
@@ -636,42 +578,36 @@ var _ = Describe("BrokerHandler", func() {
 		})
 
 		Context("When the service plan is updatable", func() {
-			BeforeEach(func() {
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-						PlanID:    "autoscaler-free-plan-id-not-updatable",
-						PreviousValues: models.PreviousValues{
-							PlanID: "autoscaler-free-plan-id",
-						},
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-				setupCfClient("autoscaler-free-plan-id")
-				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
-					ServiceInstanceId: testInstanceId,
-				}, nil)
+
+			Context("and the target plan is available", func() {
+				BeforeEach(func() {
+					updatePlan("autoscaler-free-plan-id", "a-plan-id-not-updatable")
+					bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
+						ServiceInstanceId: testInstanceId,
+					}, nil)
+				})
+
+				It("succeeds with 200", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+				})
 			})
-			It("succeeds with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			Context("and the target plan is not part of the catalog", func() {
+				BeforeEach(func() {
+					updatePlan("autoscaler-free-plan-id", "unknown-plan")
+					bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
+						ServiceInstanceId: testInstanceId,
+					}, nil)
+				})
+				It("fails with 400", func() {
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+				})
 			})
 		})
 
 		Context("The service plan is updated and a default policy was present previously", func() {
 			BeforeEach(func() {
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-						PlanID:    "autoscaler-free-plan-id",
-						PreviousValues: models.PreviousValues{
-							PlanID: "autoscaler-free-plan-id",
-						},
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-				setupCfClient("autoscaler-free-plan-id")
+				updatePlan("autoscaler-free-plan-id", "a-plan-id-not-updatable")
 
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 
@@ -695,17 +631,7 @@ var _ = Describe("BrokerHandler", func() {
 
 		Context("When the service plan is not updatable", func() {
 			BeforeEach(func() {
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-						PlanID:    "autoscaler-free-plan-id",
-						PreviousValues: models.PreviousValues{
-							PlanID: "autoscaler-free-plan-id-not-updatable",
-						},
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
+				updatePlan("a-plan-id-not-updatable", "autoscaler-free-plan-id")
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
 					ServiceInstanceId: testInstanceId,
 				}, nil)
@@ -717,15 +643,7 @@ var _ = Describe("BrokerHandler", func() {
 		})
 		Context("When the service instance does not exist", func() {
 			BeforeEach(func() {
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-						PlanID:    "non-existing-plan",
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
-				setupCfClient("non-existing-plan-catalog-id")
+				updatePlan("autoscaler-free-plan-id", "a-plan-id-not-updatable")
 				bindingdb.GetServiceInstanceReturns(nil, db.ErrDoesNotExist)
 			})
 			It("fails with 404", func() {
@@ -735,20 +653,7 @@ var _ = Describe("BrokerHandler", func() {
 		Context("Update service plan and policy both are updated together", func() {
 			BeforeEach(func() {
 				d := json.RawMessage(testDefaultPolicy)
-				instanceUpdateRequestBody = &models.InstanceUpdateRequestBody{
-					BrokerCommonRequestBody: models.BrokerCommonRequestBody{
-						ServiceID: "autoscaler-guid",
-						PlanID:    "autoscaler-free-plan-id-not-updatable",
-						PreviousValues: models.PreviousValues{
-							PlanID: "autoscaler-free-plan-id",
-						},
-					},
-					Parameters: &models.InstanceParameters{
-						DefaultPolicy: &d,
-					},
-				}
-				body, err = json.Marshal(instanceUpdateRequestBody)
-				Expect(err).NotTo(HaveOccurred())
+				updatePlanAndDefaultPolicy("autoscaler-free-plan-id", "a-plan-id-not-updatable", &d)
 				bindingdb.GetServiceInstanceReturns(&models.ServiceInstance{
 					ServiceInstanceId: testInstanceId,
 					DefaultPolicy:     "a-default-policy",
@@ -756,7 +661,6 @@ var _ = Describe("BrokerHandler", func() {
 				}, nil)
 				policydb.SetOrUpdateDefaultAppPolicyReturns([]string{"app-id-2"}, nil)
 				verifyScheduleIsUpdatedInScheduler("app-id-2", testDefaultPolicy)
-				setupCfClient("autoscaler-free-plan-id")
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 			})
 			It("fails with 400", func() {

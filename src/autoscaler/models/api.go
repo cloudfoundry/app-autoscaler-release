@@ -14,7 +14,7 @@ type PreviousValues struct {
 }
 type BrokerCommonRequestBody struct {
 	ServiceID      string         `json:"service_id"`
-	PlanID         string         `json:"plan_id"`
+	PlanID         string         `json:"plan_id,omitempty"`
 	BrokerContext  BrokerContext  `json:"context"`
 	PreviousValues PreviousValues `json:"previous_values"`
 }
