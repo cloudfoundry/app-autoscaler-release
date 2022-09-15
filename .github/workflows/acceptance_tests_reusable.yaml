@@ -120,7 +120,7 @@ jobs:
         check_filter: ".*${{ github.workflow }}$"
 
   deployment_cleanup:
-    needs: [ acceptance_tests ]
+    needs: [ acceptance_tests_verify ]
     name: Deployment cleanup
     runs-on: ubuntu-latest
     steps:
