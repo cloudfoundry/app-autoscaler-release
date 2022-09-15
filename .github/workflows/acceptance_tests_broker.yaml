@@ -2,26 +2,27 @@ name: Acceptance Tests - Broker
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
-env:
-  MAVEN_VERSION: 3.6.3
-  MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
-  PR_NUMBER: "${{ github.event.pull_request.number }}"
-  DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
-  SERVICE_BROKER_NAME: "autoscaler-${{ github.event.pull_request.number }}servicebroker"
-  SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
-  BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
-  NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
-  GINKGO_OPTS: "--fail-fast"
-  NODES: 3
-  AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
-  CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  CHECK_NAME: "${{ github.workflow }}_Check"
+# env:
+  # MAVEN_VERSION: 3.6.3
+  # MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
+  # PR_NUMBER: "${{ github.event.pull_request.number }}"
+  # DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
+  # SERVICE_BROKER_NAME: "autoscaler-${{ github.event.pull_request.number }}servicebroker"
+  # SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
+  # BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
+  # NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
+  # GINKGO_OPTS: "--fail-fast"
+  # NODES: 3
+  # AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
+  # CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
+  # CHECK_NAME: "${{ github.workflow }}_Check"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   acceptance_tests_reusable:
+    name: "Caller"
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
     with:
       buildin_mode: false
