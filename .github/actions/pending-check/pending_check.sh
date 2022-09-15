@@ -86,14 +86,15 @@ echo
   cat latest_result.json
 echo "::endgroup::"
 
+id=$( jq '.id' latest_result.json )
+number_of_checks=$(jq '. | length' results.json)
 echo "::group::Check Info"
 echo "Latest check id:${id}"
 echo "Number of checks for commit ${PR_SHA} ${number_of_checks}"
 echo "::endgroup::"
 
 
-id=$( jq '.id' latest_result.json )
-number_of_checks=$(jq '. | length' results.json)
+
 
 if [ "${number_of_checks}" -eq 0 ]; then
   echo "ERROR: no checks were found this commit!"
