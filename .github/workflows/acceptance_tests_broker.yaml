@@ -46,12 +46,13 @@ jobs:
         uses: ./app-autoscaler-release/.github/actions/pending-check
         with:
           pending_check: create
-      - name: Setup environment for deployment
-        uses: ./app-autoscaler-release/.github/actions/setup-environment
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY}}
+      # - name: Setup environment for deployment
+      #   uses: ./app-autoscaler-release/.github/actions/setup-environment
+      #   with:
+      #     ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Deploy autoscaler
         run: |
+          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment
 
@@ -67,14 +68,15 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - name: Setup environment for acceptance tests
-        uses: ./app-autoscaler-release/.github/actions/setup-environment
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY}}
+      # - name: Setup environment for acceptance tests
+      #   uses: ./app-autoscaler-release/.github/actions/setup-environment
+      #   with:
+      #     ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Run acceptance test - ${{ matrix.suite }}
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
+          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
@@ -103,11 +105,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - name: "Setup environment to cleanup the deployment"
-        uses: ./app-autoscaler-release/.github/actions/setup-environment
-        with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY}}
+      # - name: "Setup environment to cleanup the deployment"
+      #   uses: ./app-autoscaler-release/.github/actions/setup-environment
+      #   with:
+      #     ssh-key: ${{ secrets.BBL_SSH_KEY}}
       - name: Perform deployment cleanup
         run: |
+          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment-cleanup
