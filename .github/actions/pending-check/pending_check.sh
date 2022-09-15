@@ -68,12 +68,18 @@ function check_verify {
 echo "::group::Getting checkruns for commit ${PR_SHA}"
 curl -s "${curlopts[@]}" "${checkruns_commit_url}" -o checkruns.json
 
-echo "Looking for the last result"
-jq '[.check_runs[] | select(.name=="'"${CHECK_NAME}"'")]' checkruns.json > results.json
-jq '.|last' results.json > latest_result.json
+echo "::group:: checkruns.json contents"
+cat checkruns.json
+echo "::endgroup::"
 
-id=$( jq '.id' latest_result.json )
-number_of_checks=$(jq '. | length' results.json)
+echo "Looking for check_runs result of  ${CHECK_NAME}"
+jq '[.check_runs[] | select(.name=="'"${CHECK_NAME}"'")]' checkruns.json > results.json
+echo "::group:: results.json contents"
+cat results.json
+echo "::endgroup::"
+
+echo "Looking for the latest result"
+jq '.|last' results.json > latest_result.json
 
 echo "== Latest ${CHECK_NAME} check result =="
 echo
@@ -84,6 +90,10 @@ echo "::group::Check Info"
 echo "Latest check id:${id}"
 echo "Number of checks for commit ${PR_SHA} ${number_of_checks}"
 echo "::endgroup::"
+
+
+id=$( jq '.id' latest_result.json )
+number_of_checks=$(jq '. | length' results.json)
 
 if [ "${number_of_checks}" -eq 0 ]; then
   echo "ERROR: no checks were found this commit!"
