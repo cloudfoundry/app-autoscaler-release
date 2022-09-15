@@ -22,11 +22,12 @@ concurrency:
 
 jobs:
   acceptance_tests_reusable:
-    name: "Caller"
+    name: " " # No useful information to add here with this name.
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
     with:
       buildin_mode: false
       service_offering_enabled: true
+      suites: "[ 'API', 'APP', 'Broker', 'Foo' ]"
     secrets: inherit # ToDo: pass only needed secrets
 
 # jobs:
