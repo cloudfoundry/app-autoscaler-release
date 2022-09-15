@@ -12,8 +12,19 @@ build:
 	@echo "# building changeloglockcleaner"
 	@CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(BUILDTAGS) $(BUILDFLAGS) -o changeloglockcleaner main.go
 
-build_tests:
-	@for package in $$( find . -name "*.go" -exec dirname {} \; | sort | uniq  ); do echo " - compiling changeloglockcleaner/$${package}"; go test -c -o /dev/null $${package}; done;
+test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
+build_tests: $(addprefix build_test-,$(test_dirs))
+build_test-%:
+	@echo " - building '$*' tests"
+	@export build_folder=${PWD}/build/tests/$* &&\
+	 mkdir -p $${build_folder} &&\
+	 cd $* &&\
+	 for package in $$(  go list ./... | sed 's|.*/autoscaler/$*|.|' | awk '{ print length, $$0 }' | sort -n -r | cut -d" " -f2- );\
+	 do\
+	   export test_file=$${build_folder}/$${package}.test;\
+	   echo "   - compiling $${package} to $${test_file}";\
+	   go test -c -o $${test_file} $${package};\
+	 done;
 
 check: fmt lint build test
 
