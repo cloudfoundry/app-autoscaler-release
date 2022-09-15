@@ -12,10 +12,6 @@ blobs
 .final_builds/packages/**/*.tgz
 *.swp
 src/changeloglockcleaner/vendor
-
-/bin/
-/pkg/
-
 **/coverprofile.out
 **/coverprofile.out.*
 **/pom.xml.versionsBackup
@@ -41,5 +37,5 @@ workflow
 .cache
 scripts/.srl
 privkey.pem
-
 docs/*.bkp
+build

@@ -1,17 +1,30 @@
 #!/usr/bin/env bash
+# NOTE: you can run this locally for testing !!!
+# you need a github token (GITHUB_TOKEN) and beware that it adds a commit you need to drop each time also you need to remove dev_releases from root.
+# GITHUB_TOKEN=ghp_[your token]   DEST=${PWD}/../../../build VERSION="8.0.0" BUILD_OPTS="--force" PREV_VERSION=6.0.0  ./release-autoscaler.sh
+
 [ -n "${DEBUG}" ] && set -x
 set -euo pipefail
 
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+root_dir=${ROOT_DIR:-"${script_dir}/../../../"}
+
 mkdir -p 'generated-release'
-previous_version="$(cat gh-release/tag)"
-generated="$(realpath generated-release)"
+previous_version=${PREV_VERSION:-$(cat gh-release/tag)}
+generated=${DEST:-"$(realpath generated-release)"}
+build_opts=${BUILD_OPTS:-"--final"}
+VERSION=${VERSION:-$(cat "${generated}/name")}
+PERFORM_BOSH_RELEASE=${PERFORM_BOSH_RELEASE:-"true"}
+REPO_OUT=${REPO_OUT:-}
 
 function create_release() {
+   echo " - creating release"
    set -e
    local VERSION=$1
    local generated=$2
+   # shellcheck disable=SC2086
    bosh create-release \
-        --final \
+        ${build_opts} \
         --version "$VERSION" \
         --tarball="app-autoscaler-v${VERSION}.tgz"
 
@@ -22,15 +35,13 @@ function create_release() {
 }
 
 function create_tests() {
-  set -e
-  local VERSION=$1
-  local generated=$2
-  ACCEPTANCE_TESTS_FILE="${generated}/artifacts/app-autoscaler-acceptance-tests-v${VERSION}.tgz"
-  tar --create --auto-compress --directory='./src' --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
-  ACCEPTANCE_SHA256=$(sha256sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}')
+  echo " - creating acceptance test artifact"
+  pushd "${root_dir}" > /dev/null
+    make acceptance-release VERSION="${VERSION}" DEST="${generated}/artifacts/"
+  popd > /dev/null
 }
 
-pushd 'app-autoscaler-release' > /dev/null
+pushd "${root_dir}" > /dev/null
   # generate the private.yml file with the credentials
   cat > 'config/private.yml' <<EOF
 ---
@@ -46,6 +57,7 @@ EOF
   LAST_COMMIT_SHA="$(git rev-parse HEAD)"
   echo "Generating release including commits up to: ${LAST_COMMIT_SHA}"
   pushd src/changelog > /dev/null
+    echo " - running changelog"
     go run main.go \
       --changelog-file "${generated}/changelog.md" \
       --last-commit-sha-id "${LAST_COMMIT_SHA}"\
@@ -53,15 +65,13 @@ EOF
       --version-file "${generated}/name"
   popd
 
-  VERSION=$(cat "${generated}/name")
   export VERSION
-
   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
 
   echo "Displaying diff..."
   export GIT_PAGER=cat
   git diff
-  
+
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     # FIXME these should be configurable variables
     if [[ -z $(git config --global user.email) ]]; then
@@ -87,6 +97,8 @@ EOF
     export ACCEPTANCE_SHA256="dummy-sha"
   fi
   echo "${VERSION}" > "${generated}/tag"
+  ACCEPTANCE_SHA256=$(cat "${generated}/artifacts/"*.sha256)
+  export ACCEPTANCE_SHA256
   cat >> "${generated}/changelog.md" <<EOF
 
 ## Deployment
@@ -108,4 +120,4 @@ EOF
   echo "---------- end file ----------"
 popd
 
-cp -a app-autoscaler-release "${REPO_OUT}"
+[ -d "${REPO_OUT}" ] && cp -a app-autoscaler-release "${REPO_OUT}"

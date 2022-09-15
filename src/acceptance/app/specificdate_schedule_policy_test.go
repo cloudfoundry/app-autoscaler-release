@@ -47,37 +47,41 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	})
 
 	Context("when scaling by specific date schedule", func() {
-
+		const scheduleInstanceMin = 2
+		const scheduleInstanceMax = 5
+		const scheduledInstanceInit = 3
 		JustBeforeEach(func() {
 			//TODO the start app needs to be after the binding but the timings require the app been up already.
 			StartApp(appName, cfg.CfPushTimeoutDuration())
 			startDateTime = time.Now().In(time.UTC).Add(1 * time.Minute)
 			endDateTime = startDateTime.Add(time.Duration(interval+120) * time.Second)
-			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "UTC", startDateTime, endDateTime, 2, 5, 3)
+
+			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "UTC", startDateTime, endDateTime, scheduleInstanceMin, scheduleInstanceMax, scheduledInstanceInit)
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 		})
 
 		It("should scale", func() {
-			By("setting to initial_min_instance_count")
+			By(fmt.Sprintf("waiting for scheduledInstanceInit: %d", scheduledInstanceInit))
 			jobRunTime := time.Until(startDateTime.Add(1 * time.Minute))
 			WaitForNInstancesRunning(appGUID, 3, jobRunTime)
 
-			By("setting to schedule's instance_min_count")
+			By(fmt.Sprintf("waiting for scheduleInstanceMin: %d", scheduleInstanceMin))
 			jobRunTime = time.Until(endDateTime)
-			Eventually(func() int {
-				return RunningInstances(appGUID, jobRunTime)
-			}, jobRunTime, 15*time.Second).Should(Equal(2))
+			Eventually(func() int { return RunningInstances(appGUID, jobRunTime) }).
+				WithTimeout(jobRunTime).
+				WithPolling(15 * time.Second).
+				Should(Equal(2))
 
 			jobRunTime = time.Until(endDateTime)
-			Consistently(func() int {
-				return RunningInstances(appGUID, jobRunTime)
-			}, jobRunTime, 15*time.Second).Should(Equal(2))
+			By(fmt.Sprintf("waiting till end of schedule %dS and should stay %d instances", int(jobRunTime.Seconds()), scheduleInstanceMin))
+			Consistently(func() int { return RunningInstances(appGUID, jobRunTime) }).
+				WithTimeout(jobRunTime).
+				WithPolling(15 * time.Second).
+				Should(Equal(2))
 
-			By("setting to default instance_min_count")
 			WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
 
 		})
-
 	})
 
 })
