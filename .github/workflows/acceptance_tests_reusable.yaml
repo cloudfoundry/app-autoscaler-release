@@ -1,5 +1,4 @@
 name: Acceptance Tests – Reusable
-
 on:
   workflow_call:
     inputs:
@@ -33,17 +32,17 @@ env:
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
   GINKGO_OPTS: "--fail-fast"
-  NODES: 3
+  NODES: 4
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
   CHECK_NAME: "${{ github.workflow }}_Check"
 
 jobs:
   create_pending_check:
-    # We require jobs for Acceptance Tests in this workflow by checking relevant events and labels.
-    # Verifcation job runs always.
-    # Adding a non related label does not require acceptance run, however github will rerun workflow
-    #   and skip all jobs. In such case verification reuses previous check result.
+    # We require jobs for Acceptance Tests in this workflow to trigger on relevant events and labels.
+    # Verifcation job must runs always.
+    # Adding a non related label to the PR does not require acceptance tests to run, however github will rerun the workflow
+    #   and skip all jobs. In such case verification reuses previous check result or exits with failure if a check wasnt created.
     if: |
       ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
           && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
@@ -105,16 +104,16 @@ jobs:
           make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
   acceptance_tests_verify:
+    name: "${{ github.workflow }} Result"
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
-    name: "${{ github.workflow }} Result"
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
       with:
         path: app-autoscaler-release
-    - name: "Verify jobs execution"
+    - name: Verify jobs execution
       uses: ./app-autoscaler-release/.github/actions/pending-check
       with:
         pending_check: verify
@@ -129,7 +128,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-      - name: "Setup environment to cleanup the deployment"
+      - name: Setup environment for deployment cleanup
         uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
           ssh-key: ${{ secrets.bbl_ssh_key}}
