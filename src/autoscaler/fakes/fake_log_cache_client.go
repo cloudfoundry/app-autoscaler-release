@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 	clienta "code.cloudfoundry.org/go-log-cache"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 )
 
 type FakeLogCacheClientReader struct {

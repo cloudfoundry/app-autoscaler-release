@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"code.cloudfoundry.org/lager"
 	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
 	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
-	"code.cloudfoundry.org/lager"
 )
 
 type FakeLogCacheClientCreator struct {

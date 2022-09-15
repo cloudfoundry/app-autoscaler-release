@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/envelopeprocessor"
 )
 
 type FakeEnvelopeProcessorCreator struct {

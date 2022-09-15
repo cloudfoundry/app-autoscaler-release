@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 	"code.cloudfoundry.org/lager"
+	"github.com/cloudfoundry/app-autoscaler-release/eventgenerator/client"
 )
 
 type FakeMetricServerClientCreator struct {
