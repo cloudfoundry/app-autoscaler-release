@@ -1,4 +1,4 @@
-name: Acceptance Tests – (reusable)
+name: Acceptance Tests – Reusable
 
 on:
   workflow_call:
