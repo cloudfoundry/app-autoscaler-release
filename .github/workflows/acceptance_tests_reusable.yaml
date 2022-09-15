@@ -39,7 +39,18 @@ env:
   CHECK_NAME: "${{ github.workflow }}_Check"
 
 jobs:
-  create_check:
+  create_pending_check:
+    # We require jobs for Acceptance Tests in this workflow by checking relevant events and labels.
+    # Verifcation job runs always.
+    # Adding a non related label does not require acceptance run, however github will rerun workflow
+    #   and skip all jobs. In such case verification reuses previous check result.
+    if: |
+      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
+      ) ||
+      (  ( github.event.action == 'labeled' )
+          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
+      )
     name: "Create pending check"
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +64,7 @@ jobs:
           pending_check: create
 
   deploy_autoscaler:
-    needs: [ create_check ]
+    needs: [ create_pending_check ]
     name: Deploy for ${{ github.workflow }}
     runs-on: ubuntu-latest
     steps:
@@ -67,7 +78,6 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Deploy autoscaler
         run: |
-          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment
 
@@ -91,7 +101,6 @@ jobs:
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
-          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
@@ -126,6 +135,5 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Perform deployment cleanup
         run: |
-          echo ">> WIP: exiting early"; exit 0
           cd ${AUTOSCALER_DIR}
           make deployment-cleanup
