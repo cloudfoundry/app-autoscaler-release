@@ -9,6 +9,9 @@ on:
       service_offering_enabled:
         required: true
         type: boolean
+      suites:
+        required: true
+        type: string
     secrets:
       bbl_ssh_key:
         required: true
@@ -72,7 +75,7 @@ jobs:
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
-        suite: [ API, APP, Broker ]
+        suite: "${{ fromJSON(inputs.suites) }}"
     runs-on: ubuntu-latest
     name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
