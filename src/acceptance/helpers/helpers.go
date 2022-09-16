@@ -31,10 +31,6 @@ const (
 	PolicyPath = "/v1/apps/{appId}/policy"
 )
 
-type appSummary struct {
-	RunningInstances int `json:"running_instances"`
-}
-
 type Days string
 
 type ScalingPolicy struct {
@@ -354,14 +350,17 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 }
 
 func RunningInstances(appGUID string, timeout time.Duration) int {
-	//TODO move over to v3 Api's
-	cmd := cf.CfSilent("curl", "/v2/apps/"+appGUID+"/summary")
+	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID))
 	Expect(cmd.Wait(timeout)).To(Exit(0))
-	var summary appSummary
-	err := json.Unmarshal(cmd.Out.Contents(), &summary)
+	var process = struct {
+		Instances int `json:"instances"`
+	}{}
+
+	err := json.Unmarshal(cmd.Out.Contents(), &process)
 	Expect(err).ToNot(HaveOccurred())
-	GinkgoWriter.Printf("\nFound %d app instances\n", summary.RunningInstances)
-	return summary.RunningInstances
+	webInstances := process.Instances
+	GinkgoWriter.Printf("\nFound %d app instances\n", webInstances)
+	return webInstances
 }
 
 func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Duration) {

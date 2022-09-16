@@ -60,7 +60,7 @@ linters-settings:
   stylecheck:
     go: "1.15"
     # https://staticcheck.io/docs/options#checks
-    checks: ["all", "-ST1003", "-ST1005",]
+    checks: ["all", "-ST1003", "-ST1005"]
     dot-import-whitelist:
       - github.com/onsi/ginkgo/v2
       - github.com/onsi/gomega
