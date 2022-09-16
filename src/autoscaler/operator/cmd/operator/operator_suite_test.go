@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf/mocks"
+
 	models2 "code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -28,7 +30,7 @@ var (
 	prPath           string
 	cfg              config.Config
 	configFile       *os.File
-	cfServer         *testhelpers.MockServer
+	cfServer         *mocks.Server
 	healthHttpClient *http.Client
 	healthport       int
 )
@@ -59,7 +61,7 @@ var _ = SynchronizedAfterSuite(func() {
 })
 
 func initConfig() {
-	cfServer = testhelpers.NewMockServer()
+	cfServer = mocks.NewServer()
 	cfServer.Add().
 		Info(cfServer.URL()).
 		GetApp(models2.AppStatusStarted, http.StatusOK, "test_space_guid").

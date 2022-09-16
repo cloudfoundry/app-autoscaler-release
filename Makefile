@@ -45,9 +45,10 @@ target/init:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-node
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
+	@rm -rf build | true
 clean-java:
 	@echo " - cleaning java resources"
 	@cd src && mvn clean > /dev/null && cd ..
@@ -65,12 +66,16 @@ clean-scheduler:
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f testcerts/*
+clean-node:
+	@echo " - cleaning node modules"
+	@rm -rf src/acceptance/assets/app/nodeApp/node_modules
 clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
 
-.PHONY: build build-test build-all $(all_modules)
+.PHONY: build build-test build-tests build-all $(all_modules)
 build: init  $(all_modules)
+build-tests: build-test
 build-test: init $(addprefix test_,$(go_modules))
 build-all: build build-test
 db: target/db

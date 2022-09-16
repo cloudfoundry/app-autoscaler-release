@@ -4,8 +4,10 @@ on:
 jobs:
   golangci:
     name: lint
-    env:
-      GO_VERSION: 1.17
+    # DO NOT PIN THIS TO A GO VERSION!
+    # We automatically use the go minor version in the mod file and will miss golang updates and issues relate to new go versions.
+    # Yes there is one linter rowserrcheck automatically turned off because of generics
+    #  - unless we are doing DB development it does not matter, and it should be fixed soon.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

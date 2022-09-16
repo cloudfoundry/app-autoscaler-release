@@ -3,9 +3,9 @@ package cf_test
 import (
 	"net/http"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf/mocks"
 
+	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager/lagertest"
 	. "github.com/onsi/ginkgo/v2"
@@ -40,8 +40,8 @@ var _ = Describe("Oauth", func() {
 		isUserSpaceDeveloperFlag bool
 		isUserAdminFlag          bool
 
-		fakeCCServer    *testhelpers.MockServer
-		fakeTokenServer *testhelpers.MockServer
+		fakeCCServer    *mocks.Server
+		fakeTokenServer *mocks.Server
 
 		userInfoStatus   int
 		userInfoResponse userInfo
@@ -66,8 +66,8 @@ var _ = Describe("Oauth", func() {
 			UserId: TestUserId,
 		}
 
-		fakeCCServer = testhelpers.NewMockServer()
-		fakeTokenServer = testhelpers.NewMockServer()
+		fakeCCServer = mocks.NewServer()
+		fakeTokenServer = mocks.NewServer()
 		fakeTokenServer.RouteToHandler(http.MethodGet, "/userinfo", ghttp.RespondWithJSONEncodedPtr(&userInfoStatus, &userInfoResponse))
 		fakeTokenServer.RouteToHandler(http.MethodPost, "/check_token", ghttp.RespondWithJSONEncodedPtr(&userScopeStatus, &userScopeResponse))
 		fakeTokenServer.RouteToHandler("POST", PathCFAuth, ghttp.RespondWithJSONEncoded(http.StatusOK, Tokens{

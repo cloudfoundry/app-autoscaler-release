@@ -4,10 +4,8 @@ import (
 	"acceptance/helpers"
 	"time"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 )
 
 var _ = Describe("AutoScaler custom metrics policy", func() {
@@ -18,8 +16,6 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 
 	BeforeEach(func() {
 		appName, appGUID = GetAppInfo(orgGUID, spaceGUID, "node-custom-metric")
-		rawOrgs := cf.Cf("curl", "/v2/services").Wait(cfg.DefaultTimeoutDuration())
-		Expect(rawOrgs).To(Exit(0), "unable to get orgs")
 		Expect(appName).ShouldNot(Equal(""), "Unable to determine node-custom-metric from space")
 	})
 

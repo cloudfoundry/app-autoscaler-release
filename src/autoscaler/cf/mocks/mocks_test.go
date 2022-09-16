@@ -1,7 +1,9 @@
-package testhelpers_test
+package mocks_test
 
 import (
 	"errors"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf/mocks"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -20,8 +22,8 @@ var _ = Describe("Cf cloud controller", func() {
 	var (
 		conf            *cf.Config
 		cfc             *cf.Client
-		fakeCC          *MockServer
-		fakeLoginServer *MockServer
+		fakeCC          *mocks.Server
+		fakeLoginServer *mocks.Server
 		err             error
 		logger          lager.Logger
 	)
@@ -37,8 +39,8 @@ var _ = Describe("Cf cloud controller", func() {
 	}
 
 	BeforeEach(func() {
-		fakeCC = NewMockServer()
-		fakeLoginServer = NewMockServer()
+		fakeCC = mocks.NewServer()
+		fakeLoginServer = mocks.NewServer()
 		fakeCC.Add().Info(fakeLoginServer.URL())
 		fakeLoginServer.RouteToHandler("POST", cf.PathCFAuth, ghttp.RespondWithJSONEncoded(http.StatusOK, cf.Tokens{
 			AccessToken: "test-access-token",
@@ -61,7 +63,7 @@ var _ = Describe("Cf cloud controller", func() {
 	Describe("GetApp", func() {
 
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
 				mocks.Add().GetApp("STARTED", http.StatusOK, "test_space_guid").Info(fakeLoginServer.URL())
@@ -93,7 +95,7 @@ var _ = Describe("Cf cloud controller", func() {
 	Describe("GetAppProcesses", func() {
 
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
 				mocks.Add().GetAppProcesses(27).Info(fakeLoginServer.URL())
@@ -110,7 +112,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 	Describe("GetAppAndProcesses", func() {
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
 				mocks.Add().GetAppProcesses(27).Info(fakeLoginServer.URL())
@@ -148,7 +150,7 @@ var _ = Describe("Cf cloud controller", func() {
 		})
 
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
 				mocks.Add().ScaleAppWebProcess().Info(fakeLoginServer.URL())
@@ -163,7 +165,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 	Describe("GetRoles", func() {
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
 				mocks.Add().Info(fakeLoginServer.URL()).Roles(http.StatusOK, cf.Role{Guid: "mock_guid", Type: cf.RoleSpaceDeveloper})
@@ -186,7 +188,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 	Describe("GetServiceInstance", func() {
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
 				mocks.Add().Info(fakeLoginServer.URL()).ServiceInstance("A-service-plan-guid")
@@ -205,7 +207,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 	Describe("ServicePlan", func() {
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
 				mocks.Add().Info(fakeLoginServer.URL()).ServicePlan("a-broker-plan-id")
@@ -221,7 +223,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 	Describe("Info", func() {
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				conf.API = mocks.URL()
 				mocks.Add().Info(fakeLoginServer.URL())
@@ -240,7 +242,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 	Describe("OauthToken", func() {
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				mocks.Add().Info(mocks.URL())
 				mocks.Add().OauthToken("a-access-token")
@@ -258,7 +260,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 	Describe("CheckToken", func() {
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				testUserScope := []string{"cloud_controller.admin"}
 				mocks.Add().Info(mocks.URL())
@@ -276,7 +278,7 @@ var _ = Describe("Cf cloud controller", func() {
 
 	Describe("UserInfo", func() {
 		When("the mocks are used", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				mocks.Add().
 					Info(mocks.URL()).
@@ -294,7 +296,7 @@ var _ = Describe("Cf cloud controller", func() {
 			})
 		})
 		When("the mocks return 401", func() {
-			var mocks = NewMockServer()
+			var mocks = mocks.NewServer()
 			BeforeEach(func() {
 				mocks.Add().
 					Info(mocks.URL()).

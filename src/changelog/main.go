@@ -77,7 +77,7 @@ func main() {
 	if opts.changelogFile != "" {
 		err := os.WriteFile(opts.changelogFile, []byte(changelog), 0600)
 		if err != nil {
-			log.Fatalf("ERROR: failed write md file '%s':%s", opts.previousReleaseTagName, err)
+			log.Fatalf("ERROR: failed write md file '%s':%s", opts.changelogFile, err.Error())
 		}
 	} else {
 		fmt.Println(changelog)
