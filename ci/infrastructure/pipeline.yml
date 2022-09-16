@@ -1,18 +1,17 @@
 ---
 groups:
-- name: all
-  jobs:
-  - set-pipeline
-  - setup-infrastructure
-  - deploy-cf
-  - destroy-infrastructure
-  - delete-cf
-
 - name: infrastructure
   jobs:
   - setup-infrastructure
   - deploy-cf
+  - delete-cf
   - destroy-infrastructure
+  - bosh-cleanup
+  - deploy-prometheus
+
+- name: others
+  jobs:
+  - set-pipeline
 
 resource_types:
 - name: gcs-resource
@@ -30,14 +29,29 @@ resources:
     branch: main
     fetch_tags: true
     paths:
-      - ci
+      - ci/infrastructure
 
-- name: prometheus-deployment
+- name: app-autoscaler-release
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/app-autoscaler-release
+    private_key: ((autoscaler_git_key))
+    branch: main
+    fetch_tags: true
+
+
+- name: every-hour
+  type: time
+  source:
+    interval: 1h
+
+- name: prometheus-boshrelease
   type: git
   icon: github
   source:
     uri: https://github.com/bosh-prometheus/prometheus-boshrelease.git
-    branch: main
+    branch: master
 
 - name: bbl-state
   type: git
@@ -162,6 +176,30 @@ jobs:
         repository: updated-bbl-state
         rebase: true
 
+- name: bosh-cleanup
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: bbl-state
+    - get: cf-deployment-concourse-tasks
+    - get: every-hour
+      trigger: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+
+- name: deploy-prometheus
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bbl-state
+      passed: [setup-infrastructure]
+    - get: ci
+  - task: deploy-prometheus
+    file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
+
 - name: deploy-cf
   serial_groups: [infra]
   public: true
@@ -170,10 +208,12 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
+    - get: app-autoscaler-release
     - get: prometheus-boshrelease
       trigger: true
     - get: bbl-state
       trigger: true
+      passed: [setup-infrastructure]
     - get: autoscaler-env-vars-store
     - get: ci
   - task: combine-ops-files
