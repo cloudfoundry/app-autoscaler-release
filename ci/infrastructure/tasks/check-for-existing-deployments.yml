@@ -16,4 +16,4 @@ inputs:
 outputs:
 
 run:
-  path: ci/ci/autoscaler/scripts/check-for-existing-deployments.sh
+  path: ci/ci/infrastructure/scripts/check-for-existing-deployments.sh

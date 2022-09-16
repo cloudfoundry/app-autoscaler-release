@@ -12,4 +12,4 @@ inputs:
 outputs:
   - name: combined-ops
 run:
-  path: ci/ci/autoscaler/scripts/combine-ops.sh
+  path: ci/ci/infrastructure/scripts/combine-ops.sh

@@ -73,7 +73,7 @@ jobs:
   - get: ci
     trigger: true
   - set_pipeline: self
-    file: ci/ci/autoscaler/pipeline.yml
+    file: ci/ci/infrastructure/pipeline.yml
 
 
 - name: setup-infrastructure
@@ -107,8 +107,8 @@ jobs:
         repository: updated-bbl-state
         rebase: true
           #- task: update-dns-servers
-          #  file: ci/ci/autoscaler/tasks/update-dns-servers.yml
-          #  params:
+          #  file: ci/ci/infrastructure/tasks/update-dns-servers.yml
+          #  params:e
           #    BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
           #    BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
           #    GCP_DNS_ZONE: app-runtime-interfaces
@@ -139,7 +139,7 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: ci
   - task: check-for-exisiting-deployments
-    file: ci/ci/autoscaler/tasks/check-for-existing-deployments.yml
+    file: ci/ci/infrastructure/tasks/check-for-existing-deployments.yml
   - task: destroy-infrastructure
     file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
     params:
@@ -170,7 +170,7 @@ jobs:
     - get: autoscaler-env-vars-store
     - get: ci
   - task: combine-ops-files
-    file: ci/ci/autoscaler/tasks/combine-ops.yml
+    file: ci/ci/infrastructure/tasks/combine-ops.yml
     input_mapping:
       ops-files: cf-deployment
       custom-ops: ci
