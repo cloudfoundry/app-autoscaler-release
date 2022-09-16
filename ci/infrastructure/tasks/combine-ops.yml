@@ -1,19 +1,15 @@
 ---
 platform: linux
-
 image_resource:
   type: docker-image
   source:
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
     tag: main
-
-params:
-
 inputs:
-- name: bbl-state
-- name: ci
-
+  - name: ops-files
+  - name: custom-ops
+  - name: ci
 outputs:
-
+  - name: combined-ops
 run:
-  path: ci/ci/autoscaler/scripts/check-for-existing-deployments.sh
+  path: ci/ci/infrastructure/scripts/combine-ops.sh
