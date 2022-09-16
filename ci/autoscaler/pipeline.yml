@@ -425,7 +425,6 @@ jobs:
         app-autoscaler-release: app-autoscaler-release-main
 
 - name: upgrade-test-main
-  serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
   ensure:
