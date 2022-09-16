@@ -1,0 +1,202 @@
+---
+groups:
+- name: all
+  jobs:
+  - set-pipeline
+  - setup-infrastructure
+  - deploy-cf
+  - destroy-infrastructure
+  - delete-cf
+
+- name: infrastructure
+  jobs:
+  - setup-infrastructure
+  - deploy-cf
+  - destroy-infrastructure
+
+resource_types:
+- name: gcs-resource
+  type: docker-image
+  source:
+    repository: frodenas/gcs-resource
+
+resources:
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/app-autoscaler-release
+    private_key: ((autoscaler_git_key))
+    branch: main
+    fetch_tags: true
+    paths:
+      - ci
+
+- name: bbl-state
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/app-autoscaler-env-bbl-state
+    private_key: ((autoscaler_bbl_git_key))
+    branch: main
+
+- name: autoscaler-env-vars-store
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/app-autoscaler-env-bbl-state
+    private_key: ((autoscaler_bbl_git_key))
+    branch: main
+    paths:
+    - deployment-vars.yml
+
+- name: cf-deployment
+  type: git
+  icon: github
+
+  source:
+    uri: https://github.com/cloudfoundry/cf-deployment.git
+    branch: main
+
+- name: cf-deployment-concourse-tasks
+  type: git
+  icon: github
+  source:
+    branch: main
+    uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
+    tag_filter: v13.*
+
+jobs:
+- name: set-pipeline
+  public: true
+  plan:
+  - get: ci
+    trigger: true
+  - set_pipeline: self
+    file: ci/ci/autoscaler/pipeline.yml
+
+
+- name: setup-infrastructure
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: cf-deployment-concourse-tasks
+    - get: ci
+    - get: bbl-state
+  - task: setup-infrastructure
+    file: cf-deployment-concourse-tasks/bbl-up/task.yml
+    params:
+      BBL_IAAS: gcp
+      BBL_ENV_NAME: autoscaler
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
+      BBL_GCP_PROJECT_ID: cloud-foundry-310819
+      BBL_GCP_REGION: europe-west4
+      BBL_GCP_ZONE: europe-west4-a
+      DEBUG_MODE: true
+      LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+      BBL_LB_CERT: ((autoscaler_lb_cert))
+      BBL_LB_KEY: ((autoscaler_lb_key))
+    input_mapping:
+      bbl-state: bbl-state
+      bbl-config: bbl-state
+    ensure:
+      put: bbl-state
+      params:
+        repository: updated-bbl-state
+        rebase: true
+          #- task: update-dns-servers
+          #  file: ci/ci/autoscaler/tasks/update-dns-servers.yml
+          #  params:
+          #    BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
+          #    BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
+          #    GCP_DNS_ZONE: app-runtime-interfaces
+          #    GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+
+- name: delete-cf
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: bbl-state
+    - get: cf-deployment-concourse-tasks
+  - task: delete-cf
+    file: cf-deployment-concourse-tasks/bosh-delete-deployment/task.yml
+    params:
+      DEPLOYMENT_NAME: cf
+    input_mapping:
+      bbl-state: bbl-state
+
+- name: destroy-infrastructure
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: bbl-state
+    - get: cf-deployment-concourse-tasks
+    - get: ci
+  - task: check-for-exisiting-deployments
+    file: ci/ci/autoscaler/tasks/check-for-existing-deployments.yml
+  - task: destroy-infrastructure
+    file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
+    params:
+      BBL_IAAS: gcp
+      BBL_ENV_NAME: autoscaler
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
+      BBL_GCP_PROJECT_ID: cloud-foundry-310819
+    input_mapping:
+      bbl-state: bbl-state
+    ensure:
+      put: bbl-state
+      params:
+        repository: updated-bbl-state
+        rebase: true
+
+- name: deploy-cf
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: cf-deployment-concourse-tasks
+    - get: cf-deployment
+      trigger: true
+    - get: bbl-state
+      passed: [setup-infrastructure]
+      trigger: true
+    - get: autoscaler-env-vars-store
+    - get: ci
+  - task: combine-ops-files
+    file: ci/ci/autoscaler/tasks/combine-ops.yml
+    input_mapping:
+      ops-files: cf-deployment
+      custom-ops: ci
+      app-autoscaler-ci: ci
+    output_mapping:
+      combined-ops: ops-files
+  - task: deploy-cf
+    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+    input_mapping:
+      bbl-state: bbl-state
+      cf-deployment: cf-deployment
+      ops-files: ops-files
+      vars-files: autoscaler-env-vars-store
+    params:
+      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+    ensure:
+      put: autoscaler-env-vars-store
+      params:
+        repository: autoscaler-env-vars-store
+        rebase: true
+  - task: smoke-tests
+    file: cf-deployment-concourse-tasks/run-errand/task.yml
+    input_mapping:
+      bbl-state: bbl-state
+    params:
+      ERRAND_NAME: smoke-tests
+
+
