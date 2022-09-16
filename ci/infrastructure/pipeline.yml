@@ -173,7 +173,6 @@ jobs:
     - get: prometheus-boshrelease
       trigger: true
     - get: bbl-state
-      passed: [setup-infrastructure]
       trigger: true
     - get: autoscaler-env-vars-store
     - get: ci
