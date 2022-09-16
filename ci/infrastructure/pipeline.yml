@@ -227,7 +227,7 @@ jobs:
     input_mapping:
       bbl-state: bbl-state
       cf-deployment: cf-deployment
-      ops-files: ops-files
+      ops-files: combined-ops
       vars-files: autoscaler-env-vars-store
     params:
       SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
