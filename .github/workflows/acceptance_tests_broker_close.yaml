@@ -32,4 +32,4 @@ jobs:
 
       - run: |
           cd ${{ env.AUTOSCALER_DIR }}
-          make deployment-cleanup
+          make deploy-cleanup

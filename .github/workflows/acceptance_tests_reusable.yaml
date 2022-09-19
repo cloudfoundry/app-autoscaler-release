@@ -78,7 +78,7 @@ jobs:
       - name: Deploy autoscaler
         run: |
           cd ${AUTOSCALER_DIR}
-          make deployment
+          make deploy-autoscaler
 
   acceptance_tests:
     needs: [ deploy_autoscaler ]
@@ -135,4 +135,4 @@ jobs:
       - name: Perform deployment cleanup
         run: |
           cd ${AUTOSCALER_DIR}
-          make deployment-cleanup
+          make deploy-cleanup
