@@ -197,6 +197,7 @@ jobs:
     - get: bbl-state
       passed: [setup-infrastructure]
     - get: ci
+    - get: prometheus-boshrelease
   - task: deploy-prometheus
     file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
 
