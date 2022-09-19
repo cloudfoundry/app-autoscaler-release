@@ -135,10 +135,11 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: main
+    branch: prometheus
     fetch_tags: true
     paths:
       - ci
+
 - name: app-autoscaler-release-main
   type: git
   icon: github
@@ -218,13 +219,11 @@ jobs:
   - in_parallel:
     - get: app-autoscaler-release-main
       trigger: true
-    - get: ci
-  - task: run-unit-tests
+    - get: ci - task: run-unit-tests
     file: ci/ci/autoscaler/tasks/run-unit-tests.yml
     attempts: 3
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-
 
 - name: integration-tests-main
   public: true
@@ -556,7 +555,6 @@ jobs:
 #    input_mapping:
 #      app-autoscaler-release: app-autoscaler-release-pr
 
-
 - name: draft
   public: true
   build_logs_to_retain: 100
@@ -576,7 +574,6 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
 
-
 - name: update-golang
   public: true
   build_logs_to_retain: 100
@@ -593,7 +590,6 @@ jobs:
       type: golang
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-
 
 - name: update-java
   public: true

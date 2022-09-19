@@ -1,18 +1,17 @@
 ---
 groups:
-- name: all
-  jobs:
-  - set-pipeline
-  - setup-infrastructure
-  - deploy-cf
-  - destroy-infrastructure
-  - delete-cf
-
 - name: infrastructure
   jobs:
   - setup-infrastructure
   - deploy-cf
+  - delete-cf
   - destroy-infrastructure
+  - bosh-cleanup
+  - deploy-prometheus
+
+- name: others
+  jobs:
+  - set-pipeline
 
 resource_types:
 - name: gcs-resource
@@ -27,10 +26,32 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: main
+    branch: prometheus
     fetch_tags: true
     paths:
-      - ci
+      - ci/infrastructure
+
+- name: app-autoscaler-release
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:cloudfoundry/app-autoscaler-release
+    private_key: ((autoscaler_git_key))
+    branch: main
+    fetch_tags: true
+
+
+- name: every-hour
+  type: time
+  source:
+    interval: 1h
+
+- name: prometheus-boshrelease
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/bosh-prometheus/prometheus-boshrelease.git
+    branch: master
 
 - name: bbl-state
   type: git
@@ -155,6 +176,31 @@ jobs:
         repository: updated-bbl-state
         rebase: true
 
+- name: bosh-cleanup
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: bbl-state
+    - get: cf-deployment-concourse-tasks
+    - get: every-hour
+      trigger: true
+  - task: bosh-cleanup
+    file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+
+- name: deploy-prometheus
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bbl-state
+      passed: [setup-infrastructure]
+    - get: ci
+    - get: prometheus-boshrelease
+  - task: deploy-prometheus
+    file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
+
 - name: deploy-cf
   serial_groups: [infra]
   public: true
@@ -163,18 +209,18 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
+    - get: app-autoscaler-release
+    - get: prometheus-boshrelease
       trigger: true
     - get: bbl-state
-      passed: [setup-infrastructure]
       trigger: true
+      passed: [setup-infrastructure]
     - get: autoscaler-env-vars-store
     - get: ci
   - task: combine-ops-files
     file: ci/ci/infrastructure/tasks/combine-ops.yml
     input_mapping:
-      ops-files: cf-deployment
-      custom-ops: ci
-      app-autoscaler-ci: ci
+      app-autoscaler-release: ci
     output_mapping:
       combined-ops: ops-files
   - task: deploy-cf
@@ -186,7 +232,8 @@ jobs:
       vars-files: autoscaler-env-vars-store
     params:
       SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/prometheus/operators/cf/add-prometheus-uaa-clients.yml operations/prometheus/operators/cf/add-grafana-uaa-clients.yml"
+      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=2 -v grafana_redirect_uri=https://grafana.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org/login/generic_oauth"
     ensure:
       put: autoscaler-env-vars-store
       params:
