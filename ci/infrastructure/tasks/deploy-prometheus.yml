@@ -23,6 +23,7 @@ params:
 inputs:
 - name: bbl-state
 - name: ci
+- name: prometheus-boshrelease
 
 outputs:
 
