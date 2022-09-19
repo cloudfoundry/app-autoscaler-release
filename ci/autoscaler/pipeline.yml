@@ -135,7 +135,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: prometheus
+    branch: main
     fetch_tags: true
     paths:
       - ci
