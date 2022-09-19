@@ -219,7 +219,8 @@ jobs:
   - in_parallel:
     - get: app-autoscaler-release-main
       trigger: true
-    - get: ci - task: run-unit-tests
+    - get: ci
+  - task: run-unit-tests
     file: ci/ci/autoscaler/tasks/run-unit-tests.yml
     attempts: 3
     input_mapping:
