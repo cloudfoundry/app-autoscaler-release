@@ -56,6 +56,7 @@ func GetOrgSpaceNamesAndGuids(cfg *config.Config, org string) (string, string, s
 	orgGuidByte := cf.Cf("org", org, "--guid").Wait(cfg.DefaultTimeoutDuration())
 	orgGuid := strings.TrimSuffix(string(orgGuidByte.Out.Contents()), "\n")
 
+	//TODO move to v3 api
 	rawSpaces := cf.Cf("curl", fmt.Sprintf("/v2/organizations/%s/spaces", orgGuid)).Wait(cfg.DefaultTimeoutDuration())
 	Expect(rawSpaces).To(Exit(0), "unable to get spaces")
 	var spaces cfSpaces

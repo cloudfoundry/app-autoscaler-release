@@ -14,10 +14,10 @@ import (
 
 var _ = Describe("ChangelogSQLDB", func() {
 	var (
-		cdb              *sqldb.ChangelogSQLDB
-		timeoutInSecound int = 300
-		err              error
-		dbUrl            string
+		cdb             *sqldb.ChangelogSQLDB
+		timeoutInSecond = 300
+		err             error
+		dbUrl           string
 	)
 	Describe("NewChangelogSQLDB", func() {
 		JustBeforeEach(func() {
@@ -81,12 +81,12 @@ var _ = Describe("ChangelogSQLDB", func() {
 		})
 
 		JustBeforeEach(func() {
-			err = cdb.DeleteExpiredLock(timeoutInSecound)
+			err = cdb.DeleteExpiredLock(timeoutInSecond)
 		})
 
 		Context("when the lock is not expired", func() {
 			BeforeEach(func() {
-				_, err := insertLock(1, true, (0 - timeoutInSecound + 60), "locker")
+				_, err := insertLock(1, true, (0 - timeoutInSecond + 60), "locker")
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("should not error", func() {
@@ -95,7 +95,7 @@ var _ = Describe("ChangelogSQLDB", func() {
 		})
 		Context("when the lock is expired", func() {
 			BeforeEach(func() {
-				_, err := insertLock(1, true, (0 - timeoutInSecound - 60), "locker")
+				_, err := insertLock(1, true, (0 - timeoutInSecond - 60), "locker")
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("should not error", func() {

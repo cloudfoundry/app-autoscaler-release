@@ -182,11 +182,6 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			BeforeEach(func() {
 				totalTime := time.Duration(cfg.AggregateInterval*2)*time.Second + 3*time.Minute
-
-				Eventually(func() uint64 {
-					return AverageMemoryUsedByInstance(appGUID, totalTime)
-				}, totalTime, 15*time.Second).Should(BeNumerically(">=", memThreshold*MB))
-
 				WaitForNInstancesRunning(appGUID, 2, totalTime)
 			})
 

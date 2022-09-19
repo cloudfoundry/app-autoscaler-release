@@ -1,6 +1,7 @@
 package sqldb_test
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -72,7 +73,7 @@ var _ = Describe("Stored Procedure test", func() {
 
 		When("create is called", func() {
 			It("it returns the bindingId and instanceId as result", func() {
-				creds, err := storedProcedure.CreateCredentials(models.CredentialsOptions{
+				creds, err := storedProcedure.CreateCredentials(context.Background(), models.CredentialsOptions{
 					InstanceId: instanceId,
 					BindingId:  bindingId,
 				})
@@ -83,7 +84,7 @@ var _ = Describe("Stored Procedure test", func() {
 		})
 		When("delete is called", func() {
 			It("is successful", func() {
-				err := storedProcedure.DeleteCredentials(models.CredentialsOptions{
+				err := storedProcedure.DeleteCredentials(context.Background(), models.CredentialsOptions{
 					InstanceId: instanceId,
 					BindingId:  bindingId,
 				})
@@ -139,7 +140,6 @@ func addPSQLFunctions() {
 }
 
 func addCreateFunction() {
-	//nolint:rowserrcheck
 	rows, err := dbHelper.Query(`
 create or replace function create_creds(
   username varchar,
@@ -154,7 +154,6 @@ as $$ SELECT $2 || ' from create', $1 || ' from create' $$`)
 }
 
 func addDeleteFunction() {
-	//nolint:rowserrcheck
 	rows, err := dbHelper.Query(fmt.Sprintf(`
 create or replace function "deleteCreds"(
   username varchar,
@@ -176,7 +175,6 @@ $$`, instanceId, bindingId))
 }
 
 func addDeleteAllFunction() {
-	//nolint:rowserrcheck
 	rows, err := dbHelper.Query(fmt.Sprintf(`
 create or replace function "deleteAll"( instanceId varchar) 
 returns integer
@@ -196,7 +194,6 @@ $$`, instanceId))
 }
 
 func addValidateFunction() {
-	//nolint:rowserrcheck
 	rows, err := dbHelper.Query(fmt.Sprintf(`
 create or replace function "validate"( username text, password text) 
 returns TABLE( instanceId text, bindingId text)
@@ -216,7 +213,6 @@ $$`, instanceId, bindingId))
 }
 
 func deleteFunction(name string) {
-	//nolint:rowserrcheck
 	rows, err := dbHelper.Query(fmt.Sprintf("Drop function if exists public.%s", pq.QuoteIdentifier(name)))
 	defer func() { _ = rows.Close() }()
 	if err != nil {

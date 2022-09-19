@@ -16,6 +16,8 @@ import (
 	"testing"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf/mocks"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -59,7 +61,7 @@ var (
 	LOGLEVEL                string
 	noaaPollingRegPath      = regexp.MustCompile(`^/apps/.*/containermetrics$`)
 	dbHelper                *sqlx.DB
-	fakeCCNOAAUAA           *testhelpers.MockServer
+	fakeCCNOAAUAA           *mocks.Server
 	testUserScope           = []string{"cloud_controller.read", "cloud_controller.write", "password.write", "openid", "network.admin", "network.write", "uaa.user"}
 	processMap              = map[string]ifrit.Process{}
 
@@ -358,8 +360,8 @@ func updateServiceInstance(serviceInstanceId string, defaultPolicy []byte, broke
 }
 
 func deProvisionServiceInstance(serviceInstanceId string, brokerPort int, httpClient *http.Client) (*http.Response, error) {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s", brokerPort, serviceInstanceId), strings.NewReader(fmt.Sprintf(`{"service_id":"%s","plan_id": "%s"}`, serviceId, planId)))
-	Expect(err).NotTo(HaveOccurred())
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s?service_id=%s&plan_id=%s", brokerPort, serviceInstanceId, serviceId, planId), nil)
+	ExpectWithOffset(2, err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
 	return httpClient.Do(req)
@@ -393,7 +395,7 @@ func bindService(bindingId string, appId string, serviceInstanceId string, polic
 }
 
 func unbindService(bindingId string, appId string, serviceInstanceId string, brokerPort int, httpClient *http.Client) (*http.Response, error) {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s/service_bindings/%s", brokerPort, serviceInstanceId, bindingId), strings.NewReader(fmt.Sprintf(`{"app_guid":"%s","service_id":"%s","plan_id":"%s"}`, appId, serviceId, planId)))
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s/service_bindings/%s?service_id=%s&plan_id=%s", brokerPort, serviceInstanceId, bindingId, serviceId, planId), nil)
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
@@ -414,13 +416,13 @@ func provisionAndBind(serviceInstanceId string, orgId string, spaceId string, de
 
 func unbindAndDeProvision(bindingId string, appId string, serviceInstanceId string, brokerPort int, httpClient *http.Client) {
 	resp, err := unbindService(bindingId, appId, serviceInstanceId, brokerPort, httpClient)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(resp.StatusCode).To(Equal(http.StatusOK))
+	ExpectWithOffset(1, err).NotTo(HaveOccurred())
+	ExpectWithOffset(1, resp.StatusCode).To(Equal(http.StatusOK))
 	_ = resp.Body.Close()
 
 	resp, err = deProvisionServiceInstance(serviceInstanceId, brokerPort, httpClient)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(resp.StatusCode).To(Equal(http.StatusOK))
+	ExpectWithOffset(1, err).NotTo(HaveOccurred())
+	ExpectWithOffset(1, resp.StatusCode).To(Equal(http.StatusOK))
 	_ = resp.Body.Close()
 }
 
@@ -441,7 +443,7 @@ func detachPolicy(appId string, apiServerPort int, httpClient *http.Client) (*ht
 
 func attachPolicy(appId string, policy []byte, apiServerPort int, httpClient *http.Client) (*http.Response, error) {
 	req, err := http.NewRequest("PUT", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/policy", apiServerPort, appId), bytes.NewReader(policy))
-	Expect(err).NotTo(HaveOccurred())
+	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "bearer fake-token")
 	return httpClient.Do(req)
@@ -759,7 +761,7 @@ func checkScheduleContents(appId string, expectHttpStatus int, expectResponseMap
 }
 
 func startFakeCCNOAAUAA(instanceCount int) {
-	fakeCCNOAAUAA = testhelpers.NewMockServer()
+	fakeCCNOAAUAA = mocks.NewServer()
 	fakeCCNOAAUAA.Add().
 		GetApp(models.AppStatusStarted, http.StatusOK, "test_space_guid").
 		GetAppProcesses(instanceCount).
