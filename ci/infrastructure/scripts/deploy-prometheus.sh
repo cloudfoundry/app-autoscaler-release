@@ -7,7 +7,6 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-prometheus}"
-buildin_mode="${BUILDIN_MODE:-false}"
 bosh_cert_ca_file="${BOSH_CERT_CA_FILE:-$(mktemp)}"
 uaa_ssl_ca_file="${UAA_SSL_CA_FILE:-$(mktemp)}"
 uaa_ssl_cert_file="${UAA_SSL_CERT_FILE:-$(mktemp)}"
@@ -37,23 +36,12 @@ echo "Bosh cert retrived: $bosh_cert_ca_file"
 
 echo "# Deploying prometheus with name '${deployment_name}' "
 
-UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
-export UAA_CLIENT_SECRET
-CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
-
 UAA_CLIENTS_GRAFANA_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_grafana_secret -q)
 UAA_CLIENTS_CF_EXPORTER_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_cf_exporter_secret -q)
 UAA_CLIENTS_FIREHOSE_EXPORTER_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret -q)
 credhub get -n /bosh-autoscaler/cf/uaa_ssl -k ca          > $uaa_ssl_ca_file
 credhub get -n /bosh-autoscaler/cf/uaa_ssl -k certificate > $uaa_ssl_cert_file
 credhub get -n /bosh-autoscaler/cf/uaa_ssl -k private_key > $uaa_ssl_key_file
-
-uaac target "https://uaa.${system_domain}" --skip-ssl-validation
-uaac token client get admin -s "$UAA_CLIENT_SECRET"
-
-set +e
-exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
-set -e
 
 function deploy () {
   bosh_deploy_args=""
