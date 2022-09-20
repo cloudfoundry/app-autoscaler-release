@@ -259,10 +259,10 @@ jobs:
       passed: [unit-tests-main, integration-tests-main]
       trigger: true
     - get: ci
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make.yml
     params:
-      SCRIPT_NAME: make mod-tidy vendor db scheduler
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -324,10 +324,10 @@ jobs:
       passed: [unit-tests-main, integration-tests-main]
       trigger: true
     - get: ci
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make.yml
     params:
-      SCRIPT_NAME: make mod-tidy vendor db scheduler
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -389,10 +389,10 @@ jobs:
       passed: [unit-tests-main, integration-tests-main]
       trigger: true
     - get: ci
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make.yml
     params:
-      SCRIPT_NAME: make mod-tidy vendor db scheduler
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -467,10 +467,10 @@ jobs:
       NODES: 1
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make.yml
     params:
-      SCRIPT_NAME: make mod-tidy vendor db scheduler
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -503,10 +503,10 @@ jobs:
     - get: app-autoscaler-release-main
       passed: [upgrade-test-main]
     - get: ci
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make.yml
     params:
-      SCRIPT_NAME: make mod-tidy vendor db scheduler
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
