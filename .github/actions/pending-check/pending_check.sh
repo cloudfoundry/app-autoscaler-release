@@ -6,7 +6,7 @@ set -euo pipefail
 
 checkruns_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs"
 checkruns_commit_url="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${PR_SHA}/check-runs"
-curlopts=(-f --retry 5 -H "Accept: application/vnd.github+json" -H "Authorization: token ${GITHUB_TOKEN}" )
+curlopts=( --fail --retry '5' --header 'Accept: application/vnd.github+json' --header "Authorization: Bearer ${GITHUB_TOKEN}" )
 
 
 function main {
@@ -23,7 +23,6 @@ function main {
 
 #--------------------------------------------------------------------------------------------------
 function check_create {
-echo "Github-Token is $([[ -n ${GITHUB_TOKEN} ]] && echo 'Not NULL' || echo "NULL"): ${GITHUB_TOKEN}"
 echo '::group::Creating new check'
 curl -v "${curlopts[@]}" -POST "${checkruns_url}" -o new_check.json \
 -d @- << END;
