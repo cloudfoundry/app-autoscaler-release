@@ -26,7 +26,10 @@ function create_release() {
    local build_path=$2
    local release_file=$3
    echo " - creating release '${version}' in '${build_path}' as ${release_file}"
-   yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
+   yq eval -i ".properties.\"autoscaler.apiserver.info.build\".default = \"${version}\"" jobs/golangapiserver/spec
+   git add jobs/golangapiserver/spec
+   git commit -m "Updated release version to ${version} in golangapiserver"
+
    # shellcheck disable=SC2086
    bosh create-release \
         ${build_opts} \
@@ -46,16 +49,6 @@ function create_tests() {
 }
 
 function commit_release(){
-  # FIXME these should be configurable variables
-  if [[ -z $(git config --global user.email) ]]; then
-    git config --global user.email "ci@cloudfoundry.org"
-  fi
-
-  # FIXME these should be configurable variables
-  if [[ -z $(git config --global user.name) ]]; then
-    git config --global user.name "CI Bot"
-  fi
-
   pushd "${root_dir}"
   git add -A
   git status
@@ -89,8 +82,21 @@ function generate_changelog(){
       --version-file "${build_path}/name"
   popd
 }
+function setup_git(){
+  # FIXME these should be configurable variables
+  if [[ -z $(git config --global user.email) ]]; then
+    git config --global user.email "ci@cloudfoundry.org"
+  fi
+
+  # FIXME these should be configurable variables
+  if [[ -z $(git config --global user.name) ]]; then
+    git config --global user.name "CI Bot"
+  fi
+}
+
 
 pushd "${root_dir}" > /dev/null
+  setup_git
   create_bosh_config
   generate_changelog
 
