@@ -17,6 +17,5 @@ outputs:
 - name: release  
 
 run:
-  path: /usr/bin/make
+  path: app-autoscaler-release/ci/autoscaler/tasks/make.sh
   dir: release
-  args: ${TARGETS}
