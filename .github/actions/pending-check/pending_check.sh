@@ -23,6 +23,7 @@ function main {
 
 #--------------------------------------------------------------------------------------------------
 function check_create {
+echo "Github-Token is $([[ -n ${GITHUB_TOKEN} ]] && echo 'Not NULL' || echo "NULL"): ${GITHUB_TOKEN}"
 echo '::group::Creating new check'
 curl -v "${curlopts[@]}" -POST "${checkruns_url}" -o new_check.json \
 -d @- << END;
