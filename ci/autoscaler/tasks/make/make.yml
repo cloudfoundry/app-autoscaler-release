@@ -18,4 +18,3 @@ outputs:
 
 run:
   path: release/ci/autoscaler/tasks/make/make.sh
-  dir: release
