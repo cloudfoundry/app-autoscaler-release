@@ -18,4 +18,4 @@ outputs:
 - name: release  
 
 run:
-  dir: release
+  path: ci/ci/autoscaler/tasks/make/make.sh release

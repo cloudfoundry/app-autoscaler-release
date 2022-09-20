@@ -1,4 +1,4 @@
 #!/bin/bash
 set -euo pipefail
 
-make ${TARGETS}
+make -C $1 ${TARGETS}
