@@ -17,28 +17,31 @@ PERFORM_BOSH_RELEASE=${PERFORM_BOSH_RELEASE:-"true"}
 REPO_OUT=${REPO_OUT:-}
 export UPLOADER_KEY=${UPLOADER_KEY:-"NOT_SET"}
 CI=${CI:-false}
-
-RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
-ACCEPTANCE_TEST_TGZ="app-autoscaler-acceptance-tests-v${VERSION}.tgz"
 SUM_FILE="${build_path}/artifacts/files.sum.sha256"
+
 function create_release() {
-   mkdir -p "${build_path}/artifacts"
    set -e
-   local VERSION=$1
+   mkdir -p "${build_path}/artifacts"
+   local version=$1
    local build_path=$2
-   echo " - creating release '${VERSION}' in '${build_path}'"
+   local release_file=$3
+   echo " - creating release '${version}' in '${build_path}' as ${release_file}"
    yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
    # shellcheck disable=SC2086
    bosh create-release \
         ${build_opts} \
-        --version "$VERSION" \
-        --tarball="${build_path}/artifacts/${RELEASE_TGZ}"
+        --version "version" \
+        --tarball="${build_path}/artifacts/${release_file}"
 }
 
 function create_tests() {
+  set -e
+  mkdir -p "${build_path}/artifacts"
+  local version=$1
+  local build_path=$2
   echo " - creating acceptance test artifact"
   pushd "${root_dir}" > /dev/null
-    make acceptance-release VERSION="${VERSION}" DEST="${build_path}/artifacts/"
+    make acceptance-release VERSION="${version}" DEST="${build_path}/artifacts/"
   popd > /dev/null
 }
 
@@ -97,9 +100,10 @@ pushd "${root_dir}" > /dev/null
 
   VERSION=${VERSION:-$(cat "${build_path}/name")}
   echo "${VERSION}" > "${build_path}/tag"
-
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
-    create_release "${VERSION}" "${build_path}"
+    RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
+    ACCEPTANCE_TEST_TGZ="app-autoscaler-acceptance-tests-v${VERSION}.tgz"
+    create_release "${VERSION}" "${build_path}" "${RELEASE_TGZ}"
     create_tests "${VERSION}" "${build_path}"
     [ "${CI}" = "true" ] && commit_release
 
