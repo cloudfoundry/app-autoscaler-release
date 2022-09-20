@@ -23,7 +23,7 @@ env:
   MAVEN_VERSION: 3.6.3
   MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
   BUILDIN_MODE: "${{ inputs.buildin_mode }}"
-  GITHUB_TOKEN: "${{ secrets.github_token }}"
+  GITHUB_TOKEN: "${{ secrets.github_token }}" # ToDo: Remove because there is no point to have this in env, see ${{ github.token }} in: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
   SERVICE_OFFERING_ENABLED: "${{ inputs.service_offering_enabled }}"
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
@@ -52,6 +52,11 @@ jobs:
       )
     name: "Create pending check"
     runs-on: ubuntu-latest
+    # permissions:
+    #   # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
+    #   # but provided via the defaults, see:
+    #   # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+    #   checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -108,6 +113,11 @@ jobs:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
     runs-on: ubuntu-latest
+    # permissions:
+    #   # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
+    #   # but provided via the defaults, see:
+    #   # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+    #   checks: write
     steps:
     - name: Checkout
       uses: actions/checkout@v3
