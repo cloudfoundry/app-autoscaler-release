@@ -33,7 +33,7 @@ function create_release() {
    # shellcheck disable=SC2086
    bosh create-release \
         ${build_opts} \
-        --version "version" \
+        --version "${version}" \
         --tarball="${build_path}/artifacts/${release_file}"
 }
 
