@@ -19,4 +19,4 @@ outputs:
 
 run:
   path: ci/ci/autoscaler/tasks/make/make.sh
-  args: release
+  args: [ release ]
