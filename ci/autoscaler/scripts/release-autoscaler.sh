@@ -7,11 +7,11 @@
 set -euo pipefail
 
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-root_dir=${ROOT_DIR:-"${script_dir}/../../../"}
+root_dir=$(realpath "${ROOT_DIR:-"${script_dir}/../../../"}" )
 
 previous_version=${PREV_VERSION:-$(cat gh-release/tag)}
 mkdir -p 'build'
-generated=$(realpath build)
+build_path=$(realpath build)
 build_opts=${BUILD_OPTS:-"--final"}
 PERFORM_BOSH_RELEASE=${PERFORM_BOSH_RELEASE:-"true"}
 REPO_OUT=${REPO_OUT:-}
@@ -20,25 +20,25 @@ CI=${CI:-false}
 
 RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
 ACCEPTANCE_TEST_TGZ="app-autoscaler-acceptance-tests-v${VERSION}.tgz"
-SUM_FILE="${generated}/artifacts/files.sum.sha256"
+SUM_FILE="${build_path}/artifacts/files.sum.sha256"
 function create_release() {
-   mkdir -p "${generated}/artifacts"
+   mkdir -p "${build_path}/artifacts"
    set -e
    local VERSION=$1
-   local generated=$2
-   echo " - creating release '${VERSION}' in '${generated}'"
+   local build_path=$2
+   echo " - creating release '${VERSION}' in '${build_path}'"
    yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
    # shellcheck disable=SC2086
    bosh create-release \
         ${build_opts} \
         --version "$VERSION" \
-        --tarball="${generated}/artifacts/${RELEASE_TGZ}"
+        --tarball="${build_path}/artifacts/${RELEASE_TGZ}"
 }
 
 function create_tests() {
   echo " - creating acceptance test artifact"
   pushd "${root_dir}" > /dev/null
-    make acceptance-release VERSION="${VERSION}" DEST="${generated}/artifacts/"
+    make acceptance-release VERSION="${VERSION}" DEST="${build_path}/artifacts/"
   popd > /dev/null
 }
 
@@ -74,16 +74,16 @@ EOF
 }
 
 function generate_changelog(){
-  [ -e "${generated}/changelog.md" ] && return
+  [ -e "${build_path}/changelog.md" ] && return
   LAST_COMMIT_SHA="$(git rev-parse HEAD)"
   echo "Generating release notes including commits up to: ${LAST_COMMIT_SHA}"
   pushd src/changelog > /dev/null
     echo " - running changelog"
     go run main.go \
-      --changelog-file "${generated}/changelog.md" \
+      --changelog-file "${build_path}/changelog.md" \
       --last-commit-sha-id "${LAST_COMMIT_SHA}"\
       --prev-rel-tag "${previous_version}"\
-      --version-file "${generated}/name"
+      --version-file "${build_path}/name"
   popd
 }
 
@@ -95,15 +95,15 @@ pushd "${root_dir}" > /dev/null
   export GIT_PAGER=cat
   git diff
 
-  VERSION=${VERSION:-$(cat "${generated}/name")}
-  echo "${VERSION}" > "${generated}/tag"
+  VERSION=${VERSION:-$(cat "${build_path}/name")}
+  echo "${VERSION}" > "${build_path}/tag"
 
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
-    create_release "${VERSION}" "${generated}"
-    create_tests "${VERSION}" "${generated}"
+    create_release "${VERSION}" "${build_path}"
+    create_tests "${VERSION}" "${build_path}"
     [ "${CI}" = "true" ] && commit_release
 
-    sha256sum "${generated}/artifacts/"* > "${generated}/artifacts/files.sum.sha256"
+    sha256sum "${build_path}/artifacts/"* > "${build_path}/artifacts/files.sum.sha256"
     ACCEPTANCE_SHA256=$( grep "${ACCEPTANCE_TEST_TGZ}" "${SUM_FILE}" | awk '{print $1}' )
     RELEASE_SHA256=$( grep "${RELEASE_TGZ}" "${SUM_FILE}" | awk '{print $1}')
   else
@@ -113,7 +113,7 @@ pushd "${root_dir}" > /dev/null
   export ACCEPTANCE_SHA256
   export RELEASE_SHA256
 
-  cat >> "${generated}/changelog.md" <<EOF
+  cat >> "${build_path}/changelog.md" <<EOF
 
 ## Deployment
 
@@ -130,7 +130,7 @@ releases:
 \`\`\`
 EOF
   echo "---------- Changelog file ----------"
-  cat "${generated}/changelog.md"
+  cat "${build_path}/changelog.md"
   echo "---------- end file ----------"
 popd
 

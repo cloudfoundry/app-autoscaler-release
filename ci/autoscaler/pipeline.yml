@@ -518,6 +518,7 @@ jobs:
       GITHUB_TOKEN: ((autoscaler_access_token))
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+      ci: ci
   - put: release-bucket
     params:
       file: "build/artifacts/app-autoscaler-v*.tgz"
@@ -561,11 +562,11 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: ci
     - get: gh-release
     - get: app-autoscaler-release-main
       passed: [upgrade-test-main]
       trigger: true
-    - get: ci
   - task: dummy-release-autoscaler
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
@@ -574,6 +575,7 @@ jobs:
       PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+      ci: ci
 
 - name: update-golang
   public: true

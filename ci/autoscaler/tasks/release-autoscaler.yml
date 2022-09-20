@@ -19,9 +19,11 @@ params:
 
   # name of the updated repo to be pushed at the end
   REPO_OUT: pushme
+  ROOT_DIR: app-autoscaler-release
 
 inputs:
 - name: app-autoscaler-release
+- name: ci
 - name: gh-release
 
 outputs:
@@ -29,4 +31,4 @@ outputs:
 - name: pushme
 
 run:
-  path: app-autoscaler-release/ci/autoscaler/scripts/release-autoscaler.sh
+  path: ci/ci/autoscaler/scripts/release-autoscaler.sh
