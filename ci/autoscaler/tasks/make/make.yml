@@ -17,5 +17,5 @@ outputs:
 - name: release  
 
 run:
-  path: app-autoscaler-release/ci/autoscaler/tasks/make.sh
+  path: app-autoscaler-release/ci/autoscaler/tasks/make/make.sh
   dir: release

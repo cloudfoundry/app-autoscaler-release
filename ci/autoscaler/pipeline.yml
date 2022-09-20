@@ -260,7 +260,7 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
     input_mapping:
@@ -325,7 +325,7 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
     input_mapping:
@@ -390,7 +390,7 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
     input_mapping:
@@ -504,7 +504,7 @@ jobs:
       passed: [upgrade-test-main]
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
     input_mapping:
