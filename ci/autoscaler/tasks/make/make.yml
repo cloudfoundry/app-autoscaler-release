@@ -12,10 +12,10 @@ params:
 
 inputs:
 - name: release
+- name: ci
 
 outputs:
 - name: release  
 
 run:
-  path: ci/autoscaler/tasks/make/make.sh
   dir: release
