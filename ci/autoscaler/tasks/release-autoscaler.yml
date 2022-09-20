@@ -25,8 +25,8 @@ inputs:
 - name: gh-release
 
 outputs:
-- name: generated-release
-- name: pushme  
+- name: build
+- name: pushme
 
 run:
   path: app-autoscaler-release/ci/autoscaler/scripts/release-autoscaler.sh

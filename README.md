@@ -53,7 +53,7 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
 ```sh
 git clone https://github.com/cloudfoundry/app-autoscaler-release
 cd app-autoscaler-release
-./scripts/update
+make mod-tidy vendor db scheduler
 bosh create-release
 bosh -e YOUR_ENV upload-release
 ```
