@@ -262,7 +262,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -327,7 +327,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -392,7 +392,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -470,7 +470,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -506,7 +506,7 @@ jobs:
   - task: run-pre-release-script
     file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      SCRIPT_NAME: make mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -520,16 +520,16 @@ jobs:
       app-autoscaler-release: app-autoscaler-release-main
   - put: release-bucket
     params:
-      file: "generated-release/artifacts/app-autoscaler-v*.tgz"
+      file: "build/artifacts/app-autoscaler-v*.tgz"
   - put: acceptance-tests-bucket
     params:
-      file: "generated-release/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
+      file: "build/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
   - put: gh-release
     params:
-      name: generated-release/name
-      tag: generated-release/tag
-      body: generated-release/changelog.md
-      globs: [generated-release/artifacts/*]
+      name: build/name
+      tag: build/tag
+      body: build/changelog.md
+      globs: [build/artifacts/*]
       commitish: app-autoscaler-release-main/.git/ref
   - put: app-autoscaler-release-main
     params:
@@ -589,8 +589,8 @@ jobs:
     file: ci/ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: golang
-    input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+    input_mapping:
 
 - name: update-java
   public: true

@@ -10,8 +10,8 @@ jobs:
       - uses: ./.github/actions/setup-go
       - uses: ./.github/actions/setup-java
 
-      - name: Run scripts/update
-        run: scripts/update
+      - name: run go mod tidy on all .mod's
+        run: make mod-tidy
 
       - name: Check if there is any change
         id: get_changes
