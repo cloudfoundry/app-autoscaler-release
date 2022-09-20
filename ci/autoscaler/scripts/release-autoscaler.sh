@@ -25,7 +25,9 @@ function create_release() {
    local version=$1
    local build_path=$2
    local release_file=$3
+   echo " - building new release from ${PWD} at revision $(git rev-parse HEAD)"
    echo " - creating release '${version}' in '${build_path}' as ${release_file}"
+
    yq eval -i ".properties.\"autoscaler.apiserver.info.build\".default = \"${version}\"" jobs/golangapiserver/spec
    git add jobs/golangapiserver/spec
    git commit -m "Updated release version to ${version} in golangapiserver"
