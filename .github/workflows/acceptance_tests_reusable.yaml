@@ -52,11 +52,11 @@ jobs:
       )
     name: "Create pending check"
     runs-on: ubuntu-latest
-    # permissions:
-    #   # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
-    #   # but provided via the defaults, see:
-    #   # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-    #   checks: write
+    permissions:
+      # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
+      # but supposed to be provided via the defaults, see:
+      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+      checks: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -113,11 +113,11 @@ jobs:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
     runs-on: ubuntu-latest
-    # permissions:
-    #   # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
-    #   # but provided via the defaults, see:
-    #   # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-    #   checks: write
+    permissions:
+      # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
+      # but supposed to be provided via the defaults, see:
+      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
+      checks: write
     steps:
     - name: Checkout
       uses: actions/checkout@v3
