@@ -1,6 +1,5 @@
-# This can be used to set the release version of the autoscaler and is primarily used in our CI to modify the release version in our dev pipeline.
-# Parameters:
-# app_autoscaler_version: Version numbering of the release to deploy.
+# This can be used to enable the `build_in_mode`, which means disabling the service broker 
+# and exclusively using the API to interact with the App Autoscaler
 ---
 - type: replace
   path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/apiserver/use_buildin_mode?
