@@ -39,6 +39,9 @@ echo "# Deploying prometheus with name '${deployment_name}' "
 UAA_CLIENTS_GRAFANA_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_grafana_secret -q)
 UAA_CLIENTS_CF_EXPORTER_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_cf_exporter_secret -q)
 UAA_CLIENTS_FIREHOSE_EXPORTER_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret -q)
+PROMETHEUS_CLIENT=prometheus
+PROMETHEUS_CLIENT_SECRET=$(yq e .prometheus_client_password $bbl_state_path/vars/director-vars-store.yml)
+
 credhub get -n /bosh-autoscaler/cf/uaa_ssl -k ca          > $uaa_ssl_ca_file
 credhub get -n /bosh-autoscaler/cf/uaa_ssl -k certificate > $uaa_ssl_cert_file
 credhub get -n /bosh-autoscaler/cf/uaa_ssl -k private_key > $uaa_ssl_key_file
@@ -64,8 +67,8 @@ function deploy () {
     --var-file uaa_ssl.certificate="$uaa_ssl_cert_file" \
     --var-file uaa_ssl.private_key="$uaa_ssl_key_file" \
     -v bosh_url="$BOSH_ENVIRONMENT" \
-    -v bosh_username="$BOSH_CLIENT" \
-    -v bosh_password="$BOSH_CLIENT_SECRET" \
+    -v bosh_username="$PROMETHEUS_CLIENT" \
+    -v bosh_password="$PROMETHEUS_CLIENT_SECRET" \
     -v metrics_environment=oss \
     -v metron_deployment_name=cf \
     -v uaa_clients_cf_exporter_secret="$UAA_CLIENTS_CF_EXPORTER_SECRET" \
