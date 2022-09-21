@@ -30,7 +30,7 @@ function create_release() {
 
    yq eval -i ".properties.\"autoscaler.apiserver.info.build\".default = \"${version}\"" jobs/golangapiserver/spec
    git add jobs/golangapiserver/spec
-   git commit -m "Updated release version to ${version} in golangapiserver"
+   [ "${CI}" = "true" ] && git commit -m "Updated release version to ${version} in golangapiserver"
 
    # shellcheck disable=SC2086
    bosh create-release \
@@ -67,14 +67,14 @@ blobstore:
     credentials_source: static
     json_key:
 EOF
-    echo 'Generating private.yml...'
+    echo ' - Generating private.yml...'
     yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "$config_file"
 }
 
 function generate_changelog(){
   [ -e "${build_path}/changelog.md" ] && return
   LAST_COMMIT_SHA="$(git rev-parse HEAD)"
-  echo "Generating release notes including commits up to: ${LAST_COMMIT_SHA}"
+  echo " - Generating release notes including commits up to: ${LAST_COMMIT_SHA}"
   pushd src/changelog > /dev/null
     echo " - running changelog"
     go run main.go \
@@ -102,7 +102,7 @@ pushd "${root_dir}" > /dev/null
   create_bosh_config
   generate_changelog
 
-  echo "Displaying diff..."
+  echo " - Displaying diff..."
   export GIT_PAGER=cat
   git diff
 
@@ -116,8 +116,8 @@ pushd "${root_dir}" > /dev/null
     [ "${CI}" = "true" ] && commit_release
 
     sha256sum "${build_path}/artifacts/"* > "${build_path}/artifacts/files.sum.sha256"
-    ACCEPTANCE_SHA256=$( grep "${ACCEPTANCE_TEST_TGZ}" "${SUM_FILE}" | awk '{print $1}' )
-    RELEASE_SHA256=$( grep "${RELEASE_TGZ}" "${SUM_FILE}" | awk '{print $1}')
+    ACCEPTANCE_SHA256=$( grep "${ACCEPTANCE_TEST_TGZ}$" "${SUM_FILE}" | awk '{print $1}' )
+    RELEASE_SHA256=$( grep "${RELEASE_TGZ}$" "${SUM_FILE}" | awk '{print $1}')
   else
     ACCEPTANCE_SHA256="dummy-sha"
     RELEASE_SHA256="dummy-sha"
@@ -144,6 +144,9 @@ EOF
   echo "---------- Changelog file ----------"
   cat "${build_path}/changelog.md"
   echo "---------- end file ----------"
-popd
 
+popd > /dev/null
+
+echo " - Saving outputs"
 [ -d "${REPO_OUT}" ] && cp -a app-autoscaler-release "${REPO_OUT}"
+echo " - Completed"
