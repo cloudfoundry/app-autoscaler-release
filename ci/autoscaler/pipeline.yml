@@ -535,7 +535,7 @@ jobs:
   - put: app-autoscaler-release-main
     params:
       rebase: true
-      repository: pushme/app-autoscaler-release
+      repository: app-autoscaler-release
 
 # TODO move to a github action a possibly make it add the draft release notes to the PR?
 #- name: draft-pr

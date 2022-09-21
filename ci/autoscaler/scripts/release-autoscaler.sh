@@ -146,7 +146,4 @@ EOF
   echo "---------- end file ----------"
 
 popd > /dev/null
-
-echo " - Saving outputs"
-[ -d "${REPO_OUT}" ] && cp -a app-autoscaler-release "${REPO_OUT}"
 echo " - Completed"

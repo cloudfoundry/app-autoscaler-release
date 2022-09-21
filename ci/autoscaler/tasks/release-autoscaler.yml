@@ -29,7 +29,7 @@ inputs:
 
 outputs:
 - name: build
-- name: pushme
+- name: app-autoscaler-release
 
 run:
   path: ci/ci/autoscaler/scripts/release-autoscaler.sh
