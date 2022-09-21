@@ -15,6 +15,8 @@ prometheus_dir="${PROMETHEUS_DIR:-$script_dir/../../../../prometheus-boshrelease
 deployment_manifest="${prometheus_dir}/manifests/prometheus.yml"
 bosh_fix_releases="${BOSH_FIX_RELEASES:-false}"
 ops_files=${OPS_FILES:-"${prometheus_dir}/manifests/operators/monitor-bosh.yml\
+                        ${prometheus_dir}/manifests/operators/enable-bosh-uaa.yml\
+                        ${prometheus_dir}/manifests/operators/configure-bosh-exporter-uaa-client-id.yml\
                         ${prometheus_dir}/manifests/operators/monitor-cf.yml\
                         ${prometheus_dir}/manifests/operators/enable-cf-route-registrar.yml\
                         ${prometheus_dir}/manifests/operators/enable-grafana-uaa.yml\
@@ -67,8 +69,8 @@ function deploy () {
     --var-file uaa_ssl.certificate="$uaa_ssl_cert_file" \
     --var-file uaa_ssl.private_key="$uaa_ssl_key_file" \
     -v bosh_url="$BOSH_ENVIRONMENT" \
-    -v bosh_username="$PROMETHEUS_CLIENT" \
-    -v bosh_password="$PROMETHEUS_CLIENT_SECRET" \
+    -v uaa_bosh_exporter_client_id="$PROMETHEUS_CLIENT" \
+    -v uaa_bosh_exporter_client_secret="$PROMETHEUS_CLIENT_SECRET" \
     -v metrics_environment=oss \
     -v metron_deployment_name=cf \
     -v uaa_clients_cf_exporter_secret="$UAA_CLIENTS_CF_EXPORTER_SECRET" \
