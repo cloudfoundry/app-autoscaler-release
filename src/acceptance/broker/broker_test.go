@@ -8,10 +8,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/onsi/gomega/gbytes"
+
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
 )
 
@@ -20,6 +21,11 @@ type serviceInstance string
 func createService(onPlan string) serviceInstance {
 	return serviceInstance(helpers.CreateServiceWithPlan(cfg, onPlan))
 }
+
+func createServiceWithParameters(onPlan string, parameters string) serviceInstance {
+	return serviceInstance(helpers.CreateServiceWithPlanAndParameters(cfg, onPlan, parameters))
+}
+
 func (s serviceInstance) updatePlan(toPlan string) {
 	updateService := s.updatePlanRaw(toPlan)
 	ExpectWithOffset(1, updateService).To(Exit(0), "failed updating service")
@@ -32,9 +38,18 @@ func (s serviceInstance) updatePlanRaw(toPlan string) *Session {
 	return updateService
 }
 
+func (s serviceInstance) unbind(fromApp string) {
+	unbindService := cf.Cf("unbind-service", fromApp, s.name()).Wait(cfg.DefaultTimeoutDuration())
+	Expect(unbindService).To(Exit(0), "failed unbinding service instance %s from app %s", s.name(), fromApp)
+}
+
 func (s serviceInstance) delete() {
 	deleteService := cf.Cf("delete-service", string(s), "-f").Wait(cfg.DefaultTimeoutDuration())
-	Expect(deleteService).To(Exit(0))
+	Expect(deleteService).To(Exit(0), "failed deleting service instance %s", s.name())
+}
+
+func (s serviceInstance) name() string {
+	return string(s)
 }
 
 var _ = Describe("AutoScaler Service Broker", func() {
@@ -54,29 +69,91 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		}
 	})
 
-	It("performs lifecycle operations", func() {
-		instanceName := helpers.CreateService(cfg)
+	Context("performs lifecycle operations", func() {
 
-		bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(1))
+		var instance serviceInstance
 
-		combinedBuffer := gbytes.BufferWithBytes(append(bindService.Out.Contents(), bindService.Err.Contents()...))
-		Eventually(string(combinedBuffer.Contents())).Should(ContainSubstring(`[{"context":"(root).scaling_rules.1.adjustment","description":"Does not match pattern '^[-+][1-9]+[0-9]*%?$'"}]`))
+		BeforeEach(func() {
+			instance = createService(cfg.ServicePlan)
+		})
 
-		By("Test bind&unbind with policy")
-		helpers.BindServiceToAppWithPolicy(cfg, appName, instanceName, "../assets/file/policy/all.json")
+		It("fails to bind with invalid policies", func() {
+			bindService := cf.Cf("bind-service", appName, instance.name(), "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
+			Expect(bindService).To(Exit(1))
+			combinedBuffer := gbytes.BufferWithBytes(append(bindService.Out.Contents(), bindService.Err.Contents()...))
+			Eventually(string(combinedBuffer.Contents())).Should(ContainSubstring(`[{"context":"(root).scaling_rules.1.adjustment","description":"Does not match pattern '^[-+][1-9]+[0-9]*%?$'"}]`))
+		})
 
-		unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+		It("binds&unbinds with policy", func() {
+			policyFile := "../assets/file/policy/all.json"
+			policy, err := os.ReadFile(policyFile)
+			Expect(err).NotTo(HaveOccurred())
 
-		By("Test bind&unbind without policy")
-		helpers.BindServiceToApp(cfg, appName, instanceName)
+			helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
 
-		unbindService = cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
+			Expect(bindingParameters).Should(MatchJSON(policy))
 
-		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0))
+			instance.unbind(appName)
+		})
+
+		It("bind&unbinds without policy", func() {
+			helpers.BindServiceToApp(cfg, appName, instance.name())
+			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
+			Expect(bindingParameters).Should(MatchJSON("{}"))
+			instance.unbind(appName)
+		})
+
+		AfterEach(func() {
+			instance.delete()
+		})
+	})
+
+	Describe("allows setting default policies", func() {
+		var instance serviceInstance
+		var defaultPolicy []byte
+		var policy []byte
+
+		BeforeEach(func() {
+			instance = createServiceWithParameters(cfg.ServicePlan, "../assets/file/policy/default_policy.json")
+			var err error
+			defaultPolicy, err = os.ReadFile("../assets/file/policy/default_policy.json")
+			Expect(err).NotTo(HaveOccurred())
+
+			var serviceParameters = struct {
+				DefaultPolicy interface{} `json:"default_policy"`
+			}{}
+
+			err = json.Unmarshal(defaultPolicy, &serviceParameters)
+			Expect(err).NotTo(HaveOccurred())
+
+			policy, err = json.Marshal(serviceParameters.DefaultPolicy)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("allows retrieving the default policy using the Cloud Controller", func() {
+			instanceParameters := helpers.GetServiceInstanceParameters(cfg, instance.name())
+			Expect(instanceParameters).To(MatchJSON(defaultPolicy))
+		})
+
+		It("sets the default policy if no policy is set during binding and allows retrieving the policy via the binding parameters", func() {
+			helpers.BindServiceToApp(cfg, appName, instance.name())
+
+			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
+			Expect(bindingParameters).Should(MatchJSON(policy))
+
+			unbindService := cf.Cf("unbind-service", appName, instance.name()).Wait(cfg.DefaultTimeoutDuration())
+			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
+
+		})
+
+		AfterEach(func() {
+			if os.Getenv("SKIP_TEARDOWN") == "true" {
+				fmt.Println("Skipping Teardown...")
+			} else {
+				instance.delete()
+			}
+		})
 	})
 
 	It("should update service instance from autoscaler-free-plan to acceptance-standard", func() {

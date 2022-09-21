@@ -288,10 +288,13 @@ instance_groups:
                   name: ((deployment_name))
                   description: Automatically increase or decrease the number of application instances based on a policy you define.
                   bindable: true
+                  instances_retrievable: true
+                  bindings_retrievable: true
                   plans:
                     - id: autoscaler-free-plan-id
                       name: autoscaler-free-plan
                       description: This is the free service plan for the Auto-Scaling service.
+
               dashboard_redirect_uri: ""
         cf: *cf_credentials
         binding_db: *database

@@ -11,6 +11,7 @@ files:
 - autoscaler/api/policyvalidator/*
 - autoscaler/api/schemas/*
 - autoscaler/api/* # gosub
+- autoscaler/api/broker/* # gosub
 - autoscaler/api/brokerserver/* # gosub
 - autoscaler/api/cmd/api/* # gosub
 - autoscaler/api/config/* # gosub
