@@ -7,99 +7,125 @@
 set -euo pipefail
 
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-root_dir=${ROOT_DIR:-"${script_dir}/../../../"}
+root_dir=$(realpath "${ROOT_DIR:-"${script_dir}/../../../"}" )
 
-mkdir -p 'generated-release'
 previous_version=${PREV_VERSION:-$(cat gh-release/tag)}
-generated=${DEST:-"$(realpath generated-release)"}
+mkdir -p 'build'
+build_path=$(realpath build)
 build_opts=${BUILD_OPTS:-"--final"}
-VERSION=${VERSION:-$(cat "${generated}/name")}
 PERFORM_BOSH_RELEASE=${PERFORM_BOSH_RELEASE:-"true"}
 REPO_OUT=${REPO_OUT:-}
+export UPLOADER_KEY=${UPLOADER_KEY:-"NOT_SET"}
+CI=${CI:-false}
+SUM_FILE="${build_path}/artifacts/files.sum.sha256"
 
 function create_release() {
-   echo " - creating release"
    set -e
-   local VERSION=$1
-   local generated=$2
+   mkdir -p "${build_path}/artifacts"
+   local version=$1
+   local build_path=$2
+   local release_file=$3
+   echo " - building new release from ${PWD} at revision $(git rev-parse HEAD)"
+   echo " - creating release '${version}' in '${build_path}' as ${release_file}"
+
+   yq eval -i ".properties.\"autoscaler.apiserver.info.build\".default = \"${version}\"" jobs/golangapiserver/spec
+   git add jobs/golangapiserver/spec
+   [ "${CI}" = "true" ] && git commit -m "Updated release version to ${version} in golangapiserver"
+
    # shellcheck disable=SC2086
    bosh create-release \
         ${build_opts} \
-        --version "$VERSION" \
-        --tarball="app-autoscaler-v${VERSION}.tgz"
-
-    RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
-    RELEASE_SHA256="$(sha256sum "${RELEASE_TGZ}" | head -n1 | awk '{print $1}')"
-    mkdir -p "${generated}/artifacts"
-    mv "app-autoscaler-v${VERSION}.tgz" "${generated}/artifacts/"
+        --version "${version}" \
+        --tarball="${build_path}/artifacts/${release_file}"
 }
 
 function create_tests() {
+  set -e
+  mkdir -p "${build_path}/artifacts"
+  local version=$1
+  local build_path=$2
   echo " - creating acceptance test artifact"
   pushd "${root_dir}" > /dev/null
-    make acceptance-release VERSION="${VERSION}" DEST="${generated}/artifacts/"
+    make acceptance-release VERSION="${version}" DEST="${build_path}/artifacts/"
   popd > /dev/null
 }
 
-pushd "${root_dir}" > /dev/null
-  # generate the private.yml file with the credentials
-  cat > 'config/private.yml' <<EOF
+function commit_release(){
+  pushd "${root_dir}"
+  git add -A
+  git status
+  git commit -m "created release v${VERSION}"
+}
+
+function create_bosh_config(){
+   # generate the private.yml file with the credentials
+   config_file="${root_dir}/config/private.yml"
+    cat > "$config_file" <<EOF
 ---
 blobstore:
   options:
     credentials_source: static
     json_key:
 EOF
-  echo 'Generating private.yml...'
-  yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' config/private.yml
+    echo ' - Generating private.yml...'
+    yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "$config_file"
+}
 
-
+function generate_changelog(){
+  [ -e "${build_path}/changelog.md" ] && return
   LAST_COMMIT_SHA="$(git rev-parse HEAD)"
-  echo "Generating release including commits up to: ${LAST_COMMIT_SHA}"
+  echo " - Generating release notes including commits up to: ${LAST_COMMIT_SHA}"
   pushd src/changelog > /dev/null
     echo " - running changelog"
     go run main.go \
-      --changelog-file "${generated}/changelog.md" \
+      --changelog-file "${build_path}/changelog.md" \
       --last-commit-sha-id "${LAST_COMMIT_SHA}"\
       --prev-rel-tag "${previous_version}"\
-      --version-file "${generated}/name"
+      --version-file "${build_path}/name"
   popd
+}
+function setup_git(){
+  # FIXME these should be configurable variables
+  if [[ -z $(git config --global user.email) ]]; then
+    git config --global user.email "ci@cloudfoundry.org"
+  fi
 
-  export VERSION
-  yq eval -i '.properties."autoscaler.apiserver.info.build".default = strenv(VERSION)' jobs/golangapiserver/spec
+  # FIXME these should be configurable variables
+  if [[ -z $(git config --global user.name) ]]; then
+    git config --global user.name "CI Bot"
+  fi
+}
 
-  echo "Displaying diff..."
+
+pushd "${root_dir}" > /dev/null
+  setup_git
+  create_bosh_config
+  generate_changelog
+
+  echo " - Displaying diff..."
   export GIT_PAGER=cat
   git diff
 
+  VERSION=${VERSION:-$(cat "${build_path}/name")}
+  echo "v${VERSION}" > "${build_path}/tag"
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
-    # FIXME these should be configurable variables
-    if [[ -z $(git config --global user.email) ]]; then
-      git config --global user.email "ci@cloudfoundry.org"
-    fi
+    RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
+    ACCEPTANCE_TEST_TGZ="app-autoscaler-acceptance-tests-v${VERSION}.tgz"
+    create_release "${VERSION}" "${build_path}" "${RELEASE_TGZ}"
+    create_tests "${VERSION}" "${build_path}"
+    [ "${CI}" = "true" ] && commit_release
 
-    # FIXME these should be configurable variables
-    if [[ -z $(git config --global user.name) ]]; then
-      git config --global user.name "CI Bot"
-    fi
-
-    git add jobs/golangapiserver/spec
-    git commit -m "Updated release version to ${VERSION} in golangapiserver"
-
-    create_release "${VERSION}" "${generated}"
-    create_tests "${VERSION}" "${generated}"
-
-    git add -A
-    git status
-    git commit -m "release v${VERSION}"
+    sha256sum "${build_path}/artifacts/"* > "${build_path}/artifacts/files.sum.sha256"
+    ACCEPTANCE_SHA256=$( grep "${ACCEPTANCE_TEST_TGZ}$" "${SUM_FILE}" | awk '{print $1}' )
+    RELEASE_SHA256=$( grep "${RELEASE_TGZ}$" "${SUM_FILE}" | awk '{print $1}')
   else
-    export RELEASE_SHA256="dummy-sha"
-    export ACCEPTANCE_SHA256="dummy-sha"
+    ACCEPTANCE_SHA256="dummy-sha"
+    RELEASE_SHA256="dummy-sha"
   fi
-  echo "${VERSION}" > "${generated}/tag"
-  ACCEPTANCE_SHA256=$(cat "${generated}/artifacts/"*.sha256)
   export ACCEPTANCE_SHA256
-  cat >> "${generated}/changelog.md" <<EOF
+  export RELEASE_SHA256
+
+  cat >> "${build_path}/changelog.md" <<EOF
 
 ## Deployment
 
@@ -116,8 +142,8 @@ releases:
 \`\`\`
 EOF
   echo "---------- Changelog file ----------"
-  cat "${generated}/changelog.md"
+  cat "${build_path}/changelog.md"
   echo "---------- end file ----------"
-popd
 
-[ -d "${REPO_OUT}" ] && cp -a app-autoscaler-release "${REPO_OUT}"
+popd > /dev/null
+echo " - Completed"

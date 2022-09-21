@@ -6,8 +6,9 @@ image_resource:
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
     tag: main
 inputs:
-  - name: ops-files
-  - name: custom-ops
+  - name: cf-deployment
+  - name: prometheus-boshrelease
+  - name: app-autoscaler-release
   - name: ci
 outputs:
   - name: combined-ops

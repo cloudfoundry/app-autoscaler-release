@@ -139,6 +139,7 @@ resources:
     fetch_tags: true
     paths:
       - ci
+
 - name: app-autoscaler-release-main
   type: git
   icon: github
@@ -225,7 +226,6 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
 
-
 - name: integration-tests-main
   public: true
   build_logs_to_retain: 100
@@ -259,10 +259,10 @@ jobs:
       passed: [unit-tests-main, integration-tests-main]
       trigger: true
     - get: ci
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -324,10 +324,10 @@ jobs:
       passed: [unit-tests-main, integration-tests-main]
       trigger: true
     - get: ci
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -389,10 +389,10 @@ jobs:
       passed: [unit-tests-main, integration-tests-main]
       trigger: true
     - get: ci
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -467,10 +467,10 @@ jobs:
       NODES: 1
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -503,10 +503,10 @@ jobs:
     - get: app-autoscaler-release-main
       passed: [upgrade-test-main]
     - get: ci
-  - task: run-pre-release-script
-    file: ci/ci/autoscaler/tasks/run-prerelease-script.yml
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
@@ -518,23 +518,24 @@ jobs:
       GITHUB_TOKEN: ((autoscaler_access_token))
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
+      ci: ci
   - put: release-bucket
     params:
-      file: "generated-release/artifacts/app-autoscaler-v*.tgz"
+      file: "build/artifacts/app-autoscaler-v*.tgz"
   - put: acceptance-tests-bucket
     params:
-      file: "generated-release/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
+      file: "build/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
   - put: gh-release
     params:
-      name: generated-release/name
-      tag: generated-release/tag
-      body: generated-release/changelog.md
-      globs: [generated-release/artifacts/*]
+      name: build/name
+      tag: build/tag
+      body: build/changelog.md
+      globs: [build/artifacts/*]
       commitish: app-autoscaler-release-main/.git/ref
   - put: app-autoscaler-release-main
     params:
       rebase: true
-      repository: pushme/app-autoscaler-release
+      repository: app-autoscaler-release
 
 # TODO move to a github action a possibly make it add the draft release notes to the PR?
 #- name: draft-pr
@@ -556,17 +557,16 @@ jobs:
 #    input_mapping:
 #      app-autoscaler-release: app-autoscaler-release-pr
 
-
 - name: draft
   public: true
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: ci
     - get: gh-release
     - get: app-autoscaler-release-main
       passed: [upgrade-test-main]
       trigger: true
-    - get: ci
   - task: dummy-release-autoscaler
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
@@ -575,7 +575,7 @@ jobs:
       PERFORM_BOSH_RELEASE: false
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-
+      ci: ci
 
 - name: update-golang
   public: true
@@ -591,9 +591,8 @@ jobs:
     file: ci/ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: golang
-    input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
-
+    input_mapping:
 
 - name: update-java
   public: true

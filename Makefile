@@ -45,9 +45,10 @@ target/init:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-node
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-node clean-build
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
+clean-build:
 	@rm -rf build | true
 clean-java:
 	@echo " - cleaning java resources"
@@ -72,6 +73,7 @@ clean-node:
 clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
+	@rm -rf .dev_builds
 
 .PHONY: build build-test build-tests build-all $(all_modules)
 build: init  $(all_modules)
@@ -255,9 +257,7 @@ vendor-app:
 acceptance-release: mod-tidy vendor vendor-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
-	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'\
-	 && sha256sum "${ACCEPTANCE_TESTS_FILE}" | head -n1 | awk '{print $1}' > "${ACCEPTANCE_TESTS_FILE}.sha256"
-
+	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
 .PHONY: mod-tidy
 mod-tidy:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
@@ -286,19 +286,24 @@ workspace:
 uaac:
 	which uaac || gem install cf-uaac
 
-.PHONY: deployment
-deployment: mod-tidy vendor uaac db scheduler
+.PHONY: deploy-autoscaler
+deploy-autoscaler: mod-tidy vendor uaac db scheduler
 	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
 	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
+
+deploy-prometheus:
+	export DEPLOYMENT_NAME=prometheus
+	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;
+	${CI_DIR}/autoscaler/scripts/deploy-prometheus.sh;
 
 .PHONY: acceptance-tests
 acceptance-tests: vendor-app
 	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
-.PHONY: deployment-cleanup
-deployment-cleanup:
+.PHONY: deploy-cleanup
+deploy-cleanup:
 	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'";\
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;

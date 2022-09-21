@@ -1,0 +1,26 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
+    tag: main
+
+params:
+  # Required: the system domain to configure for the deployment
+  SYSTEM_DOMAIN:
+
+  # Optional: override the user to access bosh
+  BOSH_USERNAME: admin
+
+
+inputs:
+- name: bbl-state
+- name: ci
+- name: prometheus-boshrelease
+
+outputs:
+
+run:
+  path: ci/ci/infrastructure/scripts/deploy-prometheus.sh

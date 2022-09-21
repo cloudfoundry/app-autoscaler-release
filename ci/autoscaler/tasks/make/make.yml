@@ -8,13 +8,15 @@ image_resource:
     tag: main
 
 params:
-  SCRIPT_NAME:
+  TARGETS:
 
 inputs:
 - name: release
+- name: ci
 
 outputs:
 - name: release  
 
 run:
-  path: release/ci/autoscaler/scripts/run-prerelease-script.sh
+  path: ci/ci/autoscaler/tasks/make/make.sh
+  args: [ release ]

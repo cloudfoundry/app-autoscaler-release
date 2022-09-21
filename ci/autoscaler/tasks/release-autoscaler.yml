@@ -16,17 +16,20 @@ params:
 
   # if set to false, the bosh release will be skipped and only the changelog & next version generated
   PERFORM_BOSH_RELEASE: true
+  CI: true
 
   # name of the updated repo to be pushed at the end
   REPO_OUT: pushme
+  ROOT_DIR: app-autoscaler-release
 
 inputs:
 - name: app-autoscaler-release
+- name: ci
 - name: gh-release
 
 outputs:
-- name: generated-release
-- name: pushme  
+- name: build
+- name: app-autoscaler-release
 
 run:
-  path: app-autoscaler-release/ci/autoscaler/scripts/release-autoscaler.sh
+  path: ci/ci/autoscaler/scripts/release-autoscaler.sh
