@@ -107,7 +107,7 @@ pushd "${root_dir}" > /dev/null
   git diff
 
   VERSION=${VERSION:-$(cat "${build_path}/name")}
-  echo "${VERSION}" > "${build_path}/tag"
+  echo "v${VERSION}" > "${build_path}/tag"
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
     ACCEPTANCE_TEST_TGZ="app-autoscaler-acceptance-tests-v${VERSION}.tgz"
