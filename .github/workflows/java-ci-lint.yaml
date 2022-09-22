@@ -27,4 +27,4 @@ jobs:
 
       - name: Publish Results on Pull Request
         run: |
-          go run format_checkstyle.go
+          go run src/fmt_chkstyle/format_checkstyle.go
