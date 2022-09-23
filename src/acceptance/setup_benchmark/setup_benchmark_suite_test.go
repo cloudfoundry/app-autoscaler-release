@@ -5,6 +5,7 @@ import (
 	"acceptance/helpers"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
@@ -36,7 +37,7 @@ var _ = BeforeSuite(func() {
 		for _, org := range orgs {
 			orgName, _, spaceName, _ := helpers.GetOrgSpaceNamesAndGuids(cfg, org)
 			if spaceName != "" {
-				helpers.DeleteOrg(cfg, orgName)
+				helpers.DeleteOrgWithTimeout(cfg, orgName, time.Duration(60)*time.Second)
 			}
 		}
 	})
