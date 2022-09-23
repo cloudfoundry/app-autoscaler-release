@@ -62,22 +62,17 @@ var _ = BeforeSuite(func() {
 	if cfg.IsServiceOfferingEnabled() {
 		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
-
 })
 
 var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		fmt.Println("Clearing down existing test orgs/spaces...")
-
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			orgs := helpers.GetTestOrgs(cfg)
 			for _, org := range orgs {
 				helpers.DeleteOrg(cfg, org)
 			}
 		})
-
-		fmt.Println("Clearing down existing test orgs/spaces... Complete")
 	}
 })

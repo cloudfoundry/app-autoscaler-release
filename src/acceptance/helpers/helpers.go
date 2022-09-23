@@ -389,15 +389,39 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 
 func CreatePolicy(cfg *config.Config, appName, appGUID, policy string) string {
 	if cfg.IsServiceOfferingEnabled() {
-		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
-
-		bindService := cf.Cf("bind-service", appName, instanceName, "-c", policy).Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+		instanceName := CreateService(cfg)
+		BindServiceToAppWithPolicy(cfg, appName, instanceName, policy)
 		return instanceName
 	}
 	CreatePolicyWithAPI(cfg, appGUID, policy)
+	return ""
+}
+
+func BindServiceToApp(cfg *config.Config, appName string, instanceName string) {
+	BindServiceToAppWithPolicy(cfg, appName, instanceName, "")
+}
+
+func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName string, policy string) {
+	if cfg.IsServiceOfferingEnabled() {
+		args := []string{"bind-service", appName, instanceName}
+		if policy != "" {
+			args = append(args, "-c", policy)
+		}
+		bindService := cf.Cf(args...).Wait(cfg.DefaultTimeoutDuration())
+		FailOnCommandFailuref(bindService, "failed binding service %s to app %s", instanceName, appName)
+	}
+}
+
+func CreateService(cfg *config.Config) string {
+	return CreateServiceWithPlan(cfg, cfg.ServicePlan)
+}
+func CreateServiceWithPlan(cfg *config.Config, servicePlan string) string {
+	if cfg.IsServiceOfferingEnabled() {
+		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+		createService := cf.Cf("create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
+		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s", instanceName, cfg.ServiceName)
+		return instanceName
+	}
 	return ""
 }
 
@@ -444,9 +468,9 @@ func GetAppGuid(cfg *config.Config, appName string) string {
 	return strings.TrimSpace(string(guid.Out.Contents()))
 }
 
-func AbortOnCommandFailuref(command *Session, format string, args ...any) *Session {
+func FailOnCommandFailuref(command *Session, format string, args ...any) *Session {
 	if command.ExitCode() != 0 {
-		AbortSuite(fmt.Sprintf(format, args...))
+		Fail(fmt.Sprintf(format, args...))
 	}
 	return command
 }
