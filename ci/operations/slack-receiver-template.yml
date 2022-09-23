@@ -1,0 +1,7 @@
+- type: replace
+  path: /instance_groups/name=alertmanager/jobs/name=alertmanager/properties/alertmanager/receivers/name=default/slack_configs?/title
+  value: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
+
+- type: replace
+  path: /instance_groups/name=alertmanager/jobs/name=alertmanager/properties/alertmanager/receivers/name=default/slack_configs?/text
+  value: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"

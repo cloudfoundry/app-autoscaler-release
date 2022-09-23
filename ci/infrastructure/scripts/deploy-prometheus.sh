@@ -21,7 +21,8 @@ ops_files=${OPS_FILES:-"${prometheus_dir}/manifests/operators/monitor-bosh.yml\
                         ${prometheus_dir}/manifests/operators/enable-cf-route-registrar.yml\
                         ${prometheus_dir}/manifests/operators/enable-grafana-uaa.yml\
                         ${prometheus_dir}/manifests/operators/alertmanager-slack-receiver.yml\
-                        ${script_dir}/../../operations/prometheus-nats-tls.yaml"}
+                        ${script_dir}/../../operations/prometheus-nats-tls.yaml\
+                        ${script_dir}/../../operations/slack-receiver-template.yaml"}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
