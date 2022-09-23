@@ -468,7 +468,7 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
     input_mapping:
