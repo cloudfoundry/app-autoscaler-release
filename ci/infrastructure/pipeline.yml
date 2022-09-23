@@ -30,6 +30,7 @@ resources:
     fetch_tags: true
     paths:
       - ci/infrastructure
+      - ci/operations
 
 - name: app-autoscaler-release
   type: git
