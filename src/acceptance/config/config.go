@@ -68,9 +68,9 @@ type Config struct {
 	CPUUpperThreshold int64 `json:"cpu_upper_threshold"`
 
 	// For bechmark test
-	BenchmarkAppCount          int `json:"benchmark_app_count"`
-	BenchmarkPercentageToScale int `json:"benchmark_app_percentage_to_scale"`
-	BenchmarkTeardown bool `json:"benchmark_teardown"`
+	BenchmarkAppCount          int  `json:"benchmark_app_count"`
+	BenchmarkPercentageToScale int  `json:"benchmark_app_percentage_to_scale"`
+	BenchmarkTeardown          bool `json:"benchmark_teardown"`
 }
 
 var defaults = Config{
@@ -100,11 +100,10 @@ var defaults = Config{
 	HealthEndpointsBasicAuthEnabled: true,
 	CPUUpperThreshold:               100,
 
-
 	// For benchmark
-	BenchmarkAppCount: 10,
+	BenchmarkAppCount:          100,
 	BenchmarkPercentageToScale: 30,
-	BenchmarkTeardown: true,
+	BenchmarkTeardown:          true,
 }
 
 func LoadConfig(t *testing.T) *Config {
