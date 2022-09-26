@@ -11,6 +11,7 @@ skip_ssl_validation="${SKIP_SSL_VALIDATION:-true}"
 name_prefix="${NAME_PREFIX:-ASATS}"
 # shellcheck disable=SC2034
 buildin_mode="${BUILDIN_MODE:-false}"
+cf_admin_password="${CF_ADMIN_PASSWORD:-}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
 suites=${SUITES:-"api app broker"}
 ginkgo_opts="${GINKGO_OPTS:-}"
@@ -20,14 +21,17 @@ if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
   echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
   exit 1;
-  fi
+fi
 
 
-pushd "${bbl_state_path}"
-  eval "$(bbl print-env)"
-popd
+if [[ -z ${cf_admin_password} ]]; then
+  pushd "${bbl_state_path}"
+    eval "$(bbl print-env)"
+  popd
 
-cf_admin_password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+  cf_admin_password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+fi
+
 
 export GOPATH="$PWD/app-autoscaler-release"
 pushd "${autoscaler_dir}/src/acceptance"
