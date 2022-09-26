@@ -34,7 +34,7 @@ bosh delete-deployment -d "${deployment_name}" -n
 
 if [ -n "${deployment_name}" ]
 then
-  for release in $(bosh releases | grep "${deployment_name} " | awk '{print $2}')
+  for release in $(bosh releases | grep -E "${deployment_name}\s+"  | awk '{print $2}')
   do
      echo "- Deleting bosh release '${release}'"
      bosh delete-release -n "app-autoscaler/${release}"

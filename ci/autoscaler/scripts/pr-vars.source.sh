@@ -35,11 +35,13 @@ echo ">> SUITES: ${SUITES}"
 export NODES="${NODES:-3}"
 echo ">> NODES: ${NODES}"
 
-export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
 if [[ "${BUILDIN_MODE}" == 'true' ]]; then
-    export DEPLOYMENT_NAME=${DEPLOYMENT_NAME}-buildin
+    export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-buildin-${PR_NUMBER}"}"
     export SERVICE_OFFERING_ENABLED=false
-    fi
+else
+  export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
+fi
+
 echo ">> DEPLOYMENT_NAME: ${DEPLOYMENT_NAME}"
 echo ">> BUILDIN_MODE: ${BUILDIN_MODE}"
 echo ">> SERVICE_OFFERING_ENABLED: ${SERVICE_OFFERING_ENABLED}"
