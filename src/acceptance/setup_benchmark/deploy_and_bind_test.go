@@ -28,7 +28,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 
 			go func(appName string) {
 				defer GinkgoRecover()
-				helpers.CreateTestAppByName(*cfg, appName, 1)
+				helpers.CreateTestAppFromDropletByName( cfg, nodeAppDropletPath, appName, 1)
 				policy := helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 				appGUID := helpers.GetAppGuid(cfg, appName)
 				_ = helpers.CreatePolicy(cfg, appName, appGUID, policy)

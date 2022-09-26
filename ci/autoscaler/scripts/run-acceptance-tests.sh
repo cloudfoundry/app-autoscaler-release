@@ -6,16 +6,19 @@ source "${script_dir}/vars.source.sh"
 
 ginkgo_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
+cf_admin_password="${CF_ADMIN_PASSWORD:-}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
 skip_ssl_validation=${SKIP_SSL_VALIDATION:-'true'}
 skip_teardown="${SKIP_TEARDOWN:-false}"
 suites=${SUITES:-"api app broker"}
 
-pushd "${bbl_state_path}" >/dev/null
-  eval "$(bbl print-env)"
-popd >/dev/null
+if [[ -z ${cf_admin_password} ]]; then
+  pushd "${bbl_state_path}"
+    eval "$(bbl print-env)"
+  popd
 
-cf_admin_password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+  cf_admin_password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+fi
 
 pushd "${autoscaler_dir}/src/acceptance" >/dev/null
 cat > acceptance_config.json <<EOF
