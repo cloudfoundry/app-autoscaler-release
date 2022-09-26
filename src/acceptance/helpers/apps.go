@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/onsi/ginkgo/v2"
+	"os"
 	"strconv"
 	"time"
 
@@ -44,18 +45,6 @@ func getRawApps(spaceGuid string, orgGuid string, timeout time.Duration) []cfRes
 	return rawApps
 }
 
-func GetRunningApps(cfg *config.Config, orgGuid, spaceGuid string) []string {
-	rawApps := getRawApps(spaceGuid, orgGuid, cfg.DefaultTimeoutDuration())
-	return filterByState(rawApps, "RUNNING")
-}
-
-func DeleteApps(cfg *config.Config, apps []string) {
-	for _, app := range apps {
-		deleteApp := cf.Cf("delete", app, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", app))
-	}
-}
-
 func SendMetric(cfg *config.Config, appName string, metric int) {
 	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), "-f")
 }
@@ -74,6 +63,46 @@ func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int)
 	CreateTestAppByName(*cfg, appName, initialInstanceCount)
 	return appName
 }
+func CreateDroplet(cfg config.Config) string {
+	appName := "deleteme"
+	tmpDir, err := os.CreateTemp("","droplet")
+	dropletPath := fmt.Sprintf("%s.tgz",tmpDir.Name())
+	Expect(err).NotTo(HaveOccurred())
+	CreateTestAppByName(cfg, appName, 1)
+	StartApp(appName, cfg.CfPushTimeoutDuration())
+	downloadDroplet := cf.Cf("download-droplet" , appName, "--path", dropletPath).Wait( cfg.DefaultTimeoutDuration())
+	DeleteTestApp(appName,cfg.DefaultTimeoutDuration())
+	Expect(downloadDroplet).To(Exit(0), "failed download droplet")
+
+	return dropletPath
+}
+
+func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string,  initialInstanceCount int) {
+	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
+	if cfg.GetSkipSSLValidation() {
+		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
+	}
+
+	countStr := strconv.Itoa(initialInstanceCount)
+	createApp := cf.Cf("push",
+		"--var", "app_name="+appName,
+		"--var", "app_domain="+cfg.AppsDomain,
+		"--var", "service_name="+cfg.ServiceName,
+		"--var", "instances="+countStr,
+		"--var", "buildpack="+cfg.NodejsBuildpackName,
+		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
+		"--droplet", dropletPath,
+		"-f", config.NODE_APP+"/app_manifest.yml",
+		"--no-start",
+	).Wait(cfg.CfPushTimeoutDuration())
+
+	if createApp.ExitCode() != 0 {
+		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
+	}
+	Expect(createApp).To(Exit(0), "failed creating app")
+
+	ginkgo.GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
+}
 
 func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
 
@@ -88,7 +117,7 @@ func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount
 		"--var", "app_domain="+cfg.AppsDomain,
 		"--var", "service_name="+cfg.ServiceName,
 		"--var", "instances="+countStr,
-		"--var", "buildpack="+cfg.NodejsBuildpackName,
+		"--buildpack", cfg.NodejsBuildpackName,
 		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
 		"-p", config.NODE_APP,
 		"-f", config.NODE_APP+"/app_manifest.yml",

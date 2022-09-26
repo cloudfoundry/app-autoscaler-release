@@ -5,8 +5,6 @@ applications:
     NODE_TLS_REJECT_UNAUTHORIZED: ((node_tls_reject_unauthorized))
     SERVICE_NAME: ((service_name))
     NODE_ENV: production
-  buildpacks:
-  - ((buildpack))
   stack: cflinuxfs3
   # TODO: remove binding and use services
   # services:

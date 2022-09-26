@@ -16,6 +16,7 @@ import (
 var (
 	cfg   *config.Config
 	setup *workflowhelpers.ReproducibleTestSuiteSetup
+	nodeAppDropletPath string
 )
 
 func TestSetup(t *testing.T) {
@@ -54,4 +55,7 @@ var _ = BeforeSuite(func() {
 	if cfg.IsServiceOfferingEnabled() {
 		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
+
+	fmt.Println("creating droplet")
+	nodeAppDropletPath = helpers.CreateDroplet(*cfg)
 })
