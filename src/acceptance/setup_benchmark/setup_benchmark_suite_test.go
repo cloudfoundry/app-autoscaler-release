@@ -4,6 +4,8 @@ import (
 	"acceptance/config"
 	"acceptance/helpers"
 	"fmt"
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	"strconv"
 	"testing"
 	"time"
 
@@ -19,6 +21,7 @@ var (
 	nodeAppDropletPath string
 )
 
+
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
 	cfg = config.LoadConfig(t)
@@ -29,8 +32,13 @@ func TestSetup(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 
+
+
 	fmt.Println("Clearing down existing test orgs/spaces...")
-	setup = workflowhelpers.NewTestSuiteSetup(cfg)
+	// Infinite memory quota OO
+	setup = workflowhelpers.NewRunawayAppTestSuiteSetup(cfg)
+
+
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		orgs := helpers.GetTestOrgs(cfg)
@@ -45,6 +53,12 @@ var _ = BeforeSuite(func() {
 
 	fmt.Println("Clearing down existing test orgs/spaces... Complete")
 	setup.Setup()
+
+	cf.Cf("update-space-quota", setup.TestSpace.QuotaName(),"-m",strconv.Itoa( cfg.BenchmarkAppCount *256)+"MB" , "-r",strconv.Itoa( cfg.BenchmarkAppCount*2) ,"-s",strconv.Itoa(cfg.BenchmarkAppCount ))
+
+	// TODO: Update org quota
+	// setup.GetOrganizationName()
+	// cf.Cf("update-org-quota", setup.TestSpace.QuotaName(),"-m",strconv.Itoa( cfg.BenchmarkAppCount *256)+"MB" , "-r",strconv.Itoa( cfg.BenchmarkAppCount*2) ,"-s",strconv.Itoa(cfg.BenchmarkAppCount ))
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		if cfg.ShouldEnableServiceAccess() {

@@ -102,7 +102,7 @@ var defaults = Config{
 	CPUUpperThreshold:               100,
 
 	// For benchmark
-	BenchmarkAppCount:          100,
+	BenchmarkAppCount:          200,
 	BenchmarkPercentageToScale: 30,
 	BenchmarkTeardown:          true,
 }
