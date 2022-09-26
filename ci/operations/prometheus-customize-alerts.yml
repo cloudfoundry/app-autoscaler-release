@@ -1,0 +1,3 @@
+- type: replace
+  path: /instance_groups/name=prometheus2/jobs/name=bosh_alerts/properties/bosh_alerts?/job_predict_system_disk_full?/predict_time?
+  value: 7200
