@@ -44,20 +44,20 @@ var (
 	client              *http.Client
 )
 
+const componentName = "Public API Suite"
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
+	RunSpecs(t, componentName)
+}
 
-	cfg = config.LoadConfig(t)
+var _ = BeforeSuite(func() {
+	cfg = config.LoadConfig()
 	componentName := "Public API Suite"
 
 	if cfg.GetArtifactsDirectory() != "" {
 		helpers.EnableCFTrace(cfg, componentName)
 	}
-
-	RunSpecs(t, componentName)
-}
-
-var _ = BeforeSuite(func() {
 
 	otherConfig := *cfg
 	otherConfig.NamePrefix = otherConfig.NamePrefix + "_other"

@@ -5,6 +5,8 @@ import (
 	"acceptance/helpers"
 	"testing"
 
+	cth "github.com/KevinJCross/cf-test-helpers/v2/helpers"
+
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -16,15 +18,20 @@ var (
 	setup *workflowhelpers.ReproducibleTestSuiteSetup
 )
 
+const componentName = "Pre Upgrade Test Suite"
+
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
-	cfg = config.LoadConfig(t)
-	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-
-	RunSpecs(t, "Pre Upgrade Test Suite")
+	RunSpecs(t, componentName)
 }
 
 var _ = BeforeSuite(func() {
+	cfg = config.LoadConfig()
+	if cfg.GetArtifactsDirectory() != "" {
+		cth.EnableCFTrace(cfg, componentName)
+	}
+
+	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
 	GinkgoWriter.Println("Clearing down existing test orgs/spaces...")
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)

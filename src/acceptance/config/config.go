@@ -5,8 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"testing"
 	"time"
+
+	. "github.com/onsi/ginkgo/v2"
 )
 
 const NODE_APP = "../assets/app/nodeApp"
@@ -96,32 +97,32 @@ var defaults = Config{
 	CPUUpperThreshold:               100,
 }
 
-func LoadConfig(t *testing.T) *Config {
+func LoadConfig() *Config {
 	path := os.Getenv("CONFIG")
 	if path == "" {
-		t.Fatal("Must set $CONFIG to point to a json file.")
+		AbortSuite("Must set $CONFIG to point to a json file.")
 	}
 
 	config := defaults
 	err := loadConfigFromPath(path, &config)
 	if err != nil {
-		t.Fatal(err.Error())
+		AbortSuite(err.Error())
 	}
-	validate(t, &config)
+	validate(&config)
 	return &config
 }
 
-func validate(t *testing.T, c *Config) {
+func validate(c *Config) {
 	if c.ApiEndpoint == "" {
-		t.Fatal("missing configuration 'api'")
+		AbortSuite("missing configuration 'api'")
 	}
 
 	if c.AdminUser == "" {
-		t.Fatal("missing configuration 'admin_user'")
+		AbortSuite("missing configuration 'admin_user'")
 	}
 
 	if c.AdminPassword == "" {
-		t.Fatal("missing configuration 'admin_password'")
+		AbortSuite("missing configuration 'admin_password'")
 	}
 
 	if c.TimeoutScale <= 0 {
@@ -129,19 +130,19 @@ func validate(t *testing.T, c *Config) {
 	}
 
 	if c.ServiceBroker == "" {
-		t.Fatal("missing configuration 'service_broker'")
+		AbortSuite("missing configuration 'service_broker'")
 	}
 
 	if c.ServiceName == "" {
-		t.Fatal("missing configuration 'service_name'")
+		AbortSuite("missing configuration 'service_name'")
 	}
 
 	if c.ServicePlan == "" {
-		t.Fatal("missing configuration 'service_plan'")
+		AbortSuite("missing configuration 'service_plan'")
 	}
 
 	if c.AggregateInterval == 0 {
-		t.Fatal("missing configuration 'aggregate_interval'")
+		AbortSuite("missing configuration 'aggregate_interval'")
 	} else {
 		if c.AggregateInterval < 60 {
 			c.AggregateInterval = 60
@@ -149,7 +150,7 @@ func validate(t *testing.T, c *Config) {
 	}
 
 	if c.ASApiEndpoint == "" {
-		t.Fatal("missing configuration 'autoscaler_api'")
+		AbortSuite("missing configuration 'autoscaler_api'")
 	} else {
 		c.ASApiEndpoint = strings.TrimSuffix(c.ASApiEndpoint, "/")
 		if !strings.HasPrefix(c.ASApiEndpoint, "http") {
@@ -173,7 +174,7 @@ func loadConfigFromPath(path string, config *Config) error {
 	return decoder.Decode(config)
 }
 
-func (c Config) Protocol() string {
+func (c *Config) Protocol() string {
 	if c.UseHttp {
 		return "http://"
 	} else {
