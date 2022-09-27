@@ -42,6 +42,7 @@ jobs:
 
       - name: Install BOSH CLI
         run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           brew install cloudfoundry/tap/bosh-cli
 
       - name: Run Update
