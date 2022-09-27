@@ -17,7 +17,6 @@ do
   then
     echo " - Cleaning up PR:${PR_NUMBER}"
     # shellcheck disable=SC1091
-    source ./pr-vars.source.sh
     "${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh"
   else
     echo " - Skipping ${PR_NUMBER}"

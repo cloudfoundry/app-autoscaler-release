@@ -1,8 +1,9 @@
 #!/bin/bash
 # shellcheck disable=SC2086
 set -euo pipefail
-
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+#shellcheck disable=SC1091
+source "${script_dir}/pr-vars.source.sh"
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
@@ -57,8 +58,9 @@ function deploy () {
     bosh_deploy_args="$bosh_deploy_args --fix-releases"
   fi
 
-  echo " - Deploy args: '${bosh_deploy_args}'"
+  ${script_dir}/silence_prometheus_alert.sh
 
+  echo " - Deploy args: '${bosh_deploy_args}'"
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
     deploy "${deployment_manifest}" \

@@ -288,24 +288,21 @@ uaac:
 
 .PHONY: deploy-autoscaler
 deploy-autoscaler: mod-tidy vendor uaac db scheduler
-	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
 	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
 
 deploy-prometheus:
-	export DEPLOYMENT_NAME=prometheus
-	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;
-	${CI_DIR}/autoscaler/scripts/deploy-prometheus.sh;
+	@export DEPLOYMENT_NAME=prometheus;\
+	export BBL_STATE_PATH=$${BBL_STATE_PATH:-$(shell realpath "../app-autoscaler-env-bbl-state/bbl-state/")};\
+	${CI_DIR}/infrastructure/scripts/deploy-prometheus.sh;
 
 .PHONY: acceptance-tests
 acceptance-tests: vendor-app
-	@source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
-	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
 
 .PHONY: deploy-cleanup
 deploy-cleanup:
 	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'";\
-	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 .PHONY: package-specs
