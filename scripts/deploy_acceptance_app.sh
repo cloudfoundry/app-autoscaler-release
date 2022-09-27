@@ -29,7 +29,6 @@ function create_app {
   }
 
 # shellcheck disable=SC1091
-source ./pr-vars.source.sh
 cf create-org "${test_org}"
 cf target -o "${test_org}"
 cf create-space "${test_space}"

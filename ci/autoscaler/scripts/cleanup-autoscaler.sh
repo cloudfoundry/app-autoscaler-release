@@ -1,5 +1,9 @@
 #!/bin/bash
 set -euo pipefail
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+#shellcheck disable=SC1091
+source "${script_dir}/pr-vars.source.sh"
+
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 service_broker_name="${deployment_name}servicebroker"
