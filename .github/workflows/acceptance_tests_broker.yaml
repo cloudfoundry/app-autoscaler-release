@@ -12,7 +12,5 @@ jobs:
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
     with:
       suites: "[ 'API', 'APP', 'Broker' ]"
-      buildin_mode: false
-      service_offering_enabled: true
     secrets:
       bbl_ssh_key: "${{ secrets.BBL_SSH_KEY }}"
