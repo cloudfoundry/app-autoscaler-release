@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
-	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/gbytes"
@@ -19,11 +18,7 @@ import (
 type serviceInstance string
 
 func createService(onPlan string) serviceInstance {
-	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-	By(fmt.Sprintf("create service %s on plan %s", instanceName, onPlan))
-	createService := cf.Cf("create-service", cfg.ServiceName, onPlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
-	ExpectWithOffset(1, createService).To(Exit(0), "failed creating service")
-	return serviceInstance(instanceName)
+	return serviceInstance(helpers.CreateServiceWithPlan(cfg, onPlan))
 }
 func (s serviceInstance) updatePlan(toPlan string) {
 	updateService := s.updatePlanRaw(toPlan)
@@ -60,10 +55,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 	})
 
 	It("performs lifecycle operations", func() {
-		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-
-		createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
-		Expect(createService).To(Exit(0), "failed creating service")
+		instanceName := helpers.CreateService(cfg)
 
 		bindService := cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/invalid.json").Wait(cfg.DefaultTimeoutDuration())
 		Expect(bindService).To(Exit(1))
@@ -72,15 +64,13 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		Eventually(string(combinedBuffer.Contents())).Should(ContainSubstring(`[{"context":"(root).scaling_rules.1.adjustment","description":"Does not match pattern '^[-+][1-9]+[0-9]*%?$'"}]`))
 
 		By("Test bind&unbind with policy")
-		bindService = cf.Cf("bind-service", appName, instanceName, "-c", "../assets/file/policy/all.json").Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(0), "failed binding service to app with a policy ")
+		helpers.BindServiceToAppWithPolicy(cfg, appName, instanceName, "../assets/file/policy/all.json")
 
 		unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
 
 		By("Test bind&unbind without policy")
-		bindService = cf.Cf("bind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(bindService).To(Exit(0), "failed binding service to app without policy")
+		helpers.BindServiceToApp(cfg, appName, instanceName)
 
 		unbindService = cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 		Expect(unbindService).To(Exit(0), "failed unbinding service from app")

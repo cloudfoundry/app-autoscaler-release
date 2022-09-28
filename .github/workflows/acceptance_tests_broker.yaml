@@ -11,8 +11,6 @@ jobs:
     name: " " # Whitespace name looks nicest on Github UI
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
     with:
-      suites: "[ 'API', 'APP', 'Broker' ]"
-      buildin_mode: false
-      service_offering_enabled: true
+      deployment_name: "autoscaler-${{ github.event.pull_request.number }}"
     secrets:
       bbl_ssh_key: "${{ secrets.BBL_SSH_KEY }}"

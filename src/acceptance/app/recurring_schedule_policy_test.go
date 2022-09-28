@@ -1,11 +1,11 @@
 package app_test
 
 import (
+	"acceptance"
 	. "acceptance/helpers"
 	"os"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
-	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
@@ -25,12 +25,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 	)
 
 	BeforeEach(func() {
-		if cfg.IsServiceOfferingEnabled() {
-			instanceName = generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-			createService := cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
-			Expect(createService).To(Exit(0), "failed creating service")
-		}
-
+		instanceName = CreateService(cfg)
 		initialInstanceCount = 1
 		appName = CreateTestApp(cfg, "recurring-schedule", initialInstanceCount)
 		appGUID = GetAppGuid(cfg, appName)
@@ -74,7 +69,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 		Context("with days of week", func() {
 			BeforeEach(func() { daysOfMonthOrWeek = DaysOfWeek })
-			It("should scale", scaleDown)
+			It("should scale", Label(acceptance.LabelSmokeTests), scaleDown)
 		})
 	})
 

@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"acceptance"
 	"acceptance/helpers"
 	"fmt"
 	"os"
@@ -41,7 +42,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 	})
 
 	Context("when scaling by custom metrics", func() {
-		It("should scale out and scale in", func() {
+		It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 			By("Scale out to 2 instances")
 			scaleOut := func() int {
 				helpers.SendMetric(cfg, appName, 550)

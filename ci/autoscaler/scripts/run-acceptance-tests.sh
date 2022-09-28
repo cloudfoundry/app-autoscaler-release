@@ -57,7 +57,7 @@ suites_to_run=""
 for suite in $suites; do
   echo "Checking suite $suite"
   if [[ -d "$suite" ]]; then
-     echo "Adding suite $suite to list"
+     echo "Adding suite '$suite' to list"
      suites_to_run="$suites_to_run $suite"
   fi
 done
@@ -87,7 +87,7 @@ echo
 
 #run suites
 if [ "${suites_to_run}" != "" ]; then
-  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$ginkgo_opts" "${suites_to_run}"
+  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$ginkgo_opts" ${suites_to_run}
 else
   echo "Nothing to run!"
 fi

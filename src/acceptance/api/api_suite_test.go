@@ -14,7 +14,6 @@ import (
 	. "acceptance/helpers"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
-	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 	"github.com/KevinJCross/cf-test-helpers/v2/helpers"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 	. "github.com/onsi/ginkgo/v2"
@@ -44,20 +43,20 @@ var (
 	client              *http.Client
 )
 
+const componentName = "Public API Suite"
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
+	RunSpecs(t, componentName)
+}
 
-	cfg = config.LoadConfig(t)
+var _ = BeforeSuite(func() {
+	cfg = config.LoadConfig()
 	componentName := "Public API Suite"
 
 	if cfg.GetArtifactsDirectory() != "" {
 		helpers.EnableCFTrace(cfg, componentName)
 	}
-
-	RunSpecs(t, componentName)
-}
-
-var _ = BeforeSuite(func() {
 
 	otherConfig := *cfg
 	otherConfig.NamePrefix = otherConfig.NamePrefix + "_other"
@@ -83,20 +82,8 @@ var _ = BeforeSuite(func() {
 	appGUID = GetAppGuid(cfg, appName)
 
 	By("Creating test service")
-	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-
-		instanceName = generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		AbortOnCommandFailuref(
-			cf.Cf("create-service", cfg.ServiceName, cfg.ServicePlan, instanceName, "-b", cfg.ServiceBroker).
-				Wait(cfg.DefaultTimeoutDuration()),
-			"failed creating service %s", cfg.ServiceName)
-
-		AbortOnCommandFailuref(
-			cf.Cf("bind-service", appName, instanceName).
-				Wait(cfg.DefaultTimeoutDuration()),
-			"failed binding service %s to app %s", instanceName, appName)
-	}
+	instanceName = CreateService(cfg)
+	BindServiceToApp(cfg, appName, instanceName)
 	StartApp(appName, cfg.CfPushTimeoutDuration())
 
 	// #nosec G402

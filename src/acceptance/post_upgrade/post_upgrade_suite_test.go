@@ -7,8 +7,8 @@ import (
 	"os"
 	"testing"
 
+	cth "github.com/KevinJCross/cf-test-helpers/v2/helpers"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -22,13 +22,19 @@ var (
 	spaceGUID string
 )
 
+const componentName = "Post Upgrade Test Suite"
+
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
-	cfg = config.LoadConfig(t)
-	RunSpecs(t, "Post Upgrade Test Suite")
+	RunSpecs(t, componentName)
 }
 
 var _ = BeforeSuite(func() {
+	cfg = config.LoadConfig()
+	if cfg.GetArtifactsDirectory() != "" {
+		cth.EnableCFTrace(cfg, componentName)
+	}
+
 	// use smoke test to avoid creating a new user
 	setup = workflowhelpers.NewSmokeTestSuiteSetup(cfg)
 
@@ -56,22 +62,17 @@ var _ = BeforeSuite(func() {
 	if cfg.IsServiceOfferingEnabled() {
 		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
-
 })
 
 var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		fmt.Println("Clearing down existing test orgs/spaces...")
-
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			orgs := helpers.GetTestOrgs(cfg)
 			for _, org := range orgs {
 				helpers.DeleteOrg(cfg, org)
 			}
 		})
-
-		fmt.Println("Clearing down existing test orgs/spaces... Complete")
 	}
 })

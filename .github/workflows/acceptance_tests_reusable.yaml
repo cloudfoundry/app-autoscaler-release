@@ -3,12 +3,18 @@ on:
   workflow_call:
     inputs:
       buildin_mode:
-        required: true
+        required: false
         type: boolean
+        default: false
       service_offering_enabled:
-        required: true
+        required: false
         type: boolean
+        default: true
       suites:
+        required: false
+        type: string
+        default: "[ 'API', 'APP', 'Broker' ]"
+      deployment_name:
         required: true
         type: string
     secrets:
@@ -26,11 +32,8 @@ env:
   GITHUB_TOKEN: "${{ secrets.github_token }}" # ToDo: Remove because there is no point to have this in env, see ${{ github.token }} in: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
   SERVICE_OFFERING_ENABLED: "${{ inputs.service_offering_enabled }}"
   PR_NUMBER: "${{ github.event.pull_request.number }}"
-  DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
-  SERVICE_BROKER_NAME: "autoscaler-${{ github.event.pull_request.number }}servicebroker"
-  SERVICE_NAME: "autoscaler-${{ github.event.pull_request.number }}"
+  DEPLOYMENT_NAME: "${{ inputs.deployment_name }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
-  NAME_PREFIX: "autoscaler-${{ github.event.pull_request.number }}-TESTS"
   GINKGO_OPTS: "--fail-fast"
   NODES: 4
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"

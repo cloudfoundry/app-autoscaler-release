@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"acceptance"
 	"acceptance/helpers"
 	"fmt"
 	"os"
@@ -53,7 +54,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 1
 			})
 
-			It("should scale out", func() {
+			It("should scale out", Label(acceptance.LabelSmokeTests), func() {
 				helpers.WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
 
@@ -133,7 +134,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				}(doneChan)
 			})
 
-			It("should scale out", func() {
+			It("should scale out", Label(acceptance.LabelSmokeTests), func() {
 				helpers.WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
 		})
