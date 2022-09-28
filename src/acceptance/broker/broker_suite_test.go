@@ -44,17 +44,17 @@ var _ = BeforeSuite(func() {
 	})
 
 	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-})
 
-var _ = AfterSuite(func() {
-	if os.Getenv("SKIP_TEARDOWN") == "true" {
-		fmt.Println("Skipping Teardown...")
-	} else {
-		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-			if cfg.ShouldEnableServiceAccess() {
-				DisableServiceAccess(cfg, setup.GetOrganizationName())
-			}
-		})
-		setup.Teardown()
-	}
+	DeferCleanup(func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			fmt.Println("Skipping Teardown...")
+		} else {
+			workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+				if cfg.ShouldEnableServiceAccess() {
+					DisableServiceAccess(cfg, setup.GetOrganizationName())
+				}
+			})
+			setup.Teardown()
+		}
+	})
 })
