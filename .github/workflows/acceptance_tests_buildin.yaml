@@ -8,10 +8,6 @@ on:
 concurrency:
   group: acceptance_buildin-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-env:
-  BUILDIN_MODE: "true"
-  SERVICE_OFFERING_ENABLED: "false"
-  DEPLOYMENT_NAME: "autoscaler-buildin-${{ github.event.pull_request.number }}"
 
 jobs:
   acceptance_tests_reusable:
@@ -19,5 +15,8 @@ jobs:
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
     with:
       suites: "[ 'API', 'APP' ]"
+      buildin_mode: true
+      service_offering_enabled: false
+      deployment_name: "autoscaler-buildin-${{ github.event.pull_request.number }}"
     secrets:
       bbl_ssh_key: "${{ secrets.BBL_SSH_KEY }}"
