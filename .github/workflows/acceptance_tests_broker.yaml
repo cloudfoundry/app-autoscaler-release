@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [ opened, labeled, synchronize ]
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: acceptance_broker-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
