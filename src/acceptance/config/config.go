@@ -71,6 +71,7 @@ type Config struct {
 	// For bechmark test
 	BenchmarkAppCount          int  `json:"benchmark_app_count"`
 	BenchmarkPercentageToScale int  `json:"benchmark_app_percentage_to_scale"`
+	BenchmarkSetupWorkers      int `json:"benchmark_setup_workers"`
 	BenchmarkTeardown          bool `json:"benchmark_teardown"`
 }
 
@@ -102,8 +103,9 @@ var defaults = Config{
 	CPUUpperThreshold:               100,
 
 	// For benchmark
-	BenchmarkAppCount:          200,
+	BenchmarkAppCount:          100,
 	BenchmarkPercentageToScale: 30,
+	BenchmarkSetupWorkers: 50,
 	BenchmarkTeardown:          true,
 }
 
