@@ -46,6 +46,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 			experimentWg.Add(appsToScaleCount)
 
 			experiment.Sample(func(i int) {
+				defer GinkgoRecover()
 				appName := fmt.Sprintf("node-custom-metric-benchmark-%d", i+1)
 				appGUID := helpers.GetAppGuid(cfg, appName)
 				pollTime := 10 * time.Second

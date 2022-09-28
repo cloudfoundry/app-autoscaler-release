@@ -19,7 +19,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 	)
 
 	BeforeEach(func() {
-		workerCount := 30
+		workerCount := cfg.BenchmarkSetupWorkers
 		appsChan := make(chan string)
 
 		By(fmt.Sprintf("Deploying %d apps", cfg.BenchmarkAppCount))
