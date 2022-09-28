@@ -57,6 +57,7 @@ var _ = BeforeSuite(func() {
 	cf.Cf("update-space-quota", setup.TestSpace.QuotaName(),"-m",strconv.Itoa( cfg.BenchmarkAppCount *256)+"MB" , "-r",strconv.Itoa( cfg.BenchmarkAppCount*2) ,"-s",strconv.Itoa(cfg.BenchmarkAppCount ))
 
 	// TODO: Update org quota
+	setup.GetOrganizationName()
 	// setup.GetOrganizationName()
 	// cf.Cf("update-org-quota", setup.TestSpace.QuotaName(),"-m",strconv.Itoa( cfg.BenchmarkAppCount *256)+"MB" , "-r",strconv.Itoa( cfg.BenchmarkAppCount*2) ,"-s",strconv.Itoa(cfg.BenchmarkAppCount ))
 
