@@ -44,12 +44,7 @@ describe "scheduler" do
     context "uses tls" do
       context "policy_db" do
         it "includes the ca, cert and key in url when configured" do
-          expect(rendered_template).to include("sslrootcert=")
-          expect(rendered_template).to include("policy_db/ca.crt")
-          expect(rendered_template).to include("sslkey=")
-          expect(rendered_template).to include("policy_db/key")
-          expect(rendered_template).to include("sslcert=")
-          expect(rendered_template).to include("policy_db/crt")
+          check_if_certs_in_url(rendered_template, "policy_db")
         end
 
         it "does not include the ca, cert and key in url when not configured" do
@@ -62,12 +57,7 @@ describe "scheduler" do
 
       context "scheduler_db" do
         it "includes the ca, cert and key in url when configured" do
-          expect(rendered_template).to include("sslrootcert=")
-          expect(rendered_template).to include("scheduler_db/ca.crt")
-          expect(rendered_template).to include("sslkey=")
-          expect(rendered_template).to include("scheduler_db/key")
-          expect(rendered_template).to include("sslcert=")
-          expect(rendered_template).to include("scheduler_db/crt")
+          check_if_certs_in_url(rendered_template, "scheduler_db")
         end
 
         it "does not include the ca, cert and key in url when not configured" do

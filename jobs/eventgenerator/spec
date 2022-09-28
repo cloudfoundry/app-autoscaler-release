@@ -19,7 +19,7 @@ templates:
   policy_db.key.erb: config/certs/policy_db/policy_db.key
   appmetrics_db_ca.crt.erb: config/certs/appmetrics_db/ca.crt
   appmetrics_db.crt.erb: config/certs/appmetrics_db/appmetrics_db.crt
-  appmetrics_db_key.crt.erb: config/certs/appmetrics_db/appmetrics_db.key
+  appmetrics_db.key.erb: config/certs/appmetrics_db/appmetrics_db.key
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh

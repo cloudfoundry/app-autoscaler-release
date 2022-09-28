@@ -48,24 +48,14 @@ describe "scalingengine" do
       context "policy_db" do
         it "includes the ca, cert and key in url when configured" do
           rendered_template["db"]["policy_db"]["url"].tap do |url|
-            expect(url).to include("sslrootcert=")
-            expect(url).to include("policy_db/ca.crt")
-            expect(url).to include("sslkey=")
-            expect(url).to include("policy_db/key")
-            expect(url).to include("sslcert=")
-            expect(url).to include("policy_db/crt")
+            check_if_certs_in_url(url, "policy_db")
           end
         end
 
         it "does not include the ca, cert and key in url when not configured" do
           properties["autoscaler"]["policy_db"]["tls"] = nil
           rendered_template["db"]["policy_db"]["url"].tap do |url|
-            expect(url).to_not include("sslrootcert=")
-            expect(url).to_not include("policy_db/ca.crt")
-            expect(url).to_not include("sslkey=")
-            expect(url).to_not include("policy_db/key")
-            expect(url).to_not include("sslcert=")
-            expect(url).to_not include("policy_db/crt")
+            check_if_certs_not_in_url(url, "policy_db")
           end
         end
       end
@@ -73,24 +63,14 @@ describe "scalingengine" do
       context "scalingengine_db" do
         it "includes the ca, cert and key in url when configured" do
           rendered_template["db"]["scalingengine_db"]["url"].tap do |url|
-            expect(url).to include("sslrootcert=")
-            expect(url).to include("scalingengine_db/ca.crt")
-            expect(url).to include("sslkey=")
-            expect(url).to include("scalingengine_db/key")
-            expect(url).to include("sslcert=")
-            expect(url).to include("scalingengine_db/crt")
+            check_if_certs_in_url(url, "scalingengine_db")
           end
         end
 
         it "does not include the ca, cert and key in url when not configured" do
           properties["autoscaler"]["scalingengine_db"]["tls"] = nil
           rendered_template["db"]["scalingengine_db"]["url"].tap do |url|
-            expect(url).to_not include("sslrootcert=")
-            expect(url).to_not include("scalingengine_db/ca.crt")
-            expect(url).to_not include("sslkey=")
-            expect(url).to_not include("scalingengine_db/key")
-            expect(url).to_not include("sslcert=")
-            expect(url).to_not include("scalingengine_db/crt")
+            check_if_certs_not_in_url(url, "scalingengine_db")
           end
         end
       end
@@ -98,24 +78,14 @@ describe "scalingengine" do
       context "scheduler_db" do
         it "includes the ca, cert and key in url when configured" do
           rendered_template["db"]["scheduler_db"]["url"].tap do |url|
-            expect(url).to include("sslrootcert=")
-            expect(url).to include("scheduler_db/ca.crt")
-            expect(url).to include("sslkey=")
-            expect(url).to include("scheduler_db/key")
-            expect(url).to include("sslcert=")
-            expect(url).to include("scheduler_db/crt")
+            check_if_certs_in_url(url, "scheduler_db")
           end
         end
 
         it "does not include the ca, cert and key in url when not configured" do
           properties["autoscaler"]["scheduler_db"]["tls"] = nil
           rendered_template["db"]["scheduler_db"]["url"].tap do |url|
-            expect(url).to_not include("sslrootcert=")
-            expect(url).to_not include("scheduler_db/ca.crt")
-            expect(url).to_not include("sslkey=")
-            expect(url).to_not include("scheduler_db/key")
-            expect(url).to_not include("sslcert=")
-            expect(url).to_not include("scheduler_db/crt")
+            check_if_certs_not_in_url(url, "scheduler_db")
           end
         end
       end
