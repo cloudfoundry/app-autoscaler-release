@@ -9,7 +9,7 @@ env:
   BUILDIN_MODE: true
   SERVICE_OFFERING_ENABLED: false
   PR_NUMBER: "${{ github.event.pull_request.number }}"
-  DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
+  DEPLOYMENT_NAME: "autoscaler-buildin-${{ github.event.pull_request.number }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
