@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 #shellcheck disable=SC1091

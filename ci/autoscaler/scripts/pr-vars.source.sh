@@ -22,10 +22,10 @@ echo  ">> BBL_STATE_PATH: ${BBL_STATE_PATH}"
 export SYSTEM_DOMAIN="${SYSTEM_DOMAIN:-"autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"}"
 echo ">> SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 
-export AUTOSCALER_DIR="${AUTOSCALER_DIR:- $( realpath "${script_dir}/../../../")}"
+export AUTOSCALER_DIR="${AUTOSCALER_DIR:-$( realpath "${script_dir}/../../../")}"
 echo ">> AUTOSCALER_DIR: ${AUTOSCALER_DIR}"
 
-export CI_DIR=${CI_DIR:-"$(realpath "${script_dir}/../../../ci")"}
+export CI_DIR="${CI_DIR:-$(realpath "${script_dir}/../../../ci")}"
 echo ">> CI_DIR: ${CI_DIR}"
 
 export SKIP_SSL_VALIDATION=${SKIP_SSL_VALIDATION:-'true'}
