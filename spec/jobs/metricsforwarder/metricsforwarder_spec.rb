@@ -9,6 +9,7 @@ describe "metricsforwarder" do
   let(:job) { release.job("metricsforwarder") }
   let(:template) { job.template("config/metricsforwarder.yml") }
   let(:properties) { YAML.safe_load(fixture("metricsforwarder.yml").read) }
+  let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
   context "config/metricsforwarder.yml" do
     it "does not set username nor password if not configured" do
@@ -17,7 +18,6 @@ describe "metricsforwarder" do
           "port" => 1234
         }
       }
-      rendered_template = YAML.safe_load(template.render(properties))
 
       expect(rendered_template["health"])
         .to include(
@@ -33,7 +33,6 @@ describe "metricsforwarder" do
           "password" => "test-user-password"
         }
       }
-      rendered_template = YAML.safe_load(template.render(properties))
 
       expect(rendered_template["health"])
         .to include(
@@ -44,7 +43,6 @@ describe "metricsforwarder" do
     end
 
     it "has a cred helper impl by default" do
-      rendered_template = YAML.safe_load(template.render(properties))
       expect(rendered_template).to include(
         {
           "cred_helper_impl" => "default"
@@ -66,7 +64,6 @@ describe "metricsforwarder" do
         }
       }
 
-      rendered_template = YAML.safe_load(template.render(properties))
       expect(rendered_template).to include(
         {
           "cred_helper_impl" => "stored_procedure",
@@ -79,6 +76,33 @@ describe "metricsforwarder" do
           }
         }
       )
+    end
+
+    context "uses tls" do
+      context "policy_db" do
+        it "includes the ca, cert and key in url when configured" do
+          rendered_template["db"]["policy_db"]["url"].tap do |url|
+            expect(url).to include("sslrootcert=")
+            expect(url).to include("policy_db/ca.crt")
+            expect(url).to include("sslkey=")
+            expect(url).to include("policy_db/key")
+            expect(url).to include("sslcert=")
+            expect(url).to include("policy_db/crt")
+          end
+        end
+
+        it "does not include the ca, cert and key in url when not configured" do
+          properties["autoscaler"]["policy_db"]["tls"] = nil
+          rendered_template["db"]["policy_db"]["url"].tap do |url|
+            expect(url).to_not include("sslrootcert=")
+            expect(url).to_not include("policy_db/ca.crt")
+            expect(url).to_not include("sslkey=")
+            expect(url).to_not include("policy_db/key")
+            expect(url).to_not include("sslcert=")
+            expect(url).to_not include("policy_db/crt")
+          end
+        end
+      end
     end
   end
 end

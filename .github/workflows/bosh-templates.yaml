@@ -21,5 +21,4 @@ jobs:
       - name: Run Tests
         run: |
           set -e
-
-          bundle exec rspec
+          make spec-test

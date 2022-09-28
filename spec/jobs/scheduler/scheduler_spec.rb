@@ -9,6 +9,7 @@ describe "scheduler" do
   let(:job) { release.job("scheduler") }
   let(:template) { job.template("config/application.properties") }
   let(:properties) { YAML.safe_load(fixture("scheduler.yml").read) }
+  let(:rendered_template) { template.render(properties) }
 
   context "config/application.properties" do
     it "does not set username nor password if not configured" do
@@ -17,7 +18,6 @@ describe "scheduler" do
           "port" => 1234
         }
       }
-      rendered_template = template.render(properties)
 
       expect(rendered_template).to include("scheduler.healthserver.port=1234")
       expect(rendered_template).to include("scheduler.healthserver.basicAuthEnabled=false")
@@ -34,12 +34,49 @@ describe "scheduler" do
           "password" => "test-user-password"
         }
       }
-      rendered_template = template.render(properties)
 
       expect(rendered_template).to include("scheduler.healthserver.port=1234")
       expect(rendered_template).to include("scheduler.healthserver.basicAuthEnabled=true")
       expect(rendered_template).to include("scheduler.healthserver.username=test-user")
       expect(rendered_template).to include("scheduler.healthserver.password=test-user-password")
+    end
+
+    context "uses tls" do
+      context "policy_db" do
+        it "includes the ca, cert and key in url when configured" do
+          expect(rendered_template).to include("sslrootcert=")
+          expect(rendered_template).to include("policy_db/ca.crt")
+          expect(rendered_template).to include("sslkey=")
+          expect(rendered_template).to include("policy_db/key")
+          expect(rendered_template).to include("sslcert=")
+          expect(rendered_template).to include("policy_db/crt")
+        end
+
+        it "does not include the ca, cert and key in url when not configured" do
+          properties["autoscaler"]["policy_db"]["tls"] = nil
+          expect(rendered_template).to_not include("policy_db/ca.crt")
+          expect(rendered_template).to_not include("policy_db/key")
+          expect(rendered_template).to_not include("policy_db/crt")
+        end
+      end
+
+      context "scheduler_db" do
+        it "includes the ca, cert and key in url when configured" do
+          expect(rendered_template).to include("sslrootcert=")
+          expect(rendered_template).to include("scheduler_db/ca.crt")
+          expect(rendered_template).to include("sslkey=")
+          expect(rendered_template).to include("scheduler_db/key")
+          expect(rendered_template).to include("sslcert=")
+          expect(rendered_template).to include("scheduler_db/crt")
+        end
+
+        it "does not include the ca, cert and key in url when not configured" do
+          properties["autoscaler"]["scheduler_db"]["tls"] = nil
+          expect(rendered_template).to_not include("scheduler_db/ca.crt")
+          expect(rendered_template).to_not include("scheduler_db/key")
+          expect(rendered_template).to_not include("scheduler_db/crt")
+        end
+      end
     end
   end
 end

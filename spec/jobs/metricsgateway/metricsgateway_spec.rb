@@ -9,6 +9,8 @@ describe "metricsgateway" do
   let(:job) { release.job("metricsgateway") }
   let(:template) { job.template("config/metricsgateway.yml") }
   let(:properties) { YAML.safe_load(fixture("metricsgateway.yml").read) }
+  let(:links) { [Bosh::Template::Test::Link.new(name: "metricsserver")] }
+  let(:rendered_template) { YAML.safe_load(template.render(properties, consumes: links)) }
 
   context "config/metricsgateway.yml" do
     it "does not set username nor password if not configured" do
@@ -20,12 +22,6 @@ describe "metricsgateway" do
           "rlp_addr" => "localhost"
         }
       }
-      links = [
-        Bosh::Template::Test::Link.new(
-          name: "metricsserver"
-        )
-      ]
-      rendered_template = YAML.safe_load(template.render(properties, consumes: links))
 
       expect(rendered_template["health"])
         .to include(
@@ -44,12 +40,6 @@ describe "metricsgateway" do
           "rlp_addr" => "localhost"
         }
       }
-      links = [
-        Bosh::Template::Test::Link.new(
-          name: "metricsserver"
-        )
-      ]
-      rendered_template = YAML.safe_load(template.render(properties, consumes: links))
 
       expect(rendered_template["health"])
         .to include(
@@ -57,6 +47,33 @@ describe "metricsgateway" do
            "username" => "test-user",
            "password" => "test-user-password"}
         )
+    end
+
+    context "apiserver uses tls" do
+      context "policy_db" do
+        it "includes the ca, cert and key in url when configured" do
+          rendered_template["app_manager"]["policy_db"]["url"].tap do |url|
+            expect(url).to include("sslrootcert=")
+            expect(url).to include("policy_db/ca.crt")
+            expect(url).to include("sslkey=")
+            expect(url).to include("policy_db/key")
+            expect(url).to include("sslcert=")
+            expect(url).to include("policy_db/crt")
+          end
+        end
+
+        it "does not include the ca, cert and key in url when not configured" do
+          properties["autoscaler"]["policy_db"]["tls"] = nil
+          rendered_template["app_manager"]["policy_db"]["url"].tap do |url|
+            expect(url).to_not include("sslrootcert=")
+            expect(url).to_not include("policy_db/ca.crt")
+            expect(url).to_not include("sslkey=")
+            expect(url).to_not include("policy_db/key")
+            expect(url).to_not include("sslcert=")
+            expect(url).to_not include("policy_db/crt")
+          end
+        end
+      end
     end
   end
 end

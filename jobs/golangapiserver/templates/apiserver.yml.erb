@@ -1,59 +1,46 @@
 <%
 require 'yaml'
-
   def p_arr(property)
     p(property,nil) || []
   end
-  if p("autoscaler.apiserver.use_buildin_mode") == false
-    binding_db_scheme = p('autoscaler.binding_db.db_scheme')
-    binding_db_address = p('autoscaler.binding_db.address')
-    binding_db_port = p('autoscaler.binding_db.port')
-    binding_db_role = p_arr('autoscaler.binding_db.roles').find { |role| role['tag'] == 'binding_db' or role['tag'] == 'default' }
-    binding_db_database = p_arr('autoscaler.binding_db.databases').find { |database| database['tag'] == 'binding_db' or database['tag'] == 'default' } 
-    if binding_db_scheme == "postgres"
-      binding_db_url = binding_db_scheme + "://" + ERB::Util.url_encode(binding_db_role['name']) + ":" + ERB::Util.url_encode(binding_db_role['password']) + "@" + binding_db_address + ":" + binding_db_port.to_s + "/" + binding_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.binding_db.sslmode')
+
+  def generate_db_url(db_name, job_name)
+    db_scheme = p("autoscaler.#{db_name}.db_scheme")
+    db_address = p("autoscaler.#{db_name}.address")
+    db_port = p("autoscaler.#{db_name}.port")
+    db_roles = p_arr("autoscaler.#{db_name}.roles")
+    db_dbs = p_arr("autoscaler.#{db_name}.databases")
+    db_role = db_roles.find { |role| role['tag'] == db_name.tr('_', '') } ||  db_roles.find { |role| role['tag'] == 'default' }
+    db_database = db_dbs.find { |database| database['tag'] == db_name.tr('_', '') } || db_dbs.find { |database| database['tag'] == 'default' }
+
+    if db_scheme == "postgres"
+      db_url = db_scheme + "://" + ERB::Util.url_encode(db_role['name']) + ":" + ERB::Util.url_encode(db_role['password']) + "@" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?application_name=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
     else
-      binding_db_url = binding_db_role['name'] + ":" + binding_db_role['password'] + "@tcp(" + binding_db_address + ":" + binding_db_port.to_s + ")/" + binding_db_database['name'] + "?tls=" + p('autoscaler.binding_db.sslmode')
+      db_url = db_role['name'] + ":" + db_role['password'] + "@tcp(" + db_address + ":" + db_port.to_s + ")/" + db_database['name'] + "?tls=" + p("autoscaler.#{db_name}.sslmode")
     end
-    unless p('autoscaler.binding_db.tls.ca') == ""
-      binding_db_url = binding_db_url + "&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/binding_db/ca.crt"
+    unless p("autoscaler.#{db_name}.tls.ca") == ""
+      db_url = db_url + "&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
     end
+    unless p("autoscaler.#{db_name}.tls.crt") == ""
+      db_url = db_url + "&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
+    end
+    unless p("autoscaler.#{db_name}.tls.key") == ""
+      db_url = db_url + "&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
+    end
+    db_url
   end
-  
-  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
-  policy_db_address = p('autoscaler.policy_db.address')
-  policy_db_port = p('autoscaler.policy_db.port')
-  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
-  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
-  if policy_db_scheme == "postgres"
-    policy_db_url = policy_db_scheme + "://" + ERB::Util.url_encode(policy_db_role['name']) + ":" + ERB::Util.url_encode(policy_db_role['password']) + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.policy_db.sslmode')
-  else
-    policy_db_url = policy_db_role['name'] + ":" + policy_db_role['password'] + "@tcp(" + policy_db_address + ":" + policy_db_port.to_s + ")/" + policy_db_database['name'] + "?tls=" + p('autoscaler.policy_db.sslmode')
+
+  job_name = 'apiserver'
+
+  if p("autoscaler.apiserver.use_buildin_mode") == false
+    binding_db_url = generate_db_url('binding_db', job_name)
   end
-  unless p('autoscaler.policy_db.tls.ca') == ""
-    policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
-  end
+
+  policy_db_url = generate_db_url('policy_db', job_name)
 
   if p("autoscaler.storedprocedure_db.address") != ''
-    storedprocedure_db_scheme = p('autoscaler.storedprocedure_db.db_scheme')
-    storedprocedure_db_address = p('autoscaler.storedprocedure_db.address')
-    storedprocedure_db_port = p('autoscaler.storedprocedure_db.port')
-
-    roles = p_arr('autoscaler.storedprocedure_db.roles')
-    storedprocedure_db_role = roles.find { |role| role['tag'] == 'storedproceduredb'} || roles.find { |role| role['tag'] == 'default'  }
-
-    databases = p_arr('autoscaler.storedprocedure_db.databases')
-    storedprocedure_db_database = databases.find { |d| d['tag'] == 'storedproceduredb'} ||  databases.find { |d| d['tag'] == 'default' }
-    if storedprocedure_db_scheme == "postgres"
-      storedprocedure_db_url = storedprocedure_db_scheme + "://" + ERB::Util.url_encode(storedprocedure_db_role['name']) + ":" + ERB::Util.url_encode(storedprocedure_db_role['password']) + "@" + storedprocedure_db_address + ":" + storedprocedure_db_port.to_s + "/" + storedprocedure_db_database['name'] + "?application_name=golangapiserver&sslmode=" + p('autoscaler.storedprocedure_db.sslmode')
-    else
-      storedprocedure_db_url = storedprocedure_db_role['name'] + ":" + storedprocedure_db_role['password'] + "@tcp(" + storedprocedure_db_address + ":" + storedprocedure_db_port.to_s + ")/" + storedprocedure_db_database['name'] + "?tls=" + p('autoscaler.storedprocedure_db.sslmode')
-    end
-    unless p('autoscaler.storedprocedure_db.tls.ca') == ""
-      storedprocedure_db_url = storedprocedure_db_url + "&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/storedprocedure_db/ca.crt"
-    end
+    storedprocedure_db_url = generate_db_url('storedprocedure_db', job_name)
   end
-
 %>
 
 logging:

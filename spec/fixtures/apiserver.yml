@@ -10,6 +10,10 @@ autoscaler:
       - name: foo
         password: default
         tag: default
+    tls:
+      ca: BEGIN---CA---END
+      crt: BEGIN---CERT---END
+      key: BEGIN---KEY---END
   policy_db:
     address: 10.11.137.101
     databases:
@@ -21,6 +25,10 @@ autoscaler:
       - name: foo
         password: default
         tag: default
+    tls:
+      ca: BEGIN---CA---END
+      crt: BEGIN---CERT---END
+      key: BEGIN---KEY---END
   storedprocedure_db:
     address: 10.11.137.101
     port: 5432
@@ -35,6 +43,10 @@ autoscaler:
         tag: default
       - name: stored_procedure_username
         tag: storedproceduredb
+    tls:
+      ca: BEGIN---CA---END
+      crt: BEGIN---CERT---END
+      key: BEGIN---KEY---END
   cf:
     api: "https://api.api_server.domain"
     grant_type: client_credentials
