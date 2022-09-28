@@ -52,11 +52,7 @@ PROMETHEUS_CLIENT=prometheus
 PROMETHEUS_CLIENT_SECRET=$(yq e .prometheus_client_password $bbl_state_path/vars/director-vars-store.yml)
 
 
-BOSH_METIRCS_SERVER_CLIENT_CA=$(yq e .metrics_server_client_tls.ca $bbl_state_path/vars/director-vars-store.yml)
-BOSH_METIRCS_SERVER_CLIENT_CERT=$(yq e .metrics_server_client_tls.certificate $bbl_state_path/vars/director-vars-store.yml)
-BOSH_METIRCS_SERVER_CLIENT_KEY=$(yq e .metrics_server_client_tls.private_key $bbl_state_path/vars/director-vars-store.yml)
-
-
+# Metrics for ${prometheus_dir}/manifests/operators/monitor-bosh-director.yml ops-file
 BOSH_METIRCS_SERVER_CLIENT_CA=$(yq e .metrics_server_client_tls.ca $bbl_state_path/vars/director-vars-store.yml)
 BOSH_METIRCS_SERVER_CLIENT_CERT=$(yq e .metrics_server_client_tls.certificate $bbl_state_path/vars/director-vars-store.yml)
 BOSH_METIRCS_SERVER_CLIENT_KEY=$(yq e .metrics_server_client_tls.private_key $bbl_state_path/vars/director-vars-store.yml)
