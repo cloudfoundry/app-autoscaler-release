@@ -1,6 +1,7 @@
 #!/bin/bash
 # shellcheck disable=SC2086
 set -euo pipefail
+set -x
 
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -20,13 +21,12 @@ ops_files=${OPS_FILES:-"${prometheus_dir}/manifests/operators/monitor-bosh.yml\
                         ${prometheus_dir}/manifests/operators/monitor-cf.yml\
                         ${prometheus_dir}/manifests/operators/enable-cf-route-registrar.yml\
                         ${prometheus_dir}/manifests/operators/enable-grafana-uaa.yml\
-                        ${prometheus_dir}/manifests/operators/alertmanager-slack-receiver.yml\
                         ${prometheus_dir}/manifests/operators/enable-cf-loggregator-v2.yml\
-                        ${script_dir}/../../operations/prometheus-nats-tls.yml\
+                        ${prometheus_dir}/manifests/operators/monitor-bosh-director.yml\
+                        ${prometheus_dir}/manifests/operators/alertmanager-slack-receiver.yml\
                         ${script_dir}/../../operations/prometheus-customize-alerts.yml\
-                        ${script_dir}/../../operations/slack-receiver-template.yml"}
-
-                        # ${prometheus_dir}/manifests/operators/monitor-bosh-director.yml\
+                        ${script_dir}/../../operations/slack-receiver-template.yml\
+                        ${script_dir}/../../operations/prometheus-nats-tls.yml"}
 
 
 if [[ ! -d ${bbl_state_path} ]]; then
@@ -50,6 +50,18 @@ UAA_CLIENTS_CF_EXPORTER_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_
 UAA_CLIENTS_FIREHOSE_EXPORTER_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret -q)
 PROMETHEUS_CLIENT=prometheus
 PROMETHEUS_CLIENT_SECRET=$(yq e .prometheus_client_password $bbl_state_path/vars/director-vars-store.yml)
+
+
+BOSH_METIRCS_SERVER_CLIENT_CA=$(yq e .metrics_server_client_tls.ca $bbl_state_path/vars/director-vars-store.yml)
+BOSH_METIRCS_SERVER_CLIENT_CERT=$(yq e .metrics_server_client_tls.certificate $bbl_state_path/vars/director-vars-store.yml)
+BOSH_METIRCS_SERVER_CLIENT_KEY=$(yq e .metrics_server_client_tls.private_key $bbl_state_path/vars/director-vars-store.yml)
+
+
+BOSH_METIRCS_SERVER_CLIENT_CA=$(yq e .metrics_server_client_tls.ca $bbl_state_path/vars/director-vars-store.yml)
+BOSH_METIRCS_SERVER_CLIENT_CERT=$(yq e .metrics_server_client_tls.certificate $bbl_state_path/vars/director-vars-store.yml)
+BOSH_METIRCS_SERVER_CLIENT_KEY=$(yq e .metrics_server_client_tls.private_key $bbl_state_path/vars/director-vars-store.yml)
+credhub set -n /bosh-autoscaler/prometheus/bosh_metrics_server_client_ca -t certificate -c "$BOSH_METIRCS_SERVER_CLIENT_CA"
+credhub set -n /bosh-autoscaler/prometheus/bosh_metrics_server_client -t certificate -c "$BOSH_METIRCS_SERVER_CLIENT_CERT" -p "$BOSH_METIRCS_SERVER_CLIENT_KEY" -m /bosh-autoscaler/prometheus/bosh_metrics_server_client_ca
 
 credhub get -n /bosh-autoscaler/cf/uaa_ssl -k ca          > $uaa_ssl_ca_file
 credhub get -n /bosh-autoscaler/cf/uaa_ssl -k certificate > $uaa_ssl_cert_file
@@ -76,6 +88,7 @@ function deploy () {
     --var-file uaa_ssl.certificate="$uaa_ssl_cert_file" \
     --var-file uaa_ssl.private_key="$uaa_ssl_key_file" \
     -v bosh_url="$BOSH_ENVIRONMENT" \
+    -v bosh_ip="$(echo $BOSH_ENVIRONMENT | cut -d'/' -f3 |cut -d':' -f1)" \
     -v uaa_bosh_exporter_client_id="$PROMETHEUS_CLIENT" \
     -v uaa_bosh_exporter_client_secret="$PROMETHEUS_CLIENT_SECRET" \
     -v metrics_environment=oss \
