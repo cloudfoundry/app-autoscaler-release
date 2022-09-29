@@ -18,7 +18,7 @@ params:
   # checked to see if they exist, if not they will be excluded from the list
   OPS_FILES: |
     example/operation/loggregator-certs-from-cf.yml
-
+  AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
 - name: bbl-state
@@ -27,4 +27,4 @@ inputs:
 outputs:
 
 run:
-  path: app-autoscaler-release/ci/autoscaler/scripts/deploy-autoscaler.sh
+  path: ci/ci/autoscaler/scripts/deploy-autoscaler.sh
