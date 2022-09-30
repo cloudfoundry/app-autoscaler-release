@@ -227,46 +227,7 @@ jobs:
   - task: run-integration-tests
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
 
-- name: setup-infrastructure
-  serial_groups: [infra]
-  public: true
-  build_logs_to_retain: 100
-  plan:
-  - in_parallel:
-    - get: cf-deployment-concourse-tasks
-    - get: app-autoscaler-release-main
-    - get: ci
-    - get: bbl-state
-  - task: setup-infrastructure
-    file: cf-deployment-concourse-tasks/bbl-up/task.yml
-    params:
-      BBL_IAAS: gcp
-      BBL_ENV_NAME: autoscaler
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
-      BBL_GCP_PROJECT_ID: cloud-foundry-310819
-      BBL_GCP_REGION: europe-west4
-      BBL_GCP_ZONE: europe-west4-a
-      DEBUG_MODE: true
-      LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      BBL_LB_CERT: ((autoscaler_lb_cert))
-      BBL_LB_KEY: ((autoscaler_lb_key))
-    input_mapping:
-      bbl-state: bbl-state
-      bbl-config: bbl-state
-    ensure:
-      put: bbl-state
-      params:
-        repository: updated-bbl-state
-        rebase: true
-  - task: update-dns-servers
-    file: ci/ci/autoscaler/tasks/update-dns-servers.yml
-    params:
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
-      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
-      GCP_DNS_ZONE: app-runtime-interfaces
-      GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-
-- name: acceptance
+- name: acceptance-main
   public: true
   build_logs_to_retain: 100
   serial: true
