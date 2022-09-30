@@ -17,5 +17,6 @@ jobs:
       suites: "[ 'API', 'APP' ]"
       buildin_mode: true
       service_offering_enabled: false
+      deployment_name: "autoscaler-buildin-${{ github.event.pull_request.number }}"
     secrets:
       bbl_ssh_key: "${{ secrets.BBL_SSH_KEY }}"

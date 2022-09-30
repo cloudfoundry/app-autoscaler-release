@@ -58,7 +58,8 @@ function deploy () {
     bosh_deploy_args="$bosh_deploy_args --fix-releases"
   fi
 
-  ${script_dir}/silence_prometheus_alert.sh
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobExtendedUnhealthy"
 
   echo " - Deploy args: '${bosh_deploy_args}'"
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "

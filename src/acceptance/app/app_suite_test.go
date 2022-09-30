@@ -8,11 +8,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/KevinJCross/cf-test-helpers/v2/helpers"
+
 	"acceptance/config"
 	. "acceptance/helpers"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
-	"github.com/KevinJCross/cf-test-helpers/v2/helpers"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -29,20 +30,19 @@ var (
 	initialInstanceCount int
 )
 
+const componentName = "Application Scale Suite"
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
-
-	cfg = config.LoadConfig(t)
-	componentName := "Application Scale Suite"
-
-	if cfg.GetArtifactsDirectory() != "" {
-		helpers.EnableCFTrace(cfg, componentName)
-	}
-
 	RunSpecs(t, componentName)
 }
 
 var _ = BeforeSuite(func() {
+	cfg = config.LoadConfig()
+
+	if cfg.GetArtifactsDirectory() != "" {
+		helpers.EnableCFTrace(cfg, componentName)
+	}
 
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 

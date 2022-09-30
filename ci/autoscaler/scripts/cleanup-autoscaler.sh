@@ -41,9 +41,16 @@ then
   for release in $(bosh releases | grep -E "${deployment_name}\s+"  | awk '{print $2}')
   do
      echo "- Deleting bosh release '${release}'"
-     bosh delete-release -n "app-autoscaler/${release}"
+     bosh delete-release -n "app-autoscaler/${release}" &
   done
+  for user in $(cf curl /v3/users | jq -r '.resources[].username' | grep "${deployment_name}-" )
+  do
+    echo " - deleting left over user '${user}'"
+    cf delete-user -f "$user" &
+  done
+  wait
 fi
 
 echo "- Deleting credhub creds: '/bosh-autoscaler/${deployment_name}/*'"
 credhub delete -p "/bosh-autoscaler/${deployment_name}"
+

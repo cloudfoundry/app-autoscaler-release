@@ -19,22 +19,21 @@ var (
 	setup *workflowhelpers.ReproducibleTestSuiteSetup
 )
 
+const componentName = "Broker Suite"
+
 func TestAcceptance(t *testing.T) {
 	RegisterFailHandler(Fail)
+	RunSpecs(t, componentName)
+}
 
-	cfg = config.LoadConfig(t)
-	componentName := "Broker Suite"
-
+var _ = BeforeSuite(func() {
+	cfg = config.LoadConfig()
 	if cfg.GetArtifactsDirectory() != "" {
 		helpers.EnableCFTrace(cfg, componentName)
 	}
 	if cfg.IsServiceOfferingEnabled() {
-		RunSpecs(t, componentName)
+		Skip("Skipping due to tests needing a service offering enabled")
 	}
-}
-
-var _ = BeforeSuite(func() {
-
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	setup.Setup()
 
@@ -45,17 +44,17 @@ var _ = BeforeSuite(func() {
 	})
 
 	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-})
 
-var _ = AfterSuite(func() {
-	if os.Getenv("SKIP_TEARDOWN") == "true" {
-		fmt.Println("Skipping Teardown...")
-	} else {
-		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-			if cfg.ShouldEnableServiceAccess() {
-				DisableServiceAccess(cfg, setup.GetOrganizationName())
-			}
-		})
-		setup.Teardown()
-	}
+	DeferCleanup(func() {
+		if os.Getenv("SKIP_TEARDOWN") == "true" {
+			fmt.Println("Skipping Teardown...")
+		} else {
+			workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+				if cfg.ShouldEnableServiceAccess() {
+					DisableServiceAccess(cfg, setup.GetOrganizationName())
+				}
+			})
+			setup.Teardown()
+		}
+	})
 })

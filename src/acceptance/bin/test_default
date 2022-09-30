@@ -10,5 +10,5 @@ $(dirname $0)/test \
   --keep-going \
   --race \
   --skip "mtls" \
-  $@ \
+  "$@" \
   . broker app api

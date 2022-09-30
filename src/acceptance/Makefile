@@ -32,7 +32,7 @@ test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
 lint:
-	golangci-lint run
+	@golangci-lint run
 
 lint-fix:
 	golangci-lint run --fix

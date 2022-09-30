@@ -3,16 +3,14 @@ set -euo pipefail
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 #shellcheck disable=SC1091
 source "${script_dir}/pr-vars.source.sh"
-DATE=date
-which gdate > /dev/null && DATE=gdate
+DATE="date"
+which gdate > /dev/null && DATE="gdate"
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
-bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
-
 
 silence_time_mins=${SILENCE_TIME_MINS:-"20"}
-alert_name=${ALERT_NAME:-"BOSHJobExtendedUnhealthy"}
+alert_name=${ALERT_NAME:-"$1"}
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
