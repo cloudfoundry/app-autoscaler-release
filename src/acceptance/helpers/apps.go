@@ -65,19 +65,19 @@ func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int)
 }
 func CreateDroplet(cfg config.Config) string {
 	appName := "deleteme"
-	tmpDir, err := os.CreateTemp("","droplet")
-	dropletPath := fmt.Sprintf("%s.tgz",tmpDir.Name())
+	tmpDir, err := os.CreateTemp("", "droplet")
+	dropletPath := fmt.Sprintf("%s.tgz", tmpDir.Name())
 	Expect(err).NotTo(HaveOccurred())
 	CreateTestAppByName(cfg, appName, 1)
 	StartApp(appName, cfg.CfPushTimeoutDuration())
-	downloadDroplet := cf.Cf("download-droplet" , appName, "--path", dropletPath).Wait( cfg.DefaultTimeoutDuration())
-	DeleteTestApp(appName,cfg.DefaultTimeoutDuration())
+	downloadDroplet := cf.Cf("download-droplet", appName, "--path", dropletPath).Wait(cfg.DefaultTimeoutDuration())
+	DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 	Expect(downloadDroplet).To(Exit(0), "failed download droplet")
 
 	return dropletPath
 }
 
-func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string,  initialInstanceCount int) {
+func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) {
 	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
 	if cfg.GetSkipSSLValidation() {
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
@@ -99,7 +99,7 @@ func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appN
 	if createApp.ExitCode() != 0 {
 		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
 	}
-	Expect(createApp).To(Exit(0), "failed creating app")
+	Expect(createApp).To(Exit(0), fmt.Sprintf("failed creating app: %s %s", appName, string(createApp.Err.Contents())))
 
 	ginkgo.GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
 }

@@ -339,7 +339,6 @@ setup-performance:
 	export NODES=1;\
 	export DEPLOYMENT_NAME="performance";\
 	export SUITES="setup_performance";\
-	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
 .PHONY: run-performance
@@ -350,7 +349,6 @@ run-performance:
 	export NODES=1;\
 	export DEPLOYMENT_NAME="performance";\
 	export SUITES="run_performance";\
-	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
 .PHONY: package-specs

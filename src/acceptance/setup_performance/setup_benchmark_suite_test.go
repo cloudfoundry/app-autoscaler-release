@@ -17,15 +17,14 @@ import (
 )
 
 var (
-	cfg   *config.Config
-	setup *workflowhelpers.ReproducibleTestSuiteSetup
+	cfg                *config.Config
+	setup              *workflowhelpers.ReproducibleTestSuiteSetup
 	nodeAppDropletPath string
 )
 
-
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
-	cfg = config.LoadConfig(t)
+	cfg = config.LoadConfig()
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
 	RunSpecs(t, "Pre Upgrade Test Suite")
@@ -33,12 +32,9 @@ func TestSetup(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 
-
-
 	fmt.Println("Clearing down existing test orgs/spaces...")
 	// Infinite memory quota OO
 	setup = workflowhelpers.NewRunawayAppTestSuiteSetup(cfg)
-
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		orgs := helpers.GetTestOrgs(cfg)
@@ -66,16 +62,15 @@ var _ = BeforeSuite(func() {
 
 		//updateSpaceQuota := cf.Cf("update-space-quota", setup.TestSpace.QuotaName(),"-m",strconv.Itoa( cfg.BenchmarkAppCount *256)+"MB" , "-r",strconv.Itoa( cfg.BenchmarkAppCount*2) ,"-s",strconv.Itoa(cfg.BenchmarkAppCount*2)).Wait(cfg.DefaultTimeoutDuration())
 		//Expect(updateSpaceQuota).To(gexec.Exit(0), "unable update space quota")
-		orgGuid := helpers.GetOrgGuid(cfg,setup.GetOrganizationName())
-		orgQuotaName := helpers.GetOrgQuotaNameFrom(orgGuid,cfg.DefaultTimeoutDuration())
-		updateOrgQuota := cf.Cf("update-org-quota", orgQuotaName,"-m",strconv.Itoa( cfg.BenchmarkAppCount *256)+"MB" , "-r",strconv.Itoa( cfg.BenchmarkAppCount*2) ,"-s",strconv.Itoa(cfg.BenchmarkAppCount*2 )).Wait(cfg.DefaultTimeoutDuration())
+		orgGuid := helpers.GetOrgGuid(cfg, setup.GetOrganizationName())
+		orgQuotaName := helpers.GetOrgQuotaNameFrom(orgGuid, cfg.DefaultTimeoutDuration())
+		updateOrgQuota := cf.Cf("update-org-quota", orgQuotaName, "-m", strconv.Itoa(cfg.BenchmarkAppCount*256)+"MB", "-r", strconv.Itoa(cfg.BenchmarkAppCount*2), "-s", strconv.Itoa(cfg.BenchmarkAppCount*2)).Wait(cfg.DefaultTimeoutDuration())
 		Expect(updateOrgQuota).To(gexec.Exit(0), "unable update org quota: "+string(updateOrgQuota.Out.Contents()[:]))
 	})
 
 	if cfg.IsServiceOfferingEnabled() {
 		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
-
 
 	fmt.Println("creating droplet")
 	nodeAppDropletPath = helpers.CreateDroplet(*cfg)
