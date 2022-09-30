@@ -41,10 +41,8 @@ resources:
     branch: main
     fetch_tags: true
 
-- name: after-midnight
+- name: every-day
   type: time
-  source:
-    start:  11:00 PM
 
 - name: prometheus-boshrelease
   type: git
@@ -183,7 +181,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: cf-deployment-concourse-tasks
-    - get: after-midnight
+    - get: every-day
       trigger: true
   - task: bosh-cleanup
     file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
