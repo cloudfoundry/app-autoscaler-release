@@ -364,11 +364,11 @@ jobs:
         SUITES: app
 
 - name: performance
-  serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: ci
     - get: bbl-state
       trigger: true
     - get: app-autoscaler-release-main
@@ -415,18 +415,18 @@ jobs:
     output_mapping:
       release: app-autoscaler-release-main
   - task: deploy-autoscaler
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
+    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *performance-env
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/register-broker.yml
-    input_mapping:
-      release: app-autoscaler-release-main
+    file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *performance-env
+    input_mapping:
+      release: app-autoscaler-release-main
   - task: setup-performance
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
