@@ -9,7 +9,7 @@ system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundr
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 
-silence_time_mins=${SILENCE_TIME_MINS:-"20"}
+silence_time_mins=${SILENCE_TIME_MINS:-"30"}
 alert_name=${ALERT_NAME:-"$1"}
 
 pushd "${bbl_state_path}" > /dev/null
