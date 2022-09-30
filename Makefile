@@ -330,26 +330,26 @@ cleanup-concourse:
 .PHONY: cf-login
 cf-login:
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
-.PHONY: setup-benchmark
 
-setup-benchmark:
+.PHONY: setup-performance
+setup-performance:
 	export GINKGO_OPTS="-v";\
-	export NAME_PREFIX="benchmark";\
+	export NAME_PREFIX="performance";\
 	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="benchmark";\
-	export SUITES="setup_benchmark";\
+	export DEPLOYMENT_NAME="performance";\
+	export SUITES="setup_performance";\
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
-.PHONY: run-benchmark
-run-benchmark:
+.PHONY: run-performance
+run-performance:
 	export GINKGO_OPTS="-v";\
-	export NAME_PREFIX="benchmark";\
+	export NAME_PREFIX="performance";\
 	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="benchmark";\
-	export SUITES="run_benchmark";\
+	export DEPLOYMENT_NAME="performance";\
+	export SUITES="run_performance";\
 	source ${CI_DIR}/autoscaler/scripts/pr-vars.source.sh;\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
