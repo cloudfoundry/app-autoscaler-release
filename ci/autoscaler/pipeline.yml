@@ -1,8 +1,8 @@
 ---
 anchors:
-  benchmark-env: &benchmark-env
-    DEPLOYMENT_NAME: "benchmark"
-    NAME_PREFIX: "benchmark"
+  performance-env: &performance-env
+    DEPLOYMENT_NAME: "performance"
+    NAME_PREFIX: "performance"
     BOSH_FIX_RELEASES: true
     NODES: 1
     GINKGO_OPTS: "--fail-fast"
@@ -68,7 +68,7 @@ groups:
   - upgrade-test
   - update-golang
   - update-java
-  - benchmark
+  - performance
 - name: autoscaler-release
   jobs:
   - set-pipeline
@@ -403,7 +403,7 @@ jobs:
         BUILDIN_MODE: true
         SUITES: app
 
-- name: benchmark
+- name: performance
   serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
@@ -418,38 +418,38 @@ jobs:
     - get: autoscaler-env-vars-store
     - get: app-autoscaler-release-main
       resource: app-autoscaler-release-stress-test
-  - task: check-diego-cell-count
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/check-diego-cell-count.yml
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
-    params:
-      expected_cells: 4
-    on_failure:
-      do:
-      - task: combine-ops-files
-        file: app-autoscaler-release-main/ci/autoscaler/tasks/combine-ops.yml
-        input_mapping:
-          custom-ops: app-autoscaler-release-main
-          app-autoscaler-ci: app-autoscaler-release-main
-          ci: app-autoscaler-release-main
-        output_mapping:
-          combined-ops: ops-files
-      - task: scale-up-cf
-        file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-        input_mapping:
-          bbl-state: bbl-state
-          cf-deployment: cf-deployment
-          ops-files: ops-files
-          vars-files: autoscaler-env-vars-store
-        params:
-          SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-          OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
-          BOSH_DEPLOY_ARGS: "-v diego_cell_instances=4"
-        ensure:
-          put: autoscaler-env-vars-store
-          params:
-            repository: autoscaler-env-vars-store
-            rebase: true
+        #  - task: check-diego-cell-count
+        #    file: app-autoscaler-release-main/ci/autoscaler/tasks/check-diego-cell-count.yml
+        #    input_mapping:
+        #      app-autoscaler-release: app-autoscaler-release-main
+        #    params:
+        #      expected_cells: 4
+        #    on_failure:
+        #      do:
+        #      - task: combine-ops-files
+        #        file: app-autoscaler-release-main/ci/autoscaler/tasks/combine-ops.yml
+        #        input_mapping:
+        #          custom-ops: app-autoscaler-release-main
+        #          app-autoscaler-ci: app-autoscaler-release-main
+        #          ci: app-autoscaler-release-main
+        #        output_mapping:
+        #          combined-ops: ops-files
+        #      - task: scale-up-cf
+        #        file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+        #        input_mapping:
+        #          bbl-state: bbl-state
+        #          cf-deployment: cf-deployment
+        #          ops-files: ops-files
+        #          vars-files: autoscaler-env-vars-store
+        #        params:
+        #          SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+        #          OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+        #          BOSH_DEPLOY_ARGS: "-v diego_cell_instances=4"
+        #        ensure:
+        #          put: autoscaler-env-vars-store
+        #          params:
+        #            repository: autoscaler-env-vars-store
+        #            rebase: true
   - task: run-pre-release-script
     file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
     params:
@@ -461,7 +461,7 @@ jobs:
   - task: deploy-autoscaler
     file: app-autoscaler-release-main/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *benchmark-env
+      <<: *performance-env
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
@@ -470,37 +470,31 @@ jobs:
     input_mapping:
       release: app-autoscaler-release-main
     params:
-      <<: *benchmark-env
-  - task: setup-benchmark
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+      <<: *performance-env
+  - task: setup-performance
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
-      <<: *benchmark-env
-      SUITES: setup_benchmark
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
-  - task: run-benchmark
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-acceptance-tests.yml
+      TARGETS: setup-performance
+  - task: run-performance
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
-      <<: *benchmark-env
-      SUITES: run_benchmark
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
-  - task: scale-down-cf
-    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-    input_mapping:
-      bbl-state: bbl-state
-      cf-deployment: cf-deployment
-      ops-files: ops-files
-      vars-files: autoscaler-env-vars-store
-    params:
-      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
-      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=2"
-    ensure:
-      put: autoscaler-env-vars-store
-      params:
-        repository: autoscaler-env-vars-store
-        rebase: true
+      TARGETS: run-performance
+        #  - task: scale-down-cf
+        #    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
+        #    input_mapping:
+        #      bbl-state: bbl-state
+        #      cf-deployment: cf-deployment
+        #      ops-files: ops-files
+        #      vars-files: autoscaler-env-vars-store
+        #    params:
+        #      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+        #      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
+        #      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=2"
+        #    ensure:
+        #      put: autoscaler-env-vars-store
+        #      params:
+        #        repository: autoscaler-env-vars-store
+        #        rebase: true
 
 
 - name: upgrade-test

@@ -1,4 +1,4 @@
-package run_benchmark
+package run_performance
 
 import (
 	"acceptance/helpers"
