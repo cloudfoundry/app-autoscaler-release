@@ -12,6 +12,7 @@ params:
   # Optional: override the user to access bosh
   BOSH_USERNAME: admin
 
+  AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
 - name: app-autoscaler-release
