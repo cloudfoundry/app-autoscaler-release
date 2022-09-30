@@ -429,6 +429,8 @@ jobs:
       release: app-autoscaler-release-main
   - task: setup-performance
     file: ci/ci/autoscaler/tasks/make/make.yml
+    input_mapping:
+      release: app-autoscaler-release-main
     params:
       TARGETS: setup-performance
   - task: run-performance
