@@ -128,13 +128,13 @@ resources:
     branch: ((branch_name))
     fetch_tags: true
 
-- name: app-autoscaler-release-stress-test
+- name: app-autoscaler-release-performance-test
   type: git
   icon: github
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: stress-test
+    branch: performance-test
     fetch_tags: true
 
 - name: gh-release
@@ -226,7 +226,6 @@ jobs:
     - get: ci
   - task: run-integration-tests
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
-
 
 - name: setup-infrastructure
   serial_groups: [infra]
@@ -409,15 +408,10 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
-    - get: cf-deployment-concourse-tasks
-    - get: cf-deployment
-      trigger: true
     - get: bbl-state
-      passed: [setup-infrastructure]
       trigger: true
-    - get: autoscaler-env-vars-store
     - get: app-autoscaler-release-main
-      resource: app-autoscaler-release-stress-test
+      resource: app-autoscaler-release-performance-test
         #  - task: check-diego-cell-count
         #    file: app-autoscaler-release-main/ci/autoscaler/tasks/check-diego-cell-count.yml
         #    input_mapping:
@@ -450,10 +444,11 @@ jobs:
         #          params:
         #            repository: autoscaler-env-vars-store
         #            rebase: true
-  - task: run-pre-release-script
-    file: app-autoscaler-release-main/ci/autoscaler/tasks/run-prerelease-script.yml
+        #
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make/make.yml
     params:
-      SCRIPT_NAME: ./scripts/update
+      TARGETS: mod-tidy vendor db scheduler
     input_mapping:
       release: app-autoscaler-release-main
     output_mapping:
