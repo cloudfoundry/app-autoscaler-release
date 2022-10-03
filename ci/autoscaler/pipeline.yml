@@ -245,7 +245,7 @@ jobs:
   public: true
   build_logs_to_retain: 100
   serial: true
-  ensure:
+  on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params:
@@ -310,7 +310,7 @@ jobs:
   public: true
   build_logs_to_retain: 100
   serial: true
-  ensure:
+  on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params:
@@ -375,7 +375,7 @@ jobs:
   public: true
   build_logs_to_retain: 100
   serial: true
-  ensure:
+  on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params:
@@ -427,7 +427,7 @@ jobs:
 - name: upgrade-test-main
   public: true
   build_logs_to_retain: 100
-  ensure:
+  on_success:
       task: cleanup
       file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
       params:
