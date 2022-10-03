@@ -1,39 +1,6 @@
 ---
 anchors:
 
-  acceptance-main-env: &acceptance-main-env
-    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
-    DEPLOYMENT_NAME: "acceptance-main"
-    SKIP_SSL_VALIDATION: true
-    NAME_PREFIX: "acceptance-main"
-    BOSH_FIX_RELEASES: true
-    GINKGO_OPTS: "--fail-fast"
-
-  acceptance-main-log-cache-env: &acceptance-main-log-cache-env
-    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
-    DEPLOYMENT_NAME: "acceptance-lc-main"
-    SKIP_SSL_VALIDATION: true
-    NAME_PREFIX: "acceptance-lc-main"
-    BOSH_FIX_RELEASES: true
-    GINKGO_OPTS: "--fail-fast"
-
-  acceptance-main-buildin-env: &acceptance-main-buildin-env
-    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
-    DEPLOYMENT_NAME: "acceptance-bld-main"
-    SKIP_SSL_VALIDATION: true
-    NAME_PREFIX: "acceptance-bld-main"
-    BOSH_FIX_RELEASES: true
-    GINKGO_OPTS: "--fail-fast"
-    # Skipped - deployment requires retrofit of make targets
-    #BUILDIN_MODE: true
-    SERVICE_OFFERING_ENABLED: false
-
-  upgrade-test-env: &upgrade-test-env
-    SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
-    DEPLOYMENT_NAME: "upgrade-test"
-    SKIP_SSL_VALIDATION: true
-    NAME_PREFIX: "upgrade-test"
-
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
       operations/add-releases.yml
@@ -248,8 +215,8 @@ jobs:
   on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params:
-      <<: *acceptance-main-env
+    params: &acceptance-main-params
+      DEPLOYMENT_NAME: "acceptance-main"
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   plan:
@@ -270,14 +237,14 @@ jobs:
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *acceptance-main-env
+      <<: *acceptance-main-params
       <<: *app-autoscaler-ops-files
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
-      <<: *acceptance-main-env
+      <<: *acceptance-main-params
     input_mapping:
       release: app-autoscaler-release-main
   - in_parallel:
@@ -285,7 +252,7 @@ jobs:
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-env
+        <<: *acceptance-main-params
         SUITES: api
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
@@ -293,7 +260,7 @@ jobs:
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-env
+        <<: *acceptance-main-params
         SUITES: app
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
@@ -301,7 +268,7 @@ jobs:
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-env
+        <<: *acceptance-main-params
         SUITES: broker
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
@@ -313,8 +280,8 @@ jobs:
   on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params:
-      <<: *acceptance-main-log-cache-env
+    params: &acceptance-main-log-cache-params
+      DEPLOYMENT_NAME: "acceptance-lc-main"
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   plan:
@@ -335,14 +302,14 @@ jobs:
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *acceptance-main-log-cache-env
+      <<: *acceptance-main-log-cache-params
       <<: *app-autoscaler-ops-files-log-cache
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
-      <<: *acceptance-main-log-cache-env
+      <<: *acceptance-main-log-cache-params
     input_mapping:
       release: app-autoscaler-release-main
   - in_parallel:
@@ -350,7 +317,7 @@ jobs:
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-log-cache-env
+        <<: *acceptance-main-log-cache-params
         SUITES: api
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
@@ -358,7 +325,7 @@ jobs:
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-log-cache-env
+        <<: *acceptance-main-log-cache-params
         SUITES: app
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
@@ -366,7 +333,7 @@ jobs:
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-log-cache-env
+        <<: *acceptance-main-log-cache-params
         SUITES: broker
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
@@ -378,8 +345,11 @@ jobs:
   on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params:
-      <<: *acceptance-main-buildin-env
+    params: &acceptance-main-buildin-params
+      DEPLOYMENT_NAME: "acceptance-bld-main"
+      BUILDIN_MODE: true
+      SERVICE_OFFERING_ENABLED: false
+
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   plan:
@@ -400,7 +370,7 @@ jobs:
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *acceptance-main-buildin-env
+      <<: *acceptance-main-buildin-params
       <<: *app-autoscaler-ops-files-buildin
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
@@ -409,7 +379,7 @@ jobs:
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-buildin-env
+        <<: *acceptance-main-buildin-params
         BUILDIN_MODE: true
         SUITES: api
       input_mapping:
@@ -418,7 +388,7 @@ jobs:
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-buildin-env
+        <<: *acceptance-main-buildin-params
         BUILDIN_MODE: true
         SUITES: app
       input_mapping:
@@ -430,8 +400,8 @@ jobs:
   on_success:
       task: cleanup
       file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params:
-        <<: *upgrade-test-env
+      params: &upgrade-test-params
+        DEPLOYMENT_NAME: "upgrade-test"
       input_mapping:
         app-autoscaler-release: app-autoscaler-release-main
   plan:
@@ -450,18 +420,18 @@ jobs:
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
     params:
-      <<: *upgrade-test-env
+      <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
-      <<: *upgrade-test-env
+      <<: *upgrade-test-params
     input_mapping:
       release: app-autoscaler-release-main
   - task: autoscaler-pre-upgrade
     file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
-      <<: *upgrade-test-env
+      <<: *upgrade-test-params
       SUITES: |
         pre_upgrade
       NODES: 1
@@ -478,14 +448,14 @@ jobs:
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *upgrade-test-env
+      <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
     input_mapping:
       app-autoscaler-release: app-autoscaler-release-main
   - task: autoscaler-post-upgrade
     file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
-      <<: *upgrade-test-env
+      <<: *upgrade-test-params
       SUITES: |
         post_upgrade
       NODES: 1

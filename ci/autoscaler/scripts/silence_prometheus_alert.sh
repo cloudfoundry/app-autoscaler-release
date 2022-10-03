@@ -16,6 +16,7 @@ pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
 popd > /dev/null
 
+echo " - silencing alert '${alert_name}' deployment '${deployment_name}' for ${silence_time_mins} mins"
 # shellcheck disable=SC2034
 alert_manager=${ALERT_MANAGER:-"https://alertmanager.${system_domain}"}
 alert_pass=${ALERT_PASS:-$(credhub get -n /bosh-autoscaler/prometheus/alertmanager_password -q)}
@@ -26,7 +27,7 @@ curl -k -s -f -L -X 'POST' \
   -u "admin:${alert_pass}" \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json; charset=utf-8' \
- --data-binary @- << EOF
+ --data-binary @- > /dev/null << EOF
 {
   "status": {
     "state": "active"

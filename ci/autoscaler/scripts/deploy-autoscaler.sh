@@ -4,14 +4,13 @@ set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 #shellcheck disable=SC1091
 source "${script_dir}/pr-vars.source.sh"
-
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 buildin_mode="${BUILDIN_MODE:-false}"
 autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
 deployment_manifest="${script_dir}/../../../templates/app-autoscaler.yml"
-bosh_fix_releases="${BOSH_FIX_RELEASES:-false}"
+bosh_opts="${BOSH_OPTS:-"--fix-releases"}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
@@ -51,22 +50,15 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
-  bosh_deploy_args=""
-
-  if [[ $bosh_fix_releases == "true" ]]; then
-    bosh_fix_releases="${BOSH_FIX_RELEASES:-true}"
-    bosh_deploy_args="$bosh_deploy_args --fix-releases"
-  fi
-
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy"
 
-  echo " - Deploy args: '${bosh_deploy_args}'"
+  echo " - Deploy options: '${bosh_opts}'"
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
     deploy "${deployment_manifest}" \
     ${OPS_FILES_TO_USE} \
-    ${bosh_deploy_args} \
+    ${bosh_opts} \
     -v system_domain="${system_domain}" \
     -v deployment_name="${deployment_name}" \
     -v app_autoscaler_version="${bosh_release_version}" \
