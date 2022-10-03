@@ -8,8 +8,8 @@ system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundr
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 buildin_mode="${BUILDIN_MODE:-false}"
-autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
-deployment_manifest="${script_dir}/../../../templates/app-autoscaler.yml"
+autoscaler_dir="${AUTOSCALER_DIR:-$(realpath -e app-autoscaler-release)}"
+deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 bosh_opts="${BOSH_OPTS:-"--fix-releases"}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\

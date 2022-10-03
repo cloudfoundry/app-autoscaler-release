@@ -16,16 +16,20 @@ echo ">> sourcing pr-vars.source.sh from ${script_dir}"
 export PR_NUMBER=${PR_NUMBER:-44}
 if [[  ${PR_NUMBER} == 44 ]]; then echo -e "?? WARN: no PR_NUMBER is set, will use the default\n"; fi
 echo ">> PR_NUMBER: ${PR_NUMBER}"
-export BBL_STATE_PATH="${BBL_STATE_PATH:-$( realpath -e "${root_dir}/../app-autoscaler-env-bbl-state/bbl-state" 2> /dev/null || realpath -e "${root_dir}/../bbl-state/bbl-state" 2> /dev/null )}"
-echo  ">> BBL_STATE_PATH: ${BBL_STATE_PATH}"
 
 export SYSTEM_DOMAIN="${SYSTEM_DOMAIN:-"autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"}"
 echo ">> SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 
-export AUTOSCALER_DIR="${AUTOSCALER_DIR:-${root_dir}}"
+BBL_STATE_PATH="${BBL_STATE_PATH:-$( realpath -e "${root_dir}/../app-autoscaler-env-bbl-state/bbl-state" 2> /dev/null || realpath -e "${root_dir}/../bbl-state/bbl-state" 2> /dev/null )}"
+export BBL_STATE_PATH="$(realpath -e "${BBL_STATE_PATH}" )"
+echo  ">> BBL_STATE_PATH: ${BBL_STATE_PATH}"
+
+AUTOSCALER_DIR="${AUTOSCALER_DIR:-${root_dir}}"
+export AUTOSCALER_DIR="$(realpath -e "${AUTOSCALER_DIR}" )"
 echo ">> AUTOSCALER_DIR: ${AUTOSCALER_DIR}"
 
-export CI_DIR="${CI_DIR:-$(realpath -e "${root_dir}/ci")}"
+CI_DIR="${CI_DIR:-$(realpath -e "${root_dir}/ci")}"
+export CI_DIR="$(realpath -e "${CI_DIR}")"
 echo ">> CI_DIR: ${CI_DIR}"
 
 export SKIP_SSL_VALIDATION=${SKIP_SSL_VALIDATION:-'true'}
