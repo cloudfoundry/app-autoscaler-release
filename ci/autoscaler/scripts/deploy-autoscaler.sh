@@ -117,7 +117,7 @@ pushd "${autoscaler_dir}" > /dev/null
     bosh create-release --force --version="${bosh_release_version}"
 
     echo "Uploading Release"
-    bosh upload-release "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
+    bosh upload-release --fix "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
   else
     echo "the app-autoscaler release is already uploaded with the commit ${bosh_release_version}"
     echo "Attempting redeploy..."
