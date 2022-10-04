@@ -3,5 +3,5 @@
   value: 7200
 
 - type: remove
-  path: /instance_groups/name=prometheus2/jobs/name=bosh_alerts/properties?/bosh_alerts?/CFRouterRequestsTooLow
+  path: /instance_groups/name=prometheus2/jobs/name=bosh_alerts/properties/bosh_alerts/CFRouterRequestsTooLow
 
