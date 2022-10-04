@@ -96,7 +96,7 @@ pushd "${autoscaler_dir}" > /dev/null
 	    URL="${URL}?v=${STEMCELL_VERSION}"
     fi
     wget "$URL" -O stemcell.tgz
-    bosh -n upload-stemcell stemcell.tgz
+    bosh -n upload-stemcell --fix stemcell.tgz
   fi
 
   OPS_FILES_TO_USE=""
