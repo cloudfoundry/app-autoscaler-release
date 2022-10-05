@@ -20,6 +20,7 @@ RUN apt-get update && \
             curl \
             libcurl4-openssl-dev \
             git \
+            openjdk-11-jdk \
             wget \
             runit \
             openssl \
