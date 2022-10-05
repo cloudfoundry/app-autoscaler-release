@@ -33,6 +33,16 @@ RUN apt-get update && \
             gh && \
     apt-get clean
 
+# get maven
+ENV MAVEN_VERSION 3.6.3
+RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
+    tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \
+    ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
+    ln -s /opt/maven/bin/mvn /usr/local/bin && \
+    rm -f /tmp/apache-maven-${MAVEN_VERSION}.tar.gz &&\
+    mvn --version
+ENV MAVEN_HOME /opt/maven
+
 # Install go
 ARG GO_VERSION=1.18
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
