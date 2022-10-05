@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # Source this file please.
 # Moved to ci/  *DO NOT MODIFY MANUALLY*
 

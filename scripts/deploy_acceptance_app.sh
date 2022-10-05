@@ -19,7 +19,6 @@ function create_app {
       --var app_domain=autoscaler.app-runtime-interfaces.ci.cloudfoundry.org\
       --var service_name="${service_offering}"\
       --var instances=1\
-      --var buildpack=nodejs_buildpack\
       --var node_tls_reject_unauthorized=0\
       -p "${app_location}"\
       -f "${app_location}/app_manifest.yml"\

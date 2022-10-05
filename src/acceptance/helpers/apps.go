@@ -16,6 +16,8 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
+const AppResidentSize = 70
+
 func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
 	rawApps := getRawApps(spaceGuid, orgGuid, cfg.DefaultTimeoutDuration())
 	return filterByPrefix(prefix, getNames(rawApps))
@@ -90,6 +92,7 @@ func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appN
 		"--var", "instances="+countStr,
 		"--var", "buildpack="+cfg.NodejsBuildpackName,
 		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
+		"--var", "memory_mb="+strconv.Itoa(cfg.NodeMemoryLimit),
 		"--droplet", dropletPath,
 		"-f", config.NODE_APP+"/app_manifest.yml",
 		"--no-start",
@@ -117,6 +120,7 @@ func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount
 		"--var", "instances="+countStr,
 		"--buildpack", cfg.NodejsBuildpackName,
 		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
+		"--var", "memory_mb="+strconv.Itoa(cfg.NodeMemoryLimit),
 		"-p", config.NODE_APP,
 		"-f", config.NODE_APP+"/app_manifest.yml",
 		"--no-start",
@@ -136,7 +140,15 @@ func DeleteTestApp(appName string, timeout time.Duration) {
 
 func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url string) string {
 	appGuid := GetAppGuid(cfg, appName)
-	return cfh.CurlAppWithTimeout(cfg, appName, url, 10*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGuid, appInstance))
+	output := cfh.CurlAppWithTimeout(cfg, appName, url, 20*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGuid, appInstance),
+		"-f",
+		"--connect-timeout", "5",
+		"--max-time", "10",
+		"--retry", "5",
+		"--retry-delay", "0",
+		"--retry-max-time", "15")
+	GinkgoWriter.Printf("\n")
+	return output
 }
 
 func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int) {
