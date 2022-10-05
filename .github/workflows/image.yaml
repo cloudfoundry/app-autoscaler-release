@@ -1,7 +1,7 @@
 name: Create and publish a Docker image
 on:
   push:
-    branches: ['main']
+    branches: ['autoscaler-tools-dockerimage']
     paths:
       - 'ci/dockerfiles/**'
       - '.github/workflows/image.yml'
@@ -28,7 +28,7 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        image_suffix: ["deploy", "test", "tools" ]
+        image_suffix: [ "tools" ]
     name: Build and Push app-autoscaler-ci-${{ matrix.image_suffix }}
     steps:
       - name: Checkout repository
