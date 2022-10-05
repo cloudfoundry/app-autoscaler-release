@@ -10,7 +10,9 @@ deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
 buildin_mode="${BUILDIN_MODE:-false}"
 autoscaler_dir="${AUTOSCALER_DIR:-$(realpath -e app-autoscaler-release)}"
 deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
-bosh_opts="${BOSH_OPTS:-"--fix-releases"}"
+bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-"--fix-releases"}"
+bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"
+bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
@@ -50,15 +52,27 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 function deploy () {
+  OPS_FILES_TO_USE=""
+  for OPS_FILE in ${ops_files}; do
+    if [ -f "${OPS_FILE}" ]; then
+      OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
+    else
+      echo "ERROR: could not find ops file ${OPS_FILE} in ${PWD}"
+      exit 1
+    fi
+  done
+
+  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
+
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy"
 
-  echo " - Deploy options: '${bosh_opts}'"
+  echo " - Deploy options: '${bosh_deploy_opts}'"
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   bosh -n -d "${deployment_name}" \
     deploy "${deployment_manifest}" \
     ${OPS_FILES_TO_USE} \
-    ${bosh_opts} \
+    ${bosh_deploy_opts} \
     -v system_domain="${system_domain}" \
     -v deployment_name="${deployment_name}" \
     -v app_autoscaler_version="${bosh_release_version}" \
@@ -80,7 +94,7 @@ else
 	--secret "autoscaler_client_secret"
 fi
 
-pushd "${autoscaler_dir}" > /dev/null
+function find_or_upload_stemcell(){
   # Determine if we need to upload a stemcell at this point.
   #TODO refactor out function for stemcell check and update.
   STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
@@ -96,20 +110,12 @@ pushd "${autoscaler_dir}" > /dev/null
 	    URL="${URL}?v=${STEMCELL_VERSION}"
     fi
     wget "$URL" -O stemcell.tgz
-    bosh -n upload-stemcell --fix stemcell.tgz
+    bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
   fi
+}
 
-  OPS_FILES_TO_USE=""
-  for OPS_FILE in ${ops_files}; do
-    if [ -f "${OPS_FILE}" ]; then
-      OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
-    else
-      echo "ERROR: could not find ops file ${OPS_FILE} in ${PWD}"
-      exit 1
-    fi
-  done
 
-  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
+function find_or_upload_release(){
   AUTOSCALER_RELEASE_EXISTS=$(bosh releases | grep -c "${bosh_release_version}" || true)
   echo "Checking if release:'${bosh_release_version}' exists: ${AUTOSCALER_RELEASE_EXISTS}"
   if [[ "${AUTOSCALER_RELEASE_EXISTS}" == 0 ]]; then
@@ -117,11 +123,15 @@ pushd "${autoscaler_dir}" > /dev/null
     bosh create-release --force --version="${bosh_release_version}"
 
     echo "Uploading Release"
-    bosh upload-release --fix "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
+    bosh upload-release $bosh_upload_release_opts "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
   else
     echo "the app-autoscaler release is already uploaded with the commit ${bosh_release_version}"
     echo "Attempting redeploy..."
   fi
+}
 
+pushd "${autoscaler_dir}" > /dev/null
+  find_or_upload_stemcell
+  find_or_upload_release
   deploy
 popd > /dev/null
