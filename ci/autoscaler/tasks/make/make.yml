@@ -3,7 +3,7 @@ platform: linux
 
 image_resource:
   type: docker-image
-  source: 
+  source:
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-test
     tag: main
 
@@ -14,6 +14,7 @@ params:
 inputs:
 - name: app-autoscaler-release
 - name: ci
+- name: bbl-state
 
 outputs:
 - name: app-autoscaler-release
