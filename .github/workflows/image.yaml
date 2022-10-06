@@ -28,7 +28,7 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        image_suffix: ["deploy", "test"]
+        image_suffix: ["deploy", "test", "tools"]
     name: Build and Push app-autoscaler-ci-${{ matrix.image_suffix }}
     steps:
       - name: Checkout repository
@@ -51,8 +51,8 @@ jobs:
         id: ginkgo
         run: |
           version=$(grep "ginkgo " .tool-versions|  cut -f 2 -d " ")
-          echo "GINGO version from .tool-versions: \'${version}\'"
-          echo "::set-output name=version::${version}"  
+          echo "GINKGO version from .tool-versions: \'${version}\'"
+          echo "::set-output name=version::${version}"
 
       - id: get-golang-version
         shell: bash
