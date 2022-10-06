@@ -426,7 +426,7 @@ jobs:
     params:
       <<: *performance-env
     input_mapping:
-      release: app-autoscaler-release-main
+      app-autoscaler-release: app-autoscaler-release-main
   - task: setup-performance
     file: ci/ci/autoscaler/tasks/make/make.yml
     input_mapping:

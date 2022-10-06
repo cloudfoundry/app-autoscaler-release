@@ -105,7 +105,7 @@ var defaults = Config{
 	// For benchmark
 	BenchmarkAppCount:          100,
 	BenchmarkPercentageToScale: 30,
-	BenchmarkSetupWorkers:      50,
+	BenchmarkSetupWorkers:      50, // number of thread/process
 	BenchmarkTeardown:          true,
 }
 
