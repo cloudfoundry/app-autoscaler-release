@@ -66,6 +66,8 @@ function deploy () {
 
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy"
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
+
 
   echo " - Deploy options: '${bosh_deploy_opts}'"
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
