@@ -129,4 +129,4 @@ RUN echo "jq version installed $(jq --version)" &&\
     echo "bbl version installed $(bbl --version)" &&\
     echo "credhub version installed $(credhub --version)" &&\
     echo "uaac version installed $(uaac --version)" &&\
-    echo "glcoud version installed $(gloud version)"
+    echo "gcloud version installed $(gcloud version)"
