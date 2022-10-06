@@ -1,4 +1,4 @@
-package run_performance
+package run_performance_test
 
 import (
 	"acceptance/config"
@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	cfg   *config.Config
-	setup *workflowhelpers.ReproducibleTestSuiteSetup
+	cfg       *config.Config
+	setup     *workflowhelpers.ReproducibleTestSuiteSetup
 	orgName   string
 	orgGUID   string
 	spaceName string
@@ -24,7 +24,7 @@ var (
 
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
-	cfg = config.LoadConfig(t)
+	cfg = config.LoadConfig()
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	RunSpecs(t, "Pre Upgrade Test Suite")
 }
@@ -63,6 +63,6 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		// TODO: Cleanup test
+		fmt.Println("TODO: Cleanup test...")
 	}
 })

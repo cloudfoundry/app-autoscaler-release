@@ -4,7 +4,6 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
-	"github.com/onsi/ginkgo/v2"
 	"os"
 	"strconv"
 	"time"
@@ -101,11 +100,10 @@ func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appN
 	}
 	Expect(createApp).To(Exit(0), fmt.Sprintf("failed creating app: %s %s", appName, string(createApp.Err.Contents())))
 
-	ginkgo.GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
+	GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
 }
 
 func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
-
 	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
 	if cfg.GetSkipSSLValidation() {
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
@@ -129,7 +127,7 @@ func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount
 	}
 	Expect(createApp).To(Exit(0), "failed creating app")
 
-	ginkgo.GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
+	GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
 }
 
 func DeleteTestApp(appName string, timeout time.Duration) {

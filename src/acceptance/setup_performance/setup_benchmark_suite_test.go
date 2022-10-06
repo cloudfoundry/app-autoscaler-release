@@ -4,11 +4,12 @@ import (
 	"acceptance/config"
 	"acceptance/helpers"
 	"fmt"
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
-	"github.com/onsi/gomega/gexec"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	"github.com/onsi/gomega/gexec"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
@@ -49,8 +50,6 @@ var _ = BeforeSuite(func() {
 
 	fmt.Println("Clearing down existing test orgs/spaces... Complete")
 	setup.Setup()
-
-
 
 	// setup.GetOrganizationName()
 	// cf.Cf("update-org-quota", setup.TestSpace.QuotaName(),"-m",strconv.Itoa( cfg.BenchmarkAppCount *256)+"MB" , "-r",strconv.Itoa( cfg.BenchmarkAppCount*2) ,"-s",strconv.Itoa(cfg.BenchmarkAppCount ))
