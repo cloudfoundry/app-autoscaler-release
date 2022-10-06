@@ -2,6 +2,9 @@
   path: /instance_groups/name=prometheus2/jobs/name=bosh_alerts/properties?/bosh_alerts?/job_predict_system_disk_full?/predict_time?
   value: 7200
 
-- type: remove
-  path: /instance_groups/name=prometheus2/jobs/name=bosh_alerts/properties/bosh_alerts/CFRouterRequestsTooLow
+#- type: remove
+#  path: /instance_groups/name=prometheus2/jobs/name=bosh_alerts/properties/bosh_alerts/CFRouterRequestsTooLow
 
+- type: replace
+  path: /instance_groups/name=prometheus2/jobs/name=cloudfoundry_alerts/properties/cloudfoundry_alerts/router_requests_drop?/threshold?
+  value: 1
