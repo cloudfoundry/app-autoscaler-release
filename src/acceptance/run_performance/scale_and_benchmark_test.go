@@ -1,16 +1,15 @@
-package run_performance
+package run_performance_test
 
 import (
 	"acceptance/helpers"
 	"fmt"
-	"github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega/gmeasure"
 	"math"
 	"sync"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gmeasure"
 )
 
 var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
@@ -22,7 +21,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 
 	BeforeEach(func() {
 		appsToScaleCount = int(math.RoundToEven(float64(cfg.BenchmarkAppCount * cfg.BenchmarkPercentageToScale / 100)))
-		ginkgo.GinkgoWriter.Printf("\nScaling %d app: \n", appsToScaleCount)
+		GinkgoWriter.Printf("\nScaling %d app: \n", appsToScaleCount)
 		samplingConfig = gmeasure.SamplingConfig{
 			N:           appsToScaleCount,
 			NumParallel: appsToScaleCount,

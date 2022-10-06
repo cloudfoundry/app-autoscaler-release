@@ -19,17 +19,3 @@ func filterByPrefix(prefix string, in []string) []string {
 	}
 	return filtered
 }
-
-
-func filterByState(apps []cfResource, state string) []string {
-	var filtered []string
-
-	for _, item := range apps {
-		if item.State == state {
-			filtered = append(filtered, item.Name)
-		}
-	}
-
-	return filtered
-
-}

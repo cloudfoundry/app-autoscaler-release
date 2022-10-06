@@ -71,7 +71,7 @@ type Config struct {
 	// For bechmark test
 	BenchmarkAppCount          int  `json:"benchmark_app_count"`
 	BenchmarkPercentageToScale int  `json:"benchmark_app_percentage_to_scale"`
-	BenchmarkSetupWorkers      int `json:"benchmark_setup_workers"`
+	BenchmarkSetupWorkers      int  `json:"benchmark_setup_workers"`
 	BenchmarkTeardown          bool `json:"benchmark_teardown"`
 }
 
@@ -105,7 +105,7 @@ var defaults = Config{
 	// For benchmark
 	BenchmarkAppCount:          100,
 	BenchmarkPercentageToScale: 30,
-	BenchmarkSetupWorkers: 50,
+	BenchmarkSetupWorkers:      50,
 	BenchmarkTeardown:          true,
 }
 
