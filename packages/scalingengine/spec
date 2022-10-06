@@ -60,7 +60,6 @@ files:
 - autoscaler/vendor/github.com/tedsuo/ifrit/sigmon/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
-- autoscaler/vendor/golang.org/x/sys/internal/unsafeheader/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/encoding/prototext/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/encoding/protowire/* # gosub
