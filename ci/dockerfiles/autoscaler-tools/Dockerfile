@@ -44,7 +44,7 @@ RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list
 
 # install golang
-ARG GO_VERSION=1.18
+ARG GO_VERSION=1.19
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN \
@@ -107,16 +107,26 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && \
   apt-get update -y &&\
   apt-get install google-cloud-sdk -y &&\
-  apt-get clean &&\
-  gcloud version
+  apt-get clean
+
 
 ARG GINKGO_VERSION=2.1.3
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} &&\
-    ginkgo version
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION}
 
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get update -y \
     && apt install nodejs -y \
     && node -v \
-    && npm --version \
     && apt-get clean
+
+
+RUN echo "jq version installed $(jq --version)" &&\
+    echo "mvn version installed $(mvn --version)" &&\
+    echo "npm version installed $(npm --version)" &&\
+    echo "go version installed $(go version)" &&\
+    echo "ginkgo version installed $(ginkgo version)" &&\
+    echo "bosh version installed $(bosh --version)" &&\
+    echo "bbl version installed $(bbl --version)" &&\
+    echo "credhub version installed $(credhub --version)" &&\
+    echo "uaac version installed $(uaac --version)" &&\
+    echo "glcoud version installed $(gloud version)"
