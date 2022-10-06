@@ -43,25 +43,6 @@ RUN apt-get update && \
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list
 
-# Install go
-ARG GO_VERSION=1.18
-RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
-  tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
-  rm -rf go${GO_VERSION}.linux-amd64.tar.gz && \
-  mkdir -p /go/bin
-
-# set GOPATH
-ENV GOPATH /go
-# add go and GOPATH/bin to PATH
-ENV PATH $PATH:$GOPATH/bin:/usr/local/go/bin
-
-ENV POSTGRES_VERSION 12
-RUN \
-      apt-get update && \
-      apt-get install -y postgresql-${POSTGRES_VERSION} && \
-      apt-get install -y libjson-perl && \
-      apt-get clean
-
 # install golang
 ARG GO_VERSION=1.18
 ENV GOPATH $HOME/go
@@ -71,6 +52,13 @@ RUN \
   tar xzvf /tmp/go${GO_VERSION}.linux-amd64.tar.gz -C /usr/local && \
   mkdir $GOPATH && \
   rm -rf /tmp/*
+
+ENV POSTGRES_VERSION 12
+RUN \
+      apt-get update && \
+      apt-get install -y postgresql-${POSTGRES_VERSION} && \
+      apt-get install -y libjson-perl && \
+      apt-get clean
 
 # Install bosh_cli
 ENV BOSH_VERSION 6.4.4
