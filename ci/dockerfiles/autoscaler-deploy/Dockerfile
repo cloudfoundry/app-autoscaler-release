@@ -4,16 +4,20 @@ FROM ubuntu:22.04
 MAINTAINER autoscaler-team
 
 RUN apt-get update && \
-    apt-get -qqy install --fix-missing gnupg apt-transport-https wget && \
-    apt-get clean
- 
-RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add - && \
-      echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list && \
-      wget -q -O - https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+  apt-get -qqy install --fix-missing gnupg apt-transport-https wget curl && \
+  apt-get clean
 
-RUN apt-get update && \
-    apt-get -qqy install --fix-missing \
+#adding cloudfoundry
+RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add -\
+   && echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+
+#Adding github cli
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+
+RUN apt-get update\
+   && apt-get -qqy install --fix-missing \
             build-essential \
             inetutils-ping \
             vim \
@@ -30,20 +34,14 @@ RUN apt-get update && \
             python3 \
             ca-certificates \
             cf8-cli \
-            gh && \
-    apt-get clean
+            gh\
+    && apt-get clean
 
-# Install go
-ARG GO_VERSION=1.18
-RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
-  tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
-  rm -rf go${GO_VERSION}.linux-amd64.tar.gz && \
-  mkdir -p /go/bin
-
-# set GOPATH
-ENV GOPATH /go
-# add go and GOPATH/bin to PATH
-ENV PATH $PATH:$GOPATH/bin:/usr/local/go/bin
+ARG ASDF_VERSION="v0.10.2"
+RUN git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch ${ASDF_VERSION} && \
+    echo ". $HOME/.asdf/asdf.sh" >> ~/.bashrc && \
+    echo ". $HOME/.asdf/completions/asdf.bash" >> ~/.bashrc &&\
+    bash -c "asdf --version"
 
 # Install bosh_cli
 ENV BOSH_VERSION 6.4.4
