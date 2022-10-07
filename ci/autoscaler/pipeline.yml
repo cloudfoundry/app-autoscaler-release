@@ -52,27 +52,27 @@ groups:
 - name: all
   jobs:
   - set-pipeline
-  - unit-tests-main
-  - integration-tests-main
-  - acceptance-main
-  - acceptance-main-log-cache
-  - acceptance-main-buildin
+  - unit-tests
+  - integration-tests
+  - acceptance
+  - acceptance-log-cache
+  - acceptance-buildin
   - draft
   - release
-  - upgrade-test-main
+  - upgrade-test
   - update-golang
   - update-java
 - name: autoscaler-release
   jobs:
   - set-pipeline
-  - unit-tests-main
-  - integration-tests-main
-  - acceptance-main
-  - acceptance-main-log-cache
-  - acceptance-main-buildin
+  - unit-tests
+  - integration-tests
+  - acceptance
+  - acceptance-log-cache
+  - acceptance-buildin
   - draft
   - release
-  - upgrade-test-main
+  - upgrade-test
 - name: update-sdks
   jobs:
     - update-golang
@@ -107,7 +107,7 @@ resources:
     paths:
       - ci
 
-- name: app-autoscaler-release-main
+- name: app-autoscaler-release
   type: git
   icon: github
   source:
@@ -178,223 +178,174 @@ jobs:
   - set_pipeline: self
     file: ci/ci/autoscaler/pipeline.yml
 
-- name: unit-tests-main
+- name: unit-tests
   public: true
   build_logs_to_retain: 100
   serial: true
   plan:
   - in_parallel:
-    - get: app-autoscaler-release-main
+    - get: app-autoscaler-release
       trigger: true
     - get: ci
   - task: run-unit-tests
     file: ci/ci/autoscaler/tasks/run-unit-tests.yml
     attempts: 3
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
 
-- name: integration-tests-main
+- name: integration-tests
   public: true
   build_logs_to_retain: 100
   serial: true
   serial_groups: [integration]
   plan:
   - in_parallel:
-    - get: app-autoscaler-release-main
+    - get: app-autoscaler-release
       trigger: true
     - get: ci
   - task: run-integration-tests
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
 
-- name: acceptance-main
+- name: acceptance
   public: true
   build_logs_to_retain: 100
   serial: true
   on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-main-params
-      DEPLOYMENT_NAME: "acceptance-main"
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
+    params: &acceptance-params
+      DEPLOYMENT_NAME: "acceptance"
   plan:
   - in_parallel:
     - get: bbl-state
-    - get: app-autoscaler-release-main
-      passed: [unit-tests-main, integration-tests-main]
+    - get: app-autoscaler-release
+      passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
-    input_mapping:
-      release: app-autoscaler-release-main
-    output_mapping:
-      release: app-autoscaler-release-main
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *acceptance-main-params
+      <<: *acceptance-params
       <<: *app-autoscaler-ops-files
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
-      <<: *acceptance-main-params
-    input_mapping:
-      release: app-autoscaler-release-main
+      <<: *acceptance-params
   - in_parallel:
     - task: autoscaler-acceptance-api
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-params
+        <<: *acceptance-params
         SUITES: api
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
     - task: autoscaler-acceptance-app
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-params
+        <<: *acceptance-params
         SUITES: app
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
     - task: autoscaler-acceptance-broker
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-params
+        <<: *acceptance-params
         SUITES: broker
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
 
-- name: acceptance-main-log-cache
+- name: acceptance-log-cache
   public: true
   build_logs_to_retain: 100
   serial: true
   on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-main-log-cache-params
-      DEPLOYMENT_NAME: "acceptance-lc-main"
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
+    params: &acceptance-log-cache-params
+      DEPLOYMENT_NAME: "acceptance-lc"
   plan:
   - in_parallel:
     - get: bbl-state
-    - get: app-autoscaler-release-main
-      passed: [unit-tests-main, integration-tests-main]
+    - get: app-autoscaler-release
+      passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
-    input_mapping:
-      release: app-autoscaler-release-main
-    output_mapping:
-      release: app-autoscaler-release-main
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *acceptance-main-log-cache-params
+      <<: *acceptance-log-cache-params
       <<: *app-autoscaler-ops-files-log-cache
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
-      <<: *acceptance-main-log-cache-params
-    input_mapping:
-      release: app-autoscaler-release-main
+      <<: *acceptance-log-cache-params
   - in_parallel:
     - task: autoscaler-acceptance-api
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-log-cache-params
+        <<: *acceptance-log-cache-params
         SUITES: api
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
     - task: autoscaler-acceptance-app
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-log-cache-params
+        <<: *acceptance-log-cache-params
         SUITES: app
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
     - task: autoscaler-acceptance-broker
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-log-cache-params
+        <<: *acceptance-log-cache-params
         SUITES: broker
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
 
-- name: acceptance-main-buildin
+- name: acceptance-buildin
   public: true
   build_logs_to_retain: 100
   serial: true
   on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-main-buildin-params
-      DEPLOYMENT_NAME: "acceptance-bld-main"
+    params: &acceptance-buildin-params
+      DEPLOYMENT_NAME: "acceptance-bld"
       BUILDIN_MODE: true
       SERVICE_OFFERING_ENABLED: false
-
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   plan:
   - in_parallel:
     - get: bbl-state
-    - get: app-autoscaler-release-main
-      passed: [unit-tests-main, integration-tests-main]
+    - get: app-autoscaler-release
+      passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
-    input_mapping:
-      release: app-autoscaler-release-main
-    output_mapping:
-      release: app-autoscaler-release-main
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *acceptance-main-buildin-params
+      <<: *acceptance-buildin-params
       <<: *app-autoscaler-ops-files-buildin
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   - in_parallel:
     - task: autoscaler-acceptance-api
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-buildin-params
+        <<: *acceptance-buildin-params
         BUILDIN_MODE: true
         SUITES: api
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
     - task: autoscaler-acceptance-app
       attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-main-buildin-params
+        <<: *acceptance-buildin-params
         BUILDIN_MODE: true
         SUITES: app
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
 
-- name: upgrade-test-main
+- name: upgrade-test
   public: true
   build_logs_to_retain: 100
   on_success:
@@ -402,23 +353,19 @@ jobs:
       file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
       params: &upgrade-test-params
         DEPLOYMENT_NAME: "upgrade-test"
-      input_mapping:
-        app-autoscaler-release: app-autoscaler-release-main
   plan:
   - in_parallel:
     - get: bbl-state
     - get: ci
-    - get: app-autoscaler-release-main
+    - get: app-autoscaler-release
       passed:
-      - acceptance-main
-      - acceptance-main-log-cache
-      - acceptance-main-buildin
+      - acceptance
+      - acceptance-log-cache
+      - acceptance-buildin
       trigger: true
     - get: previous-stable-release
   - task: deploy-previous-stable-release
     file: ci/ci/autoscaler/tasks/deploy-previous-autoscaler.yml
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
     params:
       <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
@@ -426,8 +373,6 @@ jobs:
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *upgrade-test-params
-    input_mapping:
-      release: app-autoscaler-release-main
   - task: autoscaler-pre-upgrade
     file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -435,23 +380,15 @@ jobs:
       SUITES: |
         pre_upgrade
       NODES: 1
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
-    input_mapping:
-      release: app-autoscaler-release-main
-    output_mapping:
-      release: app-autoscaler-release-main
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   - task: autoscaler-post-upgrade
     file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -459,8 +396,6 @@ jobs:
       SUITES: |
         post_upgrade
       NODES: 1
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
 
 - name: release
   public: true
@@ -470,25 +405,18 @@ jobs:
     - get: release-bucket
     - get: acceptance-tests-bucket
     - get: gh-release
-    - get: app-autoscaler-release-main
-      passed: [upgrade-test-main]
+    - get: app-autoscaler-release
+      passed: [upgrade-test]
     - get: ci
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
-    input_mapping:
-      release: app-autoscaler-release-main
-    output_mapping:
-      release: app-autoscaler-release-main
   - task: release-autoscaler
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
       GITHUB_TOKEN: ((autoscaler_access_token))
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
-      ci: ci
   - put: release-bucket
     params:
       file: "build/artifacts/app-autoscaler-v*.tgz"
@@ -501,8 +429,8 @@ jobs:
       tag: build/tag
       body: build/changelog.md
       globs: [build/artifacts/*]
-      commitish: app-autoscaler-release-main/.git/ref
-  - put: app-autoscaler-release-main
+      commitish: app-autoscaler-release/.git/ref
+  - put: app-autoscaler-release
     params:
       rebase: true
       repository: app-autoscaler-release
@@ -514,18 +442,16 @@ jobs:
 #  plan:
 #  - in_parallel:
 #    - get: gh-release
-#    - get: app-autoscaler-release-main
+#    - get: app-autoscaler-release
 #    - get: app-autoscaler-release-pr
 #      passed: [acceptance-pr]
 #      trigger: true
 #  - task: dummy-release-autoscaler
-#    file: app-autoscaler-release-main/ci/autoscaler/tasks/release-autoscaler.yml
+#    file: app-autoscaler-release/ci/autoscaler/tasks/release-autoscaler.yml
 #    params:
 #      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
 #      GITHUB_TOKEN: ((autoscaler_access_token))
 #      PERFORM_BOSH_RELEASE: false
-#    input_mapping:
-#      app-autoscaler-release: app-autoscaler-release-pr
 
 - name: draft
   public: true
@@ -534,8 +460,8 @@ jobs:
   - in_parallel:
     - get: ci
     - get: gh-release
-    - get: app-autoscaler-release-main
-      passed: [upgrade-test-main]
+    - get: app-autoscaler-release
+      passed: [upgrade-test]
       trigger: true
   - task: dummy-release-autoscaler
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
@@ -543,16 +469,13 @@ jobs:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
       GITHUB_TOKEN: ((autoscaler_access_token))
       PERFORM_BOSH_RELEASE: false
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
-      ci: ci
 
 - name: update-golang
   public: true
   build_logs_to_retain: 100
   plan:
   - in_parallel:
-    - get: app-autoscaler-release-main
+    - get: app-autoscaler-release
     - get: java-release
     - get: golang-release
       trigger: true
@@ -561,15 +484,13 @@ jobs:
     file: ci/ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: golang
-      app-autoscaler-release: app-autoscaler-release-main
-    input_mapping:
 
 - name: update-java
   public: true
   build_logs_to_retain: 100
   plan:
   - in_parallel:
-    - get: app-autoscaler-release-main
+    - get: app-autoscaler-release
     - get: java-release
       trigger: true
     - get: golang-release
@@ -578,5 +499,3 @@ jobs:
     file: ci/ci/autoscaler/tasks/update-sdk/task.yml
     params:
       type: java
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main

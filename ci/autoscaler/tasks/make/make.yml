@@ -9,14 +9,15 @@ image_resource:
 
 params:
   TARGETS:
+  AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
-- name: release
+- name: app-autoscaler-release
 - name: ci
 
 outputs:
-- name: release  
+- name: app-autoscaler-release
 
 run:
   path: ci/ci/autoscaler/tasks/make/make.sh
-  args: [ release ]
+  args: [ app-autoscaler-release ]

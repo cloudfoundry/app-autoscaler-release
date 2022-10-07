@@ -22,11 +22,12 @@ params:
 
 
 inputs:
-- name: bbl-state
 - name: app-autoscaler-release
+- name: ci
+- name: bbl-state
 - name: previous-stable-release
 
 outputs:
 
 run:
-  path: app-autoscaler-release/ci/autoscaler/scripts/deploy-previous-autoscaler.sh
+  path: ci/ci/autoscaler/scripts/deploy-previous-autoscaler.sh

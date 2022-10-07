@@ -11,12 +11,14 @@ params:
   SYSTEM_DOMAIN:
   SERVICE_OFFERING_ENABLED: false
   SKIP_SSL_VALIDATION: false
+  AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
+- name: app-autoscaler-release
+- name: ci
 - name: bbl-state
-- name: release
 
 outputs:
 
 run:
-  path: release/ci/autoscaler/scripts/register-broker.sh
+  path: ci/ci/autoscaler/scripts/register-broker.sh

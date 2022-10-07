@@ -20,9 +20,9 @@ params:
   AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
-- name: bbl-state
 - name: app-autoscaler-release
 - name: ci
+- name: bbl-state
 
 outputs:
 

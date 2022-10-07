@@ -21,6 +21,7 @@ params:
   # name of the updated repo to be pushed at the end
   REPO_OUT: pushme
   ROOT_DIR: app-autoscaler-release
+  AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
 - name: app-autoscaler-release
