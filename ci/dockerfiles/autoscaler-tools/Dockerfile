@@ -47,9 +47,9 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 ARG GO_VERSION=1.19
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
-RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp && \
-    tar xzvf /tmp/go${GO_VERSION}.linux-amd64.tar.gz -C /usr/local && \
-    mkdir $GOPATH && \
+RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
+    tar xzvf /tmp/go${GO_VERSION}.linux-amd64.tar.gz -C /usr/local &&\
+    mkdir $GOPATH &&\
     rm -rf /tmp/* &&\
     go version
 
