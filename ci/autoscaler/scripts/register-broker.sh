@@ -7,7 +7,7 @@ source "${script_dir}/pr-vars.source.sh"
 
 system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
 deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
-service_broker_name="${deployment_name}servicebroker"
+service_broker_name="${SERVICE_BROKER_NAME:-"${deployment_name}servicebroker"}"
 autoscaler_root=${AUTOSCALER_DIR:-app-autoscaler-release}
 bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 
