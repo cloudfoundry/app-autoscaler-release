@@ -8,7 +8,7 @@ image_resource:
     tag: main
 
 cache:
-  - path:
+  - path: /go/pkg
 
 params:
   # Optional: override the user to access bosh
