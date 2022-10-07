@@ -7,8 +7,6 @@ image_resource:
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
     tag: main
 
-cache:
-  - path: /go/pkg
 
 params:
   # Optional: override the user to access bosh

@@ -6,8 +6,6 @@ image_resource:
   source: 
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-test
     tag: main
-cache:
-  - path: /go/pkg
 inputs:
 - name: app-autoscaler-release
 
