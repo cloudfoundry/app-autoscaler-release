@@ -35,6 +35,7 @@ pushd "${autoscaler_dir}" > /dev/null
   configure_git_credentials
 
   git checkout -b "${update_branch}"
+
   git commit -a -m "${pr_title}"
 
   printenv GITHUB_ACCESS_TOKEN | gh auth login --with-token -h github.com
