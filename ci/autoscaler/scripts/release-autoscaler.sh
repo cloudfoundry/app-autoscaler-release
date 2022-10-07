@@ -4,10 +4,10 @@
 # GITHUB_TOKEN=ghp_[your token]   DEST=${PWD}/../../../build VERSION="8.0.0" BUILD_OPTS="--force" PREV_VERSION=6.0.0  ./release-autoscaler.sh
 
 [ -n "${DEBUG}" ] && set -x
-set -euo pipefail
 
+set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-root_dir=$(realpath "${ROOT_DIR:-"${script_dir}/../../../"}" )
+source "${script_dir}/vars.source.sh"
 
 previous_version=${PREV_VERSION:-$(cat gh-release/tag)}
 mkdir -p 'build'
@@ -45,13 +45,13 @@ function create_tests() {
   local version=$1
   local build_path=$2
   echo " - creating acceptance test artifact"
-  pushd "${root_dir}" > /dev/null
+  pushd "${autoscaler_dir}" > /dev/null
     make acceptance-release VERSION="${version}" DEST="${build_path}/artifacts/"
   popd > /dev/null
 }
 
 function commit_release(){
-  pushd "${root_dir}"
+  pushd "${autoscaler_dir}"
   git add -A
   git status
   git commit -m "created release v${VERSION}"
@@ -59,7 +59,7 @@ function commit_release(){
 
 function create_bosh_config(){
    # generate the private.yml file with the credentials
-   config_file="${root_dir}/config/private.yml"
+   config_file="${autoscaler_dir}/config/private.yml"
     cat > "$config_file" <<EOF
 ---
 blobstore:
@@ -97,7 +97,7 @@ function setup_git(){
 }
 
 
-pushd "${root_dir}" > /dev/null
+pushd "${autoscaler_dir}" > /dev/null
   setup_git
   create_bosh_config
   generate_changelog

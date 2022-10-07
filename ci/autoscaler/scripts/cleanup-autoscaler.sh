@@ -1,14 +1,9 @@
 #!/bin/bash
+
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-#shellcheck disable=SC1091
-source "${script_dir}/pr-vars.source.sh"
+source "${script_dir}/vars.source.sh"
 
-system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
-deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
-service_broker_name="${deployment_name}servicebroker"
-autoscaler_root=${AUTOSCALER_DIR:-app-autoscaler-release}
-bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
 RELEASE_SHA=${RELEASE_SHA:-""}
 CURRENT_COMMIT_HASH=${CURRENT_COMMIT_HASH:-${RELEASE_SHA}}
 
@@ -22,7 +17,7 @@ CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 cf auth admin "$CF_ADMIN_PASSWORD"
 
 echo "# Cleaning up from acceptance tests"
-pushd "${autoscaler_root}/src/acceptance" > /dev/null
+pushd "${autoscaler_dir}/src/acceptance" > /dev/null
   ./cleanup.sh
 popd  > /dev/null
 

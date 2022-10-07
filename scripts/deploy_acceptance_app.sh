@@ -2,7 +2,7 @@
 set -euo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 pushd "${script_dir}" > /dev/null
-source ./pr-vars.source.sh
+source ./vars.source.sh
 test_app_name=test-app
 #test_service_name=test-app-service
 test_org="testing-pr-app"

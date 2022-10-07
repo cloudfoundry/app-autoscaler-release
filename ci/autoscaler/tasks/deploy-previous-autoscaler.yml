@@ -8,9 +8,6 @@ image_resource:
     tag: main
 
 params:
-  # Required: the system domain to configure for the deployment
-  SYSTEM_DOMAIN:
-
   # Optional: override the user to access bosh
   BOSH_USERNAME: admin
 

@@ -2,19 +2,11 @@
 
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-#shellcheck disable=SC1091
-source "${script_dir}/pr-vars.source.sh"
+source "${script_dir}/vars.source.sh"
 
-system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
-deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
-bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
-autoscaler_dir="${AUTOSCALER_DIR:-app-autoscaler-release}"
-skip_teardown="${SKIP_TEARDOWN:-false}"
-skip_ssl_validation="${SKIP_SSL_VALIDATION:-true}"
-name_prefix="${NAME_PREFIX:-ASATS}"
-# shellcheck disable=SC2034
-buildin_mode="${BUILDIN_MODE:-false}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
+skip_ssl_validation=${SKIP_SSL_VALIDATION:-'true'}
+skip_teardown="${SKIP_TEARDOWN:-false}"
 suites=${SUITES:-"api app broker"}
 ginkgo_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
@@ -87,6 +79,7 @@ echo
 
 #run suites
 if [ "${suites_to_run}" != "" ]; then
+  # shellcheck disable=SC2086
   SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$ginkgo_opts" ${suites_to_run}
 else
   echo "Nothing to run!"

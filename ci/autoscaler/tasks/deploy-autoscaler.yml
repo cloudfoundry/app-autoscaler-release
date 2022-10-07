@@ -7,9 +7,8 @@ image_resource:
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
     tag: main
 
-params:
-  SYSTEM_DOMAIN: "autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
 
+params:
   # Optional: override the user to access bosh
   BOSH_USERNAME: admin
 

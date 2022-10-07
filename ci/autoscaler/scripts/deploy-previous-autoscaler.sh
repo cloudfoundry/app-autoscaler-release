@@ -1,9 +1,8 @@
 #!/bin/bash
-#! /usr/bin/env bash
 
-set -eo pipefail
-script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
+set -euo pipefail
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source "${script_dir}/vars.source.sh"
 
 pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
