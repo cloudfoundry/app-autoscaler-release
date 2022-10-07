@@ -220,7 +220,7 @@ jobs:
   - task: run-integration-tests
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
 
-- name: acceptance-main
+- name: acceptance
   public: true
   build_logs_to_retain: 100
   serial: true
@@ -362,7 +362,7 @@ jobs:
     - get: ci
     - get: bbl-state
       trigger: true
-    - get: app-autoscaler-release-main
+    - get: app-autoscaler-release
       resource: app-autoscaler-release-performance-test
     ensure:
       task: cleanup
@@ -374,19 +374,17 @@ jobs:
         SERIAL: "false"
 
         #  - task: check-diego-cell-count
-        #    file: app-autoscaler-release-main/ci/autoscaler/tasks/check-diego-cell-count.yml
-        #    input_mapping:
-        #      app-autoscaler-release: app-autoscaler-release-main
+        #    file: app-autoscaler-release/ci/autoscaler/tasks/check-diego-cell-count.yml
         #    params:
         #      expected_cells: 4
         #    on_failure:
         #      do:
         #      - task: combine-ops-files
-        #        file: app-autoscaler-release-main/ci/autoscaler/tasks/combine-ops.yml
+        #        file: app-autoscaler-release/ci/autoscaler/tasks/combine-ops.yml
         #        input_mapping:
-        #          custom-ops: app-autoscaler-release-main
-        #          app-autoscaler-ci: app-autoscaler-release-main
-        #          ci: app-autoscaler-release-main
+        #          custom-ops: app-autoscaler-release
+        #          app-autoscaler-ci: app-autoscaler-release
+        #          ci: app-autoscaler-release
         #        output_mapping:
         #          combined-ops: ops-files
         #      - task: scale-up-cf
@@ -410,27 +408,17 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: mod-tidy vendor db scheduler
-    input_mapping:
-      release: app-autoscaler-release-main
-    output_mapping:
-      release: app-autoscaler-release-main
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *performance-env
       <<: *app-autoscaler-ops-files
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *performance-env
-    input_mapping:
-      app-autoscaler-release: app-autoscaler-release-main
   - task: setup-performance
     file: ci/ci/autoscaler/tasks/make/make.yml
-    input_mapping:
-      release: app-autoscaler-release-main
     params:
       TARGETS: setup-performance
   - task: run-performance
