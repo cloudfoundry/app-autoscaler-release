@@ -213,6 +213,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-params
       DEPLOYMENT_NAME: "acceptance"
+      DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state

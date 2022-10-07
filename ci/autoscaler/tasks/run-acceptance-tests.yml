@@ -8,8 +8,6 @@ image_resource:
     tag: main
 
 params:
-  SYSTEM_DOMAIN:
-  NAME_PREFIX: ASATS
   NODES: 3
 inputs:
 - name: app-autoscaler-release

@@ -2,13 +2,7 @@
 # shellcheck disable=SC2086
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-#shellcheck disable=SC1091
 source "${script_dir}/pr-vars.source.sh"
-system_domain="${SYSTEM_DOMAIN:-autoscaler.app-runtime-interfaces.ci.cloudfoundry.org}"
-bbl_state_path="${BBL_STATE_PATH:-bbl-state/bbl-state}"
-deployment_name="${DEPLOYMENT_NAME:-app-autoscaler}"
-buildin_mode="${BUILDIN_MODE:-false}"
-autoscaler_dir="${AUTOSCALER_DIR:-$(realpath -e app-autoscaler-release)}"
 deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-""}"
 bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"
