@@ -1,12 +1,5 @@
 ---
 anchors:
-  performance-env: &performance-env
-    DEPLOYMENT_NAME: "performance"
-    NAME_PREFIX: "performance"
-    BOSH_FIX_RELEASES: true
-    NODES: 1
-    GINKGO_OPTS: "--fail-fast"
-    SERIAL: "false"
 
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
@@ -354,13 +347,11 @@ jobs:
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-buildin-params
-        BUILDIN_MODE: true
         SUITES: api
     - task: autoscaler-acceptance-app
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-buildin-params
-        BUILDIN_MODE: true
         SUITES: app
 
 - name: performance
@@ -373,6 +364,15 @@ jobs:
       trigger: true
     - get: app-autoscaler-release-main
       resource: app-autoscaler-release-performance-test
+    ensure:
+      task: cleanup
+      file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+      params: &performance-env
+        DEPLOYMENT_NAME: "performance"
+        NODES: 1
+        GINKGO_OPTS: "--fail-fast"
+        SERIAL: "false"
+
         #  - task: check-diego-cell-count
         #    file: app-autoscaler-release-main/ci/autoscaler/tasks/check-diego-cell-count.yml
         #    input_mapping:
