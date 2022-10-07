@@ -18,6 +18,11 @@ function configure_git_credentials(){
   fi
 }
 
+if [ "$( git status -s | wc -l)" -eq 0 ]; then
+  echo " - Nothing changed !! "
+  exit 0
+fi
+
 package_version=$(cat ./version)
 package_sha=$(cat ./vendored-commit)
 
