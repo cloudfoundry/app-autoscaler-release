@@ -47,18 +47,17 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 ARG GO_VERSION=1.19
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
-RUN \
-  wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp && \
-  tar xzvf /tmp/go${GO_VERSION}.linux-amd64.tar.gz -C /usr/local && \
-  mkdir $GOPATH && \
-  rm -rf /tmp/*
+RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp && \
+    tar xzvf /tmp/go${GO_VERSION}.linux-amd64.tar.gz -C /usr/local && \
+    mkdir $GOPATH && \
+    rm -rf /tmp/* &&\
+    go version
 
 ENV POSTGRES_VERSION 12
-RUN \
-      apt-get update && \
-      apt-get install -y postgresql-${POSTGRES_VERSION} && \
-      apt-get install -y libjson-perl && \
-      apt-get clean
+RUN apt-get update && \
+    apt-get install -y postgresql-${POSTGRES_VERSION} && \
+    apt-get install -y libjson-perl && \
+    apt-get clean
 
 # Install bosh_cli
 ENV BOSH_VERSION 6.4.4
@@ -69,32 +68,38 @@ RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_V
 # Install bbl
 ENV BBL_VERSION 8.4.44
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${BBL_VERSION}/bbl-v${BBL_VERSION}_linux_x86-64 && \
-  mv bbl-* /usr/local/bin/bbl && \
-  chmod +x /usr/local/bin/bbl
+  mv bbl-* /usr/local/bin/bbl &&\
+  chmod +x /usr/local/bin/bbl &&\
+  bbl --version
 
 # Install credhub
 ENV CREDHUB_VERSION 2.9.0
 RUN wget -q https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-${CREDHUB_VERSION}.tgz && \
-  mv credhub /usr/local/bin/credhub
+  mv credhub /usr/local/bin/credhub &&\
+  credhub --version
 
 # Install uaac
-RUN gem install cf-uaac
+RUN gem install cf-uaac &&\
+    uaac --version
 
 # Install jq as a nice to have on container debugging
 ENV JQ_VERSION 1.6
 RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 && \
     mv jq-linux64 /usr/local/bin/jq && \
-    chmod +x /usr/local/bin/jq
+    chmod +x /usr/local/bin/jq &&\
+    jq --version
 
 # get maven
 ENV MAVEN_VERSION 3.6.3
+ENV MAVEN_HOME /opt/maven
 RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
 	tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \
 	ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
 	ln -s /opt/maven/bin/mvn /usr/local/bin && \
-	rm -f /tmp/apache-maven-${MAVEN_VERSION}.tar.gz
-ENV MAVEN_HOME /opt/maven
+	rm -f /tmp/apache-maven-${MAVEN_VERSION}.tar.gz &&\
+    mvn --version
+
 
 # install postgres
 ENV PGDATA /var/lib/postgresql/${POSTGRES_VERSION}/main
@@ -107,26 +112,18 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && \
   apt-get update -y &&\
   apt-get install google-cloud-sdk -y &&\
-  apt-get clean
+  apt-get clean &&\
+  gcloud version
 
 
 ARG GINKGO_VERSION=2.1.3
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION}
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
+    ginkgo version
 
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && apt-get update -y \
     && apt install nodejs -y \
-    && node -v \
-    && apt-get clean
+    && apt-get clean \
+    && npm --version \
+    && node -v
 
-
-RUN echo "jq version installed $(jq --version)" &&\
-    echo "mvn version installed $(mvn --version)" &&\
-    echo "npm version installed $(npm --version)" &&\
-    echo "go version installed $(go version)" &&\
-    echo "ginkgo version installed $(ginkgo version)" &&\
-    echo "bosh version installed $(bosh --version)" &&\
-    echo "bbl version installed $(bbl --version)" &&\
-    echo "credhub version installed $(credhub --version)" &&\
-    echo "uaac version installed $(uaac --version)" &&\
-    echo "gcloud version installed $(gcloud version)"
