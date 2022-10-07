@@ -2,7 +2,8 @@
 # shellcheck disable=SC2086
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source "${script_dir}/pr-vars.source.sh"
+source "${script_dir}/vars.source.sh"
+
 deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-""}"
 bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"

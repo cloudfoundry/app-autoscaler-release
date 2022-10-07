@@ -1,7 +1,9 @@
 #!/bin/bash
+
 set -euo pipefail
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${script_dir}/pr-vars.source.sh"
+source "${script_dir}/vars.source.sh"
+
 DATE="date"
 which gdate > /dev/null && DATE="gdate"
 

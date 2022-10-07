@@ -1,7 +1,8 @@
 #!/bin/bash
+
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source "${script_dir}/pr-vars.source.sh"
+source "${script_dir}/vars.source.sh"
 
 RELEASE_SHA=${RELEASE_SHA:-""}
 CURRENT_COMMIT_HASH=${CURRENT_COMMIT_HASH:-${RELEASE_SHA}}

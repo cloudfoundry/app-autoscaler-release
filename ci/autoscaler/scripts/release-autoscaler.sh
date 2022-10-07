@@ -5,10 +5,9 @@
 
 [ -n "${DEBUG}" ] && set -x
 
-# shellcheck disable=SC2086
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source "${script_dir}/pr-vars.source.sh"
+source "${script_dir}/vars.source.sh"
 
 previous_version=${PREV_VERSION:-$(cat gh-release/tag)}
 mkdir -p 'build'

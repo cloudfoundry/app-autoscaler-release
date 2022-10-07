@@ -2,7 +2,7 @@
 
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source "${script_dir}/pr-vars.source.sh"
+source "${script_dir}/vars.source.sh"
 
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
 skip_ssl_validation=${SKIP_SSL_VALIDATION:-'true'}
@@ -79,6 +79,7 @@ echo
 
 #run suites
 if [ "${suites_to_run}" != "" ]; then
+  # shellcheck disable=SC2086
   SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$ginkgo_opts" ${suites_to_run}
 else
   echo "Nothing to run!"
