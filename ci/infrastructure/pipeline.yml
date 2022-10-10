@@ -207,7 +207,6 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
-    - get: app-autoscaler-release
     - get: prometheus-boshrelease
       trigger: true
     - get: bbl-state
@@ -217,21 +216,22 @@ jobs:
     - get: ci
   - task: combine-ops-files
     file: ci/ci/infrastructure/tasks/combine-ops.yml
-    input_mapping:
-      app-autoscaler-release: ci
     output_mapping:
       combined-ops: ops-files
   - task: deploy-cf
     file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
     input_mapping:
-      bbl-state: bbl-state
-      cf-deployment: cf-deployment
-      ops-files: ops-files
       vars-files: autoscaler-env-vars-store
     params:
-      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/prometheus/operators/cf/add-prometheus-uaa-clients.yml operations/prometheus/operators/cf/add-grafana-uaa-clients.yml"
-      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=2 -v grafana_redirect_uri=https://grafana.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org/login/generic_oauth"
+      OPS_FILES: |
+        operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml
+        operations/cf/use-compiled-releases.yml
+        operations/autoscaler/enable_mtls.yml
+        operations/prometheus/operators/cf/add-prometheus-uaa-clients.yml
+        operations/prometheus/operators/cf/add-grafana-uaa-clients.yml
+      BOSH_DEPLOY_ARGS: |
+        -v diego_cell_instances=2
+        -v grafana_redirect_uri=https://grafana.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org/login/generic_oauth
     ensure:
       put: autoscaler-env-vars-store
       params:

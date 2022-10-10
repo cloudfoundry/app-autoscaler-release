@@ -8,7 +8,6 @@ image_resource:
 inputs:
   - name: cf-deployment
   - name: prometheus-boshrelease
-  - name: app-autoscaler-release
   - name: ci
 outputs:
   - name: combined-ops
