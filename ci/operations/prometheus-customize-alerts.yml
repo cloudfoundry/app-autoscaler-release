@@ -3,5 +3,9 @@
   value: 7200
 
 - type: replace
+  path: /instance_groups/name=prometheus2/jobs/name=bosh_alerts/properties?/bosh_alerts?/job_predict_ephemeral_disk_full?/evaluation_time?
+  value: 0
+
+- type: replace
   path: /instance_groups/name=prometheus2/jobs/name=cloudfoundry_alerts/properties?/cloudfoundry_alerts?/router_requests_drop?/threshold?
-  value: 1
+  value: 0
