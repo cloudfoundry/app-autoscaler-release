@@ -7,7 +7,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.7
 	github.com/onsi/ginkgo/v2 v2.2.0
-	github.com/onsi/gomega v1.20.2
+	github.com/onsi/gomega v1.21.1
 )
 
 require (
