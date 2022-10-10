@@ -3,6 +3,7 @@
     p(property,nil) || []
   end
 
+  # TODO : think of DRY for this function
   def generate_db_url(db_name, job_name)
     db_scheme = p("autoscaler.#{db_name}.db_scheme")
     db_address = p("autoscaler.#{db_name}.address")

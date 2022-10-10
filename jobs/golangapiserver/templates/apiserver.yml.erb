@@ -18,6 +18,7 @@ require 'yaml'
     else
       db_url = db_role['name'] + ":" + db_role['password'] + "@tcp(" + db_address + ":" + db_port.to_s + ")/" + db_database['name'] + "?tls=" + p("autoscaler.#{db_name}.sslmode")
     end
+
     unless p("autoscaler.#{db_name}.tls.ca") == ""
       db_url = db_url + "&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
     end
@@ -30,7 +31,7 @@ require 'yaml'
     db_url
   end
 
-  job_name = 'apiserver'
+  job_name = 'golangapiserver'
 
   if p("autoscaler.apiserver.use_buildin_mode") == false
     binding_db_url = generate_db_url('binding_db', job_name)

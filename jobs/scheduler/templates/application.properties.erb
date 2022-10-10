@@ -29,7 +29,7 @@
     db_url
   end
 
-  job_name = 'scalingengine'
+  job_name = 'scheduler'
 
   schedulerdb_role = p_arr("autoscaler.scheduler_db.roles").find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
   policydb_role = p_arr("autoscaler.policy_db.roles").find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' }
