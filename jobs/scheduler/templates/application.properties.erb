@@ -13,10 +13,12 @@
     db_database = p_arr("autoscaler.#{db_name}.databases").find { |database| database['tag'] == db_name.tr('_', '') or database['tag'] == 'default' }
 
     if db_scheme == "postgres"
-      db_url = db_scheme + "://" + ERB::Util.url_encode(db_role['name']) + ":" + ERB::Util.url_encode(db_role['password']) + "@" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?application_name=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
-    else
-      db_url = db_role['name'] + ":" + db_role['password'] + "@tcp(" + db_address + ":" + db_port.to_s + ")/" + db_database['name'] + "?tls=" + p("autoscaler.#{db_name}.sslmode")
+      db_url = "jdbc:postgresql://" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?ApplicationName=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
+    else #mysql case
+      db_url = "jdbc:mysql://" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?autoReconnect=true"
+      #FIXME revert all mysql changes as we do not have to enable tls for mysql
     end
+
     unless p("autoscaler.#{db_name}.tls.ca") == ""
       db_url = db_url + "&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
     end
@@ -50,9 +52,9 @@ spring.datasource.password=<%=schedulerdb_role['password'] %>
 #datasource for policy 
 
 <% if p("autoscaler.policy_db.db_scheme") == "postgres" %>
-  spring.policy-db-datasource.driverClassName=org.postgresql.Driver
+spring.policy-db-datasource.driverClassName=org.postgresql.Driver
 <% else %>
-  spring.policy-db-datasource.driverClassName=com.mysql.cj.jdbc.Driver
+spring.policy-db-datasource.driverClassName=com.mysql.cj.jdbc.Driver
 <% end %>
 spring.policy-db-datasource.url=<%=policydb_url %>
 spring.policy-db-datasource.password=<%=policydb_role['password'] %>

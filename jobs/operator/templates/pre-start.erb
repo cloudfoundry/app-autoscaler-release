@@ -40,6 +40,7 @@ SSLMODE='<%= p("autoscaler.lock_db.sslmode") %>'
   <% unless p('autoscaler.lock_db.tls.ca') == "" %>
     JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
     DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
+    # TODO - clarify if we need to enable TLS for lockdb
   <% end %>
 <% else %>
   JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
