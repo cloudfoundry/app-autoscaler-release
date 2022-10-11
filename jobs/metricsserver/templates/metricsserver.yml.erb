@@ -50,7 +50,7 @@ db:
     max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
-  instancemetrics_db:
+  instance_metrics_db:
     url: <%= instance_metrics_db_url %>
     max_open_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_idle_connections") %>

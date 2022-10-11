@@ -59,16 +59,16 @@ describe "metricsserver" do
         end
       end
 
-      context "instancemetrics_db" do
+      context "instance_metrics_db" do
         it "includes the ca, cert and key in url when configured" do
-          rendered_template["db"]["instancemetrics_db"]["url"].tap do |url|
+          rendered_template["db"]["instance_metrics_db"]["url"].tap do |url|
             check_if_certs_in_url(url, "instancemetrics_db")
           end
         end
 
         it "does not include the ca, cert and key in url when not configured" do
           properties["autoscaler"]["instancemetrics_db"]["tls"] = nil
-          rendered_template["db"]["instancemetrics_db"]["url"].tap do |url|
+          rendered_template["db"]["instance_metrics_db"]["url"].tap do |url|
             check_if_certs_not_in_url(url, "instancemetrics_db")
           end
         end

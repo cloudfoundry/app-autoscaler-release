@@ -12,9 +12,9 @@ templates:
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
-  appinstancemetrics_db_ca.crt.erb: config/certs/appinstancemetrics_db/ca.crt
-  appinstancemetrics_db.crt.erb: config/certs/appinstancemetrics_db/crt
-  appinstancemetrics_db.key.erb: config/certs/appinstancemetrics_db/key
+  appinstancemetrics_db_ca.crt.erb: config/certs/instancemetrics_db/ca.crt
+  appinstancemetrics_db.crt.erb: config/certs/instancemetrics_db/crt
+  appinstancemetrics_db.key.erb: config/certs/instancemetrics_db/key
 
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
@@ -77,13 +77,13 @@ properties:
     description: "The list of database roles used in instancemetricsdb database including name/password"
   autoscaler.instancemetrics_db.tls.ca:
     default: ''
-    description: 'PEM-encoded ca certificate of tls database server'
+    description: 'File location of PEM-encoded ca certificate for TLS database server'
   autoscaler.instancemetrics_db.tls.crt:
     default: ''
-    description: 'PEM-encoded certificate of tls database client'
+    description: 'File location of PEM-encoded certificate for TLS database client'
   autoscaler.instancemetrics_db.tls.key:
     default: ''
-    description: 'PEM-encoded key of tls database client'
+    description: 'File location of PEM-encoded key for TLS database client'
   autoscaler.instancemetrics_db.sslmode:
     default: disable
     description: "The sslmode to connect to postgres server"

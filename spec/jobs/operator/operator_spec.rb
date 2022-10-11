@@ -58,46 +58,46 @@ describe "operator" do
         end
       end
 
-      context "instancemetrics_db " do
+      context "instance_metrics_db " do
         it "includes the ca, cert and key in url when configured" do
-          rendered_template["instancemetrics_db"]["db"]["url"].tap do |url|
+          rendered_template["instance_metrics_db"]["db"]["url"].tap do |url|
             check_if_certs_in_url(url, "instancemetrics_db")
           end
         end
 
         it "does not include the ca, cert and key in url when not configured" do
           properties["autoscaler"]["instancemetrics_db"]["tls"] = nil
-          rendered_template["instancemetrics_db"]["db"]["url"].tap do |url|
+          rendered_template["instance_metrics_db"]["db"]["url"].tap do |url|
             check_if_certs_not_in_url(url, "instancemetrics_db ")
           end
         end
       end
 
-      context "appmetrics_db" do
+      context "app_metrics_db" do
         it "includes the ca, cert and key in url when configured" do
-          rendered_template["appmetrics_db"]["db"]["url"].tap do |url|
+          rendered_template["app_metrics_db"]["db"]["url"].tap do |url|
             check_if_certs_in_url(url, "appmetrics_db")
           end
         end
 
         it "does not include the ca, cert and key in url when not configured" do
           properties["autoscaler"]["appmetrics_db"]["tls"] = nil
-          rendered_template["appmetrics_db"]["db"]["url"].tap do |url|
+          rendered_template["app_metrics_db"]["db"]["url"].tap do |url|
             check_if_certs_not_in_url(url, "appmetrics_db")
           end
         end
       end
 
-      context "scalingengine_db" do
+      context "scaling_engine_db" do
         it "includes the ca, cert and key in url when configured" do
-          rendered_template["scalingengine_db"]["db"]["url"].tap do |url|
+          rendered_template["scaling_engine_db"]["db"]["url"].tap do |url|
             check_if_certs_in_url(url, "scalingengine_db")
           end
         end
 
         it "does not include the ca, cert and key in url when not configured" do
           properties["autoscaler"]["scalingengine_db"]["tls"] = nil
-          rendered_template["scalingengine_db"]["db"]["url"].tap do |url|
+          rendered_template["scaling_engine_db"]["db"]["url"].tap do |url|
             check_if_certs_not_in_url(url, "scalingengine_db")
           end
         end
