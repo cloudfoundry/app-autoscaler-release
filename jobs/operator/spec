@@ -17,9 +17,9 @@ templates:
   appmetrics_db_ca.crt.erb: config/certs/appmetrics_db/ca.crt
   appmetrics_db.crt.erb: config/certs/appmetrics_db/crt
   appmetrics_db.key.erb: config/certs/appmetrics_db/key
-  appinstancemetrics_db_ca.crt.erb: config/certs/appinstancemetrics_db/ca.crt
-  appinstancemetrics_db.crt.erb: config/certs/appinstancemetrics_db/crt
-  appinstancemetrics_db.key.erb: config/certs/appinstancemetrics_db/key
+  appinstancemetrics_db_ca.crt.erb: config/certs/instancemetrics_db/ca.crt
+  appinstancemetrics_db.crt.erb: config/certs/instancemetrics_db/crt
+  appinstancemetrics_db.key.erb: config/certs/instancemetrics_db/key
   lock_db_ca.crt.erb: config/certs/lock_db/ca.crt
   lock_db.crt.erb: config/certs/lock_db/crt
   lock_db.key.erb: config/certs/lock_db/key

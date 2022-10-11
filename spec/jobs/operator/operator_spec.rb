@@ -58,17 +58,17 @@ describe "operator" do
         end
       end
 
-      context "appinstancemetrics_db" do
+      context "instancemetrics_db " do
         it "includes the ca, cert and key in url when configured" do
-          rendered_template["appinstancemetrics_db"]["db"]["url"].tap do |url|
-            check_if_certs_in_url(url, "appinstancemetrics_db")
+          rendered_template["instancemetrics_db"]["db"]["url"].tap do |url|
+            check_if_certs_in_url(url, "instancemetrics_db")
           end
         end
 
         it "does not include the ca, cert and key in url when not configured" do
-          properties["autoscaler"]["appinstancemetrics_db"]["tls"] = nil
-          rendered_template["appinstancemetrics_db"]["db"]["url"].tap do |url|
-            check_if_certs_not_in_url(url, "appinstancemetrics_db")
+          properties["autoscaler"]["instancemetrics_db"]["tls"] = nil
+          rendered_template["instancemetrics_db"]["db"]["url"].tap do |url|
+            check_if_certs_not_in_url(url, "instancemetrics_db ")
           end
         end
       end
