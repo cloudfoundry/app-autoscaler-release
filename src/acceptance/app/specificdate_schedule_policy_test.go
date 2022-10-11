@@ -56,6 +56,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		})
 
 		It("should scale", func() {
+			pollTime := 15 * time.Second
 			By(fmt.Sprintf("waiting for scheduledInstanceInit: %d", scheduledInstanceInit))
 			jobRunTime := time.Until(startDateTime.Add(1 * time.Minute))
 			WaitForNInstancesRunning(appGUID, 3, jobRunTime)
@@ -63,15 +64,16 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			By(fmt.Sprintf("waiting for scheduleInstanceMin: %d", scheduleInstanceMin))
 			jobRunTime = time.Until(endDateTime)
 			Eventually(func() int { return RunningInstances(appGUID, jobRunTime) }).
-				WithTimeout(jobRunTime).
-				WithPolling(15 * time.Second).
+				//+/- poll time error margin.
+				WithTimeout(jobRunTime + pollTime).
+				WithPolling(pollTime).
 				Should(Equal(2))
 
-			jobRunTime = time.Until(endDateTime)
 			By(fmt.Sprintf("waiting till end of schedule %dS and should stay %d instances", int(jobRunTime.Seconds()), scheduleInstanceMin))
 			Consistently(func() int { return RunningInstances(appGUID, jobRunTime) }).
 				WithTimeout(jobRunTime).
-				WithPolling(15 * time.Second).
+				//+/- poll time error margin.
+				WithPolling(time.Until(endDateTime) - pollTime).
 				Should(Equal(2))
 
 			WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
