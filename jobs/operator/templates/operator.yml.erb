@@ -55,7 +55,7 @@ health:
   username: <%= p("autoscaler.operator.health.username") %>
   password: <%= p("autoscaler.operator.health.password") %>
 http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
-instancemetrics_db:
+instance_metrics_db:
   db:
     url: <%= instance_metrics_db_url %>
     max_open_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_open_connections") %>
@@ -64,7 +64,7 @@ instancemetrics_db:
   refresh_interval: <%= p("autoscaler.operator.instance_metrics_db.refresh_interval") %>
   cutoff_duration: <%= p("autoscaler.operator.instance_metrics_db.cutoff_duration") %>
 
-appmetrics_db:
+app_metrics_db:
   db:
     url: <%= app_metrics_db_url %>
     max_open_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_open_connections") %>
@@ -73,7 +73,7 @@ appmetrics_db:
   refresh_interval: <%= p("autoscaler.operator.app_metrics_db.refresh_interval") %>
   cutoff_duration: <%= p("autoscaler.operator.app_metrics_db.cutoff_duration") %>
 
-scalingengine_db:
+scaling_engine_db:
   db:
     url: <%= scaling_engine_db_url %>
     max_open_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_open_connections") %>

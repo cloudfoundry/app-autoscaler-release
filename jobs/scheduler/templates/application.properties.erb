@@ -39,9 +39,9 @@
 %>
 #datasource for application and quartz
 <% if p("autoscaler.scheduler_db.db_scheme") == "postgres" %>
-  spring.datasource.driverClassName=org.postgresql.Driver
+spring.datasource.driverClassName=org.postgresql.Driver
 <% else %>
-  spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
 <% end %>
 spring.datasource.url=<%=schedulerdb_url %>
 spring.datasource.username=<%=schedulerdb_role['name'] %>
