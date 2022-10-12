@@ -42,6 +42,14 @@ SSLMODE='<%= p("autoscaler.lock_db.sslmode") %>'
     DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
     # TODO - clarify if we need to enable TLS for lockdb
   <% end %>
+  <% unless p("autoscaler.lock_db.tls.crt") == "" %>
+    JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/operator/config/certs/lock_db/crt"
+    DBURI=$DBURI"&sslcert=/var/vcap/jobs/operator/config/certs/scheduler_db/crt"
+  <% end %>
+  <% unless p("autoscaler.lock_db.tls.key") == "" %>
+    JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/operator/config/certs/lock_db/key"
+    DBURI=$DBURI"&sslkey=/var/vcap/jobs/operator/config/certs/scheduler_db/key"
+  <% end %>
 <% else %>
   JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
   DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
