@@ -45,20 +45,16 @@ SSLMODE='<%= p("autoscaler.scheduler_db.sslmode") %>'
     JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
     DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
   <% end %>
-  <% # TODO Refactor this block
-    unless p("autoscaler.scheduler_db.tls.crt") == "" %>
+  <% unless p("autoscaler.scheduler_db.tls.crt") == "" %>
     JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/crt"
     DBURI=$DBURI"&sslcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/crt"
     <% end %>
     <% unless p("autoscaler.scheduler_db.tls.key") == "" %>
     JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key"
     DBURI=$DBURI"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key"
-
   <% end %>
-
 # URLs for mySQL DB
 <% else %>
-  #TODO - asks with PO if mySQL also need the tls
   JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
   DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
   <% unless p('autoscaler.scheduler_db.tls.ca') == "" %>
