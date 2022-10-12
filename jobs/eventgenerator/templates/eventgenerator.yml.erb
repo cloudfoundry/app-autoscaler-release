@@ -3,36 +3,9 @@
     p(property,nil) || []
   end
 
-  # TODO : think of DRY for this function
-  def generate_db_url(db_name, job_name)
-    db_scheme = p("autoscaler.#{db_name}.db_scheme")
-    db_address = p("autoscaler.#{db_name}.address")
-    db_port = p("autoscaler.#{db_name}.port")
-    db_role = p_arr("autoscaler.#{db_name}.roles").find { |role| role['tag'] == db_name.tr('_', '') or role['tag'] == 'default' }
-    db_database = p_arr("autoscaler.#{db_name}.databases").find { |database| database['tag'] == db_name.tr('_', '') or database['tag'] == 'default' }
-
-    if db_scheme == "postgres"
-      db_url = db_scheme + "://" + ERB::Util.url_encode(db_role['name']) + ":" + ERB::Util.url_encode(db_role['password']) + "@" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?application_name=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
-    else
-      db_url = db_role['name'] + ":" + db_role['password'] + "@tcp(" + db_address + ":" + db_port.to_s + ")/" + db_database['name'] + "?tls=" + p("autoscaler.#{db_name}.sslmode")
-    end
-    unless p("autoscaler.#{db_name}.tls.ca") == ""
-      db_url = db_url + "&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
-    end
-    unless p("autoscaler.#{db_name}.tls.crt") == ""
-      db_url = db_url + "&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
-    end
-    unless p("autoscaler.#{db_name}.tls.key") == ""
-      db_url = db_url + "&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
-    end
-    db_url
-  end
-
   job_name = 'eventgenerator'
-
-  policy_db_url = generate_db_url('policy_db', job_name)
-  app_metrics_db_url = generate_db_url('appmetrics_db', job_name)
-
+  policy_db_url = build_db_url('policy_db', job_name)
+  app_metrics_db_url = build_db_url('appmetrics_db', job_name)
 
   metric_collector_url = "https://" + p("autoscaler.eventgenerator.metricscollector.host") + ":" + p("autoscaler.eventgenerator.metricscollector.port").to_s
   if p("autoscaler.eventgenerator.metricscollector.use_log_cache")

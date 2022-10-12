@@ -14,17 +14,7 @@
 
   if db_scheme == "postgres"
     db_url = "jdbc:postgresql://#{db_address}:#{db_port}/#{db_database["name"]}?ApplicationName=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
-
-    unless p("autoscaler.#{db_name}.tls.ca") == ""
-      db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
-    end
-    unless p("autoscaler.#{db_name}.tls.crt") == ""
-      db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
-    end
-    unless p("autoscaler.#{db_name}.tls.key") == ""
-      db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
-    end
-
+    append_db_tls_configs(db_name, db_url, job_name)
   else #mysql case
     db_url = "jdbc:mysql://" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?autoReconnect=true"
     unless p('autoscaler.scheduler_db.tls.ca') == ""
@@ -35,10 +25,8 @@
   end
 
   job_name = 'scheduler'
-
   schedulerdb_role = p_arr("autoscaler.scheduler_db.roles").find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
   policydb_role = p_arr("autoscaler.policy_db.roles").find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' }
-
   schedulerdb_url = generate_db_url('scheduler_db', job_name)
   policydb_url = generate_db_url('policy_db', job_name)
 %>
@@ -52,8 +40,8 @@ spring.datasource.url=<%=schedulerdb_url %>
 spring.datasource.username=<%=schedulerdb_role['name'] %>
 spring.datasource.password=<%=schedulerdb_role['password'] %>
 
-#datasource for policy 
 
+#datasource for policy 
 <% if p("autoscaler.policy_db.db_scheme") == "postgres" %>
 spring.policy-db-datasource.driverClassName=org.postgresql.Driver
 <% else %>
