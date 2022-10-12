@@ -208,12 +208,11 @@ jobs:
   public: true
   build_logs_to_retain: 100
   serial: true
-  on_success:
+  ensure:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-params
       DEPLOYMENT_NAME: "acceptance"
-      DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state
@@ -258,7 +257,7 @@ jobs:
   public: true
   build_logs_to_retain: 100
   serial: true
-  on_success:
+  ensure:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-params
@@ -307,7 +306,7 @@ jobs:
   public: true
   build_logs_to_retain: 100
   serial: true
-  on_success:
+  ensure:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-buildin-params
@@ -349,7 +348,7 @@ jobs:
 - name: upgrade-test
   public: true
   build_logs_to_retain: 100
-  on_success:
+  ensure:
       task: cleanup
       file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
       params: &upgrade-test-params
