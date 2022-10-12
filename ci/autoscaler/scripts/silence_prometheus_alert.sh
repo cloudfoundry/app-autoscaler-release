@@ -20,6 +20,7 @@ alert_manager=${ALERT_MANAGER:-"https://alertmanager.${system_domain}"}
 alert_pass=${ALERT_PASS:-$(credhub get -n /bosh-autoscaler/prometheus/alertmanager_password -q)}
 start_time=$(${DATE} --iso-8601=seconds --utc)
 end_time=$(${DATE} -d "+ ${silence_time_mins} minutes" --iso-8601=seconds --utc)
+
 curl -k -s -f -L -X 'POST' \
   "${alert_manager}/api/v2/silences" \
   -u "admin:${alert_pass}" \
@@ -62,3 +63,6 @@ curl -k -s -f -L -X 'POST' \
   "endsAt": "${end_time}"
 }
 EOF
+echo "==Alert created=="
+echo ">> start_time: ${start_time}"
+echo ">> end_time: ${end_time}"

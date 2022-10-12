@@ -316,3 +316,16 @@ deploy-cleanup:
 package-specs: mod-tidy vendor
 	@echo " - Updating the package specs"
 	@./scripts/sync-package-specs
+
+
+## Prometheus Alerts
+.PHONY: silence-alerts
+silence-alerts:
+	export SILENCE_TIME_MINS=480;\
+	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'"
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy ;\
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobExtendedUnhealthy ;\
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill ;\
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy ;
