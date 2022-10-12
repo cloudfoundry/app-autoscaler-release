@@ -1,8 +1,9 @@
 SHELL := /bin/bash
+.SHELLFLAGS = -euo pipefail -c
+MAKEFLAGS = -s
 go_modules:= $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules:= $(go_modules) db scheduler
 lint_config:=${PWD}/.golangci.yaml
-.SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
 OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
 db_type:=postgres
@@ -11,7 +12,6 @@ DBURL := $(shell case "${db_type}" in\
  			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
-
 SUITES?=broker api app
 AUTOSCALER_DIR?=${PWD}
 CI_DIR?=${PWD}/ci
@@ -28,7 +28,7 @@ list-modules:
 .PHONY: check-type
 check-db_type:
 	@case "${db_type}" in\
-	 (mysql|postgres) echo "Using bd:${db_type}"; ;;\
+	 (mysql|postgres) echo " - using bd:${db_type}"; ;;\
 	 (*) echo "ERROR: db_type needs to be one of mysql|postgres"; exit 1;;\
 	 esac
 
@@ -262,14 +262,21 @@ acceptance-release: mod-tidy vendor vendor-app
 mod-tidy:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
-	   cd $${folder}; echo "- go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
+	   cd $${folder}; echo " - go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
+	done
+
+.PHONY: mod-download
+mod-download:
+	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
+	do\
+	   cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
 	done
 
 .PHONY: vendor
 vendor:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
-	   cd $${folder}; echo "- go mod vendor'$${folder}'"; go mod vendor; cd - >/dev/null;\
+	   cd $${folder}; echo " - go mod vendor '$${folder}'"; go mod vendor; cd - >/dev/null;\
 	done
 
 .PHONY: fakes

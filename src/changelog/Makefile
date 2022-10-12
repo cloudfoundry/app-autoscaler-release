@@ -1,5 +1,6 @@
 SHELL := /bin/bash
-.SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
+.SHELLFLAGS = -euo pipefail -c
+MAKEFLAGS = -s
 GO := GO111MODULE=on GO15VENDOREXPERIMENT=1 go
 GO_NOMOD := GO111MODULE=off go
 GO_VERSION := $(shell $(GO) version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
