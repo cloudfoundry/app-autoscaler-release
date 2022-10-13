@@ -109,7 +109,6 @@ function find_or_upload_stemcell(){
 
 
 function find_or_upload_release(){
-  echo "Checking if release:'${bosh_release_version}' exists: ${AUTOSCALER_RELEASE_EXISTS}"
   if ! bosh releases | grep -E "${bosh_release_version}[*]*\s" > /dev/null; then
     echo "Creating Release with bosh version ${bosh_release_version}"
     bosh create-release --force --version="${bosh_release_version}"
