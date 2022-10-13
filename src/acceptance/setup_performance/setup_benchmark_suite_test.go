@@ -63,7 +63,7 @@ var _ = BeforeSuite(func() {
 		//Expect(updateSpaceQuota).To(gexec.Exit(0), "unable update space quota")
 		orgGuid := helpers.GetOrgGuid(cfg, setup.GetOrganizationName())
 		orgQuotaName := helpers.GetOrgQuotaNameFrom(orgGuid, cfg.DefaultTimeoutDuration())
-		updateOrgQuota := cf.Cf("update-org-quota", orgQuotaName, "-m", strconv.Itoa(cfg.BenchmarkAppCount*256)+"MB", "-r", strconv.Itoa(cfg.BenchmarkAppCount*2), "-s", strconv.Itoa(cfg.BenchmarkAppCount*2)).Wait(cfg.DefaultTimeoutDuration())
+		updateOrgQuota := cf.Cf("update-org-quota", orgQuotaName, "-m", strconv.Itoa(cfg.Performance.AppCount*256)+"MB", "-r", strconv.Itoa(cfg.Performance.AppCount*2), "-s", strconv.Itoa(cfg.Performance.AppCount*2)).Wait(cfg.DefaultTimeoutDuration())
 		Expect(updateOrgQuota).To(gexec.Exit(0), "unable update org quota: "+string(updateOrgQuota.Out.Contents()[:]))
 	})
 
