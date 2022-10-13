@@ -5,19 +5,6 @@
     p(property,nil) || []
   end
 
-  def append_db_tls_configs(db_name, db_url, job_name)
-    unless p("autoscaler.#{db_name}.tls.ca") == ""
-      db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
-    end
-    unless p("autoscaler.#{db_name}.tls.crt") == ""
-      db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
-    end
-    unless p("autoscaler.#{db_name}.tls.key") == ""
-      db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
-    end
-    db_url
-  end
-
   def generate_db_url(db_name, job_name)
     db_scheme = p("autoscaler.#{db_name}.db_scheme")
     db_address = p("autoscaler.#{db_name}.address")

@@ -102,13 +102,13 @@ properties:
     description: "The list of database roles used in instancemetricsdb database including name/password"
   autoscaler.instancemetrics_db.tls.ca:
     default: ''
-    description: 'File location of PEM-encoded ca certificate for TLS database server'
+    description: 'PEM-encoded ca certificate for TLS database server'
   autoscaler.instancemetrics_db.tls.crt:
     default: ''
-    description: 'File location of PEM-encoded certificate for TLS database client'
+    description: 'PEM-encoded certificate for TLS database client'
   autoscaler.instancemetrics_db.tls.key:
     default: ''
-    description: 'File location of PEM-encoded key for tls database client'
+    description: 'PEM-encoded key for tls database client'
   autoscaler.instancemetrics_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -127,13 +127,13 @@ properties:
     description: "The list of database roles used in appmetricsdb database including name/password"
   autoscaler.appmetrics_db.tls.ca:
     default: ''
-    description: 'File location of PEM-encoded CA certificate for TLS database server'
+    description: 'PEM-encoded CA certificate for TLS database server'
   autoscaler.appmetrics_db.tls.crt:
     default: ''
-    description: 'File location of PEM-encoded certificate for TLS database client'
+    description: 'PEM-encoded certificate for TLS database client'
   autoscaler.appmetrics_db.tls.key:
     default: ''
-    description: 'File location of PEM-encoded key for TLS database client'
+    description: 'PEM-encoded key for TLS database client'
   autoscaler.appmetrics_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
@@ -152,13 +152,13 @@ properties:
     description: "The list of database roles used in scalingenginedb database including name/password"
   autoscaler.scalingengine_db.tls.ca:
     default: ''
-    description: 'File location of PEM-encoded ca certificate for TLS database server'
+    description: 'PEM-encoded ca certificate for TLS database server'
   autoscaler.scalingengine_db.tls.crt:
     default: ''
-    description: 'File location of PEM-encoded certificate for TLS database client'
+    description: 'PEM-encoded certificate for TLS database client'
   autoscaler.scalingengine_db.tls.key:
     default: ''
-    description: 'File location of PEM-encoded key for TLS database client'
+    description: 'PEM-encoded key for TLS database client'
   autoscaler.scalingengine_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
