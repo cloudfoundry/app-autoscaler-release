@@ -93,18 +93,14 @@ fi
 
 function find_or_upload_stemcell(){
   # Determine if we need to upload a stemcell at this point.
-  #TODO refactor out function for stemcell check and update.
-  STEMCELL_OS=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
-  STEMCELL_VERSION=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
-  STEMCELL_NAME="bosh-google-kvm-${STEMCELL_OS}-go_agent"
-  set +e
-  STEMCELL_EXISTS=$(bosh stemcells | grep -c "${STEMCELL_NAME}")
-  set -e
+  stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
+  stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
+  stemcell_name="bosh-google-kvm-${stemcell_os}-go_agent"
 
-  if [[ "${STEMCELL_EXISTS}" == 0 ]]; then
-    URL="https://bosh.io/d/stemcells/${STEMCELL_NAME}"
-    if [ "${STEMCELL_VERSION}" != "latest" ]; then
-	    URL="${URL}?v=${STEMCELL_VERSION}"
+  if ! bosh stemcells | grep "${stemcell_name}" >/dev/null; then
+    URL="https://bosh.io/d/stemcells/${stemcell_name}"
+    if [ "${stemcell_version}" != "latest" ]; then
+	    URL="${URL}?v=${stemcell_version}"
     fi
     wget "$URL" -O stemcell.tgz
     bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
