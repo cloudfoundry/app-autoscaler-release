@@ -20,7 +20,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 	)
 
 	BeforeEach(func() {
-		appsToScaleCount = int(math.RoundToEven(float64(cfg.BenchmarkAppCount * cfg.BenchmarkPercentageToScale / 100)))
+		appsToScaleCount = int(math.RoundToEven(float64(cfg.Performance.AppCount * cfg.Performance.PercentageToScale / 100)))
 		GinkgoWriter.Printf("\nScaling %d app: \n", appsToScaleCount)
 		samplingConfig = gmeasure.SamplingConfig{
 			N:           appsToScaleCount,

@@ -18,10 +18,10 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 	)
 
 	BeforeEach(func() {
-		workerCount := cfg.BenchmarkSetupWorkers
+		workerCount := cfg.Performance.SetupWorkers
 		appsChan := make(chan string)
 
-		By(fmt.Sprintf("Deploying %d apps", cfg.BenchmarkAppCount))
+		By(fmt.Sprintf("Deploying %d apps", cfg.Performance.AppCount))
 		wg := sync.WaitGroup{}
 		//wg.Add(cfg.BenchmarkAppCount)
 
@@ -30,7 +30,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 			go worker(appsChan, &runningApps, &wg)
 		}
 
-		for i := 0; i < cfg.BenchmarkAppCount; i++ {
+		for i := 0; i < cfg.Performance.AppCount; i++ {
 			appName = fmt.Sprintf("node-custom-metric-benchmark-%d", i)
 			appsChan <- appName
 		}
@@ -41,7 +41,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", func() {
-			Eventually(func() int32 { return atomic.LoadInt32(&runningApps) }, 3*time.Minute, 5*time.Second).Should(BeEquivalentTo(cfg.BenchmarkAppCount))
+			Eventually(func() int32 { return atomic.LoadInt32(&runningApps) }, 3*time.Minute, 5*time.Second).Should(BeEquivalentTo(cfg.Performance.AppCount))
 		})
 	})
 })
@@ -58,6 +58,6 @@ func worker(appsChan chan string, runningApps *int32, wg *sync.WaitGroup) {
 		helpers.CreateCustomMetricCred(cfg, appName, appGUID)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		atomic.AddInt32(runningApps, 1)
-		GinkgoWriter.Printf("\nRunning apps: %d/%d \n", atomic.LoadInt32(runningApps), cfg.BenchmarkAppCount)
+		GinkgoWriter.Printf("\nRunning apps: %d/%d \n", atomic.LoadInt32(runningApps), cfg.Performance.AppCount)
 	}
 }
