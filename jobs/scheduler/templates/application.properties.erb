@@ -27,7 +27,15 @@
 
     if db_scheme == "postgres"
       db_url = "jdbc:postgresql://#{db_address}:#{db_port}/#{db_database["name"]}?ApplicationName=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
-      append_db_tls_configs(db_name, db_url, job_name)
+      unless p("autoscaler.#{db_name}.tls.ca") == ""
+        db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
+      end
+      unless p("autoscaler.#{db_name}.tls.crt") == ""
+        db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
+      end
+      unless p("autoscaler.#{db_name}.tls.key") == ""
+        db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
+      end
     else #mysql case
       db_url = "jdbc:mysql://" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?autoReconnect=true"
       unless p('autoscaler.scheduler_db.tls.ca') == ""
