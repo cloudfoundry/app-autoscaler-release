@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/lib/pq"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -41,7 +40,7 @@ var _ = Describe("ChangelogSQLDB", func() {
 				dbUrl = "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable"
 			})
 			It("should error", func() {
-				Expect(err).To(BeAssignableToTypeOf(&pq.Error{}))
+				Expect(err).To(HaveOccurred())
 			})
 
 		})
