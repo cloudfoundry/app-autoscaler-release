@@ -27,18 +27,27 @@ SSLMODE='<%= p("autoscaler.policy_db.sslmode") %>'
 <% if p('autoscaler.policy_db.db_scheme') == "postgres" %>
 JDBCDBURL="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
-<% unless p('autoscaler.policy_db.tls.ca') == "" %>
-JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
-DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
-<% end %>
+  <% unless p('autoscaler.policy_db.tls.ca') == "" %>
+  JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
+  DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
+  <% end %>
+  <% unless p("autoscaler.policy_db.tls.certificate") == "" %>
+    JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/crt"
+    DBURI=$DBURI"&sslcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/crt"
+  <% end %>
+  <% unless p("autoscaler.policy_db.tls.private_key") == "" %>
+    openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/golangapiserver/config/certs/policy_db/key -out /var/vcap/jobs/golangapiserver/config/certs/policy_db/key.pk8 -nocrypt
+    JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/golangapiserver/config/certs/policy_db/key.pk8"
+    DBURI=$DBURI"&sslkey=/var/vcap/jobs/golangapiserver/config/certs/policy_db/key"
+  <% end %>
 <% else %>
 JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
-<% unless p('autoscaler.policy_db.tls.ca') == "" %>
-/var/vcap/packages/common/init-db-truststore.sh policy_db /var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt
-JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/policy_db/cacerts&trustCertificateKeyStoreType=pkcs12"
-DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
-<% end %>
+  <% unless p('autoscaler.policy_db.tls.ca') == "" %>
+  /var/vcap/packages/common/init-db-truststore.sh policy_db /var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt
+  JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/policy_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+  DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/golangapiserver/config/certs/policy_db/ca.crt"
+  <% end %>
 <% end %>
 
 detect_dns $HOST $PORT
