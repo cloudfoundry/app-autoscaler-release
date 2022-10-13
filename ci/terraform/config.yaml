@@ -1,0 +1,12 @@
+project: app-runtime-interfaces-wg
+region: europe-west3
+zone: europe-west3-a
+secondary_zone: europe-west3-b
+
+gke:
+  name: wg-ci-test
+
+source:
+  concourse_infra:
+    url: https://github.com/marcinkubica/bosh-community-stemcell-ci-infra.git//terraform/concourse-infra
+    ref: terraform
