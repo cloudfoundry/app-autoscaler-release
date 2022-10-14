@@ -451,7 +451,7 @@ jobs:
     - get: ci
     - get: every-night
       trigger: true
-  - task: list-autoscaler-deployments
+  - task: cleanup-autoscaler-deployments
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
 
 
