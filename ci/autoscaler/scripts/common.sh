@@ -33,7 +33,7 @@ function cleanup_service_broker(){
 function cleanup_bosh_deployment(){
   echo "- Deleting bosh deployment '${deployment_name}'"
   bosh delete-deployment -d "${deployment_name}" -n
-  bosh clean-up --all
+  bosh clean-up --all -n
 }
 
 function cleanup_credhub(){
