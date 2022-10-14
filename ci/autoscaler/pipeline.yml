@@ -182,6 +182,8 @@ jobs:
     trigger: true
   - set_pipeline: self
     file: ci/ci/autoscaler/pipeline.yml
+    vars:
+      branch_name: ((branch_name))
 
 - name: unit-tests
   public: true
@@ -443,11 +445,6 @@ jobs:
 - name: cleanup-autoscaler-deployments
   public: true
   build_logs_to_retain: 100
-  ensure:
-      task: cleanup
-      file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params: &upgrade-test-params
-        DEPLOYMENT_NAME: "upgrade-test"
   plan:
   - in_parallel:
     - get: bbl-state

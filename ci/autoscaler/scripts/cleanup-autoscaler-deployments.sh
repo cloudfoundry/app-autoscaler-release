@@ -22,3 +22,5 @@ function main(){
     cleanup_credhub
   done
 }
+
+main
