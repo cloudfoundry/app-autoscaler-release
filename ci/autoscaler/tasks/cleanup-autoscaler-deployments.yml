@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
+    tag: main
+
+params:
+  AUTOSCALER_DIR: app-autoscaler-release
+
+inputs:
+- name: app-autoscaler-release
+- name: ci
+- name: bbl-state
+
+outputs:
+
+run:
+  path: ci/ci/autoscaler/scripts/cleanup-autoscaler-deployments.sh

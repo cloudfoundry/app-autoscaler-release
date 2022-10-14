@@ -77,6 +77,9 @@ groups:
   jobs:
     - update-golang
     - update-java
+- name: maintenance
+  jobs:
+    - cleanup-autoscaler-deployments
 
 resource_types:
 - name: gcs-resource
@@ -96,6 +99,8 @@ resource_types:
     repository: concourse/github-release-resource
 
 resources:
+- name: every-night
+  type: time
 - name: ci
   type: git
   icon: github
@@ -434,6 +439,24 @@ jobs:
     params:
       rebase: true
       repository: app-autoscaler-release
+
+- name: cleanup-autoscaler-deployments
+  public: true
+  build_logs_to_retain: 100
+  ensure:
+      task: cleanup
+      file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+      params: &upgrade-test-params
+        DEPLOYMENT_NAME: "upgrade-test"
+  plan:
+  - in_parallel:
+    - get: bbl-state
+    - get: ci
+    - get: every-night
+      trigger: true
+  - task: list-autoscaler-deployments
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
+
 
 # TODO move to a github action a possibly make it add the draft release notes to the PR?
 #- name: draft-pr
