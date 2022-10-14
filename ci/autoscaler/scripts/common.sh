@@ -16,9 +16,9 @@ function cf_login(){
 
 function cleanup_organization(){
   echo "# Cleaning up from acceptance tests"
-  pushd "${ci_dir}/../src/acceptance" > /dev/null
+  pushd "${ci_dir}/../src/acceptance" || exit > /dev/null
     ./cleanup.sh
-  popd  > /dev/null
+  popd || exit > /dev/null
 }
 
 function cleanup_service_broker(){
