@@ -8,23 +8,35 @@
 set -euo pipefail
 
 function set_pipeline(){
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${PIPELINE_NAME}" -v branch_name="${CURRENT_BRANCH}" -v trigger_acceptance=true
+  local pipeline_name="$1"
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" -v branch_name="${CURRENT_BRANCH}" -v trigger_acceptance=true
+  fly -t autoscaler unpause-pipeline -p "${pipeline_name}"
 }
 
-SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
-pushd "${SCRIPT_RELATIVE_DIR}" > /dev/null
-  TARGET="${TARGET:-autoscaler}"
-  CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
+function pause_job(){
+  local job_name="$1"
+  fly -t "${TARGET}" pause-job -j "${job_name}"
+}
 
-  if [[ "$CURRENT_BRANCH" == "main" ]];then
-    PIPELINE_NAME="app-autoscaler-release"
-    set_pipeline
-  else
-    PIPELINE_NAME="app-autoscaler-release-${CURRENT_BRANCH}"
-    set_pipeline
-  fly -t "${TARGET}" pause-job -j "${PIPELINE_NAME}/release"
+function main(){
+  SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
+  pushd "${SCRIPT_RELATIVE_DIR}" > /dev/null
+    TARGET="${TARGET:-autoscaler}"
+    CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
 
-  fi
+    if [[ "$CURRENT_BRANCH" == "main" ]];then
+      export PIPELINE_NAME="app-autoscaler-release"
+      set_pipeline $PIPELINE_NAME
+    else
+      export PIPELINE_NAME="app-autoscaler-release-${CURRENT_BRANCH}"
+      set_pipeline "$PIPELINE_NAME"
+      pause_job "${PIPELINE_NAME}/release"
+      pause_job "${PIPELINE_NAME}/acceptance"
+      pause_job "${PIPELINE_NAME}/acceptance-buildin"
+      pause_job "${PIPELINE_NAME}/acceptance-log-cache"
+    fi
 
-  fly -t autoscaler unpause-pipeline -p "${PIPELINE_NAME}"
-popd > /dev/null
+  popd > /dev/null
+}
+
+main
