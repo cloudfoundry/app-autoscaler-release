@@ -12,7 +12,9 @@ function main(){
   bosh_login
   cf_login
 
-  deployments=($(get_autoscaler_deployments))
+  deployments=()
+  while IFS='' read -r deployment; do deployments+=("$deployment"); done < <(get_autoscaler_deployments)
+
   for deployment in "${deployments[@]}" ; do :
     export deployment_name="${deployment}"
     export name_prefix="${deployment_name}-TESTS"
