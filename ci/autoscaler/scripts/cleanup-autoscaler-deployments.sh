@@ -16,7 +16,7 @@ function main(){
   set -x
   for deployment in "${deployments[@]}" ; do :
     export DEPLOYMENT_NAME="${deployment}"
-    export NAME_PREFIX="${NAME_PREFIX:-"${DEPLOYMENT_NAME}-TESTS"}"
+    export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
 
     cleanup_organization
     cleanup_service_broker
