@@ -35,5 +35,4 @@ then
     cf delete-user -f "$user" &
   done
 fi
-
 wait
