@@ -13,7 +13,6 @@ function main(){
   cf_login
 
   deployments=($(get_autoscaler_deployments))
-  set -x
   for deployment in "${deployments[@]}" ; do :
     export DEPLOYMENT_NAME="${deployment}"
     export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
@@ -23,7 +22,6 @@ function main(){
     cleanup_bosh_deployment
     cleanup_credhub
   done
-  set +x
   cleanup_bosh
 }
 
