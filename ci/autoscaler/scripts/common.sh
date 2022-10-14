@@ -16,7 +16,7 @@ function cf_login(){
 
 function cleanup_organization(){
   echo "# Cleaning up from acceptance tests"
-  pushd "${ci_dir}/src/acceptance" > /dev/null
+  pushd "${ci_dir}/../src/acceptance" > /dev/null
     ./cleanup.sh
   popd  > /dev/null
 }
