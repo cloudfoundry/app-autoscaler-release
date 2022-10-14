@@ -8,7 +8,7 @@
 set -euo pipefail
 
 function set_pipeline(){
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${PIPELINE_NAME}" -v branch_name="${CURRENT_BRANCH}"
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${PIPELINE_NAME}" -v branch_name="${CURRENT_BRANCH}" -v trigger_acceptance=true
 }
 
 SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
@@ -23,6 +23,7 @@ pushd "${SCRIPT_RELATIVE_DIR}" > /dev/null
     PIPELINE_NAME="app-autoscaler-release-${CURRENT_BRANCH}"
     set_pipeline
   fly -t "${TARGET}" pause-job -j "${PIPELINE_NAME}/release"
+
   fi
 
   fly -t autoscaler unpause-pipeline -p "${PIPELINE_NAME}"
