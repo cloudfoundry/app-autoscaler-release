@@ -34,7 +34,9 @@ function main(){
       pause_job "${PIPELINE_NAME}/acceptance"
       pause_job "${PIPELINE_NAME}/acceptance-buildin"
       pause_job "${PIPELINE_NAME}/acceptance-log-cache"
+      pause_job "${PIPELINE_NAME}/upgrade-test"
     fi
+
 
   popd > /dev/null
 }
