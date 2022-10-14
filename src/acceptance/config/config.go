@@ -105,6 +105,9 @@ var defaults = Config{
 	HealthEndpointsBasicAuthEnabled: true,
 	CPUUpperThreshold:               100,
 
+	UseExistingOrganization: false,
+	ExistingOrganization: "",
+
 	Performance: PerformanceConfig{
 		AppCount:          100,
 		PercentageToScale: 30,
