@@ -14,8 +14,8 @@ function main(){
 
   deployments=($(get_autoscaler_deployments))
   for deployment in "${deployments[@]}" ; do :
-    export DEPLOYMENT_NAME="${deployment}"
-    export NAME_PREFIX="${DEPLOYMENT_NAME}-TESTS"
+    export deployment_name="${deployment}"
+    export name_prefix="${deployment_name}-TESTS"
 
     cleanup_organization
     cleanup_service_broker
