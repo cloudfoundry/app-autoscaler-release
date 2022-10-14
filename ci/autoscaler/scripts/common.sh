@@ -3,9 +3,9 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
 function bosh_login(){
-  pushd "${bbl_state_path}" > /dev/null
+  pushd "${bbl_state_path}" || exit > /dev/null
     eval "$(bbl print-env)"
-  popd > /dev/null
+  popd || exit > /dev/null
 }
 
 function cf_login(){
