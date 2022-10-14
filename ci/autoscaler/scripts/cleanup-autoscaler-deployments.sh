@@ -3,7 +3,6 @@
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/common.sh"
-source "${script_dir}/vars.source.sh"
 
 function get_autoscaler_deployments(){
   bosh deployments --json --column=name | jq ".Tables[0].Rows[].name" -r  | grep -E "autoscaler|upgrade|performance"
