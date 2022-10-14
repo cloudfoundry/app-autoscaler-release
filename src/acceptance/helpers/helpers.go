@@ -465,7 +465,7 @@ func GetHTTPClient(cfg *config.Config) *http.Client {
 
 func GetAppGuid(cfg *config.Config, appName string) string {
 	guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	Expect(guid).To(Exit(0))
+	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find app guid for app: %s", appName))
 	return strings.TrimSpace(string(guid.Out.Contents()))
 }
 

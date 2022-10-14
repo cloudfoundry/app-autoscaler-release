@@ -34,9 +34,9 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewSmokeTestSuiteSetup(cfg)
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		orgs := helpers.GetTestOrgs(cfg)
-		Expect(len(orgs)).To(Equal(1))
-		orgName = orgs[0]
+		organizations := helpers.GetTestOrgs(cfg)
+		Expect(len(organizations)).To(Equal(1))
+		orgName = organizations[0]
 		_, orgGUID, spaceName, spaceGUID = helpers.GetOrgSpaceNamesAndGuids(cfg, orgName)
 	})
 

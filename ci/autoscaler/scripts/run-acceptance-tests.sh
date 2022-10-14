@@ -48,13 +48,13 @@ cat > acceptance_config.json <<EOF
   "name_prefix": "${name_prefix}",
 
   "autoscaler_api": "${deployment_name}.${system_domain}",
-  "service_offering_enabled": ${service_offering_enabled}
+  "service_offering_enabled": ${service_offering_enabled},
 
   "performance": {
-    "app_count": "${performance_app_count}",
-    "app_percentage_to_scale": "${performance_app_percentage_to_scale}",
-    "setup_workers": "${performance_setup_workers}",
-    "teardown": "${performance_teardown}",
+    "app_count": ${performance_app_count},
+    "app_percentage_to_scale": ${performance_app_percentage_to_scale},
+    "setup_workers": ${performance_setup_workers},
+    "teardown": ${performance_teardown}
   }
 }
 EOF

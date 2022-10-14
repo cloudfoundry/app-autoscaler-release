@@ -376,7 +376,7 @@ jobs:
         #  - task: check-diego-cell-count
         #    file: app-autoscaler-release/ci/autoscaler/tasks/check-diego-cell-count.yml
         #    params:
-        #      expected_cells: 4
+        #      EXPECTED_CELLS: 4
         #    on_failure:
         #      do:
         #      - task: combine-ops-files

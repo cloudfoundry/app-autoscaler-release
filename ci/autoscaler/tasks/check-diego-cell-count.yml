@@ -10,5 +10,8 @@ inputs:
 - name: bbl-state
 - name: app-autoscaler-release
 
+params:
+  EXPECTED_CELLS:
+
 run:
   path: app-autoscaler-release/ci/autoscaler/scripts/check-diego-cell-count.sh
