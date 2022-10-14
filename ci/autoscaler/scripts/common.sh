@@ -1,7 +1,3 @@
-
-script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source "${script_dir}/vars.source.sh"
-
 function bosh_login(){
   pushd "${bbl_state_path}" > /dev/null || exit
     eval "$(bbl print-env)"
@@ -14,7 +10,7 @@ function cf_login(){
   cf auth admin "$CF_ADMIN_PASSWORD"
 }
 
-function cleanup_organization(){
+function cleanup_acceptance_run(){
   echo "# Cleaning up from acceptance tests"
   pushd "${ci_dir}/../src/acceptance" > /dev/null || exit
     ./cleanup.sh
@@ -45,3 +41,17 @@ function cleanup_credhub(){
   credhub delete -p "/bosh-autoscaler/${deployment_name}"
 }
 
+function unset_vars() {
+  unset PR_NUMBER
+  unset DEPLOYMENT_NAME
+  unset SYSTEM_DOMAIN
+  unset BBL_STATE_PATH
+  unset AUTOSCALER_DIR
+  unset CI_DIR
+  unset BUILDIN_MODE
+  unset SERVICE_NAME
+  unset SERVICE_BROKER_NAME
+  unset NAME_PREFIX
+  unset SERVICE_OFFERING_ENABLED
+  unset GINKGO_OPTS
+}

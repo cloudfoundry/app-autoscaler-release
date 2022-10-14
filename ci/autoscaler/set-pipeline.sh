@@ -9,7 +9,7 @@ set -euo pipefail
 
 function set_pipeline(){
   local pipeline_name="$1"
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" -v branch_name="${CURRENT_BRANCH}" -v trigger_acceptance=true
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" -v branch_name="${CURRENT_BRANCH}"
   fly -t autoscaler unpause-pipeline -p "${pipeline_name}"
 }
 
@@ -35,6 +35,7 @@ function main(){
       pause_job "${PIPELINE_NAME}/acceptance-buildin"
       pause_job "${PIPELINE_NAME}/acceptance-log-cache"
       pause_job "${PIPELINE_NAME}/upgrade-test"
+      pause_job "${PIPELINE_NAME}/cleanup-autoscaler-deployments"
     fi
 
 
