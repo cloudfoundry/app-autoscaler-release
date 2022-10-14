@@ -10,8 +10,14 @@ set -euo pipefail
 SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
 pushd "${SCRIPT_RELATIVE_DIR}" > /dev/null
   TARGET="${TARGET:-autoscaler}"
+  CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
 
-  PIPELINE_NAME="app-autoscaler-release"
+  if [[ "$CURRENT_BRANCH" == "main" ]];then
+    PIPELINE_NAME="app-autoscaler-release"
+  else
+    PIPELINE_NAME="app-autoscaler-release-${CURRENT_BRANCH}"
+  fi
 
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${PIPELINE_NAME}"
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${PIPELINE_NAME}" -v branch_name="${CURRENT_BRANCH}"
+  fly -t autoscaler unpause-pipeline -p "${PIPELINE_NAME}"
 popd
