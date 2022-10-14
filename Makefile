@@ -335,20 +335,18 @@ cf-login:
 .PHONY: setup-performance
 setup-performance:
 	export GINKGO_OPTS="-v";\
-	export NAME_PREFIX="performance";\
 	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="performance";\
+	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="setup_performance";\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
 .PHONY: run-performance
 run-performance:
 	export GINKGO_OPTS="-v";\
-	export NAME_PREFIX="performance";\
 	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="performance";\
+	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
