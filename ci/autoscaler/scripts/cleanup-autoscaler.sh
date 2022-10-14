@@ -10,6 +10,7 @@ function main(){
   cleanup_organization
   cleanup_service_broker
   cleanup_bosh_deployment
+  cleanup_bosh
   cleanup_credhub
 }
 

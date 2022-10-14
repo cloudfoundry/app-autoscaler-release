@@ -24,6 +24,8 @@ function main(){
     cleanup_credhub
   done
   set +x
+  cleanup_bosh
 }
+
 
 main
