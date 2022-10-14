@@ -31,7 +31,7 @@ function cleanup_service_broker(){
 }
 
 function cleanup_bosh_deployment(){
-  echo "- Deleting bosh deployment '${DEPLOYMENT_NAME}'"
+  echo "- Deleting bosh deployment '${deployment_name}'"
   bosh delete-deployment -d "${deployment_name}" -n
 }
 
