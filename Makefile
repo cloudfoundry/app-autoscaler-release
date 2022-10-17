@@ -312,6 +312,11 @@ deploy-cleanup:
 	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'";\
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
+
+.PHONY: cf-login
+cf-login:
+	@${CI_DIR}/autoscaler/scripts/cf-login.sh
+
 .PHONY: package-specs
 package-specs: mod-tidy vendor
 	@echo " - Updating the package specs"
