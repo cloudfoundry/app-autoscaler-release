@@ -11,6 +11,10 @@ autoscaler:
       - name: foo
         password: default
         tag: default
+    tls:
+      ca: BEGIN---CA---END
+      crt: BEGIN---CERT---END
+      key: BEGIN---KEY---END
   policy_db:
     address: 10.11.137.101
     databases:
@@ -23,3 +27,7 @@ autoscaler:
       - name: foo
         password: default
         tag: default
+    tls:
+      ca: BEGIN---CA---END
+      crt: BEGIN---CERT---END
+      key: BEGIN---KEY---END

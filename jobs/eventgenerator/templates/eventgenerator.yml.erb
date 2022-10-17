@@ -3,33 +3,42 @@
     p(property,nil) || []
   end
 
-  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
-  policy_db_address = p('autoscaler.policy_db.address')
-  policy_db_port = p('autoscaler.policy_db.port')
-  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' }
-  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
-  if policy_db_scheme == "postgres"
-    policy_db_url = policy_db_scheme + "://" + ERB::Util.url_encode(policy_db_role['name']) + ":" + ERB::Util.url_encode(policy_db_role['password']) + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=eventgenerator&sslmode=" + p('autoscaler.policy_db.sslmode')
-  else
-    policy_db_url = policy_db_role['name'] + ":" + policy_db_role['password'] + "@tcp(" + policy_db_address + ":" + policy_db_port.to_s + ")/" + policy_db_database['name'] + "?tls=" + p('autoscaler.policy_db.sslmode')
-  end
-  unless p('autoscaler.policy_db.tls.ca') == ""
-    policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/policy_db/ca.crt"
+  def build_db_url(db_name, job_name)
+    db_scheme = p("autoscaler.#{db_name}.db_scheme")
+    db_address = p("autoscaler.#{db_name}.address")
+    db_port = p("autoscaler.#{db_name}.port")
+    db_roles = p_arr("autoscaler.#{db_name}.roles")
+    db_dbs = p_arr("autoscaler.#{db_name}.databases")
+    db_role = db_roles.find { |role| role['tag'] == db_name.tr('_', '') } ||  db_roles.find { |role| role['tag'] == 'default' }
+    db_database = db_dbs.find { |database| database['tag'] == db_name.tr('_', '') } || db_dbs.find { |database| database['tag'] == 'default' }
+
+    if db_scheme == "postgres"
+      db_url = "#{db_scheme}://#{ERB::Util.url_encode(db_role['name'])}:#{ERB::Util.url_encode(db_role['password'])}@#{db_address}:#{db_port}/#{db_database['name']}?application_name=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
+    else
+      db_url = "#{db_role['name']}:#{db_role['password']}@tcp(#{db_address}:#{db_port})/#{db_database['name']}?tls=" + p("autoscaler.#{db_name}.sslmode")
+    end
+    append_db_tls_configs(db_name, db_url, job_name)
   end
 
-  app_metrics_db_scheme = p('autoscaler.appmetrics_db.db_scheme')
-  app_metrics_db_address = p('autoscaler.appmetrics_db.address')
-  app_metrics_db_port = p('autoscaler.appmetrics_db.port')
-  app_metrics_db_role = p_arr('autoscaler.appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
-  app_metrics_db_database = p_arr('autoscaler.appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
-  if app_metrics_db_scheme == "postgres"
-    app_metrics_db_url = app_metrics_db_scheme + "://" + ERB::Util.url_encode(app_metrics_db_role['name']) + ":" + ERB::Util.url_encode(app_metrics_db_role['password']) + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?application_name=eventgenerator&sslmode=" + p('autoscaler.appmetrics_db.sslmode')
-  else
-    app_metrics_db_url = app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@tcp(" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + ")/" + app_metrics_db_database['name'] + "?tls=" + p('autoscaler.appmetrics_db.sslmode')
+  def append_db_tls_configs(db_name, db_url, job_name)
+  unless p("autoscaler.#{db_name}.tls.ca") == ""
+    db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
   end
-  unless p('autoscaler.appmetrics_db.tls.ca') == ""
-    app_metrics_db_url = app_metrics_db_url + "&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
+  unless p("autoscaler.#{db_name}.tls.crt") == ""
+    db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
   end
+  unless p("autoscaler.#{db_name}.tls.key") == ""
+    db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
+  end
+  db_url
+end
+
+###########################################
+#           Template Main                 #
+###########################################
+  job_name = 'eventgenerator'
+  policy_db_url = build_db_url('policy_db', job_name)
+  app_metrics_db_url = build_db_url('appmetrics_db', job_name)
 
   metric_collector_url = "https://" + p("autoscaler.eventgenerator.metricscollector.host") + ":" + p("autoscaler.eventgenerator.metricscollector.port").to_s
   if p("autoscaler.eventgenerator.metricscollector.use_log_cache")

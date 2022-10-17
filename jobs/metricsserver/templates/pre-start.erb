@@ -34,16 +34,26 @@ SSLMODE='<%= p("autoscaler.instancemetrics_db.sslmode") %>'
 JDBCDBURL="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 <% unless p('autoscaler.instancemetrics_db.tls.ca') == "" %>
-JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt"
-DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt"
+JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/ca.crt"
+DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/ca.crt"
 <% end %>
+<% # TODO Refactor this block
+unless p("autoscaler.instancemetrics_db.tls.crt") == "" %>
+JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/crt"
+DBURI=$DBURI"&sslcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/crt"
+<% end %>
+<% unless p("autoscaler.instancemetrics_db.tls.key") == "" %>
+JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key"
+DBURI=$DBURI"&sslkey=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key"
+<% end %>
+# mysql case
 <% else %>
 JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 <% unless p('autoscaler.instancemetrics_db.tls.ca') == "" %>
-/var/vcap/packages/common/init-db-truststore.sh appinstancemetrics_db /var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt
-JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/appinstancemetrics_db/cacerts&trustCertificateKeyStoreType=pkcs12"
-DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/appinstancemetrics_db/ca.crt"
+/var/vcap/packages/common/init-db-truststore.sh appinstancemetrics_db /var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/ca.crt
+JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/instancemetrics_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/ca.crt"
 <% end %>
 <% end %>
 

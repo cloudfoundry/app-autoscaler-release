@@ -6,3 +6,4 @@ inherit_gem:
 AllCops:
   Exclude:
     - 'vendor/**/*'
+    - 'app-autoscaler-release/pkg/mod/**/*'

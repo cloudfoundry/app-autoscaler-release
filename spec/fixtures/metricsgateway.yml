@@ -10,6 +10,10 @@ autoscaler:
       - name: foo
         password: default
         tag: default
+    tls:
+      ca: BEGIN---CA---END
+      crt: BEGIN---CERT---END
+      key: BEGIN---KEY---END
   cf:
     api: https://api.cf.domain
     auth_endpoint: https://login.cf.domain
@@ -17,3 +21,7 @@ autoscaler:
     secret: uaa_secret
     uaa_api: https://login.cf.domain/uaa
     grant_type: ALLOW_ALL
+  metricsgateway:
+    nozzle:
+      rlp_addr:
+        some_addr

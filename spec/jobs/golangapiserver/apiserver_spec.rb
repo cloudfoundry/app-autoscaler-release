@@ -201,5 +201,58 @@ describe "golangapiserver" do
         end
       end
     end
+
+    context "uses tls" do
+      context "binding_db" do
+        before do
+          properties["autoscaler"]["apiserver"]["use_buildin_mode"] = false
+          properties["autoscaler"]["apiserver"]["broker"]["username"] = "foouser"
+          properties["autoscaler"]["apiserver"]["broker"]["password"] = "foopw"
+        end
+
+        it "includes the ca, cert and key in url when configured" do
+          rendered_template["db"]["binding_db"]["url"].tap do |url|
+            check_if_certs_in_url(url, "binding_db")
+          end
+        end
+
+        it "does not include the ca, cert and key in url when not configured" do
+          properties["autoscaler"]["binding_db"]["tls"] = nil
+          rendered_template["db"]["binding_db"]["url"].tap do |url|
+            check_if_certs_not_in_url(url, "binding_db")
+          end
+        end
+      end
+
+      context "policy_db" do
+        it "includes the ca, cert and key in url when configured" do
+          rendered_template["db"]["policy_db"]["url"].tap do |url|
+            check_if_certs_in_url(url, "policy_db")
+          end
+        end
+
+        it "does not include the ca, cert and key in url when not configured" do
+          properties["autoscaler"]["policy_db"]["tls"] = nil
+          rendered_template["db"]["policy_db"]["url"].tap do |url|
+            check_if_certs_not_in_url(url, "policy_db")
+          end
+        end
+      end
+
+      context "storedprocedure_db" do
+        it "includes the ca, cert and key in url when configured" do
+          rendered_template["db"]["storedprocedure_db"]["url"].tap do |url|
+            check_if_certs_in_url(url, "storedprocedure_db")
+          end
+        end
+
+        it "does not include the ca, cert and key in url when not configured" do
+          properties["autoscaler"]["storedprocedure_db"]["tls"] = nil
+          rendered_template["db"]["storedprocedure_db"]["url"].tap do |url|
+            check_if_certs_not_in_url(url, "storedprocedure_db")
+          end
+        end
+      end
+    end
   end
 end

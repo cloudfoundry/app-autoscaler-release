@@ -3,75 +3,45 @@
     p(property,nil) || []
   end
 
-  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
-  policy_db_address = p('autoscaler.policy_db.address')
-  policy_db_port = p('autoscaler.policy_db.port')
-  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default'  }
-  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb' or database['tag'] == 'default' }
-  if policy_db_scheme == "postgres"
-    policy_db_url = policy_db_scheme + "://" + ERB::Util.url_encode(policy_db_role['name']) + ":" + ERB::Util.url_encode(policy_db_role['password']) + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=operator&sslmode=" + p('autoscaler.policy_db.sslmode')
-  else
-    policy_db_url = policy_db_role['name'] + ":" + policy_db_role['password'] + "@tcp(" + policy_db_address + ":" + policy_db_port.to_s + ")/" + policy_db_database['name'] + "?tls=" + p('autoscaler.policy_db.sslmode')
-  end
-  unless p('autoscaler.policy_db.tls.ca') == ""
-    policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/operator/config/certs/policy_db/ca.crt" 
+  def build_db_url(db_name, job_name)
+    db_scheme = p("autoscaler.#{db_name}.db_scheme")
+    db_address = p("autoscaler.#{db_name}.address")
+    db_port = p("autoscaler.#{db_name}.port")
+    db_roles = p_arr("autoscaler.#{db_name}.roles")
+    db_dbs = p_arr("autoscaler.#{db_name}.databases")
+    db_role = db_roles.find { |role| role['tag'] == db_name.tr('_', '') } ||  db_roles.find { |role| role['tag'] == 'default' }
+    db_database = db_dbs.find { |database| database['tag'] == db_name.tr('_', '') } || db_dbs.find { |database| database['tag'] == 'default' }
+
+    if db_scheme == "postgres"
+      db_url = "#{db_scheme}://#{ERB::Util.url_encode(db_role['name'])}:#{ERB::Util.url_encode(db_role['password'])}@#{db_address}:#{db_port}/#{db_database['name']}?application_name=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
+    else
+      db_url = "#{db_role['name']}:#{db_role['password']}@tcp(#{db_address}:#{db_port})/#{db_database['name']}?tls=" + p("autoscaler.#{db_name}.sslmode")
+    end
+    append_db_tls_configs(db_name, db_url, job_name)
   end
 
-  instance_metrics_db_scheme = p('autoscaler.instancemetrics_db.db_scheme')
-  instance_metrics_db_address = p('autoscaler.instancemetrics_db.address')
-  instance_metrics_db_port = p('autoscaler.instancemetrics_db.port')
-  instance_metrics_db_role = p_arr('autoscaler.instancemetrics_db.roles').find { |role| role['tag'] == 'instancemetricsdb' or role['tag'] == 'default' } 
-  instance_metrics_db_database = p_arr('autoscaler.instancemetrics_db.databases').find { |database| database['tag'] == 'instancemetricsdb' or database['tag'] == 'default' } 
-  if instance_metrics_db_scheme == "postgres"
-    instance_metrics_db_url = instance_metrics_db_scheme + "://" + ERB::Util.url_encode(instance_metrics_db_role['name']) + ":" + ERB::Util.url_encode(instance_metrics_db_role['password']) + "@" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + "/" + instance_metrics_db_database['name'] + "?application_name=operator&sslmode=" + p('autoscaler.instancemetrics_db.sslmode')
-  else
-    instance_metrics_db_url = instance_metrics_db_role['name'] + ":" + instance_metrics_db_role['password'] + "@tcp(" + instance_metrics_db_address + ":" + instance_metrics_db_port.to_s + ")/" + instance_metrics_db_database['name'] + "?tls=" + p('autoscaler.instancemetrics_db.sslmode')
+  def append_db_tls_configs(db_name, db_url, job_name)
+  unless p("autoscaler.#{db_name}.tls.ca") == ""
+    db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
   end
-  unless p('autoscaler.instancemetrics_db.tls.ca') == ""
-    instance_metrics_db_url = instance_metrics_db_url + "&sslrootcert=/var/vcap/jobs/operator/config/certs/appinstancemetrics_db/ca.crt"
+  unless p("autoscaler.#{db_name}.tls.crt") == ""
+    db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
   end
-  
-  app_metrics_db_scheme = p('autoscaler.appmetrics_db.db_scheme')
-  app_metrics_db_address = p('autoscaler.appmetrics_db.address')
-  app_metrics_db_port = p('autoscaler.appmetrics_db.port')
-  app_metrics_db_role = p_arr('autoscaler.appmetrics_db.roles').find { |role| role['tag'] == 'appmetricsdb' or role['tag'] == 'default' }
-  app_metrics_db_database = p_arr('autoscaler.appmetrics_db.databases').find { |database| database['tag'] == 'appmetricsdb' or database['tag'] == 'default' }
-  if app_metrics_db_scheme == "postgres"
-    app_metrics_db_url = app_metrics_db_scheme + "://" + ERB::Util.url_encode(app_metrics_db_role['name']) + ":" + ERB::Util.url_encode(app_metrics_db_role['password']) + "@" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + "/" + app_metrics_db_database['name'] + "?application_name=operator&sslmode=" + p('autoscaler.appmetrics_db.sslmode')
-  else
-    app_metrics_db_url = app_metrics_db_role['name'] + ":" + app_metrics_db_role['password'] + "@tcp(" + app_metrics_db_address + ":" + app_metrics_db_port.to_s + ")/" + app_metrics_db_database['name'] + "?tls=" + p('autoscaler.appmetrics_db.sslmode')
+  unless p("autoscaler.#{db_name}.tls.key") == ""
+    db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
   end
-  unless p('autoscaler.appmetrics_db.tls.ca') == ""
-    app_metrics_db_url = app_metrics_db_url + "&sslrootcert=/var/vcap/jobs/operator/config/certs/appmetrics_db/ca.crt"
-  end
+  db_url
+end
 
-  scaling_engine_db_scheme = p('autoscaler.scalingengine_db.db_scheme')
-  scaling_engine_db_address = p('autoscaler.scalingengine_db.address')
-  scaling_engine_db_port = p('autoscaler.scalingengine_db.port')
-  scaling_engine_db_role = p_arr('autoscaler.scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' }
-  scaling_engine_db_database = p_arr('autoscaler.scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' }
-  if scaling_engine_db_scheme == "postgres"
-    scaling_engine_db_url = scaling_engine_db_scheme + "://" + ERB::Util.url_encode(scaling_engine_db_role['name']) + ":" + ERB::Util.url_encode(scaling_engine_db_role['password']) + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?application_name=operator&sslmode=" + p('autoscaler.scalingengine_db.sslmode')
-  else
-    scaling_engine_db_url = scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@tcp(" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + ")/" + scaling_engine_db_database['name'] + "?tls=" + p('autoscaler.scalingengine_db.sslmode')
-  end
-  unless p('autoscaler.scalingengine_db.tls.ca') == ""
-    scaling_engine_db_url = scaling_engine_db_url + "&sslrootcert=/var/vcap/jobs/operator/config/certs/scalingengine_db/ca.crt"
-  end
-
-  lock_db_scheme = p('autoscaler.lock_db.db_scheme')
-  lock_db_address = p('autoscaler.lock_db.address')
-  lock_db_port = p('autoscaler.lock_db.port')
-  lock_db_role = p_arr('autoscaler.lock_db.roles').find { |role| role['tag'] == 'lockdb' or role['tag'] == 'default' }
-  lock_db_database = p_arr('autoscaler.lock_db.databases').find { |database| database['tag'] == 'lockdb' or database['tag'] == 'default' }
-  if lock_db_scheme == "postgres"
-    lock_db_url = lock_db_scheme + "://" + ERB::Util.url_encode(lock_db_role['name']) + ":" + ERB::Util.url_encode(lock_db_role['password']) + "@" + lock_db_address + ":" + lock_db_port.to_s + "/" + lock_db_database['name'] + "?application_name=operator&sslmode=" + p('autoscaler.lock_db.sslmode')
-  else
-    lock_db_url = lock_db_role['name'] + ":" + lock_db_role['password'] + "@tcp(" + lock_db_address + ":" + lock_db_port.to_s + ")/" + lock_db_database['name'] + "?tls=" + p('autoscaler.lock_db.sslmode')
-  end
-  unless p('autoscaler.lock_db.tls.ca') == ""
-    lock_db_url = lock_db_url + "&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
-  end
+###########################################
+#           Template Main                 #
+###########################################
+  job_name = 'operator'
+  policy_db_url = build_db_url('policy_db', job_name)
+  instance_metrics_db_url = build_db_url('instancemetrics_db', job_name)
+  app_metrics_db_url = build_db_url('appmetrics_db', job_name)
+  scaling_engine_db_url = build_db_url('scalingengine_db', job_name)
+  lock_db_url = build_db_url('lock_db', job_name)
 %>
 
 cf:

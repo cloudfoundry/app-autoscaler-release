@@ -14,6 +14,8 @@ templates:
   reverselogproxy_client.key.erb: config/certs/reverselogproxy_client/client.key
 
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
+  policy_db.crt.erb: config/certs/policy_db/crt
+  policy_db.key.erb: config/certs/policy_db/key
 
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
@@ -94,6 +96,12 @@ properties:
   autoscaler.policy_db.tls.ca:
     default: ''
     description: 'PEM-encoded ca certificate of tls database server'
+  autoscaler.policy_db.tls.crt:
+    default: ''
+    description: 'PEM-encoded certificate of tls database client'
+  autoscaler.policy_db.tls.key:
+    default: ''
+    description: 'PEM-encoded key of tls database client'
   autoscaler.policy_db.sslmode:
     default: disable
     description: "The sslmode to connect to postgres server"
