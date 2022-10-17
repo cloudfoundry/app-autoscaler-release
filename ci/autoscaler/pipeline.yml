@@ -77,6 +77,9 @@ groups:
   jobs:
     - update-golang
     - update-java
+- name: maintenance
+  jobs:
+    - cleanup-autoscaler-deployments
 
 resource_types:
 - name: gcs-resource
@@ -96,13 +99,15 @@ resource_types:
     repository: concourse/github-release-resource
 
 resources:
+- name: every-night
+  type: time
 - name: ci
   type: git
   icon: github
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: main
+    branch: ((branch_name))
     fetch_tags: true
     paths:
       - ci
@@ -113,7 +118,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: main
+    branch: ((branch_name))
     fetch_tags: true
 
 - name: gh-release
@@ -177,6 +182,8 @@ jobs:
     trigger: true
   - set_pipeline: self
     file: ci/ci/autoscaler/pipeline.yml
+    vars:
+      branch_name: ((branch_name))
 
 - name: unit-tests
   public: true
@@ -434,6 +441,19 @@ jobs:
     params:
       rebase: true
       repository: app-autoscaler-release
+
+- name: cleanup-autoscaler-deployments
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: bbl-state
+    - get: ci
+    - get: every-night
+      trigger: true
+  - task: cleanup-autoscaler-deployments
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
+
 
 # TODO move to a github action a possibly make it add the draft release notes to the PR?
 #- name: draft-pr

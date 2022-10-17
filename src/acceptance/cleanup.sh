@@ -4,10 +4,10 @@ set -euo pipefail
 
 function delete_org(){
   local ORG=$1
+
   if ! cf delete-org "$ORG" -f; then
     cf target -o "$ORG"
-    SERVICES=$(cf services | grep "${SERVICE_PREFIX}" |  awk 'NR>1 { print $1}')
-    for SERVICE in $SERVICES; do
+    for SERVICE in $(cf services | grep -e "autoscaler" |  awk 'NR>1 { print $1}'); do
       cf purge-service-instance "$SERVICE" -f || echo "ERROR: purge-service-instance '$SERVICE' failed"
     done
     cf delete-org -f "$ORG" || echo "ERROR: delete-org '$ORG' failed"
@@ -16,7 +16,6 @@ function delete_org(){
 }
 
 org_prefix=${NAME_PREFIX:-"ASATS|ASUP|CUST_MET"}
-SERVICE_PREFIX=autoscaler
 
 ORGS=$(cf orgs |  awk 'NR>3{ print $1}' | grep -E "${org_prefix}" || true)
 echo "# deleting orgs: '${ORGS}'"
@@ -35,6 +34,4 @@ then
     cf delete-user -f "$user" &
   done
 fi
-
-
 wait
