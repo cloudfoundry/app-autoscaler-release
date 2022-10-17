@@ -1,10 +1,12 @@
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
+set -euo pipefail
+
 function bosh_login(){
-  pushd "${bbl_state_path}" > /dev/null || exit
+  pushd "${bbl_state_path}" > /dev/null
     eval "$(bbl print-env)"
-  popd > /dev/null || exit
+  popd > /dev/null
 }
 
 function cf_login(){
@@ -15,9 +17,9 @@ function cf_login(){
 
 function cleanup_acceptance_run(){
   echo "# Cleaning up from acceptance tests"
-  pushd "${ci_dir}/../src/acceptance" > /dev/null || exit
+  pushd "${ci_dir}/../src/acceptance" > /dev/null
     ./cleanup.sh
-  popd > /dev/null || exit
+  popd > /dev/null
 }
 
 function cleanup_service_broker(){
