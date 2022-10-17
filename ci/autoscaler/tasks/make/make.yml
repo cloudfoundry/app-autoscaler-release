@@ -9,7 +9,6 @@ image_resource:
 
 params:
   TARGETS:
-  AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
 - name: app-autoscaler-release
