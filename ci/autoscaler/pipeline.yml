@@ -46,6 +46,13 @@ anchors:
       operations/log-cache-syslog-server.yml
       operations/use_buildin_mode.yml
 
+  performance-env: &performance-env
+    DEPLOYMENT_NAME: "autoscaler-performance"
+    NODES: 1
+    GINKGO_OPTS: "--fail-fast"
+    SERIAL: "false"
+
+
 
 groups:
 - name: all
@@ -119,15 +126,6 @@ resources:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
     branch: ((branch_name))
-    fetch_tags: true
-
-- name: app-autoscaler-release-performance-test
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:cloudfoundry/app-autoscaler-release
-    private_key: ((autoscaler_git_key))
-    branch: performance-test
     fetch_tags: true
 
 - name: gh-release
@@ -363,15 +361,10 @@ jobs:
     - get: bbl-state
       trigger: true
     - get: app-autoscaler-release
-      resource: app-autoscaler-release-performance-test
-    ensure:
-      task: cleanup
-      file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params: &performance-env
-        DEPLOYMENT_NAME: "autoscaler-performance"
-        NODES: 1
-        GINKGO_OPTS: "--fail-fast"
-        SERIAL: "false"
+        #   ensure:
+        #     task: cleanup
+        #     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+        #     params: *performance-env
 
         #  - task: check-diego-cell-count
         #    file: app-autoscaler-release/ci/autoscaler/tasks/check-diego-cell-count.yml
