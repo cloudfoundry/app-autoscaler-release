@@ -29,8 +29,13 @@ function log(){
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir=$(realpath -e "${script_dir}/../../..")
 
-export PR_NUMBER=${PR_NUMBER:-44}
-if [[  ${PR_NUMBER} == 44 ]]; then warn "no PR_NUMBER is set, will use the default"; fi
+export PR_NUMBER=${PR_NUMBER:-UNDEFINED}
+if [[  ${PR_NUMBER} == "UNDEFINED" ]]; then
+  if ! PR_NUMBER=$(gh pr view --json number --jq '.number'); then
+    warn "no PR_NUMBER is set, will use the default (44)";
+    PR_NUMBER=44
+  fi
+fi
 debug "PR_NUMBER: ${PR_NUMBER}"
 
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
