@@ -3,51 +3,43 @@
     p(property,nil) || []
   end
 
-  scaling_engine_db_scheme = p('autoscaler.scalingengine_db.db_scheme')
-  scaling_engine_db_address = p('autoscaler.scalingengine_db.address')
-  scaling_engine_db_port = p('autoscaler.scalingengine_db.port')
-  scaling_engine_db_role = p_arr('autoscaler.scalingengine_db.roles').find { |role| role['tag'] == 'scalingenginedb' or role['tag'] == 'default' } 
-  scaling_engine_db_database = p_arr('autoscaler.scalingengine_db.databases').find { |database| database['tag'] == 'scalingenginedb' or database['tag'] == 'default' } 
-  if scaling_engine_db_scheme == "postgres"
-    scaling_engine_db_url = scaling_engine_db_scheme + "://" + ERB::Util.url_encode(scaling_engine_db_role['name']) + ":" + ERB::Util.url_encode(scaling_engine_db_role['password']) + "@" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + "/" + scaling_engine_db_database['name'] + "?application_name=scalingengine&sslmode=" + p('autoscaler.scalingengine_db.sslmode')
-  else
-    scaling_engine_db_url = scaling_engine_db_role['name'] + ":" + scaling_engine_db_role['password'] + "@tcp(" + scaling_engine_db_address + ":" + scaling_engine_db_port.to_s + ")/" + scaling_engine_db_database['name'] + "?tls=" + p('autoscaler.scalingengine_db.sslmode')
-  end
-  unless p('autoscaler.scalingengine_db.tls.ca') == ""
-    scaling_engine_db_url = scaling_engine_db_url + "&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
+  def build_db_url(db_name, job_name)
+    db_scheme = p("autoscaler.#{db_name}.db_scheme")
+    db_address = p("autoscaler.#{db_name}.address")
+    db_port = p("autoscaler.#{db_name}.port")
+    db_roles = p_arr("autoscaler.#{db_name}.roles")
+    db_dbs = p_arr("autoscaler.#{db_name}.databases")
+    db_role = db_roles.find { |role| role['tag'] == db_name.tr('_', '') } ||  db_roles.find { |role| role['tag'] == 'default' }
+    db_database = db_dbs.find { |database| database['tag'] == db_name.tr('_', '') } || db_dbs.find { |database| database['tag'] == 'default' }
+
+    if db_scheme == "postgres"
+      db_url = "#{db_scheme}://#{ERB::Util.url_encode(db_role['name'])}:#{ERB::Util.url_encode(db_role['password'])}@#{db_address}:#{db_port}/#{db_database['name']}?application_name=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
+    else
+      db_url = "#{db_role['name']}:#{db_role['password']}@tcp(#{db_address}:#{db_port})/#{db_database['name']}?tls=" + p("autoscaler.#{db_name}.sslmode")
+    end
+    append_db_tls_configs(db_name, db_url, job_name)
   end
 
-
-  policy_db_scheme = p('autoscaler.policy_db.db_scheme')
-  policy_db_address = p('autoscaler.policy_db.address')
-  policy_db_port = p('autoscaler.policy_db.port')
-  policy_db_role = p_arr('autoscaler.policy_db.roles').find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' }
-  policy_db_database = p_arr('autoscaler.policy_db.databases').find { |database| database['tag'] == 'policydb'  or database['tag'] == 'default'}
-  if policy_db_scheme == "postgres"
-    policy_db_url = policy_db_scheme + "://" + ERB::Util.url_encode(policy_db_role['name']) + ":" + ERB::Util.url_encode(policy_db_role['password']) + "@" + policy_db_address + ":" + policy_db_port.to_s + "/" + policy_db_database['name'] + "?application_name=scalingengine&sslmode=" + p('autoscaler.policy_db.sslmode')
-  else
-    policy_db_url = policy_db_role['name'] + ":" + policy_db_role['password'] + "@tcp(" + policy_db_address + ":" + policy_db_port.to_s + ")/" + policy_db_database['name'] + "?tls=" + p('autoscaler.policy_db.sslmode')
+  def append_db_tls_configs(db_name, db_url, job_name)
+  unless p("autoscaler.#{db_name}.tls.ca") == ""
+    db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
   end
-  unless p('autoscaler.policy_db.tls.ca') == ""
-    policy_db_url = policy_db_url + "&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/policy_db/ca.crt"
+  unless p("autoscaler.#{db_name}.tls.crt") == ""
+    db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
   end
-
-  scheduler_db_scheme = p('autoscaler.scheduler_db.db_scheme')
-  scheduler_db_address = p('autoscaler.scheduler_db.address')
-  scheduler_db_port = p('autoscaler.scheduler_db.port')
-  scheduler_db_role = p_arr('autoscaler.scheduler_db.roles').find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
-  scheduler_db_database = p_arr('autoscaler.scheduler_db.databases').find { |database| database['tag'] == 'schedulerdb' or database['tag'] == 'default' }
-  if scheduler_db_scheme == "postgres"
-    scheduler_db_url = scheduler_db_scheme + "://" + ERB::Util.url_encode(scheduler_db_role['name']) + ":" + ERB::Util.url_encode(scheduler_db_role['password']) + "@" + scheduler_db_address + ":" + scheduler_db_port.to_s + "/" + scheduler_db_database['name'] + "?application_name=scalingengine&sslmode=" + p('autoscaler.scheduler_db.sslmode')
-  else
-    scheduler_db_url = scheduler_db_role['name'] + ":" + scheduler_db_role['password'] + "@tcp(" + scheduler_db_address + ":" + scheduler_db_port.to_s + ")/" + scheduler_db_database['name'] + "?tls=" + p('autoscaler.scheduler_db.sslmode')
+  unless p("autoscaler.#{db_name}.tls.key") == ""
+    db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
   end
-  unless p('autoscaler.scheduler_db.tls.ca') == ""
-    scheduler_db_url = scheduler_db_url + "&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scheduler_db/ca.crt"
-  end
-%>
+  db_url
+end
 
-
+###########################################
+#           Template Main                 #
+###########################################
+  job_name = 'scalingengine'
+  scaling_engine_db_url = build_db_url('scalingengine_db', job_name)
+  policy_db_url = build_db_url('policy_db', job_name)
+  scheduler_db_url = build_db_url('scheduler_db', job_name)%>
 
 cf:
   api:  <%= p("autoscaler.cf.api") %>

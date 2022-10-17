@@ -9,6 +9,7 @@ describe "scheduler" do
   let(:job) { release.job("scheduler") }
   let(:template) { job.template("config/application.properties") }
   let(:properties) { YAML.safe_load(fixture("scheduler.yml").read) }
+  let(:rendered_template) { template.render(properties) }
 
   context "config/application.properties" do
     it "does not set username nor password if not configured" do

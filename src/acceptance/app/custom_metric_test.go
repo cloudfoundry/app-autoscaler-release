@@ -15,7 +15,6 @@ import (
 
 var _ = Describe("AutoScaler custom metrics policy", func() {
 	var (
-		appName string
 		appGUID string
 		policy  string
 	)

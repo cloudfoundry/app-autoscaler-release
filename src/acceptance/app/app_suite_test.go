@@ -28,6 +28,8 @@ var (
 
 	instanceName         string
 	initialInstanceCount int
+
+	appName string
 )
 
 const componentName = "Application Scale Suite"
@@ -70,6 +72,7 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
+		DebugInfo(appName)
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 				DisableServiceAccess(cfg, setup.GetOrganizationName())
@@ -78,6 +81,22 @@ var _ = AfterSuite(func() {
 		setup.Teardown()
 	}
 })
+
+func DebugInfo(anApp string) {
+	if os.Getenv("DEBUG") == "true" && cfg.ASApiEndpoint != "" {
+		GinkgoWriter.Println("=============== DEBUG ===============")
+		cf.Cf(" autoscaling-api", cfg.ASApiEndpoint).Wait()
+		cf.Cf("autoscaling-policy", anApp).Wait()
+		cf.Cf("autoscaling-history", anApp).Wait()
+		cf.Cf("autoscaling-metrics", anApp, "memoryused").Wait()
+		cf.Cf("autoscaling-metrics", anApp, "memoryutil").Wait()
+		cf.Cf("autoscaling-metrics", anApp, "responsetime").Wait()
+		cf.Cf("autoscaling-metrics", anApp, "throughput").Wait()
+		cf.Cf("autoscaling-metrics", anApp, "cpu").Wait()
+		cf.Cf("autoscaling-metrics", anApp, "test_metric").Wait()
+		GinkgoWriter.Println("=====================================")
+	}
+}
 
 func getStartAndEndTime(location *time.Location, offset, duration time.Duration) (time.Time, time.Time) {
 	// Since the validation of time could fail if spread over two days and will result in acceptance test failure

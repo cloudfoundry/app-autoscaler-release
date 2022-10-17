@@ -71,6 +71,7 @@ if [ ! -e "${bin_folder}/cf" ]; then
  chmod a+x "${bin_folder}/unchecked/cf8"
  "${bin_folder}/unchecked/cf8" --version
  mv "${bin_folder}/unchecked/cf8" "${bin_folder}/cf"
+ "${bin_folder}/cf" install-plugin -f -r CF-Community app-autoscaler-plugin && "${bin_folder}/cf" plugins
 fi
 
 rm -rf "${bin_folder}/unchecked" || true
