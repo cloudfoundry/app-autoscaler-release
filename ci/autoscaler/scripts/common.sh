@@ -1,6 +1,6 @@
+#!/bin/bash
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
-
 set -euo pipefail
 
 function bosh_login(){
@@ -39,7 +39,6 @@ function cleanup_bosh_deployment(){
 function cleanup_bosh(){
   bosh clean-up --all -n
 }
-
 
 function cleanup_credhub(){
   echo "- Deleting credhub creds: '/bosh-autoscaler/${deployment_name}/*'"

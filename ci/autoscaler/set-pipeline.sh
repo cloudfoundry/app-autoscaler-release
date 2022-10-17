@@ -57,8 +57,7 @@ function main(){
       unpause_job "$PIPELINE_NAME/set-pipeline"
     fi
 
-
   popd > /dev/null
 }
 
-main
+[ "${BASH_SOURCE[0]}" == "${0}" ] && main "$@"
