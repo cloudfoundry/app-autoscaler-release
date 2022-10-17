@@ -17,7 +17,6 @@ import (
 
 var _ = Describe("AutoScaler dynamic policy", func() {
 	var (
-		appName string
 		appGUID string
 		policy  string
 

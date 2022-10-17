@@ -127,3 +127,5 @@ RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
     && npm --version \
     && node -v
 
+RUN  cf install-plugin -f -r CF-Community app-autoscaler-plugin\
+     && cf plugins

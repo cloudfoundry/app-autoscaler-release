@@ -15,7 +15,6 @@ import (
 
 var _ = Describe("AutoScaler specific date schedule policy", func() {
 	var (
-		appName              string
 		appGUID              string
 		initialInstanceCount int
 		startDateTime        time.Time

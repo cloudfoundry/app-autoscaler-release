@@ -15,7 +15,6 @@ import (
 
 var _ = Describe("AutoScaler recurring schedule policy", func() {
 	var (
-		appName              string
 		appGUID              string
 		initialInstanceCount int
 		daysOfMonthOrWeek    Days
