@@ -368,7 +368,7 @@ jobs:
       task: cleanup
       file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
       params: &performance-env
-        DEPLOYMENT_NAME: "performance"
+        DEPLOYMENT_NAME: "autoscaler-performance"
         NODES: 1
         GINKGO_OPTS: "--fail-fast"
         SERIAL: "false"
