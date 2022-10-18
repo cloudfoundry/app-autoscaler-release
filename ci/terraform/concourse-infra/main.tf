@@ -41,7 +41,6 @@ module "concourse-infra" {
     #  machine_type_workers_pool = ""
 
 # NETWORKING
-  vpc_name = var.vpc_name
-  subnet_name = var.subnet_name
+  subnet_cidr = var.subnet_cidr
 
 }

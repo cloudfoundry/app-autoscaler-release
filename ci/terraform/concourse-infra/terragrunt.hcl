@@ -40,7 +40,7 @@ remote_state {
     sql_instance_secondary_zone = local.config.secondary_zone
 
     vpc_name = local.config.vpc_name
-    subnet_name = local.config.subnetwork_name
+    subnet_cidr = local.config.subnet_cidr
 
     dns_record = local.config.dns_record
     dns_zone = local.config.dns_zone

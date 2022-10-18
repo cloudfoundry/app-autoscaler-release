@@ -1,13 +1,29 @@
-data "google_compute_network" "vpc" {
-  name                            = var.vpc_name
-  project                         = var.project
+resource "google_compute_network" "vpc" {
+  name                    = "${var.gke_name}-vpc"
+  project                 = var.project
+  auto_create_subnetworks = "false"
 }
 
-data "google_compute_subnetwork" "subnet" {
-  name                     = var.subnet_name
-  project                  = var.project
-  region                   = var.region
+# Subnet
+resource "google_compute_subnetwork" "subnet" {
+  name          = "${var.gke_name}-subnet"
+  region        = var.region
+  project       = var.project
+  network       = google_compute_network.vpc.name
+  ip_cidr_range = var.subnet_cidr
 }
+
+# data "google_compute_network" "vpc" {
+#   name                            = var.vpc_name
+#   project                         = var.project
+# }
+
+# data "google_compute_subnetwork" "subnet" {
+#   name                     = var.subnet_name
+#   project                  = var.project
+#   region                   = var.region
+# }
+
 
 # TODO: determine if this is only bosh stemcell infra requirement
 # # create subnets required for deploying bosh workloads and running  tests
