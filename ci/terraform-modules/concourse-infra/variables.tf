@@ -28,8 +28,7 @@ variable "dns_zone" { nullable = false }
 variable "dns_domain" { nullable = false }
 variable "dns_name" { nullable = false }
 
-variable "vpc_name" { nullable = false }
-variable "subnet_name" { nullable = false }
+variable "subnet_cidr" { nullable = false }
 
 
 variable "gke_name" { nullable = false }

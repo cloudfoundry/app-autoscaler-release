@@ -1,7 +1,7 @@
 resource "google_compute_router" "nat_router" {
   encrypted_interconnect_router = "false"
   name                          = "nat-router-${var.gke_name}"
-  network                       = data.google_compute_network.vpc.name
+  network                       = google_compute_network.vpc.name
   project                       = var.project
   region                        = var.region
 }
@@ -15,7 +15,7 @@ resource "google_compute_router_nat" "nat_config" {
   nat_ip_allocate_option              = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
   subnetwork {
-    name = data.google_compute_subnetwork.subnet.id
+    name = google_compute_subnetwork.subnet.id
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
   enable_dynamic_port_allocation      = true

@@ -32,4 +32,4 @@ sql_instance_disk_size: 38
 
 
 vpc_name: default
-subnetwork_name: default
+subnet_cidr: 10.10.0.0/24
