@@ -2,7 +2,7 @@ package app_test
 
 import (
 	"acceptance"
-	"acceptance/helpers"
+	. "acceptance/helpers"
 	"fmt"
 	"os"
 	"time"
@@ -18,23 +18,24 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		policy  string
 	)
 	BeforeEach(func() {
-		policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
-		appName = helpers.CreateTestApp(cfg, "node-custom-metric", 1)
-		appGUID = helpers.GetAppGuid(cfg, appName)
-		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
-		helpers.CreateCustomMetricCred(cfg, appName, appGUID)
-		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
+		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+		appName = CreateTestApp(cfg, "node-custom-metric", 1)
+		appGUID = GetAppGuid(cfg, appName)
+		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
+		CreateCustomMetricCred(cfg, appName, appGUID)
+		StartApp(appName, cfg.CfPushTimeoutDuration())
 	})
 
 	AfterEach(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			fmt.Println("Skipping Teardown...")
 		} else {
+			DebugInfo(cfg, setup, appName)
 			DeletePolicy(appName, appGUID)
 			if !cfg.IsServiceOfferingEnabled() {
-				helpers.DeleteCustomMetricCred(cfg, appGUID)
+				DeleteCustomMetricCred(cfg, appGUID)
 			}
-			helpers.DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
+			DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 		}
 	})
 
@@ -42,15 +43,15 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 			By("Scale out to 2 instances")
 			scaleOut := func() int {
-				helpers.SendMetric(cfg, appName, 550)
-				return helpers.RunningInstances(appGUID, 5*time.Second)
+				SendMetric(cfg, appName, 550)
+				return RunningInstances(appGUID, 5*time.Second)
 			}
 			Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
 
 			By("Scale in to 1 instances")
 			scaleIn := func() int {
-				helpers.SendMetric(cfg, appName, 100)
-				return helpers.RunningInstances(appGUID, 5*time.Second)
+				SendMetric(cfg, appName, 100)
+				return RunningInstances(appGUID, 5*time.Second)
 			}
 			Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
 		})
@@ -59,7 +60,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 	Context("when adding custom-metrics via mtls", func() {
 		It("should successfully add a metric using the app", func() {
 			By("adding policy so test_metric is allowed")
-			policy = helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 			By("sending metric via mtls endpoint")
 			cf.Cf("curl", "/custom-metrics/mtls/test_metric/10", "-f").Wait(cfg.DefaultTimeoutDuration())
 		})
