@@ -8,10 +8,14 @@ export YQ_VERSION=4.26.1
 export CF_PACKAGE_VERSION=1.38.0
 export CF_VERSION=8.3.0
 
+GITHUB_ENV=${GITHUB_ENV:-"${HOME}/github_env"}
+GITHUB_PATH=${GITHUB_PATH:-"${HOME}/github_path"}
+
 echo "# Installing all deployment cli requirements"
 bin_folder="${HOME}/bin"
 mkdir -p "${bin_folder}/unchecked"
 echo "${bin_folder}" >> "${GITHUB_PATH}"
+export CF_PLUGIN_HOME="${bin_folder}"
 
 
 if [ ! -e "${bin_folder}/bosh" ]; then
@@ -71,7 +75,12 @@ if [ ! -e "${bin_folder}/cf" ]; then
  chmod a+x "${bin_folder}/unchecked/cf8"
  "${bin_folder}/unchecked/cf8" --version
  mv "${bin_folder}/unchecked/cf8" "${bin_folder}/cf"
- "${bin_folder}/cf" install-plugin -f -r CF-Community app-autoscaler-plugin && "${bin_folder}/cf" plugins
+fi
+
+if [ ! -e "${bin_folder}/.cf/plugins/AutoScaler" ]; then
+  "${bin_folder}/cf" install-plugin -f -r CF-Community app-autoscaler-plugin
+  "${bin_folder}/cf" plugins
+  echo "CF_PLUGIN_HOME=${CF_PLUGIN_HOME}" >> $GITHUB_ENV
 fi
 
 rm -rf "${bin_folder}/unchecked" || true
