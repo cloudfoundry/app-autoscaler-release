@@ -23,6 +23,11 @@ module "concourse-infra" {
   sql_instance_secondary_zone = var.sql_instance_secondary_zone
   sql_instance_backup_location = var.sql_instance_backup_location
 
+# DNS ZONE
+  dns_zone = var.dns_zone
+  dns_domain = var.dns_domain
+  dns_record = var.dns_record
+  dns_name = var.dns_name
 
 # GKE
 # gke_name = var.base_name
