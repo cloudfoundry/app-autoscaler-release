@@ -26,6 +26,10 @@ function log(){
   echo " - $1"
 }
 
+function step(){
+  echo "# $1"
+}
+
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir=$(realpath -e "${script_dir}/../../..")
 

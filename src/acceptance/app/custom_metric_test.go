@@ -10,7 +10,6 @@ import (
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 )
 
 var _ = Describe("AutoScaler custom metrics policy", func() {
@@ -31,7 +30,6 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			fmt.Println("Skipping Teardown...")
 		} else {
-			Eventually(cf.Cf("logs", appName, "--recent"), cfg.DefaultTimeoutDuration()).Should(Exit())
 			DeletePolicy(appName, appGUID)
 			if !cfg.IsServiceOfferingEnabled() {
 				helpers.DeleteCustomMetricCred(cfg, appGUID)

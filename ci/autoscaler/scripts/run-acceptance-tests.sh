@@ -4,28 +4,20 @@ set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
+ginkgo_opts="${GINKGO_OPTS:-}"
+nodes="${NODES:-3}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
 skip_ssl_validation=${SKIP_SSL_VALIDATION:-'true'}
 skip_teardown="${SKIP_TEARDOWN:-false}"
 suites=${SUITES:-"api app broker"}
-ginkgo_opts="${GINKGO_OPTS:-}"
-nodes="${NODES:-3}"
 
-if [[ ! -d ${bbl_state_path} ]]; then
-  echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
-  echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
-  exit 1;
-  fi
-
-
-pushd "${bbl_state_path}"
+pushd "${bbl_state_path}" >/dev/null
   eval "$(bbl print-env)"
-popd
+popd >/dev/null
 
 cf_admin_password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
-export GOPATH="$PWD/app-autoscaler-release"
-pushd "${autoscaler_dir}/src/acceptance"
+pushd "${autoscaler_dir}/src/acceptance" >/dev/null
 cat > acceptance_config.json <<EOF
 {
   "api": "api.${system_domain}",
@@ -47,42 +39,21 @@ EOF
 
 suites_to_run=""
 for suite in $suites; do
-  echo "Checking suite $suite"
+  log "checking suite $suite"
   if [[ -d "$suite" ]]; then
-     echo "Adding suite '$suite' to list"
+     log "Adding suite '$suite' to list"
      suites_to_run="$suites_to_run $suite"
   fi
 done
 
-echo "Running $suites_to_run"
-
-echo -e "\n>> ACCEPTANCE TEST ENV VARS:"
-at_vars=(
-system_domain
-deployment_name
-bbl_state_path
-autoscaler_dir
-skip_teardown
-skip_ssl_validation
-name_prefix
-buildin_mode
-service_offering_enabled
-suites
-ginkgo_opts
-nodes
-)
-
-for var in "${at_vars[@]}"; do
-  echo "$var: ${!var}"
-  done
-echo
+step "running $suites_to_run"
 
 #run suites
 if [ "${suites_to_run}" != "" ]; then
   # shellcheck disable=SC2086
-  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace "$ginkgo_opts" ${suites_to_run}
+  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace $ginkgo_opts ${suites_to_run}
 else
-  echo "Nothing to run!"
+  log "Nothing to run!"
 fi
 
-popd
+popd >/dev/null

@@ -18,9 +18,11 @@ CI_DIR?=${PWD}/ci
 CI?=false
 VERSION?=0.0.testing
 DEST?=build
+export BUILDIN_MODE?=false
 export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
 
 $(shell mkdir -p target)
+$(shell mkdir -p build)
 
 list-modules:
 	@echo ${go_modules}
@@ -247,11 +249,13 @@ build/autoscaler-test.tgz:
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
 
 .PHONY: vendor-app
-vendor-app:
+vendor-app: target/vendor-app
+target/vendor-app:
 	@echo " - installing node modules to package node app"
 	@cd src/acceptance/assets/app/nodeApp > /dev/null\
 	 && npm install --production\
 	 && npm prune --production
+	@touch $@
 
 .PHONY: acceptance-release
 acceptance-release: mod-tidy vendor vendor-app
@@ -295,8 +299,8 @@ uaac:
 
 .PHONY: deploy-autoscaler
 deploy-autoscaler: mod-tidy vendor uaac db scheduler
-	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh;\
-	if [[ "$${BUILDIN_MODE}" == "false" ]]; then ${CI_DIR}/autoscaler/scripts/register-broker.sh; fi;\
+	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+	[ "$${BUILDIN_MODE}" == "false" ] && ${CI_DIR}/autoscaler/scripts/register-broker.sh
 
 deploy-prometheus:
 	@export DEPLOYMENT_NAME=prometheus;\
