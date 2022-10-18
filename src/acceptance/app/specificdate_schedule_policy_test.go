@@ -44,6 +44,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		const scheduleInstanceMin = 2
 		const scheduleInstanceMax = 5
 		const scheduledInstanceInit = 3
+		const appStartTime = 30 * time.Second
 		JustBeforeEach(func() {
 			//TODO the start app needs to be after the binding but the timings require the app been up already.
 			StartApp(appName, cfg.CfPushTimeoutDuration())
@@ -70,9 +71,9 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 
 			By(fmt.Sprintf("waiting till end of schedule %dS and should stay %d instances", int(jobRunTime.Seconds()), scheduleInstanceMin))
 			Eventually(func() int { return RunningInstances(appGUID, jobRunTime) }).
-				WithTimeout(jobRunTime).
 				//+/- poll time error margin.
-				WithPolling(time.Until(endDateTime) - pollTime).
+				WithTimeout(time.Until(endDateTime) + pollTime + appStartTime).
+				WithPolling(pollTime).
 				Should(Equal(2))
 
 			WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
