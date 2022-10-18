@@ -8,9 +8,6 @@
 * ytt =>  0.43.0
 * vendir => 0.31.0
 * kubectl => 1.23
-* jq (if needed for other scripts ie. disaster recovery tasks, currently not in use)
-
-
 
 # Prerequisites for a fresh project
 Adjust `variables.tf`
