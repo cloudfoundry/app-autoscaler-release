@@ -37,6 +37,12 @@ remote_state {
     sql_instance_disk_size = local.config.sql_instance_disk_size
     sql_instance_backup_location = local.config.sql_instance_backup_location
     sql_instance_secondary_zone = local.config.secondary_zone
+
+    dns_record = local.config.dns_record
+    dns_zone = local.config.dns_zone
+    dns_domain = local.config.dns_domain
+    dns_name  = "${local.config.dns_zone}-${local.config.dns_domain}."
+
 #   #tgconf = yamldecode(file("../config.yaml"))
 #   #module_sources = local.tgconf.module_sources
   }

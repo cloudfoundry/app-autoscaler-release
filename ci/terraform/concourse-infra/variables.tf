@@ -9,3 +9,8 @@ variable "sql_instance_tier" { default = null }
 variable "sql_instance_disk_size" { default = null }
 variable "sql_instance_backup_location" { default = null }
 variable "sql_instance_secondary_zone" { default = null }
+
+variable "dns_record" { nullable = false }
+variable "dns_zone" { nullable = false }
+variable "dns_domain" { nullable = false }
+variable "dns_name" { nullable = false }
