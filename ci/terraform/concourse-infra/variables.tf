@@ -11,6 +11,9 @@ variable "sql_instance_disk_size" { default = null }
 variable "sql_instance_backup_location" { default = null }
 variable "sql_instance_secondary_zone" { default = null }
 
+variable "vpc_name" { nullable = false }
+variable "subnet_name" { nullable = false }
+
 variable "dns_record" { nullable = false }
 variable "dns_zone" { nullable = false }
 variable "dns_domain" { nullable = false }

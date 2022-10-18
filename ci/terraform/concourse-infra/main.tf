@@ -39,4 +39,9 @@ module "concourse-infra" {
     #  #master_ipv4_cidr_block    = ""
     #  machine_type_default_pool = ""
     #  machine_type_workers_pool = ""
- }
+
+# NETWORKING
+  vpc_name = var.vpc_name
+  subnet_name = var.subnet_name
+
+}
