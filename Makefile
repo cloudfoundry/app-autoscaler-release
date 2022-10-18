@@ -313,6 +313,10 @@ deploy-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 
+.PHONY: cleanup-concourse
+cleanup-concourse:
+	@${CI_DIR}/autoscaler/scripts/cleanup-concourse.sh
+
 .PHONY: cf-login
 cf-login:
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
