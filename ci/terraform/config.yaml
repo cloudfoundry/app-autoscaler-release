@@ -30,3 +30,6 @@ sql_instance_tier: db-custom-1-4096
 sql_instance_backup_location: eu
 sql_instance_disk_size: 38
 
+
+vpc_name: default
+subnetwork_name: default

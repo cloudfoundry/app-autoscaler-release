@@ -1,21 +1,26 @@
 resource "google_compute_router" "nat_router" {
   encrypted_interconnect_router = "false"
-  name                          = "nat-router"
-  network                       = google_compute_network.vpc.name
+  name                          = "nat-router-${var.gke_name}"
+  network                       = data.google_compute_network.vpc.name
   project                       = var.project
   region                        = var.region
 }
 
 
 resource "google_compute_router_nat" "nat_config" {
-  name                                = "nat-config"
+  name                                = "nat-config-${var.gke_name}"
+  project                             = var.project
   router                              = google_compute_router.nat_router.name
   region                              = google_compute_router.nat_router.region
   nat_ip_allocate_option              = "AUTO_ONLY"
-  source_subnetwork_ip_ranges_to_nat  = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-  min_ports_per_vm                    = "4095"
+  source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+  subnetwork {
+    name = data.google_compute_subnetwork.subnet.id
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+  enable_dynamic_port_allocation      = true
   enable_endpoint_independent_mapping = false
-  tcp_established_idle_timeout_sec    = 60
+  tcp_established_idle_timeout_sec    = 180
 
   log_config {
     enable = true
