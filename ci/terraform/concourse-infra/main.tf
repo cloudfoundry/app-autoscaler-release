@@ -2,7 +2,7 @@
 module "concourse-infra" {
   #variables can't be used here
   #source = "git::https://github.com/marcinkubica/bosh-community-stemcell-ci-infra.git//terraform/concourse-infra?ref=terraform_v2"
-  source = "../../../../bosh-community-stemcell-ci-infra//terraform/concourse-infra/"
+  source = "../../terraform-modules/concourse-infra"
 
   project = var.project
   region  = var.region
@@ -17,7 +17,7 @@ module "concourse-infra" {
 #   }
 
 # SQL
-  sql_instance_name = "${var.gke_name}-concourse"
+  sql_instance_name = var.sql_instance_name
   sql_instance_tier = var.sql_instance_tier
   sql_instance_disk_size = var.sql_instance_disk_size
   sql_instance_secondary_zone = var.sql_instance_secondary_zone
@@ -30,7 +30,7 @@ module "concourse-infra" {
   dns_name = var.dns_name
 
 # GKE
-# gke_name = var.base_name
+  gke_name = var.gke_name
 #    gke = {
 #      name = "wg-ci"
 #      controlplane_version = "1.23.8-gke.1900"

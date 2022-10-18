@@ -5,11 +5,19 @@ secondary_zone: europe-west3-b
 
 #concourse_url: https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
 
+# DNS record as for your Concourse https:// URL
+dns_record: concourse-refactor
+dns_zone: app-runtime-interfaces
+dns_domain: ci.cloudfoundry.org
+
+
 gcs_bucket: terraform-state-wg-ci
+# prefix builds root folder for tf state for the entire stack
 gcs_prefix: refactor
 
-
-# A name-prefix to build resource names from
+# Several resource names are build off GKE name for scaling
+# k8s cluster
+# SQL instance
 gke_name: wg-ci-refactor
 
 
@@ -18,7 +26,7 @@ gke_name: wg-ci-refactor
 #     url: https://github.com/marcinkubica/bosh-community-stemcell-ci-infra.git//terraform/concourse-infra
 #     ref: terraform
 
-
 sql_instance_tier: db-custom-1-4096
 sql_instance_backup_location: eu
 sql_instance_disk_size: 38
+

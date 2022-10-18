@@ -33,6 +33,7 @@ remote_state {
     zone    = local.config.zone
     gke_name = local.config.gke_name
 
+    sql_instance_name = "${local.config.gke_name}-concourse"
     sql_instance_tier = local.config.sql_instance_tier
     sql_instance_disk_size = local.config.sql_instance_disk_size
     sql_instance_backup_location = local.config.sql_instance_backup_location
