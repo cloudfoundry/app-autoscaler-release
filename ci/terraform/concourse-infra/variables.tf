@@ -5,6 +5,7 @@ variable "secondary_zone" { default = null }
 
 variable "gke_name" { default = null }
 
+variable "sql_instance_name" { default = null }
 variable "sql_instance_tier" { default = null }
 variable "sql_instance_disk_size" { default = null }
 variable "sql_instance_backup_location" { default = null }
