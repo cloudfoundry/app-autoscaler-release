@@ -1,6 +1,6 @@
 data "google_dns_managed_zone" "dns" {
-  name        = var.dns_zone
-  project     = var.project
+  name    = var.dns_zone
+  project = var.project
 }
 
 
@@ -9,7 +9,7 @@ resource "google_compute_address" "concourse_app" {
   region       = var.region
   address_type = "EXTERNAL"
   # gcp ip addres name can't contain dots
-  name         = replace("${var.dns_record}-${var.dns_zone}-${var.dns_domain}",".","-")
+  name = replace("${var.dns_record}-${var.dns_zone}-${var.dns_domain}", ".", "-")
 }
 
 

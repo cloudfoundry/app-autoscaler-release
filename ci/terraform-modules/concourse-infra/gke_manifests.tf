@@ -17,11 +17,11 @@ resource "kubectl_manifest" "config_connector" {
 resource "kubernetes_namespace" "concourse" {
   metadata {
     name = "concourse"
-    }
+  }
 
   lifecycle {
     ignore_changes = [metadata]
-    }
+  }
 
   depends_on = [google_container_cluster.wg_ci]
 }

@@ -40,10 +40,10 @@ resource "google_container_node_pool" "default_pool" {
       disable-legacy-endpoints = "true"
     }
 
-    oauth_scopes    = [
+    oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform",
       "https://www.googleapis.com/auth/userinfo.email"
-      ]
+    ]
     preemptible     = "false"
     service_account = google_service_account.gke_node_pools.email
 
