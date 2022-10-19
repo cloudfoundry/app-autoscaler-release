@@ -3,19 +3,14 @@ package app_test
 import (
 	"acceptance"
 	. "acceptance/helpers"
-	"os"
+	"time"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
-
-	"time"
 )
 
 var _ = Describe("AutoScaler recurring schedule policy", func() {
 	var (
-		appGUID              string
 		initialInstanceCount int
 		daysOfMonthOrWeek    Days
 		startTime            time.Time
@@ -28,15 +23,6 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		initialInstanceCount = 1
 		appName = CreateTestApp(cfg, "recurring-schedule", initialInstanceCount)
 		appGUID = GetAppGuid(cfg, appName)
-	})
-
-	AfterEach(func() {
-		if os.Getenv("SKIP_TEARDOWN") == "true" {
-			GinkgoWriter.Println("Skipping Teardown...")
-		} else {
-			DeletePolicy(appName, appGUID)
-			Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
-		}
 	})
 
 	Context("when scaling by recurring schedule", func() {

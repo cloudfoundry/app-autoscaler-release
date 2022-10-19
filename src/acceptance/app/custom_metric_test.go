@@ -3,8 +3,6 @@ package app_test
 import (
 	"acceptance"
 	. "acceptance/helpers"
-	"fmt"
-	"os"
 	"time"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
@@ -24,19 +22,6 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 		CreateCustomMetricCred(cfg, appName, appGUID)
 		StartApp(appName, cfg.CfPushTimeoutDuration())
-	})
-
-	AfterEach(func() {
-		if os.Getenv("SKIP_TEARDOWN") == "true" {
-			fmt.Println("Skipping Teardown...")
-		} else {
-			DebugInfo(cfg, setup, appName)
-			DeletePolicy(appName, appGUID)
-			if !cfg.IsServiceOfferingEnabled() {
-				DeleteCustomMetricCred(cfg, appGUID)
-			}
-			DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
-		}
 	})
 
 	Context("when scaling by custom metrics", func() {

@@ -3,22 +3,16 @@ package app_test
 import (
 	"acceptance"
 	"acceptance/helpers"
-	"fmt"
-	"os"
+	"time"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
-
-	"time"
 )
 
 var _ = Describe("AutoScaler dynamic policy", func() {
 	var (
-		appGUID string
-		policy  string
+		policy string
 
 		doneChan       chan bool
 		doneAcceptChan chan bool
@@ -34,15 +28,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		appGUID = helpers.GetAppGuid(cfg, appName)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
-	})
-
-	AfterEach(func() {
-		if os.Getenv("SKIP_TEARDOWN") == "true" {
-			fmt.Println("Skipping Teardown...")
-		} else {
-			DeletePolicy(appName, appGUID)
-			Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
-		}
 	})
 
 	Context("when scaling by memoryused", func() {

@@ -3,19 +3,14 @@ package app_test
 import (
 	. "acceptance/helpers"
 	"fmt"
-	"os"
-
 	"time"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 )
 
 var _ = Describe("AutoScaler specific date schedule policy", func() {
 	var (
-		appGUID              string
 		initialInstanceCount int
 		startDateTime        time.Time
 		endDateTime          time.Time
@@ -23,28 +18,16 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	)
 
 	BeforeEach(func() {
-
 		instanceName = CreateService(cfg)
-
 		initialInstanceCount = 1
 		appName = CreateTestApp(cfg, "date-schedule", initialInstanceCount)
 		appGUID = GetAppGuid(cfg, appName)
-	})
-
-	AfterEach(func() {
-		if os.Getenv("SKIP_TEARDOWN") == "true" {
-			fmt.Println("Skipping Teardown...")
-		} else {
-			DeletePolicy(appName, appGUID)
-			Expect(cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
-		}
 	})
 
 	Context("when scaling by specific date schedule", func() {
 		const scheduleInstanceMin = 2
 		const scheduleInstanceMax = 5
 		const scheduledInstanceInit = 3
-		const appStartTime = 30 * time.Second
 		JustBeforeEach(func() {
 			//TODO the start app needs to be after the binding but the timings require the app been up already.
 			StartApp(appName, cfg.CfPushTimeoutDuration())

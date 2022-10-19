@@ -31,6 +31,7 @@ var (
 	initialInstanceCount int
 
 	appName string
+	appGUID string
 )
 
 const componentName = "Application Scale Suite"
@@ -74,6 +75,11 @@ var _ = AfterSuite(func() {
 		fmt.Println("Skipping Teardown...")
 	} else {
 		DebugInfo(cfg, setup, appName)
+		if appName != "" {
+			DeletePolicy(appName, appGUID)
+			DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
+			DeleteCustomMetricCred(cfg, appGUID)
+		}
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 				DisableServiceAccess(cfg, setup.GetOrganizationName())

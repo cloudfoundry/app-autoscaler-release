@@ -70,14 +70,15 @@ func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
 }
 
 func DeleteCustomMetricCred(cfg *config.Config, appGUID string) {
-	oauthToken := OauthToken(cfg)
-	customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest("DELETE", customMetricURL, nil)
-	Expect(err).ShouldNot(HaveOccurred())
-	req.Header.Add("Authorization", oauthToken)
+	if !cfg.IsServiceOfferingEnabled() {
+		oauthToken := OauthToken(cfg)
+		customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
+		req, err := http.NewRequest("DELETE", customMetricURL, nil)
+		Expect(err).ShouldNot(HaveOccurred())
+		req.Header.Add("Authorization", oauthToken)
 
-	resp, err := GetHTTPClient(cfg).Do(req)
-	Expect(err).ShouldNot(HaveOccurred())
-	defer func() { _ = resp.Body.Close() }()
-	Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		resp, err := GetHTTPClient(cfg).Do(req)
+		Expect(err).ShouldNot(HaveOccurred())
+		defer func() { _ = resp.Body.Close() }()
+	}
 }
