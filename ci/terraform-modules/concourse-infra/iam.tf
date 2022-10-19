@@ -1,21 +1,6 @@
-resource "google_service_account" "autoscaler_deployer" {
-  account_id   = "autoscaler-deployer"
-  description  = "Used by concourse ci to deploy autoscaler service+infra"
-  disabled     = "false"
-  display_name = "autoscaler-deployer"
-  project      = var.project
-}
-
-# resource "google_service_account" "concourse" {
-#   account_id    = "concourse"
-#   description   = "concourse deployment on wg-ci gke"
-#   disabled      = "false"
-#  project       = var.project
-# }
-
 resource "google_service_account" "cnrm_system" {
-  account_id  = "cnrm-system"
-  description = "Config Connector account for wg-ci GKE"
+  account_id  = "${var.gke_name}-cnrm-system"
+  description = "Config Connector account for ${var.gke_name} GKE"
   disabled    = "false"
   project     = var.project
 }
@@ -43,14 +28,7 @@ resource "google_service_account_iam_member" "cnrm_system" {
 }
 
 resource "google_project_iam_custom_role" "wg_ci_role" {
-  description = "Permissions for humans to manage wg-ci project"
   permissions = [
-    "iam.serviceAccounts.setIamPolicy",
-
-    "resourcemanager.projects.get",
-    "resourcemanager.projects.getIamPolicy",
-    "resourcemanager.projects.setIamPolicy",
-
     "container.clusterRoles.bind",
     "container.clusterRoles.create",
     "container.clusterRoles.delete",
@@ -64,19 +42,27 @@ resource "google_project_iam_custom_role" "wg_ci_role" {
     "container.clusterRoleBindings.list",
     "container.clusterRoleBindings.update",
     "container.configMaps.get",
-    
-    # TODO: rather give access to particular secret 
+
+    "iam.roles.create",
+    "iam.roles.update",
+
+    "iam.serviceAccounts.setIamPolicy",
+
+    "resourcemanager.projects.get",
+    "resourcemanager.projects.getIamPolicy",
+    "resourcemanager.projects.setIamPolicy",
+    # TODO: rather give access to particular secret
     "secretmanager.versions.access"
     ]
 
   project = var.project
-  role_id = "WgCiCustomRole"
+  role_id = "${replace(var.gke_name, "-", "_")}WgCiCustomRole"
   stage   = "GA"
-  title   = "WG CI Manage"
+  title   = "WG CI Manage [${var.gke_name}]"
+  description = "Permissions for humans to manage ${var.gke_name} gke-cluster"
 }
 
 resource "google_project_iam_custom_role" "wg_ci_cnrm" {
-  description = "Additional permissions for cnrm-system on WG CI Concourse deployment"
   permissions = [
     "cloudsql.users.create",
     "cloudsql.users.delete",
@@ -89,7 +75,8 @@ resource "google_project_iam_custom_role" "wg_ci_cnrm" {
   ]
 
   project = var.project
-  role_id = "WgCiCNRMcustomRole"
+  role_id = "${replace(var.gke_name, "-", "_")}WgCiCNRMcustomRole"
   stage   = "GA"
-  title   = "WG CI CNRM-SYSTEM"
+  title   = "WG CI CNRM-SYSTEM [${var.gke_name}]"
+  description = "Additional permissions for cnrm-system on ${var.gke_name} Concourse deployment"
 }
