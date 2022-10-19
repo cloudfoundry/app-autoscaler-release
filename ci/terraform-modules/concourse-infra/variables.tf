@@ -30,41 +30,17 @@ variable "dns_name" { nullable = false }
 
 variable "subnet_cidr" { nullable = false }
 
+variable "wg_ci_human_account_permissions" { nullable = false }
+variable "wg_ci_cnrm_service_account_permissions" { nullable = false }
 
 variable "gke_name" { nullable = false }
+variable "gke_controlplane_version" { nullable = false }
+variable "gke_cluster_ipv4_cidr" { nullable = false }
+variable "gke_services_ipv4_cidr_block" { nullable = false }
+variable "gke_master_ipv4_cidr_block" { nullable = false }
+variable "gke_default_pool_machine_type" { nullable = false }
+variable "gke_workers_pool_machine_type" { nullable = false }
 
-variable "wg_ci_human_account_permissions" {
-  nullable = false
-}
-
-variable "wg_ci_cnrm_service_account_permissions" {
-  nullable = false
-}
-
-
-# variable "dns_address" {
-#  type = map(string)
-#  description = "Concourse instance dns record name (on gcp) and public url"
-#  default = {
-#     name = null
-#     url  =  null
-#  }
-# }
-
-
-
-
-
-# variable "gke_name" {
-#   default = "wg-ci"
-#     controlplane_version      = "1.23.8-gke.1900"
-#     cluster_ipv4_cidr         = "10.104.0.0/14"
-#     services_ipv4_cidr_block  = "10.108.0.0/20"
-#     master_ipv4_cidr_block    = "172.16.0.32/28"
-#     machine_type_default_pool = "e2-standard-4"
-#     machine_type_workers_pool = "n2-standard-4"
-#   }
-# }
 
 # variable "kube" {
 #   type = map(any)

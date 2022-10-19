@@ -1,6 +1,6 @@
 resource "google_service_account" "gke_node_pools" {
-  account_id   = "${var.gke.name}-node-pool"
-  display_name = "Service account for ${var.gke.name} GKE node pools"
+  account_id   = "${var.gke_name}-node-pool"
+  display_name = "Service account for ${var.gke_name} GKE node pools"
   project      = var.project
 }
 
@@ -34,7 +34,7 @@ resource "google_container_node_pool" "default_pool" {
     disk_type       = "pd-standard"
     image_type      = "COS_CONTAINERD"
     local_ssd_count = "0"
-    machine_type    = var.gke.machine_type_default_pool
+    machine_type    = var.gke_default_pool_machine_type
 
     metadata = {
       disable-legacy-endpoints = "true"
@@ -94,7 +94,7 @@ resource "google_container_node_pool" "concourse_workers" {
     disk_type       = "pd-standard"
     image_type      = "COS_CONTAINERD"
     local_ssd_count = "1"
-    machine_type    = var.gke.machine_type_workers_pool
+    machine_type    = var.gke_workers_pool_machine_type
 
     metadata = {
       disable-legacy-endpoints = "true"
