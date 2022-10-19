@@ -2,7 +2,7 @@
 module "concourse-infra" {
   #variables can't be used here
   #source = "git::https://github.com/marcinkubica/bosh-community-stemcell-ci-infra.git//terraform/concourse-infra?ref=terraform_v2"
-  source = "../../terraform-modules/concourse-infra"
+  source = "../../../terraform-modules/concourse-infra"
 
   project = var.project
   region  = var.region
