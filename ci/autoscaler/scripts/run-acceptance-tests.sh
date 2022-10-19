@@ -22,8 +22,6 @@ if [[ ! -d ${bbl_state_path} ]]; then
   exit 1;
 fi
 
->>>>>>> 3301256f (Refactor performance config format)
-
 if [[ -z ${cf_admin_password} ]]; then
   pushd "${bbl_state_path}"
     eval "$(bbl print-env)"
@@ -45,6 +43,7 @@ cat > acceptance_config.json <<EOF
   "service_broker": "${deployment_name}",
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
+	"default_timeout": 60,
   "name_prefix": "${name_prefix}",
 
   "autoscaler_api": "${deployment_name}.${system_domain}",
