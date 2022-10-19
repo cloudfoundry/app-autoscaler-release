@@ -30,19 +30,19 @@ resource "google_service_account_iam_member" "cnrm_system" {
 resource "google_project_iam_custom_role" "wg_ci_role" {
   permissions = toset(yamldecode(var.wg_ci_human_account_permissions))
 
-  project = var.project
-  role_id = "${replace(var.gke_name, "-", "_")}WgCiCustomRole"
-  stage   = "GA"
-  title   = "WG CI Manage [${var.gke_name}]"
+  project     = var.project
+  role_id     = "${replace(var.gke_name, "-", "_")}WgCiCustomRole"
+  stage       = "GA"
+  title       = "WG CI Manage [${var.gke_name}]"
   description = "Permissions for humans to manage ${var.gke_name} gke-cluster"
 }
 
 resource "google_project_iam_custom_role" "wg_ci_cnrm" {
   permissions = toset(yamldecode(var.wg_ci_cnrm_service_account_permissions))
 
-  project = var.project
-  role_id = "${replace(var.gke_name, "-", "_")}WgCiCNRMcustomRole"
-  stage   = "GA"
-  title   = "WG CI CNRM-SYSTEM [${var.gke_name}]"
+  project     = var.project
+  role_id     = "${replace(var.gke_name, "-", "_")}WgCiCNRMcustomRole"
+  stage       = "GA"
+  title       = "WG CI CNRM-SYSTEM [${var.gke_name}]"
   description = "Additional permissions for cnrm-system on ${var.gke_name} Concourse deployment"
 }

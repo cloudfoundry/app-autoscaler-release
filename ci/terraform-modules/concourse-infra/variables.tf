@@ -1,19 +1,19 @@
 variable "project" {
   type        = string
   description = "Your GCP project name."
-  nullable = false
+  nullable    = false
 }
 
 variable "region" {
   type        = string
   description = "Project region"
-  nullable = false
+  nullable    = false
 }
 
 variable "zone" {
-    type = string
-    description = "Project primary zone"
-    nullable = false
+  type        = string
+  description = "Project primary zone"
+  nullable    = false
 }
 
 

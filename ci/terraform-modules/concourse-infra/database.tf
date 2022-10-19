@@ -35,18 +35,18 @@ resource "google_sql_database_instance" "concourse" {
     }
 
     location_preference {
-      zone = var.zone
+      zone           = var.zone
       secondary_zone = var.sql_instance_secondary_zone
     }
 
     maintenance_window {
-      day          = 7     #Sunday
-      hour         = 0     #0:00 - 1:00 hours
+      day          = 7 #Sunday
+      hour         = 0 #0:00 - 1:00 hours
       update_track = "stable"
     }
 
     pricing_plan = "PER_USE"
-    tier         =  var.sql_instance_tier
+    tier         = var.sql_instance_tier
 
   }
 }

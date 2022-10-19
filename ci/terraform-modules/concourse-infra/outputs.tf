@@ -5,7 +5,7 @@ output "load_balancer_ip" {
 
 output "github_oauth" {
   # Consumed by Concourse github auth
-  value = google_secret_manager_secret.github_oauth
+  value     = google_secret_manager_secret.github_oauth
   sensitive = true
 }
 
