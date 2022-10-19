@@ -1,12 +1,12 @@
 resource "google_container_cluster" "wg_ci" {
   # beta provider uset to allow enable of Config Connector
   provider                 = google-beta
-  name                     = var.gke.name
+  name                     = var.gke_name
   location                 = var.zone
   project                  = var.project
   initial_node_count       = "1"
   remove_default_node_pool = true
-  min_master_version       = var.gke.controlplane_version
+  min_master_version       = var.gke_controlplane_version
 
   release_channel {
     channel = "STABLE"
@@ -28,8 +28,8 @@ resource "google_container_cluster" "wg_ci" {
   }
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block  = var.gke.cluster_ipv4_cidr
-    services_ipv4_cidr_block = var.gke.services_ipv4_cidr_block
+    cluster_ipv4_cidr_block  = var.gke_cluster_ipv4_cidr
+    services_ipv4_cidr_block = var.gke_services_ipv4_cidr_block
   }
   private_cluster_config {
     enable_private_endpoint = "false"
@@ -39,11 +39,11 @@ resource "google_container_cluster" "wg_ci" {
       enabled = "false"
     }
 
-    master_ipv4_cidr_block = var.gke.master_ipv4_cidr_block
+    master_ipv4_cidr_block = var.gke_master_ipv4_cidr_block
   }
 
   network    = google_compute_network.vpc.name
-  subnetwork = google_compute_subnetwork.default.name
+  subnetwork = google_compute_subnetwork.subnet.name
   network_policy {
     enabled  = "false"
     provider = "PROVIDER_UNSPECIFIED"

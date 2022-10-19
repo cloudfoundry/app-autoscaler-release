@@ -28,32 +28,7 @@ resource "google_service_account_iam_member" "cnrm_system" {
 }
 
 resource "google_project_iam_custom_role" "wg_ci_role" {
-  permissions = [
-    "container.clusterRoles.bind",
-    "container.clusterRoles.create",
-    "container.clusterRoles.delete",
-    "container.clusterRoles.escalate",
-    "container.clusterRoles.get",
-    "container.clusterRoles.list",
-    "container.clusterRoles.update",
-    "container.clusterRoleBindings.create",
-    "container.clusterRoleBindings.delete",
-    "container.clusterRoleBindings.get",
-    "container.clusterRoleBindings.list",
-    "container.clusterRoleBindings.update",
-    "container.configMaps.get",
-
-    "iam.roles.create",
-    "iam.roles.update",
-
-    "iam.serviceAccounts.setIamPolicy",
-
-    "resourcemanager.projects.get",
-    "resourcemanager.projects.getIamPolicy",
-    "resourcemanager.projects.setIamPolicy",
-    # TODO: rather give access to particular secret
-    "secretmanager.versions.access"
-    ]
+  permissions = toset(yamldecode(var.wg_ci_human_account_permissions))
 
   project = var.project
   role_id = "${replace(var.gke_name, "-", "_")}WgCiCustomRole"
@@ -63,16 +38,7 @@ resource "google_project_iam_custom_role" "wg_ci_role" {
 }
 
 resource "google_project_iam_custom_role" "wg_ci_cnrm" {
-  permissions = [
-    "cloudsql.users.create",
-    "cloudsql.users.delete",
-    "cloudsql.users.get",
-    "cloudsql.users.list",
-    "cloudsql.users.update",
-    "cloudsql.databases.get",
-    "cloudsql.databases.list",
-    "cloudsql.databases.update"
-  ]
+  permissions = toset(yamldecode(var.wg_ci_cnrm_service_account_permissions))
 
   project = var.project
   role_id = "${replace(var.gke_name, "-", "_")}WgCiCNRMcustomRole"

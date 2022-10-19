@@ -31,7 +31,14 @@ remote_state {
     project = local.config.project
     region  = local.config.region
     zone    = local.config.zone
+
     gke_name = local.config.gke_name
+    gke_controlplane_version = local.config.gke_controlplane_version
+    gke_cluster_ipv4_cidr = local.config.gke_cluster_ipv4_cidr
+    gke_services_ipv4_cidr_block = local.config.gke_services_ipv4_cidr_block
+    gke_master_ipv4_cidr_block = local.config.gke_master_ipv4_cidr_block
+    gke_default_pool_machine_type = local.config.gke_default_pool_machine_type
+    gke_workers_pool_machine_type = local.config.gke_workers_pool_machine_type
 
     sql_instance_name = "${local.config.gke_name}-concourse"
     sql_instance_tier = local.config.sql_instance_tier
@@ -46,6 +53,9 @@ remote_state {
     dns_zone = local.config.dns_zone
     dns_domain = local.config.dns_domain
     dns_name  = "${local.config.dns_zone}-${local.config.dns_domain}."
+
+    wg_ci_human_account_permissions = local.config.wg_ci_human_account_permissions
+    wg_ci_cnrm_service_account_permissions = local.config.wg_ci_cnrm_service_account_permissions
 
 #   #tgconf = yamldecode(file("../config.yaml"))
 #   #module_sources = local.tgconf.module_sources
