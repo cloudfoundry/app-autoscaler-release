@@ -3,37 +3,29 @@ region: europe-west3
 zone: europe-west3-a
 secondary_zone: europe-west3-b
 
-#concourse_url: https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
-
-# DNS record as for your Concourse URL https://<dns_record>.<dns_zone>.dns_domain
+# DNS record for your Concourse URL https://<dns_record>.<dns_zone>.dns_domain
 dns_record: concourse-refactor
 dns_zone: app-runtime-interfaces
 dns_domain: ci.cloudfoundry.org
 
-
+# gcs_prefix builds root folder for tf state for the entire stack
 gcs_bucket: terraform-state-wg-ci
-# prefix builds root folder for tf state for the entire stack
 gcs_prefix: refactor
 
 # Project's resource names are build off GKE name for scaling purposes
 # k8s cluster, SQL instance, vpc, IAM groups, cloud nat router, service accounts
 gke_name: wg-ci-refactor
 
-
-# source:
-#   concourse_infra:
-#     url: https://github.com/marcinkubica/bosh-community-stemcell-ci-infra.git//terraform/concourse-infra
-#     ref: terraform
-
+# SQL
 sql_instance_tier: db-custom-1-4096
 sql_instance_backup_location: eu
 sql_instance_disk_size: 38
 
-
+# NETWORK
 vpc_name: default
 subnet_cidr: 10.10.0.0/24
 
-# other GKE vars"
+# Other GKE vars
 gke_controlplane_version: 1.23.8-gke.1900
 gke_cluster_ipv4_cidr: 10.104.0.0/14
 gke_services_ipv4_cidr_block: 10.108.0.0/20
@@ -41,6 +33,7 @@ gke_master_ipv4_cidr_block: 172.16.0.32/28
 gke_default_pool_machine_type: e2-standard-4
 gke_workers_pool_machine_type: n2-standard-4
 
+# IAM
 wg_ci_human_account_permissions: [
     "container.clusterRoles.bind",
     "container.clusterRoles.create",
