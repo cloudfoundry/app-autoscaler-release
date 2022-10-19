@@ -91,7 +91,8 @@ Build lifecyce:
 
 # Other matters
 
-### How to obtain GKE credentials
+### How to obtain GKE credentials for your terminal
+
 ```
 > gcloud container clusters list
 NAME   LOCATION        MASTER_VERSION   MASTER_IP     MACHINE_TYPE   NODE_VERSION     NUM_NODES  STATUS
