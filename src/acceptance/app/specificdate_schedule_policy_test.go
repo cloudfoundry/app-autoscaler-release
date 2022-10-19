@@ -70,7 +70,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 				Should(Equal(2))
 
 			By(fmt.Sprintf("waiting till end of schedule %dS and should stay %d instances", int(jobRunTime.Seconds()), scheduleInstanceMin))
-			Eventually(func() int { return RunningInstances(appGUID, jobRunTime) }).
+			Consistently(func() int { return RunningInstances(appGUID, jobRunTime) }).
 				//+/- poll time error margin.
 				WithTimeout(time.Until(endDateTime) + pollTime + appStartTime).
 				WithPolling(pollTime).
