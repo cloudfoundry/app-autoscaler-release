@@ -41,34 +41,11 @@ secret: paste your Client secret
 ```
 
 
-### Import existing GCP resources to terraform state
-to be removed soon
-```
-# terraform import google_dns_managed_zone.app-runtime-interfaces projects/app-runtime-interfaces-wg/managedZones/app-runtime-interfaces
-# terraform import google_compute_network.vpc projects/app-runtime-interfaces-wg/global/networks/default
-```
-
-
-### Apply terrgrunt for infrastructure
+### Apply terrgrunt for the entire stack
 
 ```
 terragrunt run-all plan
 terragrunt run-all apply
-```
-
-### Obtain GKE credentials
-( pending automation with tf )
-```
-> gcloud container clusters list
-NAME   LOCATION        MASTER_VERSION   MASTER_IP     MACHINE_TYPE   NODE_VERSION     NUM_NODES  STATUS
-wg-ci  europe-west3-a  1.23.8-gke.1900  34.159.31.85  e2-standard-4  1.23.8-gke.1900  3          RUNNING
-
-> gcloud container clusters get-credentials wg-ci --zone europe-west3-a
-Fetching cluster endpoint and auth data.
-kubeconfig entry generated for wg-ci.
-
-❯ kubectl config current-context
-gke_app-runtime-interfaces-wg_europe-west3-a_wg-ci
 ```
 
 ### Save secrets needed for DR scenario
@@ -113,6 +90,21 @@ Build lifecyce:
 * able to destroy/redeploy concourse app and corresponding 'backend' components separately
 
 # Other matters
+
+### How to obtain GKE credentials
+```
+> gcloud container clusters list
+NAME   LOCATION        MASTER_VERSION   MASTER_IP     MACHINE_TYPE   NODE_VERSION     NUM_NODES  STATUS
+wg-ci  europe-west3-a  1.23.8-gke.1900  34.159.31.85  e2-standard-4  1.23.8-gke.1900  3          RUNNING
+
+> gcloud container clusters get-credentials wg-ci --zone europe-west3-a
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for wg-ci.
+
+❯ kubectl config current-context
+gke_app-runtime-interfaces-wg_europe-west3-a_wg-ci
+```
+
 ### DR scenario
 Please see [DR scenario readme](concourse-dr/README.md)
 #### Create hmac keys for concourse service account
