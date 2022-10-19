@@ -33,6 +33,14 @@ variable "subnet_cidr" { nullable = false }
 
 variable "gke_name" { nullable = false }
 
+variable "wg_ci_human_account_permissions" {
+  nullable = false
+}
+
+variable "wg_ci_cnrm_service_account_permissions" {
+  nullable = false
+}
+
 
 # variable "dns_address" {
 #  type = map(string)

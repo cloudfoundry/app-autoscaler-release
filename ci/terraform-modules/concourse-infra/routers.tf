@@ -6,7 +6,6 @@ resource "google_compute_router" "nat_router" {
   region                        = var.region
 }
 
-
 resource "google_compute_router_nat" "nat_config" {
   name                                = "nat-config-${var.gke_name}"
   project                             = var.project

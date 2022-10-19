@@ -16,18 +16,16 @@ Alternatively pass as env variables or vars files to terraform / terragrunt
 #### Logon to your GCP account
 
 ```
-gcloud auth login
-gcloud auth application-default login
+gcloud auth login && gcloud auth application-default login
 ```
 
 #### Create Github OAuth token and supply as a Google Secret
-1. Request creation of a Google Secret
+ 1. Request creation of a Google Secret
+    ```sh
+    terragrunt run-all apply --target module.concourse-infra.google_secret_manager_secret.github_oauth
+    ```
 
-  ```
-  terragrunt run-all plan --target module.concourse-infra.google_secret_manager_secret.github_oauth```
-  ```
-
-2. Create Github OAuth token
+ 2. Create Github OAuth token
 
 This is necessary if you want to be able to authenticate with your GitHub profile. Log on to github.com and navigate to:
 "Settings" -> "Developer settings" -> "OAuth Apps" -> "New OAuth App"
@@ -35,7 +33,7 @@ This is necessary if you want to be able to authenticate with your GitHub profil
 As "Homepage URL", enter the Concourse's base URL. As "Authorization callback URL", enter the Concourse URL followed
 by `/sky/issuer/callback`.
 
-3. Please create a version for google secret using gcloud command or webui, with a foolowing key-vaule format
+3. Please create a version for google secret using gcloud command or webui, with a following key-value format
 
 ```
 id: paste your Client ID
