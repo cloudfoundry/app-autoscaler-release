@@ -18,6 +18,13 @@ out as well as the app-autoscaler private key
 
 These docker images in this repo are built and pushed with GitHub actions, they are hosted on ghcr.io
 
+## Terraform
+### Directory “terraform“
+This directory contains the terraform-scripts to manage the resouces of the account app-runtime-interfaces-wg at google-cloud.
+
+### Directory “terraform-modules”
+This directory contains all Terraform-Modules that are developed by the team autoscaler.
+
 ## Deploy pipeline
 
 __Setup__
@@ -32,11 +39,11 @@ popd
 # Prometheus
 This is deployed using the script [deploy-prometheus](infrastructure/scripts/deploy-prometheus.sh).
 To deploy localy you will need:
- - bosh ca certificate and place this it is `${HOME}/.ssh/bosh.ca.crt`. 
+ - bosh ca certificate and place this it is `${HOME}/.ssh/bosh.ca.crt`.
  - https://github.com/bosh-prometheus/prometheus-boshrelease cloned in ../
  - https://github.com/cloudfoundry/app-autoscaler-env-bbl-state cloned in ../
 
-Then you can run the script directly. 
+Then you can run the script directly.
 ## setup
  - The Slack channel is stored in the cf credhub under `/bosh-autoscaler/prometheus/alertmanager_slack_channel`
  - The Slack Message can be customised in the [slack-receiver-template.yml](operations/slack-receiver-template.yml)
