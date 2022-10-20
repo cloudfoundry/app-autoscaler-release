@@ -21,7 +21,7 @@
         db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
       end
       unless p("autoscaler.#{db_name}.tls.private_key") == ""
-        db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key.pk8"
+        db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
       end
     else #mysql case
       db_url = "jdbc:mysql://" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?autoReconnect=true"
