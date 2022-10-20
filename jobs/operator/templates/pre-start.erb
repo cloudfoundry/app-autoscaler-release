@@ -41,11 +41,11 @@ SSLMODE='<%= p("autoscaler.lock_db.sslmode") %>'
     JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
     DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
   <% end %>
-  <% unless p("autoscaler.lock_db.tls.crt") == "" %>
+  <% unless p("autoscaler.lock_db.tls.certificate") == "" %>
     JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/operator/config/certs/lock_db/crt"
     DBURI=$DBURI"&sslcert=/var/vcap/jobs/operator/config/certs/lock_db/crt"
   <% end %>
-  <% unless p("autoscaler.lock_db.tls.key") == "" %>
+  <% unless p("autoscaler.lock_db.tls.private_key") == "" %>
     JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/operator/config/certs/lock_db/key"
     DBURI=$DBURI"&sslkey=/var/vcap/jobs/operator/config/certs/lock_db/key"
   <% end %>

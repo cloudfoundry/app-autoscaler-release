@@ -24,10 +24,10 @@
   unless p("autoscaler.#{db_name}.tls.ca") == ""
     db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
   end
-  unless p("autoscaler.#{db_name}.tls.crt") == ""
+  unless p("autoscaler.#{db_name}.tls.certificate") == ""
     db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
   end
-  unless p("autoscaler.#{db_name}.tls.key") == ""
+  unless p("autoscaler.#{db_name}.tls.private_key") == ""
     db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
   end
   db_url
