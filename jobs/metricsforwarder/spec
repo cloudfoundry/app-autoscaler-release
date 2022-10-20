@@ -41,7 +41,7 @@ properties:
 
   autoscaler.metricsforwarder.loggregator.tls.cert:
     description: "PEM-encoded tls client certificate to connect to loggregator ingress client"
-  autoscaler.metricsforwarder.loggregator.tls.key:
+  autoscaler.metricsforwarder.loggregator.tls.private_key:
     description: "PEM-encoded tls client key to connect to loggregator ingress client"
   autoscaler.metricsforwarder.loggregator.tls.ca_cert:
     description: "PEM-encoded ca certificate of loggregator ingress client"
@@ -82,10 +82,10 @@ properties:
   autoscaler.policy_db.tls.ca:
     default: ''
     description: 'PEM-encoded ca certificate of tls database server'
-  autoscaler.policy_db.tls.crt:
+  autoscaler.policy_db.tls.certificate:
     default: ''
     description: 'PEM-encoded certificate of tls database client'
-  autoscaler.policy_db.tls.key:
+  autoscaler.policy_db.tls.private_key:
     default: ''
     description: 'PEM-encoded key of tls database client'
   autoscaler.policy_db.sslmode:
@@ -113,10 +113,10 @@ properties:
   autoscaler.storedprocedure_db.tls.ca:
     default: ''
     description: 'PEM-encoded ca certificate of tls database server'
-  autoscaler.storedprocedure_db.tls.crt:
+  autoscaler.storedprocedure_db.tls.certificate:
     default: ''
     description: 'PEM-encoded certificate of tls database client'
-  autoscaler.storedprocedure_db.tls.key:
+  autoscaler.storedprocedure_db.tls.private_key:
     default: ''
     description: 'PEM-encoded key of tls database client'
   autoscaler.storedprocedure_db.sslmode:

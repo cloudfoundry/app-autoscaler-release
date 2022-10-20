@@ -77,10 +77,10 @@ properties:
   autoscaler.policy_db.tls.ca:
     default: ''
     description: 'PEM-encoded ca certificate of tls database server'
-  autoscaler.policy_db.tls.crt:
+  autoscaler.policy_db.tls.certificate:
     default: ''
     description: 'PEM-encoded certificate of tls database client'
-  autoscaler.policy_db.tls.key:
+  autoscaler.policy_db.tls.private_key:
     default: ''
     description: 'PEM-encoded key of tls database client'
   autoscaler.policy_db.sslmode:
@@ -103,10 +103,10 @@ properties:
   autoscaler.instancemetrics_db.tls.ca:
     default: ''
     description: 'PEM-encoded ca certificate for TLS database server'
-  autoscaler.instancemetrics_db.tls.crt:
+  autoscaler.instancemetrics_db.tls.certificate:
     default: ''
     description: 'PEM-encoded certificate for TLS database client'
-  autoscaler.instancemetrics_db.tls.key:
+  autoscaler.instancemetrics_db.tls.private_key:
     default: ''
     description: 'PEM-encoded key for tls database client'
   autoscaler.instancemetrics_db.sslmode:
@@ -128,10 +128,10 @@ properties:
   autoscaler.appmetrics_db.tls.ca:
     default: ''
     description: 'PEM-encoded CA certificate for TLS database server'
-  autoscaler.appmetrics_db.tls.crt:
+  autoscaler.appmetrics_db.tls.certificate:
     default: ''
     description: 'PEM-encoded certificate for TLS database client'
-  autoscaler.appmetrics_db.tls.key:
+  autoscaler.appmetrics_db.tls.private_key:
     default: ''
     description: 'PEM-encoded key for TLS database client'
   autoscaler.appmetrics_db.sslmode:
@@ -153,10 +153,10 @@ properties:
   autoscaler.scalingengine_db.tls.ca:
     default: ''
     description: 'PEM-encoded ca certificate for TLS database server'
-  autoscaler.scalingengine_db.tls.crt:
+  autoscaler.scalingengine_db.tls.certificate:
     default: ''
     description: 'PEM-encoded certificate for TLS database client'
-  autoscaler.scalingengine_db.tls.key:
+  autoscaler.scalingengine_db.tls.private_key:
     default: ''
     description: 'PEM-encoded key for TLS database client'
   autoscaler.scalingengine_db.sslmode:
@@ -283,10 +283,10 @@ properties:
   autoscaler.lock_db.tls.ca:
     default: ''
     description: 'PEM-encoded ca certificate of tls database server'
-  autoscaler.lock_db.tls.crt:
+  autoscaler.lock_db.tls.certificate:
     default: ''
     description: 'PEM-encoded certificate of tls database client'
-  autoscaler.lock_db.tls.key:
+  autoscaler.lock_db.tls.private_key:
     default: ''
     description: 'PEM-encoded key of tls database client'
   autoscaler.lock_db.sslmode:

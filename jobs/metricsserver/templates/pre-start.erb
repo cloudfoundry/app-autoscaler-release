@@ -38,11 +38,11 @@ JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/inst
 DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/ca.crt"
 <% end %>
 <% # TODO Refactor this block
-unless p("autoscaler.instancemetrics_db.tls.crt") == "" %>
+unless p("autoscaler.instancemetrics_db.tls.certificate") == "" %>
 JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/crt"
 DBURI=$DBURI"&sslcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/crt"
 <% end %>
-<% unless p("autoscaler.instancemetrics_db.tls.key") == "" %>
+<% unless p("autoscaler.instancemetrics_db.tls.private_key") == "" %>
 JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key"
 DBURI=$DBURI"&sslkey=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key"
 <% end %>

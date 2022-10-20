@@ -161,7 +161,7 @@ instance_groups:
       properties:
         databases: &database
           sslmode: verify-full
-          tls:
+          tls: &db_tls
             ca: ((postgres_ca.ca))
             certificate: ((postgres_server.certificate))
             private_key: ((postgres_server.private_key))

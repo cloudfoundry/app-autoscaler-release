@@ -45,11 +45,11 @@ SSLMODE='<%= p("autoscaler.scheduler_db.sslmode") %>'
     JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
     DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
   <% end %>
-  <% unless p("autoscaler.scheduler_db.tls.crt") == "" %>
+  <% unless p("autoscaler.scheduler_db.tls.certificate") == "" %>
     JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/crt"
     DBURI=$DBURI"&sslcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/crt"
     <% end %>
-    <% unless p("autoscaler.scheduler_db.tls.key") == "" %>
+    <% unless p("autoscaler.scheduler_db.tls.private_key") == "" %>
     JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key"
     DBURI=$DBURI"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key"
   <% end %>
