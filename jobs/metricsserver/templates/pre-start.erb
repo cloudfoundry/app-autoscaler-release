@@ -11,7 +11,7 @@
 source /var/vcap/packages/common/dns-helper.sh
 source /var/vcap/packages/common/retry-helper.sh
 
-export PATH=/var/vcap/packages/openjdk-17/bin:$PATH
+export PATH=/var/vcap/packages/openjdk-11/bin:$PATH
 
 require_consul='<%= p("autoscaler.metricsserver.require_consul") %>'
 
@@ -43,8 +43,7 @@ JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/metricsserver/config/certs/instance
 DBURI=$DBURI"&sslcert=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/crt"
 <% end %>
 <% unless p("autoscaler.instancemetrics_db.tls.private_key") == "" %>
-openssl pkcs8 -topk8 -outform DER -in /var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key -out /var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key.pk8 -nocrypt
-JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key.pk8"
+JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key"
 DBURI=$DBURI"&sslkey=/var/vcap/jobs/metricsserver/config/certs/instancemetrics_db/key"
 <% end %>
 # mysql case

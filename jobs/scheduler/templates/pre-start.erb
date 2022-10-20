@@ -17,7 +17,7 @@ source /var/vcap/packages/common/retry-helper.sh
 DB_DIR=/var/vcap/packages/db
 SCHEDULER_DIR=/var/vcap/packages/scheduler
 
-export PATH=/var/vcap/packages/openjdk-17/bin:$PATH
+export PATH=/var/vcap/packages/openjdk-11/bin:$PATH
 
 require_consul='<%= p("autoscaler.scheduler.require_consul") %>'
 
@@ -50,8 +50,7 @@ SSLMODE='<%= p("autoscaler.scheduler_db.sslmode") %>'
     DBURI=$DBURI"&sslcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/crt"
     <% end %>
     <% unless p("autoscaler.scheduler_db.tls.private_key") == "" %>
-    openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/scheduler/config/certs/scheduler_db/key -out /var/vcap/jobs/scheduler/config/certs/scheduler_db/key.pk8 -nocrypt
-    JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key.pk8"
+    JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key"
     DBURI=$DBURI"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key"
   <% end %>
 # URLs for mySQL DB
@@ -62,12 +61,6 @@ SSLMODE='<%= p("autoscaler.scheduler_db.sslmode") %>'
     /var/vcap/jobs/scheduler/bin/install_crt_truststore scheduler_db  scheduler_db/ca.crt
     JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12"
     DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scheduler/config/certs/scheduler_db/ca.crt"
-  <% end %>
-<% end %>
-
-<% if p('autoscaler.policy_db.db_scheme') == "postgres" %>
-  <% unless p("autoscaler.scheduler_db.tls.private_key") == "" %>
-    openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/scheduler/config/certs/policy_db/key -out /var/vcap/jobs/scheduler/config/certs/policy_db/key.pk8 -nocrypt
   <% end %>
 <% end %>
 
