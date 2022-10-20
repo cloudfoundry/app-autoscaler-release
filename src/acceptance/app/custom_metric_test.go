@@ -23,6 +23,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		CreateCustomMetricCred(cfg, appName, appGUID)
 		StartApp(appName, cfg.CfPushTimeoutDuration())
 	})
+	AfterEach(AppAfterEach)
 
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {

@@ -19,16 +19,13 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		ticker         *time.Ticker
 	)
 
-	BeforeEach(func() {
-
-	})
-
 	JustBeforeEach(func() {
 		appName = helpers.CreateTestApp(cfg, "dynamic-policy", initialInstanceCount)
 		appGUID = helpers.GetAppGuid(cfg, appName)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 	})
+	AfterEach(AppAfterEach)
 
 	Context("when scaling by memoryused", func() {
 

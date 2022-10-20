@@ -23,6 +23,7 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		appName = CreateTestApp(cfg, "date-schedule", initialInstanceCount)
 		appGUID = GetAppGuid(cfg, appName)
 	})
+	AfterEach(AppAfterEach)
 
 	Context("when scaling by specific date schedule", func() {
 		const scheduleInstanceMin = 2

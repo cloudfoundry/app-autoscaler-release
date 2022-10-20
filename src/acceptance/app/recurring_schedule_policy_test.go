@@ -24,6 +24,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		appName = CreateTestApp(cfg, "recurring-schedule", initialInstanceCount)
 		appGUID = GetAppGuid(cfg, appName)
 	})
+	AfterEach(AppAfterEach)
 
 	Context("when scaling by recurring schedule", func() {
 

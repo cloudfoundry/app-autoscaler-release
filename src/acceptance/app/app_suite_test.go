@@ -70,7 +70,7 @@ var _ = BeforeSuite(func() {
 
 })
 
-var _ = AfterSuite(func() {
+func AppAfterEach() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
@@ -80,6 +80,14 @@ var _ = AfterSuite(func() {
 			DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 			DeleteCustomMetricCred(cfg, appGUID)
 		}
+	}
+}
+
+var _ = AfterSuite(func() {
+	if os.Getenv("SKIP_TEARDOWN") == "true" {
+		fmt.Println("Skipping Teardown...")
+	} else {
+
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 				DisableServiceAccess(cfg, setup.GetOrganizationName())
