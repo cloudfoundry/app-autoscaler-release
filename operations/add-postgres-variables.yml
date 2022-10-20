@@ -20,3 +20,16 @@
       extended_key_usage:
         - client_auth
         - server_auth
+
+- type: replace
+  path: /variables/-
+  value:
+    name: postgres_client
+    type: certificate
+    options:
+      ca: postgres_ca
+      common_name: ((deployment_name)).autoscalerpostgres.service.cf.internal
+      alternative_names:
+        - ((deployment_name)).autoscalerpostgres.service.cf.internal
+      extended_key_usage:
+        - client_auth
