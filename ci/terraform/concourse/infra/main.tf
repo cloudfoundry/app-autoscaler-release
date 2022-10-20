@@ -34,7 +34,6 @@ module "concourse-infra" {
   # IAM
   wg_ci_human_account_permissions        = var.wg_ci_human_account_permissions
   wg_ci_cnrm_service_account_permissions = var.wg_ci_cnrm_service_account_permissions
-
 }
 
 

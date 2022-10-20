@@ -22,7 +22,7 @@ gcloud auth login && gcloud auth application-default login
 #### Create Github OAuth token and supply as a Google Secret
  1. Request creation of a Google Secret
     ```sh
-    terragrunt run-all apply --target module.concourse-infra.google_secret_manager_secret.github_oauth
+      terragrunt run-all apply --target module.concourse-infra.google_secret_manager_secret.github_oauth
     ```
 
  2. Create Github OAuth token
@@ -35,22 +35,22 @@ by `/sky/issuer/callback`.
 
 3. Please create a version for google secret using gcloud command or webui, with a following key-value format
 
-```
+```yaml
 id: paste your Client ID
 secret: paste your Client secret
 ```
 
 
 ### Apply terrgrunt for the entire stack
-
-```
+The following commands need to be run from within this directory “terraform/concourse”:
+```sh
 terragrunt run-all plan
 terragrunt run-all apply
 ```
 
 ### Save secrets needed for DR scenario
 This part is not intended to be fully automated.
-```
+```sh
 cd ./concourse-dr/
 terragrunt plan
 terragrunt apply
@@ -61,7 +61,7 @@ terragrunt apply
 ## Pending rewrite
 ### Sync exernal repositories
 You might wish to bump versions of software in [vendir.yml](vendir.yml) file
-```
+```sh
 vendir sync
 ```
 ## Execute terragrunt / terraform
@@ -71,7 +71,7 @@ To simplify this we use [terragrunt](https://terragrunt.gruntwork.io/) (with mos
 
 
 #### Manage the entire stack
-```
+```sh
 # view incoming changes (if any)
 terragrunt run-all plan
 
@@ -93,17 +93,20 @@ Build lifecyce:
 
 ### How to obtain GKE credentials for your terminal
 
-```
-> gcloud container clusters list
-NAME   LOCATION        MASTER_VERSION   MASTER_IP     MACHINE_TYPE   NODE_VERSION     NUM_NODES  STATUS
-wg-ci  europe-west3-a  1.23.8-gke.1900  34.159.31.85  e2-standard-4  1.23.8-gke.1900  3          RUNNING
+```sh
+gcloud container clusters list
+# Example output:
+# NAME   LOCATION        MASTER_VERSION   MASTER_IP     MACHINE_TYPE   NODE_VERSION     NUM_NODES  STATUS
+# wg-ci  europe-west3-a  1.23.8-gke.1900  34.159.31.85  e2-standard-4  1.23.8-gke.1900  3          RUNNING
 
-> gcloud container clusters get-credentials wg-ci --zone europe-west3-a
-Fetching cluster endpoint and auth data.
-kubeconfig entry generated for wg-ci.
+gcloud container clusters get-credentials wg-ci --zone europe-west3-a
+# Example output:
+# Fetching cluster endpoint and auth data.
+# kubeconfig entry generated for wg-ci.
 
-❯ kubectl config current-context
-gke_app-runtime-interfaces-wg_europe-west3-a_wg-ci
+kubectl config current-context
+# Example output:
+# gke_app-runtime-interfaces-wg_europe-west3-a_wg-ci
 ```
 
 ### DR scenario
