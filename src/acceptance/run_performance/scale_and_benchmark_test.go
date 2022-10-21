@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -17,6 +18,8 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 		appsToScaleCount int
 		samplingConfig   gmeasure.SamplingConfig
 		experiment       *gmeasure.Experiment
+		doneAppsCount int32
+		scaledOutAppsCount int32
 	)
 
 	BeforeEach(func() {
@@ -30,19 +33,11 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 		experiment = gmeasure.NewExperiment("Scaling Benchmark")
 	})
 
-	//	//we get the median repagination duration from the experiment we just ran
-	//	repaginationStats := experiment.GetStats("repagination")
-	//	medianDuration := repaginationStats.DurationFor(gmeasure.StatMedian)
-
-	//	//and assert that it hasn't changed much from ~100ms
-	//	Expect(medianDuration).To(BeNumerically("~", 100*time.Millisecond, 50*time.Millisecond))
-	//})
-
 	Context("when scaling by custom metrics", func() {
 		It("should scale in", Serial, Label("measurement"), func() {
 			AddReportEntry(experiment.Name, experiment)
-			experimentWg := sync.WaitGroup{}
-			experimentWg.Add(appsToScaleCount)
+			//experimentWg := sync.WaitGroup{}
+		//	experimentWg.Add(appsToScaleCount)
 
 			experiment.Sample(func(i int) {
 				defer GinkgoRecover()
@@ -53,32 +48,47 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg := sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-out", func() {
-					Eventually(func() int {
+					scaleOut := func() int {
 						helpers.SendMetric(cfg, appName, 550)
-						return helpers.RunningInstances(appGUID, 5*time.Second)
-					}).WithPolling(pollTime).WithTimeout(5 * time.Minute).Should(Equal(2))
+						return helpers.RunningInstances(appGUID, 5 *time.Second)
+					}
+					Eventually(scaleOut).WithPolling(pollTime).WithTimeout(5 * time.Minute).Should(Equal(2),
+						fmt.Sprintf("Failed to scale out app: %s", appName))
 					wg.Done()
 				})
 				wg.Wait()
+
+				atomic.AddInt32(&scaledOutAppsCount, 1)
+				fmt.Println(fmt.Sprintf("Scaled-Out apps: %d/%d", atomic.LoadInt32(&scaledOutAppsCount), appsToScaleCount))
 
 				wg = sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-in", func() {
 					scaleIn := func() int {
 						helpers.SendMetric(cfg, appName, 100)
-						//TODO: Change to autoscaler-app-history event instead of cf running instances.
 						return helpers.RunningInstances(appGUID, 5*time.Second)
 					}
-					Eventually(scaleIn).WithPolling(pollTime).WithTimeout(5 * time.Minute).Should(Equal(1))
+					Eventually(scaleIn).WithPolling(pollTime).WithTimeout(5 * time.Minute).Should(Equal(1),
+						fmt.Sprintf("Failed to scale in app: %s", appName))
 					wg.Done()
 				})
 				wg.Wait()
 
-				experimentWg.Done()
+				atomic.AddInt32(&doneAppsCount, 1)
+				fmt.Println(fmt.Sprintf("Scaled-in apps: %d/%d", atomic.LoadInt32(&doneAppsCount), appsToScaleCount))
+				//experimentWg.Done()
+
 			}, samplingConfig)
-			experimentWg.Wait()
+			//experimentWg.Wait()
+			Eventually(func() int32 { return atomic.LoadInt32(&doneAppsCount) }, 10*time.Minute, 5*time.Second).Should(BeEquivalentTo(appsToScaleCount))
+			checkMedianDurationFor(experiment, "scale-out")
+			checkMedianDurationFor(experiment, "scale-in")
 		})
-
 	})
-
 })
+
+func checkMedianDurationFor(experiment *gmeasure.Experiment, statName string){
+	scaleOutStats := experiment.GetStats(statName)
+	medianScaleOutDuration := scaleOutStats.DurationFor(gmeasure.StatMedian)
+	fmt.Println(fmt.Sprintf("%d duration:", medianScaleOutDuration ))
+}

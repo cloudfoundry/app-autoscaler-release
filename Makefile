@@ -343,7 +343,7 @@ setup-performance:
 
 .PHONY: run-performance
 run-performance:
-	export GINKGO_OPTS="-v";\
+	export GINKGO_OPTS="";\
 	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
