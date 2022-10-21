@@ -290,19 +290,16 @@ jobs:
       <<: *acceptance-log-cache-params
   - in_parallel:
     - task: autoscaler-acceptance-api
-      attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-params
         SUITES: api
     - task: autoscaler-acceptance-app
-      attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-params
         SUITES: app
     - task: autoscaler-acceptance-broker
-      attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-params
@@ -338,14 +335,12 @@ jobs:
       <<: *app-autoscaler-ops-files-buildin
   - in_parallel:
     - task: autoscaler-acceptance-api
-      attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-buildin-params
         BUILDIN_MODE: true
         SUITES: api
     - task: autoscaler-acceptance-app
-      attempts: 3
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-buildin-params

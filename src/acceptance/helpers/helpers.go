@@ -89,7 +89,7 @@ type SpecificDateSchedule struct {
 }
 
 func OauthToken(cfg *config.Config) string {
-	cmd := cf.Cf("oauth-token")
+	cmd := cf.CfSilent("oauth-token")
 	Expect(cmd.Wait(cfg.DefaultTimeoutDuration())).To(Exit(0))
 	return strings.TrimSpace(string(cmd.Out.Contents()))
 }
