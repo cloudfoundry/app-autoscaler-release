@@ -198,6 +198,8 @@ jobs:
     - get: prometheus-boshrelease
   - task: deploy-prometheus
     file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
+    params:
+      SLACK_WEBHOOK: ((slack_webhook))
 
 - name: deploy-cf
   serial_groups: [infra]

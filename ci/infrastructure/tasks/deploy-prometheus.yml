@@ -7,6 +7,9 @@ image_resource:
     repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
     tag: main
 
+params:
+  SLACK_WEBHOOK:
+
 inputs:
 - name: bbl-state
 - name: ci
