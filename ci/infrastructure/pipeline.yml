@@ -193,9 +193,11 @@ jobs:
   plan:
   - in_parallel:
     - get: bbl-state
+      trigger: true
       passed: [setup-infrastructure]
     - get: ci
     - get: prometheus-boshrelease
+      trigger: true
   - task: deploy-prometheus
     file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
     params:
