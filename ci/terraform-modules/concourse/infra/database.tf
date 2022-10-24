@@ -4,6 +4,7 @@ resource "google_sql_database_instance" "concourse" {
   name             = var.sql_instance_name
   project          = var.project
   region           = var.region
+  deletion_protection = false
 
   settings {
     activation_policy = "ALWAYS"
