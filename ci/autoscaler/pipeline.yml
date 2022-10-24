@@ -108,6 +108,9 @@ resource_types:
 resources:
 - name: every-night
   type: time
+- name: every-hour
+  type: time
+  source: {interval: 1h}
 - name: ci
   type: git
   icon: github
@@ -359,6 +362,8 @@ jobs:
   - in_parallel:
     - get: ci
     - get: bbl-state
+      trigger: true
+    - get: every-hour
       trigger: true
     - get: app-autoscaler-release
         #   ensure:
