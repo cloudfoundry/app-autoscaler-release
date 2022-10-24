@@ -41,12 +41,3 @@ variable "gke_master_ipv4_cidr_block" { nullable = false }
 variable "gke_default_pool_machine_type" { nullable = false }
 variable "gke_workers_pool_machine_type" { nullable = false }
 
-
-# variable "kube" {
-#   type = map(any)
-#   default = {
-#     config  = "~/.kube/config"
-#     # TODO: try to provide context dynamically by reading GKE
-#     context = "gke_app-runtime-interfaces-wg_europe-west3-a_wg-ci"
-#   }
-# }

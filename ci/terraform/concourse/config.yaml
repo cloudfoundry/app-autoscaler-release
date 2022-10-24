@@ -3,18 +3,25 @@ region: europe-west3
 zone: europe-west3-a
 secondary_zone: europe-west3-b
 
+# gcs_prefix builds root folder for tf state for the entire stack
+gcs_bucket: terraform-state-wg-ci
+gcs_prefix: refactor
+
 # DNS record for your Concourse URL https://<dns_record>.<dns_zone>.dns_domain
 dns_record: concourse-refactor
 dns_zone: app-runtime-interfaces
 dns_domain: ci.cloudfoundry.org
 
-# gcs_prefix builds root folder for tf state for the entire stack
-gcs_bucket: terraform-state-wg-ci
-gcs_prefix: refactor
-
 # Project's resource names are build off GKE name for scaling purposes
 # k8s cluster, SQL instance, vpc, IAM groups, cloud nat router, service accounts
 gke_name: wg-ci-refactor
+
+# Module sources for the stack - git or local
+source_infra_module: "../../../terraform-modules//concourse/infra"
+
+# ---------------------------------------------------------
+# In most cases settings below are safe to keep as defaults
+# ---------------------------------------------------------
 
 # SQL
 sql_instance_tier: db-custom-1-4096

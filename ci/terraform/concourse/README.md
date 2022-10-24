@@ -10,9 +10,9 @@
 * kubectl => 1.23
 
 # Prerequisites for a fresh project
-Adjust `variables.tf`
+Adjust `config.yml`
 
-Alternatively pass as env variables or vars files to terraform / terragrunt
+Alternatively, pass as env variables or vars files to terraform / terragrunt
 #### Logon to your GCP account
 
 ```
