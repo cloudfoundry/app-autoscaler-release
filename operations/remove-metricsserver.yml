@@ -16,3 +16,5 @@
 - type: remove
   path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/domain=((deployment_name)).metricsserver.service.cf.internal
 
+- type: remove
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_collector
