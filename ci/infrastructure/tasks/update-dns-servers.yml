@@ -10,8 +10,8 @@ image_resource:
 params:
 
 inputs:
-- name: app-autoscaler-release-main
+- name: ci
 - name: bbl-state
 
 run:
-  path: app-autoscaler-release-main/ci/autoscaler/scripts/update-dns-servers.sh
+  path: ci/ci/autoscaler/scripts/update-dns-servers.sh

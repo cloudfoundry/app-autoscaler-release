@@ -7,7 +7,7 @@ nodejs 16.14.0
 ginkgo 2.2.0
 shellcheck 0.8.0
 act 0.2.30
-concourse 7.8.1
+concourse 7.8.3
 golangci-lint 1.50.0
 bosh 7.0.1
 gcloud 403.0.0
