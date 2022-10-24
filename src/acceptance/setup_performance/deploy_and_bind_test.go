@@ -40,7 +40,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 
 		for i := 0; i < cfg.Performance.AppCount; i++ {
 			appName = fmt.Sprintf("node-custom-metric-benchmark-%d", i)
-			pendingApps.Store(appName,1)
+			pendingApps.Store(appName, 1)
 			appsChan <- appName
 		}
 
@@ -60,7 +60,6 @@ func worker(appsChan chan string, runningApps *int32, pendingApps *sync.Map, wg 
 	defer wg.Done()
 	defer GinkgoRecover()
 	for appName := range appsChan {
-
 		helpers.CreateTestAppFromDropletByName(cfg, nodeAppDropletPath, appName, 1)
 		policy := helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 		appGUID := helpers.GetAppGuid(cfg, appName)
