@@ -350,9 +350,9 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 }
 
 func RunningInstances(appGUID string, timeout time.Duration) int {
-	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID))
 	defer GinkgoRecover()
-	Expect(cmd.Wait(timeout)).To(Exit(0))
+	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID)).Wait(timeout)
+	Expect(cmd).To(Exit(0))
 	var process = struct {
 		Instances int `json:"instances"`
 	}{}
