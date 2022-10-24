@@ -409,8 +409,7 @@ func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName
 			args = append(args, "-c", policy)
 		}
 		bindService := cf.Cf(args...).Wait(cfg.DefaultTimeoutDuration())
-		FailOnCommandFailuref(bindService, "failed binding service %s to app %s. \n Command Error: %s %s", instanceName, appName, bindService.Buffer().Contents() ,bindService.Err.Contents() )
-
+		FailOnCommandFailuref(bindService, "failed binding service %s to app %s. \n Command Error: %s %s", instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents())
 	}
 }
 
@@ -421,7 +420,7 @@ func CreateServiceWithPlan(cfg *config.Config, servicePlan string) string {
 	if cfg.IsServiceOfferingEnabled() {
 		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 		createService := cf.Cf("create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
-		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s \n Command Error: %s %s",instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
+		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s \n Command Error: %s %s", instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
 		return instanceName
 	}
 	return ""
