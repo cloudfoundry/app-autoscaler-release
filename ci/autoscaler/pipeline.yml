@@ -366,42 +366,6 @@ jobs:
     - get: every-hour
       trigger: true
     - get: app-autoscaler-release
-        #   ensure:
-        #     task: cleanup
-        #     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-        #     params: *performance-env
-
-        #  - task: check-diego-cell-count
-        #    file: app-autoscaler-release/ci/autoscaler/tasks/check-diego-cell-count.yml
-        #    params:
-        #      EXPECTED_CELLS: 4
-        #    on_failure:
-        #      do:
-        #      - task: combine-ops-files
-        #        file: app-autoscaler-release/ci/autoscaler/tasks/combine-ops.yml
-        #        input_mapping:
-        #          custom-ops: app-autoscaler-release
-        #          app-autoscaler-ci: app-autoscaler-release
-        #          ci: app-autoscaler-release
-        #        output_mapping:
-        #          combined-ops: ops-files
-        #      - task: scale-up-cf
-        #        file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-        #        input_mapping:
-        #          bbl-state: bbl-state
-        #          cf-deployment: cf-deployment
-        #          ops-files: ops-files
-        #          vars-files: autoscaler-env-vars-store
-        #        params:
-        #          SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-        #          OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
-        #          BOSH_DEPLOY_ARGS: "-v diego_cell_instances=4"
-        #        ensure:
-        #          put: autoscaler-env-vars-store
-        #          params:
-        #            repository: autoscaler-env-vars-store
-        #            rebase: true
-        #
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
@@ -423,22 +387,6 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yml
     params:
       TARGETS: run-performance
-        #  - task: scale-down-cf
-        #    file: cf-deployment-concourse-tasks/bosh-deploy/task.yml
-        #    input_mapping:
-        #      bbl-state: bbl-state
-        #      cf-deployment: cf-deployment
-        #      ops-files: ops-files
-        #      vars-files: autoscaler-env-vars-store
-        #    params:
-        #      SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-        #      OPS_FILES: "operations/scale-to-one-az.yml operations/scale_out_cf_for_app-autoscaler.yaml operations/use-compiled-releases.yml operations/enable_mtls.yml"
-        #      BOSH_DEPLOY_ARGS: "-v diego_cell_instances=2"
-        #    ensure:
-        #      put: autoscaler-env-vars-store
-        #      params:
-        #        repository: autoscaler-env-vars-store
-        #        rebase: true
 
 
 - name: upgrade-test
@@ -543,25 +491,6 @@ jobs:
       trigger: true
   - task: cleanup-autoscaler-deployments
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
-
-
-# TODO move to a github action a possibly make it add the draft release notes to the PR?
-#- name: draft-pr
-#  public: true
-#  build_logs_to_retain: 100
-#  plan:
-#  - in_parallel:
-#    - get: gh-release
-#    - get: app-autoscaler-release
-#    - get: app-autoscaler-release-pr
-#      passed: [acceptance-pr]
-#      trigger: true
-#  - task: dummy-release-autoscaler
-#    file: app-autoscaler-release/ci/autoscaler/tasks/release-autoscaler.yml
-#    params:
-#      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
-#      GITHUB_TOKEN: ((autoscaler_access_token))
-#      PERFORM_BOSH_RELEASE: false
 
 - name: draft
   public: true
