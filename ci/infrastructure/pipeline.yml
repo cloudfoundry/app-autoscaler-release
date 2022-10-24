@@ -133,13 +133,13 @@ jobs:
   - in_parallel:
     - get: ci
     - get: bbl-state
-    - task: update-dns-servers
-      file: ci/ci/infrastructure/tasks/update-dns-servers.yml
-      params:
-        BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
-        BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
-        GCP_DNS_ZONE: app-runtime-interfaces
-        GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+  - task: update-dns-servers
+    file: ci/ci/infrastructure/tasks/update-dns-servers.yml
+    params:
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
+      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
+      GCP_DNS_ZONE: app-runtime-interfaces
+      GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
 
 - name: delete-cf
   serial_groups: [infra]
