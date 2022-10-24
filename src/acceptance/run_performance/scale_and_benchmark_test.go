@@ -59,7 +59,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg.Wait()
 
 				atomic.AddInt32(&scaledOutAppsCount, 1)
-				fmt.Println(fmt.Sprintf("Scaled-Out apps: %d/%d", atomic.LoadInt32(&scaledOutAppsCount), appsToScaleCount))
+				fmt.Printf("Scaled-Out apps: %d/%d\n", atomic.LoadInt32(&scaledOutAppsCount), appsToScaleCount)
 
 				wg = sync.WaitGroup{}
 				wg.Add(1)
@@ -75,7 +75,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg.Wait()
 
 				atomic.AddInt32(&doneAppsCount, 1)
-				fmt.Println(fmt.Sprintf("Scaled-in apps: %d/%d", atomic.LoadInt32(&doneAppsCount), appsToScaleCount))
+				fmt.Printf("Scaled-in apps: %d/%d\n", atomic.LoadInt32(&doneAppsCount), appsToScaleCount)
 				//experimentWg.Done()
 
 			}, samplingConfig)
@@ -90,5 +90,5 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 func checkMedianDurationFor(experiment *gmeasure.Experiment, statName string) {
 	scaleOutStats := experiment.GetStats(statName)
 	medianScaleOutDuration := scaleOutStats.DurationFor(gmeasure.StatMedian)
-	fmt.Println(fmt.Sprintf("%d duration:", medianScaleOutDuration))
+	fmt.Printf("%d duration:\n", medianScaleOutDuration)
 }
