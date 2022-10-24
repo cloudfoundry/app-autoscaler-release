@@ -62,3 +62,40 @@ export BOSH_USERNAME
 debug "BOSH_USERNAME: ${BOSH_USERNAME}"
 # shellcheck disable=SC2034
 bosh_username="${BOSH_USERNAME}"
+
+export BBL_GCP_PROJECT_ID="${BBL_GCP_PROJECT_ID:-"cloud-foundry-310819"}"
+export bbl_gcp_project_id="${BBL_GCP_PROJECT_ID}"
+export BBL_GCP_PROJECT_WG="${BBL_GCP_PROJECT_WG:-"app-runtime-interfaces-wg"}"
+export bbl_gcp_project_wg="${BBL_GCP_PROJECT_WG}"
+export BBL_GCP_SERVICE_ACCOUNT_JSON="${BBL_GCP_SERVICE_ACCOUNT_JSON:-"${HOME}/.ssh/gcp.key.json"}"
+export bbl_gcp_service_account_json="${BBL_GCP_SERVICE_ACCOUNT_JSON}"
+export GCP_DNS_ZONE=${GCP_DNS_ZONE:-"app-runtime-interfaces"}
+export gcp_dns_zone="${GCP_DNS_ZONE}"
+
+export BBL_IAAS="${BBL_IAAS:-gcp}"
+export bbl_iaas="${BBL_IAAS}"
+
+export BBL_ENV_NAME="autoscaler"
+export bbl_env_name="${BBL_ENV_NAME}"
+
+
+export BBL_GCP_REGION="europe-west4"
+export bbl_gcp_region="${BBL_GCP_REGION}"
+export BBL_GCP_ZONE="europe-west4-a"
+export bbl_gcp_zone="${BBL_GCP_ZONE}"
+
+
+function unset_vars() {
+  unset BOSH_USERNAME
+  unset CI_DIR
+  unset AUTOSCALER_DIR
+  unset BBL_STATE_PATH
+  unset SYSTEM_DOMAIN
+  unset BBL_GCP_PROJECT_ID
+  unset BBL_GCP_SERVICE_ACCOUNT_JSON
+  unset GCP_DNS_ZONE
+  unset BBL_IAAS
+  unset BBL_ENV_NAME
+  unset BBL_GCP_REGION
+  unset BBL_GCP_ZONE
+}

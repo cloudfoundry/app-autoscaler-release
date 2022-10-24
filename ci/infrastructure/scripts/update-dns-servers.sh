@@ -1,27 +1,30 @@
 #!/bin/bash
 set -euo pipefail
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source "${script_dir}/common.sh"
 
-pushd bbl-state/bbl-state
-  BBL_DNS_VALUES=$(bbl outputs | yq eval '.system_domain_dns_servers | join(" ")' -)
-popd
+pushd "${bbl_state_path}" > /dev/null
+  eval "$(bbl print-env)"
+popd > /dev/null
+
 
 
 write_gcp_service_account_key() {
-  if [ -f "${BBL_GCP_SERVICE_ACCOUNT_KEY}" ]; then
-    cp "${BBL_GCP_SERVICE_ACCOUNT_KEY}" /tmp/google_service_account.json
+  if [ -f "${bbl_gcp_service_account_json}" ]; then
+    cp "${bbl_gcp_service_account_json}" /tmp/google_service_account.json
   else
-    echo "${BBL_GCP_SERVICE_ACCOUNT_KEY}" > /tmp/google_service_account.json
+    echo "${bbl_gcp_service_account_json}" > /tmp/google_service_account.json
   fi
-  export BBL_GCP_SERVICE_ACCOUNT_KEY="/tmp/google_service_account.json"
+  bbl_gcp_service_account_json="/tmp/google_service_account.json"
 }
 
 write_gcp_service_account_key
-gcloud auth activate-service-account --key-file=${BBL_GCP_SERVICE_ACCOUNT_KEY}
-GCP_DNS_VALUES=$(gcloud dns record-sets list --project "${BBL_GCP_PROJECT_ID}" --zone "${GCP_DNS_ZONE}" --name "${GCP_DNS_NAME}" --format=json | jq -r '.[].rrdatas | join(" ") ')
+gcloud auth activate-service-account --key-file=${bbl_gcp_service_account_json}
+gcp_dns_values=$(gcloud dns record-sets list --project "${bbl_gcp_project_wg}" --zone "${gcp_dns_zone}" --name "${system_domain}" --format=json | jq -r '.[].rrdatas | join(" ") ')
 
-if [ "${BBL_DNS_VALUES}" == "${GCP_DNS_VALUES}" ]; then
+if [ "${BBL_DNS_VALUES}" == "${gcp_dns_values}" ]; then
   echo "${BBL_DNS_VALUES} is correct"
 else
-  echo "dns zone:${GCP_DNS_ZONE} name:${GCP_DNS_NAME} need to be updated to ${BBL_DNS_VALUES}"
+  echo "dns zone:${GCP_DNS_ZONE} name:${system_domain} need to be updated to ${BBL_DNS_VALUES}"
   exit 1
 fi
