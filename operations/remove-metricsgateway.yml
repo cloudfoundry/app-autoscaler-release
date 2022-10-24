@@ -5,8 +5,5 @@
   path: /instance_groups/name=metricsgateway
 
 - type: remove
-  path: /domains/name=metricsgateway
-
-- type: remove
   path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties/aliases/domain=((deployment_name)).metricsgateway.service.cf.internal
 
