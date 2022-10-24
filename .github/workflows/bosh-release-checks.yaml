@@ -53,7 +53,7 @@ jobs:
 
       - name: Build Dev Release
         id: build
-        uses: orange-cloudfoundry/bosh-release-action@v1.3.0
+        uses: orange-cloudfoundry/bosh-release-action@v2.0.0
 
       - name: Compile Dev Release
         uses: cloudfoundry/bosh-compile-action@main
