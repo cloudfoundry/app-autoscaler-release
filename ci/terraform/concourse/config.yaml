@@ -58,6 +58,8 @@ wg_ci_human_account_permissions: [
 
     "iam.roles.create",
     "iam.roles.update",
+    "iam.roles.delete",
+    "iam.roles.undelete",
 
     "iam.serviceAccounts.setIamPolicy",
 
