@@ -20,7 +20,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 
 	AfterEach(func() {
 		pendingApps.Range(func(k, v interface{}) bool {
-			fmt.Println(fmt.Sprintf("pending app: %s ", k))
+			fmt.Printf("pending app: %s \n", k)
 			return true
 		})
 
@@ -68,6 +68,6 @@ func worker(appsChan chan string, runningApps *int32, pendingApps *sync.Map, wg 
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		atomic.AddInt32(runningApps, 1)
 		pendingApps.Delete(appName)
-		fmt.Println(fmt.Sprintf("Running apps: %d/%d", atomic.LoadInt32(runningApps), cfg.Performance.AppCount))
+		fmt.Printf("Running apps: %d/%d\n", atomic.LoadInt32(runningApps), cfg.Performance.AppCount)
 	}
 }
