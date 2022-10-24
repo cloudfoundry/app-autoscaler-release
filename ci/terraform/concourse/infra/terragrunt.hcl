@@ -19,6 +19,11 @@ remote_state {
   }
 }
 
+# git for teams
+terraform {
+  source = local.config.source_infra_module
+}
+
 inputs = {
   project = local.config.project
   region  = local.config.region

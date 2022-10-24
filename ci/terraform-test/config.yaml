@@ -1,0 +1,6 @@
+test_var_a: "test_var_a-config.yaml"
+test_var_b: "test_var_b-config.yaml"
+test_var_c: "test_var_c-config.yaml"
+
+gcs_bucket: terraform-state-wg-ci
+gcs_prefix: testing
