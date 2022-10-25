@@ -5,15 +5,13 @@ import (
 	. "acceptance/helpers"
 	"time"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("AutoScaler custom metrics policy", func() {
 	var (
-		appGUID string
-		policy  string
+		policy string
 	)
 	BeforeEach(func() {
 		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
@@ -44,11 +42,12 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 	})
 
 	Context("when adding custom-metrics via mtls", func() {
-		It("should successfully add a metric using the app", func() {
+		FIt("should successfully add a metric using the app", func() {
 			By("adding policy so test_metric is allowed")
 			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 			By("sending metric via mtls endpoint")
-			cf.Cf("curl", "/custom-metrics/mtls/test_metric/10", "-f").Wait(cfg.DefaultTimeoutDuration())
+			SendMetric(cfg, appName, 10)
+			GinkgoWriter.Println("")
 		})
 	})
 })

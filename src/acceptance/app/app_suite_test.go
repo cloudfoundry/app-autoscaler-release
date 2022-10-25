@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 
@@ -113,16 +114,19 @@ func doAPIRequest(req *http.Request) (*http.Response, error) {
 }
 
 func DeletePolicyWithAPI(appGUID string) {
+	By(fmt.Sprintf("Deleting policy using api for appguid :'%s'", appGUID))
 	oauthToken := OauthToken(cfg)
 	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest("DELETE", policyURL, nil)
+	req, err := http.NewRequest(http.MethodDelete, policyURL, nil)
 	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
 
 	resp, err := doAPIRequest(req)
 	Expect(err).ShouldNot(HaveOccurred())
 	defer func() { _ = resp.Body.Close() }()
-	Expect(resp.StatusCode).To(Equal(http.StatusOK))
+	body, _ := io.ReadAll(resp.Body)
+	Expect(resp.StatusCode).To(Equal(http.StatusOK), "Failed to delete policy '%s'", string(body))
+
 }
 
 func DeletePolicy(appName, appGUID string) {

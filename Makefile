@@ -18,7 +18,9 @@ CI_DIR?=${PWD}/ci
 CI?=false
 VERSION?=0.0.testing
 DEST?=build
+
 export BUILDIN_MODE?=false
+export DEBUG?=false
 export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
 
 $(shell mkdir -p target)

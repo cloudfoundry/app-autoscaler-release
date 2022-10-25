@@ -14,7 +14,7 @@ import (
 )
 
 func DebugInfo(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup, anApp string) {
-	if os.Getenv("DEBUG") == "true" && cfg.ASApiEndpoint != "" {
+	if os.Getenv("DEBUG") != "" && cfg.ASApiEndpoint != "" {
 		if os.Getenv("CF_PLUGIN_HOME") == "" {
 			_ = os.Setenv("CF_PLUGIN_HOME", os.Getenv("HOME"))
 		}
