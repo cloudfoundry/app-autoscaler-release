@@ -42,7 +42,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 	})
 
 	Context("when adding custom-metrics via mtls", func() {
-		FIt("should successfully add a metric using the app", func() {
+		It("should successfully add a metric using the app", func() {
 			By("adding policy so test_metric is allowed")
 			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 			By("sending metric via mtls endpoint")
