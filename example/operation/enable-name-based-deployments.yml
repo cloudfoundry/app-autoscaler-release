@@ -23,10 +23,10 @@
       metricsforwarder_mtls: &metricsforwarder_mtls_public_domain ((deployment_name))-metricsforwarder-mtls.((system_domain))
       servicebroker: &servicebroker_public_domain ((deployment_name))servicebroker.((system_domain))
 
-# Addons 
+# Addons
 - type: replace
   path: /addons/name=bosh-dns-aliases/jobs/name=bosh-dns-aliases/properties
-  value: 
+  value:
     aliases:
        - domain: *postgres_domain
          targets:
@@ -234,10 +234,6 @@
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/scheduler/host?
   value: *scheduler_domain
-
-- type: replace
-  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_collector/host?
-  value: *metricsserver_domain
 
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/scaling_engine/host?
