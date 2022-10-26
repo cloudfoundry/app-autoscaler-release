@@ -25,7 +25,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3.3.0
         with:
           working-directory: src/acceptance
-          args: --config ../../.golangci.yaml
+          args: --config ../../.golangci.yaml -v
           version: ${{ steps.lint.outputs.version }}
 
       - name: lint autoscaler
