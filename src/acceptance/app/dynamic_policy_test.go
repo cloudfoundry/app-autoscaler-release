@@ -25,10 +25,10 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		instanceName = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 	})
+
 	AfterEach(AppAfterEach)
 
 	Context("when scaling by memoryused", func() {
-
 		Context("when memory used is greater than scaling out threshold", func() {
 			BeforeEach(func() {
 				policy = helpers.GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
@@ -38,7 +38,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			It("should scale out", Label(acceptance.LabelSmokeTests), func() {
 				helpers.WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
-
 		})
 
 		Context("when  memory used is lower than scaling in threshold", func() {
