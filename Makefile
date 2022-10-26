@@ -237,7 +237,7 @@ eslint:
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run ${OPTS}
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --path-prefix=src/$(patsubst lint_%,%,$@) --config ${lint_config} ${OPTS}
 
 .PHONY: spec-test
 spec-test:
@@ -350,7 +350,10 @@ run-performance:
 	export SUITES="run_performance";\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
-.PHONY: package-specs
+.PHONY: run-act
+run-act:
+	${AUTOSCALER_DIR}/scripts/run_act.sh;\
+
 package-specs: mod-tidy vendor
 	@echo " - Updating the package specs"
 	@./scripts/sync-package-specs
