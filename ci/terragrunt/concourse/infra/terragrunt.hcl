@@ -21,7 +21,7 @@ remote_state {
 
 # git for teams
 terraform {
-  source = local.config.source_infra_module
+  source = local.config.tf_modules.infra
 }
 
 inputs = {
