@@ -1,0 +1,68 @@
+#@ load("@ytt:data", "data")
+
+#@ def email():
+#@ return "cloud-sql-auth-proxy@" + data.values.google.project_id + ".iam.gserviceaccount.com"
+#@ end
+
+#!@ Based on these docs: https://cloud.google.com/sql/docs/postgres/connect-kubernetes-engine
+#!@ K8s Service account bound via workloadIdentity to Google Service account with cloudsql.client
+#!@ cnrm references: https://cloud.google.com/config-connector/docs/reference/resource-docs/iam/iampolicymember
+
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMServiceAccount
+metadata:
+  name: cloud-sql-auth-proxy
+  namespace: concourse
+  annotations:
+    cnrm.cloud.google.com/management-conflict-prevention-policy: "none"
+    kapp.k14s.io/owned-for-deletion: ""
+    cnrm.cloud.google.com/project-id: #@ data.values.google.project_id
+    cnrm.cloud.google.com/state-into-spec: merge
+spec:
+  resourceID: cloud-sql-auth-proxy
+  displayName: Used by Cloud SQL Auth proxy
+
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: iampolicymember-cloud-sql-auth-proxy
+  namespace: concourse
+  annotations:
+    kapp.k14s.io/owned-for-deletion: ""
+    cnrm.cloud.google.com/project-id: #@ data.values.google.project_id
+spec:
+  member: #@ "serviceAccount:" + email()
+  role: roles/cloudsql.client
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: #@ "projects/" + data.values.google.project_id
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloud-sql-auth-proxy
+  namespace: concourse
+  annotations:
+    iam.gke.io/gcp-service-account: #@ email()
+
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: iampolicymember-cloud-sql-auth-proxy-workload-identity
+  namespace: concourse
+  annotations:
+    kapp.k14s.io/owned-for-deletion: ""
+    cnrm.cloud.google.com/project-id: #@ data.values.google.project_id
+spec:
+  member: #@ "serviceAccount:" + data.values.google.project_id + ".svc.id.goog[concourse/cloud-sql-auth-proxy]"
+  role: roles/iam.workloadIdentityUser
+  resourceRef:
+    apiVersion: iam.cnrm.cloud.google.com/v1beta1
+    kind: IAMServiceAccount
+    name: cloud-sql-auth-proxy
+    namespace: concourse

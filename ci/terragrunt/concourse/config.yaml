@@ -17,7 +17,9 @@ dns_domain: ci.cloudfoundry.org
 gke_name: wg-ci-refactor
 
 # Module sources for the stack - git or local
-source_infra_module: "../../../terraform-modules//concourse/infra"
+tf_modules:
+  infra: "../../../terraform-modules//concourse/infra"
+  backend: "../../../terraform-modules//concourse/backend"
 
 # ---------------------------------------------------------
 # In most cases settings below are safe to keep as defaults
