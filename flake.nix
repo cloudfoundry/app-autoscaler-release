@@ -2,8 +2,7 @@
   description = "Dependencies of app-autoscaler-release";
 
   inputs = {
-    # Adapt later, after PR https://github.com/joergdw/nixpkgs/compare/rubyPackages.cf-uaac?expand=1 has been merged!
-    nixpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
   };
 
   outputs = { self, nixpkgs }:
@@ -22,7 +21,22 @@
         in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
-              rubyPackages.cf-uaac
+              act
+              bosh-cli
+              cloudfoundry-cli
+              fly
+              ginkgo
+              go
+              golangci-lint
+              google-cloud-sdk
+              maven
+              nodejs
+              ruby
+              ## The following line needs: `nixpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;`
+              ## until PR https://github.com/NixOS/nixpkgs/pull/189079 has been merged!
+              # rubyPackages.cf-uaac
+              shellcheck
+              temurin-bin-11
             ];
           };
       });
