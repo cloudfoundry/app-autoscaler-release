@@ -1,10 +1,6 @@
 data "carvel_ytt" "concourse_backend" {
 
-  files = [
-   # "../../config/carvel-secretgen-controller",
-    "files/config/database",
-  ]
-
+  files = [ "files/config" ]
   values = {
     "google.project_id" = var.project
     "google.region"     = var.region

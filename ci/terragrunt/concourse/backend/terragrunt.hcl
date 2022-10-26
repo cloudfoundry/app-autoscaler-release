@@ -34,4 +34,5 @@ inputs = {
   zone    = local.config.zone
 
   gke_name = local.config.gke_name
+  sql_instance_name = "${local.config.gke_name}-concourse"
 }
