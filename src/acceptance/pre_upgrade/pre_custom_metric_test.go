@@ -24,9 +24,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		StartApp(appName, cfg.CfPushTimeoutDuration())
 	})
 
-	AfterEach(func() {
-		DebugInfo(cfg, setup, appName)
-	})
+	AfterEach(func() { DebugInfo(cfg, setup, appName) })
 
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", func() {
