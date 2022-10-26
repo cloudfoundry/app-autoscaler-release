@@ -27,6 +27,7 @@ jobs:
           working-directory: src/acceptance
           args: --config ../../.golangci.yaml -v
           version: ${{ steps.lint.outputs.version }}
+          skip-cache: true
 
       - name: lint autoscaler
         uses: golangci/golangci-lint-action@v3.3.0
@@ -34,6 +35,7 @@ jobs:
           working-directory: src/autoscaler
           args: --config ../../.golangci.yaml
           version: ${{ steps.lint.outputs.version }}
+          skip-cache: true
 
       - name: lint changelog
         uses: golangci/golangci-lint-action@v3.3.0
@@ -41,6 +43,7 @@ jobs:
           working-directory: src/changelog
           args: --config ../../.golangci.yaml
           version: ${{ steps.lint.outputs.version }}
+          skip-cache: true
 
       - name: lint changeloglockcleaner
         uses: golangci/golangci-lint-action@v3.3.0
@@ -48,3 +51,4 @@ jobs:
           working-directory: src/changeloglockcleaner
           args: --config ../../.golangci.yaml
           version: ${{ steps.lint.outputs.version }}
+          skip-cache: true
