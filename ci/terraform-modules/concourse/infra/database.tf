@@ -1,4 +1,3 @@
-
 resource "google_sql_database_instance" "concourse" {
   database_version = "POSTGRES_13"
   name             = var.sql_instance_name
@@ -50,20 +49,5 @@ resource "google_sql_database_instance" "concourse" {
     tier         = var.sql_instance_tier
 
   }
-}
-
-resource "google_sql_database" "concourse" {
-
-  for_each = toset([
-    "concourse",
-    "credhub",
-    "uaa"
-  ])
-  charset    = "UTF8"
-  collation  = "en_US.UTF8"
-  instance   = google_sql_database_instance.concourse.name
-  name       = each.key
-  project    = var.project
-  depends_on = [google_sql_database_instance.concourse]
 }
 

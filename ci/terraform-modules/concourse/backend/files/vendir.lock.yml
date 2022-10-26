@@ -1,0 +1,23 @@
+apiVersion: vendir.k14s.io/v1alpha1
+directories:
+- contents:
+  - git:
+      commitTitle: 'Build(deps): bump proto-google-common-protos from 2.9.1 to 2.9.2...'
+      sha: c67d5e3fdf361052171d2342fd1ad9d35bdf47a4
+    path: .
+  path: config/credhub/_ytt_lib/credhub
+- contents:
+  - git:
+      commitTitle: Update UAA image reference in k8s deployment template to 75.22.0
+      sha: 893b4c5e5c840335e77be24fd2e0cb6ab843cff5
+      tags:
+      - v75.22.0
+    path: .
+  path: config/uaa/_ytt_lib/uaa
+- contents:
+  - githubRelease:
+      tag: v0.10.3
+      url: https://api.github.com/repos/vmware-tanzu/carvel-secretgen-controller/releases/71524101
+    path: .
+  path: config/carvel-secretgen-controller
+kind: LockConfig
