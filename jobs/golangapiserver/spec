@@ -18,9 +18,6 @@ templates:
   scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
   scheduler_client.crt.erb: config/certs/scheduler/client.crt
   scheduler_client.key.erb: config/certs/scheduler/client.key
-  metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
-  metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
-  metricscollector_client.key.erb: config/certs/metricscollector/client.key
   eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
   eventgenerator_client.crt.erb: config/certs/eventgenerator/client.crt
   eventgenerator_client.key.erb: config/certs/eventgenerator/client.key
@@ -123,18 +120,6 @@ properties:
   autoscaler.apiserver.scaling_engine.client_cert:
     description: "PEM-encoded client certificate"
   autoscaler.apiserver.scaling_engine.client_key:
-    description: "PEM-encoded client key"
-  autoscaler.apiserver.metrics_collector.host:
-    description: "Host where metricsCollector is running"
-    default: "metricscollector.service.cf.internal"
-  autoscaler.apiserver.metrics_collector.port:
-    description: "Port where metricsCollector will listen"
-    default: 6103
-  autoscaler.apiserver.metrics_collector.ca_cert:
-    description: "PEM-encoded CA certificate"
-  autoscaler.apiserver.metrics_collector.client_cert:
-    description: "PEM-encoded client certificate"
-  autoscaler.apiserver.metrics_collector.client_key:
     description: "PEM-encoded client key"
   autoscaler.apiserver.event_generator.host:
     description: "Host where eventGenerator is running"

@@ -125,13 +125,6 @@ scaling_engine:
     cert_file: /var/vcap/jobs/golangapiserver/config/certs/scalingengine/client.crt
     ca_file: /var/vcap/jobs/golangapiserver/config/certs/scalingengine/ca.crt
 
-metrics_collector:
-  metrics_collector_url: https://<%= p("autoscaler.apiserver.metrics_collector.host") %>:<%= p("autoscaler.apiserver.metrics_collector.port") %>
-  tls:
-    key_file: /var/vcap/jobs/golangapiserver/config/certs/metricscollector/client.key
-    cert_file: /var/vcap/jobs/golangapiserver/config/certs/metricscollector/client.crt
-    ca_file: /var/vcap/jobs/golangapiserver/config/certs/metricscollector/ca.crt
-
 scheduler:
   scheduler_url: https://<%= p("autoscaler.apiserver.scheduler.host") %>:<%= p("autoscaler.apiserver.scheduler.port") %>
   tls:
