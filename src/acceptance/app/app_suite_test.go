@@ -88,7 +88,6 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
 				DisableServiceAccess(cfg, setup.GetOrganizationName())
@@ -126,7 +125,6 @@ func DeletePolicyWithAPI(appGUID string) {
 	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(resp.Body)
 	Expect(resp.StatusCode).To(Equal(http.StatusOK), "Failed to delete policy '%s'", string(body))
-
 }
 
 func DeletePolicy(appName, appGUID string) {
