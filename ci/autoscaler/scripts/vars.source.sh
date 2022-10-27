@@ -12,7 +12,7 @@ if [ -z "${BASH_SOURCE[0]}" ]; then
 fi
 
 debug=${DEBUG:-}
-if [ -n "${debug}" ]; then
+if [ -n "${debug}" ] && [ ! "${debug}" = "false" ]; then
   function debug(){ echo "  -> $1"; }
 else
   function debug(){ :; }
