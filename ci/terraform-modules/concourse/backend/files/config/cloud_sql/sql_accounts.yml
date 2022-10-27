@@ -15,7 +15,7 @@ metadata:
 spec:
   resourceID: #@ name
   instanceRef:
-    external: #@ data.values.database.name
+    external: #@ data.values.database.instance
   password:
     valueFrom:
       secretKeyRef:

@@ -1,0 +1,320 @@
+#@ load("@ytt:library", "library")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:template", "template")
+#@ load("@ytt:yaml", "yaml")
+#@ load("@ytt:data", "data")
+
+#@ def add_concourse_namespace():
+#@overlay/match by=overlay.all, expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: concourse
+#@ end
+
+#@ def uaa_values():
+namespace: concourse
+
+admin:
+  client_secret: AdminSecretValueNotUsed
+
+database:
+  url: jdbc:postgresql://${UAA_POSTGRES_HOST}:5432/uaa?sslmode=disable
+  scheme: postgresql
+
+#! the values below and are only used for rendering, the actual sconfiguration is in `secret/uaa.yml`
+jwt:
+  policy:
+    activeKeyId: "default_jwt_policy_key"
+    keys:
+      #@overlay/match missing_ok=True
+      default_jwt_policy_key:
+        signingKey: JWTSecretValueNotUsed
+
+encryption:
+  active_key_label: "default_encryption_key"
+  #@overlay/replace
+  encryption_keys:
+  - label: default_encryption_key
+    passphrase: EncryptionSecretValueNotUsed
+
+login:
+  saml:
+    activeKeyId: default_saml_key
+    keys:
+      #@overlay/match missing_ok=True
+      default_saml_key:
+        key: SAMLKeySecretValueNotUsed
+        certificate: SAMLCERTSecretValueNotUsed
+        passphrase: ""
+
+#@ end
+
+---
+#@ def uaa_config():
+#@overlay/match missing_ok=True
+scim:
+  userids_enabled: true
+  user:
+    override: true
+  groups:
+    zones.read: Read identity zones
+    zones.write: Create and update identity zones
+    idps.read: Retrieve identity providers
+    idps.write: Create and update identity providers
+    clients.admin: Create, modify and delete OAuth clients
+    clients.write: Create and modify OAuth clients
+    clients.read: Read information about OAuth clients
+    clients.secret: Change the password of an OAuth client
+    scim.write: Create, modify and delete SCIM entities, i.e. users and groups
+    scim.read: Read all SCIM entities, i.e. users and groups
+    scim.create: Create users
+    scim.userids: Read user IDs and retrieve users by ID
+    scim.zones: Control a user's ability to manage a zone
+    scim.invite: Send invitations to users
+    password.write: Change your password
+    oauth.approval: Manage approved scopes
+    oauth.login: Authenticate users outside of the UAA
+    openid: Access profile information, i.e. email, first and last name, and phone number
+    groups.update: Update group information and memberships
+    uaa.user: Act as a user in the UAA
+    uaa.resource: Serve resources protected by the UAA
+    uaa.admin: Act as an administrator throughout the UAA
+    uaa.none: Forbid acting as a user
+    uaa.offline_token: Allow offline access
+    credhub.read: Allow read from credhub
+    credhub.write: Allow write to credhub
+
+#@overlay/match missing_ok=True
+oauth:
+  client:
+    override: true
+  #@overlay/match-child-defaults missing_ok=True
+  clients:
+    admin:
+      authorized-grant-types: client_credentials
+      authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write,openid
+      autoapprove:
+      - openid
+      id: admin
+    credhub_cli:
+      override: true
+      authorized-grant-types: password,refresh_token
+      scope: credhub.read,credhub.write
+      authorities: uaa.resource
+      access-token-validity: 60
+      refresh-token-validity: 1800
+      secret: ""
+    credhub_admin_client:
+      access-token-validity: 3600
+      authorities: credhub.read,credhub.write
+      authorized-grant-types: client_credentials
+      override: true
+      scope: ""
+  #@overlay/match missing_ok=True
+  user:
+    authorities:
+      - openid
+      - scim.me
+      - cloud_controller.read
+      - cloud_controller.write
+      - cloud_controller_service_permissions.read
+      - password.write
+      - uaa.user
+      - approvals.me
+      - oauth.approvals
+      - notification_preferences.read
+      - notification_preferences.write
+      - profile
+      - roles
+      - user_attributes
+      - uaa.offline_token
+      - credhub.read
+      - credhub.write
+
+#@ end
+
+#@ def overlay_uaa_config(old, new):
+#@   return yaml.encode(overlay.apply(yaml.decode(old), uaa_config()))
+#@ end
+
+#! overlay Credhub-specific UAA configuration given there is no equivalent data values.
+#@overlay/match by=overlay.subset({"kind":"ConfigMap", "metadata":{"name":"uaa-config"}})
+---
+data:
+  #@overlay/replace via=overlay_uaa_config
+  uaa.yml:
+
+---
+#! #@ def secret_uaa_client_credential_data(client_name, credentials):
+#! oauth:
+#!   #@yaml/text-templated-strings
+#!   clients:
+#!     (@= client_name @):
+#!       secret: #@ credentials
+#! #@ end
+
+#@ uaa = library.get("uaa")
+---
+  #@ template.replace(overlay.apply(uaa.with_data_values(uaa_values()).eval(), add_concourse_namespace()))
+
+---
+
+#! Remove UAA-templated admin client-secret so we can generate the credentials w/ Quarks
+#@ def remove_secret(name):
+#@overlay/remove
+kind: Secret
+metadata:
+  name: #@ name
+#@ end
+
+--- #@overlay/match by=overlay.subset(remove_secret("uaa-admin-client-credentials"))
+--- #@overlay/match by=overlay.subset(remove_secret("encryption-keys"))
+--- #@overlay/match by=overlay.subset(remove_secret("uaa-saml-keys"))
+--- #@overlay/match by=overlay.subset(remove_secret("uaa-jwt-policy-signing-keys"))
+
+
+#@ load("@uaa/k8s:templates/deployment.star",
+#@  "secrets_dir")
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"uaa"}})
+---
+spec:
+  template:
+    spec: #! pod spec
+#! START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
+      initContainers:
+      #@overlay/append
+      - name: fix-secrets
+        image: linuxserver/yq:amd64-latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          #!/usr/bin/env bash
+
+          cp -R /etc/secrets/* /secrets
+          cd /secrets
+          FIXED_VALUE=$(yq -r .oauth.clients.admin.secret admin_client_credentials.yml | base64 -d)
+          yq -yi ".oauth.clients.admin.secret=\"${FIXED_VALUE}\"" admin_client_credentials.yml
+
+          FIXED_VALUE=$(yq -r .scim.users[0] concourse_admin_user_credentials.yml | cut -f 2 -d'|' |base64 -d)
+          ENCODED_VALUE=$(yq -r .scim.users[0] concourse_admin_user_credentials.yml | cut -f 2 -d'|' )
+          sed -i "s#$ENCODED_VALUE#$FIXED_VALUE#g" concourse_admin_user_credentials.yml
+
+          FIXED_VALUE=$(yq -r .scim.users[0] credhub_admin_client_credentials.yml| cut -f 2 -d'|' | base64 -d)
+          ENCODED_VALUE=$(yq -r .scim.users[0] credhub_admin_client_credentials.yml| cut -f 2 -d'|')
+          sed -i "s#$ENCODED_VALUE#$FIXED_VALUE#g" credhub_admin_client_credentials.yml
+
+          FIXED_VALUE=$(yq -r .scim.users[1] credhub_admin_client_credentials.yml| cut -f 2 -d'|' | base64 -d)
+          ENCODED_VALUE=$(yq -r .scim.users[1] credhub_admin_client_credentials.yml| cut -f 2 -d'|')
+          sed -i "s#$ENCODED_VALUE#$FIXED_VALUE#g" credhub_admin_client_credentials.yml
+
+          FIXED_VALUE=$(yq -r .database.password database_credentials.yml | base64 -d)
+          yq -yi ".database.password=\"${FIXED_VALUE}\"" database_credentials.yml
+
+          FIXED_VALUE=$(yq -r .encryption.encryption_keys[0].passphrase encryption_keys.yml | base64 -d)
+          yq -yi ".encryption.encryption_keys[0].passphrase=\"${FIXED_VALUE}\"" encryption_keys.yml
+
+          FIXED_VALUE=$(yq -r .jwt.token.policy.keys.default_jwt_policy_key.signingKey jwt_policy_signing_keys.yml | base64 -d)
+          yq -yi ".jwt.token.policy.keys.default_jwt_policy_key.signingKey=\"${FIXED_VALUE}\"" jwt_policy_signing_keys.yml
+          #REMOVE EMPTY LINES
+          sed -i '/^[[:space:]]*$/d' jwt_policy_signing_keys.yml
+
+          FIXED_VALUE=$(yq -r .login.saml.keys.default_saml_key.key saml_keys.yml | base64 -d)
+          yq -Yi ".login.saml.keys.default_saml_key.key|=\"${FIXED_VALUE}\"" saml_keys.yml
+
+          FIXED_VALUE=$(yq -r .login.saml.keys.default_saml_key.certificate saml_keys.yml | base64 -d)
+          yq -Yi ".login.saml.keys.default_saml_key.certificate|=\"${FIXED_VALUE}\"" saml_keys.yml
+
+          FIXED_VALUE=$(yq -r .login.saml.keys.default_saml_key.passphrase saml_keys.yml | base64 -d)
+          yq -Yi ".login.saml.keys.default_saml_key.passphrase=\"${FIXED_VALUE}\"" saml_keys.yml
+
+          #REMOVE EMPTY LINES
+          sed -i '/^[[:space:]]*$/d' saml_keys.yml
+
+          chmod -R 444 /secrets/*
+        volumeMounts:
+        - name: concourse-user-credentials-file
+          mountPath: #@ "{}/concourse_admin_user_credentials.yml".format(secrets_dir)
+          subPath: concourse_admin_user_credentials.yml
+          readOnly: true
+        - name:  credhub-admin-client-credentials-file
+          mountPath: #@ "{}/credhub_admin_client_credentials.yml".format(secrets_dir)
+          subPath: credhub_admin_client_credentials.yml
+          readOnly: true
+        - name: fixed-secrets
+          mountPath: /secrets
+        - name: smtp-credentials-file
+          mountPath: #@ "{}/smtp_credentials.yml".format(secrets_dir)
+          subPath: smtp_credentials.yml
+          readOnly: true
+        - name: database-credentials-file
+          mountPath: #@ "{}/database_credentials.yml".format(secrets_dir)
+          subPath: database_credentials.yml
+          readOnly: true
+        - name: admin-client-credentials-file
+          mountPath: #@ "{}/admin_client_credentials.yml".format(secrets_dir)
+          subPath: admin_client_credentials.yml
+          readOnly: true
+        - name: jwt-policy-signing-keys-file
+          mountPath: #@ "{}/jwt_policy_signing_keys.yml".format(secrets_dir)
+          subPath: jwt_policy_signing_keys.yml
+          readOnly: true
+        - name: saml-keys-file
+          mountPath: #@ "{}/saml_keys.yml".format(secrets_dir)
+          subPath: saml_keys.yml
+          readOnly: true
+        - name: encryption-keys-file
+          mountPath: #@ "{}/encryption_keys.yml".format(secrets_dir)
+          subPath: encryption_keys.yml
+          readOnly: true
+#! END delete
+      containers:
+      #@overlay/match by="name"
+      - name: uaa
+        env:
+        #@overlay/append
+#! START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
+        - name: SECRETS_DIR
+          value: /secrets
+#! END delete
+        - name: UAA_POSTGRES_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        volumeMounts:
+        #@overlay/append
+#! START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
+        - name: fixed-secrets
+          mountPath: /secrets
+#! END delete
+        - name: concourse-user-credentials-file
+          mountPath: #@ "{}/concourse_admin_user_credentials.yml".format(secrets_dir)
+          subPath: concourse_admin_user_credentials.yml
+          readOnly: true
+        - name:  credhub-admin-client-credentials-file
+          mountPath: #@ "{}/credhub_admin_client_credentials.yml".format(secrets_dir)
+          subPath: credhub_admin_client_credentials.yml
+          readOnly: true
+      volumes:
+      #@overlay/append
+#! START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
+      - name: fixed-secrets
+        emptyDir:
+          medium: Memory
+#! END delete
+      - name: concourse-user-credentials-file
+        secret:
+          secretName: uaa-concourse-user-credentials
+      #@overlay/append
+      - name: credhub-admin-client-credentials-file
+        secret:
+          secretName: uaa-credhub-admin-client-credentials
+      #@overlay/match by=overlay.subset({"name": "encryption-keys-file"})
+      #@overlay/replace
+      - name: encryption-keys-file
+        secret:
+          secretName: uaa-encryption-keys
+
+

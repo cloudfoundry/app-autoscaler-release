@@ -1,0 +1,141 @@
+#@ load("@ytt:library", "library")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:template", "template")
+#@ load("@ytt:yaml", "yaml")
+
+#@ def add_concourse_namespace():
+#@overlay/match by=overlay.all, expects="1+"
+---
+metadata:
+  #@overlay/match missing_ok=True
+  namespace: concourse
+#@ end
+
+
+---
+#@ template.replace(overlay.apply(library.get("credhub").eval(), add_concourse_namespace()))
+---
+
+#! Remove templated secrets so we can generate the credentials w/ Quarks
+#@ def remove(kind, name):
+#@overlay/remove
+kind: #@ kind
+metadata:
+  name: #@ name
+#@ end
+
+--- #!@overlay/match by=overlay.subset(remove("Secret", "uaa-ca"))
+--- #@overlay/match by=overlay.subset(remove("Secret", "server-ca"))
+--- #@overlay/match by=overlay.subset(remove("ConfigMap", "credhub-config"))
+
+#! removing the loadbalancer ip as we should just randomly pick one
+#@overlay/match by=overlay.subset({"kind": "Service", "metadata":{"name":"credhub"}})
+---
+spec:
+  #@overlay/remove
+  loadBalancerIP:
+  type: ClusterIP
+
+#@overlay/match by=overlay.subset({"kind":"Deployment", "metadata":{"name":"credhub"}})
+---
+spec:
+  template:
+    spec: #! pod spec
+#! START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
+      #@overlay/match missing_ok=True
+      #@overlay/merge
+      initContainers:
+      - name: fix-secrets
+        image: linuxserver/yq:amd64-latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          #!/usr/bin/env bash
+          cp $(readlink -e /app-intermediate/application.yml) /app/config/
+          cd /app/config
+
+          FIXED_VALUE=$(yq -r .server.ssl.key_store_password application.yml | base64 -d)
+          yq -yi ".server.ssl.key_store_password=\"${FIXED_VALUE}\"" application.yml
+          FIXED_VALUE=$(yq -r .server.ssl.key_password application.yml | base64 -d)
+          yq -yi ".server.ssl.key_password=\"${FIXED_VALUE}\"" application.yml
+          FIXED_VALUE=$(yq -r .server.ssl.trust_store_password application.yml | base64 -d)
+          yq -yi ".server.ssl.trust_store_password=\"${FIXED_VALUE}\"" application.yml
+
+          FIXED_VALUE=$(yq -r .spring.datasource.password application.yml | base64 -d)
+          yq -yi ".spring.datasource.password=\"${FIXED_VALUE}\"" application.yml
+
+          FIXED_VALUE=$(yq -r .\"auth-server\".trust_store_password application.yml | base64 -d)
+          yq -yi ".\"auth-server\".trust_store_password=\"${FIXED_VALUE}\"" application.yml
+
+          FIXED_VALUE=$(yq -r .encryption.providers[0].keys[0].encryption_password application.yml | base64 -d)
+          yq -yi ".encryption.providers[0].keys[0].encryption_password=\"${FIXED_VALUE}\"" application.yml
+
+          sed -i 's/REPLACEME/${CREDHUB_POSTGRES_HOST}/g' application.yml
+        volumeMounts:
+        - name: config
+          mountPath: /app-intermediate
+        - name: fixed-secrets
+          mountPath: /app/config
+#! END delete
+      containers:
+      #@overlay/match by=overlay.subset({"name": "credhub-server"})
+      #@overlay/merge
+      - name: credhub-server
+        image: pcfseceng/credhub:latest
+        env:
+        #@overlay/append
+        - name: CREDHUB_POSTGRES_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        #@overlay/match by=overlay.subset({"name": "KEY_STORE_PASSWORD"})
+        #@overlay/replace
+        - name: KEY_STORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: credhub-keystore-key
+              key: password
+        #@overlay/match by=overlay.subset({"name": "TRUST_STORE_PASSWORD"})
+        #@overlay/replace
+        - name: TRUST_STORE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: credhub-truststore-key
+              key: password
+        #@overlay/match by=overlay.subset({"name": "ENCRYPTION_PASSWORD"})
+        #@overlay/replace
+        - name: ENCRYPTION_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: credhub-encryption-key
+              key: password
+        #@overlay/match by=overlay.subset({"name": "SUBJECT_ALTERNATIVE_NAMES"})
+        #@overlay/replace
+        - name: SUBJECT_ALTERNATIVE_NAMES
+          value: "IP:127.0.0.1, DNS:credhub.concourse.svc.cluster.local"
+#! START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
+        volumeMounts:
+        #@overlay/match by=overlay.subset({"name": "config"})
+        #@overlay/replace
+        - name: fixed-secrets
+          mountPath: /app/config
+#! END delete
+      volumes:
+        #@overlay/match by=overlay.subset({"name": "config"})
+        #@overlay/replace
+        - name: config
+          secret:
+            secretName: credhub-config
+        #@overlay/match by=overlay.subset({"name": "server-ca"})
+        #@overlay/replace
+        - name: server-ca
+          secret:
+            secretName: credhub-root-ca
+        #@overlay/append
+#! START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
+        - name: fixed-secrets
+          emptyDir:
+            medium: Memory
+#! END delete
