@@ -1,23 +1,23 @@
-data "carvel_ytt" "concourse_sqlproxy" {
+data "carvel_ytt" "sqlproxy_secretgen" {
 
-  files = [ 
+  files = [
     "files/config/carvel-secretgen-controller",
-    "files/config/cloud_sql",
-   ]
+    "files/config/cloud_sql_proxy",
+  ]
   values = {
-    "google.project_id" = var.project
-    "google.region"     = var.region
-    "database.instance" = var.sql_instance_name
-    "sql_proxy_account.name" = "${var.gke_name}-sql-proxy"
+    "google.project_id"       = var.project
+    "google.region"           = var.region
+    "database.instance"       = var.sql_instance_name
+    "sql_proxy_account.name"  = "${var.gke_name}-sql-proxy"
     "sql_proxy_account.email" = "${var.gke_name}-sql-proxy@${var.project}.iam.gserviceaccount.com"
   }
 }
 
 
-resource "carvel_kapp" "concourse_sqlproxy" {
-  app          = "concourse-sqlproxy"
+resource "carvel_kapp" "sqlproxy_secretgen" {
+  app          = "sqlproxy-secretgen"
   namespace    = "concourse"
-  config_yaml  = data.carvel_ytt.concourse_sqlproxy.result
+  config_yaml  = data.carvel_ytt.sqlproxy_secretgen.result
   diff_changes = true
 
   # use in maintenance only when needed (should not be required normally)
@@ -32,12 +32,12 @@ resource "carvel_kapp" "concourse_sqlproxy" {
 
 #-----------------------------------------------------------------------------------------------------------------
 
-data "carvel_ytt" "concourse_backend" {
+data "carvel_ytt" "credhub_uaa" {
 
-  files = [ 
-    "files/config/credhub",   
+  files = [
+    "files/config/credhub",
     "files/config/uaa"
-   ]
+  ]
   values = {
     "google.project_id" = var.project
     "google.region"     = var.region
@@ -45,12 +45,12 @@ data "carvel_ytt" "concourse_backend" {
 }
 
 
-resource "carvel_kapp" "concourse_backend" {
-  app          = "concourse-backend"
+resource "carvel_kapp" "credhub_uaa" {
+  app          = "credhub-uaa"
   namespace    = "concourse"
-  config_yaml  = data.carvel_ytt.concourse_backend.result
+  config_yaml  = data.carvel_ytt.credhub_uaa.result
   diff_changes = true
-  depends_on = [ carvel_kapp.concourse_sqlproxy, google_sql_database.concourse ]
+  depends_on   = [carvel_kapp.sqlproxy_secretgen, google_sql_database.concourse]
 
   # use in maintenance only when needed (should not be required normally)
   # deploy {

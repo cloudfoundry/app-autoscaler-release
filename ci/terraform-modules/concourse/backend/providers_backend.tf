@@ -22,10 +22,10 @@ provider "carvel" {
   kapp {
     kubeconfig {
       server = "https://${data.google_container_cluster.wg_ci.endpoint}"
-      token = data.google_client_config.provider.access_token
+      token  = data.google_client_config.provider.access_token
       ca_cert = base64decode(
-    data.google_container_cluster.wg_ci.master_auth[0].cluster_ca_certificate,
-  )
+        data.google_container_cluster.wg_ci.master_auth[0].cluster_ca_certificate,
+      )
 
     }
   }
