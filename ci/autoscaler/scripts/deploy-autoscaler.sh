@@ -12,6 +12,7 @@ serial="${SERIAL:-true}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
+ ${autoscaler_dir}/operations/connect_to_postgres_with_certs.yml\
  ${autoscaler_dir}/operations/enable-nats-tls.yml\
  ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
  ${autoscaler_dir}/operations/add-extra-plan.yml\
