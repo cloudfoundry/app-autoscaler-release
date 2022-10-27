@@ -12,8 +12,8 @@ autoscaler:
         tag: default
     tls:
       ca: BEGIN---CA---END
-      crt: BEGIN---CERT---END
-      key: BEGIN---KEY---END
+      certificate: BEGIN---CERT---END
+      private_key: BEGIN---KEY---END
   instancemetrics_db:
     address: 10.11.137.101
     databases:
@@ -28,8 +28,8 @@ autoscaler:
         tag: default
     tls:
       ca: BEGIN---CA---END
-      crt: BEGIN---CERT---END
-      key: BEGIN---KEY---END
+      certificate: BEGIN---CERT---END
+      private_key: BEGIN---KEY---END
   appmetrics_db:
     address: 10.11.137.101
     databases:
@@ -43,8 +43,8 @@ autoscaler:
         tag: default
     tls:
       ca: BEGIN---CA---END
-      crt: BEGIN---CERT---END
-      key: BEGIN---KEY---END
+      certificate: BEGIN---CERT---END
+      private_key: BEGIN---KEY---END
   scalingengine_db:
     address: 10.11.137.105
     databases:
@@ -58,8 +58,8 @@ autoscaler:
         tag: default
     tls:
       ca: BEGIN---CA---END
-      crt: BEGIN---CERT---END
-      key: BEGIN---KEY---END
+      certificate: BEGIN---CERT---END
+      private_key: BEGIN---KEY---END
   lock_db:
     address: 10.11.137.105
     databases:
@@ -73,8 +73,8 @@ autoscaler:
         tag: default
     tls:
       ca: BEGIN---CA---END
-      crt: BEGIN---CERT---END
-      key: BEGIN---KEY---END
+      certificate: BEGIN---CERT---END
+      private_key: BEGIN---KEY---END
   cf:
     api: https://api.operator.domain
     auth_endpoint: https://login.cf.domain
