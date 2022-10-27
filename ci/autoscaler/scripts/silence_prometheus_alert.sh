@@ -63,6 +63,3 @@ curl -k -s -f -L -X 'POST' \
   "endsAt": "${end_time}"
 }
 EOF
-echo "==Alert created=="
-echo ">> start_time: ${start_time}"
-echo ">> end_time: ${end_time}"

@@ -299,10 +299,14 @@ workspace:
 uaac:
 	which uaac || gem install cf-uaac
 
-.PHONY: deploy-autoscaler
-deploy-autoscaler: mod-tidy vendor uaac db scheduler
+.PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh
+deploy-autoscaler: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
+deploy-register-cf:
+	echo " - registering broker with cf"
+	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
+deploy-autoscaler-bosh:
+	echo " - deploying autoscaler"
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
-	[ "$${BUILDIN_MODE}" == "false" ] && ${CI_DIR}/autoscaler/scripts/register-broker.sh
 
 deploy-prometheus:
 	@export DEPLOYMENT_NAME=prometheus;\
