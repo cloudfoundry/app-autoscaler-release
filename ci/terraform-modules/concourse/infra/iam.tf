@@ -12,6 +12,7 @@ resource "google_project_iam_member" "cnrm_system" {
   for_each = toset([
     "roles/resourcemanager.projectIamAdmin",
     "roles/iam.serviceAccountAdmin",
+    "roles/cloudsql.instanceUser",
     "projects/${var.project}/roles/${google_project_iam_custom_role.wg_ci_cnrm.role_id}"
   ])
   role = each.key

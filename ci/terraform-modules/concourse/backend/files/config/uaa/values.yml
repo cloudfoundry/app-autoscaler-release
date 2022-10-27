@@ -1,0 +1,10 @@
+#@library/ref "@uaa"
+#@data/values
+
+#! Override uaa pod limits, more cpu for faster startup
+---
+resources:
+  uaa:
+    limits:
+      memory: 2000Mi
+      cpu: 4000m
