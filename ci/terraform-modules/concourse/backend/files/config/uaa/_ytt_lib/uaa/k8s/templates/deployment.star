@@ -11,7 +11,6 @@ java_opts_list = [
   "-Dlogging.config={}/log4j2.properties".format(config_dir),
   "-Dlog4j.configurationFile={}/log4j2.properties".format(config_dir),
   "-DCLOUDFOUNDRY_CONFIG_PATH={}".format(config_dir),
-  "-DSECRETS_DIR={}".format(secrets_dir),
   "-Djavax.net.ssl.trustStore={}".format(truststore_file),
   "-Djavax.net.ssl.trustStoreType=PKCS12",
   "-Djavax.net.ssl.trustStorePassword={}".format(truststore_password),
