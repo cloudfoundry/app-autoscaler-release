@@ -79,6 +79,9 @@ function deploy () {
     -v cf_client_id=autoscaler_client_id \
     -v cf_client_secret=autoscaler_client_secret \
     -v skip_ssl_validation=true
+
+
+  echo "# Finish deploy: '${deployment_name}'"
 }
 
 if [[ $exist == 0 ]]; then
