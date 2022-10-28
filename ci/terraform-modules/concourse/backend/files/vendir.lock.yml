@@ -2,8 +2,8 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - git:
-      commitTitle: 'Build(deps): bump proto-google-common-protos from 2.9.1 to 2.9.2...'
-      sha: c67d5e3fdf361052171d2342fd1ad9d35bdf47a4
+      commitTitle: bump to 2.12.13
+      sha: 05617071e2120d605360ecccad50de921acde7f5
     path: .
   path: config/credhub/_ytt_lib/credhub
 - contents:
