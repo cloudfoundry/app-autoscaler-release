@@ -16,12 +16,21 @@ import (
 )
 
 type cfResourceObject struct {
-	Resources []struct {
-		GUID      string `json:"guid"`
-		CreatedAt string `json:"created_at"`
-		Name      string `json:"name"`
-		Username  string `json:"username"`
-	} `json:"resources"`
+	Pagination struct {
+		TotalPages int `json:"total_pages"`
+		Next       struct {
+			Href string `json:"href"`
+		} `json:"next"`
+	} `json:"pagination"`
+	Resources []cfResource `json:"resources"`
+}
+
+type cfResource struct {
+	GUID      string `json:"guid"`
+	CreatedAt string `json:"created_at"`
+	Name      string `json:"name"`
+	Username  string `json:"username"`
+	State     string `json:"state"`
 }
 
 func GetServices(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
@@ -31,7 +40,7 @@ func GetServices(cfg *config.Config, orgGuid, spaceGuid string, prefix string) [
 	err := json.Unmarshal(rawServices.Out.Contents(), &services)
 	Expect(err).ShouldNot(HaveOccurred())
 
-	return filterByPrefix(prefix, getNames(services))
+	return filterByPrefix(prefix, getNames(services.Resources))
 }
 
 func DeleteServices(cfg *config.Config, services []string) {
@@ -58,6 +67,7 @@ func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
 		Expect(err).ShouldNot(HaveOccurred())
 		req.Header.Add("Authorization", oauthToken)
 
+		//TODO ... this wont scale to 1000 apps at once
 		resp, err := GetHTTPClient(cfg).Do(req)
 		Expect(err).ShouldNot(HaveOccurred())
 		defer func() { _ = resp.Body.Close() }()

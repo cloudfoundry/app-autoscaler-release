@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/onsi/ginkgo/v2"
 
@@ -15,24 +17,33 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
-type cfOrgs struct {
-	Resources []struct {
-		Name      string `json:"name"`
-		GUID      string `json:"guid"`
-		CreatedAt string `json:"created_at"`
-	} `json:"resources"`
+func getRawOrgsByPage(page int, timeout time.Duration) cfResourceObject {
+	var response cfResourceObject
+	rawResponse := cf.Cf("curl", "/v3/organizations?&page="+strconv.Itoa(page)).Wait(timeout)
+	Expect(rawResponse).To(Exit(0), "unable to get orgs")
+	err := json.Unmarshal(rawResponse.Out.Contents(), &response)
+	Expect(err).ShouldNot(HaveOccurred())
+	return response
+}
+
+func getRawOrgs(timeout time.Duration) []cfResource {
+	var rawOrgs []cfResource
+	totalPages := 1
+
+	for page := 1; page <= totalPages; page++ {
+		var response = getRawOrgsByPage(page, timeout)
+		totalPages = response.Pagination.TotalPages
+		rawOrgs = append(rawOrgs, response.Resources...)
+	}
+
+	return rawOrgs
 }
 
 func GetTestOrgs(cfg *config.Config) []string {
-	rawOrgs := cf.CfSilent("curl", "/v3/organizations").Wait(cfg.DefaultTimeoutDuration())
-	Expect(rawOrgs).To(Exit(0), "unable to get orgs")
-
-	var orgs cfOrgs
-	err := json.Unmarshal(rawOrgs.Out.Contents(), &orgs)
-	Expect(err).ShouldNot(HaveOccurred())
+	rawOrgs := getRawOrgs(cfg.DefaultTimeoutDuration())
 
 	var orgNames []string
-	for _, org := range orgs.Resources {
+	for _, org := range rawOrgs {
 		if strings.HasPrefix(org.Name, cfg.NamePrefix) {
 			orgNames = append(orgNames, org.Name)
 		}
@@ -81,6 +92,10 @@ func GetOrgGuid(cfg *config.Config, org string) string {
 }
 
 func DeleteOrg(cfg *config.Config, org string) {
-	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(cfg.DefaultTimeoutDuration())
+	DeleteOrgWithTimeout(cfg, org, cfg.DefaultTimeoutDuration())
+}
+
+func DeleteOrgWithTimeout(cfg *config.Config, org string, timeout time.Duration) {
+	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(timeout)
 	Expect(deleteOrg).To(Exit(0), fmt.Sprintf("unable to delete org %s", org))
 }

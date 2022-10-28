@@ -12,6 +12,15 @@ import (
 
 const NODE_APP = "../assets/app/nodeApp"
 
+type PerformanceConfig struct {
+	AppCount                      int  `json:"app_count"`
+	PercentageToScale             int  `json:"app_percentage_to_scale"`
+	SetupWorkers                  int  `json:"setup_workers"`
+	Teardown                      bool `json:"teardown"`
+	ExpectedMedianScaleOutSeconds int  `json:"expected_median_scale_out_seconds"`
+	ExpectedMedianScaleInSeconds  int  `json:"expected_median_scale_in_seconds"`
+}
+
 type Config struct {
 	ApiEndpoint                    string  `json:"api"`
 	AppsDomain                     string  `json:"apps_domain"`
@@ -67,6 +76,8 @@ type Config struct {
 	HealthEndpointsBasicAuthEnabled bool `json:"health_endpoints_basic_auth_enabled"`
 
 	CPUUpperThreshold int64 `json:"cpu_upper_threshold"`
+
+	Performance PerformanceConfig `json:"performance"`
 }
 
 var defaults = Config{
@@ -95,6 +106,18 @@ var defaults = Config{
 	EnableServiceAccess:             true,
 	HealthEndpointsBasicAuthEnabled: true,
 	CPUUpperThreshold:               100,
+
+	UseExistingOrganization: false,
+	ExistingOrganization:    "",
+
+	Performance: PerformanceConfig{
+		AppCount:                      100,
+		PercentageToScale:             30,
+		SetupWorkers:                  50,  // number of thread/process
+		ExpectedMedianScaleInSeconds:  100, // Replace with educated guesses base on test runs
+		ExpectedMedianScaleOutSeconds: 100, // Replace with educated guesses base on test run
+		Teardown:                      true,
+	},
 }
 
 func LoadConfig() *Config {
