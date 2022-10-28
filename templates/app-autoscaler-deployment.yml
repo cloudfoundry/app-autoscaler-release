@@ -528,12 +528,6 @@ instance_groups:
             ca_cert: ((scalingengine_ca.ca))
             client_cert: ((scalingengine_client.certificate))
             client_key: ((scalingengine_client.private_key))
-          metrics_collector:
-            host: metricsserver.service.cf.internal
-            port: *metricsserverPort
-            ca_cert: ((metricsserver_ca.ca))
-            client_cert: ((metricsserver_client.certificate))
-            client_key: ((metricsserver_client.private_key))
           event_generator:
             ca_cert: ((eventgenerator_ca.ca))
             client_cert: ((eventgenerator_client.certificate))
