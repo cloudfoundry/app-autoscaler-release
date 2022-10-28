@@ -8,6 +8,7 @@ deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-""}"
 bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"
 bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
+serial="${SERIAL:-true}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
@@ -71,12 +72,16 @@ function deploy () {
     ${OPS_FILES_TO_USE} \
     ${bosh_deploy_opts} \
     -v system_domain="${system_domain}" \
+    -v serial="${serial}" \
     -v deployment_name="${deployment_name}" \
     -v app_autoscaler_version="${bosh_release_version}" \
     -v admin_password="${CF_ADMIN_PASSWORD}" \
     -v cf_client_id=autoscaler_client_id \
     -v cf_client_secret=autoscaler_client_secret \
     -v skip_ssl_validation=true
+
+
+  echo "# Finish deploy: '${deployment_name}'"
 }
 
 if [[ $exist == 0 ]]; then

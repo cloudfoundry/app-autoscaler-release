@@ -38,5 +38,6 @@ workflow
 .cache
 scripts/.srl
 privkey.pem
+app-autoscaler-release
 docs/*.bkp
 build
