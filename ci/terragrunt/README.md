@@ -5,7 +5,7 @@
 * glcoud
 * helm
 * terraform
-* terragrunt 
+* terragrunt
 * kapp
 * ytt
 * vendir
@@ -22,7 +22,7 @@ asdf current
 
 ### Permissions
 
-Users who are required to perform operations, needs to be added in the Role `WG CI Manage` via IAM in Google Cloud console 
+Users who are required to perform operations need to be added in the Role `WG CI Manage` via IAM in Google Cloud console.
 
 # Prerequisites for a fresh project
 ## 1. Configuration

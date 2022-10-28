@@ -41,3 +41,5 @@ variable "gke_master_ipv4_cidr_block" { nullable = false }
 variable "gke_default_pool_machine_type" { nullable = false }
 variable "gke_workers_pool_machine_type" { nullable = false }
 
+variable "github_secret_name" { nullable = false }
+
