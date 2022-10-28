@@ -1,5 +1,5 @@
 resource "google_secret_manager_secret" "github_oauth" {
-  secret_id = "${var.gke_name}-concourse-github-oauth"
+  secret_id = var.github_secret_name
   project   = var.project
 
   # when creating versions with gcloud it creates empty labels
@@ -9,7 +9,7 @@ resource "google_secret_manager_secret" "github_oauth" {
   replication {
     user_managed {
       replicas {
-        location = "europe-west3"
+        location = var.region
       }
     }
   }

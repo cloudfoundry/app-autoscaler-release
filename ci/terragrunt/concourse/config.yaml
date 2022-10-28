@@ -20,6 +20,7 @@ gke_name: wg-ci-refactor
 tf_modules:
   infra: "../../../terraform-modules//concourse/infra"
   backend: "../../../terraform-modules//concourse/backend"
+  app: "../../../terraform-modules//concourse/app"
 
 # ---------------------------------------------------------
 # In most cases settings below are safe to keep as defaults

@@ -26,3 +26,5 @@ variable "gke_workers_pool_machine_type" { nullable = false }
 
 variable "wg_ci_human_account_permissions" { nullable = false }
 variable "wg_ci_cnrm_service_account_permissions" { nullable = false }
+
+variable "github_secret_name" { nullable = false }

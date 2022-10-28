@@ -1,0 +1,80 @@
+rbac:
+  create: false
+
+secrets:
+  create: false
+
+postgresql:
+  enabled: false
+
+concourse:
+  web:
+    bindPort: 80
+    tls:
+      enabled: true
+    letsEncrypt:
+      enabled: true
+    kubernetes:
+      enabled: false
+    credhub:
+      enabled: true
+      url: https://credhub.concourse.svc.cluster.local:9000
+      useCaCert: true
+      insecureSkipVerify: false
+    postgres:
+      host: 127.0.0.1
+      database: concourse
+    localAuth:
+      enabled: false
+    auth:
+      github:
+        enabled: true
+      mainTeam:
+        github:
+          ## Comma-separated allow list of GitHub users.
+          ##
+          user:
+
+          ## Comma-separated allow list of GitHub orgs.
+          ##
+          org:
+
+          ## Comma-separated allow list of GitHub teams.
+          ##
+          team: <required team>
+    externalUrl: <required URL>
+    enableResourceCausality: true
+web:
+  service:
+    api:
+      type: LoadBalancer
+      loadBalancerIP: <required IP>
+worker:
+  additionalAffinities:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 50
+          preference:
+            matchExpressions:
+              - key: cloud.google.com/gke-nodepool
+                operator: In
+                values:
+                  - "concourse-workers"
+  tolerations:
+    - key: "workers"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+  kind: Deployment
+  additionalVolumeMounts:
+    - name: concourse-work-dir
+      mountPath: /concourse-work-dir
+  additionalVolumes:
+    - name: concourse-work-dir
+      hostPath:
+        path: "/mnt/disks/ssd0"
+  nodeSelector:
+    cloud.google.com/gke-local-ssd: "true"
+  resources:
+    requests:
+      cpu: "3000m"
