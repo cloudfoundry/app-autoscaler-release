@@ -350,8 +350,9 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 }
 
 func RunningInstances(appGUID string, timeout time.Duration) int {
-	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID))
-	Expect(cmd.Wait(timeout)).To(Exit(0))
+	defer GinkgoRecover()
+	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID)).Wait(timeout)
+	Expect(cmd).To(Exit(0))
 	var process = struct {
 		Instances int `json:"instances"`
 	}{}
@@ -408,7 +409,7 @@ func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName
 			args = append(args, "-c", policy)
 		}
 		bindService := cf.Cf(args...).Wait(cfg.DefaultTimeoutDuration())
-		FailOnCommandFailuref(bindService, "failed binding service %s to app %s", instanceName, appName)
+		FailOnCommandFailuref(bindService, "failed binding service %s to app %s. \n Command Error: %s %s", instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents())
 	}
 }
 
@@ -419,7 +420,7 @@ func CreateServiceWithPlan(cfg *config.Config, servicePlan string) string {
 	if cfg.IsServiceOfferingEnabled() {
 		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 		createService := cf.Cf("create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
-		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s", instanceName, cfg.ServiceName)
+		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s \n Command Error: %s %s", instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
 		return instanceName
 	}
 	return ""
@@ -464,7 +465,7 @@ func GetHTTPClient(cfg *config.Config) *http.Client {
 
 func GetAppGuid(cfg *config.Config, appName string) string {
 	guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	Expect(guid).To(Exit(0))
+	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find app guid for app: %s \n CLI Output:\n %s", appName, guid.Out.Contents()))
 	return strings.TrimSpace(string(guid.Out.Contents()))
 }
 
