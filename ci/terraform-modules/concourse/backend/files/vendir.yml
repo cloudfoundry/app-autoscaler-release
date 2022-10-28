@@ -8,7 +8,7 @@ directories:
   - path: .
     git:
       url: https://github.com/cloudfoundry-incubator/credhub
-      ref: c67d5e3
+      ref: "0561707"
     includePaths:
     - kubernetes/**/*
 - path: config/uaa/_ytt_lib/uaa
