@@ -3,7 +3,7 @@ SHELL := /bin/bash
 MAKEFLAGS = -s
 go_modules:= $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules:= $(go_modules) db scheduler
-lint_config:=${PWD}/.golangci.yaml
+.SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
 OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
 db_type:=postgres
@@ -13,8 +13,9 @@ DBURL := $(shell case "${db_type}" in\
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
 SUITES?=broker api app
-AUTOSCALER_DIR?=${PWD}
-CI_DIR?=${PWD}/ci
+AUTOSCALER_DIR?=$(shell pwd)
+lint_config:=${AUTOSCALER_DIR}/.golangci.yaml
+CI_DIR?=${AUTOSCALER_DIR}/ci
 CI?=false
 VERSION?=0.0.testing
 DEST?=build
@@ -236,7 +237,7 @@ eslint:
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint --config ${lint_config} run ${OPTS}
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --path-prefix=src/$(patsubst lint_%,%,$@) --config ${lint_config} ${OPTS}
 
 .PHONY: spec-test
 spec-test:
@@ -331,7 +332,28 @@ cleanup-concourse:
 cf-login:
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
 
-.PHONY: package-specs
+.PHONY: setup-performance
+setup-performance:
+	export GINKGO_OPTS="";\
+	export SKIP_TEARDOWN=true;\
+	export NODES=1;\
+	export DEPLOYMENT_NAME="autoscaler-performance";\
+	export SUITES="setup_performance";\
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
+
+.PHONY: run-performance
+run-performance:
+	export GINKGO_OPTS="";\
+	export SKIP_TEARDOWN=true;\
+	export NODES=1;\
+	export DEPLOYMENT_NAME="autoscaler-performance";\
+	export SUITES="run_performance";\
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
+
+.PHONY: run-act
+run-act:
+	${AUTOSCALER_DIR}/scripts/run_act.sh;\
+
 package-specs: mod-tidy vendor
 	@echo " - Updating the package specs"
 	@./scripts/sync-package-specs
