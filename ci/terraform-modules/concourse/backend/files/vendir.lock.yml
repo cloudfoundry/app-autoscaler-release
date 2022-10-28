@@ -8,10 +8,10 @@ directories:
   path: config/credhub/_ytt_lib/credhub
 - contents:
   - git:
-      commitTitle: Update UAA image reference in k8s deployment template to 75.22.0
-      sha: 893b4c5e5c840335e77be24fd2e0cb6ab843cff5
+      commitTitle: Update UAA image reference in k8s deployment template to 76.3.0
+      sha: dd34f9c4d82b9985c9bb1def092325cab023fac0
       tags:
-      - v75.22.0
+      - v76.3.0
     path: .
   path: config/uaa/_ytt_lib/uaa
 - contents:

@@ -16,7 +16,7 @@ directories:
   - path: .
     git:
       url: https://github.com/cloudfoundry/uaa
-      ref: v75.22.0
+      ref: v76.3.0
     includePaths:
     - k8s/templates/**/*
 # START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
