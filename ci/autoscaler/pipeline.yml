@@ -46,14 +46,6 @@ anchors:
       operations/log-cache-syslog-server.yml
       operations/use_buildin_mode.yml
 
-  performance-env: &performance-env
-    DEPLOYMENT_NAME: "autoscaler-performance"
-    NODES: 1
-    GINKGO_OPTS: "--fail-fast"
-    SERIAL: "false"
-
-
-
 groups:
 - name: all
   jobs:
@@ -108,9 +100,6 @@ resource_types:
 resources:
 - name: every-night
   type: time
-- name: every-hour
-  type: time
-  source: {interval: 1h}
 - name: ci
   type: git
   icon: github
@@ -358,13 +347,18 @@ jobs:
 - name: performance
   public: true
   build_logs_to_retain: 100
+  ensure:
+    task: cleanup
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params: &performance-env
+      DEPLOYMENT_NAME: "autoscaler-performance"
+      NODES: 1
+      GINKGO_OPTS: "--fail-fast"
+      SERIAL: "false"
   plan:
   - in_parallel:
     - get: ci
     - get: bbl-state
-      trigger: true
-    - get: every-hour
-      trigger: true
     - get: app-autoscaler-release
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yml
