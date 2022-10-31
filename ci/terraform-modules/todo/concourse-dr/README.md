@@ -7,6 +7,7 @@ Scenario assumes terraform was run after 1st deployment from `concourse-dr/creat
 * deleted entire deployment including 'concourse' namespace
 * deleted all databases and database users
 * GKE cluster not destroyed
+
 TODO:
 * test recovery with fresh k8s cluster
 

@@ -69,9 +69,9 @@ terragrunt run-all apply
 ## 5. Save secrets needed for DR scenario
 This part is not intended to be fully automated.
 ```sh
-cd ./concourse-dr/
-terragrunt plan
-terragrunt apply
+cd ../concourse-dr
+terragrunt plan --terragrunt-config=create.hcl
+terragrunt apply --terragrunt-config=restore.hcl
 ```
 
 
