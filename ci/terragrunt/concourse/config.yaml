@@ -16,6 +16,10 @@ dns_domain: ci.cloudfoundry.org
 # k8s cluster, SQL instance, vpc, IAM groups, cloud nat router, service accounts
 gke_name: wg-ci-refactor
 
+# Concourse teams
+concourse_github_mainTeam: "cloudfoundry:wg-app-runtime-interfaces-autoscaler-approvers"
+concourse_github_mainTeamUser: ""
+
 # Module sources for the stack - git or local
 tf_modules:
   infra: "../../../terraform-modules//concourse/infra"
@@ -25,6 +29,7 @@ tf_modules:
 # ---------------------------------------------------------
 # In most cases settings below are safe to keep as defaults
 # ---------------------------------------------------------
+concourse_helm_version: "17.0.27"
 
 # SQL
 sql_instance_tier: db-custom-1-4096

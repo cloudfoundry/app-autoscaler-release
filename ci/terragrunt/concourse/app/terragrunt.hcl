@@ -37,8 +37,15 @@ inputs = {
   region  = local.config.region
   zone    = local.config.zone
 
+  concourse_helm_version: local.config.concourse_helm_version
+
   gke_name = local.config.gke_name
 
+  load_balancer_ip = dependency.infra.outputs.load_balancer_ip
+  load_balancer_dns = dependency.infra.outputs.load_balancer_dns
   github_oauth_secret_name = dependency.infra.outputs.github_oauth_secret_name
+
+  concourse_github_mainTeam = local.config.concourse_github_mainTeam
+  concourse_github_mainTeamUser = local.config.concourse_github_mainTeamUser
 
 }

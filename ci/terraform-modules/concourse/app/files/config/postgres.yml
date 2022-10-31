@@ -1,0 +1,34 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:library", "library")
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:template", "template")
+
+#@overlay/match by=overlay.subset({"kind": "Deployment", "metadata": {"name": "concourse-web"}})
+---
+spec:
+  template:
+    spec:
+      initContainers:
+      #@overlay/match by=overlay.subset({"name": "concourse-migration"})
+      #@overlay/merge
+      - name: concourse-migration
+        env:
+        #@overlay/match by=overlay.subset({"name": "CONCOURSE_POSTGRES_HOST"})
+        #@overlay/replace
+        - name: CONCOURSE_POSTGRES_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+      containers:
+      #@overlay/match by=overlay.subset({"name": "concourse-web"})
+      #@overlay/merge
+      - name: concourse-web
+        env:
+        #@overlay/match by=overlay.subset({"name": "CONCOURSE_POSTGRES_HOST"})
+        #@overlay/replace
+        - name: CONCOURSE_POSTGRES_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
