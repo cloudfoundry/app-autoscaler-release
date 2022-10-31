@@ -46,14 +46,6 @@ anchors:
       operations/log-cache-syslog-server.yml
       operations/use_buildin_mode.yml
 
-  performance-env: &performance-env
-    DEPLOYMENT_NAME: "autoscaler-performance"
-    NODES: 1
-    GINKGO_OPTS: "--fail-fast"
-    SERIAL: "false"
-
-
-
 groups:
 - name: all
   jobs:
@@ -355,6 +347,14 @@ jobs:
 - name: performance
   public: true
   build_logs_to_retain: 100
+  ensure:
+    task: cleanup
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params: &performance-env
+      DEPLOYMENT_NAME: "autoscaler-performance"
+      NODES: 1
+      GINKGO_OPTS: "--fail-fast"
+      SERIAL: "false"
   plan:
   - in_parallel:
     - get: ci
