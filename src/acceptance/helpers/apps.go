@@ -79,24 +79,29 @@ func CreateDroplet(cfg config.Config) string {
 }
 
 func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) {
+	createTestApp(*cfg, appName, initialInstanceCount, "--droplet", dropletPath)
+}
+
+func createTestApp(cfg config.Config, appName string, initialInstanceCount int, args ...string) {
 	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
 	if cfg.GetSkipSSLValidation() {
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
 	}
-
 	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push",
-		"--var", "app_name="+appName,
-		"--var", "app_domain="+cfg.AppsDomain,
-		"--var", "service_name="+cfg.ServiceName,
-		"--var", "instances="+countStr,
-		"--var", "buildpack="+cfg.NodejsBuildpackName,
-		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
-		"--var", "memory_mb="+strconv.Itoa(cfg.NodeMemoryLimit),
-		"--droplet", dropletPath,
-		"-f", config.NODE_APP+"/app_manifest.yml",
+	params := []string{
+		"push",
+		"--var", "app_name=" + appName,
+		"--var", "app_domain=" + cfg.AppsDomain,
+		"--var", "service_name=" + cfg.ServiceName,
+		"--var", "instances=" + countStr,
+		"--var", "buildpack=" + cfg.NodejsBuildpackName,
+		"--var", "node_tls_reject_unauthorized=" + setNodeTLSRejectUnauthorizedEnvironmentVariable,
+		"--var", "memory_mb=" + strconv.Itoa(cfg.NodeMemoryLimit),
+		"-f", config.NODE_APP + "/app_manifest.yml",
 		"--no-start",
-	).Wait(cfg.CfPushTimeoutDuration())
+	}
+	params = append(params, args...)
+	createApp := cf.Cf(params...).Wait(cfg.CfPushTimeoutDuration())
 
 	if createApp.ExitCode() != 0 {
 		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
@@ -107,31 +112,7 @@ func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appN
 }
 
 func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
-	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
-	if cfg.GetSkipSSLValidation() {
-		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
-	}
-
-	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push",
-		"--var", "app_name="+appName,
-		"--var", "app_domain="+cfg.AppsDomain,
-		"--var", "service_name="+cfg.ServiceName,
-		"--var", "instances="+countStr,
-		"--buildpack", cfg.NodejsBuildpackName,
-		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
-		"--var", "memory_mb="+strconv.Itoa(cfg.NodeMemoryLimit),
-		"-p", config.NODE_APP,
-		"-f", config.NODE_APP+"/app_manifest.yml",
-		"--no-start",
-	).Wait(cfg.CfPushTimeoutDuration())
-
-	if createApp.ExitCode() != 0 {
-		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
-	}
-	Expect(createApp).To(Exit(0), "failed creating app")
-
-	GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
+	createTestApp(cfg, appName, initialInstanceCount, "-p", config.NODE_APP)
 }
 
 func DeleteTestApp(appName string, timeout time.Duration) {
