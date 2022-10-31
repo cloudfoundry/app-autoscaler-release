@@ -4,7 +4,7 @@
 provider "registry.terraform.io/hashicorp/google" {
   version = "4.41.0"
   hashes = [
-    "h1:2Bl3jLwdZpzp70yuCIxfn7gL/858f0I/Cv7yuzRySM0=",
+    "h1:y93m+LUJaInSsUB1gN/BKrUL97rizTh//5oFUdA7pFM=",
     "zh:0c31cae2ec737150987554993f0e332b022bf8e369217967f10029259441db0a",
     "zh:4d477e5412575353267cde02d028d8b53b4f9b472548d4079a0512c3ba11751f",
     "zh:52a14d7cd851f050a5bf2ba6789200b40bccb0e6240865bcc94f496ae0f77bc0",
@@ -23,7 +23,7 @@ provider "registry.terraform.io/hashicorp/google" {
 provider "registry.terraform.io/hashicorp/google-beta" {
   version = "4.41.0"
   hashes = [
-    "h1:/YLU8F+ltpZp+/W/K4znb3XsS83Kdc4QcBGMQ9XEgVs=",
+    "h1:/IXKuSzpiVuyHG2K3IANxAPh77atkfoC+HkuclgHgfk=",
     "zh:17ab0b89abba35b5fa1e6bfccc83672ed5db84de4bf3c44eb79c9093b31fad38",
     "zh:1d76a5d9b6739167de5a2ec102b375bb1764d2dae4265fcfe32f408978161f7d",
     "zh:2637bf7e62406919280db89873e90e7b64679f5b0cebf4a916f6dfaeac4336cb",
@@ -42,7 +42,7 @@ provider "registry.terraform.io/hashicorp/google-beta" {
 provider "registry.terraform.io/hashicorp/helm" {
   version = "2.7.1"
   hashes = [
-    "h1:OGZRkgiLBWmoA8/a9xZnEs5gsC5JhW+75++MkCPQbqw=",
+    "h1:L5qLTfZH7PnZt9+YnS7iYmPBEDQOpEjZiF0v50BRNi8=",
     "zh:13e2467092deeff01c4cfa2b54ba4510aa7a9b06c58f22c4215b0f4333858364",
     "zh:4549843db4fdf5d8150e8c0734e67b54b5c3bcfc914e3221e6952f428fb984d2",
     "zh:55b5f83ed52f93dd00a73c33c948326052efd700350c19e63bb1679b12bfcda6",
@@ -61,7 +61,7 @@ provider "registry.terraform.io/hashicorp/helm" {
 provider "registry.terraform.io/hashicorp/kubernetes" {
   version = "2.14.0"
   hashes = [
-    "h1:4zSUEWLVFn2Sji7mWT64XQGWwBQVDqTGXGfW4ZBB16U=",
+    "h1:7fQ/FCIZjnff7EzkyQ6Jh+wBAIZFwHoi5qOxQ1/OD6I=",
     "zh:1363fcd6eb3c63113eaa6947a4e7a9f78a6974ea344e89b662d97a78e2ccb70c",
     "zh:166352455666b7d584705ceeb00f24fb9b884ab84e3a1a6019dc45d6539c9174",
     "zh:4615249ce5311f6fbea9738b25b6e6159e7dcf4693b0a24bc6a5720d1bfd38d0",
@@ -80,18 +80,6 @@ provider "registry.terraform.io/hashicorp/kubernetes" {
 provider "registry.terraform.io/vmware-tanzu/carvel" {
   version = "0.11.0"
   hashes = [
-    "h1:HslYwK+G5J3IdsXMx0ZMU2p6g1Ef7aVfUtZZu4YYJsg=",
-    "zh:3c30070314cd7da84da2d5a92727fb73b1df9d7b84741f6f546a371ee8888343",
-    "zh:47a956718197e8acc997a80723b341564c65650e7157ac3bc37fe87193421e26",
-    "zh:4c50d7039bb5ed10343428809ffb76eb2614a136009d346dcbc33fadc41f6e62",
-    "zh:5e51a8c5f6ce40e504245f650471aebcbe496eddb6e45d6fa39464cae1826fed",
-    "zh:6b0bbf211d430b82ccc0b48bb968a6774cb2cdf14857082f08b17cfba0001840",
-    "zh:6e2ff5f40826cac5c67426dbb1cbb7d87db8d159c086942e261d9408a3dd727b",
-    "zh:87e5131ffc9e49aa4f0870fce306741869d3db16182fce447a54f5c983ecd427",
-    "zh:aa62d835e25423fb006fac9abfe831df1f54abef1ac85cf03f8c0e334f437fc5",
-    "zh:b2d4ef885ecc97b2e577e5ee99d9c51237aaa903a6cdf54fc16dc24922521a2d",
-    "zh:c90a853e5eb6873fc3470016f2b91a73ea564a6b2c05b5869527b9fd7a8ae799",
-    "zh:cbd57379966e609d9a600dc89783b41ac64601c13b87ca3a5b0b5be254181e2d",
-    "zh:e6e538fe5ebd296a7a2325095bfad34148fe043e5219ea6f067f25f915bf881d",
+    "h1:Tsyjz4cNG+WiUvU0wAHqXtS1h3SO0bCIB9hoi/3VHvw=",
   ]
 }
