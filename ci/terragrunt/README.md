@@ -9,7 +9,6 @@
 * kapp
 * ytt
 * vendir
-* kubectl
 
 The required tools are defined in the .tool-versions file
 ```
