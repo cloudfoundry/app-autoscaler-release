@@ -34,13 +34,11 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	Context("when scaling by memoryused", func() {
 
 		Context("There is a scale out and scale in policy", func() {
-			var maxThreshold int64
 			var heapToUse int64
 			BeforeEach(func() {
-				maxThreshold = int64(math.Min(float64(cfg.NodeMemoryLimit-20), 200))
-				heapToUse = maxThreshold - AppResidentSize
+				heapToUse = int64(math.Min(float64(cfg.NodeMemoryLimit-20), 200))
 
-				if AppResidentSize+20 >= maxThreshold {
+				if AppResidentSize+20 >= heapToUse {
 					Fail("There is not enough app memory in the app to run this test.\n - app resident size %d\n - app memory limit: %d\n - heap to use: %d", AppResidentSize, cfg.NodeMemoryLimit, int(heapToUse))
 				}
 
