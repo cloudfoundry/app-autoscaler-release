@@ -17,7 +17,7 @@ RUN \
             zip \
             gcc \
             git \
-            openjdk-11-jdk \
+            openjdk-17-jdk \
             gnupg \
             gnupg2 \
             ruby \

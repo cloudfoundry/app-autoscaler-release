@@ -1,10 +1,7 @@
 #! /usr/bin/env bash
 
 set -euo pipefail
-
-script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-root_dir="${script_dir}/../../../../.."
-autoscaler_dir="${root_dir}/app-autoscaler-release"
+UPLOADER_KEY=${UPLOADER_KEY:-$( cat "${HOME}/.ssh/autoscaler_blobstore_uploader.key")}
 
 function vendor-package {
   local release=${1}
