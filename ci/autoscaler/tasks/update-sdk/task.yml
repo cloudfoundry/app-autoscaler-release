@@ -19,6 +19,9 @@ params:
   GITHUB_ACCESS_TOKEN: ((autoscaler_access_token))
   GITHUB_PRIVATE_KEY: ((autoscaler_git_key))
   type:
+  JAVA_DIR: java-release
+  GOLANG_DIR: golang-release
+  CREATE_PR: true
 
 run:
   path: app-autoscaler-release/ci/autoscaler/tasks/update-sdk/update_package.sh
