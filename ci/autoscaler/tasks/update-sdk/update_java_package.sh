@@ -12,4 +12,4 @@ export java_dir=${JAVA_DIR:-$( realpath -e "${autoscaler_dir}/../java-release")}
 java_version=$(grep "${java_dir}/packages/openjdk-17/spec" -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g')
 echo -n "${java_version}" > version
 
-vendor-package java-release openjdk-17 "${java_version}"
+vendor-package "${java_dir}" openjdk-17 "${java_version}"

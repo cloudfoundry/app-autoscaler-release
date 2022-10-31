@@ -20,6 +20,7 @@ params:
   GITHUB_PRIVATE_KEY: ((autoscaler_git_key))
   type:
   JAVA_DIR: java-release
+  GOLANG_DIR: golang-release
   CREATE_PR: true
 
 run:
