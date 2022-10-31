@@ -27,7 +27,7 @@ templates:
 packages:
   - scheduler
   - db
-  - openjdk-11
+  - openjdk-17
   - common
   - changeloglockcleaner
 

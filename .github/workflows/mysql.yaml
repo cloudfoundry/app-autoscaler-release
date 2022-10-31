@@ -13,7 +13,6 @@ jobs:
   build:
     strategy:
       matrix:
-        java: [11, 17]
         mysql: [8]
         suite: [test, integration]
     env:
@@ -37,8 +36,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup-go
       - uses: ./.github/actions/setup-java
-        with:
-          version: ${{ matrix.java }}
 
       - name: Build
         run: |
