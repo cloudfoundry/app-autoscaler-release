@@ -70,7 +70,7 @@ async function getMtlsAgent () {
 }
 
 app.get('/slow/:time', async function (req, res) {
-  const delayInMS = parseInt(req.params.time, 10)
+  const delayInMS = Math.min(parseInt(req.params.time, 10), 10000) // Define maximum to avoid attack vector
   await new Promise((resolve) => setTimeout(() => resolve(), delayInMS))
   res.status(200).send('dummy application with slow response')
 })
