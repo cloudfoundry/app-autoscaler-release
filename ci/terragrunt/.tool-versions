@@ -1,6 +1,5 @@
 gcloud 403.0.0
 helm 3.10.0
-kubectl 1.23
 terraform 1.3.1
 terraform-lsp
 terragrunt 0.39.0
