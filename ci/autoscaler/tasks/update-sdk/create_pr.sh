@@ -42,8 +42,8 @@ if [ "$( git status -s | wc -l)" -eq 0 ]; then
   exit 0
 fi
 
-package_version=$(cat "${root_dir}/version")
-package_sha=$(cat "${root_dir}/vendored-commit")
+package_version=$(cat "${root_dir}/version") && rm "${root_dir}/version"
+package_sha=$(cat "${root_dir}/vendored-commit") && rm "${root_dir}/vendored-commit"
 
 dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
 update_branch="${type}-version-bump-${dashed_version}_${package_sha}"
