@@ -3,7 +3,7 @@ data "helm_template" "concourse" {
   repository  = "https://concourse-charts.storage.googleapis.com/"
   chart       = "concourse"
   version     = var.concourse_helm_version
-  values      = ["${file("files/values.helm.yml")}"]
+  values      = ["${file("files/${var.gke_workers_pool_machine_type}.yml")}"]
 
   set {
     name  = "concourse.web.externalUrl"

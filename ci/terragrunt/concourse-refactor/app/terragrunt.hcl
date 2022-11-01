@@ -37,10 +37,9 @@ inputs = {
   region  = local.config.region
   zone    = local.config.zone
 
-  concourse_helm_version = local.config.concourse_helm_version
+  concourse_helm_version: local.config.concourse_helm_version
 
   gke_name = local.config.gke_name
-  gke_workers_pool_machine_type = local.config.gke_workers_pool_machine_type
 
   load_balancer_ip = dependency.infra.outputs.load_balancer_ip
   load_balancer_dns = dependency.infra.outputs.load_balancer_dns

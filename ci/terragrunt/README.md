@@ -57,13 +57,9 @@ secret: paste your Client secret
 ## 4. Apply terrgrunt for the entire stack
 The following commands need to be run from within this directory “terragrunt/concourse”:
 ```sh
-terragrunt run-all plan
-```
-IMPORTANT: please ensure you are happy with the terragunt plan before continuing with apply. Do not run
-`terraform plan` separtely becuase terragrunt is used as a wrapper to terraform.
-```
 terragrunt run-all apply
 ```
+*NOTE: it's not possible to `plan` for a fresh project due to the fact we can't test kubernetes resources against non existing cluster*
 
 ## 5. Save secrets needed for DR scenario
 This part is not intended to be fully automated.
@@ -75,31 +71,24 @@ terragrunt apply --terragrunt-config=restore.hcl
 
 
 ---
-
-## Pending rewrite
-### Sync external repositories
-You might wish to bump versions of software in [vendir.yml](vendir.yml) file
-```sh
-vendir sync
-```
-
-# Upgrade components managed by kapp (when needed)
+## Upgrade components managed by kapp and vendir (when needed)
 Required actions:
 * changing charts versions
 * `vendir sync`
+* please see readme in terraform-modules/backend
 
-Build lifecycle:
-* managed by terraform.
-* able to destroy/redeploy concourse app and corresponding 'backend' components separately
+## Plan/apply terragrunt for changes to modules
 
-# Other matters
+```sh
+terragrunt run-all plan --terragrunt-source-update
+```
 
 ## Destroy the project
 ```
 terragrunt run-all destroy
 ```
 
-### How to obtain GKE credentials for your terminal
+## How to obtain GKE credentials for your terminal
 
 ```sh
 gcloud container clusters list
@@ -117,12 +106,9 @@ kubectl config current-context
 # gke_app-runtime-interfaces-wg_europe-west3-a_wg-ci
 ```
 
-### DR scenario
-Please see [DR scenario readme](concourse-dr/README.md)
-#### Create hmac keys for concourse service account
-TBD. Currently not required?
+## DR scenario
+Please see [DR scenario readme](doc/disaster_recovery.md)
 
-#### Secret rotation
-Quark Secrets have been dropped.
+## Secret rotation
+* Quark Secrets have been dropped.
 * TBD process with Carvel Secret Manager
-* TBD SQL users password update - might not be an issue due to the separation of concourse backend and app.

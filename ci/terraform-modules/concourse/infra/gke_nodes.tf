@@ -93,7 +93,7 @@ resource "google_container_node_pool" "concourse_workers" {
     disk_size_gb    = "100"
     disk_type       = "pd-standard"
     image_type      = "COS_CONTAINERD"
-    local_ssd_count = "1"
+    local_ssd_count = var.gke_workers_pool_ssd_count
     machine_type    = var.gke_workers_pool_machine_type
 
     metadata = {
