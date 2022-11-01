@@ -332,6 +332,10 @@ cleanup-concourse:
 cf-login:
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
 
+.PHONY: ssh-autoscaler
+ssh-autoscaler:
+	@${CI_DIR}/autoscaler/scripts/ssh-autoscaler.sh
+
 .PHONY: setup-performance
 setup-performance:
 	export GINKGO_OPTS="";\

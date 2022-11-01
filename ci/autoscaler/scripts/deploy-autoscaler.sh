@@ -76,6 +76,7 @@ function deploy () {
     -v deployment_name="${deployment_name}" \
     -v app_autoscaler_version="${bosh_release_version}" \
     -v admin_password="${CF_ADMIN_PASSWORD}" \
+    -v eventgenerator_max_in_flight=50 \
     -v cf_client_id=autoscaler_client_id \
     -v cf_client_secret=autoscaler_client_secret \
     -v skip_ssl_validation=true

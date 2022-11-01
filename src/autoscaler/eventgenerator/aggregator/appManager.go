@@ -13,7 +13,6 @@ import (
 	"code.cloudfoundry.org/lager"
 )
 
-type Consumer func(map[string]*models.AppPolicy, chan *models.AppMonitor)
 type GetPoliciesFunc func() map[string]*models.AppPolicy
 type SaveAppMetricToCacheFunc func(*models.AppMetric) bool
 type QueryAppMetricsFunc func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error)
