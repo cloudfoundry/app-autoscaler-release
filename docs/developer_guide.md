@@ -2,11 +2,11 @@
 
 ## Autoscaler Architecture (WIP)
 
-![Alt text](./autoscaler.svg)
+![Alt text](./images/autoscaler.svg)
 
 ### MetricsForwarder
 
-![Alt text](./metrics_forwarder.svg)
+![Alt text](./images/metrics_forwarder.svg)
 
 - Provides an HTTP server to stream app custom metrics to loggregator.
 - Authenticate requests via XFCC or BasicAuth.
@@ -15,7 +15,7 @@
 
 ### EventGenerator
 
-![Alt text](./eventgenerator.svg)
+![Alt text](./images/eventgenerator.svg)
 
 - Keeps Apps sharded by eventGenerator node.
 - Fetches and caches AppPolicy's rules related metrics to evaluate scaling events.
@@ -24,7 +24,7 @@
 
 ### MetricsServer (To be Deprecated)
 
-![Alt text](./metrics_server.svg)
+![Alt text](./images/metrics_server.svg)
 
 **Responsabilities:**
 
@@ -36,5 +36,5 @@
 
 ### MetricsGateway (To be Deprecated)
 
-![Alt text](./metrics_gateway.svg)
+![Alt text](./images/metrics_gateway.svg)
 
