@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+function write_vendor_commit(){
+  pushd "${release}" > /dev/null
+    git rev-parse HEAD > "${root_dir}/vendored-commit"
+  popd > /dev/null
+}
 
 function vendor-package {
   local release=${1}
@@ -11,7 +16,7 @@ function vendor-package {
   package_location=${release}
   config_file=config/private.yml
   log "Building package for ${release} for version '${version}'"
-  pushd "${root_dir}/${release}" > /dev/null && git rev-parse HEAD > "${root_dir}/vendored-commit" && popd > /dev/null
+  write_vendor_commit
 
     # generate the private.yml file with the credentials
   step "Generating private.yml..."
@@ -26,8 +31,8 @@ EOF
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "${config_file}"
 
   bosh vendor-package "${package}" "${package_location}"
-  cp "${root_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
-  echo -n "${version}" > "packages/${package}/version" && git add "packages/${package}/version"
+  mv "${root_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
+  mv "${root_dir}/version" "packages/${package}/version" && git add "packages/${package}/version"
 
   log "Git diff -----"
   git --no-pager diff
