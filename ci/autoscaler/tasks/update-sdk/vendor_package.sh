@@ -31,8 +31,8 @@ EOF
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "${config_file}"
 
   bosh vendor-package "${package}" "${package_location}"
-  mv "${root_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
-  mv "${root_dir}/version" "packages/${package}/version" && git add "packages/${package}/version"
+  cp "${root_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
+  cp "${root_dir}/version" "packages/${package}/version" && git add "packages/${package}/version"
 
   log "Git diff -----"
   git --no-pager diff
