@@ -75,6 +75,7 @@ worker:
         path: "/mnt/disks/ssd0"
   nodeSelector:
     cloud.google.com/gke-local-ssd: "true"
+    cloud.google.com/gke-nodepool: "concourse-workers"
   resources:
     requests:
       cpu: "3000m"
