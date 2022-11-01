@@ -7,11 +7,11 @@ set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 autoscaler_dir="${script_dir}/../../../../../app-autoscaler-release"
-github_access_token=${GITHUB_ACCESS_TOKEN:-)}
+github_access_token=${GITHUB_ACCESS_TOKEN:-}
 github_private_key=${GITHUB_PRIVATE_KEY:-}
 
 function add_private_key(){
-  if [ -n "${github_private_key}" ]; then
+  if [[ -n "${github_private_key}" ]]; then
     mkdir -p "$HOME/.ssh"
     chmod 700 "$HOME/.ssh"
     printenv GITHUB_PRIVATE_KEY > "$HOME/.ssh/id_rsa"
@@ -23,7 +23,7 @@ function add_private_key(){
 }
 
 function login_gh(){
-  if [ -n "${github_access_token}" ]; then
+  if [[ -n "${github_access_token}" ]]; then
     printenv github_access_token | gh auth login --with-token -h github.com
   fi
 }
