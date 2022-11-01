@@ -66,6 +66,15 @@ worker:
       value: "true"
       effect: "NoSchedule"
   kind: Deployment
+  additionalVolumeMounts:
+    - name: concourse-work-dir
+      mountPath: /concourse-work-dir
+  additionalVolumes:
+    - name: concourse-work-dir
+      hostPath:
+        path: "/mnt/stateful_partition/concourse-worker"
+  nodeSelector:
+    cloud.google.com/gke-nodepool: "concourse-workers"
   resources:
     requests:
       cpu: "3000m"
