@@ -1,6 +1,6 @@
-# App AutoScaler Policy JSON Specification 
+# App AutoScaler Policy JSON Specification
 
-`App AutoScaler` requires a policy file written in JSON with the following schema: 
+`App AutoScaler` requires a policy file written in JSON with the following schema:
 
 ## Policy
 
@@ -12,7 +12,7 @@
 | schedules                            | JSON Array<schedules>       | `AnyOf`  |scheduled, see `Schedules` below              |
 
 
-### Scaling Rules 
+### Scaling Rules
 
 | Name                 | Type         | Required|Description                                                                      |
 |:---------------------|--------------|---------|---------------------------------------------------------------------------------|
@@ -32,7 +32,7 @@
 | recurring_schedule                   | JSON Array<recurring_schedules>| `AnyOf`   |the schedules which will take effect repeatly, see `Recurring Schedule` below |
 | specific_date                        | JSON Array<specific_date>      | `AnyOf`   |the schedules which take effect only once, see `Specific Date` below     |
 
-#### Recurring Schedule 
+#### Recurring Schedule
 
 | Name                                 | Type                | Required| Description                                                                             |
 |:-------------------------------------|---------------------|---------|-----------------------------------------------------------------------------------------|
@@ -45,7 +45,7 @@
 | instance_max_count                   | int                 | true    | maximal number of instance count for this schedule                                      |
 | initial_min_instance_count           | int                 | false   | the initial minimal number of instance count for this schedule                          |
 
-#### Specific Date 
+#### Specific Date
 
 | Name                                 | Type                       | Required| Description                                                                |
 |:-------------------------------------|----------------------------|---------|----------------------------------------------------------------------------|
@@ -57,11 +57,11 @@
 
 ## Constraints
 
-* If one schedule overlaps another, the one which **starts** first will be guaranteed, while the later one is completely ignored. For example: 
+* If one schedule overlaps another, the one which **starts** first will be guaranteed, while the later one is completely ignored. For example:
 
-    - Schedule #1:  --------sssssssssss---------------------------- 
+    - Schedule #1:  --------sssssssssss----------------------------
     - Schedule #2:  ---------------ssssssssssssss-----------------
-    - Schedule #3:  --------------------------sssssssss------------     
+    - Schedule #3:  --------------------------sssssssss------------
 
     With above definition, schedule #1 and #3 will be applied, while scheudle #2 is ignored.
 
@@ -73,8 +73,8 @@
 
 
 [a]:https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html
-[policy-dynamic]: /docs/dynamicpolicy.json
-[policy-dynamic-custom]: /docs/customemetricpolicy.json
-[policy-all]: /docs/fullpolicy.json
+[policy-dynamic]: /docs/assets/dynamicpolicy.json
+[policy-dynamic-custom]: /docs/assets/customemetricpolicy.json
+[policy-all]: /docs/assets/fullpolicy.json
 
 

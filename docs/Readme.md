@@ -11,7 +11,7 @@ The [Cloud Foundry App Auto-Scaler][git] automatically adjust the instance numbe
 * Dynamic scaling based on application performance metrics
 * Scheduled scaling based on time
 
-The Cloud Foundry [Admin or Space Developers role][userrole] is needed to manage the autoscaling policy, query metric values and scaling events. 
+The Cloud Foundry [Admin or Space Developers role][userrole] is needed to manage the autoscaling policy, query metric values and scaling events.
 
 ---
 ## Concepts of Autoscaling policy
@@ -20,20 +20,20 @@ Autoscaling policy is represented in JSON and consists of the following parts. R
 
 Autoscaling can be defined explicitly in the service binding or through a [default policy](#default-policy) at a service instance level.
 
-### Default policy 
+### Default policy
 
-The default policy feature is optional. It applies to all service bindings 
+The default policy feature is optional. It applies to all service bindings
 that are created without an explicit policy. It can be configured when provisioning a
 service instance. It can be specified by passing through a service
 creation parameter called `default_policy`.
 
 The default policy can be changed via the `cf update-service` command. The changes
-will be propagated to all apps that use the default policy. If a policy is set explicitly 
-on an app with the same content as the default policy, updates on the default policy 
-will not affect that app. Setting the default policy can be achieved by removing 
+will be propagated to all apps that use the default policy. If a policy is set explicitly
+on an app with the same content as the default policy, updates on the default policy
+will not affect that app. Setting the default policy can be achieved by removing
 the binding level policy.
 
-The default policy can be removed, by setting it to an empty JSON object when 
+The default policy can be removed, by setting it to an empty JSON object when
 calling `cf update-service`.
 
 
@@ -46,16 +46,16 @@ Instance limits are used to define the default minimal and maximal instance numb
 
 ####  Metric types
 
-The following are the built-in metrics that you can use to scale your application based on. They are averaged over all the instances of your application. 
+The following are the built-in metrics that you can use to scale your application based on. They are averaged over all the instances of your application.
 
 * **memoryused**
-	
+
 	"memoryused" represents the absolute value of the used memory of your application. The unit of "memoryused" metric is "MB".
-	
+
 * **memoryutil**
-	
+
 	"memoryutil", a short name of "memory utilization", is the used memory of the total memory allocated to the application in percentage.
-	
+
 	For example, if the memory usage of the application is 100MB  and memory quota is 200MB, the value of "memoryutil" is 50%.
 
 * **cpu**
@@ -63,21 +63,21 @@ The following are the built-in metrics that you can use to scale your applicatio
 	"cpu", a short name of "cpu utilization", is the cpu usage of your application in percentage.
 
 * **responsetime**
-	
+
 	"responsetime" represents the average amount of time the application takes to respond to a request in a given time period.  The unit of "responsetime" is "ms" (milliseconds).
 
 * **throughput**
 
 	"throughput" is the total number of the processed requests  in a given time period. The  unit of "throughput" is "rps" (requests per second).
 
-* **custom metric** 
+* **custom metric**
 
-	Custom metric is supported since [app-autoscaler v3.0.0 release][app-autoscaler-v3.0.0]. You can define your own metric name and emit your own metric to `App Autoscaler` to trigger further dynamic scaling. Only alphabet letters, numbers and "_" are allowed for a valid metric name, and the maximum length of the metric name is limited up to 100 characters. 
-	
- 
+	Custom metric is supported since [app-autoscaler v3.0.0 release][app-autoscaler-v3.0.0]. You can define your own metric name and emit your own metric to `App Autoscaler` to trigger further dynamic scaling. Only alphabet letters, numbers and "_" are allowed for a valid metric name, and the maximum length of the metric name is limited up to 100 characters.
+
+
 ####  Threshold and Adjustment
 
-`App AutoScaler` evaluates the aggregated metric values against the threshold defined in the dynamic scaling rules, and change the application instance count according to the adjustment setting.  
+`App AutoScaler` evaluates the aggregated metric values against the threshold defined in the dynamic scaling rules, and change the application instance count according to the adjustment setting.
 
 For example, if you want to scale out your application by adding 2 instances when the application's througput exceeds 800 requests per second, define the the scaling rule as below:
 ```
@@ -89,29 +89,29 @@ For example, if you want to scale out your application by adding 2 instances whe
 }
 ```
 
-####  (Optional) Breach duration and Cooldown 
+####  (Optional) Breach duration and Cooldown
 
-`App AutoScaler` will not take scaling action until your application continues breaching the rule in a time duration defined in `breach_duration_secs`.  This setting controls how fast the autoscaling action could be triggered. 
+`App AutoScaler` will not take scaling action until your application continues breaching the rule in a time duration defined in `breach_duration_secs`.  This setting controls how fast the autoscaling action could be triggered.
 
 `cool_down_secs` defines the time duration to wait before the next scaling kicks in.  It helps to ensure that your application does not launch or terminate instances before your application becomes stable. This setting can be configured based on your instance warm-up time or other needs.
 
 *Note:*
 
-* You can define multiple scaling-out and scaling-in rules. However, `App-AutoScaler` does not detect conflicts among them.  It is your responsibility to ensure the scaling rules do not conflict with each other to avoid fluctuation or other issues. 
+* You can define multiple scaling-out and scaling-in rules. However, `App-AutoScaler` does not detect conflicts among them.  It is your responsibility to ensure the scaling rules do not conflict with each other to avoid fluctuation or other issues.
 
 * `breach_duration_secs` and `cool_down_secs` are both optional entries in scaling_rule definition.  The `App Autoscaler` provider will define the default value if you omit them from the policy.
 
 ###  Schedules
 
-`App AutoScaler` uses schedules to overwrite the default instance limits for specific time periods. During these time periods, all dynamic scaling rules are still effective. 
+`App AutoScaler` uses schedules to overwrite the default instance limits for specific time periods. During these time periods, all dynamic scaling rules are still effective.
 
-The design of `Schedules` is mainly used to prepare enough instances for  peak hours. 
+The design of `Schedules` is mainly used to prepare enough instances for  peak hours.
 
 You can define recurring schedules, or specific schedules which are executed only once in [autoscaling policy][policy].
 
-Particularly, besides overriding the default instance limit of `instance_min_count` and `instance_max_count`, you can also define an `initial_min_instance_count` in the schedule.  
+Particularly, besides overriding the default instance limit of `instance_min_count` and `instance_max_count`, you can also define an `initial_min_instance_count` in the schedule.
 
-For example, in the following schedule rule, `App AutoScaler` will set your application instance number to be 50 when the schedule starts, and make sure your instances number is within [10,100] during the scheduled time period.  
+For example, in the following schedule rule, `App AutoScaler` will set your application instance number to be 50 when the schedule starts, and make sure your instances number is within [10,100] during the scheduled time period.
 ```
 {
     "start_date_time": "2099-01-01T10:00",
@@ -136,21 +136,21 @@ The following gives some policy examples for you to start with. Refer to [Policy
 
 ## Connect an application to App-AutoScaler
 
-`App-AutoScaler` can be offered as a Cloud Foundry service or an extension of your Cloud Foundry platform. Consult your Cloud Foundry provider for how it is offered. 
+`App-AutoScaler` can be offered as a Cloud Foundry service or an extension of your Cloud Foundry platform. Consult your Cloud Foundry provider for how it is offered.
 
 ###  As a Cloud Foundry extension
-When `App AutoScaler` is offered as Cloud Foundry platform extension,  you don't need to connect your application to autoscaler, go directly to next section to attach autoscaling policy to your application with CLI. 
+When `App AutoScaler` is offered as Cloud Foundry platform extension,  you don't need to connect your application to autoscaler, go directly to next section to attach autoscaling policy to your application with CLI.
 
 ###  As a Cloud Foundry service
-When `App AutoScaler` is offered as a Cloud Foundry service via [open service broker api][osb] , you need to provision and bind `App AutoScaler` service through [Cloud Foundry CLI][cfcli]  first. 
+When `App AutoScaler` is offered as a Cloud Foundry service via [open service broker api][osb] , you need to provision and bind `App AutoScaler` service through [Cloud Foundry CLI][cfcli]  first.
 
 * [Create an instance of the service][sprovision]
 * [Bind the service instance to your application][sbind]
-	
-	Note you can attach scaling policy together with service binding by providing the policy file name as a parameter of the service binding command. 
+
+	Note you can attach scaling policy together with service binding by providing the policy file name as a parameter of the service binding command.
 	```
 	cf bind-service <app_name> <service_instance_name> -c <policy_file_name>
-	```	
+	```
 
 To disconnect `App AutoScaler` from your application, unbind the service instance. This will remove the  autoscaling policy as well. Furthermore, you can deprovision the service instance if no application is bound.
 
@@ -161,35 +161,35 @@ To disconnect `App AutoScaler` from your application, unbind the service instanc
 ----
 ## Command Line interface
 
-This section gives how to use the command line interface to manage autoscaling policies,  query metrics and scaling event history. Go to the [CLI user guide][cli] for the detailed CLI references. 
+This section gives how to use the command line interface to manage autoscaling policies,  query metrics and scaling event history. Go to the [CLI user guide][cli] for the detailed CLI references.
 
-### Getting started with AutoScaler CLI 
+### Getting started with AutoScaler CLI
 
 * Install [AutoScaler CLI plugin][cli]
 * Set App AutoScaler API endpoint （Optional)
-    
-    AutoScaler CLI plugin interacts with `App AutoScaler`  through its [public API][api].  
-	
+
+    AutoScaler CLI plugin interacts with `App AutoScaler`  through its [public API][api].
+
 	By default, `App AutoScaler` API endpoint is set to `https://autoscaler.<cf-domain>` automatically.  You can change to others like the example below
-    ``` 
+    ```
 	 cf asa https://example-autoscaler.<cf-domain>
     ```
 
-### Attach policy 
+### Attach policy
 
-Create or update autoscaling policy for your application with command. 
+Create or update autoscaling policy for your application with command.
 ```
 	 cf aasp <app_name> <policy_file_name>
 ```
 
-### Detach policy 
+### Detach policy
 
 Remove autoscaling policy to disable `App Autoscaler` with command
 ```
 	 cf dasp <app_name>
 ```
 
-### View policy 
+### View policy
 
 To retrieve the current autoscaling policy, use command below
 ```
@@ -203,7 +203,7 @@ Query the most recent metrics with command
 	 cf asm <app_name> <metric_type>
 ```
 
-Note the output of the `cf asm` command shows aggregated metrics instead of the raw data of instance metrics.  
+Note the output of the `cf asm` command shows aggregated metrics instead of the raw data of instance metrics.
 
 Refer to  [AutoScaler CLI user guide][cli] for the advanced options to specify the time range, the number of metric values to return and display order.
 
@@ -242,17 +242,17 @@ First, you need to define a dynamic scaling rule with a customized metric name, 
 
 *  Create credential for your application
 
-To scale with custom metric, your application need to emit its own metric to `App Autoscaler`'s metric server.  
+To scale with custom metric, your application need to emit its own metric to `App Autoscaler`'s metric server.
 Given the metric submission is proceeded inside an application,  an `App Autoscaler` specific credential is required to authorize the access.
 
 If `App Autoscaler` is offered as a service,  the credential and autoscaler metric server's URL are injected into VCAP_SERVICES by service binding directly.
 
-If `App Autoscaler` is offered as a Cloud Foundry extension, the credential need to be generated explictly with command  `cf create-autoscaling-credential` as below example: 
+If `App Autoscaler` is offered as a Cloud Foundry extension, the credential need to be generated explictly with command  `cf create-autoscaling-credential` as below example:
 
 ```
->>>cf create-autoscaling-credential <app_name> --output <credential_json_file_path> 
+>>>cf create-autoscaling-credential <app_name> --output <credential_json_file_path>
 ...
->>> cat <credential_json_file_path> 
+>>> cat <credential_json_file_path>
 {
     "app_id": "c99f4f6d-2d67-4eb6-897f-21be90e0dee5",
     "username": "9bb48dd3-9246-4d7e-7827-b478e9bbedcd",
@@ -261,13 +261,13 @@ If `App Autoscaler` is offered as a Cloud Foundry extension, the credential need
 }
 ```
 
-Then, you need to configure the credential to your application as an environment variable by `cf set-env` command 
-or through user-provided-service approach as below: 
+Then, you need to configure the credential to your application as an environment variable by `cf set-env` command
+or through user-provided-service approach as below:
 
 ```
->>> cf create-user-provided-service <user-provided-service-name> -p <credential_json_file_path> 
+>>> cf create-user-provided-service <user-provided-service-name> -p <credential_json_file_path>
 ...
->>> cf bind-service <app_name>  <user-provided-service-name> 
+>>> cf bind-service <app_name>  <user-provided-service-name>
 ...
 TIP: Use 'cf restage <app-name>' to ensure your env variable changes take effect
 ```
@@ -300,7 +300,7 @@ A JSON payload is required with above API to submit metric name, value and the c
 *Note:*
 
 * `<INSTANCE INDEX>` is the index of current application instance. You can fetch the index from environment variable `CF_INSTANCE_INDEX`
-* `<CUSTOM METRIC NAME>` is the name of the emit metric which must be equal to the metric name that you define in the policy. 
+* `<CUSTOM METRIC NAME>` is the name of the emit metric which must be equal to the metric name that you define in the policy.
 * `<CUSTOM METRIC VALUE>` is value that you would like to submit. The `value` here must be a NUMBER.
 * `<CUSTOM METRIC UNIT>` is the unit of the metric, optional.
 
@@ -310,9 +310,9 @@ Please refer to [Emit metric API Spec][emit-metric-api] for more information.
 [git]:https://github.com/cloudfoundry/app-autoscaler
 [cli]: https://github.com/cloudfoundry/app-autoscaler-cli-plugin#install-plugin
 [policy]: policy.md
-[policy-dynamic]: dynamicpolicy.json
-[policy-dynamic-custom]: customemetricpolicy.json
-[policy-all]: fullpolicy.json
+[policy-dynamic]: assets/dynamicpolicy.json
+[policy-dynamic-custom]: assets/customemetricpolicy.json
+[policy-all]: assets/fullpolicy.json
 [api]: Public_API.rst
 [osb]: https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md
 [cfcli]: https://github.com/cloudfoundry/cli
