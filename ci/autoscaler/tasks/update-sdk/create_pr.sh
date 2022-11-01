@@ -7,11 +7,7 @@ set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 autoscaler_dir="${script_dir}/../../../../../app-autoscaler-release"
-<<<<<<< Updated upstream
-
-=======
 github_access_token=${GITHUB_ACCESS_TOKEN:-$(cat "${HOME}/.ssh/github_token")}
->>>>>>> Stashed changes
 
 function configure_git_credentials(){
  if [[ -z $(git config --global user.email) ]]; then
@@ -42,7 +38,7 @@ pushd "${autoscaler_dir}" > /dev/null
 
   git commit -a -m "${pr_title}"
 
-  printenv GITHUB_ACCESS_TOKEN | gh auth login --with-token -h github.com
+  printenv github_access_token | gh auth login --with-token -h github.com
 
   mkdir -p "$HOME/.ssh"
   chmod 700 "$HOME/.ssh"
