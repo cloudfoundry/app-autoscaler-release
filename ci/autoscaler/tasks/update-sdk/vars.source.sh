@@ -37,12 +37,6 @@ export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' || echo 
 [ "${PR_NUMBER}" == "44" ] && warn "no PR_NUMBER is set, will use the default (44)";
 debug "PR_NUMBER: ${PR_NUMBER}"
 
-export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
-debug "DEPLOYMENT_NAME: ${DEPLOYMENT_NAME}"
-log "set up vars: DEPLOYMENT_NAME=${DEPLOYMENT_NAME}"
-# shellcheck disable=SC2034
-deployment_name="${DEPLOYMENT_NAME}"
-
 export SYSTEM_DOMAIN="${SYSTEM_DOMAIN:-"autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"}"
 debug "SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 # shellcheck disable=SC2034
@@ -66,42 +60,5 @@ export CI_DIR="$(realpath -e "${CI_DIR}")"
 debug "CI_DIR: ${CI_DIR}"
 # shellcheck disable=SC2034
 ci_dir="${CI_DIR}"
-
-export BUILDIN_MODE=${BUILDIN_MODE:-"false"}
-debug "BUILDIN_MODE: ${BUILDIN_MODE}"
-# shellcheck disable=SC2034
-buildin_mode="${BUILDIN_MODE}"
-
-export SERVICE_NAME="${DEPLOYMENT_NAME}"
-debug "SERVICE_NAME: ${SERVICE_NAME}"
-# shellcheck disable=SC2034
-service_name="%{SERVICE_NAME"
-
-export SERVICE_BROKER_NAME="${DEPLOYMENT_NAME}servicebroker"
-debug "SERVICE_BROKER_NAME: ${SERVICE_BROKER_NAME}"
-# shellcheck disable=SC2034
-service_broker_name="${SERVICE_BROKER_NAME}"
-
-export NAME_PREFIX="${NAME_PREFIX:-"${DEPLOYMENT_NAME}-TESTS"}"
-debug "NAME_PREFIX: ${NAME_PREFIX}"
-# shellcheck disable=SC2034
-name_prefix="${NAME_PREFIX}"
-
-export SERVICE_OFFERING_ENABLED=${SERVICE_OFFERING_ENABLED:-true}
-debug "SERVICE_OFFERING_ENABLED: ${SERVICE_OFFERING_ENABLED}"
-
-export GINKGO_OPTS=${GINKGO_OPTS:-"--fail-fast"}
-
-export PERFORMANCE_APP_COUNT="${PERFORMANCE_APP_COUNT:-20}"
-debug "PERFORMANCE_APP_COUNT: ${PERFORMANCE_APP_COUNT}"
-
-export PERFORMANCE_APP_PERCENTAGE_TO_SCALE="${PERFORMANCE_APP_PERCENTAGE_TO_SCALE:-30}"
-debug "PERFORMANCE_APP_PERCENTAGE_TO_SCALE: ${PERFORMANCE_APP_PERCENTAGE_TO_SCALE}"
-
-export PERFORMANCE_SETUP_WORKERS="${PERFORMANCE_SETUP_WORKERS:-50}"
-debug "PERFORMANCE_SETUP_WORKERS: ${PERFORMANCE_SETUP_WORKERS}"
-
-export PERFORMANCE_TEARDOWN=${PERFORMANCE_TEARDOWN:-true}
-debug "PERFORMANCE_TEARDOWN: ${PERFORMANCE_TEARDOWN}"
 
 

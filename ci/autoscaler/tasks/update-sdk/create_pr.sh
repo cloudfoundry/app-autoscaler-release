@@ -7,7 +7,7 @@ set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 autoscaler_dir="${script_dir}/../../../../../app-autoscaler-release"
-github_access_token=${GITHUB_ACCESS_TOKEN:-)}
+github_access_token=${GITHUB_ACCESS_TOKEN:-}
 github_private_key=${GITHUB_PRIVATE_KEY:-}
 
 function add_private_key(){
