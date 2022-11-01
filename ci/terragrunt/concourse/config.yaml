@@ -20,11 +20,11 @@ gke_name: wg-ci
 concourse_github_mainTeam: "cloudfoundry:wg-app-runtime-interfaces-autoscaler-approvers"
 concourse_github_mainTeamUser: ""
 
-# Concourse helm chart 
+# Concourse helm chart
 concourse_helm_version: "17.0.37"
 
 # Module sources for the stack - git or local
-# ie. 
+# ie.
 #  infra: "git@github.com:cloudfoundry/app-autoscaler-release.git//ci/terraform-modules/concourse/infra?ref=new-concourse"
 #  infra: "../../..//terraform-modules//concourse/infra"
 tf_modules:
@@ -77,6 +77,7 @@ wg_ci_human_account_permissions: [
     "container.clusterRoleBindings.update",
     "container.configMaps.get",
 
+    # *Note* iam.roles allow to esalate privileges to any account
     "iam.roles.create",
     "iam.roles.update",
     "iam.roles.delete",
