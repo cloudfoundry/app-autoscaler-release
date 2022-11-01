@@ -2,6 +2,7 @@
 applications:
   - name: ((app_name))
     env:
+      NODE_OPTIONS: --max_old_space_size=((memory_mb))
       NODE_TLS_REJECT_UNAUTHORIZED: "((node_tls_reject_unauthorized))"
       SERVICE_NAME: ((service_name))
       NODE_ENV: production
