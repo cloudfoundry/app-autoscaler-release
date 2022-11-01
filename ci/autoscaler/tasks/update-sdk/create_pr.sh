@@ -6,7 +6,7 @@
 set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-autoscaler_dir="${script_dir}/../../../../../app-autoscaler-release"
+source "${script_dir}/vars.source.sh"
 github_access_token=${GITHUB_ACCESS_TOKEN:-}
 github_private_key=${GITHUB_PRIVATE_KEY:-}
 
@@ -42,8 +42,8 @@ if [ "$( git status -s | wc -l)" -eq 0 ]; then
   exit 0
 fi
 
-package_version=$(cat ./version)
-package_sha=$(cat ./vendored-commit)
+package_version=$(cat "${root_dir}/version")
+package_sha=$(cat "${root_dir}/vendored-commit")
 
 dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
 update_branch="${type}-version-bump-${dashed_version}_${package_sha}"
