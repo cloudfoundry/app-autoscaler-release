@@ -4,42 +4,35 @@ zone: europe-west3-a
 secondary_zone: europe-west3-b
 
 # gcs_prefix builds root folder for tf state for the entire stack
-gcs_bucket: terraform-wg-ci
-gcs_prefix: concourse
+gcs_bucket: terraform-state-wg-ci
+gcs_prefix: refactor
 
 # DNS record for your Concourse URL https://<dns_record>.<dns_zone>.dns_domain
-dns_record: concourse
+dns_record: concourse-refactor
 dns_zone: app-runtime-interfaces
 dns_domain: ci.cloudfoundry.org
 
 # Project's resource names are build off GKE name for scaling purposes
 # k8s cluster, SQL instance, vpc, IAM groups, cloud nat router, service accounts
-gke_name: wg-ci
+gke_name: wg-ci-refactor
 
 # Concourse teams
 concourse_github_mainTeam: "cloudfoundry:wg-app-runtime-interfaces-autoscaler-approvers"
 concourse_github_mainTeamUser: ""
 
-# Concourse helm chart 
-concourse_helm_version: "17.0.37"
-
 # Module sources for the stack - git or local
-# ie. 
-#  infra: "git@github.com:cloudfoundry/app-autoscaler-release.git//ci/terraform-modules/concourse/infra?ref=new-concourse"
-#  infra: "../../..//terraform-modules//concourse/infra"
 tf_modules:
-  infra: "../../..//terraform-modules/concourse/infra"
-  backend: "../../..//terraform-modules//concourse/backend"
-  app: "../../..//terraform-modules//concourse/app"
-  dr_create: "../..//terraform-modules//concourse/dr/create"
-  dr_restore: "../..//terraform-modules//concourse/dr/restore"
-
-
-
+  infra: "../../../terraform-modules//concourse/infra"
+  backend: "../../../terraform-modules//concourse/backend"
+  app: "../../../terraform-modules//concourse/app"
+  dr_create: "../../terraform-modules//concourse/dr/create"
+  dr_restore: "../../terraform-modules//concourse/dr/restore"
 
 # ---------------------------------------------------------
 # In most cases settings below are safe to keep as defaults
 # ---------------------------------------------------------
+concourse_helm_version: "17.0.37"
+
 # SQL
 sql_instance_tier: db-custom-1-4096
 sql_instance_backup_location: eu
@@ -55,11 +48,7 @@ gke_cluster_ipv4_cidr: 10.104.0.0/14
 gke_services_ipv4_cidr_block: 10.108.0.0/20
 gke_master_ipv4_cidr_block: 172.16.0.32/28
 gke_default_pool_machine_type: e2-standard-4
-gke_default_pool_ssd_count: 0
-# typical config for concourse worker is n4-standard-4 and ssd_count: 1
-# note: economy e2-standard machine can't use local ssd drives
-gke_workers_pool_machine_type: e2-standard-4
-gke_workers_pool_ssd_count: 0
+gke_workers_pool_machine_type: n2-standard-4
 
 # IAM
 wg_ci_human_account_permissions: [

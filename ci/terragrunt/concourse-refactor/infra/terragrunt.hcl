@@ -15,7 +15,7 @@ remote_state {
     location       = "${local.config.region}"
     # use for uniform bucket-level access
     # (https://cloud.google.com/storage/docs/uniform-bucket-level-access)
-    enable_bucket_policy_only = true
+    enable_bucket_policy_only = false
   }
 }
 
@@ -35,9 +35,7 @@ inputs = {
   gke_services_ipv4_cidr_block = local.config.gke_services_ipv4_cidr_block
   gke_master_ipv4_cidr_block = local.config.gke_master_ipv4_cidr_block
   gke_default_pool_machine_type = local.config.gke_default_pool_machine_type
-  gke_default_pool_ssd_count = local.config.gke_default_pool_ssd_count
   gke_workers_pool_machine_type = local.config.gke_workers_pool_machine_type
-  gke_workers_pool_ssd_count = local.config.gke_default_pool_ssd_count
 
   sql_instance_name = "${local.config.gke_name}-concourse"
   sql_instance_tier = local.config.sql_instance_tier
