@@ -5,7 +5,7 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/common.sh"
 
 function get_autoscaler_deployments(){
-  bosh deployments --json --column=name | jq ".Tables[0].Rows[].name" -r  | grep -E "autoscaler|upgrade|performance"
+  bosh deployments --json | jq -r '.Tables[0].Rows[] | select(.release_s | contains("app-autoscaler/")) | .name'
 }
 
 function main(){
