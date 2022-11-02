@@ -9,6 +9,7 @@
 * kapp
 * ytt
 * vendir
+* yq
 
 The required tools are defined in the .tool-versions file
 ```
@@ -33,60 +34,92 @@ gcloud auth login && gcloud auth application-default login
 ```
 
 ## 3. Create Github OAuth token and supply as a Google Secret
- 1. Request creation of a Google Secret
+ 1. Create Github OAuth token
+
+    This is necessary if you want to be able to authenticate with your GitHub profile. Log on to github.com and navigate to:
+  "Settings" -> "Developer settings" -> "OAuth Apps" -> "New OAuth App"
+
+    As "Homepage URL", enter the Concourse's base URL. As "Authorization callback URL", enter the Concourse URL followed
+by `/sky/issuer/callback`.
+
+ 2. Create Google Secret - use a correct naming convention
+The created secret name will be used by terraform scripts and needs to conform to the following convention `${gke_name}-concourse-github-oauth`. By default, `gke_name` is `wg-ci` (working group CI system).
+
+
     ```sh
-      terragrunt run-all apply --target module.concourse-infra.google_secret_manager_secret.github_oauth
+    cd <folder with config.yaml>
+    ```
+    ```sh
+    secret_id="$(yq .gke_name config.yaml)-concourse-github-oauth"
+    secret_region="$(yq .region config.yaml)"
+    gcloud secrets create ${secret_id} \
+     --replication-policy="user-managed" \
+     --locations=${secret_region}
+
     ```
 
- 2. Create Github OAuth token
-
-This is necessary if you want to be able to authenticate with your GitHub profile. Log on to github.com and navigate to:
-"Settings" -> "Developer settings" -> "OAuth Apps" -> "New OAuth App"
-
-As "Homepage URL", enter the Concourse's base URL. As "Authorization callback URL", enter the Concourse URL followed
-by `/sky/issuer/callback`.
 
 3. Please create a version for google secret using gcloud command or webui, with a following key-value format
 
-```yaml
-id: paste your Client ID
-secret: paste your Client secret
-```
+    ```yaml
+    id: your Client ID
+    secret: your Client secret
+    ```
+   *gcloud* cli example
+    ```sh
+    cd <folder with config.yaml>
+    ```
+    ```sh
+    secret_id="$(yq .gke_name config.yaml)-concourse-github-oauth"
+    echo -n 'id: your Client ID\nsecret: your Client secret' | \
+    gcloud secrets versions add ${secret_id} --data-file=-
+    ```
 
-
+    For more information please refer to [gcloud documentation](https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets).
 ## 4. Apply terrgrunt for the entire stack
-The following commands need to be run from within this directory “terragrunt/concourse”:
+The following command needs to be run from within your root `concourse` directory (containing `config.yaml` file).
+
+*NOTE: it's not possible to `plan` for a fresh project due to the fact we can't test kubernetes resources against non existing cluster*
 ```sh
 terragrunt run-all apply
 ```
-*NOTE: it's not possible to `plan` for a fresh project due to the fact we can't test kubernetes resources against non existing cluster*
+
 
 ## 5. Save secrets needed for DR scenario
 This part is not intended to be fully automated.
 ```sh
-cd ../concourse-dr
+cd ../concourse/dr
 terragrunt plan --terragrunt-config=create.hcl
-terragrunt apply --terragrunt-config=restore.hcl
+terragrunt apply --terragrunt-config=create.hcl
 ```
 
 
 ---
-## Upgrade components managed by kapp and vendir (when needed)
-Required actions:
-* changing charts versions
-* `vendir sync`
-* please see readme in terraform-modules/backend
-
-## Plan/apply terragrunt for changes to modules
-
-```sh
-terragrunt run-all plan --terragrunt-source-update
-```
 
 ## Destroy the project
 ```
 terragrunt run-all destroy
 ```
+
+## Plan/apply terragrunt for a specific component of the stack
+e
+```sh
+cd concourse/app
+terragrunt plan
+terragrunt apply
+```
+
+## Plan/apply terragrunt for changes to modules
+Update your terragrunt cache folders when terraform source modules code would change
+```sh
+terragrunt run-all plan --terragrunt-source-update
+```
+
+## Upgrade components managed by kapp and vendir (when needed)
+Required actions:
+* changing charts versions
+* `vendir sync`
+* please see readme in terraform-modules/backend
 
 ## How to obtain GKE credentials for your terminal
 

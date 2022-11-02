@@ -18,12 +18,8 @@ out as well as the app-autoscaler private key
 
 These docker images in this repo are built and pushed with GitHub actions, they are hosted on ghcr.io
 
-## Terraform
-### Directory “terraform“
-This directory contains the terraform-scripts to manage the resouces of the account app-runtime-interfaces-wg at google-cloud.
-
-### Directory “terraform-modules”
-This directory contains all Terraform-Modules that are developed by the team autoscaler.
+## Terrgrunt
+This directory contains the terragrunt managed stacks of resouces in account app-runtime-interfaces-wg GCP project.
 
 ## Deploy pipeline
 
