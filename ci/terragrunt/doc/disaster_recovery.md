@@ -15,46 +15,52 @@ terragrunt apply --terragrunt-config=restore.hcl
 * GKE cluster not destroyed
 
 TODO:
-* test recovery with fresh k8s cluster
+* test recovery will all infrastructure destroyed but sql instance
 
 
 # Steps
 ## 1. Restore SQL Instance from backup
-* https://console.cloud.google.com/sql/instances/concourse/backups -> Restore desired backup version
+* https://console.cloud.google.com/sql/instances/
+  * Choose the desired database instance 
+  * Restore desired backup version
 
-## 2. Ensure infra part is up to scratch. 
+## 2. Ensure infra and backend parts are up to date 
 Please note the usage of brackets as these allow you to execute bash commands from subfolders and return to the current folder once finished.
 
 ```
-( cd ./concourse/infra && terragrunt apply )
+( cd ./concourse && terragrunt run-all plan --terragrunt-exclude-dir ./app )
 ```
+*Note: terragrunt plan only works if kubernetes cluster exists*
 
-## 3. Recreate 'backend' part.
 ```
-( cd ./concourse-backend && terragrunt apply )
+( cd ./concourse && terragrunt run-all apply --terragrunt-exclude-dir ./app )
 ```
 *Note: terraform reporting missing databases at this point is an indication instance restoration needs to be run.*
 
 
-* **MAINTENANCE:** In case carvel kapp is unwilling to apply backend changes you can taint it and re-provision.
-_WARNING_ proceed with caution if you use the backend in other projects on the cluster (ie. carvel secret gen). Shall this be a case secretgen should not be a part of managed concourse deployment anymore.
-
-    ```
-    cd ./concourse-backend
-    terraform taint carvel_kapp.concourse_backend
-    terraform plan
-    terraform apply
-    ```
-
-## 4. Restore secrets
+## 3. Restore secrets
 ```
 ( cd concourse-dr && terragrunt apply --terragrunt-config=restore.hcl )
 ```
 
-## 5. Deploy remaining components
+## 4. Deploy remaining components
 From this moment onward `terragrunt` should be happy to run again as usual.
 ```
 terragrunt run-all plan
 terragrunt run-all apply
+```
+
+# Troubleshooting
+
+###  Carvel kapp is unwilling to apply backend changes
+
+   In case carvel kapp is unwilling to apply backend changes you can taint it and re-provision.
+  _WARNING_ proceed with caution if you use the backend in other projects on the cluster (ie. carvel secret gen). Shall this be a case secretgen should not be a part of managed concourse deployment anymore.
+
+```
+cd ./concourse/backend
+terragrunt taint carvel_kapp.concourse_backend
+terragrunt plan
+terragrunt apply
 ```
 
