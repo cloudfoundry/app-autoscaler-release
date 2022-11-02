@@ -1,7 +1,7 @@
 # Provide github oauth token prior to app deployment
 data "google_secret_manager_secret_version" "github_oauth" {
-  # secret = data.terraform_remote_state.infra.outputs.github_oauth.name
-  secret = var.github_oauth_secret_name
+  secret = "${var.gke_name}-concourse-github-oauth"
+  project = var.project
 }
 
 locals {
