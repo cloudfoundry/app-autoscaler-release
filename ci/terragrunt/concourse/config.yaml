@@ -21,7 +21,7 @@ concourse_github_mainTeam: "cloudfoundry:wg-app-runtime-interfaces-autoscaler-ap
 concourse_github_mainTeamUser: ""
 
 # Concourse helm chart
-concourse_helm_version: "17.0.37"
+concourse_helm_version: "17.0.27"
 
 # Module sources for the stack - git or local
 # ie.
