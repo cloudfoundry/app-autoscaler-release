@@ -1,6 +1,11 @@
 name: Check if go.mod is tidy
 on:
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-tidy-go-mod:
     name: ensure that go mod tidy has run
@@ -15,7 +20,8 @@ jobs:
 
       - name: Check if there is any change
         id: get_changes
-        run: echo "::set-output name=changed::$(git status --porcelain | wc -l)"
+        run: echo "changed=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
+
       - name: Process changes
         if: steps.get_changes.outputs.changed != 0
         run: |
