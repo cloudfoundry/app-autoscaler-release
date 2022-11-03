@@ -30,7 +30,7 @@ resources:
     branch: new-concourse
     fetch_tags: true
     paths:
-      - ci/cf-nfrastructure
+      - ci/cf-infrastructure
       - ci/operations
 
 - name: every-day
