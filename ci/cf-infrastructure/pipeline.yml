@@ -207,7 +207,7 @@ jobs:
     - get: prometheus-boshrelease
       trigger: true
   - task: deploy-prometheus
-    file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
+    file: ci/ci/cf-infrastructure/tasks/deploy-prometheus.yml
     params:
       BBL_GCP_REGION: europe-west3
       BBL_GCP_ZONE: europe-west3-a
