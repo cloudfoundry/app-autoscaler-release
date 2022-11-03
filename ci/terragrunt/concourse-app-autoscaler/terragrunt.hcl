@@ -1,7 +1,3 @@
-dependencies {
-  paths = ["../concourse/app"]
-}
-
 remote_state {
   backend = "gcs"
   generate = {

@@ -1,7 +1,7 @@
 resource "concourse_team" "app_autoscaler" {
   team_name = "app-autoscaler"
 
-  owners = [ 
+  owners = [
     "group:github:sap-cloudfoundry:app-autoscaler",
     "group:github:cloudfoundry:wg-app-runtime-interfaces-autoscaler-approvers"
   ]
