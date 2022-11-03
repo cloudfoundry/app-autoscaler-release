@@ -134,7 +134,7 @@ jobs:
     - get: ci
     - get: bbl-state
   - task: update-dns-servers
-    file: ci/cf-infrastructure/tasks/update-dns-servers.yml
+    file: ci/ci/cf-infrastructure/tasks/update-dns-servers.yml
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
       BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
