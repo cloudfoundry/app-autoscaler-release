@@ -14,4 +14,4 @@ inputs:
 - name: bbl-state
 
 run:
-  path: ci/ci/autoscaler/scripts/update-dns-servers.sh
+  path: ci/ci/cf-infrastructre/scripts/update-dns-servers.sh
