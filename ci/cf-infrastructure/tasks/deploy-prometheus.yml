@@ -16,4 +16,4 @@ inputs:
 - name: prometheus-boshrelease
 
 run:
-  path: ci/ci/infrastructure/scripts/deploy-prometheus.sh
+  path: ci/ci/cf-infrastructure/scripts/deploy-prometheus.sh

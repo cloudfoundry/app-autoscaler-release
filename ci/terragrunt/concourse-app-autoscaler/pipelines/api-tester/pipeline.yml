@@ -32,5 +32,5 @@ jobs:
         args:
           - -ce
           - |
-            cd app-autoscaler-release/ci/terragrunt/concourse-manage/pipelines/api-tester/src
+            cd app-autoscaler-release/ci/terragrunt/concourse-app-autoscaler/pipelines/api-tester/src
             go test -v ./...
