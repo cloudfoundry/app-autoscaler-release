@@ -1,0 +1,102 @@
+project: app-runtime-interfaces-wg
+region: europe-west3
+zone: europe-west3-a
+secondary_zone: europe-west3-b
+
+# gcs_prefix builds root folder for tf state for the entire stack
+gcs_bucket: terraform-wg-ci-test
+gcs_prefix: concourse
+
+# DNS record for your Concourse URL https://<dns_record>.<dns_zone>.dns_domain
+dns_record: concourse-test
+dns_zone: app-runtime-interfaces
+dns_domain: ci.cloudfoundry.org
+
+# Project's resource names are build off GKE name for scaling purposes
+# k8s cluster, SQL instance, vpc, IAM groups, cloud nat router, service accounts
+gke_name: wg-ci-test
+
+# Concourse teams
+concourse_github_mainTeam: "cloudfoundry:wg-app-runtime-interfaces-autoscaler-approvers"
+concourse_github_mainTeamUser: ""
+
+# Concourse helm chart
+concourse_helm_version: "17.0.27"
+
+# Module sources for the stack - git or local
+# ie.
+#  infra: "git@github.com:cloudfoundry/app-autoscaler-release.git//ci/terraform-modules/concourse/infra?ref=new-concourse"
+#  infra: "../../..//terraform-modules//concourse/infra"
+tf_modules:
+  infra: "../../..//terraform-modules/concourse/infra"
+  backend: "../../..//terraform-modules//concourse/backend"
+  app: "../../..//terraform-modules//concourse/app"
+
+
+
+
+# ---------------------------------------------------------
+# In most cases settings below are safe to keep as defaults
+# ---------------------------------------------------------
+# SQL
+sql_instance_tier: db-custom-1-4096
+sql_instance_backup_location: eu
+sql_instance_disk_size: 38
+
+# NETWORK
+vpc_name: default
+subnet_cidr: 10.10.0.0/24
+
+# Other GKE vars
+gke_controlplane_version: 1.23.8-gke.1900
+gke_cluster_ipv4_cidr: 10.104.0.0/14
+gke_services_ipv4_cidr_block: 10.108.0.0/20
+gke_master_ipv4_cidr_block: 172.16.0.32/28
+gke_default_pool_machine_type: e2-standard-4
+gke_default_pool_ssd_count: 0
+# typical config for concourse worker is n4-standard-4 and ssd_count: 1
+# note: economy e2-standard machine can't use local ssd drives
+gke_workers_pool_machine_type: n4-standard-4
+gke_workers_pool_ssd_count: 0
+
+# IAM
+wg_ci_human_account_permissions: [
+    "container.clusterRoles.bind",
+    "container.clusterRoles.create",
+    "container.clusterRoles.delete",
+    "container.clusterRoles.escalate",
+    "container.clusterRoles.get",
+    "container.clusterRoles.list",
+    "container.clusterRoles.update",
+    "container.clusterRoleBindings.create",
+    "container.clusterRoleBindings.delete",
+    "container.clusterRoleBindings.get",
+    "container.clusterRoleBindings.list",
+    "container.clusterRoleBindings.update",
+    "container.configMaps.get",
+
+    # *Note* iam.roles allow to esalate privileges to any account
+    "iam.roles.create",
+    "iam.roles.update",
+    "iam.roles.delete",
+    "iam.roles.undelete",
+
+    "iam.serviceAccounts.setIamPolicy",
+
+    "resourcemanager.projects.get",
+    "resourcemanager.projects.getIamPolicy",
+    "resourcemanager.projects.setIamPolicy",
+    # TODO: rather give access to particular secret
+    "secretmanager.versions.access"
+    ]
+
+wg_ci_cnrm_service_account_permissions: [
+    "cloudsql.users.create",
+    "cloudsql.users.delete",
+    "cloudsql.users.get",
+    "cloudsql.users.list",
+    "cloudsql.users.update",
+    "cloudsql.databases.get",
+    "cloudsql.databases.list",
+    "cloudsql.databases.update"
+  ]
