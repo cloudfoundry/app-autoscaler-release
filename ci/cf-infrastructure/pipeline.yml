@@ -30,7 +30,7 @@ resources:
     branch: new-concourse
     fetch_tags: true
     paths:
-      - ci/infrastructure
+      - ci/cf-nfrastructure
       - ci/operations
 
 - name: every-day
@@ -84,7 +84,7 @@ jobs:
   - get: ci
     trigger: true
   - set_pipeline: self
-    file: ci/ci/infrastructure/pipeline.yml
+    file: ci/ci/cf-infrastructure/pipeline.yml
 
 
 - name: setup-infrastructure
@@ -134,7 +134,7 @@ jobs:
     - get: ci
     - get: bbl-state
   - task: update-dns-servers
-    file: ci/infrastructure/tasks/update-dns-servers.yml
+    file: ci/cf-infrastructure/tasks/update-dns-servers.yml
     params:
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
       BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
@@ -166,7 +166,7 @@ jobs:
     - get: cf-deployment-concourse-tasks
     - get: ci
   - task: check-for-exisiting-deployments
-    file: ci/ci/infrastructure/tasks/check-for-existing-deployments.yml
+    file: ci/ci/cf-infrastructure/tasks/check-for-existing-deployments.yml
   - task: destroy-infrastructure
     file: cf-deployment-concourse-tasks/bbl-destroy/task.yml
     params:
@@ -229,7 +229,7 @@ jobs:
     - get: autoscaler-env-vars-store
     - get: ci
   - task: combine-ops-files
-    file: ci/ci/infrastructure/tasks/combine-ops.yml
+    file: ci/ci/cf-infrastructure/tasks/combine-ops.yml
     input_mapping:
       app-autoscaler-release: ci
     output_mapping:
