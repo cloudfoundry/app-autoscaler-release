@@ -79,11 +79,11 @@ export BBL_ENV_NAME="autoscaler"
 export bbl_env_name="${BBL_ENV_NAME}"
 debug "BBL_ENV_NAME: ${BBL_ENV_NAME}"
 
-export BBL_GCP_REGION="europe-west4"
+export BBL_GCP_REGION="europe-west3"
 export bbl_gcp_region="${BBL_GCP_REGION}"
 debug "BBL_GCP_REGION: ${BBL_GCP_REGION}"
 
-export BBL_GCP_ZONE="europe-west4-a"
+export BBL_GCP_ZONE="europe-west3-a"
 export bbl_gcp_zone="${BBL_GCP_ZONE}"
 debug "BBL_GCP_ZONE: ${BBL_GCP_ZONE}"
 
