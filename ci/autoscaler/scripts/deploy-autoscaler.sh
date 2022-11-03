@@ -59,11 +59,13 @@ function deploy () {
   done
 
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-
+  
+  # Try to silence Prometheus but do not fail deployment if there's an error
+  set +e
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy"
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
-
+  set -e
 
   echo " - Deploy options: '${bosh_deploy_opts}'"
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
