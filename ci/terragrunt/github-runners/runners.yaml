@@ -1,0 +1,9 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: autoscaler-runners
+spec:
+  replicas: 0
+  template:
+    spec:
+      repository: cloudfoundry/app-autoscaler-release
