@@ -48,7 +48,7 @@ set +e
 exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
-function deploy () {
+function deploy() {
   OPS_FILES_TO_USE=""
   for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
@@ -99,7 +99,7 @@ else
 	--secret "autoscaler_client_secret"
 fi
 
-function find_or_upload_stemcell(){
+function find_or_upload_stemcell() {
   # Determine if we need to upload a stemcell at this point.
   stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
   stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
@@ -115,14 +115,21 @@ function find_or_upload_stemcell(){
   fi
 }
 
-
-function find_or_upload_release(){
+function find_or_upload_release() {
   if ! bosh releases | grep -E "${bosh_release_version}[*]*\s" > /dev/null; then
-    echo "Creating Release with bosh version ${bosh_release_version}"
-    bosh create-release --force --version="${bosh_release_version}"
+
+    local -r release_desc_file="dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
+    if [ ! -f "${release_desc_file}" ]
+    then
+      echo "Creating Release with bosh version ${bosh_release_version}"
+      bosh create-release --force --version="${bosh_release_version}"
+    else
+      echo -e "Release with bosh-version ${bosh_release_version} already locally present. Reusing it."\
+        "\n\tIf this does not work, please consider executing `bosh reset-release`."
+    fi
 
     echo "Uploading Release"
-    bosh upload-release $bosh_upload_release_opts "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
+    bosh upload-release $bosh_upload_release_opts "${release_desc_file}"
   else
     echo "the app-autoscaler release is already uploaded with the commit ${bosh_release_version}"
     echo "Attempting redeploy..."
