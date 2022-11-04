@@ -41,8 +41,18 @@ env:
   CHECK_NAME: "${{ github.workflow }}_Check"
 
 jobs:
-
-
+  create_pending_check:
+    # We require jobs for Acceptance Tests in this workflow to trigger on relevant events and labels.
+    # Verifcation job must runs always.
+    # Adding a non related label to the PR does not require acceptance tests to run, however github will rerun the workflow
+    #   and skip all jobs. In such case verification reuses previous check result or exits with failure if a check wasnt created.
+    if: |
+      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
+          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
+      ) ||
+      (  ( github.event.action == 'labeled' )
+          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
+      )
     name: "Create pending check"
     runs-on: ubuntu-latest
     permissions:
@@ -64,57 +74,20 @@ jobs:
     needs: [ create_pending_check ]
     name: Deploy for ${{ github.workflow }}
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
-      volumes:
-        - bbl:/bbl
-        - app-autoscaler-release:/app-autoscaler-release
     steps:
-      - name: clone BBL repo
-        uses: actions/checkout@v3
-        with:
-          repository: cloudfoundry/app-autoscaler-env-bbl-state
-          ssh-key: ${{ inputs.ssh-key }}
-          path: bbl
       - name: Checkout
         uses: actions/checkout@v3
         with:
           path: app-autoscaler-release
-            #    - name: Setup environment for deployment
-            #      uses: ./app-autoscaler-release/.github/actions/setup-environment
-            #      with:
-            #        ssh-key: ${{ secrets.bbl_ssh_key}}
+      - name: Setup environment for deployment
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
+        with:
+          ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Deploy autoscaler
         run: |
           cd ${AUTOSCALER_DIR}
           make deploy-autoscaler
 
-  container-test-job:
-    runs-on: ubuntu-latest
-    container:
-      image: node:14.16
-      env:
-        NODE_ENV: development
-      ports:
-        - 80
-      volumes:
-        - my_docker_volume:/volume_mount
-      options: --cpus 1
-    steps:
-      - name: Check for dockerenv file
-        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
-  create_pending_check:
-    # We require jobs for Acceptance Tests in this workflow to trigger on relevant events and labels.
-    # Verifcation job must runs always.
-    # Adding a non related label to the PR does not require acceptance tests to run, however github will rerun the workflow
-    #   and skip all jobs. In such case verification reuses previous check result or exits with failure if a check wasnt created.
-    if: |
-      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
-          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
-      ) ||
-      (  ( github.event.action == 'labeled' )
-          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
-      )
   acceptance_tests:
     needs: [ deploy_autoscaler ]
     strategy:
