@@ -16,7 +16,7 @@ runs:
       shell: bash
       run: |
         if [ -z "${{ inputs.version }}" ]; then
-          VERSION=$(grep -E -m 1 -o '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' ${{ inputs.source }}/packages/openjdk-11/version  | head -1)
+          VERSION=$(grep -E -m 1 -o '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' ${{ inputs.source }}/packages/openjdk-17/version  | head -1)
           echo "::set-output name=version::${VERSION}"
           echo "Using automatically determined version ${VERSION}"
         else
