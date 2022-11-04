@@ -10,7 +10,6 @@ import (
 
 	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"
 	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("AutoScaler dynamic policy", func() {
@@ -42,7 +41,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					Fail("There is not enough app memory in the app to run this test.\n - app resident size %d\n - app memory limit: %d\n - heap to use: %d", AppResidentSize, cfg.NodeMemoryLimit, int(heapToUse))
 				}
 
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", AppResidentSize+20, AppResidentSize+20)
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", AppResidentSize+10, AppResidentSize+10)
 				initialInstanceCount = 1
 			})
 
