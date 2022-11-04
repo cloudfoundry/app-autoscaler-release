@@ -305,9 +305,11 @@ deploy-autoscaler: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh depl
 deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
+
 deploy-autoscaler-bosh:
 	echo " - deploying autoscaler"
 	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+
 
 deploy-prometheus:
 	@export DEPLOYMENT_NAME=prometheus;\
