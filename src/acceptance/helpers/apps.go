@@ -16,7 +16,7 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
-const AppResidentSize = 70
+const AppResidentSize = 55
 
 func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
 	rawApps := getRawApps(spaceGuid, orgGuid, cfg.DefaultTimeoutDuration())
