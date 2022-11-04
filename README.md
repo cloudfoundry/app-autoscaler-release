@@ -17,7 +17,7 @@ The `App-AutoScaler` has the following components:
 * `scalingengine`: takes the scaling actions based on dynamic scaling rules or schedules
 
 ## Development
- 
+
 ### System requirements
 
 * Java 11 or above
@@ -28,8 +28,8 @@ The `App-AutoScaler` has the following components:
 
 ### Database requirement
 
-The `App-AutoScaler` supports Postgres and MySQL. It uses Postgres as the default backend 
-data store. These are run up locally with docker images so ensure that docker is working on 
+The `App-AutoScaler` supports Postgres and MySQL. It uses Postgres as the default backend
+data store. These are run up locally with docker images so ensure that docker is working on
 your system before running up the tests.
 
 ### Setup
@@ -46,7 +46,7 @@ Generate [scheduler test certs](https://github.com/cloudfoundry/app-autoscaler/b
 
 
 #### Initialize the Database
-**Note:** The makefile will init the database if it has not already been run before running the tests. 
+**Note:** The makefile will init the database if it has not already been run before running the tests.
 
 * **Postgres**
 ```shell

@@ -77,7 +77,7 @@ var _ = BeforeSuite(func() {
 		}
 	})
 
-	appName = CreateTestApp(cfg, appName, 1)
+	appName = CreateTestApp(cfg, "apitest", 1)
 	appGUID = GetAppGuid(cfg, appName)
 
 	By("Creating test service")

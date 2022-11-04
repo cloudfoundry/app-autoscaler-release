@@ -49,8 +49,8 @@ target/init:
 	@make -C src/autoscaler buildtools
 	@touch $@
 
-.PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-node clean-build
+.PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-node clean-build clean-acceptance
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 clean-build:
@@ -79,6 +79,11 @@ clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
 	@rm -rf .dev_builds
+clean-acceptance:
+	@echo " - cleaning acceptance"
+	@rm src/acceptance/acceptance_config.json &> /dev/null || true
+	@rm src/acceptance/ginkgo* &> /dev/null || true
+	@rm -rf src/acceptance/results &> /dev/null || true
 
 .PHONY: build build-test build-tests build-all $(all_modules)
 build: init  $(all_modules)
@@ -256,12 +261,12 @@ vendor-app: target/vendor-app
 target/vendor-app:
 	@echo " - installing node modules to package node app"
 	@cd src/acceptance/assets/app/nodeApp > /dev/null\
-	 && npm install --production\
-	 && npm prune --production
+	 && npm install --omit=dev\
+	 && npm prune --omit=dev
 	@touch $@
 
 .PHONY: acceptance-release
-acceptance-release: mod-tidy vendor vendor-app
+acceptance-release: clean-acceptance mod-tidy vendor vendor-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'

@@ -94,6 +94,7 @@ jobs:
       matrix:
         suite: "${{ fromJSON(inputs.suites) }}"
     runs-on: ubuntu-latest
+    continue-on-error: true
     name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
       - name: Checkout
