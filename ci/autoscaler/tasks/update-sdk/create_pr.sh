@@ -24,6 +24,9 @@ function add_private_key(){
 
 function login_gh(){
   if [ -n "${github_access_token}" ]; then
+    step "Logging into github"
+    export GITHUB_TOKEN="${github_access_token}"
+    export GITHUB_ACCESS_TOKEN="${github_access_token}"
     printenv github_access_token | gh auth login --with-token -h github.com
   fi
 }
