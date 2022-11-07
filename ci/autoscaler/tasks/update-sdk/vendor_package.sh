@@ -32,7 +32,11 @@ EOF
   export UPLOADER_KEY=${UPLOADER_KEY:-$(cat "${HOME}/.ssh/autoscaler_blobstore_uploader.key")}
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "${config_file}"
 
-  bosh vendor-package "${package}" "${package_location}"
+  pushd ${autoscaler_dir} > /dev/null
+    step "vendoring package ${package}"
+    bosh vendor-package "${package}" "${package_location}"
+  popd > /dev/null
+
   cp "${autoscaler_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
   cp "${autoscaler_dir}/version" "packages/${package}/version" && git add "packages/${package}/version"
 

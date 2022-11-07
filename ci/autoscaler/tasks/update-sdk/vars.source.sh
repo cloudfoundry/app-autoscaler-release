@@ -33,10 +33,6 @@ function step(){
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir=$(realpath -e "${script_dir}/../../../..")
 
-export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' || echo 44)}
-[ "${PR_NUMBER}" == "44" ] && warn "no PR_NUMBER is set, will use the default (44)";
-debug "PR_NUMBER: ${PR_NUMBER}"
-
 export SYSTEM_DOMAIN="${SYSTEM_DOMAIN:-"autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"}"
 debug "SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 # shellcheck disable=SC2034
