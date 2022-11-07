@@ -51,9 +51,9 @@ dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
 update_branch="${type}-version-bump-${dashed_version}_${package_sha}"
 pr_title="Update ${type} version to ${package_version}"
 pr_description="Automatic version bump of ${type} to \`${package_version}\`<br/>Package commit sha: [${package_sha}](https://github.com/bosh-packages/${type}-release/commit/${package_sha})"
-login_gh
 add_private_key
 configure_git_credentials
+login_gh
 
 pushd "${autoscaler_dir}" > /dev/null
   git checkout -b "${update_branch}"
