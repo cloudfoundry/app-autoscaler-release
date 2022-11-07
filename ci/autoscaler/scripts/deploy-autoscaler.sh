@@ -17,7 +17,9 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/add-extra-plan.yml\
  ${autoscaler_dir}/operations/set-release-version.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
- ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
+ ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
+ ${autoscaler_dir}/operations/operations/remove-metricsserver.yml\
+ ${autoscaler_dir}/operations/operations/remove-metricsgateway.yml"}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
@@ -59,7 +61,7 @@ function deploy () {
   done
 
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-  
+
   # Try to silence Prometheus but do not fail deployment if there's an error
   set +e
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"

@@ -22,6 +22,9 @@ anchors:
       operations/set-release-version.yml
       operations/enable-log-cache.yml
       operations/log-cache-syslog-server.yml
+      operations/remove-metricsserver.yml
+      operations/remove-metricsgateway.yml
+
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
@@ -45,6 +48,8 @@ anchors:
       operations/enable-log-cache.yml
       operations/log-cache-syslog-server.yml
       operations/use_buildin_mode.yml
+      operations/remove-metricsserver.yml
+      operations/remove-metricsgateway.yml
 
 groups:
 - name: all
