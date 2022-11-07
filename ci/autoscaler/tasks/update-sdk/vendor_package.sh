@@ -35,12 +35,13 @@ EOF
   pushd ${autoscaler_dir} > /dev/null
     step "vendoring package ${package}"
     bosh vendor-package "${package}" "${package_location}"
-  popd > /dev/null
-  vendor_commit_file="${autoscaler_dir}/packages/${package}/vendored-commit"
-  version_commit_file="${autoscaler_dir}/packages/${package}/version"
-  cp "${autoscaler_dir}/vendored-commit" "${vendor_commit_file}" && git add  "${vendor_commit_file}"
-  cp "${autoscaler_dir}/version" "${version_commit_file}" && git add "${version_commit_file}"
 
-  log "Git diff -----"
-  git --no-pager diff
+    vendor_commit_file="${autoscaler_dir}/packages/${package}/vendored-commit"
+    version_commit_file="${autoscaler_dir}/packages/${package}/version"
+    cp "${autoscaler_dir}/vendored-commit" "${vendor_commit_file}" && git add "${vendor_commit_file}"
+    cp "${autoscaler_dir}/version" "${version_commit_file}" && git add "${version_commit_file}"
+
+    log "Git diff -----"
+    git --no-pager diff
+  popd > /dev/null
 }
