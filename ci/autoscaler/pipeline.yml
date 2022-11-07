@@ -1,6 +1,5 @@
 ---
 anchors:
-
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
       operations/add-releases.yml
@@ -223,7 +222,7 @@ jobs:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-params
-      DEPLOYMENT_NAME: "acceptance"
+      DEPLOYMENT_NAME: ((acceptance_deployment_name))
       DEBUG: true
   plan:
   - in_parallel:
@@ -270,7 +269,7 @@ jobs:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-params
-      DEPLOYMENT_NAME: "acceptance-lc"
+      DEPLOYMENT_NAME: ((logcache_acceptance_deployment_name))
       DEBUG: true
   plan:
   - in_parallel:
@@ -317,7 +316,7 @@ jobs:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-buildin-params
-      DEPLOYMENT_NAME: "acceptance-bld"
+      DEPLOYMENT_NAME: ((builtin_acceptance_deployment_name))
       BUILDIN_MODE: true
       SERVICE_OFFERING_ENABLED: false
       DEBUG: true

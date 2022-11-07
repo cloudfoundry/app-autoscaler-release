@@ -7,12 +7,24 @@
 # Then  `TARGET=local set-pipeline.sh`
 set -euo pipefail
 
+fly_args=""
+
+add_var() {
+    fly_args="${fly_args} -v ${1}=${2}"
+}
+
 TARGET="${TARGET:-autoscaler}"
 
 function set_pipeline(){
   local pipeline_name="$1"
 
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" -v branch_name="${CURRENT_BRANCH}"
+	add_var branch_name "${CURRENT_BRANCH}"
+	add_var acceptance_deployment_name 					"${CURRENT_BRANCH}-acceptance"
+	add_var logcache_acceptance_deployment_name "${CURRENT_BRANCH}-acceptance-lc"
+	add_var builtin_acceptance_deployment_name 	"${CURRENT_BRANCH}-acceptance-bld"
+
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" $fly_args
+
   fly -t autoscaler unpause-pipeline -p "${pipeline_name}"
 }
 
