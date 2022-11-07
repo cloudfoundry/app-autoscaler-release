@@ -34,19 +34,18 @@ inputs = {
   gke_cluster_ipv4_cidr = local.config.gke_cluster_ipv4_cidr
   gke_services_ipv4_cidr_block = local.config.gke_services_ipv4_cidr_block
   gke_master_ipv4_cidr_block = local.config.gke_master_ipv4_cidr_block
+  gke_subnet_cidr = local.config.gke_subnet_cidr
   gke_default_pool_machine_type = local.config.gke_default_pool_machine_type
   gke_default_pool_ssd_count = local.config.gke_default_pool_ssd_count
   gke_workers_pool_machine_type = local.config.gke_workers_pool_machine_type
   gke_workers_pool_ssd_count = local.config.gke_default_pool_ssd_count
+  gke_cloud_nat_min_ports_per_vm = local.config.gke_cloud_nat_min_ports_per_vm
 
   sql_instance_name = "${local.config.gke_name}-concourse"
   sql_instance_tier = local.config.sql_instance_tier
   sql_instance_disk_size = local.config.sql_instance_disk_size
   sql_instance_backup_location = local.config.sql_instance_backup_location
   sql_instance_secondary_zone = local.config.secondary_zone
-
-  vpc_name = local.config.vpc_name
-  subnet_cidr = local.config.subnet_cidr
 
   dns_record = local.config.dns_record
   dns_zone = local.config.dns_zone

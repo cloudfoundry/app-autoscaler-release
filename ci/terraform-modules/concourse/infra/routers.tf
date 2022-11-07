@@ -17,7 +17,9 @@ resource "google_compute_router_nat" "nat_config" {
     name                    = google_compute_subnetwork.subnet.id
     source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
   }
-  enable_dynamic_port_allocation      = true
+  enable_dynamic_port_allocation      = false
+  min_ports_per_vm = var.gke_cloud_nat_min_ports_per_vm
+
   enable_endpoint_independent_mapping = false
   tcp_established_idle_timeout_sec    = 180
 

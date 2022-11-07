@@ -28,8 +28,6 @@ variable "dns_zone" { nullable = false }
 variable "dns_domain" { nullable = false }
 variable "dns_name" { nullable = false }
 
-variable "subnet_cidr" { nullable = false }
-
 variable "wg_ci_human_account_permissions" { nullable = false }
 variable "wg_ci_cnrm_service_account_permissions" { nullable = false }
 
@@ -42,6 +40,8 @@ variable "gke_default_pool_machine_type" { nullable = false }
 variable "gke_default_pool_ssd_count" { nullable = false }
 variable "gke_workers_pool_machine_type" { nullable = false }
 variable "gke_workers_pool_ssd_count" { nullable = false }
+variable "gke_subnet_cidr" { nullable = false }
+variable "gke_cloud_nat_min_ports_per_vm" { nullable = false }
 
 variable "github_secret_name" { nullable = false }
 

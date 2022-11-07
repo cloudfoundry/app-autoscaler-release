@@ -7,15 +7,7 @@
 # Then  `TARGET=local set-pipeline.sh`
 set -euo pipefail
 
-export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
-
-fly_args=""
-
-add_var() {
-    fly_args="${fly_args} -v ${1}=${2}"
-}
-
-TARGET="${TARGET:-app-autoscaler-release}"
+TARGET="${TARGET:-app-runtime-interfaces}"
 
 function set_pipeline(){
   local pipeline_name="$1"
@@ -30,8 +22,7 @@ function set_pipeline(){
     add_var builtin_acceptance_deployment_name  "${PR_NUMBER}-acceptance-bld"
   fi
 
-  # shellcheck disable=SC2086
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" $fly_args
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" -v branch_name="${CURRENT_BRANCH}"
   fly -t "${TARGET}" unpause-pipeline -p "${pipeline_name}"
 }
 
@@ -60,7 +51,8 @@ function pause_jobs(){
 function main(){
   SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
   pushd "${SCRIPT_RELATIVE_DIR}" > /dev/null
-    CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
+    #CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
+    CURRENT_BRANCH="main"
 
     if [[ "$CURRENT_BRANCH" == "main" ]];then
       export PIPELINE_NAME="app-autoscaler-release"
