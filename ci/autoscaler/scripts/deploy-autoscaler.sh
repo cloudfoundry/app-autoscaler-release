@@ -60,7 +60,7 @@ function deploy() {
   done
 
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-  
+
   # Try to silence Prometheus but do not fail deployment if there's an error
   set +e
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
