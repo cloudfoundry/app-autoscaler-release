@@ -37,10 +37,12 @@ function configure_git_credentials(){
   fi
 }
 
-if [ "$( git status -s | wc -l)" -eq 0 ]; then
-  echo " - Nothing changed !! "
-  exit 0
-fi
+pushd "${autoscaler_dir}" > /dev/null
+  if [ "$( git status -s | wc -l)" -eq 0 ]; then
+    echo " - Nothing changed !! "
+    exit 0
+  fi
+popd > /dev/null
 
 package_version=$(cat "${root_dir}/version") && rm "${root_dir}/version"
 package_sha=$(cat "${root_dir}/vendored-commit") && rm "${root_dir}/vendored-commit"
