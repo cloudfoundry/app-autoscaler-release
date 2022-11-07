@@ -7,7 +7,7 @@ set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
-github_access_token=${GITHUB_ACCESS_TOKEN:-}
+export github_access_token=${GITHUB_ACCESS_TOKEN:-}
 export github_private_key=${GITHUB_PRIVATE_KEY:-}
 
 function add_private_key(){
