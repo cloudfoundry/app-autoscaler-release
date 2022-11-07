@@ -37,14 +37,16 @@ RUN apt-get update && \
             cf8-cli \
             gnupg \
             gnupg2 \
-            gh && \
+            gh  \
+            make \
+            mysql-client && \
     apt-get clean
 
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list
 
 # install golang
-ARG GO_VERSION=1.19
+ARG GO_VERSION=1.19.2
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
@@ -60,7 +62,7 @@ RUN apt-get update && \
     apt-get clean
 
 # Install bosh_cli
-ARG BOSH_VERSION=6.4.4
+ARG BOSH_VERSION=7.0.1
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
@@ -101,7 +103,6 @@ RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archiv
 	rm -rf /tmp/* &&\
     mvn --version
 
-
 # install postgres
 ENV PGDATA /var/lib/postgresql/${POSTGRES_VERSION}/main
 ENV PGCONFIG /etc/postgresql/${POSTGRES_VERSION}/main
@@ -116,7 +117,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   apt-get clean &&\
   gcloud version
 
-ARG GINKGO_VERSION=2.1.3
+ARG GINKGO_VERSION=2.4.0
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
     ginkgo version
 

@@ -1,4 +1,9 @@
 name: Bosh Templates Test
+
+concurrency:
+  group: autoscaler-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
   workflow_dispatch:
