@@ -8,7 +8,7 @@ set -euo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
 github_access_token=${GITHUB_ACCESS_TOKEN:-}
-github_private_key=${GITHUB_PRIVATE_KEY:-}
+export github_private_key=${GITHUB_PRIVATE_KEY:-}
 
 function add_private_key(){
   if [ -n "${github_private_key}" ]; then
@@ -25,8 +25,6 @@ function add_private_key(){
 function login_gh(){
   if [ -n "${github_access_token}" ]; then
     step "Logging into github"
-    export GITHUB_TOKEN="${github_access_token}"
-    export GITHUB_ACCESS_TOKEN="${github_access_token}"
     printenv github_access_token | gh auth login --with-token -h github.com
   fi
 }
