@@ -12,4 +12,3 @@ variable "concourse_github_mainTeamUser" { nullable = false }
 
 variable "load_balancer_ip" { nullable = false }
 variable "load_balancer_dns" { nullable = false }
-variable "github_oauth_secret_name" { nullable = false }
