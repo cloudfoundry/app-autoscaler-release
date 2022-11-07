@@ -5,7 +5,10 @@ set -euo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
 source "${script_dir}/vendor_package.sh"
-export golang_dir=${GOLANG_DIR:-$(realpath -e "${autoscaler_dir}/../golang-release")}
+
+golang_dir=${GOLANG_DIR:-"${autoscaler_dir}/../golang-release"}
+export golang_dir="$(realpath -e "${golang_dir}")"
+
 SED="sed"
 which gsed >/dev/null && SED=gsed
 
@@ -20,5 +23,5 @@ find "${autoscaler_dir}" -name go.mod -type f -exec ${SED} -i "s/^[[:space:]]*go
 step "updating .tool-version with ${golang_version}"
 "${SED}" -i "s/golang 1.*/golang ${golang_version}/g" "${autoscaler_dir}/.tool-versions"
 
-echo -n "${golang_version}" > version
+echo -n "${golang_version}" > ${autoscaler_dir}/version
 vendor-package "$golang_dir" golang-1-linux "${golang_version}"

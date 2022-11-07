@@ -7,8 +7,8 @@ set -euo pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
-github_access_token=${GITHUB_ACCESS_TOKEN:-}
-github_private_key=${GITHUB_PRIVATE_KEY:-}
+export github_access_token=${GITHUB_ACCESS_TOKEN:-}
+export github_private_key=${GITHUB_PRIVATE_KEY:-}
 
 function add_private_key(){
   if [ -n "${github_private_key}" ]; then
@@ -24,6 +24,7 @@ function add_private_key(){
 
 function login_gh(){
   if [ -n "${github_access_token}" ]; then
+    step "Logging into github"
     printenv github_access_token | gh auth login --with-token -h github.com
   fi
 }
@@ -37,10 +38,12 @@ function configure_git_credentials(){
   fi
 }
 
-if [ "$( git status -s | wc -l)" -eq 0 ]; then
-  echo " - Nothing changed !! "
-  exit 0
-fi
+pushd "${autoscaler_dir}" > /dev/null
+  if [ "$( git status -s | wc -l)" -eq 0 ]; then
+    echo " - Nothing changed !! "
+    exit 0
+  fi
+popd > /dev/null
 
 package_version=$(cat "${root_dir}/version") && rm "${root_dir}/version"
 package_sha=$(cat "${root_dir}/vendored-commit") && rm "${root_dir}/vendored-commit"
@@ -49,9 +52,9 @@ dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
 update_branch="${type}-version-bump-${dashed_version}_${package_sha}"
 pr_title="Update ${type} version to ${package_version}"
 pr_description="Automatic version bump of ${type} to \`${package_version}\`<br/>Package commit sha: [${package_sha}](https://github.com/bosh-packages/${type}-release/commit/${package_sha})"
-login_gh
 add_private_key
 configure_git_credentials
+login_gh
 
 pushd "${autoscaler_dir}" > /dev/null
   git checkout -b "${update_branch}"
