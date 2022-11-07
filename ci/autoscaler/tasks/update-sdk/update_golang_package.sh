@@ -5,7 +5,10 @@ set -euo pipefail
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
 source "${script_dir}/vendor_package.sh"
-export golang_dir=${GOLANG_DIR:-$(realpath -e "${autoscaler_dir}/../golang-release")}
+
+golang_dir=${GOLANG_DIR:-"${autoscaler_dir}/../golang-release"}
+export golang_dir="$(realpath -e "${golang_dir}")"
+
 SED="sed"
 which gsed >/dev/null && SED=gsed
 
