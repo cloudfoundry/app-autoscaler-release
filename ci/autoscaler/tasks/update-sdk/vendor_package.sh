@@ -36,9 +36,10 @@ EOF
     step "vendoring package ${package}"
     bosh vendor-package "${package}" "${package_location}"
   popd > /dev/null
-
-  cp "${autoscaler_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
-  cp "${autoscaler_dir}/version" "packages/${package}/version" && git add "packages/${package}/version"
+  vendor_commit_file="${autoscaler_dir}/packages/${package}/vendored-commit"
+  version_commit_file="${autoscaler_dir}/packages/${package}/version"
+  cp "${autoscaler_dir}/vendored-commit" "${vendor_commit_file}" && git add  "${vendor_commit_file}"
+  cp "${autoscaler_dir}/version" "${version_commit_file}" && git add "${version_commit_file}"
 
   log "Git diff -----"
   git --no-pager diff
