@@ -6,6 +6,8 @@
 # When running concourse locally: ` fly -t "local" login -c "http://localhost:8080" `
 # Then  `TARGET=local set-pipeline.sh`
 set -euo pipefail
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/scripts
+source "${script_dir}/vars.source.sh"
 
 fly_args=""
 
@@ -18,10 +20,17 @@ TARGET="${TARGET:-autoscaler}"
 function set_pipeline(){
   local pipeline_name="$1"
 
+
 	add_var branch_name "${CURRENT_BRANCH}"
-	add_var acceptance_deployment_name 					"${CURRENT_BRANCH}-acceptance"
-	add_var logcache_acceptance_deployment_name "${CURRENT_BRANCH}-acceptance-lc"
-	add_var builtin_acceptance_deployment_name 	"${CURRENT_BRANCH}-acceptance-bld"
+  if [[ -z $PR_NUMBER ]]; then
+    add_var acceptance_deployment_name 					"acceptance"
+    add_var logcache_acceptance_deployment_name "acceptance-lc"
+    add_var builtin_acceptance_deployment_name 	"acceptance-bld"
+  else
+    add_var acceptance_deployment_name 					"${PR_NUMBER}-acceptance"
+    add_var logcache_acceptance_deployment_name "${PR_NUMBER}-acceptance-lc"
+    add_var builtin_acceptance_deployment_name 	"${PR_NUMBER}-acceptance-bld"
+  fi
 
   fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" $fly_args
 
