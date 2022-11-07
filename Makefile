@@ -240,6 +240,11 @@ eslint:
 	@echo " - linting testApp"
 	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
+.PHONY: lint-actions
+lint-actions:
+	@echo " - linting GitHub actions"
+	go run github.com/rhysd/actionlint/cmd/actionlint@latest
+
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --path-prefix=src/$(patsubst lint_%,%,$@) --config ${lint_config} ${OPTS}
