@@ -187,6 +187,9 @@ jobs:
     file: ci/ci/autoscaler/pipeline.yml
     vars:
       branch_name: ((branch_name))
+      acceptance_deployment_name: ((acceptance_deployment_name))
+      logcache_acceptance_deployment_name: ((logcache_acceptance_deployment_name))
+      builtin_acceptance_deployment_name: ((builtin_acceptance_deployment_name))
 
 - name: unit-tests
   public: true
