@@ -5,8 +5,8 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
 
 function write_vendor_commit(){
-  pushd "${release}" > /dev/null
-    git rev-parse HEAD > "${root_dir}/vendored-commit"
+  pushd "${1}" > /dev/null
+    git rev-parse HEAD > "${autoscaler_dir}/vendored-commit"
   popd > /dev/null
 }
 
@@ -18,7 +18,7 @@ function vendor-package {
   package_location=${release}
   config_file="${autoscaler_dir}/config/private.yml"
   log "Building package for ${release} for version '${version}'"
-  write_vendor_commit
+  write_vendor_commit "${release}"
 
     # generate the private.yml file with the credentials
   step "Generating private.yml..."

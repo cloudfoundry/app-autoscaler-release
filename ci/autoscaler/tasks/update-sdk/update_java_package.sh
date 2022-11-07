@@ -12,6 +12,6 @@ export java_dir="$(realpath -e "${java_dir}")"
 
 # shellcheck disable=SC2154
 java_version=$(grep "${java_dir}/packages/openjdk-17/spec" -e "- jdk-" | sed -E 's/- jdk-(.*)\.tar\.gz/\1/g')
-echo -n "${java_version}" > version
+echo -n "${java_version}" > ${autoscaler_dir}/version
 
 vendor-package "${java_dir}" openjdk-17 "${java_version}"
