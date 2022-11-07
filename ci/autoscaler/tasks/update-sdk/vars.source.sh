@@ -42,13 +42,6 @@ debug "SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 # shellcheck disable=SC2034
 system_domain="${SYSTEM_DOMAIN}"
 
-BBL_STATE_PATH="${BBL_STATE_PATH:-$( realpath -e "${root_dir}/../app-autoscaler-env-bbl-state/bbl-state" 2> /dev/null || echo "${root_dir}/../bbl-state/bbl-state" )}"
-BBL_STATE_PATH="$(realpath -e "${BBL_STATE_PATH}" || echo "ERR_invalid_state_path" )"
-export BBL_STATE_PATH
-debug  "BBL_STATE_PATH: ${BBL_STATE_PATH}"
-# shellcheck disable=SC2034
-bbl_state_path="${BBL_STATE_PATH}"
-
 AUTOSCALER_DIR="${AUTOSCALER_DIR:-${root_dir}}"
 export AUTOSCALER_DIR="$(realpath -e "${AUTOSCALER_DIR}" )"
 debug "AUTOSCALER_DIR: ${AUTOSCALER_DIR}"

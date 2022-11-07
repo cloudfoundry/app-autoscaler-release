@@ -16,7 +16,7 @@ function vendor-package {
   local version=${3}
   local package_location
   package_location=${release}
-  config_file="${autscaler_dir}/config/private.yml"
+  config_file="${autoscaler_dir}/config/private.yml"
   log "Building package for ${release} for version '${version}'"
   write_vendor_commit
 
@@ -33,8 +33,8 @@ EOF
   yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "${config_file}"
 
   bosh vendor-package "${package}" "${package_location}"
-  cp "${autscaler_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
-  cp "${autscaler_dir}/version" "packages/${package}/version" && git add "packages/${package}/version"
+  cp "${autoscaler_dir}/vendored-commit" "packages/${package}/vendored-commit" && git add "packages/${package}/vendored-commit"
+  cp "${autoscaler_dir}/version" "packages/${package}/version" && git add "packages/${package}/version"
 
   log "Git diff -----"
   git --no-pager diff
