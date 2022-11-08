@@ -42,6 +42,18 @@ function cleanup_bosh_deployment(){
   bosh delete-deployment -d "${deployment_name}" -n
 }
 
+function delete_releases(){
+  if [ -n "${deployment_name}" ]
+  then
+    for release in $(bosh releases | grep -E "${deployment_name}\s+"  | awk '{print $2}')
+    do
+       echo "- Deleting bosh release '${release}'"
+       bosh delete-release -n "app-autoscaler/${release}" &
+    done
+    wait
+  fi
+}
+
 function cleanup_bosh(){
   bosh clean-up --all -n
 }
