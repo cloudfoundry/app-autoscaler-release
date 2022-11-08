@@ -23,7 +23,7 @@ templates:
   hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 
 packages:
-  - openjdk-11
+  - openjdk-17
   - db
   - metricsgateway
   - common

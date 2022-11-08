@@ -16,6 +16,8 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
+const AppResidentSize = 55
+
 func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
 	rawApps := getRawApps(spaceGuid, orgGuid, cfg.DefaultTimeoutDuration())
 	return filterByPrefix(prefix, getNames(rawApps))
@@ -77,23 +79,29 @@ func CreateDroplet(cfg config.Config) string {
 }
 
 func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) {
+	createTestApp(*cfg, appName, initialInstanceCount, "--droplet", dropletPath)
+}
+
+func createTestApp(cfg config.Config, appName string, initialInstanceCount int, args ...string) {
 	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
 	if cfg.GetSkipSSLValidation() {
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
 	}
-
 	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push",
-		"--var", "app_name="+appName,
-		"--var", "app_domain="+cfg.AppsDomain,
-		"--var", "service_name="+cfg.ServiceName,
-		"--var", "instances="+countStr,
-		"--var", "buildpack="+cfg.NodejsBuildpackName,
-		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
-		"--droplet", dropletPath,
-		"-f", config.NODE_APP+"/app_manifest.yml",
+	params := []string{
+		"push",
+		"--var", "app_name=" + appName,
+		"--var", "app_domain=" + cfg.AppsDomain,
+		"--var", "service_name=" + cfg.ServiceName,
+		"--var", "instances=" + countStr,
+		"--var", "buildpack=" + cfg.NodejsBuildpackName,
+		"--var", "node_tls_reject_unauthorized=" + setNodeTLSRejectUnauthorizedEnvironmentVariable,
+		"--var", "memory_mb=" + strconv.Itoa(cfg.NodeMemoryLimit),
+		"-f", config.NODE_APP + "/app_manifest.yml",
 		"--no-start",
-	).Wait(cfg.CfPushTimeoutDuration())
+	}
+	params = append(params, args...)
+	createApp := cf.Cf(params...).Wait(cfg.CfPushTimeoutDuration())
 
 	if createApp.ExitCode() != 0 {
 		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
@@ -104,30 +112,7 @@ func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appN
 }
 
 func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
-	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
-	if cfg.GetSkipSSLValidation() {
-		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
-	}
-
-	countStr := strconv.Itoa(initialInstanceCount)
-	createApp := cf.Cf("push",
-		"--var", "app_name="+appName,
-		"--var", "app_domain="+cfg.AppsDomain,
-		"--var", "service_name="+cfg.ServiceName,
-		"--var", "instances="+countStr,
-		"--buildpack", cfg.NodejsBuildpackName,
-		"--var", "node_tls_reject_unauthorized="+setNodeTLSRejectUnauthorizedEnvironmentVariable,
-		"-p", config.NODE_APP,
-		"-f", config.NODE_APP+"/app_manifest.yml",
-		"--no-start",
-	).Wait(cfg.CfPushTimeoutDuration())
-
-	if createApp.ExitCode() != 0 {
-		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
-	}
-	Expect(createApp).To(Exit(0), "failed creating app")
-
-	GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
+	createTestApp(cfg, appName, initialInstanceCount, "-p", config.NODE_APP)
 }
 
 func DeleteTestApp(appName string, timeout time.Duration) {
@@ -136,7 +121,15 @@ func DeleteTestApp(appName string, timeout time.Duration) {
 
 func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url string) string {
 	appGuid := GetAppGuid(cfg, appName)
-	return cfh.CurlAppWithTimeout(cfg, appName, url, 10*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGuid, appInstance))
+	output := cfh.CurlAppWithTimeout(cfg, appName, url, 20*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGuid, appInstance),
+		"-f",
+		"--connect-timeout", "5",
+		"--max-time", "10",
+		"--retry", "5",
+		"--retry-delay", "0",
+		"--retry-max-time", "15")
+	GinkgoWriter.Printf("\n")
+	return output
 }
 
 func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int) {

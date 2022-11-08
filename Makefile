@@ -50,8 +50,8 @@ target/init:
 	@make -C src/autoscaler buildtools
 	@touch $@
 
-.PHONY: clean-autoscaler clean-java clean-vendor
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-node clean-build
+.PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-node clean-build clean-acceptance
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 clean-build:
@@ -80,6 +80,11 @@ clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
 	@rm -rf .dev_builds
+clean-acceptance:
+	@echo " - cleaning acceptance"
+	@rm src/acceptance/acceptance_config.json &> /dev/null || true
+	@rm src/acceptance/ginkgo* &> /dev/null || true
+	@rm -rf src/acceptance/results &> /dev/null || true
 
 .PHONY: build build-test build-tests build-all $(all_modules)
 build: init  $(all_modules)
@@ -236,6 +241,11 @@ eslint:
 	@echo " - linting testApp"
 	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
+.PHONY: lint-actions
+lint-actions:
+	@echo " - linting GitHub actions"
+	go run github.com/rhysd/actionlint/cmd/actionlint@latest
+
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --path-prefix=src/$(patsubst lint_%,%,$@) --config ${lint_config} ${OPTS}
@@ -257,12 +267,12 @@ vendor-app: target/vendor-app
 target/vendor-app:
 	@echo " - installing node modules to package node app"
 	@cd src/acceptance/assets/app/nodeApp > /dev/null\
-	 && npm install --production\
-	 && npm prune --production
+	 && npm install --omit=dev\
+	 && npm prune --omit=dev
 	@touch $@
 
 .PHONY: acceptance-release
-acceptance-release: mod-tidy vendor vendor-app
+acceptance-release: clean-acceptance mod-tidy vendor vendor-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
@@ -306,9 +316,11 @@ deploy-autoscaler: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh depl
 deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
+
 deploy-autoscaler-bosh:
 	echo " - deploying autoscaler"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+
 
 deploy-prometheus:
 	@export DEPLOYMENT_NAME=prometheus;\
@@ -361,8 +373,8 @@ package-specs: mod-tidy vendor
 
 
 ## Prometheus Alerts
-.PHONY: silence-alerts
-silence-alerts:
+.PHONY: alerts-silence
+alerts-silence:
 	export SILENCE_TIME_MINS=480;\
 	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'"
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy ;\
@@ -371,3 +383,17 @@ silence-alerts:
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill ;\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy ;
+
+.PHONY: docker-login docker docker-image
+docker-login: target/docker-login
+target/docker-login:
+	gcloud auth login
+	docker login ghcr.io
+	@touch $@
+docker-image: docker-login
+	docker build -t ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest  ci/dockerfiles/autoscaler-tools
+	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
+
+.PHONY: build-tools
+build-tools:
+	make -C src/autoscaler buildtools

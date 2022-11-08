@@ -187,9 +187,6 @@ var _ = Describe("AutoScaler Public API", func() {
 
 			It("should successfully scale out", func() {
 
-				By("check instance metrics")
-				Expect(len(getMetrics().Metrics)).Should(BeNumerically(">=", 1))
-
 				By("check aggregated metrics")
 				Expect(len(getAggregatedMetrics().Metrics)).Should(BeNumerically(">=", 1))
 
@@ -219,16 +216,6 @@ func getAggregatedMetrics() *AggregatedMetricsResults {
 	raw, status := get(aggregatedMetricURL)
 	Expect(status).To(Equal(200))
 	var metrics *AggregatedMetricsResults
-	err := json.Unmarshal(raw, &metrics)
-	Expect(err).ShouldNot(HaveOccurred())
-	return metrics
-}
-
-func getMetrics() *MetricsResults {
-	raw, status := get(metricURL)
-	Expect(status).To(Equal(200))
-
-	var metrics *MetricsResults
 	err := json.Unmarshal(raw, &metrics)
 	Expect(err).ShouldNot(HaveOccurred())
 	return metrics

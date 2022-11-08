@@ -5,12 +5,14 @@ const https = require('https')
 const axios = require('axios')
 const os = require('os')
 const cpuCount = os.cpus().length
-const { BroadcastChannel, Worker } = require('worker_threads')
+const { Worker } = require('worker_threads')
 
 let metricsForwarderURL = ''
 let mfUsername = ''
 let mfPassword = ''
 const serviceName = process.env.SERVICE_NAME
+let cpuWorkers = []
+let memWorker = null
 
 function getCredentials () {
   // NOTE: the way we check for credentials existence might be further improved.
@@ -68,10 +70,8 @@ async function getMtlsAgent () {
 }
 
 app.get('/slow/:time', async function (req, res) {
-  const delayInMS = parseInt(req.params.time, 10)
-  await new Promise((resolve, reject) => {
-    setTimeout(() => resolve(), delayInMS)
-  })
+  const delayInMS = Math.min(parseInt(req.params.time, 10), 10000) // Define maximum to avoid attack vector
+  await new Promise((resolve) => setTimeout(() => resolve(), delayInMS))
   res.status(200).send('dummy application with slow response')
 })
 
@@ -155,7 +155,7 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
       metrics: [
         {
           name: metricType,
-          value: parseInt(metricValue),
+          value: metricValue,
           unit: 'test-unit'
         }
       ]
@@ -186,30 +186,91 @@ app.get('/custom-metrics/mtls/:type/:value', async function (req, res) {
   }
 })
 
+app.get('/memory/close', async function (req, res) {
+  await stopMemWorker('close')
+  res.status(200).json({ status: 'close memory test' })
+})
+
+app.get('/memory/stats', async function (req, res) {
+  res.status(200).json({ process: process.memoryUsage() })
+})
+
+function startMemWorker (src) {
+  stopMemWorker(src)
+  memWorker = new Worker('./mem_load.mjs')
+}
+app.get('/memory/:megabytes/:minute', async function (req, res) {
+  startMemWorker('/memory/:megabytes/:minute')
+  let megabytes = parseInt(req.params.megabytes, 10)
+  const minute = parseInt(req.params.minute, 10)
+  const memoryMax = parseInt(process.env.MEMORY_MAX)
+  const ramUsableInPercent = 0.85 // If exceeded, OS may terminate the process.
+  const totalMemMb = memoryMax * ramUsableInPercent
+  if (megabytes > totalMemMb) {
+    res.status(400).json({
+      result: 'asked for more heap than is available',
+      memory_usage: process.memoryUsage(),
+      requested_heap_usage: megabytes / 1000,
+      application_limit: process.env.MEMORY_MAX,
+      max_memory_allowed: totalMemMb
+    })
+    return
+  }
+  megabytes = Math.max(1, megabytes)
+  memWorker.postMessage({ action: 'chew', totalMemoryUsage: megabytes, source: '/memory/:megabytes/:minute' })
+  setTimeout(async () => stopMemWorker('timer'), minute * 60 * 1000)
+  res.status(200).json({ result: 'success', msg: `using worker to allocate ${megabytes}MB of heap for ${minute} minutes` })
+})
+
+function stopMemWorker (src) {
+  if (memWorker) {
+    memWorker.postMessage({ action: 'stop', source: src })
+  }
+  memWorker = null
+}
+
+function stopCpuWorkers (src) {
+  cpuWorkers.forEach(worker => worker.postMessage({ action: 'stop', source: src }))
+  cpuWorkers = []
+}
+
+function startCpuWorker (utilization) {
+  const worker = new Worker('./cpu_load.mjs')
+  worker.postMessage({
+    action: 'start_load',
+    utilization,
+    source: `/cpu/:util/:minute worker[${cpuWorkers.length}]`
+  })
+  cpuWorkers.push(worker)
+}
+
 app.get('/cpu/:util/:minute', async function (req, res) {
+  stopCpuWorkers('start')
   let util = parseInt(req.params.util, 10)
   const minute = parseInt(req.params.minute, 10)
   const maxUtil = cpuCount * 100
   util = Math.max(1, util)
-  util = Math.min(maxUtil, util)
-  const msg =
-        'set app cpu utilization to ' + util + '% for ' + minute + ' minutes'
-  const maxWorkerUtil = 99
+  if (util > maxUtil) {
+    res.status(400).json({
+      result: 'asked for more cpu util than is available',
+      cpus: cpuCount,
+      max_util: maxUtil
+    })
+    return
+  }
+  const msg = 'set app cpu utilization to ' + util + '% for ' + minute + ' minutes'
+  const maxWorkerUtil = 100
   let remainingUtil = util
   while (remainingUtil > maxWorkerUtil) {
-    startWorker(maxWorkerUtil, minute)
+    startCpuWorker(maxWorkerUtil)
     remainingUtil = remainingUtil - maxWorkerUtil
   }
-  startWorker(remainingUtil, minute)
+  startCpuWorker(remainingUtil)
+  setTimeout(() => stopCpuWorkers('timer'), minute * 60 * 1000)
   res.status(200).send(msg)
 })
 
-function startWorker (util, minute) {
-  new Worker('./worker.js', { workerData: { util, minute } }) // eslint-disable-line no-new
-}
-
 app.get('/cpu/close', async function (req, res) {
-  const bc = new BroadcastChannel('stop_channel')
-  bc.postMessage('stop')
-  res.status(200).send('close cpu test')
+  stopCpuWorkers()
+  res.status(200).json({ status: 'close cpu test' })
 })

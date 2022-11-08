@@ -20,9 +20,7 @@ runs:
       run: |
         VERSION=$(cat ${{ inputs.source }}/go.mod | grep -E "^go " | sed 's/go //')
         echo "Using version ${VERSION}"
-        [ -z "${{ inputs.version }}" ] \
-          && echo "::set-output name=version::${VERSION}" \
-          || echo "::set-output name=version::${{ inputs.version }}"
+        [ -z "${{ inputs.version }}" ] && { echo "version=${VERSION}" >> $GITHUB_OUTPUT; } || echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
 
     - name: Setup Go
       uses: actions/setup-go@v3
