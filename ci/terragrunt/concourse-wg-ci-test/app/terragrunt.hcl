@@ -41,6 +41,8 @@ inputs = {
 
   gke_name = local.config.gke_name
   gke_workers_pool_machine_type = local.config.gke_workers_pool_machine_type
+  gke_workers_pool_node_count = local.config.gke_workers_pool_node_count
+  gke_default_pool_node_count = local.config.gke_default_pool_node_count
 
   load_balancer_ip = dependency.infra.outputs.load_balancer_ip
   load_balancer_dns = dependency.infra.outputs.load_balancer_dns

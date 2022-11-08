@@ -42,9 +42,9 @@ inputs = {
   gke_default_pool_autoscaling_max = local.config.gke_default_pool_autoscaling_max
 
   gke_workers_pool_machine_type = local.config.gke_workers_pool_machine_type
+  gke_workers_pool_ssd_count = local.config.gke_workers_pool_ssd_count
   gke_workers_pool_node_count = local.config.gke_workers_pool_node_count
   gke_workers_pool_autoscaling_max = local.config.gke_workers_pool_autoscaling_max
-  gke_workers_pool_ssd_count = local.config.gke_workers_pool_ssd_count
 
   gke_cloud_nat_min_ports_per_vm = local.config.gke_cloud_nat_min_ports_per_vm
 

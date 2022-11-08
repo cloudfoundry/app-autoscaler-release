@@ -33,29 +33,32 @@ Adjust `config.yml`
 gcloud auth login && gcloud auth application-default login
 ```
 
-## 3. Create Github OAuth token and supply as a Google Secret
- 1. Create Github OAuth token
+## 3. Create Github OAuth App and supply as a Google Secret
+This is necessary if you want to be able to authenticate with your GitHub profile.
+ 1. Create Github OAuth App 
 
-    This is necessary if you want to be able to authenticate with your GitHub profile. Log on to github.com and navigate to:
-  "Settings" -> "Developer settings" -> "OAuth Apps" -> "New OAuth App"
+    Log on to github.com https://github.com/settings/developers -> Click "New OAuth App"
 
-    As "Homepage URL", enter the Concourse's base URL. As "Authorization callback URL", enter the Concourse URL followed
-by `/sky/issuer/callback`.
+    As "Homepage URL", enter the Concourse's base URL beginning with **https://**. 
+ 
+    As "Authorization callback URL", enter the Concourse URL followed by `/sky/issuer/callback` also beginnign with **https://**.
+
 
  2. Create Google Secret - use a correct naming convention
 The created secret name will be used by terraform scripts and needs to conform to the following convention `${gke_name}-concourse-github-oauth`. By default, `gke_name` is `wg-ci` (working group CI system).
 
-
     ```sh
     cd <folder with config.yaml>
     ```
+
     ```sh
     secret_id="$(yq .gke_name config.yaml)-concourse-github-oauth"
     secret_region="$(yq .region config.yaml)"
+    project="$(yq .project config.yaml)"
     gcloud secrets create ${secret_id} \
      --replication-policy="user-managed" \
-     --locations=${secret_region}
-
+     --locations=${secret_region}\
+     --project=${project}
     ```
 
 
@@ -71,8 +74,11 @@ The created secret name will be used by terraform scripts and needs to conform t
     ```
     ```sh
     secret_id="$(yq .gke_name config.yaml)-concourse-github-oauth"
-    echo -n 'id: your Client ID\nsecret: your Client secret' | \
-    gcloud secrets versions add ${secret_id} --data-file=-
+    project="$(yq .project config.yaml)"
+    id="your Client ID"
+    secret="your Client secret"
+    echo -n "id: ${id}\nsecret: ${secret}" | \
+    gcloud secrets versions add ${secret_id} --data-file=- --project=${project}
     ```
 
     For more information please refer to [gcloud documentation](https://cloud.google.com/secret-manager/docs/creating-and-accessing-secrets).

@@ -30,6 +30,16 @@ data "helm_template" "concourse" {
     name  = "concourse.web.auth.mainTeam.localUser"
     value = ""
   }
+
+  set {
+    name = "worker.replicas"
+    value = var.gke_workers_pool_node_count
+  }
+
+  set {
+    name = "web.replicas"
+    value = var.gke_default_pool_node_count
+  }
 }
 
 data "carvel_ytt" "concourse_app" {
