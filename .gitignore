@@ -40,4 +40,5 @@ scripts/.srl
 privkey.pem
 app-autoscaler-release
 docs/*.bkp
+*.drawio.bkp
 build
