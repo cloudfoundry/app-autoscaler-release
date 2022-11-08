@@ -3,9 +3,9 @@ variable "region" { nullable = false }
 variable "zone" { nullable = false }
 
 variable "gke_name" { nullable = false }
+variable "gke_workers_pool_machine_type" { nullable = false }
 
 variable "concourse_helm_version" { nullable = false }
-
 variable "concourse_github_mainTeam" { nullable = false }
 variable "concourse_github_mainTeamUser" { nullable = false }
 
