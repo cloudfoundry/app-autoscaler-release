@@ -17,7 +17,7 @@ runs:
       run: |
         if [ -z "${{ inputs.version }}" ]; then
           VERSION=$(grep -E -m 1 -o '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' ${{ inputs.source }}/packages/openjdk-17/version  | head -1)
-          echo "::set-output name=version::${VERSION}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Using automatically determined version ${VERSION}"
         else
           echo "::set-output name=version::${{ inputs.version }}"
