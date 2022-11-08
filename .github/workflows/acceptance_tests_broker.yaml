@@ -10,7 +10,7 @@ concurrency:
 jobs:
   acceptance_tests_reusable:
     name: " " # Whitespace name looks nicest on Github UI
-    uses: ./.github/workflows/acceptance_tests_reusable.yaml
+    uses: ./.github/workflows/actions/acceptance.yaml
     with:
       deployment_name: "autoscaler-${{ github.event.pull_request.number }}"
     secrets:
