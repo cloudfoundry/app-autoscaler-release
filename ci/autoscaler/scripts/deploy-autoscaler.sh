@@ -86,11 +86,11 @@ function deploy() {
       -v cf_client_secret=autoscaler_client_secret \
       -v skip_ssl_validation=true > "${tmp_manifest_file}"
 
-  if [ -z "${DEBUG+}" ]
+  if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
   then
     echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
   else
-    trap "$(rm ${tmp_manifest_file})" EXIT
+    trap '$(rm ${tmp_manifest_file})' EXIT ERR
   fi
 
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
