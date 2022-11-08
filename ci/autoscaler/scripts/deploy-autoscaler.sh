@@ -136,6 +136,7 @@ function find_or_upload_release() {
       echo "Creating Release with bosh version ${bosh_release_version}"
       bosh create-release --force --version="${bosh_release_version}"
     else
+      # shellcheck disable=SC2006
       echo -e "Release with bosh-version ${bosh_release_version} already locally present. Reusing it."\
         "\n\tIf this does not work, please consider executing `bosh reset-release`."
     fi

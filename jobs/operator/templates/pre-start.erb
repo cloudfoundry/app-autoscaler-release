@@ -46,7 +46,8 @@ SSLMODE='<%= p("autoscaler.lock_db.sslmode") %>'
     DBURI=$DBURI"&sslcert=/var/vcap/jobs/operator/config/certs/lock_db/crt"
   <% end %>
   <% unless p("autoscaler.lock_db.tls.private_key") == "" %>
-    JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/operator/config/certs/lock_db/key"
+    openssl pkcs8 -topk8 -outform DER -in /var/vcap/jobs/operator/config/certs/lock_db/key -out /var/vcap/jobs/operator/config/certs/lock_db/key.pk8 -nocrypt
+    JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/operator/config/certs/lock_db/key.pk8"
     DBURI=$DBURI"&sslkey=/var/vcap/jobs/operator/config/certs/lock_db/key"
   <% end %>
 <% else %>
@@ -58,7 +59,7 @@ SSLMODE='<%= p("autoscaler.lock_db.sslmode") %>'
     DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
    <% end %>
  <% end %>
- 
+
 detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
 
