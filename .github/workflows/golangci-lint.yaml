@@ -26,6 +26,9 @@ jobs:
           echo "golangci-lint version: '${version}'"
           echo "version=${version}" >> $GITHUB_OUTPUT;
 
+      - name: lint version
+        run: echo "version = '${{ steps.lint.outputs.version }}'"
+
       - name: lint acceptance
         uses: golangci/golangci-lint-action@v3.3.0
         with:
