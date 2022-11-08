@@ -10,6 +10,7 @@ db_type:=postgres
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"; ;; \
  			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
+DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
 SUITES?=broker api app
@@ -327,7 +328,7 @@ deploy-register-cf:
 
 deploy-autoscaler-bosh:
 	echo " - deploying autoscaler"
-	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
 
 deploy-prometheus:
