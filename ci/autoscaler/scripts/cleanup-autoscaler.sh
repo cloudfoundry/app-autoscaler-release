@@ -10,7 +10,6 @@ function main(){
   cleanup_acceptance_run
   cleanup_service_broker
   cleanup_bosh_deployment
-  cleanup_bosh
   cleanup_credhub
 }
 
