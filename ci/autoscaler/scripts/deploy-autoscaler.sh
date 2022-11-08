@@ -47,6 +47,18 @@ set +e
 exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
+if [[ $exist == 0 ]]; then
+  echo "Updating client token"
+  uaac client update "autoscaler_client_id" \
+	    --authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
+else
+  echo "Creating client token"
+  uaac client add "autoscaler_client_id" \
+	--authorized_grant_types "client_credentials" \
+	--authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read" \
+	--secret "autoscaler_client_secret"
+fi
+
 function deploy () {
   OPS_FILES_TO_USE=""
   for OPS_FILE in ${ops_files}; do
@@ -58,8 +70,6 @@ function deploy () {
     fi
   done
 
-  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-  
   # Try to silence Prometheus but do not fail deployment if there's an error
   set +e
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
@@ -67,8 +77,10 @@ function deploy () {
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
   set -e
 
-  echo " - Deploy options: '${bosh_deploy_opts}'"
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
+  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
+  echo " - Deploy options: '${bosh_deploy_opts}'"
+
   bosh -n -d "${deployment_name}" \
     deploy "${deployment_manifest}" \
     ${OPS_FILES_TO_USE} \
@@ -82,21 +94,8 @@ function deploy () {
     -v cf_client_secret=autoscaler_client_secret \
     -v skip_ssl_validation=true
 
-
-  echo "# Finish deploy: '${deployment_name}'"
+  echo "# deployment finished: '${deployment_name}'"
 }
-
-if [[ $exist == 0 ]]; then
-  echo "Updating client token"
-  uaac client update "autoscaler_client_id" \
-	    --authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
-else
-  echo "Creating client token"
-  uaac client add "autoscaler_client_id" \
-	--authorized_grant_types "client_credentials" \
-	--authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read" \
-	--secret "autoscaler_client_secret"
-fi
 
 function find_or_upload_stemcell(){
   # Determine if we need to upload a stemcell at this point.
@@ -113,7 +112,6 @@ function find_or_upload_stemcell(){
     bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
   fi
 }
-
 
 function find_or_upload_release(){
   if ! bosh releases | grep -E "${bosh_release_version}[*]*\s" > /dev/null; then
