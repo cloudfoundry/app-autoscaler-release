@@ -24,7 +24,7 @@ jobs:
           git config --global --add safe.directory ${PWD}
           version=$(cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2 | sed -E 's/(v[0-9]+\.[0-9]+.[0-9]+).*/\1/')
           echo "golangci-lint version: '${version}'"
-          echo "::set-output name=version::${version}"
+          echo "version=${version}" >> $GITHUB_OUTPUT;
 
       - name: lint acceptance
         uses: golangci/golangci-lint-action@v3.3.0
