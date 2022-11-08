@@ -240,6 +240,11 @@ eslint:
 	@echo " - linting testApp"
 	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
+.PHONY: lint-actions
+lint-actions:
+	@echo " - linting GitHub actions"
+	go run github.com/rhysd/actionlint/cmd/actionlint@latest
+
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --path-prefix=src/$(patsubst lint_%,%,$@) --config ${lint_config} ${OPTS}
@@ -370,7 +375,7 @@ package-specs: mod-tidy vendor
 .PHONY: alerts-silence
 alerts-silence:
 	export SILENCE_TIME_MINS=480;\
-	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'"
+	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'";\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy ;\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobExtendedUnhealthy ;\
