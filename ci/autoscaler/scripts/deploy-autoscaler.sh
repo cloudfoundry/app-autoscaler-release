@@ -70,7 +70,9 @@ function deploy() {
 
   echo " - Deploy options: '${bosh_deploy_opts}'"
 
-  local tmp_manifest_file="$(mktemp --tmpdir='dev_releases' ${deployment_name}.bosh-manifest.XXX.yaml)"
+  local tmp_manifest_file
+  tmp_manifest_file="$(mktemp ./dev_releases/${deployment_name}.bosh-manifest.yaml.XXX)"
+  echo "tmp_manifest_file=${tmp_manifest_file}"
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
       ${OPS_FILES_TO_USE} \
