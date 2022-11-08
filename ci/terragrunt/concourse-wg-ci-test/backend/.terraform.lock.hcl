@@ -25,7 +25,6 @@ provider "registry.terraform.io/vmware-tanzu/carvel" {
   version = "0.11.0"
   hashes = [
     "h1:HslYwK+G5J3IdsXMx0ZMU2p6g1Ef7aVfUtZZu4YYJsg=",
-    "h1:Tsyjz4cNG+WiUvU0wAHqXtS1h3SO0bCIB9hoi/3VHvw=",
     "zh:3c30070314cd7da84da2d5a92727fb73b1df9d7b84741f6f546a371ee8888343",
     "zh:47a956718197e8acc997a80723b341564c65650e7157ac3bc37fe87193421e26",
     "zh:4c50d7039bb5ed10343428809ffb76eb2614a136009d346dcbc33fadc41f6e62",

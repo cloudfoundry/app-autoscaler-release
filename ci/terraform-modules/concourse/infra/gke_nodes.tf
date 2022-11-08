@@ -7,15 +7,15 @@ resource "google_service_account" "gke_node_pools" {
 
 resource "google_container_node_pool" "default_pool" {
   cluster    = google_container_cluster.wg_ci.name
-  node_count = "1"
+  node_count = var.gke_default_pool_node_count
 
   node_locations = [var.zone]
   project        = var.project
   location       = var.zone
 
   autoscaling {
-    max_node_count       = "3"
-    min_node_count       = "1"
+    max_node_count       = var.gke_default_pool_autoscaling_max
+    min_node_count       = var.gke_default_pool_node_count
     total_max_node_count = "0"
     total_min_node_count = "0"
   }
@@ -33,7 +33,7 @@ resource "google_container_node_pool" "default_pool" {
     disk_size_gb    = "100"
     disk_type       = "pd-standard"
     image_type      = "COS_CONTAINERD"
-    local_ssd_count = "0"
+    local_ssd_count = var.gke_default_pool_ssd_count
     machine_type    = var.gke_default_pool_machine_type
 
     metadata = {
@@ -68,15 +68,15 @@ resource "google_container_node_pool" "default_pool" {
 
 resource "google_container_node_pool" "concourse_workers" {
   cluster    = google_container_cluster.wg_ci.name
-  node_count = "2"
+  node_count = var.gke_workers_pool_node_count
 
   node_locations = [var.zone]
   project        = var.project
   location       = var.zone
 
   autoscaling {
-    max_node_count       = "4"
-    min_node_count       = "2"
+    max_node_count       = var.gke_workers_pool_autoscaling_max
+    min_node_count       = var.gke_workers_pool_node_count
     total_max_node_count = "0"
     total_min_node_count = "0"
   }

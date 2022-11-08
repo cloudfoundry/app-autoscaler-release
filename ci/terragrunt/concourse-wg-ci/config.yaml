@@ -54,10 +54,14 @@ gke_services_ipv4_cidr_block: 10.108.0.0/20
 gke_master_ipv4_cidr_block: 172.16.0.32/28
 gke_subnet_cidr: 10.10.0.0/24
 gke_default_pool_machine_type: e2-standard-4
+gke_default_pool_node_count: 1
+gke_default_pool_autoscaling_max: 3
 gke_default_pool_ssd_count: 0
 # typical config for concourse worker is n4-standard-4 and ssd_count: 1
 # note: economy e2-standard machine can't use local ssd drives
 gke_workers_pool_machine_type: e2-standard-4
+gke_workers_pool_node_count: 2
+gke_workers_pool_autoscaling_max: 4
 gke_workers_pool_ssd_count: 0
 # low number of preallocated ports will impact networking for heavy concourse pipelines
 gke_cloud_nat_min_ports_per_vm: 16384

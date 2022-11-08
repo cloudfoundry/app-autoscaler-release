@@ -1,7 +1,7 @@
-# run with terragrunt apply --terragrunt-config=create.hcl
+# run with terragrunt apply --terragrunt-config=dr/create.hcl
 
 locals {
-  config = yamldecode(file("../concourse/config.yaml"))
+  config = yamldecode(file("../config.yaml"))
 }
 
 
@@ -18,7 +18,7 @@ remote_state {
     location       = "${local.config.region}"
     # use for uniform bucket-level access
     # (https://cloud.google.com/storage/docs/uniform-bucket-level-access)
-    enable_bucket_policy_only = false
+    enable_bucket_policy_only = true
   }
 }
 
