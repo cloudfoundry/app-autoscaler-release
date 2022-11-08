@@ -38,15 +38,18 @@ function configure_git_credentials(){
   fi
 }
 
-pushd "${autoscaler_dir}" > /dev/null
-  if [ "$( git status -s | wc -l)" -eq 0 ]; then
-    echo " - Nothing changed !! "
-    exit 0
-  fi
-popd > /dev/null
-
 package_version=$(cat "${root_dir}/version") && rm "${root_dir}/version"
 package_sha=$(cat "${root_dir}/vendored-commit") && rm "${root_dir}/vendored-commit"
+
+pushd "${autoscaler_dir}" > /dev/null
+  if [ "$( git status -s | wc -l)" -eq 0 ]; then
+    step "Nothing changed !!"
+    exit 0
+  else
+    step "adding files to PR"
+    git status -s
+  fi
+popd > /dev/null
 
 dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
 update_branch="${type}-version-bump-${dashed_version}_${package_sha}"

@@ -375,7 +375,7 @@ package-specs: mod-tidy vendor
 .PHONY: alerts-silence
 alerts-silence:
 	export SILENCE_TIME_MINS=480;\
-	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'"
+	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'";\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy ;\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobExtendedUnhealthy ;\

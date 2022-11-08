@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # To run this script you need to have set up the target using
-# fly -t "autoscaler" login -c "https://bosh.ci.cloudfoundry.org" -n "app-autoscaler"
+# fly login -t app-autoscaler-release -c https://concourse.app-runtime-interfaces.ci.cloudfoundry.org -n app-autoscaler
 #
 # When running concourse locally: ` fly -t "local" login -c "http://localhost:8080" `
 # Then  `TARGET=local set-pipeline.sh`
@@ -15,7 +15,7 @@ add_var() {
     fly_args="${fly_args} -v ${1}=${2}"
 }
 
-TARGET="${TARGET:-autoscaler}"
+TARGET="${TARGET:-app-autoscaler-release}"
 
 function set_pipeline(){
   local pipeline_name="$1"

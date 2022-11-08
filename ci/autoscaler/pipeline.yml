@@ -34,6 +34,7 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
+      operations/set-release-version.yml
 
   app-autoscaler-ops-files-buildin: &app-autoscaler-ops-files-buildin
     OPS_FILES: |
