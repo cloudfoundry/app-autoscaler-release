@@ -45,8 +45,6 @@ sql_instance_tier: db-custom-1-4096
 sql_instance_backup_location: eu
 sql_instance_disk_size: 38
 
-# NETWORK
-
 # Other GKE vars
 gke_controlplane_version: 1.23.8-gke.1900
 gke_cluster_ipv4_cidr: 10.104.0.0/14

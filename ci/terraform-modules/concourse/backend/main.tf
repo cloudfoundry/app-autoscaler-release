@@ -9,7 +9,6 @@ data "carvel_ytt" "sqlproxy_secretgen" {
     "google.region"           = var.region
     "database.instance"       = var.sql_instance_name
     "sql_proxy_account.name"  = "${var.gke_name}-sql-proxy"
-    "sql_proxy_account.email" = "${var.gke_name}-sql-proxy@${var.project}.iam.gserviceaccount.com"
   }
 }
 
@@ -50,7 +49,7 @@ resource "carvel_kapp" "credhub_uaa" {
   namespace    = "concourse"
   config_yaml  = data.carvel_ytt.credhub_uaa.result
   diff_changes = true
-  depends_on   = [carvel_kapp.sqlproxy_secretgen, google_sql_database.concourse]
+  depends_on   = [google_service_account.sql_proxy, carvel_kapp.sqlproxy_secretgen, google_sql_database.concourse]
 
   # use in maintenance only when needed (should not be required normally)
   # deploy {
