@@ -26,6 +26,7 @@
               cloudfoundry-cli
               fly
               ginkgo
+              gh
               go
               golangci-lint
               google-cloud-sdk
