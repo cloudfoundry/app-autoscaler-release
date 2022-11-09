@@ -84,7 +84,8 @@ function deploy() {
       -v admin_password="${CF_ADMIN_PASSWORD}" \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
-      -v skip_ssl_validation=true > "${tmp_manifest_file}"
+      -v skip_ssl_validation=true \
+      > "${tmp_manifest_file}"
 
   if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
   then
