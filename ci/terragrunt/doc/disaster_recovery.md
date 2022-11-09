@@ -1,10 +1,10 @@
 # Prerequisites
 
-Scenario assumes terragrun was run after 1st deployment from `concourse-dr` folder.
+Scenario assumes terragrunt was run after 1st deployment from `concourse-dr` folder.
 ```sh
-cd concourse-dr
-terragrunt plan --terragrunt-config=create.hcl
-terragrunt apply --terragrunt-config=restore.hcl
+cd <folder with config.yaml>
+terragrunt plan --terragrunt-config=dr/create.hcl
+terragrunt apply --terragrunt-config=dr/create.hcl
 ```
 
 
@@ -19,13 +19,15 @@ TODO:
 
 
 # Steps
-## 1. Restore SQL Instance from backup
+## 1. Restore SQL Instance from backup (if required)
 * https://console.cloud.google.com/sql/instances/
   * Choose the desired database instance 
   * Restore desired backup version
 
 ## 2. Ensure infra and backend parts are up to date 
 Please note the usage of brackets as these allow you to execute bash commands from subfolders and return to the current folder once finished.
+
+*from folder with config.yaml*
 
 ```
 ( cd ./concourse && terragrunt run-all plan --terragrunt-exclude-dir ./app )

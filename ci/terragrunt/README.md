@@ -93,14 +93,16 @@ terragrunt run-all apply
 
 ## 5. Save secrets needed for DR scenario
 This part is not intended to be fully automated.
+
+NOTE: App module will attempt to verify execution of dr create and and will error out until completed
 ```sh
-cd ../concourse/dr
-terragrunt plan --terragrunt-config=create.hcl
-terragrunt apply --terragrunt-config=create.hcl
+terragrunt plan --terragrunt-config=dr/create.hcl
+terragrunt apply --terragrunt-config=dr/create.hcl
 ```
 
 
 ---
+# Notes and known limitations
 
 ## Destroy the project
 ```
@@ -147,6 +149,30 @@ kubectl config current-context
 
 ## DR scenario
 Please see [DR scenario readme](doc/disaster_recovery.md)
+
+### DR credhub encryption check
+
+The app module will check for existence and integrity of the credhub encryption key. Following errors may appear if the user does not execute dr-create
+1. Crehub encryption key does not exist in google secret manager or has no version
+   ```
+   │ Error: Error retrieving available secret manager secret versions: googleapi: Error 404: Secret [projects/899763165748/secrets/wg-ci-test-credhub-encryption-key] not found or has no versions.
+   │
+   │   with data.google_secret_manager_secret_version.credhub_encryption_key,
+   │   on credhub_dr_check.tf line 2, in data "google_secret_manager_secret_version" "credhub_encryption_key":
+   │    2: data "google_secret_manager_secret_version" "credhub_encryption_key" {
+   │
+   ```
+2. Credhub encryption keys stored in google secrets manager is different to the one stored in kubernetes secret 
+    ```
+    │ Error: Call to unknown function
+    │ 
+    │   on .terraform/modules/assertion_encryption_key_identical/main.tf line 6, in locals:
+    │    6:   content = var.condition ? "" : SEE_ABOVE_ERROR_MESSAGE(true ? null : "ERROR: ${var.error_message}")
+    │     ├────────────────
+    │     │ var.error_message is "*** Encryption keys in terraform and kubernetes do not match ***"
+    │ 
+    │ There is no function named "SEE_ABOVE_ERROR_MESSAGE".
+    ```
 
 ## Secret rotation
 * Quark Secrets have been dropped.
