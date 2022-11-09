@@ -2,8 +2,9 @@ name: Acceptance Tests - Broker
 on:
   pull_request:
     types: [ opened, labeled, synchronize ]
+
 concurrency:
-  group: acceptance_broker-${{ github.event.pull_request.number || github.ref }}
+  group: "${{ github.workflow }}/${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:

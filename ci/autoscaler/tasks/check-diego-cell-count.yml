@@ -1,0 +1,17 @@
+---
+platform: linux
+image_resource:
+  type: docker-image
+  source:
+    repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
+    tag: main
+
+inputs:
+- name: bbl-state
+- name: app-autoscaler-release
+
+params:
+  EXPECTED_CELLS:
+
+run:
+  path: app-autoscaler-release/ci/autoscaler/scripts/check-diego-cell-count.sh

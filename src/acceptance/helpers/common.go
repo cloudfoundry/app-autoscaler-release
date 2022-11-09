@@ -2,9 +2,9 @@ package helpers
 
 import "strings"
 
-func getNames(resources cfResourceObject) []string {
+func getNames(resources []cfResource) []string {
 	var names []string
-	for _, item := range resources.Resources {
+	for _, item := range resources {
 		names = append(names, item.Name)
 	}
 	return names

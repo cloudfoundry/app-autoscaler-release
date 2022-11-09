@@ -6,7 +6,7 @@ on:
      - 'src/acceptance/**'
 
 concurrency:
-  group: acceptance_buildin-${{ github.event.pull_request.number || github.ref }}
+  group: "${{ github.workflow }}/${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:

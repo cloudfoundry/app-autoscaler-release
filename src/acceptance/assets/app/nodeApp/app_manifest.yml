@@ -1,25 +1,24 @@
 ---
 applications:
-- name: ((app_name))
-  env:
-    NODE_TLS_REJECT_UNAUTHORIZED: ((node_tls_reject_unauthorized))
-    SERVICE_NAME: ((service_name))
-    NODE_ENV: production
-  buildpacks:
-  - ((buildpack))
-  stack: cflinuxfs3
-  # TODO: remove binding and use services
-  # services:
-  # - autoscaler-3-service-9b6122feab3e785e
-  routes:
-  - route: ((app_name)).((app_domain))
-    protocol: http1
-  processes:
-  - type: web
-    instances: ((instances))
-    memory: 128M
-    disk_quota: 128M
-    health-check-type: http
-    health-check-invocation-timeout: 10
-    health-check-http-endpoint: "/health"
-    timeout: 120
+  - name: ((app_name))
+    env:
+      NODE_OPTIONS: --max_old_space_size=((memory_mb))
+      NODE_TLS_REJECT_UNAUTHORIZED: "((node_tls_reject_unauthorized))"
+      SERVICE_NAME: ((service_name))
+      NODE_ENV: production
+      MEMORY_MAX: ((memory_mb))
+    buildpacks:
+      - ((buildpack))
+    stack: cflinuxfs3
+    routes:
+      - route: ((app_name)).((app_domain))
+        protocol: http1
+    processes:
+      - type: web
+        instances: ((instances))
+        memory: ((memory_mb))M
+        disk_quota: 200M
+        health-check-type: http
+        health-check-invocation-timeout: 10
+        health-check-http-endpoint: "/health"
+        timeout: 120

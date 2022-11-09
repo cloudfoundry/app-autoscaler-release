@@ -1,6 +1,11 @@
 name: generate
 on:
   pull_request:
+
+concurrency:
+  group: "${{ github.workflow }}/${{ github.ref }}"
+  cancel-in-progress: true
+
 jobs:
   generate:
     name: ensure fakes are up to date
@@ -21,7 +26,7 @@ jobs:
 
       - name: Check if there is any change
         id: get_changes
-        run: echo "::set-output name=changed::$(git status --porcelain | wc -l)"
+        run: echo "changed=$(git status --porcelain | wc -l)"  >> $GITHUB_OUTPUT
       - name: Process changes
         if: steps.get_changes.outputs.changed != 0
         run: |

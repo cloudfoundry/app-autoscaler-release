@@ -47,7 +47,6 @@ anchors:
       operations/log-cache-syslog-server.yml
       operations/use_buildin_mode.yml
 
-
 groups:
 - name: all
   jobs:
@@ -62,6 +61,7 @@ groups:
   - upgrade-test
   - update-golang
   - update-java
+  - performance
 - name: autoscaler-release
   jobs:
   - set-pipeline
@@ -338,14 +338,51 @@ jobs:
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-buildin-params
-        BUILDIN_MODE: true
         SUITES: api
     - task: autoscaler-acceptance-app
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-buildin-params
-        BUILDIN_MODE: true
         SUITES: app
+
+- name: performance
+  public: true
+  build_logs_to_retain: 100
+  ensure:
+    task: cleanup
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params: &performance-env
+      DEPLOYMENT_NAME: "autoscaler-performance"
+      NODES: 1
+      GINKGO_OPTS: "--fail-fast"
+      SERIAL: "false"
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: bbl-state
+    - get: app-autoscaler-release
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make/make.yml
+    params:
+      TARGETS: mod-tidy vendor db scheduler
+  - task: deploy-autoscaler
+    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+    params:
+      <<: *performance-env
+      <<: *app-autoscaler-ops-files
+  - task: register-broker
+    file: ci/ci/autoscaler/tasks/register-broker.yml
+    params:
+      <<: *performance-env
+  - task: setup-performance
+    file: ci/ci/autoscaler/tasks/make/make.yml
+    params:
+      TARGETS: setup-performance
+  - task: run-performance
+    file: ci/ci/autoscaler/tasks/make/make.yml
+    params:
+      TARGETS: run-performance
+
 
 - name: upgrade-test
   public: true
@@ -449,25 +486,6 @@ jobs:
       trigger: true
   - task: cleanup-autoscaler-deployments
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
-
-
-# TODO move to a github action a possibly make it add the draft release notes to the PR?
-#- name: draft-pr
-#  public: true
-#  build_logs_to_retain: 100
-#  plan:
-#  - in_parallel:
-#    - get: gh-release
-#    - get: app-autoscaler-release
-#    - get: app-autoscaler-release-pr
-#      passed: [acceptance-pr]
-#      trigger: true
-#  - task: dummy-release-autoscaler
-#    file: app-autoscaler-release/ci/autoscaler/tasks/release-autoscaler.yml
-#    params:
-#      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
-#      GITHUB_TOKEN: ((autoscaler_access_token))
-#      PERFORM_BOSH_RELEASE: false
 
 - name: draft
   public: true
