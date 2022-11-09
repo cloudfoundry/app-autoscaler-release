@@ -51,12 +51,13 @@ function pause_jobs(){
 function main(){
   SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
   pushd "${SCRIPT_RELATIVE_DIR}" > /dev/null
-    #CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
-    CURRENT_BRANCH="main"
+    CURRENT_BRANCH="$(git symbolic-ref --short HEAD)"
 
     if [[ "$CURRENT_BRANCH" == "main" ]];then
-      export PIPELINE_NAME="app-autoscaler-release"
-      set_pipeline $PIPELINE_NAME
+      echo "------------------------------------------------------------------------"
+      echo "Please don't use this script on main branch (controlled with terragrunt)"
+      echo "------------------------------------------------------------------------"
+      exit 1
     else
       export PIPELINE_NAME="app-autoscaler-release-${CURRENT_BRANCH}"
       set_pipeline "$PIPELINE_NAME"

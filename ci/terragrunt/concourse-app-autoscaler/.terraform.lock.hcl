@@ -2,12 +2,12 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/terraform-provider-concourse/concourse" {
-  version = "7.4.0"
+  version = "8.0.1"
   hashes = [
-    "h1:G5QPzg8FPoVOoUHOoL1FpzHga2OvcFvnetY4ExqICJk=",
-    "zh:01eef2a4207485f261abc59fbcc5e14173f9cd126e713d44f3c5eba53189a99c",
-    "zh:4cc198e668f70b91ceaacdc50e5412978f32656fd036d917b5c68f3fbba53783",
-    "zh:a1147b56809311c84e4f95966e198beaa41736e5674c33fdfc944177f09e6519",
-    "zh:f36d5516d2a5113f31fe75d6ed3b6ae9cfaad7298fe2197f001bc291dbaa3cc3",
+    "h1:OP91MopcG3YtOKmaADRNJeO4v85ekfQrRwtU26L/rbA=",
+    "zh:4638163fe4950e57fa8a1aa5c9e11e8f51b9bad4902692e15f669291d692ef92",
+    "zh:48d98eb6880e8d1f8603e99a0461fe431b0faa8c22e383d9713ce0415459548e",
+    "zh:86f438cf035feb2ee08db8565b34fa3a128f03d5beace9ce93eeceaa277739e0",
+    "zh:c22d5caa0fce2327ada7ca9e35bd9b88f341f8a3ab5e38532cc86e734cc0dfb4",
   ]
 }
