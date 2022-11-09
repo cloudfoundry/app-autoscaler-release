@@ -32,7 +32,8 @@ function set_pipeline(){
     add_var builtin_acceptance_deployment_name 	"${PR_NUMBER}-acceptance-bld"
   fi
 
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" $fly_args
+  # shellcheck disable=SC2086
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml"--pipeline="${pipeline_name}" $fly_args
 
   fly -t autoscaler unpause-pipeline -p "${pipeline_name}"
 }
