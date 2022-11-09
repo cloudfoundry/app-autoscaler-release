@@ -18,8 +18,8 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/set-release-version.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
  ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
- ${autoscaler_dir}/operations/operations/remove-metricsserver.yml\
- ${autoscaler_dir}/operations/operations/remove-metricsgateway.yml"}
+ ${autoscaler_dir}/operations/remove-metricsserver.yml\
+ ${autoscaler_dir}/operations/remove-metricsgateway.yml"}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
