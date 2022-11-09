@@ -240,6 +240,11 @@ eslint:
 	@echo " - linting testApp"
 	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
+.PHONY: markdownlint
+markdownlint: markdownlint-cli
+	@echo " - linting markdown files"
+	@markdownlint .
+
 .PHONY: lint-actions
 lint-actions:
 	@echo " - linting GitHub actions"
@@ -309,6 +314,10 @@ workspace:
 .PHONY: uuac
 uaac:
 	which uaac || gem install cf-uaac
+
+.PHONY: markdownlint-cli
+markdownlint-cli:
+	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh
 deploy-autoscaler: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
