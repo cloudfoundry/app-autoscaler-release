@@ -1,6 +1,6 @@
 resource "google_service_account" "sql_proxy" {
   account_id  = "${var.gke_name}-sql-proxy"
-  description = "Used by Cloud SQL Auth proxy [${var.gke_name}]"
+  display_name = "Used by Cloud SQL Auth proxy [${var.gke_name}]"
   disabled    = "false"
   project     = var.project
 }
