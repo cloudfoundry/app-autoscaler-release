@@ -43,11 +43,6 @@ db_type := postgres
 go_modules := $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 lint_config := ${AUTOSCALER_DIR}/.golangci.yaml
 
-
-
-
-
-
 $(shell mkdir -p target)
 $(shell mkdir -p build)
 
@@ -264,6 +259,11 @@ eslint:
 	@echo " - linting testApp"
 	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
 
+.PHONY: markdownlint
+markdownlint: markdownlint-cli
+	@echo " - linting markdown files"
+	@markdownlint .
+
 .PHONY: lint-actions
 lint-actions:
 	@echo " - linting GitHub actions"
@@ -334,6 +334,10 @@ workspace:
 uaac:
 	which uaac || gem install cf-uaac
 
+.PHONY: markdownlint-cli
+markdownlint-cli:
+	which markdownlint || npm install -g --omit=dev markdownlint-cli
+
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh
 deploy-autoscaler: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
@@ -397,15 +401,16 @@ package-specs: mod-tidy vendor
 
 ## Prometheus Alerts
 .PHONY: alerts-silence
+.ONESHELL:
 alerts-silence:
-	export SILENCE_TIME_MINS=${SILENCE_TIME_MINS};\
-	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'"
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobExtendedUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy ;
+	export SILENCE_TIME_MINS=${SILENCE_TIME_MINS}
+	echo " - Silencing deployment '${DEPLOYMENT_NAME} $((${SILENCE_TIME_MINS} / 60)) hours'"
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobExtendedUnhealthy
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy
 
 .PHONY: docker-login docker docker-image
 docker-login: target/docker-login

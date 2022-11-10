@@ -93,11 +93,6 @@ resource_types:
     repository: ghcr.io/bonzofenix/github-pr-resource
     tag: master
 
-- name: github-release
-  type: docker-image
-  source:
-    repository: concourse/github-release-resource
-
 resources:
 - name: every-night
   type: time
@@ -445,6 +440,7 @@ jobs:
     - get: release-bucket
     - get: acceptance-tests-bucket
     - get: gh-release
+    - get: bbl-state
     - get: app-autoscaler-release
       passed: [upgrade-test]
     - get: ci

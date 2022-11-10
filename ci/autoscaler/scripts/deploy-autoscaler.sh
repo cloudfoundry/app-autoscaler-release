@@ -35,7 +35,7 @@ pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
 popd > /dev/null
 
-echo "# Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
+echo "> Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
 
 UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 export UAA_CLIENT_SECRET
@@ -47,6 +47,18 @@ uaac token client get admin -s "$UAA_CLIENT_SECRET"
 set +e
 exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
+
+if [[ $exist == 0 ]]; then
+  echo "Updating client token"
+  uaac client update "autoscaler_client_id" \
+	    --authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
+else
+  echo "Creating client token"
+  uaac client add "autoscaler_client_id" \
+	--authorized_grant_types "client_credentials" \
+	--authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read" \
+	--secret "autoscaler_client_secret"
+fi
 
 function deploy() {
   OPS_FILES_TO_USE=""
@@ -68,11 +80,9 @@ function deploy() {
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
   set -e
 
-  echo " - Deploy options: '${bosh_deploy_opts}'"
 
   local tmp_manifest_file
   tmp_manifest_file="$(mktemp ./dev_releases/${deployment_name}.bosh-manifest.yaml.XXX)"
-  echo "tmp_manifest_file=${tmp_manifest_file}"
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
       ${OPS_FILES_TO_USE} \
@@ -94,23 +104,14 @@ function deploy() {
     trap '$(rm ${tmp_manifest_file})' EXIT ERR
   fi
 
-  echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
+  echo "> creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
+  echo " - tmp_manifest_file=${tmp_manifest_file}"
+  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
+  echo " - Deploy options: '${bosh_deploy_opts}'"
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
 
-  echo "# Finish deploy: '${deployment_name}'"
+  echo "> deployment finished: '${deployment_name}'"
 }
-
-if [[ $exist == 0 ]]; then
-  echo "Updating client token"
-  uaac client update "autoscaler_client_id" \
-	    --authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
-else
-  echo "Creating client token"
-  uaac client add "autoscaler_client_id" \
-	--authorized_grant_types "client_credentials" \
-	--authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read" \
-	--secret "autoscaler_client_secret"
-fi
 
 function find_or_upload_stemcell() {
   # Determine if we need to upload a stemcell at this point.
