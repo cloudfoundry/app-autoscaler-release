@@ -10,7 +10,7 @@ binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sor
 test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 
 GINKGO_OPTS=-r --race --require-suite --randomize-all --cover ${OPTS}
-
+export CONFIG?=../../../../acceptance_config.json
 
 .PHONY: build
 build:
@@ -49,11 +49,11 @@ buildtools:
 	@which counterfeiter >/dev/null || go install github.com/maxbrunsfeld/counterfeiter/v6
 
 lint:
-	@cd ../../; make lint_autoscaler OPTS=${OPTS}
+	@cd ../../../../../; make lint_acceptance OPTS=${OPTS}
 
 .PHONY: start
 start: build
-	docker  run -it --name go_app -v $$PWD/build/:/cf/bin --rm cloudfoundry/cflinuxfs3 /cf/bin/app
+	docker  run -it --name go_app -v $$PWD/build/:/cf/bin -p 8080:8080 --rm cloudfoundry/cflinuxfs3 /cf/bin/app
 
 .PHONY: deploy
 deploy: build

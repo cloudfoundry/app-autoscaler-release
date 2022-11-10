@@ -7,7 +7,7 @@ function getConfItem(){
   if [ "$val" = "null" ]; then return 1; fi
   echo "$val"
 }
-if [ -z ${config} ]; then
+if [ -z "${config}" ]; then
   echo "ERROR: Please supply the config using CONFIG env variable"
   exit 1
 fi
@@ -26,7 +26,7 @@ cf push\
   --var instances=1\
   --var node_tls_reject_unauthorized=0\
   --var memory_mb="$(getConfItem node_memory_limit||echo 128)"\
-  --var buildpack="binary-buildpack"\
+  --var buildpack="binary_buildpack"\
   -f "manifest.yml"\
   -c ./app
 popd > /dev/null
