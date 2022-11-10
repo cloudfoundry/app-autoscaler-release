@@ -6,12 +6,14 @@ MAKEFLAGS = -s
 # ========== Configuration for the targets ==========
 # The following variables are intended to be overwritable on make-invocation
 
-export ACCEPTANCE_TESTS_FILE := ${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+export ACCEPTANCE_TESTS_FILE = ${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+AUTOSCALER_DIR := $(shell pwd)
 
 export BUILDIN_MODE := false
 
 CI := false
-CI_DIR := ${AUTOSCALER_DIR}/ci
+
+CI_DIR = ${AUTOSCALER_DIR}/ci
 
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"; ;; \
@@ -21,24 +23,29 @@ export DEBUG := false
 
 DEST := build
 
+MVN_OPTS := -Dmaven.test.skip=true
+
+MYSQL_TAG := 8
+
+OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname)
+
+POSTGRES_TAG := 12
+
 SILENCE_TIME_MINS := 480
 
 SUITES := broker api app
 
+VERSION := 0.0.testing
+
 # ========== Definition of the targets ==========
 all_modules := $(go_modules) db scheduler
-AUTOSCALER_DIR := $(shell pwd)
 db_type := postgres
 go_modules := $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 lint_config := ${AUTOSCALER_DIR}/.golangci.yaml
 
-MVN_OPTS := -Dmaven.test.skip=true
-MYSQL_TAG := 8
 
-OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname)
-POSTGRES_TAG := 12
 
-VERSION := 0.0.testing
+
 
 
 $(shell mkdir -p target)
