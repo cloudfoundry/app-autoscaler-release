@@ -19,9 +19,7 @@ TARGET="${TARGET:-app-autoscaler-release}"
 
 function set_pipeline(){
   local pipeline_name="$1"
-
-
-	add_var branch_name "${CURRENT_BRANCH}"
+  add_var branch_name "${CURRENT_BRANCH}"
   if [[ -z $PR_NUMBER ]]; then
     add_var acceptance_deployment_name          "acceptance"
     add_var logcache_acceptance_deployment_name "acceptance-lc"
@@ -34,31 +32,26 @@ function set_pipeline(){
 
   # shellcheck disable=SC2086
   fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" $fly_args
-
-  fly -t autoscaler unpause-pipeline -p "${pipeline_name}"
+  fly -t "${TARGET}" unpause-pipeline -p "${pipeline_name}"
 }
 
 function pause_job(){
   local job_name="$1"
-
   fly -t "${TARGET}" pause-job -j "${job_name}"
 }
 
 function unpause_job(){
   local job_name="$1"
-
   fly -t "${TARGET}" unpause-job -j "${job_name}"
 }
 
 function get_jobs(){
   local pipeline_name="$1"
-
   fly -t "${TARGET}" jobs --pipeline="${pipeline_name}" --json  | jq ".[].name" -r
 }
 
 function pause_jobs(){
   local pipeline_name="$1"
-
   for job in $(get_jobs "$pipeline_name"); do
     pause_job "${pipeline_name}/$job"
   done
