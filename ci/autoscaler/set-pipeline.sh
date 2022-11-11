@@ -7,12 +7,34 @@
 # Then  `TARGET=local set-pipeline.sh`
 set -euo pipefail
 
+export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
+
+fly_args=""
+
+add_var() {
+    fly_args="${fly_args} -v ${1}=${2}"
+}
+
 TARGET="${TARGET:-app-autoscaler-release}"
 
 function set_pipeline(){
   local pipeline_name="$1"
 
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" -v branch_name="${CURRENT_BRANCH}"
+
+	add_var branch_name "${CURRENT_BRANCH}"
+  if [[ -z $PR_NUMBER ]]; then
+    add_var acceptance_deployment_name          "acceptance"
+    add_var logcache_acceptance_deployment_name "acceptance-lc"
+    add_var builtin_acceptance_deployment_name  "acceptance-bld"
+  else
+    add_var acceptance_deployment_name          "${PR_NUMBER}-acceptance"
+    add_var logcache_acceptance_deployment_name "${PR_NUMBER}-acceptance-lc"
+    add_var builtin_acceptance_deployment_name  "${PR_NUMBER}-acceptance-bld"
+  fi
+
+  # shellcheck disable=SC2086
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${pipeline_name}" $fly_args
+
   fly -t autoscaler unpause-pipeline -p "${pipeline_name}"
 }
 

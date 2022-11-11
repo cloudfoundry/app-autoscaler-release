@@ -77,7 +77,8 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		})
 	})
 
-	Context("Metrics Server: basic auth tests", func() {
+	// TODO: Deprecate this test with Metrics Server code
+	Context("Metrics Server: basic auth tests", Pending, func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-metricsserver", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
@@ -95,7 +96,8 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		})
 	})
 
-	Context("Metrics Gateway: basic auth tests", func() {
+	// TODO: Deprecate this test with Metrics Gateway code
+	Context("Metrics Gateway: basic auth tests", Pending, func() {
 		It("should fail to check health without basic auth credentials", func() {
 			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-metricsgateway", 1), nil)
 			Expect(err).ShouldNot(HaveOccurred())
