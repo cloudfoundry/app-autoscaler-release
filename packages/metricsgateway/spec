@@ -18,8 +18,7 @@ files:
 - autoscaler/metricsgateway/helpers/* # gosub
 - autoscaler/models/* # gosub
 - autoscaler/routes/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/cfhttp/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/cfhttp/unix_transport/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-diodes/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v8/* # gosub

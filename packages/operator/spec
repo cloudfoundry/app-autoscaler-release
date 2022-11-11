@@ -26,6 +26,7 @@ files:
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/internal/truncate/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/tlsconfig/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
 - autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
