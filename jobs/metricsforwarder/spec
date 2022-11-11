@@ -42,7 +42,7 @@ properties:
 
   autoscaler.metricsforwarder.loggregator.tls.cert:
     description: "PEM-encoded tls client certificate to connect to loggregator ingress client"
-  autoscaler.metricsforwarder.loggregator.tls.private_key:
+  autoscaler.metricsforwarder.loggregator.tls.key:
     description: "PEM-encoded tls client key to connect to loggregator ingress client"
   autoscaler.metricsforwarder.loggregator.tls.ca_cert:
     description: "PEM-encoded ca certificate of loggregator ingress client"
