@@ -12,6 +12,7 @@ templates:
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
+
   storedprocedure_db_ca.crt.erb: config/certs/storedprocedure_db/ca.crt
   storedprocedure_db.crt.erb: config/certs/storedprocedure_db/crt
   storedprocedure_db.key.erb: config/certs/storedprocedure_db/key
@@ -41,7 +42,7 @@ properties:
 
   autoscaler.metricsforwarder.loggregator.tls.cert:
     description: "PEM-encoded tls client certificate to connect to loggregator ingress client"
-  autoscaler.metricsforwarder.loggregator.tls.private_key:
+  autoscaler.metricsforwarder.loggregator.tls.key:
     description: "PEM-encoded tls client key to connect to loggregator ingress client"
   autoscaler.metricsforwarder.loggregator.tls.ca_cert:
     description: "PEM-encoded ca certificate of loggregator ingress client"
