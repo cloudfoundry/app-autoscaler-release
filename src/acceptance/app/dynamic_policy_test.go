@@ -38,11 +38,11 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			BeforeEach(func() {
 				heapToUse = int64(math.Min(float64(cfg.NodeMemoryLimit-20), 200))
 
-				if AppResidentSize+20 >= heapToUse {
+				if AppResidentSize+30 >= heapToUse {
 					Fail("There is not enough app memory in the app to run this test.\n - app resident size %d\n - app memory limit: %d\n - heap to use: %d", AppResidentSize, cfg.NodeMemoryLimit, int(heapToUse))
 				}
 
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", AppResidentSize+10, AppResidentSize+20)
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", 80, 80)
 				initialInstanceCount = 1
 			})
 
