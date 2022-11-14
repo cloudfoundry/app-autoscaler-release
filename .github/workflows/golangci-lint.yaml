@@ -27,7 +27,7 @@ jobs:
           echo "version=${version}" >> $GITHUB_OUTPUT;
 
       - name: lint acceptance
-        uses: golangci/golangci-lint-action@v3.3.0
+        uses: golangci/golangci-lint-action@v3.3.1
         with:
           working-directory: src/acceptance
           args: --config ../../.golangci.yaml -v
@@ -35,7 +35,7 @@ jobs:
           skip-cache: true
 
       - name: lint autoscaler
-        uses: golangci/golangci-lint-action@v3.3.0
+        uses: golangci/golangci-lint-action@v3.3.1
         with:
           working-directory: src/autoscaler
           args: --config ../../.golangci.yaml
@@ -43,7 +43,7 @@ jobs:
           skip-cache: true
 
       - name: lint changelog
-        uses: golangci/golangci-lint-action@v3.3.0
+        uses: golangci/golangci-lint-action@v3.3.1
         with:
           working-directory: src/changelog
           args: --config ../../.golangci.yaml
@@ -51,7 +51,7 @@ jobs:
           skip-cache: true
 
       - name: lint changeloglockcleaner
-        uses: golangci/golangci-lint-action@v3.3.0
+        uses: golangci/golangci-lint-action@v3.3.1
         with:
           working-directory: src/changeloglockcleaner
           args: --config ../../.golangci.yaml
