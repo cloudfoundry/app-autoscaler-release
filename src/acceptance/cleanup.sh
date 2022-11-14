@@ -21,6 +21,7 @@ config=${CONFIG:-""}
 DELETE_ORG="true"
 DELETE_SPACE="true"
 DELETE_USER="true"
+SERVICE_PREFIX="autoscaler"
 if [ -n "${config}" ] && which jq > /dev/null ; then
   DELETE_ORG=$(not "$(getConfItem 'use_existing_organization' || echo false )")
   DELETE_SPACE=$(not "$(getConfItem 'use_existing_space'|| echo false )")
