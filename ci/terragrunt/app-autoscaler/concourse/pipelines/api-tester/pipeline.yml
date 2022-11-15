@@ -6,7 +6,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/cloudfoundry/app-autoscaler-release.git
-    branch: new-concourse
+    branch: main
 
 
 jobs:
