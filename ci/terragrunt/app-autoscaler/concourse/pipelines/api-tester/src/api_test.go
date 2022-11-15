@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestCurler_Curl(t *testing.T) {
+func TestCurlerCurl(t *testing.T) {
 	curler := Curler{
 		NumAllowedErrors: 10,
 		NumRequests: 3000,
