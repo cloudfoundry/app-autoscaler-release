@@ -8,29 +8,3 @@ resource "concourse_pipeline" "api_tester" {
   pipeline_config        = file("pipelines/api-tester/pipeline.yml")
   pipeline_config_format = "yaml"
 }
-
-resource "concourse_pipeline" "cf_infrastructure" {
-  team_name     = "app-autoscaler"
-  pipeline_name = "cf-infrastructure"
-
-  is_exposed = false
-  is_paused  = false
-
-  pipeline_config        = file("../../cf-infrastructure/pipeline.yml")
-  pipeline_config_format = "yaml"
-}
-
-
-resource "concourse_pipeline" "app_autoscaler_release" {
-  team_name     = "app-autoscaler"
-  pipeline_name = "app-autoscaler-release"
-
-  is_exposed = false
-  is_paused  = false
-
-  pipeline_config        = file("../../autoscaler/pipeline.yml")
-  pipeline_config_format = "yaml"
-  vars = {
-    branch_name = "main"
-  }
-}
