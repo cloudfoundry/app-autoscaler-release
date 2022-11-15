@@ -10,7 +10,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.5.0
 	github.com/onsi/gomega v1.24.1
 	github.com/sirupsen/logrus v1.9.0
-	github.com/steinfletcher/apitest v1.5.13
+	github.com/steinfletcher/apitest v1.5.14
 	github.com/stretchr/testify v1.8.1
 )
 
