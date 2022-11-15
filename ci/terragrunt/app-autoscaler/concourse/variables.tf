@@ -1,5 +1,5 @@
 variable "fly_target" {
-    default = "app-runtime-interfaces"
+    default = "app-autoscaler-release"
 }
 
 variable "project" {
