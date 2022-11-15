@@ -2,8 +2,6 @@
 
 Concourse URL: [https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/](https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/)
 
-*note: teams management will be moved to the new repository*
-
 # Dependencies
 None. Terraform scripts are contained with terragrunt config.
 
