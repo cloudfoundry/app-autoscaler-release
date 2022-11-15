@@ -1,0 +1,17 @@
+apiVersion: vendir.k14s.io/v1alpha1
+directories:
+- contents:
+  - git:
+      commitTitle: bump to 2.12.13
+      sha: 05617071e2120d605360ecccad50de921acde7f5
+    path: .
+  path: config/credhub/_ytt_lib/credhub
+- contents:
+  - git:
+      commitTitle: Update UAA image reference in k8s deployment template to 76.3.0
+      sha: dd34f9c4d82b9985c9bb1def092325cab023fac0
+      tags:
+      - v76.3.0
+    path: .
+  path: config/uaa/_ytt_lib/uaa
+kind: LockConfig

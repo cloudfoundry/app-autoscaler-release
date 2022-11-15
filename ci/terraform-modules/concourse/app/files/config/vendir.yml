@@ -1,0 +1,26 @@
+---
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+minimumRequiredVersion: 0.30.0
+directories:
+- path: config/credhub/_ytt_lib/credhub
+  contents:
+  - path: .
+    git:
+      url: https://github.com/cloudfoundry-incubator/credhub
+      ref: "0561707"
+    includePaths:
+    - kubernetes/**/*
+- path: config/uaa/_ytt_lib/uaa
+  contents:
+  - path: .
+    git:
+      url: https://github.com/cloudfoundry/uaa
+      ref: v76.3.0
+    includePaths:
+    - k8s/templates/**/*
+# START delete when https://github.com/vmware-tanzu/carvel-secretgen-controller/issues/70 is fixed
+    # "DSECRETS_DIR" was removed to support our temporary templateconfig rewrite solution
+    ignorePaths:
+    - k8s/templates/deployment.star
+# END delete

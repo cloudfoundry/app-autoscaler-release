@@ -60,7 +60,6 @@ inputs = {
   dns_name  = "${local.config.dns_zone}-${local.config.dns_domain}."
 
   wg_ci_human_account_permissions = local.config.wg_ci_human_account_permissions
-  wg_ci_cnrm_service_account_permissions = local.config.wg_ci_cnrm_service_account_permissions
-
+  
   github_secret_name = "${local.config.gke_name}-concourse-github-oauth"
 }

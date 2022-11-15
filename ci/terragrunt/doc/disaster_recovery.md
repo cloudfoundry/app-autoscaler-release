@@ -1,58 +1,41 @@
 # Prerequisites
 
-Scenario assumes terragrunt was run after 1st deployment from `concourse-dr` folder.
-```sh
-cd <folder with config.yaml>
-terragrunt plan --terragrunt-config=dr/create.hcl
-terragrunt apply --terragrunt-config=dr/create.hcl
-```
+1. The backup of credhub encryption key has been stored in GCP Secret Manager - this part is handled automatically with `dr_creste` terragrunt part of the stack
+2. The secret in GCP was not deleted/altered manually.
+3. Credhub database exists or is available or recovered from a backup.
 
 
 ## DR scenario tested
 
 * deleted entire deployment including 'concourse' namespace
-* deleted all databases and database users
-* GKE cluster not destroyed
+* deleted all databases and database users with db recovered from backup
+* GKE cluster destroyed
 
-TODO:
-* test recovery will all infrastructure destroyed but sql instance
 
 
 # Steps
-## 1. Restore SQL Instance from backup (if required)
-* https://console.cloud.google.com/sql/instances/
-  * Choose the desired database instance 
-  * Restore desired backup version
-
-## 2. Ensure infra and backend parts are up to date 
-Please note the usage of brackets as these allow you to execute bash commands from subfolders and return to the current folder once finished.
-
-*from folder with config.yaml*
-
+Fully automated restore with:
 ```
-( cd ./concourse && terragrunt run-all plan --terragrunt-exclude-dir ./app )
-```
-*Note: terragrunt plan only works if kubernetes cluster exists*
-
-```
-( cd ./concourse && terragrunt run-all apply --terragrunt-exclude-dir ./app )
-```
-*Note: terraform reporting missing databases at this point is an indication instance restoration needs to be run.*
-
-
-## 3. Restore secrets
-```
-( cd concourse-dr && terragrunt apply --terragrunt-config=restore.hcl )
+cd <folder witg config.yaml>
+../scripts/dr_restore.sh
 ```
 
-## 4. Deploy remaining components
-From this moment onward `terragrunt` should be happy to run again as usual.
-```
-terragrunt run-all plan
-terragrunt run-all apply
-```
 
+---
 # Troubleshooting
+### Unexpected credhub encryption-key-in k8s secrets
+Providing GKE cluster or application was removed recovery is not expecting credhub-encryption-key stored in kubernetes secrets. Please remove it from k8s since it will be restored from GCP Secret Manager.
+
+```
+╷
+│ Error: secrets "credhub-encryption-key" already exists
+│ 
+│   with kubernetes_secret_v1.credhub_encryption_key,
+│   on credhub_restore.tf line 6, in resource "kubernetes_secret_v1" "credhub_encryption_key":
+│    6: resource "kubernetes_secret_v1" "credhub_encryption_key" {
+│ 
+╵
+```
 
 ###  Carvel kapp is unwilling to apply backend changes
 
@@ -60,9 +43,13 @@ terragrunt run-all apply
   _WARNING_ proceed with caution if you use the backend in other projects on the cluster (ie. carvel secret gen). Shall this be a case secretgen should not be a part of managed concourse deployment anymore.
 
 ```
-cd ./concourse/backend
+cd ./backend
 terragrunt taint carvel_kapp.concourse_backend
 terragrunt plan
 terragrunt apply
 ```
-
+Re run dr restore
+```
+cd ..
+../scripts/dr_restore.sh
+```

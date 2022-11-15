@@ -29,5 +29,5 @@ resource "kubectl_manifest" "sql_proxy_service_account" {
        iam.gke.io/gcp-service-account: ${google_service_account.sql_proxy.email}
   YAML
 
-  depends_on = [google_service_account.sql_proxy]
+  depends_on = [data.google_container_cluster.wg_ci, google_service_account.sql_proxy, kubectl_manifest.config_connector, kubernetes_namespace.concourse ]
 }

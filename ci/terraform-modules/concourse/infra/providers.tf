@@ -11,14 +11,21 @@ terraform {
 
 data "google_client_config" "provider" {}
 
-data "google_container_cluster" "wg_ci" {
-  project  = var.project
-  name     = var.gke_name
-  location = var.zone
+provider "google" {
+  project = var.project
+  region  = var.region
+  zone    = var.zone
 }
 
+provider "google-beta" {
+  project = var.project
+  region  = var.region
+  zone    = var.zone
+}
+
+
 provider "kubernetes" {
-  host  = "https://${data.google_container_cluster.wg_ci.endpoint}"
+  host  = "https://${google_container_cluster.wg_ci.endpoint}"
   token = data.google_client_config.provider.access_token
   cluster_ca_certificate = base64decode(
     google_container_cluster.wg_ci.master_auth[0].cluster_ca_certificate,
@@ -26,7 +33,7 @@ provider "kubernetes" {
 }
 
 provider "kubectl" {
-  host  = "https://${data.google_container_cluster.wg_ci.endpoint}"
+  host  = "https://${google_container_cluster.wg_ci.endpoint}"
   token = data.google_client_config.provider.access_token
   cluster_ca_certificate = base64decode(
     google_container_cluster.wg_ci.master_auth[0].cluster_ca_certificate,

@@ -3,6 +3,10 @@ resource "google_sql_database_instance" "concourse" {
   name             = var.sql_instance_name
   project          = var.project
   region           = var.region
+
+  # recommended protection via GCP SQL Instance settings
+  # https://console.cloud.google.com/sql/instances/ -> select instance name -> edit
+  # ->  Data Protection -> tick: Enable delete protection
   deletion_protection = false
 
   settings {

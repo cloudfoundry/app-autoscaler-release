@@ -29,7 +29,6 @@ variable "dns_domain" { nullable = false }
 variable "dns_name" { nullable = false }
 
 variable "wg_ci_human_account_permissions" { nullable = false }
-variable "wg_ci_cnrm_service_account_permissions" { nullable = false }
 
 variable "gke_name" { nullable = false }
 variable "gke_controlplane_version" { nullable = false }

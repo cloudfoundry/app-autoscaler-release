@@ -16,7 +16,7 @@ resource "google_sql_database" "concourse" {
   instance   = data.google_sql_database_instance.concourse.name
   name       = each.key
   project    = var.project
-  depends_on = [data.google_sql_database_instance.concourse, carvel_kapp.sqlproxy_secretgen]
+  depends_on = [data.google_sql_database_instance.concourse, carvel_kapp.sqlproxy, carvel_kapp.carvel_secretgen]
 
 }
 
