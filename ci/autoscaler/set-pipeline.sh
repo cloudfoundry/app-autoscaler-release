@@ -74,4 +74,5 @@ function main(){
 
   popd > /dev/null
 }
+
 [ "${BASH_SOURCE[0]}" == "${0}" ] && main "$@"
