@@ -34,7 +34,7 @@ push autoscaler
 popd
 ```
 
-# Prometheus
+## Prometheus
 
 This is deployed using the script [deploy-prometheus](infrastructure/scripts/deploy-prometheus.sh).
 To deploy localy you will need:
@@ -45,7 +45,7 @@ To deploy localy you will need:
 
 Then you can run the script directly.
 
-## setup
+### setup
 
 - The Slack channel is stored in the cf credhub under `/bosh-autoscaler/prometheus/alertmanager_slack_channel`
 - The Slack Message can be customised in the [slack-receiver-template.yml](operations/slack-receiver-template.yml)
