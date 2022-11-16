@@ -258,6 +258,7 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
       -v skip_ssl_validation=true \
       -o example/operation/external-db.yml
   ```
+
 >** The DATABASE_VAR_FILE should look like as below
   ```sh
   database:
