@@ -7,14 +7,14 @@ The `App-AutoScaler` provides the capability to adjust the computation resources
 
 The `App-AutoScaler` has the following components:
 
-  * `api` : provides public APIs to manage scaling policy
-  * `servicebroker`: implements the [Cloud Foundry service broker API][k]
-  * `metricsgateway` : collects and filters loggregator events via loggregator v2  API
-  * `metricsserver`: transforms loggregator events to app-autoscaler performance metrics ( metricsgateway + metricsserver is a replacement of metricscollector)
-  * `metricsforwarder`: receives and forwards custom metrics to loggregator via v2 ingress API
-  * `eventgenerator`: aggregates memory metrics, evaluates scaling rules and triggers events for dynamic scaling
-  * `scheduler`: manages the schedules in scaling policy and trigger events for scheduled scaling
-  * `scalingengine`: takes the scaling actions based on dynamic scaling rules or schedules
+* `api` : provides public APIs to manage scaling policy
+* `servicebroker`: implements the [Cloud Foundry service broker API][k]
+* `metricsgateway` : collects and filters loggregator events via loggregator v2  API
+* `metricsserver`: transforms loggregator events to app-autoscaler performance metrics ( metricsgateway + metricsserver is a replacement of metricscollector)
+* `metricsforwarder`: receives and forwards custom metrics to loggregator via v2 ingress API
+* `eventgenerator`: aggregates memory metrics, evaluates scaling rules and triggers events for dynamic scaling
+* `scheduler`: manages the schedules in scaling policy and trigger events for scheduled scaling
+* `scalingengine`: takes the scaling actions based on dynamic scaling rules or schedules
 
 ## Development
 
