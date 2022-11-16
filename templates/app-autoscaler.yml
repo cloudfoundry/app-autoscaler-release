@@ -635,6 +635,7 @@ instance_groups:
               ca_cert: ((loggregator_tls_agent.ca))
               cert: ((loggregator_tls_agent.certificate))
               key: ((loggregator_tls_agent.private_key))
+        storedprocedure_db: *database
   - name: loggregator_agent
     release: loggregator-agent
     consumes:
