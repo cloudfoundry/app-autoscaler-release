@@ -244,7 +244,6 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
       -o example/operation/cf-mysql-db.yml
   ```
 
-
 * Deploy autoscaler with external postgres database and mysql database
 
   ```sh
