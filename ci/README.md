@@ -1,4 +1,5 @@
 # app-autoscaler-ci
+
 This repository provides all public scripts and pipeline deployments used
 by the app autoscaler team.  The public pipeline is hosted at: https://bosh.ci.cloudfoundry.org/.
 
@@ -19,6 +20,7 @@ out as well as the app-autoscaler private key
 These docker images in this repo are built and pushed with GitHub actions, they are hosted on ghcr.io
 
 ## Terrgrunt
+
 This directory contains the terragrunt managed stacks of resouces in account app-runtime-interfaces-wg GCP project.
 
 ## Deploy pipeline
@@ -33,6 +35,7 @@ popd
 ```
 
 # Prometheus
+
 This is deployed using the script [deploy-prometheus](infrastructure/scripts/deploy-prometheus.sh).
 To deploy localy you will need:
  - bosh ca certificate and place this it is `${HOME}/.ssh/bosh.ca.crt`.
@@ -40,6 +43,7 @@ To deploy localy you will need:
  - https://github.com/cloudfoundry/app-autoscaler-env-bbl-state cloned in ../
 
 Then you can run the script directly.
+
 ## setup
  - The Slack channel is stored in the cf credhub under `/bosh-autoscaler/prometheus/alertmanager_slack_channel`
  - The Slack Message can be customised in the [slack-receiver-template.yml](operations/slack-receiver-template.yml)
