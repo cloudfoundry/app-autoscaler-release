@@ -36,7 +36,6 @@ popd
 
 # Prometheus
 
-
 This is deployed using the script [deploy-prometheus](infrastructure/scripts/deploy-prometheus.sh).
 To deploy localy you will need:
 
