@@ -1,6 +1,7 @@
 {
   "comment": "Relaxed rules",
   "default": true,
-  "line-length": false
+  "line-length": false,
+  "ul-indent": 1
 }
 
