@@ -8,7 +8,6 @@ deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-""}"
 bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"
 bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
-serial="${SERIAL:-true}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
@@ -18,7 +17,9 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/add-extra-plan.yml\
  ${autoscaler_dir}/operations/set-release-version.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
- ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
+ ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
+ ${autoscaler_dir}/operations/remove-metricsserver.yml\
+ ${autoscaler_dir}/operations/remove-metricsgateway.yml"}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
