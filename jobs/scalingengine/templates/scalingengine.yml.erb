@@ -51,14 +51,15 @@ cf:
   idle_connection_timeout_ms: <%= p("autoscaler.cf.idle_connection_timeout_ms") %>
   max_idle_conns_per_host_ms: <%= p("autoscaler.cf.max_idle_conns_per_host_ms") %>
 
-
 server:
   port:  <%= p("autoscaler.scalingengine.server.port") %>
+  <% if_p("autoscaler.scalingengine.ca_cert", "autoscaler.scalingengine.server_cert",
+    "autoscaler.scalingengine.server_key") do  %>
   tls:
     key_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/server.key
     cert_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/server.crt
     ca_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/ca.crt
-
+  <% end %>
 logging:
   level: <%= p("autoscaler.scalingengine.logging.level") %>
 http_client_timeout: <%= p("autoscaler.scalingengine.http_client_timeout") %>
