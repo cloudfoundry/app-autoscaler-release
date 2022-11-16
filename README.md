@@ -55,7 +55,8 @@ Generate [scheduler test certs](https://github.com/cloudfoundry/app-autoscaler/b
   make init-db
   ```
 
-  * **MySQL**
+* **MySQL**
+
   ```shell
   make init-db db_type=mysql
   ```
