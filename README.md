@@ -153,6 +153,7 @@ You can use the  `make clean` to remove:
   * autoscaler build artifacts
 
 ### Coding Standards
+
 Autoscaler uses Golangci and Checkstyle for its code base. Refer to [style-guide](style-guide/README.md)
 
 ## Bosh Release for app-autoscaler service
