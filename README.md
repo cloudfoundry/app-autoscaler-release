@@ -49,7 +49,8 @@ Generate [scheduler test certs](https://github.com/cloudfoundry/app-autoscaler/b
 
 **Note:** The makefile will init the database if it has not already been run before running the tests.
 
-  * **Postgres**
+* **Postgres**
+
   ```shell
   make init-db
   ```
