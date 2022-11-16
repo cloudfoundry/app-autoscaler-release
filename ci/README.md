@@ -37,6 +37,7 @@ popd
 
 # Prometheus
 
+
 This is deployed using the script [deploy-prometheus](infrastructure/scripts/deploy-prometheus.sh).
 To deploy localy you will need:
  - bosh ca certificate and place this it is `${HOME}/.ssh/bosh.ca.crt`.
