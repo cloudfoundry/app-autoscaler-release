@@ -1,7 +1,7 @@
 # app-autoscaler-ci
 
 This repository provides all public scripts and pipeline deployments used
-by the app autoscaler team.  The public pipeline is hosted at: https://bosh.ci.cloudfoundry.org/.
+by the app autoscaler team.  The public pipeline is hosted at: <https://bosh.ci.cloudfoundry.org/>.
 
 To reproduce this pipeline, you can use your own private configuration files for the `pipeline.yml` files as described below.
 
