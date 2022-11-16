@@ -60,11 +60,12 @@ make init-db db_type=mysql
 
 
 #### Generate TLS Certificates
-create the certificates
+
+Create the certificates.
 
 **Note**:
- - on macos it will install `certstrap` automatically but on other OS's it needs to be pre-installed
- - The makefile will create the certificates if it has not already been run before running the tests.
+ * on macos it will install `certstrap` automatically but on other OS's it needs to be pre-installed
+ * The makefile will create the certificates if it has not already been run before running the tests.
 ```shell
 make test-certs
 ```
@@ -82,9 +83,10 @@ To use a specific postgres version
 make clean #Only if you're changing versions to refresh the running docker image.
 make test POSTGRES_TAG=x.y
 ```
+
 where:
- - x is the major version
- - y is the minor version ( this can be left out to get the most recent patch)
+ * x is the major version
+ * y is the minor version ( this can be left out to get the most recent patch)
 
 
 * **MySQL**:
