@@ -260,6 +260,7 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
   ```
 
 >** The DATABASE_VAR_FILE should look like as below
+
   ```sh
   database:
     name: <database_name>
