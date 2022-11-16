@@ -66,8 +66,10 @@ Generate [scheduler test certs](https://github.com/cloudfoundry/app-autoscaler/b
 Create the certificates.
 
 **Note**:
+
   * on macos it will install `certstrap` automatically but on other OS's it needs to be pre-installed
   * The makefile will create the certificates if it has not already been run before running the tests.
+
 ```shell
 make test-certs
 ```
@@ -76,33 +78,37 @@ make test-certs
 The default database is postgres
 
   * **Postgres**:
+
   ```shell
   make test
   ```
 
-To use a specific postgres version
+To use a specific postgres version:
+
 ```shell
 make clean #Only if you're changing versions to refresh the running docker image.
 make test POSTGRES_TAG=x.y
 ```
 
 where:
+
   * x is the major version
   * y is the minor version ( this can be left out to get the most recent patch)
+  * **MySQL**:
 
+    ```shell
+    make test db_type=mysql
+    ```
 
-* **MySQL**:
-```shell
-make test db_type=mysql
-```
+To use a specific MySQL version:
 
-To use a specific MySQL version
 ```shell
 make clean #Only if you're changing versions to refresh the running docker image.
 make test db_type=mysql MYSQL_TAG=x.y
 ```
 
 where:
+
   * x is the major version
   * y is the minor version ( this can be left out to get the most recent patch)
 
@@ -111,42 +117,48 @@ where:
 The default database is postgres
 
   * **Postgres**:
+
   ```shell
   make integration
   ```
 
-To use a specific postgres version
+To use a specific postgres version:
+
 ```shell
 make clean #Only if you're changing versions to refresh the running docker image.
 make integration POSTGRES_TAG=x.y
 ```
 
 where:
+
   * x is the major version
   * y is the minor version ( this can be left out to get the most recent patch)
-
-
   * **MySQL**:
-  ```shell
-  make integration db_type=mysql
-  ```
 
-To use a specific MySQL version
+    ```shell
+    make integration db_type=mysql
+    ```
+
+To use a specific MySQL version:
+
 ```shell
 make clean #Only if you're changing versions to refresh the running docker image.
 make integration db_type=mysql MYSQL_TAG=x.y
 ```
 
 where:
+
   * x is the major version
   * y is the minor version ( this can be left out to get the most recent patch)
 
 ### Build App-AutoScaler
+
 ```shell
 make build
 ```
 
 ### Clean up
+
 You can use the  `make clean` to remove:
 
   * database ( postgres or mysql)
