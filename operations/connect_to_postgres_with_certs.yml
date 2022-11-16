@@ -79,6 +79,7 @@
 - type: replace
   path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db/tls/private_key
   value: ((postgres_client.private_key))
+
 - type: replace
   path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/policy_db/tls/certificate
   value: ((postgres_client.certificate))
@@ -113,8 +114,11 @@
   value: ((postgres_client.private_key))
 
 - type: replace
-  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/policy_db/tls/certificate
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/storedprocedure_db/tls/ca
+  value: ((postgres_client.ca))
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/storedprocedure_db/tls/certificate
   value: ((postgres_client.certificate))
 - type: replace
-  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/policy_db/tls/private_key
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/storedprocedure_db/tls/private_key
   value: ((postgres_client.private_key))
