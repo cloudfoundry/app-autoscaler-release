@@ -40,9 +40,10 @@ popd
 
 This is deployed using the script [deploy-prometheus](infrastructure/scripts/deploy-prometheus.sh).
 To deploy localy you will need:
- - bosh ca certificate and place this it is `${HOME}/.ssh/bosh.ca.crt`.
- - https://github.com/bosh-prometheus/prometheus-boshrelease cloned in ../
- - https://github.com/cloudfoundry/app-autoscaler-env-bbl-state cloned in ../
+
+- bosh ca certificate and place this it is `${HOME}/.ssh/bosh.ca.crt`.
+- <https://github.com/bosh-prometheus/prometheus-boshrelease> cloned in ../
+- <https://github.com/cloudfoundry/app-autoscaler-env-bbl-state> cloned in ../
 
 Then you can run the script directly.
 
