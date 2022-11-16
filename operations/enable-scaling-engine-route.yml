@@ -12,3 +12,10 @@
     uris:
       - ((deployment_name))-scalingengine-srv.((system_domain))
 
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/scaling_engine/host
+  value: ((deployment_name))-scalingengine-srv.((system_domain))
+
+- type: replace
+  path: /variables/name=scalingengine_server_cert/options/alternative_names/-
+  value: ((deployment_name))-scalingengine-srv.((system_domain))
