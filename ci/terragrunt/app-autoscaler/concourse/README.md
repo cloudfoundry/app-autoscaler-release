@@ -1,6 +1,6 @@
 # App-autoscaler team and pipelines management for Concourse
 
-Concourse URL: [https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/](https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/)
+Concourse URL: <https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/>
 
 ## Dependencies
 
