@@ -89,7 +89,6 @@ function deploy() {
       ${OPS_FILES_TO_USE} \
       ${bosh_deploy_opts} \
       -v system_domain="${system_domain}" \
-      -v serial="${serial}" \
       -v deployment_name="${deployment_name}" \
       -v app_autoscaler_version="${bosh_release_version}" \
       -v admin_password="${CF_ADMIN_PASSWORD}" \
