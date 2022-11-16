@@ -1,0 +1,14 @@
+---
+# routing api from certs
+# scalingengine
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=route_registrar/properties/routes/-
+  value:
+    name: autoscaler_scalingengine
+    registration_interval: 20s
+    port: 6104
+    tags:
+      component: autoscaler_scalingengine
+    uris:
+      - ((deployment_name))-scalingengine-srv.((system_domain))
+
