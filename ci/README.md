@@ -21,6 +21,7 @@ These docker images in this repo are built and pushed with GitHub actions, they 
 
 ## Terrgrunt
 
+
 This directory contains the terragrunt managed stacks of resouces in account app-runtime-interfaces-wg GCP project.
 
 ## Deploy pipeline
