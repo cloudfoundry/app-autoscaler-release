@@ -2,7 +2,7 @@
 # routing api from certs
 # scalingengine
 - type: replace
-  path: /instance_groups/name=scalingengine/jobs/name=route_registrar/properties/routes/-
+  path: /instance_groups/name=scalingengine/jobs/name=route_registrar/properties/route_registrar/routes/-
   value:
     name: autoscaler_scalingengine
     registration_interval: 20s
