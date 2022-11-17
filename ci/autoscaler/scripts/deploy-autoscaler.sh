@@ -82,8 +82,7 @@ function deploy() {
   set -e
 
   local tmp_manifest_file
-  mkdir -p "./dev_releases"
-  tmp_manifest_file="$(mktemp ./dev_releases/${deployment_name}.bosh-manifest.yaml.XXX)"
+  tmp_manifest_file="$(mktemp "${deployment_name}.bosh-manifest.yaml.XXX")"
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
       ${OPS_FILES_TO_USE} \
