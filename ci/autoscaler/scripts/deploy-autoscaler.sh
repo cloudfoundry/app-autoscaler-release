@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 # shellcheck disable=SC2086
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -101,7 +101,7 @@ function deploy() {
   then
     echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
   else
-    trap '$(rm ${tmp_manifest_file})' EXIT ERR
+    trap '$(rm ${tmp_manifest_file})' EXIT
   fi
 
   echo "> creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
@@ -110,6 +110,7 @@ function deploy() {
   echo " - Deploy options: '${bosh_deploy_opts}'"
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
 
+  echo
   echo "> deployment finished: '${deployment_name}'"
 }
 
