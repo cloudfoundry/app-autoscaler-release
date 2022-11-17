@@ -81,8 +81,20 @@ function deploy() {
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
   set -e
 
+  # Set the local tmp_dir depending on if we run on github-actions or not, see:
+  # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+  local tmp_dir
+  if test -v "GITHUB_ACTIONS" -a "${GITHUB_ACTIONS}" != 'false'
+  then
+    tmp_dir="${RUNNER_TEMP}"
+  else # local system
+    mkdir -p './dev_releases'
+    tmp_dir="$(pwd)/dev_release"
+  fi
+
   local tmp_manifest_file
-  tmp_manifest_file="$(mktemp --tmpdir "${deployment_name}.bosh-manifest.yaml.XXX")"
+  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
+  #"$(realpath "$(mktemp "./dev_releases/${deployment_name}.bosh-manifest.yaml.XXX")")"
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
       ${OPS_FILES_TO_USE} \
