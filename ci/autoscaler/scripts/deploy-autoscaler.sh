@@ -90,13 +90,12 @@ function deploy() {
   then
     tmp_dir="${RUNNER_TEMP}"
   else # local system
-    mkdir -p './dev_releases'
-    tmp_dir="$(pwd)/dev_release"
+    tmp_dir="$(pwd)/dev_releases"
+    mkdir -p "${tmp_dir}"
   fi
 
   local tmp_manifest_file
   tmp_manifest_file="$(mktemp --tmpdir="${tmp_dir}" "${deployment_name}.bosh-manifest.yaml.XXX")"
-  #"$(realpath "$(mktemp "./dev_releases/${deployment_name}.bosh-manifest.yaml.XXX")")"
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
       ${OPS_FILES_TO_USE} \
