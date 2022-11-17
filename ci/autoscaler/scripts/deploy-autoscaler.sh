@@ -81,8 +81,8 @@ function deploy() {
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
   set -e
 
-
   local tmp_manifest_file
+  mkdir -p "./dev_releases"
   tmp_manifest_file="$(mktemp ./dev_releases/${deployment_name}.bosh-manifest.yaml.XXX)"
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
@@ -101,7 +101,12 @@ function deploy() {
   then
     echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
   else
-    trap '$(rm ${tmp_manifest_file})' EXIT
+  # This trap-command MUST be rendered NOW! In case of single-quotation the traped code will
+  # try to access a variable which does not exist anymore because of its scope being within
+  # the current function.
+  #
+  # shellcheck disable=SC2064
+    trap "$(rm ${tmp_manifest_file})" EXIT
   fi
 
   echo "> creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
