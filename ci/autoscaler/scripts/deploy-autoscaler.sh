@@ -84,7 +84,9 @@ function deploy() {
   # Set the local tmp_dir depending on if we run on github-actions or not, see:
   # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
   local tmp_dir
-  if test -v "GITHUB_ACTIONS" -a "${GITHUB_ACTIONS}" != 'false'
+  local perform_as_gh_action
+  perform_as_gh_action="${GITHUB_ACTIONS:-false}"
+  if "${perform_as_gh_action}" != 'false'
   then
     tmp_dir="${RUNNER_TEMP}"
   else # local system
@@ -93,7 +95,7 @@ function deploy() {
   fi
 
   local tmp_manifest_file
-  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
+  tmp_manifest_file="$(mktemp --tmpdir="${tmp_dir}" "${deployment_name}.bosh-manifest.yaml.XXX")"
   #"$(realpath "$(mktemp "./dev_releases/${deployment_name}.bosh-manifest.yaml.XXX")")"
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
