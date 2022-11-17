@@ -96,6 +96,7 @@ function deploy() {
 
   local tmp_manifest_file
   tmp_manifest_file="$(mktemp --tmpdir="${tmp_dir}" "${deployment_name}.bosh-manifest.yaml.XXX")"
+  echo '¡¡¡1!!!'; ls -lah "${tmp_manifest_file}" #; cat "${tmp_manifest_file}" # TODO: Debug github action
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
       ${OPS_FILES_TO_USE} \
@@ -108,7 +109,7 @@ function deploy() {
       -v cf_client_secret=autoscaler_client_secret \
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
-
+  echo '¡¡¡2!!!'; ls -lah "${tmp_manifest_file}" #; cat "${tmp_manifest_file}" # TODO: Debug github action
   if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
   then
     echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
@@ -118,11 +119,12 @@ function deploy() {
   # the current function.
   #
   # shellcheck disable=SC2064
-    trap "$(rm ${tmp_manifest_file})" EXIT
+    trap "rm ${tmp_manifest_file}" EXIT
   fi
 
   echo "> creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   echo " - tmp_manifest_file=${tmp_manifest_file}"
+  echo '¡¡¡3!!!'; ls -lah "${tmp_manifest_file}"; cat "${tmp_manifest_file}" # TODO: Debug github action
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
   echo " - Deploy options: '${bosh_deploy_opts}'"
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
