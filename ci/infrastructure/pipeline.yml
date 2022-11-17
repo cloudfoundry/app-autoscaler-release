@@ -101,10 +101,10 @@ jobs:
     params:
       BBL_IAAS: gcp
       BBL_ENV_NAME: autoscaler
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
-      BBL_GCP_PROJECT_ID: cloud-foundry-310819
-      BBL_GCP_REGION: europe-west4
-      BBL_GCP_ZONE: europe-west4-a
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
+      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
+      BBL_GCP_REGION: europe-west3
+      BBL_GCP_ZONE: europe-west3-a
       DEBUG_MODE: true
       LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
       BBL_LB_CERT: ((autoscaler_lb_cert))
@@ -172,8 +172,8 @@ jobs:
     params:
       BBL_IAAS: gcp
       BBL_ENV_NAME: autoscaler
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
-      BBL_GCP_PROJECT_ID: cloud-foundry-310819
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
+      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
     input_mapping:
       bbl-state: bbl-state
     ensure:
@@ -209,6 +209,8 @@ jobs:
   - task: deploy-prometheus
     file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
     params:
+      BBL_GCP_REGION: europe-west3
+      BBL_GCP_ZONE: europe-west3-a
       SLACK_WEBHOOK: ((slack_webhook))
 
 - name: deploy-cf

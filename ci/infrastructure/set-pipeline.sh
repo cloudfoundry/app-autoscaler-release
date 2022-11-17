@@ -9,7 +9,7 @@ set -euo pipefail
 
 SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
 pushd "${SCRIPT_RELATIVE_DIR}" > /dev/null
-  TARGET="${TARGET:-autoscaler}"
+  TARGET="${TARGET:-app-runtime-interfaces}"
 
   PIPELINE_NAME="infrastructure"
 
