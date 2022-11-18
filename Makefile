@@ -123,7 +123,7 @@ target/scheduler_test_certs:
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
 test-autoscaler: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
-	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}" OPTS="${OPTS}"
+	@make -C src/autoscaler test DBURL="${DBURL}" OPTS="${OPTS}"
 test-autoscaler-suite: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
@@ -327,7 +327,7 @@ deploy-register-cf:
 
 deploy-autoscaler-bosh:
 	echo " - deploying autoscaler"
-	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
 
 deploy-prometheus:
