@@ -1,28 +1,47 @@
+# ========== Make configuration (should stay untouched) ==========
 SHELL := /bin/bash
-.SHELLFLAGS = -euo pipefail -c
-MAKEFLAGS = -s
-go_modules:= $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
-all_modules:= $(go_modules) db scheduler
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
-MVN_OPTS="-Dmaven.test.skip=true"
-OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
-db_type:=postgres
+MAKEFLAGS = -s
+
+# ========== Configuration for the targets ==========
+# The following variables are intended to be overwritable on make-invocation
+
+export ACCEPTANCE_TESTS_FILE = ${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+AUTOSCALER_DIR := $(shell pwd)
+
+export BUILDIN_MODE := false
+
+CI := false
+
+CI_DIR = ${AUTOSCALER_DIR}/ci
+
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"; ;; \
  			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
-MYSQL_TAG := 8
-POSTGRES_TAG := 12
-SUITES?=broker api app
-AUTOSCALER_DIR?=$(shell pwd)
-lint_config:=${AUTOSCALER_DIR}/.golangci.yaml
-CI_DIR?=${AUTOSCALER_DIR}/ci
-CI?=false
-VERSION?=0.0.testing
-DEST?=build
 
-export BUILDIN_MODE?=false
-export DEBUG?=false
-export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+export DEBUG := false
+
+DEST := build
+
+MVN_OPTS := -Dmaven.test.skip=true
+
+MYSQL_TAG := 8
+
+OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname)
+
+POSTGRES_TAG := 12
+
+SILENCE_TIME_MINS := 480
+
+SUITES := broker api app
+
+VERSION := 0.0.testing
+
+# ========== Definition of the targets ==========
+all_modules := $(go_modules) db scheduler
+db_type := postgres
+go_modules := $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
+lint_config := ${AUTOSCALER_DIR}/.golangci.yaml
 
 $(shell mkdir -p target)
 $(shell mkdir -p build)
