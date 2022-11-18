@@ -3,6 +3,18 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 set -euo pipefail
 
+function retry(){
+  max_retries=$1
+  shift
+  retries=0
+  command="$*"
+  until [ "${retries}" -eq "${max_retries}" ] || $command; do
+    ((retries=retries+1))
+    echo " - retrying command '${command}' attempt: ${retries}"
+  done
+  [ "${retries}" -lt "${max_retries}" ] || { echo "ERROR: Command '$*' failed after ${max_retries} attempts"; return 1; }
+}
+
 function bosh_login(){
   if [[ ! -d ${bbl_state_path} ]]; then
     echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
@@ -24,7 +36,7 @@ function cf_login(){
 function cleanup_acceptance_run(){
   echo "# Cleaning up from acceptance tests"
   pushd "${ci_dir}/../src/acceptance" > /dev/null
-    ./cleanup.sh
+    retry 5 ./cleanup.sh
   popd > /dev/null
 }
 
@@ -33,13 +45,13 @@ function cleanup_service_broker(){
   SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}" || true)
   if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
     echo "- Service Broker exists, deleting broker '${deployment_name}'"
-    cf delete-service-broker "${deployment_name}" -f
+    retry 3 cf delete-service-broker "${deployment_name}" -f
   fi
 }
 
 function cleanup_bosh_deployment(){
   echo "- Deleting bosh deployment '${deployment_name}'"
-  bosh delete-deployment -d "${deployment_name}" -n
+  retry 3 bosh delete-deployment -d "${deployment_name}" -n
 }
 
 function delete_releases(){
