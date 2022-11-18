@@ -27,7 +27,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: main
+    branch: bbl-parent-dns-recordset
     fetch_tags: true
     paths:
       - ci/infrastructure
@@ -109,6 +109,8 @@ jobs:
       LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
       BBL_LB_CERT: ((autoscaler_lb_cert))
       BBL_LB_KEY: ((autoscaler_lb_key))
+      BBL_CONFIG_DIR: ci/infrastructure/bbl-patches
+      TF_VAR_parent_dns_zone: app-runtime-interfaces
     input_mapping:
       bbl-state: bbl-state
       bbl-config: bbl-state
@@ -117,29 +119,6 @@ jobs:
       params:
         repository: updated-bbl-state
         rebase: true
-          #- task: update-dns-servers
-          #  file: ci/ci/infrastructure/tasks/update-dns-servers.yml
-          #  params:e
-          #    BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
-          #    BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
-          #    GCP_DNS_ZONE: app-runtime-interfaces
-          #    GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-
-- name: update-dns-servers
-  serial_groups: [infra]
-  public: true
-  build_logs_to_retain: 100
-  plan:
-  - in_parallel:
-    - get: ci
-    - get: bbl-state
-  - task: update-dns-servers
-    file: ci/ci/infrastructure/tasks/update-dns-servers.yml
-    params:
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
-      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
-      GCP_DNS_ZONE: app-runtime-interfaces
-      GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
 
 - name: delete-cf
   serial_groups: [infra]
