@@ -109,7 +109,12 @@ metricCollector:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.crt
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/ca.crt
-
+  <% if_p("autoscaler.eventgenerator.metricscollector.uaa") do %>
+  uaa:
+    url: <%= p("autoscaler.eventgenerator.metricscollector.uaa.url") %>
+    client_id: <%= p("autoscaler.eventgenerator.metricscollector.uaa.client_id") %>
+    client_secret: <%= p("autoscaler.eventgenerator.metricscollector.uaa.client_secret") %>
+  <% end %>
 
 defaultStatWindowSecs: <%= p("autoscaler.eventgenerator.defaultStatWindowSecs") %>
 defaultBreachDurationSecs: <%= p("autoscaler.eventgenerator.defaultBreachDurationSecs") %>

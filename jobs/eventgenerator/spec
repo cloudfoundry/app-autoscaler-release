@@ -198,6 +198,15 @@ properties:
   autoscaler.eventgenerator.metricscollector.client_key:
     description: "PEM-encoded client key"
 
+  autoscaler.eventgenerator.metricscollector.uaa.url:
+    description: "UAA Url to perform oauth authentication"
+
+  autoscaler.eventgenerator.metricscollector.uaa.client_id:
+    description: "UAA client id"
+
+  autoscaler.eventgenerator.metricscollector.uaa.client_secret:
+    description: "UAA client secret"
+
   autoscaler.eventgenerator.defaultStatWindowSecs:
     description: "Default value for stat_window_secs"
     default: 120

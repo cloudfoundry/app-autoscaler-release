@@ -19,7 +19,8 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
  ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
  ${autoscaler_dir}/operations/remove-metricsserver.yml\
- ${autoscaler_dir}/operations/remove-metricsgateway.yml"}
+ ${autoscaler_dir}/operations/remove-metricsgateway.yml\
+ ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml"}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
@@ -108,6 +109,8 @@ function deploy() {
       -v admin_password="${CF_ADMIN_PASSWORD}" \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
+      -v eventgenerator_client_id=admin \
+      -v eventgenerator_client_secret="${UAA_CLIENT_SECRET}" \
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
