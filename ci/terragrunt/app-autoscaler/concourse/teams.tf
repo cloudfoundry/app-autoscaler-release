@@ -3,7 +3,8 @@ resource "concourse_team" "app_autoscaler" {
 
   owners = [
     "group:github:sap-cloudfoundry:app-autoscaler",
-    "group:github:cloudfoundry:wg-app-runtime-interfaces-autoscaler-approvers"
+    "group:github:cloudfoundry:wg-app-runtime-interfaces-autoscaler-approvers",
+    "group:github:cloudfoundry:wg-app-runtime-interfaces-autoscaler-reviewers"
   ]
 }
 

@@ -3,6 +3,7 @@ actionlint 1.6.22
 bosh 7.0.1
 cf 8.5.0
 concourse 7.8.1
+direnv 2.32.1
 gcloud 403.0.0
 ginkgo 2.5.0
 github-cli
