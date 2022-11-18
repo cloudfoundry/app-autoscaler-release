@@ -382,15 +382,16 @@ package-specs: mod-tidy vendor
 
 ## Prometheus Alerts
 .PHONY: alerts-silence
+.ONESHELL:
 alerts-silence:
-	export SILENCE_TIME_MINS=480;\
-	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'";\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobExtendedUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy ;
+	export SILENCE_TIME_MINS=${SILENCE_TIME_MINS}
+	echo " - Silencing deployment '${DEPLOYMENT_NAME} $((${SILENCE_TIME_MINS} / 60)) hours'"
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobExtendedUnhealthy
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill
+	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy
 
 .PHONY: docker-login docker docker-image
 docker-login: target/docker-login
