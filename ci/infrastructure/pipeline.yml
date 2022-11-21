@@ -108,12 +108,10 @@ jobs:
       LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
       BBL_LB_CERT: ((autoscaler_lb_cert))
       BBL_LB_KEY: ((autoscaler_lb_key))
-      BBL_CONFIG_DIR: ci/infrastructure/bbl-patches
       TF_VAR_parent_dns_zone: app-runtime-interfaces
     input_mapping:
       bbl-state: bbl-state
       bbl-config: bbl-state
-      app-autoscaler-release: ci
     ensure:
       put: bbl-state
       params:
