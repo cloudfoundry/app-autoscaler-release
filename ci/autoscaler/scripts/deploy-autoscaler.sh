@@ -111,7 +111,8 @@ function deploy() {
       -v cf_client_secret=autoscaler_client_secret \
       -v eventgenerator_client_id=admin \
       -v eventgenerator_client_secret="${UAA_CLIENT_SECRET}" \
-      -v skip_ssl_validation=true \
+      -v eventgenerator_uaa_skip_ssl_validation=true \
+    -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
   if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]

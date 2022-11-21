@@ -114,6 +114,7 @@ metricCollector:
     url: <%= p("autoscaler.eventgenerator.metricscollector.uaa.url") %>
     client_id: <%= p("autoscaler.eventgenerator.metricscollector.uaa.client_id") %>
     client_secret: <%= p("autoscaler.eventgenerator.metricscollector.uaa.client_secret") %>
+    skip_ssl_validation: <%= p("autoscaler.eventgenerator.metricscollector.uaa.skip_ssl_validation") %>
   <% end %>
 
 defaultStatWindowSecs: <%= p("autoscaler.eventgenerator.defaultStatWindowSecs") %>
