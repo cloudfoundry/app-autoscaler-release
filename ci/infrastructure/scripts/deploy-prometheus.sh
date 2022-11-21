@@ -6,6 +6,7 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
 bosh_deploy_opts=${BOSH_DEPLOY_OPTS:-}
+bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
 deployment_name="${DEPLOYMENT_NAME:-prometheus}"
 bosh_cert_ca_file=${BOSH_CERT_CA_FILE:-"${HOME}/.ssh/bosh.ca.crt"}
 uaa_ssl_ca_file="${UAA_SSL_CA_FILE:-$(mktemp)}"
