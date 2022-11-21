@@ -32,18 +32,28 @@ SSLMODE='<%= p("autoscaler.appmetrics_db.sslmode") %>'
 <% if p('autoscaler.appmetrics_db.db_scheme') == "postgres" %>
 JDBCDBURL="jdbc:postgresql://$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
-<% unless p('autoscaler.appmetrics_db.tls.ca') == "" %>
-JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
-DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
-<% end %>
+	<% unless p('autoscaler.appmetrics_db.tls.ca') == "" %>
+		JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
+		DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
+	<% end %>
+	<% unless p("autoscaler.appmetrics_db.tls.certificate") == "" %>
+		JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.crt"
+		DBURI=$DBURI"&sslcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.crt"
+	<% end %>
+	<% unless p("autoscaler.appmetrics_db.tls.private_key") == "" %>
+		openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.key -out /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.key.pk8 -nocrypt
+		JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.key.pk8"
+		DBURI=$DBURI"&sslkey=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.key"
+	<% end %>
+
 <% else %>
 JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
-<% unless p('autoscaler.appmetrics_db.tls.ca') == "" %>
-/var/vcap/packages/common/init-db-truststore.sh appmetrics_db /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt
-JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/appmetrics_db/cacerts&trustCertificateKeyStoreType=pkcs12"
-DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
-<% end %>
+	<% unless p('autoscaler.appmetrics_db.tls.ca') == "" %>
+		/var/vcap/packages/common/init-db-truststore.sh appmetrics_db /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt
+		JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/appmetrics_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+		DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
+	<% end %>
 <% end %>
 
 detect_dns $HOST $PORT
