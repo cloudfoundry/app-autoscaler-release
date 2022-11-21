@@ -1,6 +1,5 @@
 ---
 anchors:
-
   app-autoscaler-ops-files: &app-autoscaler-ops-files
     OPS_FILES: |
       operations/add-releases.yml
@@ -22,6 +21,9 @@ anchors:
       operations/set-release-version.yml
       operations/enable-log-cache.yml
       operations/log-cache-syslog-server.yml
+      operations/remove-metricsserver.yml
+      operations/remove-metricsgateway.yml
+
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
@@ -46,6 +48,8 @@ anchors:
       operations/enable-log-cache.yml
       operations/log-cache-syslog-server.yml
       operations/use_buildin_mode.yml
+      operations/remove-metricsserver.yml
+      operations/remove-metricsgateway.yml
 
 groups:
 - name: all
@@ -179,6 +183,9 @@ jobs:
     file: ci/ci/autoscaler/pipeline.yml
     vars:
       branch_name: ((branch_name))
+      acceptance_deployment_name: ((acceptance_deployment_name))
+      logcache_acceptance_deployment_name: ((logcache_acceptance_deployment_name))
+      builtin_acceptance_deployment_name: ((builtin_acceptance_deployment_name))
 
 - name: unit-tests
   public: true
@@ -214,7 +221,7 @@ jobs:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-params
-      DEPLOYMENT_NAME: "acceptance"
+      DEPLOYMENT_NAME: ((acceptance_deployment_name))
       DEBUG: true
   plan:
   - in_parallel:
@@ -261,7 +268,7 @@ jobs:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-params
-      DEPLOYMENT_NAME: "acceptance-lc"
+      DEPLOYMENT_NAME: ((logcache_acceptance_deployment_name))
       DEBUG: true
   plan:
   - in_parallel:
@@ -308,7 +315,7 @@ jobs:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-buildin-params
-      DEPLOYMENT_NAME: "acceptance-bld"
+      DEPLOYMENT_NAME: ((builtin_acceptance_deployment_name))
       BUILDIN_MODE: true
       SERVICE_OFFERING_ENABLED: false
       DEBUG: true

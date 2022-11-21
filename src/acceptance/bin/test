@@ -4,15 +4,15 @@ set -euo pipefail
 
 bin_dir=$(dirname "${BASH_SOURCE[0]}")
 pushd "${bin_dir}/.." > /dev/null
-  MIN_GO_VERSION=$(cat go.mod | grep "go " | awk '{print $2}' | sed -E 's/[0-9]+\.([0-9]+).*/\1/')
+  MIN_GO_VERSION=$(cat go.mod | grep --extended-regexp '^go\s[0-9.]+$'  | awk '{print $2}' | sed -E 's/[0-9]+\.([0-9]+).*/\1/')
 
   which go > /dev/null || {\
     echo "ERROR: golang 1.${MIN_GO_VERSION} needs to be installed to run these tests. " 1>&2;\
     exit 1;\
   }
 
-  minor_version=$(go version | cut -d " " -f 3 | sed -E 's/go[0-9]+\.([0-9]+).*/\1/')
-  [ "${minor_version}" -lt ${MIN_GO_VERSION} ] && { \
+  minor_version=$(go version | cut -d ' ' -f 3 | sed -E 's/go[0-9]+\.([0-9]+).*/\1/')
+  [ "${minor_version}" -lt "${MIN_GO_VERSION}" ] && { \
     echo "ERROR: golang version 1.${MIN_GO_VERSION} or above needs to be installed to use the acceptance tests" 1>&2;\
     exit 1;\
   }

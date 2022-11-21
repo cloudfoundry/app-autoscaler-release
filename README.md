@@ -2,8 +2,8 @@
 
 The `App-AutoScaler` provides the capability to adjust the computation resources for Cloud Foundry applications through
 
-* Dynamic scaling based on application performance metrics
-* Scheduled scaling based on time
+  * Dynamic scaling based on application performance metrics
+  * Scheduled scaling based on time
 
 The `App-AutoScaler` has the following components:
 
@@ -46,25 +46,30 @@ Generate [scheduler test certs](https://github.com/cloudfoundry/app-autoscaler/b
 
 
 #### Initialize the Database
+
 **Note:** The makefile will init the database if it has not already been run before running the tests.
 
 * **Postgres**
-```shell
-make init-db
-```
+
+  ```shell
+  make init-db
+  ```
 
 * **MySQL**
-```shell
-make init-db db_type=mysql
-```
 
+  ```shell
+  make init-db db_type=mysql
+  ```
 
 #### Generate TLS Certificates
-create the certificates
+
+Create the certificates.
 
 **Note**:
- - on macos it will install `certstrap` automatically but on other OS's it needs to be pre-installed
- - The makefile will create the certificates if it has not already been run before running the tests.
+
+  * on macos it will install `certstrap` automatically but on other OS's it needs to be pre-installed
+  * The makefile will create the certificates if it has not already been run before running the tests.
+
 ```shell
 make test-certs
 ```
@@ -72,80 +77,95 @@ make test-certs
 ### Unit tests
 The default database is postgres
 
-* **Postgres**:
-```shell
-make test
-```
+  * **Postgres**:
 
-To use a specific postgres version
+  ```shell
+  make test
+  ```
+
+To use a specific postgres version:
+
 ```shell
 make clean #Only if you're changing versions to refresh the running docker image.
 make test POSTGRES_TAG=x.y
 ```
+
 where:
- - x is the major version
- - y is the minor version ( this can be left out to get the most recent patch)
 
+  * x is the major version
+  * y is the minor version ( this can be left out to get the most recent patch)
+  * **MySQL**:
 
-* **MySQL**:
-```shell
-make test db_type=mysql
-```
+    ```shell
+    make test db_type=mysql
+    ```
 
-To use a specific MySQL version
+To use a specific MySQL version:
+
 ```shell
 make clean #Only if you're changing versions to refresh the running docker image.
 make test db_type=mysql MYSQL_TAG=x.y
 ```
+
 where:
-- x is the major version
-- y is the minor version ( this can be left out to get the most recent patch)
+
+  * x is the major version
+  * y is the minor version ( this can be left out to get the most recent patch)
 
 
 ### Integration tests
 The default database is postgres
 
-* **Postgres**:
-```shell
-make integration
-```
+  * **Postgres**:
 
-To use a specific postgres version
+  ```shell
+  make integration
+  ```
+
+To use a specific postgres version:
+
 ```shell
 make clean #Only if you're changing versions to refresh the running docker image.
 make integration POSTGRES_TAG=x.y
 ```
+
 where:
-- x is the major version
-- y is the minor version ( this can be left out to get the most recent patch)
 
+  * x is the major version
+  * y is the minor version ( this can be left out to get the most recent patch)
+  * **MySQL**:
 
-* **MySQL**:
-```shell
-make integration db_type=mysql
-```
+    ```shell
+    make integration db_type=mysql
+    ```
 
-To use a specific MySQL version
+To use a specific MySQL version:
+
 ```shell
 make clean #Only if you're changing versions to refresh the running docker image.
 make integration db_type=mysql MYSQL_TAG=x.y
 ```
+
 where:
-- x is the major version
-- y is the minor version ( this can be left out to get the most recent patch)
+
+  * x is the major version
+  * y is the minor version ( this can be left out to get the most recent patch)
 
 ### Build App-AutoScaler
+
 ```shell
 make build
 ```
 
 ### Clean up
+
 You can use the  `make clean` to remove:
 
-* database ( postgres or mysql)
-* autoscaler build artifacts
+  * database ( postgres or mysql)
+  * autoscaler build artifacts
 
 ### Coding Standards
+
 Autoscaler uses Golangci and Checkstyle for its code base. Refer to [style-guide](style-guide/README.md)
 
 ## Bosh Release for app-autoscaler service
@@ -159,15 +179,10 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
 ### Bosh Lite Deployment
 
 * Install [Bosh-cli-v2](https://bosh.io/docs/cli-v2.html#install)
-
 * Install and start [BOSH-Deployment](https://github.com/cloudfoundry/bosh-deployment), following its [README](https://github.com/cloudfoundry/bosh-deployment/blob/master/README.md).
-
 * Install [CF-deployment](https://github.com/cloudfoundry/cf-deployment#deploying-cf)
-
 * Create a new autoscaler client
-
   UAA CLI is required to here to create a new UAA client id.
-
   * Install the UAA CLI, `uaac`.
 
     ```sh
@@ -198,13 +213,13 @@ The purpose of this bosh release is to deploy and setup the [app-autoscaler](htt
 
 * Create and upload App-Autoscaler release
 
-```sh
-git clone https://github.com/cloudfoundry/app-autoscaler-release
-cd app-autoscaler-release
-make mod-tidy vendor db scheduler
-bosh create-release
-bosh -e YOUR_ENV upload-release
-```
+  ```sh
+  git clone https://github.com/cloudfoundry/app-autoscaler-release
+  cd app-autoscaler-release
+  make mod-tidy vendor db scheduler
+  bosh create-release
+  bosh -e YOUR_ENV upload-release
+  ```
 
 * Deploy app-autoscaler with the newly created autoscaler client
 
@@ -212,16 +227,16 @@ bosh -e YOUR_ENV upload-release
 
   So the valid TLS certification to access Loggregator Reverse Log Proxy is required here.   When deploying in bosh-lite, the most easy way is to provide loggregator certificates generated by `cf-deployments`.
 
-```sh
-bosh -e YOUR_ENV -d app-autoscaler \
-     deploy templates/app-autoscaler-deployment.yml \
-     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-     -l <PATH_TO_CF_DEPLOYMENT_VAR_FILES> \
-     -v system_domain=bosh-lite.com \
-     -v cf_client_id=autoscaler_client_id \
-     -v cf_client_secret=<AUTOSCALE_CLIENT_SECRET> \
-     -v skip_ssl_validation=true
-```
+  ```sh
+  bosh -e YOUR_ENV -d app-autoscaler \
+      deploy templates/app-autoscaler-deployment.yml \
+      --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+      -l <PATH_TO_CF_DEPLOYMENT_VAR_FILES> \
+      -v system_domain=bosh-lite.com \
+      -v cf_client_id=autoscaler_client_id \
+      -v cf_client_secret=<AUTOSCALE_CLIENT_SECRET> \
+      -v skip_ssl_validation=true
+  ```
 
 * Deploy autoscaler with cf deployment mysql database
 
@@ -229,50 +244,51 @@ bosh -e YOUR_ENV -d app-autoscaler \
 
   The lastest Autoscaler release add the support for mysql database, Autoscaler can connect the same mysql database with cf deployment. Use the operation file `example/operation/cf-mysql-db.yml` which including the cf database host , password and tls.ca cert.
 
-```sh
-bosh -e YOUR_ENV -d app-autoscaler \
-     deploy templates/app-autoscaler-deployment.yml \
-     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-     -l <PATH_TO_CF_DEPLOYMENT_VAR_FILES> \
-     -v system_domain=bosh-lite.com \
-     -v cf_client_id=autoscaler_client_id \
-     -v cf_client_secret=<AUTOSCALE_CLIENT_SECRET> \
-     -v skip_ssl_validation=true \
-     -o example/operation/cf-mysql-db.yml
-```
-
+  ```sh
+  bosh -e YOUR_ENV -d app-autoscaler \
+      deploy templates/app-autoscaler-deployment.yml \
+      --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+      -l <PATH_TO_CF_DEPLOYMENT_VAR_FILES> \
+      -v system_domain=bosh-lite.com \
+      -v cf_client_id=autoscaler_client_id \
+      -v cf_client_secret=<AUTOSCALE_CLIENT_SECRET> \
+      -v skip_ssl_validation=true \
+      -o example/operation/cf-mysql-db.yml
+  ```
 
 * Deploy autoscaler with external postgres database and mysql database
 
-```sh
-bosh -e YOUR_ENV -d app-autoscaler \
-     deploy templates/app-autoscaler-deployment.yml \
-     --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
-     -l <PATH_TO_CF_DEPLOYMENT_VAR_FILE> \
-     -l <PATH_TO_DATABASE_VAR_FILE> \
-     -v system_domain=bosh-lite.com \
-     -v cf_client_id=autoscaler_client_id \
-     -v cf_client_secret=<AUTOSCALE_CLIENT_SECRET> \
-     -v skip_ssl_validation=true \
-     -o example/operation/external-db.yml
-```
->** The DATABASE_VAR_FILE should look like as below
-```sh
-database:
-  name: <database_name>
-  host: <database_host>
-  port: <database_port>
-  scheme: <database_scheme>
-  username: <database_username>
-  password: <database_password>
-  sslmode: <database_sslmode>
-  tls:
-    ca: |
-      -----BEGIN CERTIFICATE-----
-           
-      -----END CERTIFICATE-----
+  ```sh
+  bosh -e YOUR_ENV -d app-autoscaler \
+      deploy templates/app-autoscaler-deployment.yml \
+      --vars-store=bosh-lite/deployments/vars/autoscaler-deployment-vars.yml \
+      -l <PATH_TO_CF_DEPLOYMENT_VAR_FILE> \
+      -l <PATH_TO_DATABASE_VAR_FILE> \
+      -v system_domain=bosh-lite.com \
+      -v cf_client_id=autoscaler_client_id \
+      -v cf_client_secret=<AUTOSCALE_CLIENT_SECRET> \
+      -v skip_ssl_validation=true \
+      -o example/operation/external-db.yml
+  ```
 
-```
+>** The DATABASE_VAR_FILE should look like as below
+
+  ```sh
+  database:
+    name: <database_name>
+    host: <database_host>
+    port: <database_port>
+    scheme: <database_scheme>
+    username: <database_username>
+    password: <database_password>
+    sslmode: <database_sslmode>
+    tls:
+      ca: |
+        -----BEGIN CERTIFICATE-----
+
+        -----END CERTIFICATE-----
+  ```
+
 The table below shows the description of all the variables:
 
 Property | Description

@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 # shellcheck disable=SC2086
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -8,7 +8,6 @@ deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-""}"
 bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"
 bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
-serial="${SERIAL:-true}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
@@ -18,7 +17,9 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/add-extra-plan.yml\
  ${autoscaler_dir}/operations/set-release-version.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
- ${autoscaler_dir}/operations/log-cache-syslog-server.yml"}
+ ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
+ ${autoscaler_dir}/operations/remove-metricsserver.yml\
+ ${autoscaler_dir}/operations/remove-metricsgateway.yml"}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
@@ -80,15 +81,26 @@ function deploy() {
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
   set -e
 
+  # Set the local tmp_dir depending on if we run on github-actions or not, see:
+  # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+  local tmp_dir
+  local perform_as_gh_action
+  perform_as_gh_action="${GITHUB_ACTIONS:-false}"
+  if "${perform_as_gh_action}" != 'false'
+  then
+    tmp_dir="${RUNNER_TEMP}"
+  else # local system
+    tmp_dir="$(pwd)/dev_releases"
+    mkdir -p "${tmp_dir}"
+  fi
 
   local tmp_manifest_file
-  tmp_manifest_file="$(mktemp ./dev_releases/${deployment_name}.bosh-manifest.yaml.XXX)"
+  tmp_manifest_file="$(mktemp --tmpdir="${tmp_dir}" "${deployment_name}.bosh-manifest.yaml.XXX")"
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
       ${OPS_FILES_TO_USE} \
       ${bosh_deploy_opts} \
       -v system_domain="${system_domain}" \
-      -v serial="${serial}" \
       -v deployment_name="${deployment_name}" \
       -v app_autoscaler_version="${bosh_release_version}" \
       -v admin_password="${CF_ADMIN_PASSWORD}" \
@@ -96,12 +108,16 @@ function deploy() {
       -v cf_client_secret=autoscaler_client_secret \
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
-
   if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
   then
     echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
   else
-    trap '$(rm ${tmp_manifest_file})' EXIT ERR
+  # This trap-command MUST be rendered NOW! In case of single-quotation the traped code will
+  # try to access a variable which does not exist anymore because of its scope being within
+  # the current function.
+  #
+  # shellcheck disable=SC2064
+    trap "rm ${tmp_manifest_file}" EXIT
   fi
 
   echo "> creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
@@ -110,6 +126,7 @@ function deploy() {
   echo " - Deploy options: '${bosh_deploy_opts}'"
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
 
+  echo
   echo "> deployment finished: '${deployment_name}'"
 }
 

@@ -416,14 +416,67 @@ func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName
 func CreateService(cfg *config.Config) string {
 	return CreateServiceWithPlan(cfg, cfg.ServicePlan)
 }
+
 func CreateServiceWithPlan(cfg *config.Config, servicePlan string) string {
+	return CreateServiceWithPlanAndParameters(cfg, servicePlan, "")
+}
+
+func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string) string {
 	if cfg.IsServiceOfferingEnabled() {
 		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		createService := cf.Cf("create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
+		cfCommand := []string{"create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker}
+		if defaultPolicy != "" {
+			cfCommand = append(cfCommand, "-c", defaultPolicy)
+		}
+		createService := cf.Cf(cfCommand...).Wait(cfg.DefaultTimeoutDuration())
 		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s \n Command Error: %s %s", instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
 		return instanceName
 	}
 	return ""
+}
+
+func GetServiceInstanceGuid(cfg *config.Config, instanceName string) string {
+	guid := cf.Cf("service", instanceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
+	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find service instance guid for service instance: %s \n CLI Output:\n %s", instanceName, guid.Out.Contents()))
+	return strings.TrimSpace(string(guid.Out.Contents()))
+}
+
+func GetServiceInstanceParameters(cfg *config.Config, instanceName string) string {
+	instanceGuid := GetServiceInstanceGuid(cfg, instanceName)
+
+	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/service_instances/%s/parameters", instanceGuid)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(cmd).To(Exit(0))
+	return strings.TrimSpace(string(cmd.Out.Contents()))
+}
+
+func GetServiceCredentialBindingGuid(cfg *config.Config, instanceGuid string, appName string) string {
+	appGuid := GetAppGuid(cfg, appName)
+	guid := cf.CfSilent("curl", fmt.Sprintf("/v3/service_credential_bindings?service_instance_guids=%s&app_guids=%s", instanceGuid, appGuid)).Wait(cfg.DefaultTimeoutDuration())
+
+	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find service credential binding guid for service instance guid : %s and app name %s \n CLI Output:\n %s", instanceGuid, appName, guid.Out.Contents()))
+
+	contents := guid.Out.Contents()
+
+	type ServiceCredentialBinding struct {
+		GUID string `json:"guid"`
+	}
+
+	var serviceCredentialBindings = struct {
+		Resources []ServiceCredentialBinding `json:"resources"`
+	}{}
+	err := json.Unmarshal(contents, &serviceCredentialBindings)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	return serviceCredentialBindings.Resources[0].GUID
+}
+
+func GetServiceCredentialBindingParameters(cfg *config.Config, instanceName string, appName string) string {
+	instanceGuid := GetServiceInstanceGuid(cfg, instanceName)
+	serviceCredentialBindingGuid := GetServiceCredentialBindingGuid(cfg, instanceGuid, appName)
+
+	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/service_credential_bindings/%s/parameters", serviceCredentialBindingGuid)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(cmd).To(Exit(0))
+	return strings.TrimSpace(string(cmd.Out.Contents()))
 }
 
 func CreatePolicyWithAPI(cfg *config.Config, appGUID, policy string) {
