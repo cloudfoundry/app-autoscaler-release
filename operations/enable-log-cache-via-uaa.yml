@@ -7,13 +7,13 @@
   value: 8083
 
 - type: replace
-  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/url
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/url?
   value: uaa.((system_domain))
 
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/client_id?
-  value: ((eventgenerator_client_id))
+  value: ((eventgenerator_uaa_client_id))
 
 - type: replace
-  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/client_id?
-  value: ((eventgenerator_client_secret))
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/client_secret?
+  value: ((eventgenerator_uaa_client_secret))
