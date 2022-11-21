@@ -95,7 +95,9 @@ function deploy() {
   fi
 
   local tmp_manifest_file
-  tmp_manifest_file="$(mktemp --tmpdir="${tmp_dir}" "${deployment_name}.bosh-manifest.yaml.XXX")"
+  # on MacOS mktemp does not know the --tmpdir option
+  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
+
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
       ${OPS_FILES_TO_USE} \
