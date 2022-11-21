@@ -8,7 +8,6 @@ groups:
   - destroy-infrastructure
   - bosh-cleanup
   - deploy-prometheus
-  - update-dns-servers
 
 - name: others
   jobs:
