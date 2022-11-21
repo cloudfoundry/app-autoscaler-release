@@ -37,13 +37,13 @@ DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 		DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
 	<% end %>
 	<% unless p("autoscaler.appmetrics_db.tls.certificate") == "" %>
-		JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/crt"
+		JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.crt"
 		DBURI=$DBURI"&sslcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.crt"
 	<% end %>
 	<% unless p("autoscaler.appmetrics_db.tls.private_key") == "" %>
 		openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.key -out /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.key.pk8 -nocrypt
 		JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.key.pk8"
-		DBURI=$DBURI"&sslkey=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/key"
+		DBURI=$DBURI"&sslkey=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/appmetrics_db.key"
 	<% end %>
 
 <% else %>
