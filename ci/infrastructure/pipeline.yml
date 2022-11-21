@@ -113,6 +113,7 @@ jobs:
     input_mapping:
       bbl-state: bbl-state
       bbl-config: bbl-state
+      app-autoscaler-release: ci
     ensure:
       put: bbl-state
       params:
