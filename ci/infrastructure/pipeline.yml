@@ -26,7 +26,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler_git_key))
-    branch: bbl-parent-dns-recordset
+    branch: main
     fetch_tags: true
     paths:
       - ci/infrastructure
