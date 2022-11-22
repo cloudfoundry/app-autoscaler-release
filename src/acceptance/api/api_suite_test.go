@@ -13,12 +13,10 @@ import (
 	"acceptance/config"
 	. "acceptance/helpers"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/helpers"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 )
 
 const (
@@ -64,18 +62,10 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	otherSetup = workflowhelpers.NewTestSuiteSetup(&otherConfig)
 
-	//Cleanup(cfg, setup)
-	//Cleanup(&otherConfig, otherSetup)
-
 	otherSetup.Setup()
 	setup.Setup()
 
-	By("Enable Service Access")
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-			EnableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
+	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
 
 	appName = CreateTestApp(cfg, "apitest", 1)
 	appGUID = GetAppGuid(cfg, appName)
@@ -115,40 +105,10 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		if cfg.IsServiceOfferingEnabled() {
-			if appName != "" && instanceName != "" {
-				unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-				if unbindService.ExitCode() != 0 {
-					purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-					Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
-				}
-			}
-
-			if instanceName != "" {
-				deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-				if deleteService.ExitCode() != 0 {
-					purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-					Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s", instanceName))
-				}
-			}
-		}
-
-		if appName != "" {
-			deleteApp := cf.Cf("delete", appName, "-f", "-r").Wait(cfg.DefaultTimeoutDuration())
-			Expect(deleteApp).To(Exit(0), fmt.Sprintf("unable to delete app %s", appName))
-		}
-
-		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-				DisableServiceAccess(cfg, setup.GetOrganizationName())
-			}
-		})
-
+		DeleteService(cfg, setup, instanceName, appName)
+		DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
+		DisableServiceAccess(cfg, setup)
 		otherSetup.Teardown()
 		setup.Teardown()
 	}
 })
-
-func DoAPIRequest(req *http.Request) (*http.Response, error) {
-	return client.Do(req)
-}

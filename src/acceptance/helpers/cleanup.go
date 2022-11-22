@@ -8,7 +8,7 @@ import (
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 )
 
-func Cleanup(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteSetup) {
+func CleanupOrgs(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteSetup) {
 	ginkgo.By("Clearing down existing test orgs/spaces...")
 	workflowhelpers.AsUser(wfh.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		orgs := GetTestOrgs(cfg)

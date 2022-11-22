@@ -15,11 +15,9 @@ import (
 	"acceptance/config"
 	. "acceptance/helpers"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
 )
 
 var (
@@ -50,25 +48,11 @@ var _ = BeforeSuite(func() {
 	}
 
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-
-	//Cleanup(cfg, setup)
-
 	setup.Setup()
-
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-			EnableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
-
-	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-	}
-
+	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
+	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	interval = cfg.AggregateInterval
-
 	client = GetHTTPClient(cfg)
-
 })
 
 func AppAfterEach() {
@@ -77,7 +61,8 @@ func AppAfterEach() {
 	} else {
 		DebugInfo(cfg, setup, appName)
 		if appName != "" {
-			DeletePolicy(appName, appGUID)
+			DeleteService(cfg, nil, instanceName, appName)
+			DeletePolicy(appGUID)
 			DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 			DeleteCustomMetricCred(cfg, appGUID)
 		}
@@ -88,11 +73,7 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-			if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
-				DisableServiceAccess(cfg, setup.GetOrganizationName())
-			}
-		})
+		DisableServiceAccess(cfg, setup)
 		setup.Teardown()
 	}
 })
@@ -108,10 +89,6 @@ func getStartAndEndTime(location *time.Location, offset, duration time.Duration)
 	return startTime, endTime
 }
 
-func doAPIRequest(req *http.Request) (*http.Response, error) {
-	return client.Do(req)
-}
-
 func DeletePolicyWithAPI(appGUID string) {
 	By(fmt.Sprintf("Deleting policy using api for appguid :'%s'", appGUID))
 	oauthToken := OauthToken(cfg)
@@ -120,20 +97,15 @@ func DeletePolicyWithAPI(appGUID string) {
 	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
 
-	resp, err := doAPIRequest(req)
+	resp, err := client.Do(req)
 	Expect(err).ShouldNot(HaveOccurred())
 	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(resp.Body)
 	Expect(resp.StatusCode).To(Equal(http.StatusOK), "Failed to delete policy '%s'", string(body))
 }
 
-func DeletePolicy(appName, appGUID string) {
-	if cfg.IsServiceOfferingEnabled() {
-		unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
-		Expect(unbindService).To(Exit(0), "failed unbinding service from app")
-		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
-		Expect(deleteService).To(Exit(0))
-	} else {
+func DeletePolicy(appGUID string) {
+	if !cfg.IsServiceOfferingEnabled() {
 		DeletePolicyWithAPI(appGUID)
 	}
 }
