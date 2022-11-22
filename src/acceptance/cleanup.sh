@@ -33,9 +33,9 @@ fi
 function delete_org(){
   local ORG=$1
 
-  if ! cf delete-org "$ORG" -f; then
+  if ! cf delete-org -f "$ORG"; then
     cf target -o "$ORG"
-    SERVICES=$(cf services | grep "${SERVICE_PREFIX}" |  awk 'NR>1 { print $1}')
+    SERVICES=$(cf services | grep "${SERVICE_PREFIX}" |  awk '{ print $1}')
     for SERVICE in $SERVICES; do
       cf purge-service-instance "$SERVICE" -f || echo "ERROR: purge-service-instance '$SERVICE' failed"
     done
