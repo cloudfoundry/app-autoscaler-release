@@ -38,6 +38,15 @@ SSLMODE='<%= p("autoscaler.scalingengine_db.sslmode") %>'
  		JDBCDBURL=$JDBCDBURL"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
  		DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
  	<% end %>
+	<% unless p("autoscaler.scalingengine_db.tls.certificate") == "" %>
+		JDBCDBURL=$JDBCDBURL"&sslcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/crt"
+		DBURI=$DBURI"&sslcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/crt"
+	<% end %>
+	<% unless p("autoscaler.scalingengine_db.tls.private_key") == "" %>
+		openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key -out /var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key.pk8 -nocrypt
+		JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key.pk8"
+		DBURI=$DBURI"&sslkey=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key"
+	<% end %>
 <% else %>
 	JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 	DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
