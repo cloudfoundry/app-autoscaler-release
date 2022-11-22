@@ -69,6 +69,7 @@ SSLMODE='<%= p("autoscaler.scheduler_db.sslmode") %>'
   <% unless p("autoscaler.scheduler_db.tls.private_key") == "" %>
     openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/scheduler/config/certs/policy_db/key -out /var/vcap/jobs/scheduler/config/certs/policy_db/key.pk8 -nocrypt
   <% end %>
+<% end %>
 
 detect_dns $HOST $PORT
 /var/vcap/packages/changeloglockcleaner/changeloglockcleaner -d "$DBURI" -e <%= p("autoscaler.changeloglock_timeout_seconds") %>
