@@ -232,7 +232,7 @@ func put(url string, body string) ([]byte, int) {
 	req.Header.Add("Authorization", oauthToken)
 	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := DoAPIRequest(req)
+	resp, err := client.Do(req)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	defer func() { _ = resp.Body.Close() }()
@@ -252,7 +252,7 @@ func deleteReq(url string) ([]byte, int) {
 	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
 	req.Header.Add("Content-Type", "application/json")
-	resp, err := DoAPIRequest(req)
+	resp, err := client.Do(req)
 	Expect(err).ShouldNot(HaveOccurred())
 	defer func() { _ = resp.Body.Close() }()
 	response, err := io.ReadAll(resp.Body)
@@ -270,7 +270,7 @@ func get(url string) ([]byte, int) {
 	req.Header.Add("Authorization", oauthToken)
 	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := DoAPIRequest(req)
+	resp, err := client.Do(req)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	defer func() { _ = resp.Body.Close() }()

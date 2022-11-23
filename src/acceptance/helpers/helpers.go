@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
+
 	. "github.com/onsi/ginkgo/v2"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/generator"
@@ -94,48 +96,59 @@ func OauthToken(cfg *config.Config) string {
 	return strings.TrimSpace(string(cmd.Out.Contents()))
 }
 
-func EnableServiceAccess(cfg *config.Config, orgName string) {
-	if orgName == "" {
-		Fail(fmt.Sprintf("Org must not be an empty string. Using broker:%s, serviceName:%s", cfg.ServiceBroker, cfg.ServiceName))
+func EnableServiceAccess(setup *workflowhelpers.ReproducibleTestSuiteSetup, cfg *config.Config, orgName string) {
+	if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if orgName == "" {
+				Fail(fmt.Sprintf("Org must not be an empty string. Using broker:%s, serviceName:%s", cfg.ServiceBroker, cfg.ServiceName))
+			}
+			enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
+		})
 	}
-	enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
 }
 
-func DisableServiceAccess(cfg *config.Config, orgName string) {
-	enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
+func DisableServiceAccess(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup) {
+	if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			orgName := setup.GetOrganizationName()
+			enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
+		})
+	}
 }
 
 func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
-	spaceCmd := cf.Cf("space", spaceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
-	spaceGuid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
+	if cfg.IsServiceOfferingEnabled() {
+		spaceCmd := cf.Cf("space", spaceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
+		Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
+		spaceGuid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
 
-	serviceCmd := cf.CfSilent("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
-	if serviceCmd.ExitCode() != 0 {
-		Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
-	}
-
-	var services = struct {
-		Included struct {
-			ServiceOfferings []struct{ Name string } `json:"service_offerings"`
+		serviceCmd := cf.CfSilent("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
+		if serviceCmd.ExitCode() != 0 {
+			Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
 		}
-	}{}
-	contents := serviceCmd.Out.Contents()
-	err := json.Unmarshal(contents, &services)
-	if err != nil {
-		AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
-	}
-	GinkgoWriter.Printf("\nFound services: %s\n", services.Included.ServiceOfferings)
-	for _, service := range services.Included.ServiceOfferings {
-		if service.Name == serviceName {
-			return
-		}
-	}
 
-	cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-	Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
+		var services = struct {
+			Included struct {
+				ServiceOfferings []struct{ Name string } `json:"service_offerings"`
+			}
+		}{}
+		contents := serviceCmd.Out.Contents()
+		err := json.Unmarshal(contents, &services)
+		if err != nil {
+			AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
+		}
+		GinkgoWriter.Printf("\nFound services: %s\n", services.Included.ServiceOfferings)
+		for _, service := range services.Included.ServiceOfferings {
+			if service.Name == serviceName {
+				return
+			}
+		}
+
+		cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
+		Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
+	}
 }
 
 func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
