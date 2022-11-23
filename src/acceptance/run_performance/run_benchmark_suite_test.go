@@ -64,5 +64,6 @@ var _ = AfterSuite(func() {
 		fmt.Println("Skipping Teardown...")
 	} else {
 		fmt.Println("TODO: Cleanup test...")
+		setup.Teardown()
 	}
 })

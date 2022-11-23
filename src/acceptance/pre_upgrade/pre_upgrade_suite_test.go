@@ -2,7 +2,7 @@ package pre_upgrade_test
 
 import (
 	"acceptance/config"
-	"acceptance/helpers"
+	. "acceptance/helpers"
 	"testing"
 
 	cth "github.com/KevinJCross/cf-test-helpers/v2/helpers"
@@ -37,22 +37,18 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		orgs := helpers.GetTestOrgs(cfg)
+		orgs := GetTestOrgs(cfg)
 		for _, org := range orgs {
-			helpers.DeleteOrg(cfg, org)
+			DeleteOrg(cfg, org)
 		}
 	})
 
 	GinkgoWriter.Println("Clearing down existing test orgs/spaces... Complete")
 	setup.Setup()
 
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.ShouldEnableServiceAccess() {
-			helpers.EnableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
+	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
 
 	if cfg.IsServiceOfferingEnabled() {
-		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
+		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
 })

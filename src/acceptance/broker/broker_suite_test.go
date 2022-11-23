@@ -38,23 +38,13 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	setup.Setup()
 
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		if cfg.ShouldEnableServiceAccess() {
-			EnableServiceAccess(cfg, setup.GetOrganizationName())
-		}
-	})
-
+	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
 	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-
 	DeferCleanup(func() {
 		if os.Getenv("SKIP_TEARDOWN") == "true" {
 			fmt.Println("Skipping Teardown...")
 		} else {
-			workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-				if cfg.ShouldEnableServiceAccess() {
-					DisableServiceAccess(cfg, setup.GetOrganizationName())
-				}
-			})
+			DisableServiceAccess(cfg, setup)
 			setup.Teardown()
 		}
 	})
