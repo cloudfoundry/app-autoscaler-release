@@ -14,3 +14,4 @@ gcloud 403.0.0
 cf 8.5.0
 actionlint 1.6.22
 direnv 2.32.1
+yq 4.27.5
