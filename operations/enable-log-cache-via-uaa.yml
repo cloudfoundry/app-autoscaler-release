@@ -4,7 +4,7 @@
 
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/port
-  value: 8083
+  value:
 
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/url?

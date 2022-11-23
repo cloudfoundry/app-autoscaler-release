@@ -40,7 +40,12 @@ end
   policy_db_url = build_db_url('policy_db', job_name)
   app_metrics_db_url = build_db_url('appmetrics_db', job_name)
 
-  metric_collector_url = p("autoscaler.eventgenerator.metricscollector.host") + ":" + p("autoscaler.eventgenerator.metricscollector.port").to_s
+
+  metric_collector_url = p("autoscaler.eventgenerator.metricscollector.host")
+  metrics_collector_port = p("autoscaler.eventgenerator.metricscollector.port")
+  if metrics_collector_port.empty?
+    metric_collector_url += ":" + metrics_collector_port
+  end
 
   sorted_instances=link("eventgenerator").instances.sort_by {|i|i.address}
   nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
