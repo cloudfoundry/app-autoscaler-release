@@ -40,6 +40,7 @@ popd > /dev/null
 echo "> Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
 
 UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
+UAA_FIREHOST_EXPORTER_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)
 export UAA_CLIENT_SECRET
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
@@ -109,8 +110,8 @@ function deploy() {
       -v admin_password="${CF_ADMIN_PASSWORD}" \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
-      -v eventgenerator_client_id=admin \
-      -v eventgenerator_client_secret="${UAA_CLIENT_SECRET}" \
+      -v eventgenerator_uaa_client_id=firehose_exporter \
+      -v eventgenerator_uaa_client_secret="${UAA_FIREHOST_EXPORTER_CLIENT_SECRET}" \
       -v eventgenerator_uaa_skip_ssl_validation=true \
     -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"

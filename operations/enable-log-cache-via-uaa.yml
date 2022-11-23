@@ -4,7 +4,7 @@
 
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/port
-  value:
+  value: ""
 
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/url?
@@ -18,7 +18,6 @@
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/client_secret?
   value: ((eventgenerator_uaa_client_secret))
 
-# TODO : SHOULD be removed later
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/uaa?/skip_ssl_validation?
   value: ((eventgenerator_uaa_skip_ssl_validation))
