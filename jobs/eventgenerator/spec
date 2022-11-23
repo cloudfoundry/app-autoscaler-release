@@ -183,7 +183,7 @@ properties:
 
   autoscaler.eventgenerator.metricscollector.host:
     description: "Host where the metrics collector is running"
-    default: "metricscollector.service.cf.internal"
+    default: "https://metricscollector.service.cf.internal"
 
   autoscaler.eventgenerator.metricscollector.port:
     description: "Port where the metrics collector will listen"
