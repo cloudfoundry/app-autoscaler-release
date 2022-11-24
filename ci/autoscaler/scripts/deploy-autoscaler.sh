@@ -80,21 +80,53 @@ function deploy () {
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
   set -e
 
+  # Set the local tmp_dir depending on if we run on github-actions or not, see:
+  # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+  local tmp_dir
+  local perform_as_gh_action
+  perform_as_gh_action="${GITHUB_ACTIONS:-false}"
+  if "${perform_as_gh_action}" != 'false'
+  then
+    tmp_dir="${RUNNER_TEMP}"
+  else # local system
+    tmp_dir="$(pwd)/dev_releases"
+    mkdir -p "${tmp_dir}"
+  fi
+
+  local tmp_manifest_file
+  # on MacOS mktemp does not know the --tmpdir option
+  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
+
+  bosh -n -d "${deployment_name}" \
+      interpolate "${deployment_manifest}" \
+      ${OPS_FILES_TO_USE} \
+      ${bosh_deploy_opts} \
+      -v system_domain="${system_domain}" \
+      -v deployment_name="${deployment_name}" \
+      -v app_autoscaler_version="${bosh_release_version}" \
+      -v admin_password="${CF_ADMIN_PASSWORD}" \
+      -v cf_client_id=autoscaler_client_id \
+      -v cf_client_secret=autoscaler_client_secret \
+      -v skip_ssl_validation=true \
+      > "${tmp_manifest_file}"
+      
+  if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
+  then
+    echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
+  else
+  # This trap-command MUST be rendered NOW! In case of single-quotation the traped code will
+  # try to access a variable which does not exist anymore because of its scope being within
+  # the current function.
+  #
+  # shellcheck disable=SC2064
+    trap "rm ${tmp_manifest_file}" EXIT
+  fi
+
   echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
   echo " - Deploy options: '${bosh_deploy_opts}'"
 
-  bosh -n -d "${deployment_name}" \
-    deploy "${deployment_manifest}" \
-    ${OPS_FILES_TO_USE} \
-    ${bosh_deploy_opts} \
-    -v system_domain="${system_domain}" \
-    -v deployment_name="${deployment_name}" \
-    -v app_autoscaler_version="${bosh_release_version}" \
-    -v admin_password="${CF_ADMIN_PASSWORD}" \
-    -v cf_client_id=autoscaler_client_id \
-    -v cf_client_secret=autoscaler_client_secret \
-    -v skip_ssl_validation=true
+  bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
 
   echo "# deployment finished: '${deployment_name}'"
 }

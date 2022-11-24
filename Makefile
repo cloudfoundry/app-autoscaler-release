@@ -327,7 +327,7 @@ deploy-register-cf:
 
 deploy-autoscaler-bosh:
 	echo " - deploying autoscaler"
-	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 
 
 deploy-prometheus:
