@@ -15,7 +15,7 @@ type TLSCerts struct {
 func (t *TLSCerts) CreateClientConfig() (*tls.Config, error) {
 	if t != nil && t.CertFile != "" && t.KeyFile != "" {
 		clientTls := tlsconfig.Build(
-			tlsconfig.WithIdentityFromFile(t.CertFile, t.KeyFile),
+			tlsconfig.WithInternalServiceDefaults(),
 			tlsconfig.WithIdentityFromFile(t.CertFile, t.KeyFile))
 		if t.CACertFile != "" {
 			return clientTls.Client(tlsconfig.WithAuthorityFromFile(t.CACertFile))
