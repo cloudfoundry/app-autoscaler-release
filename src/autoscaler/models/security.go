@@ -28,7 +28,7 @@ func (t *TLSCerts) CreateClientConfig() (*tls.Config, error) {
 func (t *TLSCerts) CreateServerConfig() (*tls.Config, error) {
 	if t != nil && t.CertFile != "" && t.KeyFile != "" {
 		serverTls := tlsconfig.Build(
-			tlsconfig.WithIdentityFromFile(t.CertFile, t.KeyFile),
+			tlsconfig.WithInternalServiceDefaults(),
 			tlsconfig.WithIdentityFromFile(t.CertFile, t.KeyFile))
 		if t.CACertFile != "" {
 			return serverTls.Server(tlsconfig.WithClientAuthenticationFromFile(t.CACertFile))
