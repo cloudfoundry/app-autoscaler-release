@@ -10,10 +10,13 @@ concurrency:
 jobs:
   generate-gosub:
     name: ensure gosub specs are up to date
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: test docker
-        run: docker ps; docker images
+        run: |
+          docker ps
+          docker images
+          
       - name: Trust my checkout
         run: git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
 
