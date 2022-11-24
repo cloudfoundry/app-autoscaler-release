@@ -1,5 +1,5 @@
 ---
-name: Build with Mysql
+name: ARC - Build with Mysql
 
 on:
   pull_request:
