@@ -90,6 +90,8 @@ jobs:
       matrix:
         suite: "${{ fromJSON(inputs.suites) }}"
     runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
     continue-on-error: true
     name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
