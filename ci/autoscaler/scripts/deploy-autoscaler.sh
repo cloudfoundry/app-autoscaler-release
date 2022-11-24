@@ -95,7 +95,7 @@ function deploy () {
 
   local tmp_manifest_file
   # on MacOS mktemp does not know the --tmpdir option
-  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
+  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.XXX.yaml")"
 
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
