@@ -52,7 +52,7 @@ SSLMODE='<%= p("autoscaler.scheduler_db.sslmode") %>'
     <% unless p("autoscaler.scheduler_db.tls.private_key") == "" %>
     openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/scheduler/config/certs/scheduler_db/key -out /var/vcap/jobs/scheduler/config/certs/scheduler_db/key.pk8 -nocrypt
     JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key.pk8"
-    DBURI=$DBURI"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key.sh1t"
+    DBURI=$DBURI"&sslkey=/var/vcap/jobs/scheduler/config/certs/scheduler_db/key"
   <% end %>
 # URLs for mySQL DB
 <% else %>
