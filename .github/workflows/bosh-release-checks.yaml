@@ -14,8 +14,8 @@ jobs:
     steps:
       - name: test docker
         run: |
-          docker ps
-          docker images
+          docker ps;
+          docker images;
 
       - name: Trust my checkout
         run: git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
