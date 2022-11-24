@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 # shellcheck disable=SC2086
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -11,6 +11,7 @@ bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
+ ${autoscaler_dir}/operations/connect_to_postgres_with_certs.yml\
  ${autoscaler_dir}/operations/enable-nats-tls.yml\
  ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
  ${autoscaler_dir}/operations/add-extra-plan.yml\
@@ -35,7 +36,7 @@ pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
 popd > /dev/null
 
-echo "# Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
+echo "> Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
 
 UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 export UAA_CLIENT_SECRET
@@ -60,7 +61,7 @@ else
 	--secret "autoscaler_client_secret"
 fi
 
-function deploy () {
+function deploy() {
   OPS_FILES_TO_USE=""
   for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
@@ -95,7 +96,7 @@ function deploy () {
 
   local tmp_manifest_file
   # on MacOS mktemp does not know the --tmpdir option
-  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.XXX.yaml")"
+  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
 
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
@@ -109,7 +110,7 @@ function deploy () {
       -v cf_client_secret=autoscaler_client_secret \
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
-      
+
   if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
   then
     echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
@@ -122,16 +123,17 @@ function deploy () {
     trap "rm ${tmp_manifest_file}" EXIT
   fi
 
-  echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
+  echo "> creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
+  echo " - tmp_manifest_file=${tmp_manifest_file}"
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
   echo " - Deploy options: '${bosh_deploy_opts}'"
-
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
 
-  echo "# deployment finished: '${deployment_name}'"
+  echo
+  echo "> deployment finished: '${deployment_name}'"
 }
 
-function find_or_upload_stemcell(){
+function find_or_upload_stemcell() {
   # Determine if we need to upload a stemcell at this point.
   stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
   stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
@@ -142,18 +144,27 @@ function find_or_upload_stemcell(){
     if [ "${stemcell_version}" != "latest" ]; then
 	    URL="${URL}?v=${stemcell_version}"
     fi
-    wget "$URL" -O stemcell.tgz
+    wget "${URL}" -O stemcell.tgz
     bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
   fi
 }
 
-function find_or_upload_release(){
+function find_or_upload_release() {
   if ! bosh releases | grep -E "${bosh_release_version}[*]*\s" > /dev/null; then
-    echo "Creating Release with bosh version ${bosh_release_version}"
-    bosh create-release --force --version="${bosh_release_version}"
+
+    local -r release_desc_file="dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
+    if [ ! -f "${release_desc_file}" ]
+    then
+      echo "Creating Release with bosh version ${bosh_release_version}"
+      bosh create-release --force --version="${bosh_release_version}"
+    else
+      # shellcheck disable=SC2006
+      echo -e "Release with bosh-version ${bosh_release_version} already locally present. Reusing it."\
+        "\n\tIf this does not work, please consider executing `bosh reset-release`."
+    fi
 
     echo "Uploading Release"
-    bosh upload-release $bosh_upload_release_opts "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
+    bosh upload-release ${bosh_upload_release_opts} "${release_desc_file}"
   else
     echo "the app-autoscaler release is already uploaded with the commit ${bosh_release_version}"
     echo "Attempting redeploy..."

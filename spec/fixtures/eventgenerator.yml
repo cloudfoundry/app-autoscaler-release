@@ -13,8 +13,8 @@ autoscaler:
         tag: default
     tls:
       ca: BEGIN---CA---END
-      crt: BEGIN---CERT---END
-      key: BEGIN---KEY---END
+      certificate: BEGIN---CERT---END
+      private_key: BEGIN---KEY---END
   appmetrics_db:
     address: 10.11.137.101
     databases:
@@ -29,5 +29,5 @@ autoscaler:
         tag: default
     tls:
       ca: BEGIN---CA---END
-      crt: BEGIN---CERT---END
-      key: BEGIN---KEY---END
+      certificate: BEGIN---CERT---END
+      private_key: BEGIN---KEY---END

@@ -96,10 +96,10 @@ properties:
   autoscaler.policy_db.tls.ca:
     default: ''
     description: 'PEM-encoded ca certificate of tls database server'
-  autoscaler.policy_db.tls.crt:
+  autoscaler.policy_db.tls.certificate:
     default: ''
     description: 'PEM-encoded certificate of tls database client'
-  autoscaler.policy_db.tls.key:
+  autoscaler.policy_db.tls.private_key:
     default: ''
     description: 'PEM-encoded key of tls database client'
   autoscaler.policy_db.sslmode:

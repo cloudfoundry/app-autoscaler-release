@@ -6,7 +6,6 @@ dev_releases
 .blobs
 blobs
 .dev_builds
-.idea
 .DS_Store
 .final_builds/jobs/**/*.tgz
 .final_builds/packages/**/*.tgz
@@ -17,13 +16,10 @@ src/changeloglockcleaner/vendor
 **/pom.xml.versionsBackup
 bosh-lite/deployments/*
 /RemoteSystemsTempFiles
-/.DS_Store
 /.metadata
 /pkg/
 /bin/
 /.recommenders
-/.project
-/.settings/
 target
 /app-autoscaler-release/
 test-certs

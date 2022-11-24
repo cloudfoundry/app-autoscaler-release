@@ -10,6 +10,7 @@ db_type:=postgres
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"; ;; \
  			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
+DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
 SUITES?=broker api app
@@ -123,7 +124,7 @@ target/scheduler_test_certs:
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
 test-autoscaler: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
-	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}" OPTS="${OPTS}"
+	@make -C src/autoscaler test DBURL="${DBURL}" OPTS="${OPTS}"
 test-autoscaler-suite: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
