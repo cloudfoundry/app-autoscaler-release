@@ -96,7 +96,7 @@ function deploy() {
 
   local tmp_manifest_file
   # on MacOS mktemp does not know the --tmpdir option
-  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
+  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.XXX.yaml")"
 
   bosh -n -d "${deployment_name}" \
       interpolate "${deployment_manifest}" \
@@ -111,7 +111,7 @@ function deploy() {
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
-  if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
+if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
   then
     echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
   else
@@ -123,14 +123,13 @@ function deploy() {
     trap "rm ${tmp_manifest_file}" EXIT
   fi
 
-  echo "> creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
-  echo " - tmp_manifest_file=${tmp_manifest_file}"
+  echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
   echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
   echo " - Deploy options: '${bosh_deploy_opts}'"
+
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
 
-  echo
-  echo "> deployment finished: '${deployment_name}'"
+  echo "# deployment finished: '${deployment_name}'"
 }
 
 function find_or_upload_stemcell() {
