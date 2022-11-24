@@ -1,0 +1,17 @@
+name: ARC - Acceptance Tests - Broker
+on:
+  pull_request:
+    types: [ opened, labeled, synchronize ]
+
+concurrency:
+  group: "${{ github.workflow }}/${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  acceptance_tests_reusable:
+    name: " " # Whitespace name looks nicest on Github UI
+    uses: ./.github/workflows/acceptance_tests_reusable.yaml
+    with:
+      deployment_name: "autoscaler-${{ github.event.pull_request.number }}"
+    secrets:
+      bbl_ssh_key: "${{ secrets.BBL_SSH_KEY }}"
