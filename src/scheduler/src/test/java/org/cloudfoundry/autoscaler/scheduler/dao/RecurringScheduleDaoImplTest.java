@@ -4,11 +4,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import jakarta.transaction.Transactional;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.transaction.Transactional;
 import org.cloudfoundry.autoscaler.scheduler.entity.RecurringScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.RecurringScheduleEntitiesBuilder;
 import org.cloudfoundry.autoscaler.scheduler.util.TestDataDbUtil;

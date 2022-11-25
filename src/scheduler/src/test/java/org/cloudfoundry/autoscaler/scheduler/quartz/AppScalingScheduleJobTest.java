@@ -118,7 +118,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -171,7 +171,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -205,7 +205,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -255,7 +255,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -289,7 +289,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
 
@@ -336,7 +336,7 @@ public class AppScalingScheduleJobTest {
         .thenReturn(existingActiveSchedule);
     Mockito.when(activeScheduleDao.deleteActiveSchedulesByAppId(Mockito.anyString())).thenReturn(1);
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
 
@@ -371,7 +371,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
     Mockito.when(activeScheduleDao.findByAppId(Mockito.anyString()))
         .thenThrow(new DatabaseValidationException("test exception"));
 
@@ -406,7 +406,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 204, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 204, null);
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -438,7 +438,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
 
     Mockito.doThrow(new DatabaseValidationException("test exception"))
         .doNothing()
@@ -495,7 +495,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 204, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 204, null);
 
     Mockito.doThrow(new DatabaseValidationException("test exception"))
         .doReturn(1)
@@ -532,7 +532,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
 
     Mockito.doThrow(new DatabaseValidationException("test exception"))
         .when(activeScheduleDao)
@@ -576,7 +576,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 204, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 204, null);
 
     Mockito.doThrow(new DatabaseValidationException("test exception"))
         .when(activeScheduleDao)
@@ -614,7 +614,8 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 404, "test not found message");
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(
+        appId, scheduleId, 404, "test not found message");
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -647,7 +648,8 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 400, "test error message");
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(
+        appId, scheduleId, 400, "test error message");
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -698,7 +700,8 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 400, "test error message");
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(
+        appId, scheduleId, 400, "test error message");
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -727,7 +730,8 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 500, "test error message");
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(
+        appId, scheduleId, 500, "test error message");
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -775,7 +779,8 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 500, "test error message");
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(
+        appId, scheduleId, 500, "test error message");
 
     TestJobListener testJobListener = new TestJobListener(1);
     memScheduler.getListenerManager().addJobListener(testJobListener);
@@ -852,7 +857,7 @@ public class AppScalingScheduleJobTest {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 204, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 204, null);
 
     Mockito.doThrow(new SchedulerException("test exception"))
         .when(scheduler)

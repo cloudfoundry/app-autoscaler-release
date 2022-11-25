@@ -4,10 +4,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.transaction.Transactional;
 import org.cloudfoundry.autoscaler.scheduler.entity.SpecificDateScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.SpecificDateScheduleEntitiesBuilder;
 import org.cloudfoundry.autoscaler.scheduler.util.TestDataDbUtil;

@@ -17,7 +17,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <io.prometheus.simpleclient.version>0.16.0</io.prometheus.simpleclient.version>
         <sonar.organization>cloudfoundry</sonar.organization>
         <sonar.projectKey>cloudfoundry_app-autoscaler-release</sonar.projectKey>
@@ -26,6 +26,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-properties-migrator</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -69,11 +74,6 @@
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-jasper</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <!-- Note: Explicitly specified as the respective jar is not showing in
             the maven dependencies -->
         <dependency>
@@ -96,8 +96,8 @@
             <version>2.9.0</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
@@ -187,7 +187,6 @@
                 <configuration>
 		    <propertyExpansion>checkstyle.config.path=${basedir}/../../style-guide</propertyExpansion>
 		    <configLocation>${basedir}/../../style-guide/google_checks.xml</configLocation>
-                    <encoding>UTF-8</encoding>
                     <failOnViolation>true</failOnViolation>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                 </configuration>

@@ -4,8 +4,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
-import javax.transaction.Transactional;
 import org.cloudfoundry.autoscaler.scheduler.entity.ActiveScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.TestDataDbUtil;
 import org.cloudfoundry.autoscaler.scheduler.util.TestDataSetupHelper;

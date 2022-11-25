@@ -10,7 +10,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -28,7 +27,7 @@ public class SchedulerApplicationTest {
 
   @Test
   public void testApplicationExitsWhenSchedulerDbUnreachable() {
-    expectedEx.expect(ApplicationContextException.class);
+    expectedEx.expect(org.springframework.beans.factory.BeanCreationException.class);
     SchedulerApplication.main(
         new String[] {
           "--spring.autoconfigure.exclude="
@@ -40,7 +39,7 @@ public class SchedulerApplicationTest {
 
   @Test
   public void testApplicationExitsWhenPolicyDbUnreachable() {
-    expectedEx.expect(ApplicationContextException.class);
+    expectedEx.expect(org.springframework.beans.factory.BeanCreationException.class);
     SchedulerApplication.main(
         new String[] {
           "--spring.autoconfigure.exclude="

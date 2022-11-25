@@ -1,6 +1,6 @@
 package org.cloudfoundry.autoscaler.scheduler.conf;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
