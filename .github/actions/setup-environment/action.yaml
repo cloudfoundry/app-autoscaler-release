@@ -1,3 +1,6 @@
+#TODO: wants openssl
+# libssl.so.1.1: cannot open shared object file: No such file or directory - /opt/hostedtoolcache/Ruby/2.7.6/x64/lib/ruby/2.7.0/x86_64-linux/openssl.so
+# https://github.com/cloudfoundry/app-autoscaler-release/actions/runs/3547797483/jobs/5958314929#step:5:333
 name: 'Acceptance Tests Common'
 description: 'Common steps for all acceptance tests'
 inputs:
