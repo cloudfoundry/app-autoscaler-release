@@ -46,10 +46,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup-go
       - uses: ./.github/actions/setup-java
-      - name: Install BOSH CLI
-        run: |
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          brew install cloudfoundry/tap/bosh-cli
 
       - name: Run Update
         run: |
