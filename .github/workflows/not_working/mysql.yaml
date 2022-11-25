@@ -1,4 +1,6 @@
 ---
+#TODO: mysql timed out creating database (on n4-standard-4)
+# https://github.com/cloudfoundry/app-autoscaler-release/actions/runs/3547498182/jobs/5957933700#step:8:15
 name: ARC - Build with Mysql
 
 on:

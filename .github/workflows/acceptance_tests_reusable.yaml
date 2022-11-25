@@ -70,6 +70,9 @@ jobs:
     needs: [ create_pending_check ]
     name: Deploy for ${{ github.workflow }}
     runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
