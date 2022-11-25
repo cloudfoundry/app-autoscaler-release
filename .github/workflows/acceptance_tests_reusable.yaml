@@ -71,7 +71,7 @@ jobs:
     name: Deploy for ${{ github.workflow }}
     runs-on: self-hosted
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+      image: booker/app-autoscaler-release-tools
 
     steps:
       - name: Checkout
@@ -94,7 +94,7 @@ jobs:
         suite: "${{ fromJSON(inputs.suites) }}"
     runs-on: self-hosted
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+      image: booker/app-autoscaler-release-tools
     continue-on-error: true
     name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
@@ -118,6 +118,9 @@ jobs:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
     runs-on: self-hosted
+    container:
+      image: booker/app-autoscaler-release-tools
+
     permissions:
       # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
       # but supposed to be provided via the defaults, see:
@@ -138,6 +141,9 @@ jobs:
     needs: [ acceptance_tests_verify ]
     name: Deployment cleanup
     runs-on: self-hosted
+    container:
+      image: booker/app-autoscaler-release-tools
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3

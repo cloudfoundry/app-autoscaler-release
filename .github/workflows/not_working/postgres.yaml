@@ -1,3 +1,5 @@
+#TODO:  Unexpected error running Liquibase: liquibase.exception.DatabaseException: liquibase.exception.DatabaseException: Connection could not be created to jdbc:postgresql://127.0.0.1/autoscaler with driver org.postgresql.Driver.  Connection to 127.0.0.1:5432 refused. 
+# https://github.com/cloudfoundry/app-autoscaler-release/actions/runs/3549168357/jobs/5961226050#step:8:40
 ---
 name: ARC - Build with Postgres
 
