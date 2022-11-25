@@ -16,6 +16,8 @@ performance_app_percentage_to_scale="${PERFORMANCE_APP_PERCENTAGE_TO_SCALE:-}"
 performance_setup_workers="${PERFORMANCE_SETUP_WORKERS:-}"
 performance_teardown=${PERFORMANCE_TEARDOWN:-true}
 
+echo "reached run-acceptance-tests.sh"
+
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
   echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
