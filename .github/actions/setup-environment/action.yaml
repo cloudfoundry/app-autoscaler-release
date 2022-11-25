@@ -23,7 +23,10 @@ runs:
         ruby-version: 2.7
         bundler-cache: true
       env:
-       ImageOS: "ubuntu20" #required on self-hosted runner
+       ImageOS: "ubuntu22" #required on self-hosted runner
+      run: |
+        echo "deb http://security.ubuntu.com/ubuntu focal-security main" | tee /etc/apt/sources.list.d/focal-security.list
+        apt update && apt install libssl1.1
 
 
     - name: Cli Cache
