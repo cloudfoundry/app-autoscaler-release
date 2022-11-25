@@ -19,6 +19,9 @@ runs:
       with:
         ruby-version: 2.7
         bundler-cache: true
+      env:
+       ImageOS: "ubuntu20" #required on self-hosted runner
+
 
     - name: Cli Cache
       uses: actions/cache@v3
