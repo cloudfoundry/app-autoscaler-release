@@ -119,6 +119,9 @@ jobs:
           echo "type bash"; type bash
           echo "which bash"; which bash
           echo "type bash"; type bash
+          echo "bash --version"; bash --version
+          SUITES="$(echo ${MATRIX_SUITE}|tr '[:upper:]' '[:lower:]'"
+          echo $SUITES
           #echo "MATRIX_SUITE: ${MATRIX_SUITE,,}"
           #make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
