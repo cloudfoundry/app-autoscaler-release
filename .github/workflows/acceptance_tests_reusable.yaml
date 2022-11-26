@@ -74,18 +74,21 @@ jobs:
       image: booker/app-autoscaler-release-tools
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-      - name: Setup environment for deployment
-        uses: ./app-autoscaler-release/.github/actions/setup-environment
-        with:
-          ssh-key: ${{ secrets.bbl_ssh_key}}
-      - name: Deploy autoscaler
+      # - name: Checkout
+      #   uses: actions/checkout@v3
+      #   with:
+      #     path: app-autoscaler-release
+      # - name: Setup environment for deployment
+      #   uses: ./app-autoscaler-release/.github/actions/setup-environment
+      #   with:
+      #     ssh-key: ${{ secrets.bbl_ssh_key}}
+      # - name: Deploy autoscaler
+      #   run: |
+      #     cd ${AUTOSCALER_DIR}
+      #     make deploy-autoscaler
+      - name: DEBUG exit early
         run: |
-          cd ${AUTOSCALER_DIR}
-          make deploy-autoscaler
+          exit 0
 
   acceptance_tests:
     needs: [ deploy_autoscaler ]
@@ -111,7 +114,8 @@ jobs:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
           cd ${AUTOSCALER_DIR}
-          make acceptance-tests SUITES="${MATRIX_SUITE,,}"
+          bash --version
+          #make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
   acceptance_tests_verify:
     name: "${{ github.workflow }} Result"
