@@ -25,16 +25,16 @@ runs:
       env:
        ImageOS: "ubuntu22" #required on self-hosted runner
 
-    - name: Cli Cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          "${{ env.HOME }}/bin/"
-        key: ${{ runner.os }}-deploy_cli-${{ hashFiles( '${{ env.AUTOSCALER_DIR }}/.github/actions/setup_acceptance/install_cli.sh' ) }}
+    # - name: Cli Cache
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: |
+    #       "${{ env.HOME }}/bin/"
+    #     key: ${{ runner.os }}-deploy_cli-${{ hashFiles( '${{ env.AUTOSCALER_DIR }}/.github/actions/setup_acceptance/install_cli.sh' ) }}
 
-    - name: Install deployment ClIs
-      shell: bash
-      run: "${AUTOSCALER_DIR}/.github/actions/setup-environment/install_cli.sh"
+    # - name: Install deployment ClIs
+    #   shell: bash
+    #   run: "${AUTOSCALER_DIR}/.github/actions/setup-environment/install_cli.sh"
 
     - name: clone BBL repo
       uses: actions/checkout@v3
