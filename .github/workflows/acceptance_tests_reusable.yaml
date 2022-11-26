@@ -114,7 +114,8 @@ jobs:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
           cd ${AUTOSCALER_DIR}
-          bash --version
+          echo "MATRIX_SUITE: $MATRIX_SUITE"
+          echo "MATRIX_SUITE: ${MATRIX_SUITE,,}
           #make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
   acceptance_tests_verify:
@@ -149,6 +150,9 @@ jobs:
       image: booker/app-autoscaler-release-tools
 
     steps:
+      - name: DEBUG exit early
+        run: |
+          exit 0
       - name: Checkout
         uses: actions/checkout@v3
         with:
