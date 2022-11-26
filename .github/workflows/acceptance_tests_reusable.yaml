@@ -114,25 +114,14 @@ jobs:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
           cd ${AUTOSCALER_DIR}
-          echo "MATRIX_SUITE: ${MATRIX_SUITE}"
-          echo "BASH_VERSION: $BASH_VERSION"
-          echo "type bash"; type bash
-          echo "which bash"; which bash
-          echo "type bash"; type bash
-          echo "bash --version"; bash --version
           SUITES="$(echo ${MATRIX_SUITE}|tr '[:upper:]' '[:lower:]')"
-          echo $SUITES
-          #echo "MATRIX_SUITE: ${MATRIX_SUITE,,}"
-          #make acceptance-tests SUITES="${MATRIX_SUITE,,}"
+          make acceptance-tests
 
   acceptance_tests_verify:
     name: "${{ github.workflow }} Result"
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
     runs-on: self-hosted
-    container:
-      image: booker/app-autoscaler-release-tools
-
     permissions:
       # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
       # but supposed to be provided via the defaults, see:
