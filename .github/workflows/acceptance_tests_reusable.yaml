@@ -115,6 +115,10 @@ jobs:
         run: |
           cd ${AUTOSCALER_DIR}
           echo "MATRIX_SUITE: ${MATRIX_SUITE}"
+          echo "BASH_VERSION: $BASH_VERSION"
+          echo "type bash"; type bash
+          echo "which bash"; which bash
+          echo "type bash"; type bash
           echo "MATRIX_SUITE: ${MATRIX_SUITE,,}"
           #make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
