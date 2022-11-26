@@ -114,8 +114,8 @@ jobs:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
           cd ${AUTOSCALER_DIR}
-          SUITES="$(echo ${MATRIX_SUITE}|tr '[:upper:]' '[:lower:]')"
-          make acceptance-tests
+          make acceptance-tests SUITES="$(echo ${MATRIX_SUITE}|tr '[:upper:]' '[:lower:]')"
+
 
   acceptance_tests_verify:
     name: "${{ github.workflow }} Result"
