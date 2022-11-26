@@ -74,18 +74,18 @@ jobs:
       image: booker/app-autoscaler-release-tools
 
     steps:
-      # - name: Checkout
-      #   uses: actions/checkout@v3
-      #   with:
-      #     path: app-autoscaler-release
-      # - name: Setup environment for deployment
-      #   uses: ./app-autoscaler-release/.github/actions/setup-environment
-      #   with:
-      #     ssh-key: ${{ secrets.bbl_ssh_key}}
-      # - name: Deploy autoscaler
-      #   run: |
-      #     cd ${AUTOSCALER_DIR}
-      #     make deploy-autoscaler
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: app-autoscaler-release
+      - name: Setup environment for deployment
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
+        with:
+          ssh-key: ${{ secrets.bbl_ssh_key}}
+      - name: Deploy autoscaler
+        run: |
+          cd ${AUTOSCALER_DIR}
+          make deploy-autoscaler
       - name: DEBUG exit early
         run: |
           exit 0
@@ -109,7 +109,7 @@ jobs:
         uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
           ssh-key: ${{ secrets.bbl_ssh_key}}
-      - name: Run acceptance test - ${{ matrix.suite.lowercase }}
+      - name: Run acceptance test - ${{ matrix.suite }}
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
