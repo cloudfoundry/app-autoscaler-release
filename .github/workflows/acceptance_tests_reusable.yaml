@@ -111,11 +111,10 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Run acceptance test - ${{ matrix.suite }}
         env:
-          #MATRIX_SUITE: ${{ matrix.suite }}
-          SUITES: ${{ matrix.suite.toLowerCase() }}
+          MATRIX_SUITE: ${{ matrix.suite }}
         run: |
           cd ${AUTOSCALER_DIR}
-          make acceptance-tests 
+          make acceptance-tests
           #SUITES="$(echo ${MATRIX_SUITE}|tr '[:upper:]' '[:lower:]')"
 
 
