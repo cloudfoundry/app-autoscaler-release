@@ -31,7 +31,7 @@ env:
   DEPLOYMENT_NAME: "${{ inputs.deployment_name }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   GINKGO_OPTS: "--fail-fast"
-  NODES: 8
+  NODES: 16
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
   CHECK_NAME: "${{ github.workflow }}_Check"
@@ -86,9 +86,6 @@ jobs:
         run: |
           cd ${AUTOSCALER_DIR}
           make deploy-autoscaler
-      - name: DEBUG exit early
-        run: |
-          exit 0
 
   acceptance_tests:
     needs: [ deploy_autoscaler ]
