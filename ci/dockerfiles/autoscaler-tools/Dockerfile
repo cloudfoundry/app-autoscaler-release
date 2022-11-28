@@ -7,6 +7,9 @@ RUN apt-get update && \
     apt-get -qqy install --fix-missing gnupg apt-transport-https wget && \
     apt-get clean
 
+RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && \
+    chmod a+x /usr/local/bin/yq
+
 RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add - && \
       echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list && \
       wget -q -O - https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
@@ -21,7 +24,6 @@ RUN apt-get update && \
             curl \
             libcurl4-openssl-dev \
             git \
-            wget \
             runit \
             openssl \
             unzip \
