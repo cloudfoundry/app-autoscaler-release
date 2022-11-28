@@ -7,6 +7,15 @@
 # Then  `TARGET=local set-pipeline.sh`
 set -euo pipefail
 
+if "$(which gh)" > /dev/null; then
+  echo "gh cli found"
+  gh --version
+else
+  echo "no gh cli found!"  
+  exit 1
+fi
+
+
 export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
 
 fly_args=""
