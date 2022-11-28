@@ -21,7 +21,7 @@ jobs:
         run: git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
 
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup-go
+      # - uses: ./.github/actions/setup-go
 
       - name: sync-package-specs
         run: make package-specs
