@@ -1,6 +1,6 @@
 module apitester
 
-go 1.15
+go 1.19
 
 require (
 	github.com/onsi/gomega v1.16.0
