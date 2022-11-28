@@ -19,7 +19,8 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/enable-log-cache.yml\
  ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
  ${autoscaler_dir}/operations/remove-metricsserver.yml\
- ${autoscaler_dir}/operations/remove-metricsgateway.yml"}
+ ${autoscaler_dir}/operations/remove-metricsgateway.yml\
+ ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml"}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
@@ -39,6 +40,7 @@ popd > /dev/null
 echo "> Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
 
 UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
+UAA_FIREHOST_EXPORTER_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)
 export UAA_CLIENT_SECRET
 CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 
@@ -108,7 +110,10 @@ function deploy() {
       -v admin_password="${CF_ADMIN_PASSWORD}" \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
-      -v skip_ssl_validation=true \
+      -v eventgenerator_uaa_client_id=firehose_exporter \
+      -v eventgenerator_uaa_client_secret="${UAA_FIREHOST_EXPORTER_CLIENT_SECRET}" \
+      -v eventgenerator_uaa_skip_ssl_validation=true \
+    -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
   if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
