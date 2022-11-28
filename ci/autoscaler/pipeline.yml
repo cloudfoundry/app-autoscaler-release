@@ -87,12 +87,12 @@ groups:
 
 resource_types:
 - name: gcs-resource
-  type: docker-image
+  type: registry-image
   source:
     repository: frodenas/gcs-resource
 
 - name: pull-request
-  type: docker-image
+  type: registry-image
   source:
     repository: ghcr.io/bonzofenix/github-pr-resource
     tag: master
