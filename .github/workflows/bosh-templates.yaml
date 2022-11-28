@@ -11,6 +11,8 @@ jobs:
   templates:
     name: Bosh Templates Test
     runs-on: self-hosted
+    container:
+      image: booker/app-autoscaler-release-tools
     steps:
       - name: Checkout
         uses: actions/checkout@v3

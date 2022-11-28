@@ -14,6 +14,8 @@ jobs:
     # Yes there is one linter rowserrcheck automatically turned off because of generics
     #  - unless we are doing DB development it does not matter, and it should be fixed soon.
     runs-on: self-hosted
+    container:
+      image: booker/app-autoscaler-release-tools
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup-go
