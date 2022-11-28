@@ -10,9 +10,6 @@ jobs:
   generate:
     name: ensure fakes are up to date
     runs-on: self-hosted
-    container:
-      image: booker/app-autoscaler-release-tools
-
     steps:
       - uses: actions/checkout@v3
       - name: Go Build
