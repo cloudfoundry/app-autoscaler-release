@@ -35,8 +35,7 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_DATABASE: autoscaler
         ports:
-#          - 3306:3306
-         - 3306
+         - 3306:3306
 
     steps:
       - uses: actions/checkout@v3
@@ -46,5 +45,8 @@ jobs:
           make build db_type=mysql
 
       - name: ${{ matrix.suite }}
+        env: 
+          MYSQL_HOST: mysql
+          MYSQL_PORT: 3306
         run: |
           make ${{ matrix.suite }} db_type=mysql

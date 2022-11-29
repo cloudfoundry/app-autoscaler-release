@@ -58,5 +58,6 @@ jobs:
         env:
           POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
+          POSTGRES_DB: autoscaler
         run: |
           make ${{ matrix.suite }}
