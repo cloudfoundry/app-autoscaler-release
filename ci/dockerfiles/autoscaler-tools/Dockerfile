@@ -46,6 +46,7 @@ RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list
 
 # install golang
+# renovate: datasource=golang-version depName=golang
 ARG GO_VERSION=1.19.2
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
@@ -62,12 +63,14 @@ RUN apt-get update && \
     apt-get clean
 
 # Install bosh_cli
+# renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
 ARG BOSH_VERSION=7.0.1
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
 
 # Install bbl
+# renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
 ARG BBL_VERSION=8.4.44
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${BBL_VERSION}/bbl-v${BBL_VERSION}_linux_x86-64 && \
   mv bbl-* /usr/local/bin/bbl &&\
@@ -75,8 +78,9 @@ RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/v$
   bbl --version
 
 # Install credhub
+# renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
 ARG CREDHUB_VERSION=2.9.0
-RUN wget -q https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz && \
+RUN wget -q https://github.com/cloudfoundry/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-${CREDHUB_VERSION}.tgz && \
   mv credhub /usr/local/bin/credhub &&\
   rm credhub-linux-${CREDHUB_VERSION}.tgz &&\
@@ -87,6 +91,7 @@ RUN gem install cf-uaac &&\
     uaac --version
 
 # Install jq as a nice to have on container debugging
+# renovate: datasource=github-releases depName=jq lookupName=stedolan/jq
 ARG JQ_VERSION=1.6
 RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 && \
     mv jq-linux64 /usr/local/bin/jq && \
@@ -94,6 +99,7 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq
     jq --version
 
 # get maven
+# renovate: datasource=maven depName=org.apache.maven:maven-core
 ARG MAVEN_VERSION=3.6.3
 ENV MAVEN_HOME /opt/maven
 RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
@@ -117,10 +123,12 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   apt-get clean &&\
   gcloud version
 
+# renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
 ARG GINKGO_VERSION=2.4.0
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
     ginkgo version
 
+# renovate: datasource=node depName=node
 ARG NODE_VERSION=16
 RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && apt-get update -y \
