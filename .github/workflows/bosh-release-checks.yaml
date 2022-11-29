@@ -1,5 +1,3 @@
-#TODO: wants brew
-# https://github.com/cloudfoundry/app-autoscaler-release/actions/runs/3547435912/jobs/5957606354#step:9:13
 name: ARC - Create Bosh Release
 on:
   pull_request:
