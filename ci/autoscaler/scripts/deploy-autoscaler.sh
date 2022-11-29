@@ -8,7 +8,6 @@ deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-""}"
 bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"
 bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
-debug=${DEBUG:-}
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
@@ -23,13 +22,7 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/remove-metricsgateway.yml\
  ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml"}
 
-if [[ ! -d ${bbl_state_path} ]]; then
-  echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
-  echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
-  exit 1;
-  fi
-
-if [[ ${buildin_mode} == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
+if [[ "${buildin_mode}" == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
 
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
@@ -38,7 +31,7 @@ pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
 popd > /dev/null
 
-echo "> Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
+log "Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
 
 UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 UAA_FIREHOST_EXPORTER_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)
@@ -53,37 +46,18 @@ exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
 set -e
 
 if [[ $exist == 0 ]]; then
-  echo "Updating client token"
+  step "Updating client token"
   uaac client update "autoscaler_client_id" \
 	    --authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
 else
-  echo "Creating client token"
+  step "Creating client token"
   uaac client add "autoscaler_client_id" \
 	--authorized_grant_types "client_credentials" \
 	--authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read" \
 	--secret "autoscaler_client_secret"
 fi
 
-function deploy() {
-  OPS_FILES_TO_USE=""
-  for OPS_FILE in ${ops_files}; do
-    if [ -f "${OPS_FILE}" ]; then
-      OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
-    else
-      echo "ERROR: could not find ops file ${OPS_FILE} in ${PWD}"
-      exit 1
-    fi
-  done
-
-  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-
-  # Try to silence Prometheus but do not fail deployment if there's an error
-  set +e
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy"
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
-  set -e
-
+function create_manifest(){
   # Set the local tmp_dir depending on if we run on github-actions or not, see:
   # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
   local tmp_dir
@@ -97,7 +71,6 @@ function deploy() {
     mkdir -p "${tmp_dir}"
   fi
 
-  local tmp_manifest_file
   # on MacOS mktemp does not know the --tmpdir option
   tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
 
@@ -117,26 +90,38 @@ function deploy() {
     -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
-  if [ -z "${debug+}" ] && [ "${debug}" != 'false' ]
-  then
-    echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
-  else
-  # This trap-command MUST be rendered NOW! In case of single-quotation the traped code will
-  # try to access a variable which does not exist anymore because of its scope being within
-  # the current function.
-  #
-  # shellcheck disable=SC2064
-    trap "rm ${tmp_manifest_file}" EXIT
-  fi
+    # shellcheck disable=SC2064
+  if [ -z "${debug}" ] || [ "${debug}" = "false" ] ; then  trap "rm ${tmp_manifest_file}" EXIT ; fi
+}
 
-  echo "> creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
-  echo " - tmp_manifest_file=${tmp_manifest_file}"
-  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-  echo " - Deploy options: '${bosh_deploy_opts}'"
+function check_ops_files(){
+  OPS_FILES_TO_USE=""
+  for OPS_FILE in ${ops_files}; do
+    if [ -f "${OPS_FILE}" ]; then
+      OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${OPS_FILE}"
+    else
+      echo "ERROR: could not find ops file ${OPS_FILE} in ${PWD}"
+      exit 1
+    fi
+  done
+}
+
+function deploy() {
+  check_ops_files
+  step "Using Ops files: '${OPS_FILES_TO_USE}'"
+
+  # Try to silence Prometheus but do not fail deployment if there's an error
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill" || true
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy" || true
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy" || true
+
+  create_manifest
+
+  log "creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
+  debug "tmp_manifest_file=${tmp_manifest_file}"
+  step "Using Ops files: '${OPS_FILES_TO_USE}'"
+  step "Deploy options: '${bosh_deploy_opts}'"
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
-
-  echo
-  echo "> deployment finished: '${deployment_name}'"
 }
 
 function find_or_upload_stemcell() {
