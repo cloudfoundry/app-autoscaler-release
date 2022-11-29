@@ -15,6 +15,11 @@
       "matchManagers": ["gomod"],
       "matchDepTypes": ["golang"],
       "enabled": false
+    },
+    {
+      "description": "Strip of v prefix from version number in certain github releases",
+      "packageNames": ["cloudfoundry/bosh-cli"],
+      "extractVersion": "^v(?<version>.*)$"
     }
   ]
 }

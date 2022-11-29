@@ -71,8 +71,8 @@ RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_V
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
-ARG BBL_VERSION=8.4.44
-RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${BBL_VERSION}/bbl-v${BBL_VERSION}_linux_x86-64 && \
+ARG BBL_VERSION=v8.4.44
+RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_x86-64 && \
   mv bbl-* /usr/local/bin/bbl &&\
   chmod +x /usr/local/bin/bbl &&\
   bbl --version
@@ -92,8 +92,8 @@ RUN gem install cf-uaac &&\
 
 # Install jq as a nice to have on container debugging
 # renovate: datasource=github-releases depName=jq lookupName=stedolan/jq
-ARG JQ_VERSION=1.6
-RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 && \
+ARG JQ_VERSION=jq-1.6
+RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-linux64 && \
     mv jq-linux64 /usr/local/bin/jq && \
     chmod +x /usr/local/bin/jq &&\
     jq --version
@@ -124,8 +124,8 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   gcloud version
 
 # renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
-ARG GINKGO_VERSION=2.4.0
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
+ARG GINKGO_VERSION=v2.4.0
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} && \
     ginkgo version
 
 ARG NODE_VERSION=18
