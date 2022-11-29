@@ -55,5 +55,8 @@ jobs:
           make build
 
       - name: ${{ matrix.suite }}
+        env:
+          POSTGRES_HOST: postgres
+          POSTGRES_PORT: 5432
         run: |
           make ${{ matrix.suite }}
