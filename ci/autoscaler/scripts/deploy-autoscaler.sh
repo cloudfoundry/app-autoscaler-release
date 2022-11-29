@@ -8,6 +8,7 @@ deployment_manifest="${autoscaler_dir}/templates/app-autoscaler.yml"
 bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-""}"
 bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"
 bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
+debug=${DEBUG:-}
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
@@ -116,7 +117,7 @@ function deploy() {
     -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
-  if [ -z "${DEBUG+}" ] && [ "${DEBUG}" != 'false' ]
+  if [ -z "${debug+}" ] && [ "${debug}" != 'false' ]
   then
     echo "Manifest for '${deployment_name}' to deploy with bosh written into file ${tmp_manifest_file}."
   else
