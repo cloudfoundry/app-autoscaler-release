@@ -8,6 +8,7 @@
     ":automergeMinor"
   ],
   "transitiveRemediation": true,
+  "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
   "platformAutomerge": true,
   "packageRules": [
     {
