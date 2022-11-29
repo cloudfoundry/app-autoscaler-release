@@ -128,8 +128,7 @@ ARG GINKGO_VERSION=2.4.0
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} && \
     ginkgo version
 
-# renovate: datasource=node depName=node
-ARG NODE_VERSION=16
+ARG NODE_VERSION=18
 RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && apt-get update -y \
     && apt install nodejs -y \
