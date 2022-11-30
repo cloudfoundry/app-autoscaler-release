@@ -11,10 +11,11 @@ parentPort.on("message",(payload, node) => {
     if (payload.action && payload.action === "chew") {
         memoryHeld = chewMemory(payload.totalMemoryUsage)
     } else {
-        memoryHeld = new List()
+        memoryHeld = null
         gc()
         console.log(`Mem: got a ${payload.action} freeing memory`)
         process.exit()
+        gc()
     }
 })
 
