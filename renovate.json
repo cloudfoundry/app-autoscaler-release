@@ -22,5 +22,7 @@
       "packageNames": ["cloudfoundry/bosh-cli", "onsi/ginkgo"],
       "extractVersion": "^v(?<version>.*)$"
     }
-  ]
+  ],
+  "schedule": ["after 1am and before 7am every weekday"],
+  "timezone": "Europe/Berlin"
 }
