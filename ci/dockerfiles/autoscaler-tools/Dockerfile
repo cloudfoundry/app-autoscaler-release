@@ -100,7 +100,7 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-li
 
 # get maven
 # renovate: datasource=maven depName=org.apache.maven:maven-core
-ARG MAVEN_VERSION=3.6.3
+ARG MAVEN_VERSION=3.8.6
 ENV MAVEN_HOME /opt/maven
 RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
 	tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \
