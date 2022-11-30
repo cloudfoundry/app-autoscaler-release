@@ -3,7 +3,7 @@ module changelog
 go 1.19
 
 require (
-	github.com/Masterminds/semver/v3 v3.1.1
+	github.com/Masterminds/semver/v3 v3.2.0
 	github.com/shurcooL/githubv4 v0.0.0-20221126192849-0b5c4c7994eb
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/oauth2 v0.0.0-20210810183815-faf39c7919d5
