@@ -3,7 +3,6 @@
   "extends": [
     "config:js-app",
     "regexManagers:dockerfileVersions",
-    "schedule:weekdays",
     ":label(dependencies)",
     ":automergeMinor"
   ],
