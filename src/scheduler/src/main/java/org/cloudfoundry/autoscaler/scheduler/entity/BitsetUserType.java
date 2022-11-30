@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -14,22 +15,21 @@ import org.hibernate.usertype.UserType;
  * This is a user defined Type class. This class is created to handle the integer arrays, so as to
  * be able to map them to PostgreSQL integer[].
  */
-public class BitsetUserType implements UserType {
+public class BitsetUserType implements UserType<int[]> {
   protected static final int SQLTYPE = java.sql.Types.INTEGER;
 
   @Override
-  public Object nullSafeGet(
-      ResultSet rs,
-      String[] names,
+  public int[] nullSafeGet(
+      ResultSet resultSet,
+      int columnIndex,
       SharedSessionContractImplementor sharedSessionContractImplementor,
-      Object owner)
-      throws HibernateException, SQLException {
-    String columnName = names[0];
-    int value = rs.getInt(columnName);
+      Object o)
+      throws SQLException {
+    int value = resultSet.getInt(columnIndex);
 
     List<Integer> javaArray = new ArrayList<>();
     if (value == 0) {
-      return null;
+      return new int[0];
     } else {
       for (int i = 0; (1L << i) < value; i++) {
         if ((value & (1L << i)) != 0) {
@@ -44,19 +44,18 @@ public class BitsetUserType implements UserType {
   @Override
   public void nullSafeSet(
       PreparedStatement statement,
-      Object value,
+      int[] ints,
       int index,
       SharedSessionContractImplementor sharedSessionContractImplementor)
       throws HibernateException, SQLException {
-    if (value == null) {
+    if (ints == null) {
       statement.setNull(index, SQLTYPE);
     } else {
-      int[] castObject = (int[]) value;
 
       int bitset = 0;
 
-      for (int intCastObject : castObject) {
-        bitset |= 1 << (intCastObject - 1);
+      for (int i : ints) {
+        bitset |= 1 << (i - 1);
       }
 
       statement.setInt(index, bitset);
@@ -64,28 +63,28 @@ public class BitsetUserType implements UserType {
   }
 
   @Override
-  public Object assemble(final Serializable cached, final Object owner) throws HibernateException {
-    return cached;
+  public int[] assemble(final Serializable cached, final Object owner) throws HibernateException {
+    return (int[]) cached;
   }
 
   @Override
-  public Object deepCopy(final Object o) throws HibernateException {
-    return o == null ? null : ((int[]) o).clone();
+  public int[] deepCopy(int[] ints) {
+    return ints == null ? null : ints.clone();
   }
 
   @Override
-  public Serializable disassemble(final Object o) throws HibernateException {
-    return (Serializable) o;
+  public Serializable disassemble(int[] ints) {
+    return ints;
   }
 
   @Override
-  public boolean equals(final Object x, final Object y) throws HibernateException {
-    return x == null ? y == null : x.equals(y);
+  public boolean equals(int[] ints, int[] j1) {
+    return Arrays.equals(ints, j1);
   }
 
   @Override
-  public int hashCode(final Object o) throws HibernateException {
-    return o == null ? 0 : o.hashCode();
+  public int hashCode(int[] ints) {
+    return Arrays.hashCode(ints);
   }
 
   @Override
@@ -94,18 +93,17 @@ public class BitsetUserType implements UserType {
   }
 
   @Override
-  public Object replace(final Object original, final Object target, final Object owner)
-      throws HibernateException {
-    return original;
+  public int[] replace(int[] ints, int[] j1, Object o) {
+    return ints;
   }
 
   @Override
-  public Class<Integer> returnedClass() {
-    return int.class;
+  public Class<int[]> returnedClass() {
+    return int[].class;
   }
 
   @Override
-  public int[] sqlTypes() {
-    return new int[] {SQLTYPE};
+  public int getSqlType() {
+    return SQLTYPE;
   }
 }

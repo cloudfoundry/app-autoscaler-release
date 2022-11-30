@@ -6,13 +6,12 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 import org.cloudfoundry.autoscaler.scheduler.util.DateHelper;
 import org.cloudfoundry.autoscaler.scheduler.util.DateTimeDeserializer;
 import org.cloudfoundry.autoscaler.scheduler.util.DateTimeSerializer;
@@ -20,14 +19,12 @@ import org.cloudfoundry.autoscaler.scheduler.util.DateTimeSerializer;
 @ApiModel
 @Entity
 @Table(name = "app_scaling_specific_date_schedule")
-@NamedQueries({
-  @NamedQuery(
-      name = SpecificDateScheduleEntity.query_specificDateSchedulesByAppId,
-      query = SpecificDateScheduleEntity.jpql_specificDateSchedulesByAppId),
-  @NamedQuery(
-      name = SpecificDateScheduleEntity.query_findDistinctAppIdAndGuidFromSpecificDateSchedule,
-      query = SpecificDateScheduleEntity.jpql_findDistinctAppIdAndGuidFromSpecificDateSchedule)
-})
+@NamedQuery(
+    name = SpecificDateScheduleEntity.query_specificDateSchedulesByAppId,
+    query = SpecificDateScheduleEntity.jpql_specificDateSchedulesByAppId)
+@NamedQuery(
+    name = SpecificDateScheduleEntity.query_findDistinctAppIdAndGuidFromSpecificDateSchedule,
+    query = SpecificDateScheduleEntity.jpql_findDistinctAppIdAndGuidFromSpecificDateSchedule)
 public class SpecificDateScheduleEntity extends ScheduleEntity {
 
   @ApiModelProperty(example = DateHelper.DATE_TIME_FORMAT, required = true, position = 1)
@@ -67,7 +64,7 @@ public class SpecificDateScheduleEntity extends ScheduleEntity {
   public static final String query_specificDateSchedulesByAppId =
       "SpecificDateScheduleEntity.schedulesByAppId";
   static final String jpql_specificDateSchedulesByAppId =
-      " FROM SpecificDateScheduleEntity" + " WHERE app_id = :appId";
+      " FROM SpecificDateScheduleEntity WHERE appId = :appId";
 
   public static final String query_findDistinctAppIdAndGuidFromSpecificDateSchedule =
       "SpecificDateScheduleEntity.findDistinctAppIdAndGuid";
