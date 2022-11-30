@@ -1,5 +1,3 @@
-FROM mikefarah/yq:4.27.5 AS yq
-
 FROM ubuntu:22.04
 MAINTAINER autoscaler-team
 
@@ -97,6 +95,13 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-li
     mv jq-linux64 /usr/local/bin/jq && \
     chmod +x /usr/local/bin/jq &&\
     jq --version
+
+# install yq
+# renovate: datasource=github-releases depName=yq lookupName=mikefarah/yq
+ARG YQ_VERSION=v4.30.5
+RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 && \
+    chmod a+x /usr/local/bin/yq && \
+    yq --version
 
 # get maven
 # renovate: datasource=maven depName=org.apache.maven:maven-core
