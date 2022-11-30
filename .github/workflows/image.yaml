@@ -71,5 +71,5 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}:main
           build-args: |
-            GINKGO_VERSION=${{ steps.ginkgo.outputs.version }}
+            GINKGO_VERSION=v${{ steps.ginkgo.outputs.version }}
             GO_VERSION=${{ steps.get-golang-version.outputs.version }}

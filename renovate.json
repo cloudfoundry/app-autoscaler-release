@@ -18,7 +18,7 @@
     },
     {
       "description": "Strip of v prefix from version number in certain github releases",
-      "packageNames": ["cloudfoundry/bosh-cli", "onsi/ginkgo"],
+      "packageNames": ["cloudfoundry/bosh-cli"],
       "extractVersion": "^v(?<version>.*)$"
     }
   ],
