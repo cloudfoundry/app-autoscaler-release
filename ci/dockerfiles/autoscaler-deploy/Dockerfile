@@ -83,8 +83,8 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   apt-get clean &&\
   gcloud version
 
-ARG GINKGO_VERSION=2.1.3
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@v${GINKGO_VERSION} &&\
+ARG GINKGO_VERSION=v2.1.3
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} &&\
     ginkgo version
 
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
