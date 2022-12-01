@@ -12,7 +12,7 @@ jobs:
   build:
     strategy:
       matrix:
-        run: [run-1, run-2, run-3]
+        run: [run-1, run-2, run-3, run-4]
     runs-on: self-hosted
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
