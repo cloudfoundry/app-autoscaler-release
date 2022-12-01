@@ -1,0 +1,28 @@
+---
+#TODO: mysql timed out creating database (on n2-standard-4)
+# https://github.com/cloudfoundry/app-autoscaler-release/actions/runs/3547498182/jobs/5957933700#step:8:15
+name: ARC - HPA Test 1
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.workflow }}/${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        run: [run-1, run-2, run-3]
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+    continue-on-error: false
+    name: hpa test
+    steps:
+      - name: ${{ matrix.run }}
+        run: |
+          echo "Sleeping for 5mins"
+          sleep 5m
