@@ -1,9 +1,10 @@
 package org.cloudfoundry.autoscaler.scheduler.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.cloudfoundry.autoscaler.scheduler.entity.SpecificDateScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.error.DatabaseValidationException;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +41,7 @@ public class SpecificDateScheduleDaoImpl extends GenericDaoImpl<SpecificDateSche
 
   @Override
   @Transactional(readOnly = true)
-  public List<Pair<String, String>> getDistinctAppIdAndGuidList() {
+  public Map<String, String> getDistinctAppIdAndGuidList() {
     try {
       List<Object[]> res =
           entityManager
@@ -48,7 +49,14 @@ public class SpecificDateScheduleDaoImpl extends GenericDaoImpl<SpecificDateSche
                   SpecificDateScheduleEntity.query_findDistinctAppIdAndGuidFromSpecificDateSchedule,
                   Object[].class)
               .getResultList();
-      return res.stream().map(r -> Pair.of((String) (r[0]), (String) (r[1]))).toList();
+
+      Map<String, String> result = new HashMap<>(res.size());
+
+      for (Object[] r : res) {
+        result.put((String) (r[0]), (String) (r[1]));
+      }
+
+      return result;
 
     } catch (Exception e) {
 

@@ -22,7 +22,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.cloudfoundry.autoscaler.scheduler.dao.ActiveScheduleDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.PolicyJsonDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.RecurringScheduleDao;
@@ -58,7 +60,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.data.util.Pair;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -780,8 +781,8 @@ public class ScheduleManagerTest {
   public void testSynchronizeSchedules_with_no_policy_and_no_schedules() {
 
     when(policyJsonDao.getAllPolicies()).thenReturn(new ArrayList<>());
-    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<>());
-    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<>());
+    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new HashMap<>());
+    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new HashMap<>());
     SynchronizeResult result = scheduleManager.synchronizeSchedules();
 
     assertThat("It should do nothing", result, is(new SynchronizeResult(0, 0, 0)));
@@ -845,8 +846,8 @@ public class ScheduleManagerTest {
           }
         };
     when(policyJsonDao.getAllPolicies()).thenReturn(policyJsonList);
-    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<>());
-    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<>());
+    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new HashMap<>());
+    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new HashMap<>());
     when(specificDateScheduleDao.create(any())).thenReturn(schedules.getSpecificDate().get(0));
     when(recurringScheduleDao.create(any())).thenReturn(schedules.getRecurringSchedule().get(0));
 
@@ -895,23 +896,11 @@ public class ScheduleManagerTest {
             .setRecurringSchedule(recurringEntities)
             .setTimeZone(TestDataSetupHelper.timeZone)
             .build();
-    Pair<String, String> appIdAndGuid = Pair.of(appId, guid);
+    Map<String, String> appIdAndGuid = Collections.singletonMap(appId, guid);
 
     when(policyJsonDao.getAllPolicies()).thenReturn(new ArrayList<>());
-    when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(
-            new ArrayList<>() {
-              {
-                add(appIdAndGuid);
-              }
-            });
-    when(recurringScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(
-            new ArrayList<>() {
-              {
-                add(appIdAndGuid);
-              }
-            });
+    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(appIdAndGuid);
+    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(appIdAndGuid);
     when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(appId))
         .thenReturn(schedules.getSpecificDate());
     when(recurringScheduleDao.findAllRecurringSchedulesByAppId(appId))
@@ -987,7 +976,7 @@ public class ScheduleManagerTest {
     ApplicationSchedules anotherApplicationSchedule =
         new ApplicationPolicyBuilder(1, 5).setSchedules(anotherSchedules).build();
 
-    Pair<String, String> appIdAndGuid = Pair.of(appId, guid);
+    Map<String, String> appIdAndGuid = Collections.singletonMap(appId, guid);
 
     List<PolicyJsonEntity> policyJsonList =
         new ArrayList<>() {
@@ -998,10 +987,8 @@ public class ScheduleManagerTest {
           }
         };
     when(policyJsonDao.getAllPolicies()).thenReturn(policyJsonList);
-    when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(Collections.singletonList(appIdAndGuid));
-    when(recurringScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(Collections.singletonList(appIdAndGuid));
+    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(appIdAndGuid);
+    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(appIdAndGuid);
     when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(appId))
         .thenReturn(schedules.getSpecificDate());
     when(recurringScheduleDao.findAllRecurringSchedulesByAppId(appId))
@@ -1063,7 +1050,7 @@ public class ScheduleManagerTest {
     ApplicationSchedules anotherApplicationSchedule =
         new ApplicationPolicyBuilder(1, 5).setSchedules(null).build();
 
-    Pair<String, String> appIdAndGuid = Pair.of(appId, guid);
+    Map<String, String> appIdAndGuid = Collections.singletonMap(appId, guid);
 
     List<PolicyJsonEntity> policyJsonList =
         new ArrayList<>() {
@@ -1074,20 +1061,8 @@ public class ScheduleManagerTest {
           }
         };
     when(policyJsonDao.getAllPolicies()).thenReturn(policyJsonList);
-    when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(
-            new ArrayList<>() {
-              {
-                add(appIdAndGuid);
-              }
-            });
-    when(recurringScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(
-            new ArrayList<>() {
-              {
-                add(appIdAndGuid);
-              }
-            });
+    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(appIdAndGuid);
+    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(appIdAndGuid);
     when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(appId))
         .thenReturn(schedules.getSpecificDate());
     when(recurringScheduleDao.findAllRecurringSchedulesByAppId(appId))
@@ -1162,7 +1137,7 @@ public class ScheduleManagerTest {
     ApplicationSchedules anotherapplicationSchedule =
         new ApplicationPolicyBuilder(1, 5).setSchedules(anotherSchedules).build();
 
-    Pair<String, String> appIdAndGuid = Pair.of(appId, guid);
+    Map<String, String> appIdAndGuid = Collections.singletonMap(appId, guid);
 
     List<PolicyJsonEntity> policyJsonList =
         new ArrayList<>() {
@@ -1171,20 +1146,8 @@ public class ScheduleManagerTest {
           }
         };
     when(policyJsonDao.getAllPolicies()).thenReturn(policyJsonList);
-    when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(
-            new ArrayList<>() {
-              {
-                add(appIdAndGuid);
-              }
-            });
-    when(recurringScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(
-            new ArrayList<>() {
-              {
-                add(appIdAndGuid);
-              }
-            });
+    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(appIdAndGuid);
+    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(appIdAndGuid);
     when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(appId))
         .thenReturn(schedules.getSpecificDate());
     when(recurringScheduleDao.findAllRecurringSchedulesByAppId(appId))

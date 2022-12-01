@@ -8,8 +8,8 @@ import static org.junit.Assert.fail;
 import jakarta.transaction.Transactional;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.cloudfoundry.autoscaler.scheduler.entity.RecurringScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.RecurringScheduleEntitiesBuilder;
 import org.cloudfoundry.autoscaler.scheduler.util.TestDataDbUtil;
@@ -20,7 +20,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.util.Pair;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -113,11 +112,11 @@ public class RecurringScheduleDaoImplTest {
     ;
     testDataDbUtil.insertRecurringSchedule(entities);
 
-    List<Pair<String, String>> foundEntityList = recurringScheduleDao.getDistinctAppIdAndGuidList();
+    Map<String, String> foundEntityList = recurringScheduleDao.getDistinctAppIdAndGuidList();
 
     assertThat("It should have two record", foundEntityList.size(), is(2));
 
-    Set<String> appIdSet = foundEntityList.stream().map(Pair::getFirst).collect(Collectors.toSet());
+    Set<String> appIdSet = foundEntityList.keySet();
 
     assertThat(
         "It should contains the two inserted entities",

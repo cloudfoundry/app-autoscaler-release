@@ -1,9 +1,10 @@
 package org.cloudfoundry.autoscaler.scheduler.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.cloudfoundry.autoscaler.scheduler.entity.RecurringScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.error.DatabaseValidationException;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +29,7 @@ public class RecurringScheduleDaoImpl extends GenericDaoImpl<RecurringScheduleEn
 
   @Override
   @Transactional(readOnly = true)
-  public List<Pair<String, String>> getDistinctAppIdAndGuidList() {
+  public Map<String, String> getDistinctAppIdAndGuidList() {
     try {
       List<Object[]> res =
           entityManager
@@ -36,8 +37,14 @@ public class RecurringScheduleDaoImpl extends GenericDaoImpl<RecurringScheduleEn
                   RecurringScheduleEntity.query_findDistinctAppIdAndGuidFromRecurringSchedule,
                   Object[].class)
               .getResultList();
-      return res.stream().map(r -> Pair.of((String) (r[0]), (String) (r[1]))).toList();
 
+      Map<String, String> result = new HashMap<>(res.size());
+
+      for (Object[] r : res) {
+        result.put((String) (r[0]), (String) (r[1]));
+      }
+
+      return result;
     } catch (Exception e) {
       throw new DatabaseValidationException("Find All recurring schedules failed", e);
     }
