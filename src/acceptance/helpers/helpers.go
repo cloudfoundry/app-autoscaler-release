@@ -380,6 +380,7 @@ func RunningInstances(appGUID string, timeout time.Duration) int {
 func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Duration) {
 	By(fmt.Sprintf("Waiting for %d instances of app: %s", instances, appGUID))
 	Eventually(getAppInstances(appGUID, 8*time.Second)).
+		WithOffset(1).
 		WithTimeout(timeout).
 		WithPolling(10 * time.Second).
 		Should(Equal(instances))
