@@ -1,11 +1,10 @@
 package org.cloudfoundry.autoscaler.scheduler.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -22,6 +21,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.cloudfoundry.autoscaler.scheduler.dao.ActiveScheduleDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.PolicyJsonDao;
@@ -58,6 +58,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -111,9 +112,9 @@ public class ScheduleManagerTest {
   @Test
   public void testGetAllSchedules_with_no_schedules() {
     String appId = TestDataSetupHelper.generateAppIds(1)[0];
-    Mockito.when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(eq(appId)))
+    Mockito.when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(appId))
         .thenReturn(new ArrayList<>());
-    Mockito.when(recurringScheduleDao.findAllRecurringSchedulesByAppId(eq(appId)))
+    Mockito.when(recurringScheduleDao.findAllRecurringSchedulesByAppId(appId))
         .thenReturn(new ArrayList<>());
 
     Schedules scalingSchedules = scheduleManager.getAllSchedules(appId).getSchedules();
@@ -132,9 +133,9 @@ public class ScheduleManagerTest {
     List<RecurringScheduleEntity> recurringScheduleEntities =
         new RecurringScheduleEntitiesBuilder(2, 2).setAppId(appId).setScheduleId().build();
 
-    Mockito.when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(eq(appId)))
+    Mockito.when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(appId))
         .thenReturn(specificDateScheduleEntities);
-    Mockito.when(recurringScheduleDao.findAllRecurringSchedulesByAppId(eq(appId)))
+    Mockito.when(recurringScheduleDao.findAllRecurringSchedulesByAppId(appId))
         .thenReturn(recurringScheduleEntities);
 
     Schedules scalingSchedules = scheduleManager.getAllSchedules(appId).getSchedules();
@@ -501,7 +502,7 @@ public class ScheduleManagerTest {
   }
 
   @Test
-  public void testNotifyScalingEngine_when_ResourceAccessException() throws Exception {
+  public void testNotifyScalingEngine_when_ResourceAccessException() {
     String appId = TestDataSetupHelper.generateAppIds(1)[0];
     long scheduleId = 1L;
 
@@ -536,8 +537,8 @@ public class ScheduleManagerTest {
               appId,
               scheduleId,
               "delete");
-      assertThat(sie.getMessage(), is(expectedMessage));
-      assertTrue(sie.getCause().getClass().equals(ResourceAccessException.class));
+      assertEquals(expectedMessage, sie.getMessage());
+      assertEquals(ResourceAccessException.class, sie.getCause().getClass());
     }
   }
 
@@ -778,10 +779,9 @@ public class ScheduleManagerTest {
   @Test
   public void testSynchronizeSchedules_with_no_policy_and_no_schedules() {
 
-    when(policyJsonDao.getAllPolicies()).thenReturn(new ArrayList<PolicyJsonEntity>());
-    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<Object[]>());
-    when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(new ArrayList<Object[]>());
+    when(policyJsonDao.getAllPolicies()).thenReturn(new ArrayList<>());
+    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<>());
+    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<>());
     SynchronizeResult result = scheduleManager.synchronizeSchedules();
 
     assertThat("It should do nothing", result, is(new SynchronizeResult(0, 0, 0)));
@@ -839,15 +839,14 @@ public class ScheduleManagerTest {
         new ApplicationPolicyBuilder(1, 5).setSchedules(schedules).build();
 
     List<PolicyJsonEntity> policyJsonList =
-        new ArrayList<PolicyJsonEntity>() {
+        new ArrayList<>() {
           {
             add(new PolicyJsonEntityBuilder(appId, guid, applicationSchedule).build());
           }
         };
     when(policyJsonDao.getAllPolicies()).thenReturn(policyJsonList);
-    when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(new ArrayList<Object[]>());
-    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<Object[]>());
+    when(specificDateScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<>());
+    when(recurringScheduleDao.getDistinctAppIdAndGuidList()).thenReturn(new ArrayList<>());
     when(specificDateScheduleDao.create(any())).thenReturn(schedules.getSpecificDate().get(0));
     when(recurringScheduleDao.create(any())).thenReturn(schedules.getRecurringSchedule().get(0));
 
@@ -896,19 +895,19 @@ public class ScheduleManagerTest {
             .setRecurringSchedule(recurringEntities)
             .setTimeZone(TestDataSetupHelper.timeZone)
             .build();
-    String[] appIdAndGuid = {appId, guid};
+    Pair<String, String> appIdAndGuid = Pair.of(appId, guid);
 
-    when(policyJsonDao.getAllPolicies()).thenReturn(new ArrayList<PolicyJsonEntity>());
+    when(policyJsonDao.getAllPolicies()).thenReturn(new ArrayList<>());
     when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
         .thenReturn(
-            new ArrayList() {
+            new ArrayList<>() {
               {
                 add(appIdAndGuid);
               }
             });
     when(recurringScheduleDao.getDistinctAppIdAndGuidList())
         .thenReturn(
-            new ArrayList() {
+            new ArrayList<>() {
               {
                 add(appIdAndGuid);
               }
@@ -988,10 +987,10 @@ public class ScheduleManagerTest {
     ApplicationSchedules anotherApplicationSchedule =
         new ApplicationPolicyBuilder(1, 5).setSchedules(anotherSchedules).build();
 
-    String[] appIdAndGuid = {appId, guid};
+    Pair<String, String> appIdAndGuid = Pair.of(appId, guid);
 
     List<PolicyJsonEntity> policyJsonList =
-        new ArrayList<PolicyJsonEntity>() {
+        new ArrayList<>() {
           {
             add(
                 new PolicyJsonEntityBuilder(appId, anotherGuid, anotherApplicationSchedule)
@@ -1000,19 +999,9 @@ public class ScheduleManagerTest {
         };
     when(policyJsonDao.getAllPolicies()).thenReturn(policyJsonList);
     when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(
-            new ArrayList() {
-              {
-                add(appIdAndGuid);
-              }
-            });
+        .thenReturn(Collections.singletonList(appIdAndGuid));
     when(recurringScheduleDao.getDistinctAppIdAndGuidList())
-        .thenReturn(
-            new ArrayList() {
-              {
-                add(appIdAndGuid);
-              }
-            });
+        .thenReturn(Collections.singletonList(appIdAndGuid));
     when(specificDateScheduleDao.findAllSpecificDateSchedulesByAppId(appId))
         .thenReturn(schedules.getSpecificDate());
     when(recurringScheduleDao.findAllRecurringSchedulesByAppId(appId))
@@ -1074,10 +1063,10 @@ public class ScheduleManagerTest {
     ApplicationSchedules anotherApplicationSchedule =
         new ApplicationPolicyBuilder(1, 5).setSchedules(null).build();
 
-    String[] appIdAndGuid = {appId, guid};
+    Pair<String, String> appIdAndGuid = Pair.of(appId, guid);
 
     List<PolicyJsonEntity> policyJsonList =
-        new ArrayList<PolicyJsonEntity>() {
+        new ArrayList<>() {
           {
             add(
                 new PolicyJsonEntityBuilder(appId, anotherGuid, anotherApplicationSchedule)
@@ -1087,14 +1076,14 @@ public class ScheduleManagerTest {
     when(policyJsonDao.getAllPolicies()).thenReturn(policyJsonList);
     when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
         .thenReturn(
-            new ArrayList() {
+            new ArrayList<>() {
               {
                 add(appIdAndGuid);
               }
             });
     when(recurringScheduleDao.getDistinctAppIdAndGuidList())
         .thenReturn(
-            new ArrayList() {
+            new ArrayList<>() {
               {
                 add(appIdAndGuid);
               }
@@ -1173,10 +1162,10 @@ public class ScheduleManagerTest {
     ApplicationSchedules anotherapplicationSchedule =
         new ApplicationPolicyBuilder(1, 5).setSchedules(anotherSchedules).build();
 
-    String[] appIdAndGuid = {appId, guid};
+    Pair<String, String> appIdAndGuid = Pair.of(appId, guid);
 
     List<PolicyJsonEntity> policyJsonList =
-        new ArrayList<PolicyJsonEntity>() {
+        new ArrayList<>() {
           {
             add(new PolicyJsonEntityBuilder(appId, guid, anotherapplicationSchedule).build());
           }
@@ -1184,14 +1173,14 @@ public class ScheduleManagerTest {
     when(policyJsonDao.getAllPolicies()).thenReturn(policyJsonList);
     when(specificDateScheduleDao.getDistinctAppIdAndGuidList())
         .thenReturn(
-            new ArrayList() {
+            new ArrayList<>() {
               {
                 add(appIdAndGuid);
               }
             });
     when(recurringScheduleDao.getDistinctAppIdAndGuidList())
         .thenReturn(
-            new ArrayList() {
+            new ArrayList<>() {
               {
                 add(appIdAndGuid);
               }

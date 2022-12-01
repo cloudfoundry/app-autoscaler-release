@@ -9,12 +9,11 @@ import static org.cloudfoundry.autoscaler.scheduler.util.ScheduleJobHelper.INSTA
 import static org.cloudfoundry.autoscaler.scheduler.util.ScheduleJobHelper.INSTANCE_MIN_COUNT;
 import static org.cloudfoundry.autoscaler.scheduler.util.ScheduleJobHelper.SCHEDULE_ID;
 import static org.cloudfoundry.autoscaler.scheduler.util.ScheduleJobHelper.TIMEZONE;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -322,8 +321,8 @@ public class ScheduleJobManagerTest {
         new JobKey(
             scheduleId + JobActionEnum.END.getJobIdSuffix() + "_" + startJobIdentifier, "Schedule");
 
-    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(eq(startJobKey));
-    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(eq(endJobKey));
+    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(startJobKey);
+    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(endJobKey);
   }
 
   @Test
@@ -349,8 +348,8 @@ public class ScheduleJobManagerTest {
         new JobKey(
             scheduleId + JobActionEnum.END.getJobIdSuffix() + "_" + startJobIdentifier, "Schedule");
 
-    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(eq(startJobKey));
-    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(eq(endJobKey));
+    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(startJobKey);
+    Mockito.verify(scheduler, Mockito.times(1)).deleteJob(endJobKey);
   }
 
   @Test

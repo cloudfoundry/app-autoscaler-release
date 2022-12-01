@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -371,8 +372,8 @@ public class ScheduleManager {
     Map<String, String> appIdAndGuidMap = new HashMap<String, String>();
     Map<String, String> scheduleAppIdGuidMap = new HashMap<String, String>();
     List<PolicyJsonEntity> policyList = null;
-    List recurringScheduleList = null;
-    List specificDateScheduleList = null;
+    List<Pair<String, String>> recurringScheduleList = null;
+    List<Pair<String, String>> specificDateScheduleList = null;
     try {
       policyList = policyJsonDao.getAllPolicies();
       recurringScheduleList = recurringScheduleDao.getDistinctAppIdAndGuidList();
@@ -391,16 +392,14 @@ public class ScheduleManager {
     }
 
     if (recurringScheduleList.size() > 0) {
-      for (Object ro : recurringScheduleList) {
-        Object[] roArray = (Object[]) ro;
-        appIdAndGuidMap.put((String) (roArray[0]), (String) (roArray[1]));
+      for (Pair<String, String> ro : recurringScheduleList) {
+        appIdAndGuidMap.put(ro.getFirst(), ro.getSecond());
       }
     }
 
     if (specificDateScheduleList.size() > 0) {
-      for (Object so : specificDateScheduleList) {
-        Object[] soArray = (Object[]) so;
-        appIdAndGuidMap.put((String) (soArray[0]), (String) (soArray[1]));
+      for (Pair<String, String> so : specificDateScheduleList) {
+        appIdAndGuidMap.put(so.getFirst(), so.getSecond());
       }
     }
 

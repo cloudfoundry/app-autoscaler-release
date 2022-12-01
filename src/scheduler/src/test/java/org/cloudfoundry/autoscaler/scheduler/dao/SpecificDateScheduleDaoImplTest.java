@@ -1,13 +1,14 @@
 package org.cloudfoundry.autoscaler.scheduler.dao;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import jakarta.transaction.Transactional;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.cloudfoundry.autoscaler.scheduler.entity.SpecificDateScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.SpecificDateScheduleEntitiesBuilder;
 import org.cloudfoundry.autoscaler.scheduler.util.TestDataDbUtil;
@@ -18,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.util.Pair;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -111,21 +113,17 @@ public class SpecificDateScheduleDaoImplTest {
             .build();
     testDataDbUtil.insertSpecificDateSchedule(entities);
 
-    List foundEntityList = specificDateScheduleDao.getDistinctAppIdAndGuidList();
+    List<Pair<String, String>> foundEntityList =
+        specificDateScheduleDao.getDistinctAppIdAndGuidList();
 
     assertThat("It should have two record", foundEntityList.size(), is(2));
 
-    Set<String> appIdSet =
-        new HashSet<String>() {
-          {
-            add((String) ((Object[]) (foundEntityList.get(0)))[0]);
-            add((String) ((Object[]) (foundEntityList.get(1)))[0]);
-          }
-        };
+    Set<String> appIdSet = foundEntityList.stream().map(Pair::getFirst).collect(Collectors.toSet());
+
     assertThat(
         "It should contains the two inserted entities",
-        appIdSet.contains(appId1) && appIdSet.contains(appId2),
-        is(true));
+        appIdSet,
+        containsInAnyOrder(appId1, appId2));
   }
 
   @Test
