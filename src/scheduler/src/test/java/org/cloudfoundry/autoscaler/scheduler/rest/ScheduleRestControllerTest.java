@@ -1,8 +1,9 @@
 package org.cloudfoundry.autoscaler.scheduler.rest;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -483,14 +484,14 @@ public class ScheduleRestControllerTest {
   }
 
   private void assertNoSchedulesFound(ResultActions resultActions) throws Exception {
-    resultActions.andExpect(content().string(Matchers.isEmptyString()));
+    resultActions.andExpect(content().string(is(emptyString())));
     resultActions.andExpect(header().doesNotExist("Content-type"));
     resultActions.andExpect(status().isNotFound());
   }
 
   private void assertResponseForCreateSchedules(
       ResultActions resultActions, ResultMatcher expectedStatus) throws Exception {
-    resultActions.andExpect(content().string(Matchers.isEmptyString()));
+    resultActions.andExpect(content().string(is(emptyString())));
     resultActions.andExpect(header().doesNotExist("Content-type"));
     resultActions.andExpect(expectedStatus);
   }
@@ -554,7 +555,7 @@ public class ScheduleRestControllerTest {
   }
 
   private void assertSchedulesAreDeleted(ResultActions resultActions) throws Exception {
-    resultActions.andExpect(content().string(Matchers.isEmptyString()));
+    resultActions.andExpect(content().string(is(emptyString())));
     resultActions.andExpect(header().doesNotExist("Content-type"));
     resultActions.andExpect(status().isNoContent());
   }

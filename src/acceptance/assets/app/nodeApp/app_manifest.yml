@@ -7,8 +7,6 @@ applications:
       SERVICE_NAME: ((service_name))
       NODE_ENV: production
       MEMORY_MAX: ((memory_mb))
-    buildpacks:
-      - ((buildpack))
     stack: cflinuxfs3
     routes:
       - route: ((app_name)).((app_domain))
