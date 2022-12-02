@@ -1,7 +1,7 @@
 package org.cloudfoundry.autoscaler.scheduler.quartz;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,7 +25,6 @@ import org.cloudfoundry.autoscaler.scheduler.util.TestDataSetupHelper.JobInforma
 import org.cloudfoundry.autoscaler.scheduler.util.TestJobListener;
 import org.cloudfoundry.autoscaler.scheduler.util.error.DatabaseValidationException;
 import org.cloudfoundry.autoscaler.scheduler.util.error.MessageBundleResourceHelper;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -71,8 +70,6 @@ public class AppScalingScheduleJobTest {
   @Value("${autoscaler.scalingengine.url}")
   private String scalingEngineUrl;
 
-  private AutoCloseable mock;
-
   @BeforeClass
   public static void beforeClass() throws IOException {
     embeddedTomcatUtil = new EmbeddedTomcatUtil();
@@ -84,14 +81,9 @@ public class AppScalingScheduleJobTest {
     embeddedTomcatUtil.stop();
   }
 
-  @After
-  public void closeMock() throws Exception {
-    mock.close();
-  }
-
   @Before
   public void before() throws SchedulerException {
-    mock = MockitoAnnotations.openMocks(this);
+    MockitoAnnotations.initMocks(this);
     memScheduler = createMemScheduler();
     testDataDbUtil.cleanupData(memScheduler);
 

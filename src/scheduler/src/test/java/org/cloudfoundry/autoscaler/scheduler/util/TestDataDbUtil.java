@@ -71,16 +71,16 @@ public class TestDataDbUtil {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     return jdbcTemplate.queryForObject(
         "SELECT COUNT(1) FROM app_scaling_specific_date_schedule WHERE app_id=?",
-        Integer.class,
-        new Object[] {appId});
+        new Object[] {appId},
+        Integer.class);
   }
 
   public int getNumberOfRecurringSchedulesByAppId(String appId) {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     return jdbcTemplate.queryForObject(
         "SELECT COUNT(1) FROM app_scaling_recurring_schedule WHERE app_id=?",
-        Integer.class,
-        new Object[] {appId});
+        new Object[] {appId},
+        Integer.class);
   }
 
   public long getNumberOfActiveSchedules() {
@@ -93,16 +93,16 @@ public class TestDataDbUtil {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     return jdbcTemplate.queryForObject(
         "SELECT COUNT(1) FROM app_scaling_active_schedule WHERE app_id=?",
-        Long.class,
-        new Object[] {appId});
+        new Object[] {appId},
+        Long.class);
   }
 
   public long getNumberOfActiveSchedulesByScheduleId(Long scheduleId) {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
     return jdbcTemplate.queryForObject(
         "SELECT COUNT(1) FROM app_scaling_active_schedule WHERE id=?",
-        Long.class,
-        new Object[] {scheduleId});
+        new Object[] {scheduleId},
+        Long.class);
   }
 
   public void insertSpecificDateSchedule(List<SpecificDateScheduleEntity> entities) {
@@ -261,10 +261,10 @@ public class TestDataDbUtil {
     }
     String driverName = this.dataSource.getConnection().getMetaData().getDriverName().toLowerCase();
     if (driverName != null && !driverName.isEmpty()) {
-      if (driverName.contains("postgresql")) {
+      if (driverName.indexOf("postgresql") > -1) {
         this.databaseType = DatabaseType.POSTGRESQL;
         return this.databaseType;
-      } else if (driverName.contains("mysql")) {
+      } else if (driverName.indexOf("mysql") > -1) {
         this.databaseType = DatabaseType.MYSQL;
         return this.databaseType;
       } else {

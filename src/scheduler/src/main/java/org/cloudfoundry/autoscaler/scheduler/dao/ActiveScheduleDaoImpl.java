@@ -5,7 +5,6 @@ import javax.annotation.Resource;
 import javax.sql.DataSource;
 import org.cloudfoundry.autoscaler.scheduler.entity.ActiveScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.error.DatabaseValidationException;
-import org.hibernate.type.SqlTypes;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
@@ -41,11 +40,7 @@ public class ActiveScheduleDaoImpl extends JdbcDaoSupport implements ActiveSched
   public ActiveScheduleEntity find(Long id) {
     try {
       return getJdbcTemplate()
-          .queryForObject(
-              SELECT_SQL,
-              new Object[] {id},
-              new int[] {SqlTypes.BIGINT},
-              new ActiveScheduleEntity());
+          .queryForObject(SELECT_SQL, new Object[] {id}, new ActiveScheduleEntity());
     } catch (EmptyResultDataAccessException ex) {
       return null;
     } catch (DataAccessException e) {
@@ -95,11 +90,7 @@ public class ActiveScheduleDaoImpl extends JdbcDaoSupport implements ActiveSched
   public List<ActiveScheduleEntity> findByAppId(String appId) {
     try {
       return getJdbcTemplate()
-          .query(
-              SELECT_BY_APPID_SQL,
-              new Object[] {appId},
-              new int[] {SqlTypes.VARCHAR},
-              new ActiveScheduleEntity());
+          .query(SELECT_BY_APPID_SQL, new Object[] {appId}, new ActiveScheduleEntity());
     } catch (DataAccessException e) {
       throw new DatabaseValidationException(
           "Select active schedules by Application Id:" + appId + " failed", e);

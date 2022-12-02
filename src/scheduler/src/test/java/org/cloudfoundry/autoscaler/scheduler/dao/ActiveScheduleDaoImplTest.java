@@ -1,8 +1,8 @@
 package org.cloudfoundry.autoscaler.scheduler.dao;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertThat;
 
 import java.util.List;
 import javax.transaction.Transactional;
@@ -32,8 +32,8 @@ public class ActiveScheduleDaoImplTest {
 
     // Add fake test records.
     String appId = "appId_1";
-    long scheduleId = 1L;
-    long startJobIdentifier = 1L;
+    Long scheduleId = 1L;
+    Long startJobIdentifier = 1L;
     testDataDbUtil.insertActiveSchedule(appId, scheduleId, 1, 5, 0, startJobIdentifier);
 
     appId = "appId_2";
@@ -120,7 +120,7 @@ public class ActiveScheduleDaoImplTest {
   @Test
   public void testDeleteAllActiveSchedulesByAppId() {
     String appId = TestDataSetupHelper.generateAppIds(1)[0];
-    long scheduleId = 3L;
+    Long scheduleId = 3L;
     ActiveScheduleEntity activeScheduleEntity =
         TestDataSetupHelper.generateActiveScheduleEntity(appId, scheduleId);
     activeScheduleDao.create(activeScheduleEntity);
