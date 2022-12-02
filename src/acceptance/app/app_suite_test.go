@@ -26,8 +26,8 @@ var (
 	interval int
 	client   *http.Client
 
-	instanceName         string
-	initialInstanceCount int
+	instanceName string
+	//initialInstanceCount int
 
 	appName string
 	appGUID string

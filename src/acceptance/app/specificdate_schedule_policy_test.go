@@ -30,17 +30,8 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		const scheduleInstanceMin = 2
 		const scheduleInstanceMax = 5
 		const scheduledInstanceInit = 3
-		JustBeforeEach(func() {
-			//TODO the start app needs to be after the binding but the timings require the app been up already.
-			StartApp(appName, cfg.CfPushTimeoutDuration())
-			startDateTime = time.Now().In(time.UTC).Add(1 * time.Minute)
-			endDateTime = startDateTime.Add(time.Duration(interval+120) * time.Second)
 
-			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "UTC", startDateTime, endDateTime, scheduleInstanceMin, scheduleInstanceMax, scheduledInstanceInit)
-			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
-		})
-
-		It("should scale", func() {
+		ShouldScale := func() {
 			pollTime := 15 * time.Second
 			By(fmt.Sprintf("waiting for scheduledInstanceInit: %d", scheduledInstanceInit))
 			jobRunTime := time.Until(startDateTime.Add(1 * time.Minute))
@@ -62,6 +53,20 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 				Should(Equal(2))
 
 			WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
+		}
+
+		JustBeforeEach(func() {
+			//TODO the start app needs to be after the binding but the timings require the app been up already.
+			StartApp(appName, cfg.CfPushTimeoutDuration())
+			startDateTime = time.Now().In(time.UTC).Add(1 * time.Minute)
+			endDateTime = startDateTime.Add(time.Duration(interval+120) * time.Second)
+
+			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "UTC", startDateTime, endDateTime, scheduleInstanceMin, scheduleInstanceMax, scheduledInstanceInit)
+			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 		})
+
+		for i := 0; i < 20; i++ {
+			It(fmt.Sprintf("should scale %d", i), ShouldScale)
+		}
 	})
 })

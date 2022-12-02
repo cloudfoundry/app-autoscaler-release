@@ -3,6 +3,7 @@ package app_test
 import (
 	"acceptance"
 	. "acceptance/helpers"
+	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -50,13 +51,16 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 		Context("with days of month", func() {
 			BeforeEach(func() { daysOfMonthOrWeek = DaysOfMonth })
-			It("should scale", scaleDown)
+			for i := 0; i < 20; i++ {
+				It(fmt.Sprintf("should scale %d", i), scaleDown)
+			}
 		})
 
 		Context("with days of week", func() {
 			BeforeEach(func() { daysOfMonthOrWeek = DaysOfWeek })
-			It("should scale", Label(acceptance.LabelSmokeTests), scaleDown)
+			for i := 0; i < 20; i++ {
+				It(fmt.Sprintf("should scale %d", i), Label(acceptance.LabelSmokeTests), scaleDown)
+			}
 		})
 	})
-
 })
