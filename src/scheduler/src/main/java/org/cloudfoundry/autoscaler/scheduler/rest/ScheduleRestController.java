@@ -4,20 +4,25 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import org.cloudfoundry.autoscaler.scheduler.rest.model.ApplicationSchedules;
 import org.cloudfoundry.autoscaler.scheduler.rest.model.Schedules;
 import org.cloudfoundry.autoscaler.scheduler.service.ScheduleManager;
-import org.cloudfoundry.autoscaler.scheduler.util.error.ValidationErrorResult;
+import org.hibernate.validator.constraints.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,13 +30,13 @@ import org.springframework.web.bind.annotation.RestController;
 /** Controller class for handling the REST api calls. */
 @RestController
 @RequestMapping(value = "/v1/apps/{app_id}/schedules")
+@Validated
 public class ScheduleRestController {
 
-  @Autowired private ValidationErrorResult validationErrorResult;
   @Autowired ScheduleManager scheduleManager;
-  private Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  @RequestMapping(method = RequestMethod.GET)
+  @GetMapping
   @ApiOperation(
       value = "Get all schedules (specific dates and recurring) for the specified application id.",
       produces = "application/json")
@@ -46,8 +51,10 @@ public class ScheduleRestController {
   public ResponseEntity<ApplicationSchedules> getAllSchedules(
       @ApiParam(name = "app_id", value = "The application id", required = true)
           @PathVariable("app_id")
+          @NotNull
+          @UUID
           String appId) {
-    logger.info("Get All schedules for application: " + appId);
+    logger.info("Get All schedules for application: {}", appId);
 
     ApplicationSchedules savedApplicationSchedules = scheduleManager.getAllSchedules(appId);
 
@@ -59,7 +66,7 @@ public class ScheduleRestController {
     }
   }
 
-  @RequestMapping(method = RequestMethod.PUT)
+  @PutMapping
   @ResponseStatus(HttpStatus.OK)
   @ApiOperation(
       value = "Create/Modify schedules for the specified application id.",
@@ -72,10 +79,15 @@ public class ScheduleRestController {
   public ResponseEntity<List<String>> createSchedules(
       @ApiParam(name = "app_id", value = "The application id", required = true)
           @PathVariable("app_id")
+          @NotNull
+          @UUID
           String appId,
-      @ApiParam(name = "guid", value = "The policy guid", required = true) @RequestParam("guid")
+      @ApiParam(name = "guid", value = "The policy guid", required = true)
+          @RequestParam("guid")
+          @NotNull
+          @UUID
           String guid,
-      @RequestBody ApplicationSchedules rawApplicationPolicy) {
+      @RequestBody @Valid ApplicationSchedules rawApplicationPolicy) {
     // Note: Request could be to update existing schedules or create new schedules.
 
     scheduleManager.setUpSchedules(appId, guid, rawApplicationPolicy);
@@ -84,14 +96,14 @@ public class ScheduleRestController {
     boolean isUpdateScheduleRequest = existingSchedules.hasSchedules();
 
     if (isUpdateScheduleRequest) { // Request to update the schedules
-      logger.info("Update schedules for application: " + appId);
+      logger.info("Update schedules for application: {}", appId);
 
-      logger.info("Delete existing schedules for application: " + appId);
+      logger.info("Delete existing schedules for application: {}", appId);
       scheduleManager.deleteSchedules(appId);
     }
 
     if (rawApplicationPolicy.getSchedules() != null) {
-      logger.info("Create schedules for application: " + appId);
+      logger.info("Create schedules for application: {}", appId);
       scheduleManager.createSchedules(rawApplicationPolicy.getSchedules());
     }
 
@@ -102,7 +114,7 @@ public class ScheduleRestController {
     return new ResponseEntity<>(null, null, HttpStatus.OK);
   }
 
-  @RequestMapping(method = RequestMethod.DELETE)
+  @DeleteMapping
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiOperation(
       value =
@@ -119,6 +131,8 @@ public class ScheduleRestController {
   public ResponseEntity<List<String>> deleteSchedules(
       @ApiParam(name = "app_id", value = "The application id", required = true)
           @PathVariable("app_id")
+          @NotNull
+          @UUID
           String appId) {
 
     Schedules existingSchedules = scheduleManager.getAllSchedules(appId).getSchedules();
@@ -126,7 +140,7 @@ public class ScheduleRestController {
       return new ResponseEntity<>(null, null, HttpStatus.NOT_FOUND);
     }
 
-    logger.info("Delete schedules for application: " + appId);
+    logger.info("Delete schedules for application: {}", appId);
     scheduleManager.deleteSchedules(appId);
 
     return new ResponseEntity<>(null, null, HttpStatus.NO_CONTENT);
