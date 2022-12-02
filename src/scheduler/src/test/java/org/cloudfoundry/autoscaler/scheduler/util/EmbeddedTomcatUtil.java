@@ -1,19 +1,17 @@
 package org.cloudfoundry.autoscaler.scheduler.util;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.apache.tomcat.util.net.SSLHostConfig;
-import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 
 public class EmbeddedTomcatUtil {
 
@@ -64,14 +62,14 @@ public class EmbeddedTomcatUtil {
     }
   }
 
-  public void addScalingEngineMockForAppAndScheduleId(
-      String appId, Long scheduleId, int statusCode, String message) throws ServletException {
+  public void setup(String appId, Long scheduleId, int statusCode, String message)
+      throws ServletException {
     String url = "/v1/apps/" + appId + "/active_schedules/" + scheduleId;
     tomcat.addServlet(appContext.getPath(), appId, new ScalingEngineMock(statusCode, message));
     appContext.addServletMappingDecoded(url, appId);
   }
 
-  public void addScalingEngineMockForAppId(String appId, int statusCode, String message) {
+  public void setup(String appId, int statusCode, String message) {
     String url = "/v1/apps/" + appId + "/active_schedules/*";
     tomcat.addServlet(appContext.getPath(), appId, new ScalingEngineMock(statusCode, message));
     appContext.addServletMappingDecoded(url, appId);
@@ -81,25 +79,15 @@ public class EmbeddedTomcatUtil {
     httpsConnector.setPort(8091);
     httpsConnector.setSecure(true);
     httpsConnector.setScheme("https");
-
-    httpsConnector.setProperty("clientAuth", "true");
-    httpsConnector.setProperty("sslProtocol", "TLSv1.2");
-    httpsConnector.setProperty("SSLEnabled", "true");
-
-    SSLHostConfig sslConfig = new SSLHostConfig();
-
-    SSLHostConfigCertificate certConfig =
-        new SSLHostConfigCertificate(sslConfig, SSLHostConfigCertificate.Type.RSA);
-    certConfig.setCertificateKeystoreFile("../src/test/resources/certs/fake-scalingengine.p12");
-    certConfig.setCertificateKeystorePassword("123456");
-    certConfig.setCertificateKeyAlias("fake-scalingengine");
-
-    sslConfig.addCertificate(certConfig);
-
-    sslConfig.setTruststoreFile("../src/test/resources/certs/test.truststore");
-    sslConfig.setTruststorePassword("123456");
-
-    httpsConnector.addSslHostConfig(sslConfig);
+    httpsConnector.setAttribute("truststoreFile", "../src/test/resources/certs/test.truststore");
+    httpsConnector.setAttribute("truststorePass", "123456");
+    httpsConnector.setAttribute(
+        "keystoreFile", "../src/test/resources/certs/fake-scalingengine.p12");
+    httpsConnector.setAttribute("keyAlias", "fake-scalingengine");
+    httpsConnector.setAttribute("keystorePass", "123456");
+    httpsConnector.setAttribute("clientAuth", "true");
+    httpsConnector.setAttribute("sslProtocol", "TLSv1.2");
+    httpsConnector.setAttribute("SSLEnabled", true);
   }
 
   static class ScalingEngineMock extends HttpServlet {

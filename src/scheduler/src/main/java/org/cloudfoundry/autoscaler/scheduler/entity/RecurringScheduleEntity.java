@@ -5,14 +5,15 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import org.cloudfoundry.autoscaler.scheduler.util.DateDeserializer;
 import org.cloudfoundry.autoscaler.scheduler.util.DateHelper;
 import org.cloudfoundry.autoscaler.scheduler.util.DateSerializer;
@@ -23,12 +24,14 @@ import org.hibernate.annotations.Type;
 @ApiModel
 @Entity
 @Table(name = "app_scaling_recurring_schedule")
-@NamedQuery(
-    name = RecurringScheduleEntity.query_recurringSchedulesByAppId,
-    query = RecurringScheduleEntity.jpql_recurringSchedulesByAppId)
-@NamedQuery(
-    name = RecurringScheduleEntity.query_findDistinctAppIdAndGuidFromRecurringSchedule,
-    query = RecurringScheduleEntity.jpql_findDistinctAppIdAndGuidFromRecurringSchedule)
+@NamedQueries({
+  @NamedQuery(
+      name = RecurringScheduleEntity.query_recurringSchedulesByAppId,
+      query = RecurringScheduleEntity.jpql_recurringSchedulesByAppId),
+  @NamedQuery(
+      name = RecurringScheduleEntity.query_findDistinctAppIdAndGuidFromRecurringSchedule,
+      query = RecurringScheduleEntity.jpql_findDistinctAppIdAndGuidFromRecurringSchedule)
+})
 public class RecurringScheduleEntity extends ScheduleEntity {
 
   @ApiModelProperty(
@@ -70,13 +73,13 @@ public class RecurringScheduleEntity extends ScheduleEntity {
   private LocalDate endDate;
 
   @ApiModelProperty(example = "[2, 3, 4, 5]", hidden = true)
-  @Type(value = org.cloudfoundry.autoscaler.scheduler.entity.BitsetUserType.class)
+  @Type(type = "org.cloudfoundry.autoscaler.scheduler.entity.BitsetUserType")
   @Column(name = "days_of_week")
   @JsonProperty(value = "days_of_week")
   private int[] daysOfWeek;
 
   @ApiModelProperty(example = "[10, 20, 25]", position = 6)
-  @Type(value = org.cloudfoundry.autoscaler.scheduler.entity.BitsetUserType.class)
+  @Type(type = "org.cloudfoundry.autoscaler.scheduler.entity.BitsetUserType")
   @Column(name = "days_of_month")
   @JsonProperty(value = "days_of_month")
   private int[] daysOfMonth;
@@ -134,7 +137,7 @@ public class RecurringScheduleEntity extends ScheduleEntity {
   public static final String query_recurringSchedulesByAppId =
       "RecurringScheduleEntity.schedulesByAppId";
   static final String jpql_recurringSchedulesByAppId =
-      "FROM RecurringScheduleEntity WHERE appId = :appId";
+      " FROM RecurringScheduleEntity" + " WHERE app_id = :appId";
   public static final String query_findDistinctAppIdAndGuidFromRecurringSchedule =
       "RecurringScheduleEntity.findDistinctAppIdAndGuid";
   static final String jpql_findDistinctAppIdAndGuidFromRecurringSchedule =

@@ -1,11 +1,11 @@
 package org.cloudfoundry.autoscaler.scheduler.util;
 
-import jakarta.annotation.Resource;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import org.cloudfoundry.autoscaler.scheduler.entity.RecurringScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.entity.SpecificDateScheduleEntity;

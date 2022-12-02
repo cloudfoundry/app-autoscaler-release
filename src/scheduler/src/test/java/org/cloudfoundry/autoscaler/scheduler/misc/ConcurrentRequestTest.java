@@ -51,7 +51,7 @@ public class ConcurrentRequestTest {
     String appId = "appId";
     long scheduleId = 0L;
 
-    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
 
     String scalingEnginePathActiveSchedule =
         ScalingEngineUtil.getScalingEngineActiveSchedulePath(scalingEngineUrl, appId, scheduleId);

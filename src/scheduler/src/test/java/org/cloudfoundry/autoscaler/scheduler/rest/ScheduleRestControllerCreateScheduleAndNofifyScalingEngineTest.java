@@ -1,8 +1,8 @@
 package org.cloudfoundry.autoscaler.scheduler.rest;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -157,7 +157,7 @@ public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
     specificDateScheduleEntity.setStartDateTime(startTime);
     specificDateScheduleEntity.setEndDateTime(endTime);
 
-    embeddedTomcatUtil.addScalingEngineMockForAppId(appId, 200, null);
+    embeddedTomcatUtil.setup(appId, 200, null);
 
     scheduler
         .getListenerManager()

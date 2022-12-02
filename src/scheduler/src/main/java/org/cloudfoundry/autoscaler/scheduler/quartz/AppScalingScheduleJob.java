@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -99,7 +98,7 @@ public abstract class AppScalingScheduleJob extends QuartzJobBean {
       HttpStatusCodeException hsce) {
     String appId = activeScheduleEntity.getAppId();
     Long scheduleId = activeScheduleEntity.getId();
-    HttpStatusCode errorResponseCode = hsce.getStatusCode();
+    HttpStatus errorResponseCode = hsce.getStatusCode();
     if (errorResponseCode == HttpStatus.NOT_FOUND) {
       String message =
           messageBundleResourceHelper.lookupMessage(

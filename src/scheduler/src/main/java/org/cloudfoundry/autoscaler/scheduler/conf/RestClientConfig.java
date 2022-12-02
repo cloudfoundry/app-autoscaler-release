@@ -4,16 +4,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import javax.net.ssl.SSLContext;
-import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.io.HttpClientConnectionManager;
-import org.apache.hc.client5.http.ssl.HttpsSupport;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
-import org.apache.hc.core5.ssl.SSLContexts;
-import org.apache.hc.core5.util.Timeout;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,16 +65,24 @@ public class RestClientConfig {
     HttpClientBuilder builder = HttpClientBuilder.create();
     SSLConnectionSocketFactory sslsf =
         new SSLConnectionSocketFactory(
-            sslcontext, new String[] {protocol}, null, HttpsSupport.getDefaultHostnameVerifier());
+            sslcontext,
+            new String[] {protocol},
+            null,
+            SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
-    HttpClientConnectionManager ccm =
-        PoolingHttpClientConnectionManagerBuilder.create().setSSLSocketFactory(sslsf).build();
+    builder.setSSLSocketFactory(sslsf);
+    Registry<ConnectionSocketFactory> registry =
+        RegistryBuilder.<ConnectionSocketFactory>create()
+            .register("https", sslsf)
+            .register("http", new PlainConnectionSocketFactory())
+            .build();
+    HttpClientConnectionManager ccm = new PoolingHttpClientConnectionManager(registry);
     builder.setConnectionManager(ccm);
     RequestConfig requestConfig =
         RequestConfig.custom()
-            .setConnectTimeout(Timeout.ofSeconds(httpClientTimeout))
-            .setConnectionRequestTimeout(Timeout.ofSeconds(httpClientTimeout))
-            .setResponseTimeout(Timeout.ofSeconds(httpClientTimeout))
+            .setConnectTimeout(httpClientTimeout * 1000)
+            .setConnectionRequestTimeout(httpClientTimeout * 1000)
+            .setSocketTimeout(httpClientTimeout * 1000)
             .build();
     builder.setDefaultRequestConfig(requestConfig);
     return builder.build();

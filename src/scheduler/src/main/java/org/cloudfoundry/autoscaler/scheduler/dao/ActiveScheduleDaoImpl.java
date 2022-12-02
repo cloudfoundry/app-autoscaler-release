@@ -1,7 +1,7 @@
 package org.cloudfoundry.autoscaler.scheduler.dao;
 
-import jakarta.annotation.Resource;
 import java.util.List;
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import org.cloudfoundry.autoscaler.scheduler.entity.ActiveScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.error.DatabaseValidationException;

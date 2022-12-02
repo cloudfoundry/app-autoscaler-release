@@ -1,7 +1,7 @@
 package org.cloudfoundry.autoscaler.scheduler.rest;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.cloudfoundry.autoscaler.scheduler.util.error.InvalidDataException;
 import org.cloudfoundry.autoscaler.scheduler.util.error.SchedulerInternalException;
 import org.cloudfoundry.autoscaler.scheduler.util.error.ValidationErrorResult;
