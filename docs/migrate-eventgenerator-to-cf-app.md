@@ -3,9 +3,10 @@
 ==== WORK IN PROGRESS====
 ## Motivation
 
-Deploy Autoscaler's eventgenerator service on a bosh vm is slow e.g vm creation/recover time
+Compared with apps deployed on BOSH-provisioned VMs the CF Runtime restores failing app instances (due to infrastructure issues) way faster and is a perfect target for [12-factor](https://12factor.net) apps.
 
-CF Runtime takes care of provisioning the missing app instances
+The eventgenerator is a 12-factor app, but also splits the work to be done between app instances, which means that missing app instances degrade the service as certain apps won't be scaled, so a runtime that can quickly restart failing app instances in case of hardware failures is key to minimize disruptions.
+
 
 ## Eventgenerator on a Bosh VM
 
