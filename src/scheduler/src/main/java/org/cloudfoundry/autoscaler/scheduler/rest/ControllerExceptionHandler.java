@@ -1,6 +1,7 @@
 package org.cloudfoundry.autoscaler.scheduler.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import org.cloudfoundry.autoscaler.scheduler.util.error.InvalidDataException;
 import org.cloudfoundry.autoscaler.scheduler.util.error.SchedulerInternalException;
@@ -56,4 +57,9 @@ public class ControllerExceptionHandler {
   @ExceptionHandler(MissingServletRequestParameterException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   private void handleMissingParameter(MissingServletRequestParameterException e) {}
+
+  @ExceptionHandler(value = {ConstraintViolationException.class})
+  protected ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException e) {
+    return new ResponseEntity<>(e.getMessage(), null, HttpStatus.BAD_REQUEST);
+  }
 }

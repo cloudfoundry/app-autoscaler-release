@@ -19,7 +19,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerA
 import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.transaction.jta.JtaAutoConfiguration;
-import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -42,8 +41,7 @@ import org.springframework.context.event.EventListener;
       JdbcTemplateAutoConfiguration.class,
       JtaAutoConfiguration.class,
       HibernateJpaAutoConfiguration.class,
-      JpaRepositoriesAutoConfiguration.class,
-      ValidationAutoConfiguration.class
+      JpaRepositoriesAutoConfiguration.class
     })
 public class SchedulerApplication {
 

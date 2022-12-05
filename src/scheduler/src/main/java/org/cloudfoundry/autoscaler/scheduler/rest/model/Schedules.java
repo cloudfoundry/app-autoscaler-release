@@ -3,6 +3,7 @@ package org.cloudfoundry.autoscaler.scheduler.rest.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import org.cloudfoundry.autoscaler.scheduler.entity.RecurringScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.entity.SpecificDateScheduleEntity;
@@ -11,6 +12,7 @@ import org.cloudfoundry.autoscaler.scheduler.entity.SpecificDateScheduleEntity;
 public class Schedules {
   @ApiModelProperty(required = true, position = 1)
   @JsonProperty(value = "timezone")
+  @NotBlank
   String timeZone;
 
   @ApiModelProperty(position = 3)
