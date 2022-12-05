@@ -13,6 +13,7 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
+- autoscaler/helpers/handlers/* # gosub
 - autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/models/* # gosub
 - autoscaler/routes/* # gosub
@@ -21,9 +22,6 @@ files:
 - autoscaler/scalingengine/config/* # gosub
 - autoscaler/scalingengine/schedule/* # gosub
 - autoscaler/scalingengine/server/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/cfhttp/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/cfhttp/handlers/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/cfhttp/unix_transport/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/* # gosub
