@@ -294,5 +294,3 @@ app.get('/cpu/close', async function (req, res) {
 })
 
 gc()
-
-
