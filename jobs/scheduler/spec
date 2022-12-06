@@ -160,4 +160,6 @@ properties:
   autoscaler.scheduler.application.props:
     description: "Additional properties to inject into the spring application properties file"
     default: ''
-    example: 'logging.level.org.quartz=info'
+    example: |
+      logging.level.org.cloudfoundry.autoscaler.scheduler=info
+      logging.level.org.quartz=info
