@@ -157,3 +157,7 @@ properties:
     description: "Java Virtual Machine parameters to be used when start scheduler process"
     default: ''
     example: '-Xmx400m -XX:MaxMetaspaceSize=128m'
+  autoscaler.scheduler.application.props:
+    description: "Additional properties to inject into the spring application properties file"
+    default: ''
+    example: 'logging.level.org.quartz=info'

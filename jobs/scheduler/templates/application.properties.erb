@@ -1,5 +1,3 @@
-#!/bin/bash
-
 <%
   def p_arr(property)
     p(property,nil) || []
@@ -114,3 +112,6 @@ spring.aop.auto=false
 management.endpoints.enabled=false
 spring.data.jpa.repositories.enabled=false
 spring.main.allow-bean-definition-overriding=true
+
+#User added properties
+<%=p('autoscaler.scheduler.application.props')%>
