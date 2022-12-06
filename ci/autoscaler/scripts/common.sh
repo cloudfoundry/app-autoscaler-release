@@ -16,6 +16,7 @@ function retry(){
 }
 
 function bosh_login(){
+  step "bosh login"
   if [[ ! -d ${bbl_state_path} ]]; then
     echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
     echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
@@ -28,20 +29,21 @@ function bosh_login(){
 }
 
 function cf_login(){
+  step "login to cf"
   cf api "https://api.${system_domain}" --skip-ssl-validation
   CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
   cf auth admin "$CF_ADMIN_PASSWORD"
 }
 
 function cleanup_acceptance_run(){
-  echo "# Cleaning up from acceptance tests"
+  step "cleaning up from acceptance tests"
   pushd "${ci_dir}/../src/acceptance" > /dev/null
     retry 5 ./cleanup.sh
   popd > /dev/null
 }
 
 function cleanup_service_broker(){
-  echo "- Deleting service broker for deployment '${deployment_name}'"
+  step "deleting service broker for deployment '${deployment_name}'"
   SERVICE_BROKER_EXISTS=$(cf service-brokers | grep -c "${service_broker_name}.${system_domain}" || true)
   if [[ $SERVICE_BROKER_EXISTS == 1 ]]; then
     echo "- Service Broker exists, deleting broker '${deployment_name}'"
@@ -50,11 +52,12 @@ function cleanup_service_broker(){
 }
 
 function cleanup_bosh_deployment(){
-  echo "- Deleting bosh deployment '${deployment_name}'"
+  step "deleting bosh deployment '${deployment_name}'"
   retry 3 bosh delete-deployment -d "${deployment_name}" -n
 }
 
 function delete_releases(){
+  step "deleting releases"
   if [ -n "${deployment_name}" ]
   then
     for release in $(bosh releases | grep -E "${deployment_name}\s+"  | awk '{print $2}')
@@ -67,12 +70,13 @@ function delete_releases(){
 }
 
 function cleanup_bosh(){
-  bosh clean-up --all -n
+  step "cleaning up bosh"
+  retry 3 bosh clean-up --all -n
 }
 
 function cleanup_credhub(){
-  echo "- Deleting credhub creds: '/bosh-autoscaler/${deployment_name}/*'"
-  credhub delete -p "/bosh-autoscaler/${deployment_name}"
+  step "cleaning up credhub: '/bosh-autoscaler/${deployment_name}/*'"
+  retry 3 credhub delete -p "/bosh-autoscaler/${deployment_name}"
 }
 
 function unset_vars() {
