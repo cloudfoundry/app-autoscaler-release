@@ -13,7 +13,7 @@ func CleanupOrgs(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteS
 	workflowhelpers.AsUser(wfh.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		orgs := GetTestOrgs(cfg)
 		for _, org := range orgs {
-			DeleteOrg(cfg, org)
+			DeleteOrgWithTimeout(org, cfg.DefaultTimeoutDuration())
 		}
 	})
 	ginkgo.By("Clearing down existing test orgs/spaces... Complete")

@@ -103,7 +103,7 @@ func EnableServiceAccess(setup *workflowhelpers.ReproducibleTestSuiteSetup, cfg 
 				Fail(fmt.Sprintf("Org must not be an empty string. Using broker:%s, serviceName:%s", cfg.ServiceBroker, cfg.ServiceName))
 			}
 			enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
+			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s: %s", cfg.ServiceName, orgName, enableServiceAccess.Err.Contents()))
 		})
 	}
 }

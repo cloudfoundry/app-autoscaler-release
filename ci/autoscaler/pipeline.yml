@@ -350,7 +350,7 @@ jobs:
 - name: performance
   public: true
   build_logs_to_retain: 100
-  ensure:
+  on_failure:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &performance-env
@@ -376,14 +376,14 @@ jobs:
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *performance-env
-  - task: setup-performance
-    file: ci/ci/autoscaler/tasks/make/make.yml
-    params:
-      TARGETS: setup-performance
-  - task: run-performance
-    file: ci/ci/autoscaler/tasks/make/make.yml
-    params:
-      TARGETS: run-performance
+        # - task: setup-performance
+        #   file: ci/ci/autoscaler/tasks/make/make.yml
+        #   params:
+        #     TARGETS: setup-performance
+        # - task: run-performance
+        #   file: ci/ci/autoscaler/tasks/make/make.yml
+        #   params:
+        #     TARGETS: run-performance
 
 
 - name: upgrade-test

@@ -35,17 +35,8 @@ var _ = BeforeSuite(func() {
 
 	GinkgoWriter.Println("Clearing down existing test orgs/spaces...")
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		orgs := GetTestOrgs(cfg)
-		for _, org := range orgs {
-			DeleteOrg(cfg, org)
-		}
-	})
-
-	GinkgoWriter.Println("Clearing down existing test orgs/spaces... Complete")
+	CleanupOrgs(cfg, setup)
 	setup.Setup()
-
 	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
 
 	if cfg.IsServiceOfferingEnabled() {

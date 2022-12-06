@@ -91,9 +91,6 @@ func GetOrgGuid(cfg *config.Config, org string) string {
 	return strings.TrimSuffix(string(orgGuidByte.Out.Contents()), "\n")
 }
 
-func DeleteOrg(cfg *config.Config, org string) {
-	DeleteOrgWithTimeout(org, cfg.DefaultTimeoutDuration())
-}
 
 func DeleteOrgWithTimeout(org string, timeout time.Duration) {
 	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(timeout)

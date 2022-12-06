@@ -1,4 +1,4 @@
-package pre_upgrade_test
+package peformance_setup_test
 
 import (
 	"acceptance/helpers"

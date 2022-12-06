@@ -19,6 +19,7 @@ type PerformanceConfig struct {
 	Teardown                      bool `json:"teardown"`
 	ExpectedMedianScaleOutSeconds int  `json:"expected_median_scale_out_seconds"`
 	ExpectedMedianScaleInSeconds  int  `json:"expected_median_scale_in_seconds"`
+	UpdateExistingOrgQuota        bool `json:"update_existing_org_quota"`
 }
 
 type Config struct {
@@ -117,6 +118,7 @@ var defaults = Config{
 		ExpectedMedianScaleInSeconds:  100, // Replace with educated guesses base on test runs
 		ExpectedMedianScaleOutSeconds: 100, // Replace with educated guesses base on test run
 		Teardown:                      true,
+		UpdateExistingOrgQuota:        true,
 	},
 }
 
