@@ -67,7 +67,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when memoryutil", func() {
 			BeforeEach(func() {
 				//current app resident size is 66mb so 66/128mb is 55%
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryutil", 58, 65)
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryutil", 58, 63)
 				initialInstanceCount = 1
 			})
 

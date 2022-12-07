@@ -9,6 +9,7 @@
   "transitiveRemediation": true,
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
   "platformAutomerge": true,
+  "automergeStrategy": "squash",
   "packageRules": [
     {
       "description": "Opt-out minimum Go version updates: https://github.com/renovatebot/renovate/issues/16715",
