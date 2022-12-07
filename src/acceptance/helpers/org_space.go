@@ -44,7 +44,7 @@ func GetTestOrgs(cfg *config.Config) []string {
 
 	var orgNames []string
 	for _, org := range rawOrgs {
-		if strings.HasPrefix(org.Name, cfg.NamePrefix) {
+		if strings.HasPrefix(org.Name, cfg.NamePrefix) || org.Name == cfg.ExistingOrganization {
 			orgNames = append(orgNames, org.Name)
 		}
 	}
@@ -90,7 +90,6 @@ func GetOrgGuid(cfg *config.Config, org string) string {
 	orgGuidByte := cf.Cf("org", org, "--guid").Wait(cfg.DefaultTimeoutDuration())
 	return strings.TrimSuffix(string(orgGuidByte.Out.Contents()), "\n")
 }
-
 
 func DeleteOrgWithTimeout(org string, timeout time.Duration) {
 	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(timeout)
