@@ -1,5 +1,3 @@
-FROM mikefarah/yq:4.30.5 AS yq
-
 FROM ubuntu:22.04
 MAINTAINER autoscaler-team
 
@@ -33,7 +31,8 @@ RUN apt-get update && \
             gh && \
     apt-get clean
 
-# Install go
+# install golang
+# renovate: datasource=golang-version depName=golang
 ARG GO_VERSION=1.18
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz && \
   tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
@@ -46,18 +45,21 @@ ENV GOPATH /go
 ENV PATH $PATH:$GOPATH/bin:/usr/local/go/bin
 
 # Install bosh_cli
+# renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
 ENV BOSH_VERSION 6.4.4
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
 
 # Install bbl
-ENV BBL_VERSION 8.4.44
-RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/v${BBL_VERSION}/bbl-v${BBL_VERSION}_linux_x86-64 && \
+# renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
+ENV BBL_VERSION v8.4.44
+RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_x86-64 && \
   mv bbl-* /usr/local/bin/bbl && \
   chmod +x /usr/local/bin/bbl
 
 # Install credhub
+# renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
 ENV CREDHUB_VERSION 2.9.0
 RUN wget -q https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-${CREDHUB_VERSION}.tgz && \
@@ -67,13 +69,18 @@ RUN wget -q https://github.com/cloudfoundry-incubator/credhub-cli/releases/downl
 RUN gem install cf-uaac
 
 # Install jq as a nice to have on container debugging
-ENV JQ_VERSION 1.6
-RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 && \
+# renovate: datasource=github-releases depName=jq lookupName=stedolan/jq
+ENV JQ_VERSION jq-1.6
+RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-linux64 && \
     mv jq-linux64 /usr/local/bin/jq && \
     chmod +x /usr/local/bin/jq
 
-# Install yq
-COPY --from=yq /usr/bin/yq /usr/local/bin/yq
+# install yq
+# renovate: datasource=github-releases depName=yq lookupName=mikefarah/yq
+ARG YQ_VERSION=v4.30.5
+RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 && \
+    chmod a+x /usr/local/bin/yq && \
+    yq --version
 
 # Install gcloud
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
@@ -83,13 +90,15 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   apt-get clean &&\
   gcloud version
 
+# renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
 ARG GINKGO_VERSION=v2.1.3
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} &&\
     ginkgo version
 
-RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+ARG NODE_VERSION=18
+RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && apt-get update -y \
     && apt install nodejs -y \
-    && node -v \
+    && apt-get clean \
     && npm --version \
-    && apt-get clean
+    && node -v
