@@ -1,12 +1,6 @@
 ---
 name: scheduler
 templates:
-  scheduler.erb: bin/scheduler
-  pre-start.erb: bin/pre-start
-  liquibase.properties: bin/liquibase.properties
-  application.properties.erb: config/application.properties
-  install_crt_keystore.sh: bin/install_crt_keystore
-  install_crt_truststore.sh: bin/install_crt_truststore
   scheduler_ca.crt.erb: config/certs/ca.crt
   scheduler_server.crt.erb: config/certs/server.crt
   scheduler_server.key.erb: config/certs/server.key
@@ -19,6 +13,13 @@ templates:
   scheduler_db_ca.crt.erb: config/certs/scheduler_db/ca.crt
   scheduler_db.crt.erb: config/certs/scheduler_db/crt
   scheduler_db.key.erb: config/certs/scheduler_db/key
+
+  scheduler.erb: bin/scheduler
+  pre-start.erb: bin/pre-start
+  liquibase.properties: bin/liquibase.properties
+  application.properties.erb: config/application.properties
+  install_crt_keystore.sh: bin/install_crt_keystore
+  install_crt_truststore.sh: bin/install_crt_truststore
   hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
   hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
   hooks/post-start.sh.erb: bin/hooks/post-start.sh
