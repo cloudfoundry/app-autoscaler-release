@@ -25,6 +25,7 @@ var (
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
 	cfg = config.LoadConfig()
+	cfg.Prefix = "autoscaler-performance"
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	RunSpecs(t, "Pre Upgrade Test Suite")
 }

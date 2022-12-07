@@ -16,7 +16,6 @@ type PerformanceConfig struct {
 	AppCount                      int  `json:"app_count"`
 	PercentageToScale             int  `json:"app_percentage_to_scale"`
 	SetupWorkers                  int  `json:"setup_workers"`
-	Teardown                      bool `json:"teardown"`
 	ExpectedMedianScaleOutSeconds int  `json:"expected_median_scale_out_seconds"`
 	ExpectedMedianScaleInSeconds  int  `json:"expected_median_scale_in_seconds"`
 	UpdateExistingOrgQuota        bool `json:"update_existing_org_quota"`
@@ -87,7 +86,7 @@ var defaults = Config{
 	JavaBuildpackName:            "java_buildpack",
 	NodejsBuildpackName:          "nodejs_buildpack",
 	DefaultTimeout:               30, // seconds
-	CfPushTimeout:                3,  // minutes
+	CfPushTimeout:                5,  // minutes
 	LongCurlTimeout:              2,  // minutes
 	BrokerStartTimeout:           5,  // minutes
 	AsyncServiceOperationTimeout: 2,  // minutes
@@ -117,7 +116,6 @@ var defaults = Config{
 		SetupWorkers:                  50,  // number of thread/process
 		ExpectedMedianScaleInSeconds:  100, // Replace with educated guesses base on test runs
 		ExpectedMedianScaleOutSeconds: 100, // Replace with educated guesses base on test run
-		Teardown:                      true,
 		UpdateExistingOrgQuota:        true,
 	},
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 	"github.com/onsi/gomega/gexec"
+	"os"
 	"strconv"
 	"testing"
 	"time"
@@ -24,38 +25,47 @@ var (
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
 	cfg = config.LoadConfig()
+	cfg.Prefix = "autoscaler-performance"
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-	RunSpecs(t, "Pre Upgrade Test Suite")
+	RunSpecs(t, "Setup Performance Test Suite")
 }
 
 var _ = BeforeSuite(func() {
+	var spaceGuid, orgGuid string
 
-	if cfg.Performance.Teardown {
+	if os.Getenv("SKIP_TEARDOWN") == "true" {
+		fmt.Println("Skipping Teardown...")
+	} else {
 		cleanup()
-
 	}
 	setup.Setup()
 
 	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
-	if cfg.Performance.UpdateExistingOrgQuota {
-		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-			orgGuid := GetOrgGuid(cfg, setup.GetOrganizationName())
-			orgQuotaName := GetOrgQuotaNameFrom(orgGuid, cfg.DefaultTimeoutDuration())
+	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+		_, orgGuid, _, spaceGuid = GetOrgSpaceNamesAndGuids(cfg, setup.GetOrganizationName())
+		orgQuotaName := GetOrgQuotaNameFrom(orgGuid, cfg.DefaultTimeoutDuration())
+		if cfg.Performance.UpdateExistingOrgQuota {
 			updateOrgQuota(orgQuotaName, cfg.Performance.AppCount, cfg.DefaultTimeoutDuration())
-		})
-	}
+		}
+	})
+	cleanupExistingServiceInstances(setup, orgGuid, spaceGuid)
 
 	if cfg.IsServiceOfferingEnabled() {
 		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
-
 	fmt.Println("creating droplet")
 	nodeAppDropletPath = CreateDroplet(*cfg)
 
 })
 
+func cleanupExistingServiceInstances(setup *workflowhelpers.ReproducibleTestSuiteSetup, orgGuid string, spaceGuid string) {
+	services := GetServices(cfg, orgGuid, spaceGuid)
+	for _, instanceName := range services {
+		DeleteServiceInstance(cfg, setup, instanceName)
+	}
+}
+
 func cleanup() {
-	fmt.Println("Clearing down existing test orgs/spaces...")
 	// Infinite memory quota OO
 	setup = workflowhelpers.NewRunawayAppTestSuiteSetup(cfg)
 
@@ -66,10 +76,11 @@ func cleanup() {
 			cleanupOrg()
 		}
 	})
-	fmt.Println("Clearing down existing test orgs/spaces... Complete")
+
 }
 
 func cleanupOrg() {
+	fmt.Println("Clearing down existing test orgs/spaces...")
 	orgs := GetTestOrgs(cfg)
 	for _, org := range orgs {
 		orgName, _, spaceName, _ := GetOrgSpaceNamesAndGuids(cfg, org)
@@ -77,10 +88,11 @@ func cleanupOrg() {
 			DeleteOrgWithTimeout(orgName, time.Duration(120)*time.Second)
 		}
 	}
+	fmt.Println("Clearing down existing test orgs/spaces... Complete")
 }
 
 func cleanupApps() {
-	org := cfg.ExistingOrganization
+	_ = cfg.ExistingOrganization
 
 }
 

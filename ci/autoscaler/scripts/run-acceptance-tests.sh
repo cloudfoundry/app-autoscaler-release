@@ -18,7 +18,6 @@ nodes="${NODES:-3}"
 performance_app_count="${PERFORMANCE_APP_COUNT:-}"
 performance_app_percentage_to_scale="${PERFORMANCE_APP_PERCENTAGE_TO_SCALE:-}"
 performance_setup_workers="${PERFORMANCE_SETUP_WORKERS:-}"
-performance_teardown=${PERFORMANCE_TEARDOWN:-true}
 performance_update_existing_org_quota=${PERFORMANCE_UPDATE_EXISTING_ORG_QUOTA:-true}
 
 if [[ ! -d ${bbl_state_path} ]]; then
@@ -62,7 +61,6 @@ cat > acceptance_config.json <<EOF
     "app_count": ${performance_app_count},
     "app_percentage_to_scale": ${performance_app_percentage_to_scale},
     "setup_workers": ${performance_setup_workers},
-    "teardown": ${performance_teardown},
     "update_existing_org_quota": ${performance_update_existing_org_quota}
   }
 }
