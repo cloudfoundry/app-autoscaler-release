@@ -59,7 +59,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg.Wait()
 
 				atomic.AddInt32(&scaledOutAppsCount, 1)
-				fmt.Printf("Scaled-Out apps: %d/%d\n", atomic.LoadInt32(&scaledOutAppsCount), appsToScaleCount)
+				fmt.Printf("\nScaled-Out apps: %d/%d\n", atomic.LoadInt32(&scaledOutAppsCount), appsToScaleCount)
 
 				wg = sync.WaitGroup{}
 				wg.Add(1)

@@ -27,7 +27,7 @@ func TestSetup(t *testing.T) {
 	cfg = config.LoadConfig()
 	cfg.Prefix = "autoscaler-performance"
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-	RunSpecs(t, "Pre Upgrade Test Suite")
+	RunSpecs(t, "Performance Test Suite")
 }
 
 var _ = BeforeSuite(func() {

@@ -9,6 +9,7 @@ import (
 	"github.com/onsi/gomega/gexec"
 	"os"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -48,21 +49,47 @@ var _ = BeforeSuite(func() {
 			updateOrgQuota(orgQuotaName, cfg.Performance.AppCount, cfg.DefaultTimeoutDuration())
 		}
 	})
-	cleanupExistingServiceInstances(setup, orgGuid, spaceGuid)
+	cleanUpServiceInstanceInParallel(setup, orgGuid, spaceGuid)
 
 	if cfg.IsServiceOfferingEnabled() {
 		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
-	fmt.Println("creating droplet")
+	fmt.Println("creating droplet...")
 	nodeAppDropletPath = CreateDroplet(*cfg)
 
 })
 
-func cleanupExistingServiceInstances(setup *workflowhelpers.ReproducibleTestSuiteSetup, orgGuid string, spaceGuid string) {
-	services := GetServices(cfg, orgGuid, spaceGuid)
-	for _, instanceName := range services {
+func cleanUpServiceInstanceInParallel(setup *workflowhelpers.ReproducibleTestSuiteSetup, orgGuid string, spaceGuid string) {
+	waitGroup := sync.WaitGroup{}
+	servicesChan := make(chan string)
+
+	serviceInstances := GetServices(cfg, orgGuid, spaceGuid)
+	if len(serviceInstances) != 0 {
+		fmt.Printf("\ndeleting existing service instances: %d\n", len(serviceInstances))
+		for i := 0; i < len(serviceInstances)*2; i++ {
+			waitGroup.Add(1)
+			i := i
+			go deleteExistingServiceInstances(i, servicesChan, setup, orgGuid, spaceGuid, &waitGroup)
+		}
+		for _, serviceInstanceName := range serviceInstances {
+			servicesChan <- serviceInstanceName
+		}
+		close(servicesChan)
+		//fmt.Printf("waiting for go routines to be finished\n")
+		waitGroup.Wait()
+		//fmt.Printf("running in main\n")
+	}
+}
+
+func deleteExistingServiceInstances(workerId int, servicesChan chan string, setup *workflowhelpers.ReproducibleTestSuiteSetup, orgGuid string, spaceGuid string, wg *sync.WaitGroup) {
+	fmt.Printf("Worker %d  - Delete Service Instance starting...\n", workerId)
+	defer wg.Done()
+	defer GinkgoRecover()
+	for instanceName := range servicesChan {
+		fmt.Printf("worker %d  - deleting service instance - %s\n", workerId, instanceName)
 		DeleteServiceInstance(cfg, setup, instanceName)
 	}
+	fmt.Printf("worker %d  - Delete Service Instance finished...\n", workerId)
 }
 
 func cleanup() {
