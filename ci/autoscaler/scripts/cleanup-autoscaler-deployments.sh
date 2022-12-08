@@ -11,7 +11,7 @@ function get_autoscaler_deployments(){
 function main(){
   bosh_login
   cf_login
-
+  step "Deployments to cleanup: $(get_autoscaler_deployments)"
   while IFS='' read -r deployment; do
     unset_vars
     export DEPLOYMENT_NAME="${deployment}"
