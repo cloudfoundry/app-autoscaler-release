@@ -11,6 +11,17 @@ if [ -z "${BASH_SOURCE[0]}" ]; then
   return
 fi
 
+write_error_state() {
+  echo "Error failed execution of \"$1\" at line $2"
+  local frame=0
+  while true ; do
+    caller $frame && break
+    ((frame++));
+  done
+}
+
+trap 'write_error_state "$BASH_COMMAND" "$LINENO"' ERR
+
 debug=${DEBUG:-}
 if [ -n "${debug}" ] && [ ! "${debug}" = "false" ]; then
   function debug(){ echo "  -> $1"; }
@@ -37,6 +48,8 @@ export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
 debug "PR_NUMBER: ${PR_NUMBER}"
 
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
+if [ "${DEPLOYMENT_NAME}" = "autoscaler-" ] ; then echo "No deployment name or PR number set"; exit 1; fi
+
 debug "DEPLOYMENT_NAME: ${DEPLOYMENT_NAME}"
 log "set up vars: DEPLOYMENT_NAME=${DEPLOYMENT_NAME}"
 # shellcheck disable=SC2034
