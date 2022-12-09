@@ -51,7 +51,7 @@ var _ = BeforeSuite(func() {
 	fmt.Println("Clearing down existing test orgs/spaces... Complete")
 	setup.Setup()
 
-	EnableServiceAccess(nil, cfg, setup.GetOrganizationName())
+	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		orgGuid := GetOrgGuid(cfg, setup.GetOrganizationName())
 		orgQuotaName := GetOrgQuotaNameFrom(orgGuid, cfg.DefaultTimeoutDuration())
