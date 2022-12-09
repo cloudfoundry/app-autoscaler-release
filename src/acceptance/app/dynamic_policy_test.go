@@ -42,7 +42,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 					Fail("There is not enough app memory in the app to run this test.\n - app resident size %d\n - app memory limit: %d\n - heap to use: %d", AppResidentSize, cfg.NodeMemoryLimit, int(heapToUse))
 				}
 
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", 87, 87)
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", 78, 82)
 				initialInstanceCount = 1
 			})
 
