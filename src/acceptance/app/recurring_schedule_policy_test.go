@@ -30,7 +30,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 		JustBeforeEach(func() {
 			startTime, endTime = getStartAndEndTime(time.UTC, 70*time.Second, time.Duration(interval+120)*time.Second)
-			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 80, "UTC", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
+			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 87, "UTC", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 			StartApp(appName, cfg.CfPushTimeoutDuration())
 		})

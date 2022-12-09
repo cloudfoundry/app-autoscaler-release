@@ -164,7 +164,6 @@ public class ScheduleManager {
    */
   @Transactional
   public void createSchedules(Schedules schedules) {
-
     List<RecurringScheduleEntity> recurringSchedules = schedules.getRecurringSchedule();
     List<SpecificDateScheduleEntity> specificDateSchedules = schedules.getSpecificDate();
 
