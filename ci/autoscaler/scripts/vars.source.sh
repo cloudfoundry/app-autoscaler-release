@@ -48,8 +48,8 @@ export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
 debug "PR_NUMBER: '${PR_NUMBER}'"
 user=${USER:-"test"}
 
-[ -z "${PR_NUMBER}" ] && DEPLOYMENT_NAME="${user}"
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
+[ "${DEPLOYMENT_NAME}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
 debug "DEPLOYMENT_NAME: ${DEPLOYMENT_NAME}"
 log "set up vars: DEPLOYMENT_NAME=${DEPLOYMENT_NAME}"
 # shellcheck disable=SC2034
