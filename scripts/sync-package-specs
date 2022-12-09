@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-# ensure gosub is installed (this will recompile it only if necessary)
-go install github.com/garethjevans/gosub@latest
-
 function sync_package() {
   bosh_pkg=${1}
   golang_pkg=${2}
@@ -19,9 +16,9 @@ function sync_package() {
     cd $PWD/src/autoscaler/${golang_pkg}
     {
       cat ${spec_dir}/spec | grep -v '# gosub'
-      GO111MODULE=on GOOS=linux gosub list "$@" | grep autoscaler | \
+      GO111MODULE=on GOOS=linux go run github.com/garethjevans/gosub@54a908b701f1cbb9e49d4e8117348df3b9381c1b list "$@" | grep autoscaler | \
         sed -e 's|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- \1/* # gosub|g'
-      GO111MODULE=on GOOS=linux gosub list "$@" | grep -v autoscaler | \
+      GO111MODULE=on GOOS=linux go run github.com/garethjevans/gosub@54a908b701f1cbb9e49d4e8117348df3b9381c1b list "$@" | grep -v autoscaler | \
         sed -e 's|\(.*\)|- autoscaler/vendor/\1/* # gosub|g'
     } > ${spec_dir}/spec.new
 
