@@ -33,9 +33,9 @@ func DebugInfo(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteS
 		_, _ = fmt.Fprintf(output, "\n=============== DEBUG ===============\n")
 		for _, command := range commands {
 			command.Wait(30 * time.Second)
-			_, _ = fmt.Fprintf(output, strings.Join(command.Command.Args, " ")+": \n")
-			_, _ = fmt.Fprintf(output, string(command.Out.Contents())+"\n")
-			_, _ = fmt.Fprintf(output, string(command.Err.Contents())+"\n")
+			_, _ = fmt.Fprintln(output, strings.Join(command.Command.Args, " ")+":")
+			_, _ = fmt.Fprintln(output, string(command.Out.Contents()))
+			_, _ = fmt.Fprintln(output, string(command.Err.Contents()))
 		}
 		_, _ = fmt.Fprintf(output, "\n=====================================\n")
 		GinkgoWriter.Print(output.String())
