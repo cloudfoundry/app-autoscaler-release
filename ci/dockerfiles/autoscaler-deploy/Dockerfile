@@ -53,14 +53,14 @@ RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_V
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
-ENV BBL_VERSION v8.4.44
+ENV BBL_VERSION v8.4.110
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_x86-64 && \
   mv bbl-* /usr/local/bin/bbl && \
   chmod +x /usr/local/bin/bbl
 
 # Install credhub
 # renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
-ENV CREDHUB_VERSION 2.9.0
+ENV CREDHUB_VERSION 2.9.9
 RUN wget -q https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-${CREDHUB_VERSION}.tgz && \
   mv credhub /usr/local/bin/credhub
