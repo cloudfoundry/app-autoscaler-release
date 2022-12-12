@@ -4,7 +4,6 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -38,6 +37,14 @@ func getRawOrgs(timeout time.Duration) []cfResource {
 
 	return rawOrgs
 }
+func FindExistingOrgAndSpace(cfg *config.Config) (orgName string, spaceName string) {
+	organizations := GetTestOrgs(cfg)
+	Expect(len(organizations)).To(Equal(1))
+	orgName = organizations[0]
+	_, _, spaceName, _ = GetOrgSpaceNamesAndGuids(cfg, orgName)
+
+	return orgName, spaceName
+}
 
 func GetTestOrgs(cfg *config.Config) []string {
 	rawOrgs := getRawOrgs(cfg.DefaultTimeoutDuration())
@@ -52,38 +59,18 @@ func GetTestOrgs(cfg *config.Config) []string {
 	return orgNames
 }
 
-type SpaceResources struct {
-	Resources []Space `json:"resources"`
-}
-type Space struct {
-	Guid string `json:"guid"`
-	Name string `json:"name"`
-}
-
 func GetOrgSpaceNamesAndGuids(cfg *config.Config, org string) (orgName string, orgGuid string, spaceName string, spaceGuid string) {
 	orgGuid = GetOrgGuid(cfg, org)
-	spaces := GetSpaces(cfg, orgGuid)
-	if len(spaces.Resources) == 0 {
+	spaces := GetRawSpaces(orgGuid, cfg.DefaultTimeoutDuration())
+	if len(spaces) == 0 {
 		return org, orgGuid, "", ""
 	}
-	spaceName = spaces.Resources[0].Name
-	spaceGuid = spaces.Resources[0].Guid
+	spaceName = spaces[0].Name
+	spaceGuid = spaces[0].Guid
 
 	ginkgo.GinkgoWriter.Printf("\nUsing Org: %s - %s\n", org, orgGuid)
 	ginkgo.GinkgoWriter.Printf("\nUsing Space: %s - %s\n", spaceName, spaceGuid)
 	return org, orgGuid, spaceName, spaceGuid
-}
-
-func GetSpaces(cfg *config.Config, orgGuid string) struct {
-	Resources []Space `json:"resources"`
-} {
-	params := url.Values{"organization_guids": []string{orgGuid}}
-	rawSpaces := cf.CfSilent("curl", fmt.Sprintf("/v3/spaces?%s", params.Encode())).Wait(cfg.DefaultTimeoutDuration())
-	Expect(rawSpaces).To(Exit(0), "unable to get spaces")
-	spaces := SpaceResources{}
-	err := json.Unmarshal(rawSpaces.Out.Contents(), &spaces)
-	Expect(err).ShouldNot(HaveOccurred())
-	return spaces
 }
 
 func GetOrgGuid(cfg *config.Config, org string) string {

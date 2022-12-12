@@ -16,6 +16,8 @@ import (
 var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 	var (
 		appsToScaleCount   int
+		percentageToScale  int
+		appCount           int
 		samplingConfig     gmeasure.SamplingConfig
 		experiment         *gmeasure.Experiment
 		doneAppsCount      int32
@@ -23,8 +25,13 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 	)
 
 	BeforeEach(func() {
-		appsToScaleCount = int(math.RoundToEven(float64(cfg.Performance.AppCount * cfg.Performance.PercentageToScale / 100)))
-		GinkgoWriter.Printf("\nScaling %d app: \n", appsToScaleCount)
+		percentageToScale, appCount = cfg.Performance.PercentageToScale, cfg.Performance.AppCount
+		appsToScaleCount = int(math.RoundToEven(float64(appCount * percentageToScale / 100)))
+		Expect(appsToScaleCount).To(BeNumerically(">", 0),
+			"%d % of %d must round up to 1 or more app/s", percentageToScale, appCount)
+
+		fmt.Printf("\nScaling %d app: \n", appsToScaleCount)
+
 		samplingConfig = gmeasure.SamplingConfig{
 			N:           appsToScaleCount,
 			NumParallel: appsToScaleCount,
@@ -36,8 +43,6 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 	Context("when scaling by custom metrics", func() {
 		It("should scale in", Serial, Label("measurement"), func() {
 			AddReportEntry(experiment.Name, experiment)
-			//experimentWg := sync.WaitGroup{}
-			//	experimentWg.Add(appsToScaleCount)
 
 			experiment.Sample(func(i int) {
 				defer GinkgoRecover()
@@ -76,10 +81,9 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 
 				atomic.AddInt32(&doneAppsCount, 1)
 				fmt.Printf("Scaled-in apps: %d/%d\n", atomic.LoadInt32(&doneAppsCount), appsToScaleCount)
-				//experimentWg.Done()
 
 			}, samplingConfig)
-			//experimentWg.Wait()
+
 			Eventually(func() int32 { return atomic.LoadInt32(&doneAppsCount) }, 10*time.Minute, 5*time.Second).Should(BeEquivalentTo(appsToScaleCount))
 			checkMedianDurationFor(experiment, "scale-out")
 			checkMedianDurationFor(experiment, "scale-in")

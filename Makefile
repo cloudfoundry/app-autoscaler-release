@@ -360,7 +360,6 @@ cf-login:
 .PHONY: setup-performance
 setup-performance:
 	export GINKGO_OPTS="";\
-	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="setup_performance";\

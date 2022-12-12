@@ -31,7 +31,6 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 
 		By(fmt.Sprintf("Deploying %d apps", cfg.Performance.AppCount))
 		wg := sync.WaitGroup{}
-		//wg.Add(cfg.BenchmarkAppCount)
 
 		for i := 0; i < workerCount; i++ {
 			wg.Add(1)

@@ -37,8 +37,10 @@ var _ = BeforeSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		cleanup()
+		cleanupExistingSpace()
 	}
+
+	setup = workflowhelpers.NewRunawayAppTestSuiteSetup(cfg)
 	setup.Setup()
 
 	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
@@ -66,7 +68,7 @@ func cleanUpServiceInstanceInParallel(setup *workflowhelpers.ReproducibleTestSui
 	serviceInstances := GetServices(cfg, orgGuid, spaceGuid)
 	if len(serviceInstances) != 0 {
 		fmt.Printf("\ndeleting existing service instances: %d\n", len(serviceInstances))
-		for i := 0; i < len(serviceInstances)*2; i++ {
+		for i := 0; i < len(serviceInstances); i++ {
 			waitGroup.Add(1)
 			i := i
 			go deleteExistingServiceInstances(i, servicesChan, setup, orgGuid, spaceGuid, &waitGroup)
@@ -75,9 +77,7 @@ func cleanUpServiceInstanceInParallel(setup *workflowhelpers.ReproducibleTestSui
 			servicesChan <- serviceInstanceName
 		}
 		close(servicesChan)
-		//fmt.Printf("waiting for go routines to be finished\n")
 		waitGroup.Wait()
-		//fmt.Printf("running in main\n")
 	}
 }
 
@@ -92,34 +92,23 @@ func deleteExistingServiceInstances(workerId int, servicesChan chan string, setu
 	fmt.Printf("worker %d  - Delete Service Instance finished...\n", workerId)
 }
 
-func cleanup() {
-	// Infinite memory quota OO
-	setup = workflowhelpers.NewRunawayAppTestSuiteSetup(cfg)
+func cleanupExistingSpace() {
+	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+		organizations := GetTestOrgs(cfg)
+		Expect(len(organizations)).To(Equal(1))
+		orgName := organizations[0]
+		orgGuid := GetOrgGuid(cfg, orgName)
+
 		if cfg.UseExistingOrganization {
-			cleanupApps()
+			spaces := GetTestSpaces(orgGuid, cfg)
+			DeleteSpaces(orgName, spaces, cfg.DefaultTimeoutDuration())
 		} else {
-			cleanupOrg()
-		}
-	})
-
-}
-
-func cleanupOrg() {
-	fmt.Println("Clearing down existing test orgs/spaces...")
-	orgs := GetTestOrgs(cfg)
-	for _, org := range orgs {
-		orgName, _, spaceName, _ := GetOrgSpaceNamesAndGuids(cfg, org)
-		if spaceName != "" {
+			orgName := setup.GetOrganizationName()
 			DeleteOrgWithTimeout(orgName, time.Duration(120)*time.Second)
 		}
-	}
-	fmt.Println("Clearing down existing test orgs/spaces... Complete")
-}
-
-func cleanupApps() {
-	_ = cfg.ExistingOrganization
+	})
 
 }
 

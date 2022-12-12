@@ -17,9 +17,7 @@ var (
 	cfg       *config.Config
 	setup     *workflowhelpers.ReproducibleTestSuiteSetup
 	orgName   string
-	orgGUID   string
 	spaceName string
-	spaceGUID string
 )
 
 func TestSetup(t *testing.T) {
@@ -35,10 +33,7 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewSmokeTestSuiteSetup(cfg)
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		organizations := helpers.GetTestOrgs(cfg)
-		Expect(len(organizations)).To(Equal(1))
-		orgName = organizations[0]
-		_, orgGUID, spaceName, spaceGUID = helpers.GetOrgSpaceNamesAndGuids(cfg, orgName)
+		orgName, spaceName = helpers.FindExistingOrgAndSpace(cfg)
 	})
 
 	Expect(orgName).ToNot(Equal(""), "orgName has not been determined")
