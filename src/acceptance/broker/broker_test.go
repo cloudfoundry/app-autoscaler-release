@@ -89,7 +89,8 @@ var _ = Describe("AutoScaler Service Broker", func() {
 			policy, err := os.ReadFile(policyFile)
 			Expect(err).NotTo(HaveOccurred())
 
-			helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			err := helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			Expect(err).NotTo(HaveOccurred())
 
 			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
 			Expect(bindingParameters).Should(MatchJSON(policy))

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -404,7 +405,7 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 func CreatePolicy(cfg *config.Config, appName, appGUID, policy string) string {
 	if cfg.IsServiceOfferingEnabled() {
 		instanceName := CreateService(cfg)
-		BindServiceToAppWithPolicy(cfg, appName, instanceName, policy)
+		Retry(3, 60, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
 		return instanceName
 	}
 	CreatePolicyWithAPI(cfg, appGUID, policy)
@@ -415,15 +416,23 @@ func BindServiceToApp(cfg *config.Config, appName string, instanceName string) {
 	BindServiceToAppWithPolicy(cfg, appName, instanceName, "")
 }
 
-func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName string, policy string) {
+func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName string, policy string) error {
+	var err error
+
 	if cfg.IsServiceOfferingEnabled() {
 		args := []string{"bind-service", appName, instanceName}
 		if policy != "" {
 			args = append(args, "-c", policy)
 		}
 		bindService := cf.Cf(args...).Wait(cfg.DefaultTimeoutDuration())
-		FailOnCommandFailuref(bindService, "failed binding service %s to app %s. \n Command Error: %s %s", instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents())
+
+		if bindService.ExitCode() != 0 {
+			err = errors.New(fmt.Sprintf("failed binding service %s to app %s. \n Command Error: %s %s",
+				instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents()))
+		}
 	}
+
+	return err
 }
 
 func CreateService(cfg *config.Config) string {
