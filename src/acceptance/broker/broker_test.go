@@ -4,6 +4,7 @@ import (
 	"acceptance/helpers"
 	"encoding/json"
 	"fmt"
+	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 	url2 "net/url"
 	"os"
 	"strings"
@@ -19,11 +20,15 @@ import (
 type serviceInstance string
 
 func createService(onPlan string) serviceInstance {
-	return serviceInstance(helpers.CreateServiceWithPlan(cfg, onPlan))
+	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+	helpers.FailOnError(helpers.CreateServiceWithPlan(cfg, onPlan, instanceName))
+	return serviceInstance(instanceName)
 }
 
 func createServiceWithParameters(onPlan string, parameters string) serviceInstance {
-	return serviceInstance(helpers.CreateServiceWithPlanAndParameters(cfg, onPlan, parameters))
+	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+	helpers.FailOnError(helpers.CreateServiceWithPlanAndParameters(cfg, onPlan, parameters, instanceName))
+	return serviceInstance(instanceName)
 }
 
 func (s serviceInstance) updatePlan(toPlan string) {
@@ -89,7 +94,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 			policy, err := os.ReadFile(policyFile)
 			Expect(err).NotTo(HaveOccurred())
 
-			err := helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			err = helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
 			Expect(err).NotTo(HaveOccurred())
 
 			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
@@ -116,9 +121,9 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		var policy []byte
 
 		BeforeEach(func() {
-			instance = createServiceWithParameters(cfg.ServicePlan, "../assets/file/policy/default_policy.json")
-			var err error
-			defaultPolicy, err = os.ReadFile("../assets/file/policy/default_policy.json")
+			_ = createServiceWithParameters(cfg.ServicePlan, "../assets/file/policy/default_policy.json")
+
+			defaultPolicy, err := os.ReadFile("../assets/file/policy/default_policy.json")
 			Expect(err).NotTo(HaveOccurred())
 
 			var serviceParameters = struct {

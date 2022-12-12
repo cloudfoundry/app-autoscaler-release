@@ -15,13 +15,12 @@ import (
 
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
-	. "github.com/onsi/ginkgo/v2"
-
 	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 )
 
 const (
@@ -404,7 +403,8 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 
 func CreatePolicy(cfg *config.Config, appName, appGUID, policy string) string {
 	if cfg.IsServiceOfferingEnabled() {
-		instanceName := CreateService(cfg)
+		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+		Retry(3, 60, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
 		Retry(3, 60, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
 		return instanceName
 	}
@@ -436,25 +436,29 @@ func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName
 }
 
 func CreateService(cfg *config.Config) string {
-	return CreateServiceWithPlan(cfg, cfg.ServicePlan)
+	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+	FailOnError(CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName))
+	return instanceName
 }
 
-func CreateServiceWithPlan(cfg *config.Config, servicePlan string) string {
-	return CreateServiceWithPlanAndParameters(cfg, servicePlan, "")
+func CreateServiceWithPlan(cfg *config.Config, servicePlan string, instanceName string) error {
+	return CreateServiceWithPlanAndParameters(cfg, servicePlan, "", instanceName)
 }
 
-func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string) string {
+func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string, instanceName string) error {
+	var err error
+
 	if cfg.IsServiceOfferingEnabled() {
-		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 		cfCommand := []string{"create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker}
 		if defaultPolicy != "" {
 			cfCommand = append(cfCommand, "-c", defaultPolicy)
 		}
 		createService := cf.Cf(cfCommand...).Wait(cfg.DefaultTimeoutDuration())
-		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s \n Command Error: %s %s", instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
-		return instanceName
+		err = errors.New(fmt.Sprintf("Failed to create service instance %s on service %s \n Command Error: %s %s",
+			instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents()))
 	}
-	return ""
+
+	return err
 }
 
 func GetServiceInstanceGuid(cfg *config.Config, instanceName string) string {
