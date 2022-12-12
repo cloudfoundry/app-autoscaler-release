@@ -39,7 +39,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			var heapToUse int
 			BeforeEach(func() {
 				heapToUse = min(maxHeapLimitMb, 200)
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", 78, 82)
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", 78, 80)
 				initialInstanceCount = 1
 			})
 
