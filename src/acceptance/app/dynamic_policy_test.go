@@ -43,7 +43,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 1
 			})
 
-			FIt("should scale out and then back in.", Label(acceptance.LabelSmokeTests), func() {
+			It("should scale out and then back in.", Label(acceptance.LabelSmokeTests), func() {
 				By(fmt.Sprintf("Use heap %d mb of heap on app", heapToUse))
 				CurlAppInstance(cfg, appName, 0, fmt.Sprintf("/memory/%d/5", heapToUse))
 
@@ -68,7 +68,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 1
 			})
 
-			FIt("should scale out and back in", func() {
+			It("should scale out and back in", func() {
 				heapToUse := min(maxHeapLimitMb, int(float64(cfg.NodeMemoryLimit)*0.80))
 				By(fmt.Sprintf("use 80%% or %d of memory in app", heapToUse))
 				CurlAppInstance(cfg, appName, 0, fmt.Sprintf("/memory/%d/5", heapToUse))
