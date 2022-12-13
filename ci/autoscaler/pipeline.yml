@@ -102,6 +102,7 @@ resources:
   type: time
   source:
     start: 10:00 PM
+    stop: 11:00 PM
     location: "Europe/Berlin"
 
 - name: ci
