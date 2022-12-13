@@ -30,9 +30,12 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 
 	Context("when scaling by recurring schedule", func() {
 
+		scheduleInitialMinInstanceCount := 3
+		scheduleInstanceMinCount := 2
+		instanceMinCount := 1
 		JustBeforeEach(func() {
 			startTime, endTime = getStartAndEndTime(time.UTC, 70*time.Second, time.Duration(interval+120)*time.Second)
-			policy = GenerateDynamicAndRecurringSchedulePolicy(1, 4, 50, "UTC", startTime, endTime, daysOfMonthOrWeek, 2, 5, 3)
+			policy = GenerateDynamicAndRecurringSchedulePolicy(instanceMinCount, 4, 50, "UTC", startTime, endTime, daysOfMonthOrWeek, scheduleInstanceMinCount, 5, scheduleInitialMinInstanceCount)
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 			StartApp(appName, cfg.CfPushTimeoutDuration())
 		})
@@ -40,14 +43,14 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		scaleDown := func() {
 			By("setting to initial_min_instance_count")
 			jobRunTime := time.Until(startTime.Add(5 * time.Minute))
-			WaitForNInstancesRunning(appGUID, 3, jobRunTime)
+			WaitForNInstancesRunning(appGUID, scheduleInitialMinInstanceCount, jobRunTime, "The schedule should initially trigger scaling to initial_min_instance_count %i", scheduleInitialMinInstanceCount)
 
 			By("setting schedule's instance_min_count")
 			jobRunTime = time.Until(endTime)
-			Eventually(func() (int, error) { return RunningInstances(appGUID, jobRunTime) }, jobRunTime, 15*time.Second).Should(Equal(2))
+			WaitForNInstancesRunning(appGUID, scheduleInstanceMinCount, jobRunTime, "The schedule should allow scaling down to instance_min_count %i", scheduleInstanceMinCount)
 
 			By("setting to default instance_min_count")
-			WaitForNInstancesRunning(appGUID, 1, time.Until(endTime.Add(time.Duration(interval+60)*time.Second)))
+			WaitForNInstancesRunning(appGUID, instanceMinCount, time.Until(endTime.Add(time.Duration(interval+60)*time.Second)), "After the schedule ended scaling down to instance_min_count %i should be possible", instanceMinCount)
 		}
 
 		Context("with days of month", func() {

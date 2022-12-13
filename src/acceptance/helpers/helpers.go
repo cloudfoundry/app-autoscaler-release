@@ -385,13 +385,13 @@ func RunningInstances(appGUID string, timeout time.Duration) (int, error) {
 	return webInstances, nil
 }
 
-func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Duration) {
+func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Duration, optionalDescription ...interface{}) {
+	GinkgoHelper()
 	By(fmt.Sprintf("Waiting for %d instances of app: %s", instances, appGUID))
 	Eventually(getAppInstances(appGUID, 8*time.Second)).
-		WithOffset(1).
 		WithTimeout(timeout).
-		WithPolling(10 * time.Second).
-		Should(Equal(instances))
+		WithPolling(10*time.Second).
+		Should(Equal(instances), optionalDescription...)
 }
 
 func getAppInstances(appGUID string, timeout time.Duration) func() int {
