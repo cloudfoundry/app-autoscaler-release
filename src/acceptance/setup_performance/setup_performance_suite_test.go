@@ -4,9 +4,7 @@ import (
 	"acceptance/config"
 	. "acceptance/helpers"
 	"fmt"
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
-	"github.com/onsi/gomega/gexec"
 	"os"
 	"strconv"
 	"sync"
@@ -20,13 +18,14 @@ import (
 var (
 	cfg                *config.Config
 	setup              *workflowhelpers.ReproducibleTestSuiteSetup
+	originalOrgQuota   OrgQuota
 	nodeAppDropletPath string
 )
 
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
 	cfg = config.LoadConfig()
-	cfg.Prefix = "autoscaler-performance"
+	cfg.Prefix = "autoscaler-performance-TESTS"
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	RunSpecs(t, "Setup Performance Test Suite")
 }
@@ -46,11 +45,9 @@ var _ = BeforeSuite(func() {
 	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		_, orgGuid, _, spaceGuid = GetOrgSpaceNamesAndGuids(cfg, setup.GetOrganizationName())
-		orgQuotaName := GetOrgQuotaNameFrom(orgGuid, cfg.DefaultTimeoutDuration())
-		if cfg.Performance.UpdateExistingOrgQuota {
-			updateOrgQuota(orgQuotaName, cfg.Performance.AppCount, cfg.DefaultTimeoutDuration())
-		}
+		updateOrgQuotaForPerformanceTest(orgGuid)
 	})
+
 	cleanUpServiceInstanceInParallel(setup, orgGuid, spaceGuid)
 
 	if cfg.IsServiceOfferingEnabled() {
@@ -61,7 +58,25 @@ var _ = BeforeSuite(func() {
 
 })
 
+func updateOrgQuotaForPerformanceTest(orgGuid string) {
+	if cfg.Performance.UpdateExistingOrgQuota {
+		originalOrgQuota = GetOrgQuota(orgGuid, cfg.DefaultTimeoutDuration())
+		fmt.Printf("\n=> originalOrgQuota %+v\n", originalOrgQuota)
+		performanceOrgQuota := OrgQuota{
+			Name:             originalOrgQuota.Name,
+			AppInstances:     strconv.Itoa(cfg.Performance.AppCount * 2),
+			TotalMemory:      strconv.Itoa(cfg.Performance.AppCount*256) + "MB",
+			Routes:           strconv.Itoa(cfg.Performance.AppCount * 2),
+			ServiceInstances: strconv.Itoa(cfg.Performance.AppCount * 2),
+			RoutePorts:       "-1",
+		}
+		fmt.Printf("=> setting new org quota %s\n", originalOrgQuota.Name)
+		UpdateOrgQuota(performanceOrgQuota, cfg.DefaultTimeoutDuration())
+	}
+}
+
 func cleanUpServiceInstanceInParallel(setup *workflowhelpers.ReproducibleTestSuiteSetup, orgGuid string, spaceGuid string) {
+
 	waitGroup := sync.WaitGroup{}
 	servicesChan := make(chan string)
 
@@ -102,15 +117,4 @@ func cleanup() {
 			DeleteSpaces(cfg.ExistingOrganization, GetTestSpaces(orgGuid, cfg), cfg.DefaultTimeoutDuration())
 		}
 	})
-
-}
-
-func updateOrgQuota(name string, appCount int, timeout time.Duration) {
-	args := []string{"update-org-quota", name}
-	args = append(args, "-r", strconv.Itoa(appCount*2))
-	args = append(args, "-s", strconv.Itoa(appCount*2))
-	args = append(args, "-m", strconv.Itoa(appCount*256)+"MB")
-	args = append(args, "--reserved-route-ports", "-1")
-	updateOrgQuota := cf.Cf(args...).Wait(timeout)
-	Expect(updateOrgQuota).To(gexec.Exit(0), "unable update org quota: "+string(updateOrgQuota.Out.Contents()[:]))
 }

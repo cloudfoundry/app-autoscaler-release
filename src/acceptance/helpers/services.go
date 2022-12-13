@@ -28,12 +28,47 @@ type cfResourceObject struct {
 	Resources []cfResource `json:"resources"`
 }
 
+// "apps": {
+// "total_memory_in_mb": 5120,
+// "per_process_memory_in_mb": null,
+// "total_instances": null,
+// "per_app_tasks": null,
+// "log_rate_limit_in_bytes_per_second": null
+// },
+// "services": {
+// "paid_services_allowed": true,
+// "total_service_instances": 40,
+// "total_service_keys": null
+// },
+// "routes": {
+// "total_routes": 40,
+// "total_reserved_ports": null
+// }
 type cfResource struct {
 	GUID      string `json:"guid"`
 	CreatedAt string `json:"created_at"`
 	Name      string `json:"name"`
 	Username  string `json:"username"`
 	State     string `json:"state"`
+
+	// ----------------- OrgQuota Resource fields ----------------
+	Apps struct {
+		TotalMemoryInMb              int `json:"total_memory_in_mb"`
+		PerProcessMemoryInMb         int `json:"per_process_memory_in_mb"`
+		TotalInstances               int `json:"total_instances"`
+		PerAppTasks                  int `json:"per_app_tasks"`
+		LogRateLimitInBytesPerSecond int `json:"log_rate_limit_in_bytes_per_second"`
+	} `json:"apps"`
+	Services struct {
+		PaidServicesAllowed   bool `json:"paid_services_allowed"`
+		TotalServiceInstances int  `json:"total_service_instances"`
+		TotalServiceKeys      int  `json:"total_service_keys"`
+	} `json:"services"`
+	Routes struct {
+		TotalRoutes        int `json:"total_routes"`
+		TotalReservedPorts int `json:"total_reserved_ports"`
+	} `json:"routes"`
+	// ----------------- OrgQuota Resource fields ----------------
 }
 
 const (
