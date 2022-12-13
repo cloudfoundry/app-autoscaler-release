@@ -43,13 +43,13 @@ function setup_autoscaler_uaac(){
   if uaac client get autoscaler_client_id >/dev/null; then
     step "updating autoscaler uaac client"
     uaac client update "autoscaler_client_id" \
-  	    --authorities "$uaac_authorities" > /dev/null
+      --authorities "$uaac_authorities" > /dev/null
   else
     step "creating autoscaler uaac client"
     uaac client add "autoscaler_client_id" \
-  	--authorized_grant_types "client_credentials" \
-  	--authorities "$uaac_authorities" \
-  	--secret "$autoscaler_secret" > /dev/null
+      --authorized_grant_types "client_credentials" \
+      --authorities "$uaac_authorities" \
+      --secret "$autoscaler_secret" > /dev/null
   fi
 }
 
