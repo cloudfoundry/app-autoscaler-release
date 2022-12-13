@@ -230,7 +230,6 @@ jobs:
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name))
-      DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state
@@ -277,7 +276,6 @@ jobs:
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-params
       DEPLOYMENT_NAME: ((logcache_acceptance_deployment_name))
-      DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state
@@ -326,7 +324,6 @@ jobs:
       DEPLOYMENT_NAME: ((builtin_acceptance_deployment_name))
       BUILDIN_MODE: true
       SERVICE_OFFERING_ENABLED: false
-      DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state
@@ -402,7 +399,6 @@ jobs:
       file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
       params: &upgrade-test-params
         DEPLOYMENT_NAME: "upgrade-test"
-        DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state
