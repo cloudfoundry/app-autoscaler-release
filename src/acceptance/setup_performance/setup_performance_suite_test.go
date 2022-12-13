@@ -37,7 +37,7 @@ var _ = BeforeSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		cleanupExistingSpace()
+		cleanupExistingSpaceIfEnabled()
 	}
 
 	setup = workflowhelpers.NewRunawayAppTestSuiteSetup(cfg)
@@ -56,7 +56,7 @@ var _ = BeforeSuite(func() {
 	if cfg.IsServiceOfferingEnabled() {
 		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
-	fmt.Println("creating droplet...")
+	fmt.Println("\ncreating droplet...")
 	nodeAppDropletPath = CreateDroplet(*cfg)
 
 })
@@ -92,7 +92,11 @@ func deleteExistingServiceInstances(workerId int, servicesChan chan string, setu
 	fmt.Printf("worker %d  - Delete Service Instance finished...\n", workerId)
 }
 
-func cleanupExistingSpace() {
+func cleanupExistingSpaceIfEnabled() {
+	if !cfg.UseExistingSpace {
+		fmt.Printf("\nusing existing space = %t ..skipping space deletion", cfg.UseExistingSpace)
+		return
+	}
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {

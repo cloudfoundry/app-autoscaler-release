@@ -17,10 +17,10 @@ import (
 
 	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
 )
 
 const (
@@ -365,7 +365,7 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 func RunningInstances(appGUID string, timeout time.Duration) int {
 	defer GinkgoRecover()
 	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID)).Wait(timeout)
-	Expect(cmd).To(Exit(0))
+	Expect(cmd).To(Exit(0), fmt.Sprintf("failed to curl cloud controller api for app: %s  %s", appGUID, string(cmd.Err.Contents())))
 	var process = struct {
 		Instances int `json:"instances"`
 	}{}

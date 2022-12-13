@@ -28,9 +28,9 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 		percentageToScale, appCount = cfg.Performance.PercentageToScale, cfg.Performance.AppCount
 		appsToScaleCount = int(math.RoundToEven(float64(appCount * percentageToScale / 100)))
 		Expect(appsToScaleCount).To(BeNumerically(">", 0),
-			"%d % of %d must round up to 1 or more app/s", percentageToScale, appCount)
+			fmt.Sprintf("%d percent of %d must round up to 1 or more app(s)", percentageToScale, appCount))
 
-		fmt.Printf("\nScaling %d app: \n", appsToScaleCount)
+		fmt.Printf("\nScaling %d apps: \n", appsToScaleCount)
 
 		samplingConfig = gmeasure.SamplingConfig{
 			N:           appsToScaleCount,
