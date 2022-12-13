@@ -42,5 +42,22 @@ describe "scheduler" do
       expect(rendered_template).to include("scheduler.healthserver.username=test-user")
       expect(rendered_template).to include("scheduler.healthserver.password=test-user-password")
     end
+
+    it "extension properties are added to the properties file" do
+      properties["autoscaler"]["scheduler"] = {
+        "application" => {
+          "props" => <<-HEREDOC
+          logging.level.org.hibernate=error
+          logging.level.org.cloudfoundry.autoscaler.scheduler=info
+          logging.level.org.quartz=info
+          HEREDOC
+        }
+      }
+      rendered_template = template.render(properties)
+
+      expect(rendered_template).to include("logging.level.org.hibernate=error")
+      expect(rendered_template).to include("logging.level.org.cloudfoundry.autoscaler.scheduler=info")
+      expect(rendered_template).to include("logging.level.org.quartz=info")
+    end
   end
 end
