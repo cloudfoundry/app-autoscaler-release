@@ -1,9 +1,7 @@
 # asactors/scheduler
 - type: replace
-  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler?
-  value:
-    application:
-      props: |
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler?/application/props
+  value: |
         logging.level.org.springframework.web=warn
         logging.level.org.hibernate.SQL=warn
         logging.level.org.hibernate.type=error
