@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# shellcheck disable=SC2086
+# shellcheck disable=SC2086,SC2034,SC2155
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
@@ -33,29 +33,25 @@ pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
 popd > /dev/null
 
-log "Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
+function setup_autoscaler_uaac(){
+  local uaac_authorities="cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
+  local autoscaler_secret="autoscaler_client_secret"
+  local uaa_client_secret=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
+  uaac target "https://uaa.${system_domain}" --skip-ssl-validation > /dev/null
+  uaac token client get admin -s "$uaa_client_secret" > /dev/null
 
-UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
-UAA_FIREHOST_EXPORTER_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)
-export UAA_CLIENT_SECRET
-CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
-
-uaac target "https://uaa.${system_domain}" --skip-ssl-validation
-uaac token client get admin -s "$UAA_CLIENT_SECRET"
-
-exist=$(uaac client get autoscaler_client_id | grep -c NotFound || echo 0)
-
-if [[ $exist == 0 ]]; then
-  step "Updating client token"
-  uaac client update "autoscaler_client_id" \
-	    --authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
-else
-  step "Creating client token"
-  uaac client add "autoscaler_client_id" \
-	--authorized_grant_types "client_credentials" \
-	--authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read" \
-	--secret "autoscaler_client_secret"
-fi
+  if uaac client get autoscaler_client_id >/dev/null; then
+    step "updating autoscaler uaac client"
+    uaac client update "autoscaler_client_id" \
+  	    --authorities "$uaac_authorities" > /dev/null
+  else
+    step "creating autoscaler uaac client"
+    uaac client add "autoscaler_client_id" \
+  	--authorized_grant_types "client_credentials" \
+  	--authorities "$uaac_authorities" \
+  	--secret "$autoscaler_secret" > /dev/null
+  fi
+}
 
 function create_manifest(){
   # Set the local tmp_dir depending on if we run on github-actions or not, see:
@@ -81,11 +77,11 @@ function create_manifest(){
       -v system_domain="${system_domain}" \
       -v deployment_name="${deployment_name}" \
       -v app_autoscaler_version="${bosh_release_version}" \
-      -v admin_password="${CF_ADMIN_PASSWORD}" \
+      -v admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)" \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
       -v eventgenerator_uaa_client_id=firehose_exporter \
-      -v eventgenerator_uaa_client_secret="${UAA_FIREHOST_EXPORTER_CLIENT_SECRET}" \
+      -v eventgenerator_uaa_client_secret="$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)"\
       -v eventgenerator_uaa_skip_ssl_validation=true \
     -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
@@ -95,7 +91,7 @@ function create_manifest(){
 }
 
 function check_ops_files(){
-  step "Using Ops files: '${OPS_FILES_TO_USE}'"
+  step "Using Ops files: '${ops_files}'"
   OPS_FILES_TO_USE=""
   for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
@@ -160,6 +156,8 @@ function find_or_upload_release() {
   fi
 }
 
+log "Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
+setup_autoscaler_uaac
 pushd "${autoscaler_dir}" > /dev/null
   check_ops_files
   find_or_upload_stemcell
