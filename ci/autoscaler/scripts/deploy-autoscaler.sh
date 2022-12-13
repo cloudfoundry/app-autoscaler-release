@@ -43,9 +43,7 @@ CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
 uaac target "https://uaa.${system_domain}" --skip-ssl-validation
 uaac token client get admin -s "$UAA_CLIENT_SECRET"
 
-set +e
-exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
-set -e
+exist=$(uaac client get autoscaler_client_id | grep -c NotFound || echo 0)
 
 if [[ $exist == 0 ]]; then
   step "Updating client token"
@@ -109,7 +107,6 @@ function check_ops_files(){
 }
 
 function deploy() {
-  check_ops_files
   step "Using Ops files: '${OPS_FILES_TO_USE}'"
 
   # Try to silence Prometheus but do not fail deployment if there's an error
@@ -165,6 +162,7 @@ function find_or_upload_release() {
 }
 
 pushd "${autoscaler_dir}" > /dev/null
+  check_ops_files
   find_or_upload_stemcell
   find_or_upload_release
   deploy
