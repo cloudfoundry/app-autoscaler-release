@@ -9,6 +9,7 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
+      operations/enable-scheduler-logging.yml
 
   app-autoscaler-ops-files-log-cache: &app-autoscaler-ops-files-log-cache
     OPS_FILES: |
@@ -23,6 +24,7 @@ anchors:
       operations/log-cache-syslog-server.yml
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
+      operations/enable-scheduler-logging.yml
 
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
@@ -50,6 +52,7 @@ anchors:
       operations/use_buildin_mode.yml
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
+      operations/enable-scheduler-logging.yml
 
 groups:
 - name: all

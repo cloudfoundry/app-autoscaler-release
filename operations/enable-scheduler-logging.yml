@@ -1,0 +1,17 @@
+# asactors/scheduler
+- type: replace
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler?/application/props
+  value: |
+        logging.level.org.springframework.web=warn
+        logging.level.org.hibernate.SQL=warn
+        logging.level.org.hibernate.type=error
+        logging.level.org.hibernate.tool.hbm2ddl=error
+        logging.level.org.hibernate.pretty=error
+        logging.level.org.hibernate.cache=error
+        logging.level.org.hibernate.transaction=warn
+        logging.level.org.hibernate.jdbc=warn
+        logging.level.org.hibernate.hql.ast.AST=error
+        logging.level.org.hibernate.secure=error
+        logging.level.org.hibernate=error
+        logging.level.org.cloudfoundry.autoscaler.scheduler=info
+        logging.level.org.quartz=info
