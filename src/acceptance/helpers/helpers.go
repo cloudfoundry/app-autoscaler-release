@@ -364,8 +364,18 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 
 func RunningInstances(appGUID string, timeout time.Duration) int {
 	defer GinkgoRecover()
-	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID)).Wait(timeout)
-	Expect(cmd).To(Exit(0), fmt.Sprintf("failed to curl cloud controller api for app: %s  %s", appGUID, string(cmd.Err.Contents())))
+	var cmd *Session
+	getAppProcesses := func() error {
+		var err error
+		cmd = cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID)).Wait(timeout)
+		if cmd.ExitCode() != 0 {
+			err = errors.New(fmt.Sprintf("failed to curl cloud controller api for app: %s  %s", appGUID, string(cmd.Err.Contents())))
+		}
+		return err
+	}
+
+	Retry(2, 60, getAppProcesses)
+
 	var process = struct {
 		Instances int `json:"instances"`
 	}{}
@@ -445,19 +455,19 @@ func CreateServiceWithPlan(cfg *config.Config, servicePlan string, instanceName 
 	return CreateServiceWithPlanAndParameters(cfg, servicePlan, "", instanceName)
 }
 
-func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string, instanceName string) error {
-	var err error
-
+func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string, instanceName string) (err error) {
 	if cfg.IsServiceOfferingEnabled() {
 		cfCommand := []string{"create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker}
 		if defaultPolicy != "" {
 			cfCommand = append(cfCommand, "-c", defaultPolicy)
 		}
 		createService := cf.Cf(cfCommand...).Wait(cfg.DefaultTimeoutDuration())
-		err = errors.New(fmt.Sprintf("Failed to create service instance %s on service %s \n Command Error: %s %s",
-			instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents()))
-	}
 
+		if createService.ExitCode() != 0 {
+			err = errors.New(fmt.Sprintf("Failed to create service instance %s on service %s \n Command Error: %s %s",
+				instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents()))
+		}
+	}
 	return err
 }
 

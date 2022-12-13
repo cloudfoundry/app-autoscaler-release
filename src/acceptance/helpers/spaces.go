@@ -27,7 +27,7 @@ func GetTestSpaces(orgGuid string, cfg *config.Config) []string {
 
 	var spaceNames []string
 	for _, space := range rawSpaces {
-		if strings.HasPrefix(space.Name, cfg.NamePrefix) || space.Name == cfg.ExistingSpace {
+		if strings.HasPrefix(space.Name, cfg.NamePrefix) {
 			spaceNames = append(spaceNames, space.Name)
 		}
 	}
@@ -46,6 +46,12 @@ func GetRawSpaces(orgGuid string, timeout time.Duration) []Space {
 }
 
 func DeleteSpaces(orgName string, spaces []string, timeout time.Duration) {
+	if len(spaces) == 0 {
+		return
+	}
+
+	fmt.Println(fmt.Sprintf("Deleting spaces: %s ", strings.Join(spaces, ", ")))
+
 	for _, spaceName := range spaces {
 		deleteSpace := cf.Cf("delete-space", "-f", "-o", orgName, spaceName).Wait(timeout)
 		Expect(deleteSpace).To(Exit(0), fmt.Sprintf("failed deleting space: %s in org: %s: %s", spaceName, orgName, string(deleteSpace.Err.Contents())))

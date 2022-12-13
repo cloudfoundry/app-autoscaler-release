@@ -2,7 +2,7 @@ package run_performance_test
 
 import (
 	"acceptance/config"
-	"acceptance/helpers"
+	. "acceptance/helpers"
 	"fmt"
 	"os"
 	"testing"
@@ -32,26 +32,32 @@ var _ = BeforeSuite(func() {
 	// use smoke test to avoid creating a new user
 	setup = workflowhelpers.NewSmokeTestSuiteSetup(cfg)
 
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		orgName, spaceName = helpers.FindExistingOrgAndSpace(cfg)
-	})
+	if cfg.UseExistingOrganization && !cfg.UseExistingSpace {
+		orgGuid := GetOrgGuid(cfg, cfg.ExistingOrganization)
+		spaces := GetTestSpaces(orgGuid, cfg)
+		Expect(len(spaces)).To(Equal(1), "Found more than one space in existing org %s", cfg.ExistingOrganization)
+		cfg.ExistingSpace = spaces[0]
+	} else {
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			orgName, spaceName = FindExistingOrgAndSpace(cfg)
+		})
 
-	Expect(orgName).ToNot(Equal(""), "orgName has not been determined")
-	Expect(spaceName).ToNot(Equal(""), "spaceName has not been determined")
+		Expect(orgName).ToNot(Equal(""), "orgName has not been determined")
+		Expect(spaceName).ToNot(Equal(""), "spaceName has not been determined")
 
-	// discover the org / space from the environment
+		cfg.ExistingOrganization = orgName
+		cfg.ExistingSpace = spaceName
+	}
+
 	cfg.UseExistingOrganization = true
 	cfg.UseExistingSpace = true
-
-	cfg.ExistingOrganization = orgName
-	cfg.ExistingSpace = spaceName
 
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
 	setup.Setup()
 
 	if cfg.IsServiceOfferingEnabled() {
-		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
+		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
 })
 
