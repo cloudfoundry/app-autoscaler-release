@@ -95,6 +95,7 @@ function create_manifest(){
 }
 
 function check_ops_files(){
+  step "Using Ops files: '${OPS_FILES_TO_USE}'"
   OPS_FILES_TO_USE=""
   for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
@@ -107,8 +108,6 @@ function check_ops_files(){
 }
 
 function deploy() {
-  step "Using Ops files: '${OPS_FILES_TO_USE}'"
-
   # Try to silence Prometheus but do not fail deployment if there's an error
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill" || true
   ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy" || true
