@@ -8,11 +8,12 @@ import (
 	"regexp"
 	"strings"
 
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 )
 
-const PostgresDriverName = "postgres"
+const PostgresDriverName = "pgx"
 const MysqlDriverName = "mysql"
 const postgresDbURLPattern = `^(postgres|postgresql):\/\/(.+):(.+)@([\da-zA-Z\.-]+)(:[\d]{4,5})?\/(.+)`
 const mysqlDbURLPattern = `(.+):(.+)@tcp\(([\da-zA-Z\.-]+)(:[\d]{4,5})?\)\/(.+)`
@@ -59,7 +60,7 @@ func (cdb *ChangelogSQLDB) Close() error {
 
 func (cdb *ChangelogSQLDB) DeleteExpiredLock(timeoutInSecond int) error {
 	switch cdb.sqldb.DriverName() {
-	case "postgres":
+	case "pgx":
 		query := fmt.Sprintf(`DO $$                  
     BEGIN 
         IF EXISTS
