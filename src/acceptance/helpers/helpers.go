@@ -319,7 +319,7 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 	timezone string, startTime, endTime time.Time, daysOfMonthOrWeek Days,
 	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
 	scalingInRule := ScalingRule{
-		MetricType:            "memoryused",
+		MetricType:            "cpu",
 		BreachDurationSeconds: TestBreachDurationSeconds,
 		Threshold:             threshold,
 		Operator:              "<",
