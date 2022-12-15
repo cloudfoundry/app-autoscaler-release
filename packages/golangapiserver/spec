@@ -60,6 +60,7 @@ files:
 - autoscaler/vendor/github.com/jackc/pgx/v5/pgxpool/* # gosub
 - autoscaler/vendor/github.com/jackc/pgx/v5/stdlib/* # gosub
 - autoscaler/vendor/github.com/jackc/puddle/v2/* # gosub
+- autoscaler/vendor/github.com/jackc/puddle/v2/internal/genstack/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
 - autoscaler/vendor/github.com/matttproud/golang_protobuf_extensions/pbutil/* # gosub
@@ -92,11 +93,13 @@ files:
 - autoscaler/vendor/github.com/xeipuuv/gojsonpointer/* # gosub
 - autoscaler/vendor/github.com/xeipuuv/gojsonreference/* # gosub
 - autoscaler/vendor/github.com/xeipuuv/gojsonschema/* # gosub
+- autoscaler/vendor/go.uber.org/atomic/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/pbkdf2/* # gosub
 - autoscaler/vendor/golang.org/x/exp/constraints/* # gosub
 - autoscaler/vendor/golang.org/x/exp/slices/* # gosub
+- autoscaler/vendor/golang.org/x/sync/semaphore/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/golang.org/x/text/cases/* # gosub
 - autoscaler/vendor/golang.org/x/text/internal/* # gosub
