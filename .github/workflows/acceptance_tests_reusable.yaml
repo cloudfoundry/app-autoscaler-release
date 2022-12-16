@@ -26,7 +26,6 @@ on:
 
 env:
   BUILDIN_MODE: "${{ inputs.buildin_mode }}"
-  #GITHUB_TOKEN: "${{ secrets.github_token }}" # ToDo: Remove because there is no point to have this in env, see ${{ github.token }} in: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
   SERVICE_OFFERING_ENABLED: "${{ inputs.service_offering_enabled }}"
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "${{ inputs.deployment_name }}"
@@ -95,7 +94,7 @@ jobs:
         suite: "${{ fromJSON(inputs.suites) }}"
     runs-on: self-hosted
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+      image: "${{ inputs.self_hosted_image }}"
     continue-on-error: true
     name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
@@ -141,7 +140,7 @@ jobs:
     name: Deployment cleanup
     runs-on: self-hosted
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+      image: "${{ inputs.self_hosted_image }}"
 
     steps:
       - name: Checkout
