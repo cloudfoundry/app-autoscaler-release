@@ -71,7 +71,7 @@ jobs:
     name: Deploy for ${{ github.workflow }}
     runs-on: self-hosted
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
 
     steps:
       - name: Checkout
@@ -94,7 +94,7 @@ jobs:
         suite: "${{ fromJSON(inputs.suites) }}"
     runs-on: self-hosted
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     continue-on-error: true
     name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
@@ -140,7 +140,7 @@ jobs:
     name: Deployment cleanup
     runs-on: self-hosted
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
 
     steps:
       - name: Checkout
