@@ -18,7 +18,7 @@ jobs:
       image: booker/app-autoscaler-release-tools
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup-go
+#      - uses: ./.github/actions/setup-go
 
       - name: get golangci-lint version
         id: lint

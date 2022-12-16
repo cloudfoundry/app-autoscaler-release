@@ -10,9 +10,11 @@ jobs:
   generate:
     name: ensure fakes are up to date
     runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup-go
+#      - uses: ./.github/actions/setup-go
       - name: Go Build
         run: |
           source .envrc
