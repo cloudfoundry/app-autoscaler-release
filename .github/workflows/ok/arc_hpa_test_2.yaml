@@ -1,0 +1,25 @@
+---
+name: ARC - HPA Test 2
+
+on:
+  pull_request:
+
+concurrency:
+  group: "${{ github.workflow }}/${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        run: [run-1, run-2, run-3, run-4]
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+    continue-on-error: false
+    name: hpa test
+    steps:
+      - name: ${{ matrix.run }}
+        run: |
+          echo "Sleeping for 5mins"
+          sleep 5m
