@@ -15,10 +15,9 @@ jobs:
     #  - unless we are doing DB development it does not matter, and it should be fixed soon.
     runs-on: self-hosted
     container:
-      image: booker/app-autoscaler-release-tools
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
       - uses: actions/checkout@v3
-#      - uses: ./.github/actions/setup-go
 
       - name: get golangci-lint version
         id: lint
