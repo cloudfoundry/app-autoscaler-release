@@ -45,8 +45,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    - uses: ./.github/actions/setup-go
-    - uses: ./.github/actions/setup-java
+#    - uses: ./.github/actions/setup-go
+#    - uses: ./.github/actions/setup-java
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
