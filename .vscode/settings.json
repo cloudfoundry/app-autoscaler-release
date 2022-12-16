@@ -1,0 +1,7 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "codetogether.virtualCursorJoin": "sharedVirtualCursor",
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-workflow.json": "file:///Users/C5349221/SAPDevelop/app-autoscaler-release/.github/workflows/acceptance_tests_buildin.yaml"
+    }
+}

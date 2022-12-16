@@ -10,7 +10,7 @@ jobs:
   generate:
     name: ensure fakes are up to date
     runs-on: self-hosted
-    #issue when using container: ->  Run source .envrc  source: not found
+    #issue when using container: ->  Run source .envrc -> source: not found
 #    container:
 #      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
