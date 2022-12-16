@@ -7,10 +7,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # - uses: ./app-autoscaler-release/.github/actions/setup-java
-    #   with:
-    #     source: app-autoscaler-release
-
     - name: clone BBL repo
       uses: actions/checkout@v3
       with:
