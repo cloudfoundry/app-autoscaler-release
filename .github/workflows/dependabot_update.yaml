@@ -19,16 +19,13 @@ jobs:
           echo $SHELL $BASH_VERSION
           set -euo pipefail
 
-          echo "exit 127"; exit 127;
-          echo "exit 128"; exit 128;
-          ech0 "exit 1"; exit 1;
-
-
           echo "updating src/autoscaler"
-          pushd src/autoscaler > /dev/null\
-            && go mod download\
-            && go mod vendor\
-            && popd > /dev/null
+          pushd src/autoscalerX > /dev/null
+            go mod download
+            go mod vendor
+          popd > /dev/null
+
+
           echo "updating src/changeloglockcleaner"
           pushd src/changeloglockcleaner > /dev/null\
             && go mod download\
