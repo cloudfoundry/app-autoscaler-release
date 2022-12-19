@@ -1,4 +1,4 @@
-name: Dependabot spec updates
+name: ARC - Dependabot spec updates
 on: pull_request
 
 defaults:
