@@ -3,6 +3,8 @@ MAINTAINER autoscaler-team
 
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/London"
 
+RUN chsh --shell='/usr/bin/bash'
+
 RUN apt-get update && \
     apt-get -qqy install --fix-missing gnupg apt-transport-https wget && \
     apt-get clean
