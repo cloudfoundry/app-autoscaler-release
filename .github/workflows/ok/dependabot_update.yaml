@@ -11,7 +11,7 @@ jobs:
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
 
-    #if: ${{ github.actor == 'dependabot[bot]' }}
+    if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - uses: actions/checkout@v3
       - name: mod download and vendor
@@ -28,6 +28,7 @@ jobs:
             go mod vendor
           popd > /dev/null
 
+          # workaround for https://github.com/UnicornGlobal/has-changes-action/issues/8
           git config --global --add safe.directory /github/workspace
 
       - name: Sync specs
