@@ -21,10 +21,12 @@ jobs:
       - name: Go Build
         run: |
           source .envrc
+          git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
+
           pushd src/autoscaler
-            # make buildtools
-            # make generate
-            # git diff
+            make buildtools
+            make generate
+            git diff
             git status
           popd
 
