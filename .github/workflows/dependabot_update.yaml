@@ -1,11 +1,15 @@
 name: Dependabot spec updates
 on: pull_request
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   dependabot:
     runs-on: self-hosted
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:pr-1207
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
 
     #if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
