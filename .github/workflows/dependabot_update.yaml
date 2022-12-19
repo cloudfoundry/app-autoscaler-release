@@ -28,14 +28,14 @@ jobs:
             go mod vendor
           popd > /dev/null
 
+          git config --global --add safe.directory /github/workspace
+
       - name: Sync specs
         run: ./scripts/sync-package-specs
 
       - name: Check if there are changes
         id: changes
         uses: UnicornGlobal/has-changes-action@v1.0.12
-        run: |
-          git config --global --add safe.directory /github/workspace
 
       - name: Process changes
         if: steps.changes.outputs.changed == 1
