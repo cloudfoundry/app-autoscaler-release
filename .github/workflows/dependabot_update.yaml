@@ -27,19 +27,19 @@ jobs:
             && go mod vendor\
             && popd > /dev/null
 
-      # - name: Sync specs
-      #   run: ./scripts/sync-package-specs
+      - name: Sync specs
+        run: ./scripts/sync-package-specs
 
-      # - name: Check if there are changes
-      #   id: changes
-      #   uses: UnicornGlobal/has-changes-action@v1.0.12
+      - name: Check if there are changes
+        id: changes
+        uses: UnicornGlobal/has-changes-action@v1.0.12
 
-      # - name: Process changes
-      #   if: steps.changes.outputs.changed == 1
-      #   uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
-      #   with:
-      #     add: './packages/**/spec'
-      #     message: 'Updating spec files from `dependabot[bot]` changes'
-      #     push: true
+      - name: Process changes
+        if: steps.changes.outputs.changed == 1
+        uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+        with:
+          add: './packages/**/spec'
+          message: 'Updating spec files from `dependabot[bot]` changes'
+          push: true
 
 

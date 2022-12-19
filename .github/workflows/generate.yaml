@@ -22,9 +22,9 @@ jobs:
         run: |
           source .envrc
           pushd src/autoscaler
-            make buildtools
-            make generate
-            git diff
+            # make buildtools
+            # make generate
+            # git diff
             git status
           popd
 
