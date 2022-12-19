@@ -72,7 +72,7 @@ step "running $suites_to_run"
 #run suites
 if [ "${suites_to_run}" != "" ]; then
   # shellcheck disable=SC2086
-  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace $ginkgo_opts ${suites_to_run}
+  SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json DEBUG=true ./bin/test -race -nodes="${nodes}" --slow-spec-threshold=120s -trace $ginkgo_opts ${suites_to_run}
 else
   log "Nothing to run!"
 fi
