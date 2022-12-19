@@ -13,10 +13,10 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ github-private-workers ]
+    branches: [ main ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ github-private-workers ]
+    branches: [ main ]
   schedule:
     - cron: '19 08 * * *'
 
