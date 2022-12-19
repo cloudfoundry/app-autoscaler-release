@@ -17,11 +17,13 @@ jobs:
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
+        
       - uses: actions/checkout@v3
       - name: Go Build
         run: |
           source .envrc
-          git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
 
           pushd src/autoscaler
             make buildtools

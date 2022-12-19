@@ -17,7 +17,8 @@ jobs:
       - name: mod download and vendor
         run: |
           set -euo pipefail
-          
+          pwd
+          ls -la
           echo "updating src/autoscaler"
           pushd src/app-autoscaler/src/autoscaler > /dev/null\
             && go mod download\
