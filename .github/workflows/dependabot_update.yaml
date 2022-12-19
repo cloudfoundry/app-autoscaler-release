@@ -17,7 +17,7 @@ jobs:
       - name: mod download and vendor
         run: |
           echo "updating src/autoscaler"
-          pushd src/autoscalerX > /dev/null
+          pushd src/autoscaler > /dev/null
             go mod download
             go mod vendor
           popd > /dev/null
@@ -26,7 +26,7 @@ jobs:
           pushd src/changeloglockcleaner > /dev/null
             go mod download
             go mod vendor
-            popd > /dev/null
+          popd > /dev/null
 
       - name: Sync specs
         run: ./scripts/sync-package-specs
