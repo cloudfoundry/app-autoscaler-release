@@ -24,7 +24,7 @@ jobs:
 
       - name: Check if there is any change
         run: |
-          # git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE}"; \
+          # git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"; \
             [ $(git status --porcelain | wc -l) -eq 0 ] || \
             { \
               git status;\
