@@ -1,6 +1,6 @@
 name: ARC - Create and publish a Docker image
 on:
-#   push:
+  push:
 #     branches: ['main']
 #     paths:
 #       - 'ci/dockerfiles/**'
