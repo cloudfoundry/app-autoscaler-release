@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           pwd
-          
+
           pushd app-autoscaler-release/templates
             MANIFEST_PATH=$PWD/../templates/app-autoscaler-deployment.yml \
             OPERATION_DIR_PATH=$PWD/../example/operation \
