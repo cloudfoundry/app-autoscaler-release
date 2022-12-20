@@ -1,6 +1,7 @@
 name: ARC – Manifest Tests
 on:
-  pull_request: # To do: Please de-comment the lines below!
+  pull_request:
+    ## To do: Please de-comment the lines below!
     # paths:
     #   - 'templates/**'
     #   - 'jobs/**'
