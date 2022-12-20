@@ -1,6 +1,6 @@
-name: Manifest Tests
+name: ARC – Manifest Tests
 on:
-  pull_request:
+  pull_request: # TODO: Please uncomment the lines below!
     # paths:
     #   - 'templates/**'
     #   - 'jobs/**'
@@ -10,19 +10,25 @@ concurrency:
   group: "${{ github.workflow }}/${{ github.ref }}"
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   test_manifest:
     name: Manifest Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
       - uses: actions/checkout@v3
-      - uses: .github/actions/setup-environment
+      - uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
       - name: Run Tests - old manifest
         run: |
-          set -e
+          set -euo pipefail
 
           pushd templates
             MANIFEST_PATH=$PWD/../templates/app-autoscaler-deployment.yml \
