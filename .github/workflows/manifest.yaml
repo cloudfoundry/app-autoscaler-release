@@ -21,10 +21,13 @@ jobs:
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
+      - name: Checkout
       - uses: actions/checkout@v3
-      - uses: ./app-autoscaler-release/.github/actions/setup-environment
+
+      - name: Setup environment
+        uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
-          ssh-key: ${{ secrets.BBL_SSH_KEY }}
+          ssh-key: ${{ secrets.bbl_ssh_key}}
 
       - name: Run Tests - old manifest
         run: |
