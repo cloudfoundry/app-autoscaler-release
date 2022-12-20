@@ -21,6 +21,7 @@ jobs:
       - name: Go Build
         run: |
           source .envrc
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
           git status
           git config --global --add safe.directory /github/workspace
           pwd; ls -la
