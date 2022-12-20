@@ -22,14 +22,12 @@ jobs:
         run: |
           source .envrc
           git config --global --add safe.directory ${GITHUB_WORKSPACE}
-          git status
-          pwd; ls -la
+
           pushd src/autoscaler
-          pwd; ls -la
-            # make buildtools
-            # make generate
-            # git diff
-            # git status
+            make buildtools
+            make generate
+            git diff
+            git status
           popd
 
       - name: Check if there is any change
