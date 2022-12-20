@@ -17,14 +17,13 @@ jobs:
     steps:
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
-      - uses: actions/checkout@v3
 
+      - uses: actions/checkout@v3
       - name: sync-package-specs
         run: make package-specs
 
       - name: Check if there is any change
         run: |
-          # git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"; \
             [ $(git status --porcelain | wc -l) -eq 0 ] || \
             { \
               git status;\
@@ -39,6 +38,9 @@ jobs:
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
       - uses: actions/checkout@v3
       - name: Run Update
         run: |
