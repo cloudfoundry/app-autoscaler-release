@@ -21,8 +21,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '16'
-
-      - run: |
+      
+      - name: NPM install
+        run: |
           cd src/acceptance/assets/app/nodeApp
           npm install
           git status
