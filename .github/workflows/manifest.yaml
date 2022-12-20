@@ -1,10 +1,10 @@
 name: ARC – Manifest Tests
 on:
-  pull_request:
-    paths:
-      - 'templates/**'
-      - 'jobs/**'
-      - 'packages/**'
+  pull_request: # To do: Please de-comment the lines below!
+    # paths:
+    #   - 'templates/**'
+    #   - 'jobs/**'
+    #   - 'packages/**'
 
 concurrency:
   group: "${{ github.workflow }}/${{ github.ref }}"
