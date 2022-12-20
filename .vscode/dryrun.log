@@ -1,6 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory `/Users/C5349221/SAPDevelop/app-autoscaler-release'
-echo acceptance autoscaler changelog changeloglockcleaner
- 
-make: Leaving directory `/Users/C5349221/SAPDevelop/app-autoscaler-release'
- 
