@@ -1,10 +1,10 @@
 name: Manifest Tests
 on:
   pull_request:
-    paths:
-      - 'templates/**'
-      - 'jobs/**'
-      - 'packages/**'
+    # paths:
+    #   - 'templates/**'
+    #   - 'jobs/**'
+    #   - 'packages/**'
 
 concurrency:
   group: "${{ github.workflow }}/${{ github.ref }}"
