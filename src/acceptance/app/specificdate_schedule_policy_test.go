@@ -36,28 +36,28 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			startDateTime = time.Now().In(time.UTC).Add(1 * time.Minute)
 			endDateTime = startDateTime.Add(time.Duration(interval+120) * time.Second)
 
-			policy = GenerateDynamicAndSpecificDateSchedulePolicy(1, 4, 80, "UTC", startDateTime, endDateTime, scheduleInstanceMin, scheduleInstanceMax, scheduledInstanceInit)
+			policy = GenerateSpecificDateSchedulePolicy(startDateTime, endDateTime, scheduleInstanceMin, scheduleInstanceMax, scheduledInstanceInit)
 			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 		})
 
 		It("should scale", func() {
 			pollTime := 15 * time.Second
 			By(fmt.Sprintf("waiting for scheduledInstanceInit: %d", scheduledInstanceInit))
-			jobRunTime := time.Until(startDateTime.Add(1 * time.Minute))
-			WaitForNInstancesRunning(appGUID, 3, jobRunTime)
+			WaitForNInstancesRunning(appGUID, 3, time.Until(startDateTime.Add(1*time.Minute)))
 
 			By(fmt.Sprintf("waiting for scheduleInstanceMin: %d", scheduleInstanceMin))
-			jobRunTime = time.Until(endDateTime)
-			Eventually(func() int { return RunningInstances(appGUID, jobRunTime) }).
+			jobRunTime := time.Until(endDateTime)
+			Eventually(func() int { return RunningInstances(appGUID, cfg.DefaultTimeoutDuration()) }).
 				//+/- poll time error margin.
 				WithTimeout(jobRunTime + pollTime).
 				WithPolling(pollTime).
 				Should(Equal(2))
 
-			By(fmt.Sprintf("waiting till end of schedule %dS and should stay %d instances", int(jobRunTime.Seconds()), scheduleInstanceMin))
+			//+/- poll time error margin.
+			timeout := time.Until(endDateTime) - pollTime
+			By(fmt.Sprintf("waiting till end of schedule %dS and should stay %d instances", int(timeout.Seconds()), scheduleInstanceMin))
 			Consistently(func() int { return RunningInstances(appGUID, jobRunTime) }).
-				//+/- poll time error margin.
-				WithTimeout(time.Until(endDateTime) - pollTime).
+				WithTimeout(timeout).
 				WithPolling(pollTime).
 				Should(Equal(2))
 
