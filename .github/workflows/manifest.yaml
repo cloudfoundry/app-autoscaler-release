@@ -35,8 +35,8 @@ jobs:
         run: |
           set -euo pipefail
           pwd
-          ls -la
-          pushd templates
+          
+          pushd app-autoscaler-release/templates
             MANIFEST_PATH=$PWD/../templates/app-autoscaler-deployment.yml \
             OPERATION_DIR_PATH=$PWD/../example/operation \
             SCALINGENGINE_INSTANCE_GROUP=asactors\
@@ -53,7 +53,7 @@ jobs:
         run: |
           set -e
 
-          pushd templates
+          pushd app-autoscaler-release/templates
             MANIFEST_PATH=$PWD/app-autoscaler.yml \
             OPERATION_DIR_PATH=$PWD/../operations \
             ./manifest_tests.sh
