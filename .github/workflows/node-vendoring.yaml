@@ -1,4 +1,4 @@
-name: Check Node Vendoring
+name: ARC - Check Node Vendoring
 
 on:
   pull_request:
@@ -9,7 +9,10 @@ concurrency:
 
 jobs:
   check-node-vendoring:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
