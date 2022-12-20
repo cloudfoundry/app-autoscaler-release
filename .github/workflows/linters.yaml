@@ -1,0 +1,56 @@
+name: ARC - Linters
+
+on: [pull_request]
+
+jobs:
+  linters:
+    name: reviewdog
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: npm install
+        working-directory: src/acceptance/assets/app/nodeApp
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          # Not needed with a .ruby-version file
+          ruby-version: 2.7
+          # runs 'bundle install' and caches installed gems automatically
+          bundler-cache: true
+        env:
+          # Needed for self-hosted runner
+          ImageOS: "ubuntu22"
+      - uses: reviewdog/action-eslint@v1
+        with:
+          workdir: "src/acceptance/assets/app/nodeApp"
+          eslint_flags: ''
+          reporter: github-pr-review # Default is github-pr-check # github-pr-review
+      - name: shellcheck
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          reporter: github-pr-review
+      - name: actionlint
+        uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: github-pr-review
+      - name: rubocop
+        uses: reviewdog/action-rubocop@v2
+        with:
+          rubocop_version: gemfile
+          rubocop_extensions: standard:gemfile
+          reporter: github-pr-review
+      - name: alex
+        uses: reviewdog/action-alex@v1
+        with:
+          reporter: github-pr-review
+      - name: markdownlint
+        uses: reviewdog/action-markdownlint@v0
+        with:
+          reporter: github-pr-review
