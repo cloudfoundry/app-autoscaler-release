@@ -2,29 +2,16 @@ name: Dependency spec updates
 on: pull_request
 
 jobs:
-  dependabot:
+  package-specs:
     runs-on: ubuntu-latest
     if: contains(fromJson('["dependabot[bot]", "renovate[bot]"]'), github.event.pull_request.user.login) && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup-go
 
-      - name: mod download and vendor
+      - name: package-specs
         run: |
-          echo "updating src/autoscaler"
-          pushd src/app-autoscaler/src/autoscaler > /dev/null\
-            && go mod download\
-            && go mod vendor\
-            && popd > /dev/null
-          echo "updating src/changeloglockcleaner"
-          pushd src/changeloglockcleaner > /dev/null\
-            && go mod download\
-            && go mod vendor\
-            && popd > /dev/null
-
-      - name: Sync specs
-        run: ./scripts/sync-package-specs
-
+          make package-specs
       - name: Check if there are changes
         id: changes
         uses: UnicornGlobal/has-changes-action@v1.0.12
