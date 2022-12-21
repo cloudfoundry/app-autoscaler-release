@@ -1,10 +1,10 @@
-name: Dependabot spec updates
+name: Dependency spec updates
 on: pull_request
 
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    if: contains(fromJson('["dependabot[bot]", "renovate[bot]"]'), github.event.pull_request.user.login) && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup-go
