@@ -28,20 +28,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          path: app-autoscaler-release
-
-      - name: Setup environment
-        uses: ./app-autoscaler-release/.github/actions/setup-environment
-        with:
-          ssh-key: ${{ secrets.bbl_ssh_key}}
 
       - name: Run Tests - old manifest
         run: |
           set -euo pipefail
           pwd
 
-          pushd app-autoscaler-release/templates
+          pushd templates
             MANIFEST_PATH=$PWD/../templates/app-autoscaler-deployment.yml \
             OPERATION_DIR_PATH=$PWD/../example/operation \
             SCALINGENGINE_INSTANCE_GROUP=asactors\
@@ -58,8 +51,18 @@ jobs:
         run: |
           set -e
 
-          pushd app-autoscaler-release/templates
+          pushd templates
             MANIFEST_PATH=$PWD/app-autoscaler.yml \
+            OPERATION_DIR_PATH=$PWD/../operations \
+            ./manifest_tests.sh
+          popd
+
+      - name: Run Tests - Deployment
+        run: |
+          set -e
+
+          pushd templates
+            MANIFEST_PATH=$PWD/app-autoscaler-deployment.yml \
             OPERATION_DIR_PATH=$PWD/../operations \
             ./manifest_tests.sh
           popd
