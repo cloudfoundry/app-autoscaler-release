@@ -120,4 +120,4 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoimpl/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/timestamppb/* # gosub
-- autoscaler/vendor/gopkg.in/yaml.v2/* # gosub
+- autoscaler/vendor/gopkg.in/yaml.v3/* # gosub
