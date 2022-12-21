@@ -40,10 +40,12 @@ jobs:
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
       - uses: actions/checkout@v3
-      - name: Build
+      - name: make build
         run: |
           make build db_type=mysql
 
-      - name: ${{ matrix.suite }}
+      - name: make ${{ matrix.suite }}
+        env:
+          DB_HOST: mysql
         run: |
-          make ${{ matrix.suite }} db_type=mysql DB_HOST=mysql
+          make ${{ matrix.suite }} db_type=mysql
