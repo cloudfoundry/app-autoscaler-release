@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Curl test
         run: |
-          curl mysql:3306
+          curl 127.0.0.1:3306
       # - uses: ./.github/actions/setup-go
       # - uses: ./.github/actions/setup-java
 
