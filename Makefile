@@ -35,7 +35,7 @@ list-modules:
 .PHONY: check-type
 check-db_type:
 	@case "${db_type}" in\
-	 (mysql|postgres) echo " - using bd:${db_type}"; ;;\
+	 (mysql|postgres) echo " - using db_type:${db_type}"; ;;\
 	 (*) echo "ERROR: db_type needs to be one of mysql|postgres"; exit 1;;\
 	 esac
 
