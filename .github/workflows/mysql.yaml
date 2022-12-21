@@ -40,15 +40,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Curl test
+        env:
+          DBURL: mysql/autoscaler
         run: |
-          ping mysql
-      # - uses: ./.github/actions/setup-go
-      # - uses: ./.github/actions/setup-java
-
       # - name: Build
       #   run: |
       #     make build db_type=mysql
 
-      # - name: ${{ matrix.suite }}
-      #   run: |
-      #     make ${{ matrix.suite }} db_type=mysql
+      - name: ${{ matrix.suite }}
+        run: |
+          make ${{ matrix.suite }} db_type=mysql
