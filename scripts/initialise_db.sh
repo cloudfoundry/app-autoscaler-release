@@ -19,7 +19,7 @@ fi
 case $1 in
 mysql)
   DB_USER=${DB_USER:-"root"}
-  URL="jdbc:mysql://127.0.0.1/autoscaler"
+  URL=${DBURL:-"jdbc:mysql://127.0.0.1/autoscaler"}
   DRIVER="com.mysql.cj.jdbc.Driver"
   PASSWORD_OPT=""
   ;;
