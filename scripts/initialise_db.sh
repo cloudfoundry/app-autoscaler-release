@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+echo "Running $0"
 LOG_FILE=liqubase.log
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 ROOT="$SCRIPT_DIR/.."
