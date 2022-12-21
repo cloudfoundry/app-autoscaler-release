@@ -12,6 +12,8 @@ jobs:
       - name: package-specs
         run: |
           make package-specs
+          # workaround for https://github.com/UnicornGlobal/has-changes-action/issues/8
+          git config --global --add safe.directory /github/workspace
       - name: Check if there are changes
         id: changes
         uses: UnicornGlobal/has-changes-action@v1.0.12
