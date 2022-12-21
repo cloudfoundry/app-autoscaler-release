@@ -59,4 +59,4 @@ jobs:
           POSTGRES_DB: autoscaler
           DB_HOST: postgres
         run: |
-          make ${{ matrix.suite }}db_type=postgres DB_HOST=$DB_HOST
+          make ${{ matrix.suite }} db_type=postgres DB_HOST=$DB_HOST
