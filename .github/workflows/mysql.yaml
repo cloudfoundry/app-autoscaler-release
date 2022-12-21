@@ -38,11 +38,14 @@ jobs:
 
 
     steps:
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${{ env.GITHUB_WORKSPACE }}"
+
       - uses: actions/checkout@v3
-      - name: Curl test
-        env:
-          DBURL: mysql/autoscaler
-        run: |
+      #git - name: Curl test
+        # env:
+        #   DBURL: mysql/autoscaler
+        # run: |
       # - name: Build
       #   run: |
       #     make build db_type=mysql
