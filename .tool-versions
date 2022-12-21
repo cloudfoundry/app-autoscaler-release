@@ -16,3 +16,4 @@ actionlint 1.6.22
 direnv 2.32.2
 yq 4.27.5
 github-cli 2.20.2
+python 3.11.1
