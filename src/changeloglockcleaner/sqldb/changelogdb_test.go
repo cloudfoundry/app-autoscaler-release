@@ -3,12 +3,11 @@ package sqldb_test
 import (
 	"changeloglockcleaner/sqldb"
 	"strings"
+	"os"
 
 	"github.com/go-sql-driver/mysql"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"os"
 )
 
 var _ = Describe("ChangelogSQLDB", func() {
@@ -17,6 +16,7 @@ var _ = Describe("ChangelogSQLDB", func() {
 		timeoutInSecond = 300
 		err             error
 		dbUrl           string
+		dbHost          = os.Getenv("DB_HOST")
 	)
 	Describe("NewChangelogSQLDB", func() {
 		JustBeforeEach(func() {
@@ -50,7 +50,7 @@ var _ = Describe("ChangelogSQLDB", func() {
 				if strings.Contains(os.Getenv("DBURL"), "postgres") {
 					Skip("Not configured for mysql")
 				}
-				dbUrl = "not-exist-user:not-exist-password@tcp(" + os.Getenv("DB_HOST") + ")/autoscaler?tls=false"
+				dbUrl = "not-exist-user:not-exist-password@tcp("+dbHost+")/autoscaler?tls=false"
 			})
 			It("should error", func() {
 				Expect(err).To(BeAssignableToTypeOf(&mysql.MySQLError{}))
