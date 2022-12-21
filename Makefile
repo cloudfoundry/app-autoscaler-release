@@ -196,7 +196,7 @@ waitfor_mysql_CI_false:
 	@echo -n " - Waiting for table creation ."
 	@until [[ ! -z `docker exec mysql mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null` ]]; do echo -n "."; sleep 1; done
 waitfor_mysql_CI_true:
-	@echo -n " - Waiting for table creation (CI_true)"
+	@echo -n " - Waiting for table creation"
 	@which mysql >/dev/null &&\
 	 {\
 	   T=0;\

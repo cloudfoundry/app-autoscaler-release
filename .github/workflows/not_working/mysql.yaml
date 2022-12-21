@@ -44,6 +44,8 @@ jobs:
       #     make build db_type=mysql
 
       - name: ${{ matrix.suite }}
+        env:
+          DB_HOST: mysql
         run: |
           curl 127.0.0.1:3306
           # make ${{ matrix.suite }} db_type=mysql
