@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 function sync_package() {
   bosh_pkg=${1}
@@ -9,25 +9,20 @@ function sync_package() {
   shift
 
   (
-    set -e
-
     spec_dir=$PWD/packages/${bosh_pkg}
     echo "Syncing ${bosh_pkg}..."
     cd $PWD/src/autoscaler/${golang_pkg}
     {
-      cat ${spec_dir}/spec | grep -v '# gosub'
-      GO111MODULE=on GOOS=linux go run github.com/garethjevans/gosub@54a908b701f1cbb9e49d4e8117348df3b9381c1b list "$@" | grep autoscaler | \
+      cat "${spec_dir}/spec" | grep -v '# gosub'
+      go run github.com/garethjevans/gosub@54a908b701f1cbb9e49d4e8117348df3b9381c1b list "$@" | grep autoscaler | \
         sed -e 's|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- \1/* # gosub|g'
-      GO111MODULE=on GOOS=linux go run github.com/garethjevans/gosub@54a908b701f1cbb9e49d4e8117348df3b9381c1b list "$@" | grep -v autoscaler | \
+      go run github.com/garethjevans/gosub@54a908b701f1cbb9e49d4e8117348df3b9381c1b list "$@" | grep -v autoscaler | \
         sed -e 's|\(.*\)|- autoscaler/vendor/\1/* # gosub|g'
-    } > ${spec_dir}/spec.new
+    } > "${spec_dir}/spec.new"
 
-    mv ${spec_dir}/spec.new ${spec_dir}/spec
+    mv "${spec_dir}/spec.new" "${spec_dir}/spec"
   )
 }
-
-export GOPATH=$PWD
-export PATH=$GOPATH/bin:$PATH
 
 sync_package eventgenerator eventgenerator -app ./...
 sync_package golangapiserver api -app ./...
