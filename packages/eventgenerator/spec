@@ -29,10 +29,11 @@ files:
 - autoscaler/vendor/code.cloudfoundry.org/go-log-cache/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-log-cache/internal/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-log-cache/rpc/logcache_v1/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v8/rfc5424/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/internal/truncate/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/rfc5424/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/tlsconfig/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/blang/semver/* # gosub
