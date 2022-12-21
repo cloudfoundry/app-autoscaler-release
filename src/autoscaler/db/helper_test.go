@@ -51,7 +51,7 @@ var _ = Describe("Helper", func() {
 		Context("when need to verify mysql server, cert is provided ", func() {
 			BeforeEach(func() {
 				certPath = "../../../test-certs/api.crt"
-				dbUrl = "root@tcp" + os.Getenv("DB_HOST") + ":3306)/autoscaler?tls=verify-ca&sslrootcert=" + certPath
+				dbUrl = "root@tcp(" + os.Getenv("DB_HOST") + ":3306)/autoscaler?tls=verify-ca&sslrootcert=" + certPath
 			})
 			It("returns mysql database connection", func() {
 				Expect(err).NotTo(HaveOccurred())
