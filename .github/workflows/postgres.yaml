@@ -41,6 +41,9 @@ jobs:
         ports:
          - 5432:5432
     steps:
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
       - uses: actions/checkout@v3
       - name: make build
         env:
@@ -56,4 +59,4 @@ jobs:
           POSTGRES_DB: autoscaler
           DB_HOST: postgres
         run: |
-          make ${{ matrix.suite }}
+          make ${{ matrix.suite }} DB_HOST=$DB_HOST
