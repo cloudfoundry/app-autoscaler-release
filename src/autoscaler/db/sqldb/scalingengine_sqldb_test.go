@@ -2,6 +2,8 @@ package sqldb_test
 
 import (
 	"strings"
+	"time"
+	"os"
 
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
@@ -14,13 +16,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"time"
-	"os"
 )
 
 var _ = Describe("ScalingEngineSqldb", func() {
 	var (
 		dbConfig          db.DatabaseConfig
+		dbHost            = os.Getenv("DB_HOST")
 		logger            lager.Logger
 		sdb               *ScalingEngineSQLDB
 		err               error
@@ -108,7 +109,7 @@ var _ = Describe("ScalingEngineSqldb", func() {
 				if strings.Contains(dbUrl, "postgres") {
 					Skip("Not configured for mysql")
 				}
-				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + os.Getenv("DB_HOST") + ")/autoscaler?tls=false"
+				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + dbHost + ")/autoscaler?tls=false"
 			})
 			It("should throw an error", func() {
 				Expect(err).To(BeAssignableToTypeOf(&mysql.MySQLError{}))

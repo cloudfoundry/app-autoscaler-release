@@ -1,6 +1,8 @@
 package sqldb_test
 
 import (
+	"encoding/json"
+	"time"
 	"context"
 	"database/sql"
 	"fmt"
@@ -17,15 +19,13 @@ import (
 	"github.com/go-sql-driver/mysql"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"encoding/json"
-	"time"
 )
 
 var _ = Describe("PolicySQLDB", func() {
 	var (
 		pdb               *PolicySQLDB
 		dbConfig          db.DatabaseConfig
+		dbHost            = os.Getenv("DB_HOST")
 		logger            lager.Logger
 		err               error
 		appIds            map[string]bool
@@ -109,7 +109,7 @@ var _ = Describe("PolicySQLDB", func() {
 				if strings.Contains(dbUrl, "postgres") {
 					Skip("Not configured for mysql")
 				}
-				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + os.Getenv("DB_HOST") + ")/autoscaler?tls=false"
+				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + dbHost + ")/autoscaler?tls=false"
 			})
 			It("should throw an error", func() {
 				Expect(err).To(BeAssignableToTypeOf(&mysql.MySQLError{}))

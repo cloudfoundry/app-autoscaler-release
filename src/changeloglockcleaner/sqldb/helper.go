@@ -26,9 +26,9 @@ type MySQLConfig struct {
 
 	This function is used to generate db connection info, for example,
 	For mysql:
-	input dbUrl: 'username:password@tcp(" + os.Getenv("DB_HOST") + ":3306)/autoscaler?tls=custom&sslrootcert=db_ca.crt'
+	input dbUrl: 'username:password@tcp(" + dbHost + ":3306)/autoscaler?tls=custom&sslrootcert=db_ca.crt'
 	  return:
-	  &Database{DriverName: "mysql", DSN:"username:password@tcp(" + os.Getenv("DB_HOST") + ":3306)/autoscaler?parseTime=true&tls=custom"}
+	  &Database{DriverName: "mysql", DSN:"username:password@tcp(" + dbHost + ":3306)/autoscaler?parseTime=true&tls=custom"}
 
 For postgres:
 

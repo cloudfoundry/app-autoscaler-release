@@ -4,6 +4,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"os"
 
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
@@ -15,13 +16,13 @@ import (
 	"github.com/go-sql-driver/mysql"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"os"
 )
 
 var _ = Describe("AppMetricSQLDB", func() {
 	var (
 		adb            *AppMetricSQLDB
 		dbConfig       db.DatabaseConfig
+		dbHost         = os.Getenv("DB_HOST")
 		logger         lager.Logger
 		err            error
 		appMetrics     []*models.AppMetric
@@ -87,7 +88,7 @@ var _ = Describe("AppMetricSQLDB", func() {
 				if strings.Contains(dbUrl, "postgres") {
 					Skip("Not configured for postgres")
 				}
-				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + os.Getenv("DB_HOST") + ")/autoscaler?tls=false"
+				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + dbHost + ")/autoscaler?tls=false"
 			})
 			It("should throw an error", func() {
 				Expect(err).To(BeAssignableToTypeOf(&mysql.MySQLError{}))

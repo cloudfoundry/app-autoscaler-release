@@ -13,6 +13,7 @@ var _ = Describe("Helper", func() {
 		dbUrl    string
 		err      error
 		database *Database
+		dbHost   = os.Getenv("DB_HOST")
 	)
 
 	Describe("GetConnection", func() {
@@ -22,26 +23,26 @@ var _ = Describe("Helper", func() {
 		})
 		Context("when mysql query parameters are provided", func() {
 			BeforeEach(func() {
-				dbUrl = "root@tcp(" + os.Getenv("DB_HOST") + ":3306)/autoscaler?tls=preferred"
+				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler?tls=preferred"
 			})
 			It("returns mysql database object", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(database).To(Equal(&Database{
 					DriverName: "mysql",
-					DSN:        "root@tcp(" + os.Getenv("DB_HOST") + ":3306)/autoscaler?parseTime=true&tls=preferred",
+					DSN:        "root@tcp(" + dbHost + ":3306)/autoscaler?parseTime=true&tls=preferred",
 				}))
 			})
 		})
 
 		Context("when mysql query parameters are not provided", func() {
 			BeforeEach(func() {
-				dbUrl = "root@tcp(" + os.Getenv("DB_HOST") + ":3306)/autoscaler"
+				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler"
 			})
 			It("returns mysql database object", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(database).To(Equal(&Database{
 					DriverName: "mysql",
-					DSN:        "root@tcp(" + os.Getenv("DB_HOST") + ":3306)/autoscaler?parseTime=true",
+					DSN:        "root@tcp(" + dbHost + ":3306)/autoscaler?parseTime=true",
 				}))
 			})
 
@@ -49,7 +50,7 @@ var _ = Describe("Helper", func() {
 
 		Context("when need to verify mysql server, cert is not provided ", func() {
 			BeforeEach(func() {
-				dbUrl = "root@tcp(" + os.Getenv("DB_HOST") + ":3306)/autoscaler?tls=verify-ca"
+				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler?tls=verify-ca"
 			})
 			It("should error", func() {
 				Expect(err).To(HaveOccurred())
