@@ -17,6 +17,7 @@ import (
 
 	"sync"
 	"time"
+	"os"
 )
 
 var _ = Describe("InstancemetricsSqldb", func() {
@@ -89,7 +90,7 @@ var _ = Describe("InstancemetricsSqldb", func() {
 				if strings.Contains(dbUrl, "postgres") {
 					Skip("Mysql test")
 				}
-				dbConfig.URL = "not-exist-user:not-exist-password@tcp(localhost)/autoscaler?tls=false"
+				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + os.Getenv("DB_HOST") + ")/autoscaler?tls=false"
 			})
 			It("should throw an error", func() {
 				Expect(err).To(BeAssignableToTypeOf(&mysql.MySQLError{}))

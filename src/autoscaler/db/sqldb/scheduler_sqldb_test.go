@@ -15,6 +15,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"time"
+	"os"
 )
 
 var _ = Describe("SchedulerSqldb", func() {
@@ -56,7 +57,7 @@ var _ = Describe("SchedulerSqldb", func() {
 				if !strings.Contains(dbUrl, "postgres") {
 					Skip("Not configured for postgres")
 				}
-				dbConfig.URL = "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable"
+				dbConfig.URL = "postgres://not-exist-user:not-exist-password@" + os.Getenv("DB_HOST") + "/autoscaler?sslmode=disable"
 			})
 			It("should throw an error", func() {
 				Expect(err).To(HaveOccurred())
@@ -68,7 +69,7 @@ var _ = Describe("SchedulerSqldb", func() {
 				if strings.Contains(dbUrl, "postgres") {
 					Skip("Not configured for postgres")
 				}
-				dbConfig.URL = "not-exist-user:not-exist-password@tcp(localhost)/autoscaler?tls=false"
+				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + os.Getenv("DB_HOST") + ")/autoscaler?tls=false"
 			})
 			It("should throw an error", func() {
 				Expect(err).To(BeAssignableToTypeOf(&mysql.MySQLError{}))

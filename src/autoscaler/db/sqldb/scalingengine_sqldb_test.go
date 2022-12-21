@@ -15,6 +15,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"time"
+	"os"
 )
 
 var _ = Describe("ScalingEngineSqldb", func() {
@@ -107,7 +108,7 @@ var _ = Describe("ScalingEngineSqldb", func() {
 				if strings.Contains(dbUrl, "postgres") {
 					Skip("Not configured for mysql")
 				}
-				dbConfig.URL = "not-exist-user:not-exist-password@tcp(localhost)/autoscaler?tls=false"
+				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + os.Getenv("DB_HOST") + ")/autoscaler?tls=false"
 			})
 			It("should throw an error", func() {
 				Expect(err).To(BeAssignableToTypeOf(&mysql.MySQLError{}))
