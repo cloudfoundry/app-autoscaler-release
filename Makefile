@@ -6,10 +6,11 @@ all_modules:= $(go_modules) db scheduler
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
 OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
-db_type:=postgres
+db_type:=
+DB_HOST:= localhost
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"; ;; \
- 			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
+ 			 (mysql) printf "root@tcp(mysql)/autoscaler?tls=false"; ;; esac)
 DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
@@ -195,15 +196,15 @@ waitfor_mysql_CI_false:
 	@echo -n " - Waiting for table creation ."
 	@until [[ ! -z `docker exec mysql mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null` ]]; do echo -n "."; sleep 1; done
 waitfor_mysql_CI_true:
-	@echo -n " - Waiting for table creation "
+	@echo -n " - Waiting for table creation (CI_true)"
 	@which mysql >/dev/null &&\
 	 {\
 	   T=0;\
-	   until [[ ! -z "$(shell mysql -u "root" -h "127.0.0.1"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
+	   until [[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
 	     || [[ $${T} -gt 30 ]];\
 	   do echo -n "."; sleep 1; T=$$((T+1)); done;\
 	 }
-	@[ ! -z "$(shell mysql -u "root" -h "127.0.0.1" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
+	@[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
 	  || { echo "ERROR: Mysql timed out creating database"; exit 1; }
 
 
