@@ -40,13 +40,13 @@ var _ = Describe("Helper", func() {
 
 		Context("when mysql query parameters are not provided", func() {
 			BeforeEach(func() {
-				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler"
+				dbUrl = "root@tcp(localhost:3306)/autoscaler"
 			})
 			It("returns mysql database object", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(database).To(Equal(&Database{
 					DriverName: "mysql",
-					DSN:        "root@tcp(" + dbHost + ":3306)/autoscaler?parseTime=true",
+					DSN:        "root@tcp(localhost:3306)/autoscaler?parseTime=true",
 				}))
 			})
 
