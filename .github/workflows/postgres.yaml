@@ -47,8 +47,10 @@ jobs:
 
       - name: Build
         run: |
+          set -euo pipefail
           make build
 
       - name: ${{ matrix.suite }}
         run: |
+          set -euo pipefail
           make ${{ matrix.suite }}
