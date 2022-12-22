@@ -16,7 +16,7 @@ jobs:
         # postgres: [9.6, 12]
         # suite: [test, integration]
         postgres: [9.6]
-        suite: test
+        suite: [test]
     env:
       DB_DATABASE: autoscaler
       DB_USER: postgres
