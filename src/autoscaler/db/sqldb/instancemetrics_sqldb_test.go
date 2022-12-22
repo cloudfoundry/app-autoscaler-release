@@ -90,7 +90,7 @@ var _ = Describe("InstancemetricsSqldb", func() {
 				if strings.Contains(dbUrl, "postgres") {
 					Skip("Mysql test")
 				}
-				dbConfig.URL = "not-exist-user:not-exist-password@tcp(" + dbHost + ")/autoscaler?tls=false"
+				dbConfig.URL = "not-exist-user:not-exist-password@tcp("+dbHost+")/autoscaler?tls=false"
 			})
 			It("should throw an error", func() {
 				Expect(err).To(BeAssignableToTypeOf(&mysql.MySQLError{}))
