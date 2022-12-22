@@ -88,7 +88,7 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Deploy autoscaler
         run: |
-          cd ${AUTOSCALER_DIR}
+          cd "${AUTOSCALER_DIR}"
           make deploy-autoscaler
 
   acceptance_tests:
@@ -114,7 +114,7 @@ jobs:
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
-          cd ${AUTOSCALER_DIR}
+          cd "${AUTOSCALER_DIR}"
           make acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
 
@@ -157,5 +157,5 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Perform deployment cleanup
         run: |
-          cd ${AUTOSCALER_DIR}
+          cd "${AUTOSCALER_DIR}"
           make deploy-cleanup
