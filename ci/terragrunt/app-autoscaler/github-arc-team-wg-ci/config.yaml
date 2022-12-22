@@ -3,12 +3,12 @@ region: europe-west3
 zone: europe-west3-a
 
 # gcs_prefix is build by terragrunt with `github-arc-team-<team_name>`
-gcs_bucket: terraform-wg-ci-test
+gcs_bucket: terraform-wg-ci
 
 team_name: app-autoscaler
 
 # Your GKE cluster (assumes one already exists)
-gke_name: wg-ci-test
+gke_name: wg-ci
 
 arc_webhook_server_domain: app-runtime-interfaces.ci.cloudfoundry.org
 
