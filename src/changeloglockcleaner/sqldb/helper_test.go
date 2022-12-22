@@ -40,9 +40,9 @@ var _ = Describe("Helper", func() {
 
 		Context("when mysql query parameters are not provided", func() {
 			BeforeEach(func() {
-				if strings.Contains(dbUrl, "postgres") {
-					Skip("Not configured for mysql")
-				}
+				//if strings.Contains(dbUrl, "postgres") {
+				//	Skip("Not configured for mysql")
+				//}
 				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler"
 			})
 			It("returns mysql database object", func() {
