@@ -48,7 +48,7 @@ jobs:
       - name: Build
         run: |
           go install github.com/onsi/ginkgo/v2/ginkgo@latest
-          go get github.com/onsi/gomega/...
+          go install github.com/onsi/gomega@latest
           make build
 
       - name: ${{ matrix.suite }}
