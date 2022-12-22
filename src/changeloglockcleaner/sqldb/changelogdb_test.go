@@ -37,7 +37,7 @@ var _ = Describe("ChangelogSQLDB", func() {
 				if !strings.Contains(os.Getenv("DBURL"), "postgres") {
 					Skip("Not configured for postgres")
 				}
-				dbUrl = "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable"
+				dbUrl = "postgres://not-exist-user:not-exist-password@"+dbHost+"/autoscaler?sslmode=disable"
 			})
 			It("should error", func() {
 				Expect(err).To(HaveOccurred())

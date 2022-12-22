@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"os"
+	"strings"
 )
 
 var _ = Describe("Helper", func() {
@@ -23,6 +24,9 @@ var _ = Describe("Helper", func() {
 		})
 		Context("when mysql query parameters are provided", func() {
 			BeforeEach(func() {
+				if strings.Contains(dbUrl, "postgres") {
+					Skip("Not configured for mysql")
+				}
 				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler?tls=preferred"
 			})
 			It("returns mysql database object", func() {
@@ -36,6 +40,9 @@ var _ = Describe("Helper", func() {
 
 		Context("when mysql query parameters are not provided", func() {
 			BeforeEach(func() {
+				if strings.Contains(dbUrl, "postgres") {
+					Skip("Not configured for mysql")
+				}
 				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler"
 			})
 			It("returns mysql database object", func() {
@@ -50,6 +57,9 @@ var _ = Describe("Helper", func() {
 
 		Context("when need to verify mysql server, cert is not provided ", func() {
 			BeforeEach(func() {
+				if strings.Contains(dbUrl, "postgres") {
+					Skip("Not configured for mysql")
+				}
 				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler?tls=verify-ca"
 			})
 			It("should error", func() {
