@@ -25,7 +25,7 @@ var (
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
 	cfg = config.LoadConfig()
-	cfg.Prefix = "autoscaler-performance"
+	cfg.Prefix = "autoscaler-performance-TESTS"
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	RunSpecs(t, "Setup Performance Test Suite")
 }
@@ -59,19 +59,10 @@ var _ = BeforeSuite(func() {
 	fmt.Print("done")
 })
 
-var _ = AfterSuite(func() {
-	updateOrgQuotaToOriginal()
-})
-
-func updateOrgQuotaToOriginal() {
-	if cfg.Performance.UpdateExistingOrgQuota {
-		UpdateOrgQuota(originalOrgQuota, cfg.DefaultTimeoutDuration())
-	}
-}
-
 func updateOrgQuotaForPerformanceTest(orgGuid string) {
 	if cfg.Performance.UpdateExistingOrgQuota {
 		originalOrgQuota = GetOrgQuota(orgGuid, cfg.DefaultTimeoutDuration())
+		fmt.Printf("\n=> originalOrgQuota %+v\n", originalOrgQuota)
 		performanceOrgQuota := OrgQuota{
 			Name:             originalOrgQuota.Name,
 			AppInstances:     strconv.Itoa(cfg.Performance.AppCount * 2),
@@ -80,7 +71,7 @@ func updateOrgQuotaForPerformanceTest(orgGuid string) {
 			ServiceInstances: strconv.Itoa(cfg.Performance.AppCount * 2),
 			RoutePorts:       "-1",
 		}
-
+		fmt.Printf("=> setting new org quota %s\n", originalOrgQuota.Name)
 		UpdateOrgQuota(performanceOrgQuota, cfg.DefaultTimeoutDuration())
 	}
 }
