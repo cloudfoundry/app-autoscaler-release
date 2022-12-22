@@ -123,7 +123,7 @@ target/scheduler_test_certs:
 
 .PHONY: test test-autoscaler test-changelog test-changeloglockcleaner test-scheduler
 #test: test-autoscaler test-changelog test-changeloglockcleaner test-acceptance-unit test-scheduler
-test: test-changeloglockcleaner test-acceptance-unit test-scheduler
+test: test test-autoscaler
 test-autoscaler: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
 	@make -C src/autoscaler test DBURL="${DBURL}" OPTS="${OPTS}"
