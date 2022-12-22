@@ -3,6 +3,7 @@ package helpers
 import (
 	"acceptance/config"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -88,25 +89,32 @@ func createTestApp(cfg config.Config, appName string, initialInstanceCount int, 
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
 	}
 	countStr := strconv.Itoa(initialInstanceCount)
-	params := []string{
-		"push",
-		"--var", "app_name=" + appName,
-		"--var", "app_domain=" + cfg.AppsDomain,
-		"--var", "service_name=" + cfg.ServiceName,
-		"--var", "instances=" + countStr,
-		"--var", "buildpack=" + cfg.NodejsBuildpackName,
-		"--var", "node_tls_reject_unauthorized=" + setNodeTLSRejectUnauthorizedEnvironmentVariable,
-		"--var", "memory_mb=" + strconv.Itoa(cfg.NodeMemoryLimit),
-		"-f", config.NODE_APP + "/app_manifest.yml",
-		"--no-start",
-	}
-	params = append(params, args...)
-	createApp := cf.Cf(params...).Wait(cfg.CfPushTimeoutDuration())
 
-	if createApp.ExitCode() != 0 {
-		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
+	pushApp := func() error {
+		var err error
+		params := []string{
+			"push",
+			"--var", "app_name=" + appName,
+			"--var", "app_domain=" + cfg.AppsDomain,
+			"--var", "service_name=" + cfg.ServiceName,
+			"--var", "instances=" + countStr,
+			"--var", "buildpack=" + cfg.NodejsBuildpackName,
+			"--var", "node_tls_reject_unauthorized=" + setNodeTLSRejectUnauthorizedEnvironmentVariable,
+			"--var", "memory_mb=" + strconv.Itoa(cfg.NodeMemoryLimit),
+			"-f", config.NODE_APP + "/app_manifest.yml",
+			"--no-start",
+		}
+		params = append(params, args...)
+		createApp := cf.Cf(params...).Wait(cfg.CfPushTimeoutDuration())
+		if createApp.ExitCode() != 0 {
+			err = errors.New(fmt.Sprintf("failed to push an app: %s  %s", appName, string(createApp.Err.Contents())))
+			cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
+			return err
+
+		}
+		return err
 	}
-	Expect(createApp).To(Exit(0), fmt.Sprintf("failed creating app: %s %s", appName, string(createApp.Err.Contents())))
+	Retry(2, 60, pushApp)
 
 	GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
 }
