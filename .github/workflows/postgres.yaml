@@ -1,5 +1,3 @@
-#TODO:  Unexpected error running Liquibase: liquibase.exception.DatabaseException: liquibase.exception.DatabaseException: Connection could not be created to jdbc:postgresql://127.0.0.1/autoscaler with driver org.postgresql.Driver.  Connection to 127.0.0.1:5432 refused. 
-# https://github.com/cloudfoundry/app-autoscaler-release/actions/runs/3549168357/jobs/5961226050#step:8:40
 ---
 name: ARC - Build with Postgres
 
@@ -23,9 +21,9 @@ jobs:
       DB_PASSWORD: postgres
     runs-on: self-hosted
     container:
-      image: booker/app-autoscaler-release-tools
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     continue-on-error: true
-    name: Build suite=${{ matrix.suite }}, jdk=${{ matrix.java }}, postgres=${{ matrix.postgres }}
+    name: Build suite=${{ matrix.suite }}, postgres=${{ matrix.postgres }}
     services:
       postgres:
         image: postgres:${{ matrix.postgres }}
@@ -59,4 +57,4 @@ jobs:
           POSTGRES_DB: autoscaler
           DB_HOST: postgres
         run: |
-          make ${{ matrix.suite }} db_type=postgres DB_HOST=$DB_HOST
+          make ${{ matrix.suite }} DB_HOST=$DB_HOST

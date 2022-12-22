@@ -23,7 +23,7 @@ jobs:
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     continue-on-error: true
-    name: Build suite=${{ matrix.suite }}, jdk=${{ matrix.java }}, mysql=${{ matrix.mysql }}
+    name: Build suite=${{ matrix.suite }}, mysql=${{ matrix.mysql }}
     services:
       mysql:
         image: mysql:${{ matrix.mysql }}
