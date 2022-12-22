@@ -13,8 +13,10 @@ jobs:
   build:
     strategy:
       matrix:
-        postgres: [9.6, 12]
-        suite: [test, integration]
+        # postgres: [9.6, 12]
+        # suite: [test, integration]
+        postgres: [9.6]
+        suite: test
     env:
       DB_DATABASE: autoscaler
       DB_USER: postgres
