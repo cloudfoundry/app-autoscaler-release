@@ -204,4 +204,4 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/types/known/fieldmaskpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/timestamppb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/wrapperspb/* # gosub
-- autoscaler/vendor/gopkg.in/yaml.v2/* # gosub
+- autoscaler/vendor/gopkg.in/yaml.v3/* # gosub
