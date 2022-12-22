@@ -24,9 +24,9 @@ var _ = Describe("Helper", func() {
 		})
 		Context("when mysql query parameters are provided", func() {
 			BeforeEach(func() {
-				if strings.Contains(dbUrl, "postgres") {
+			/*	if strings.Contains(dbUrl, "postgres") {
 					Skip("Not configured for mysql")
-				}
+				} */
 				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler?tls=preferred"
 			})
 			It("returns mysql database object", func() {
@@ -54,10 +54,7 @@ var _ = Describe("Helper", func() {
 
 		Context("when need to verify mysql server, cert is not provided ", func() {
 			BeforeEach(func() {
-				if strings.Contains(dbUrl, "postgres") {
-					Skip("Not configured for mysql")
-				}
-				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler?tls=verify-ca"
+				dbUrl = "root@tcp(localhost:3306)/autoscaler?tls=verify-ca"
 			})
 			It("should error", func() {
 				Expect(err).To(HaveOccurred())
@@ -67,13 +64,13 @@ var _ = Describe("Helper", func() {
 
 		Context("when postgres dburl is provided", func() {
 			BeforeEach(func() {
-				dbUrl = "postgres://postgres:password@"+dbHost+":5432/autoscaler?sslmode=disable"
+				dbUrl = "postgres://postgres:password@localhost:5432/autoscaler?sslmode=disable"
 			})
 			It("returns postgres database object", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(database).To(Equal(&Database{
 					DriverName: "pgx",
-					DSN:        "postgres://postgres:password@"+dbHost+":5432/autoscaler?sslmode=disable",
+					DSN:        "postgres://postgres:password@localhost:5432/autoscaler?sslmode=disable",
 				}))
 			})
 		})
