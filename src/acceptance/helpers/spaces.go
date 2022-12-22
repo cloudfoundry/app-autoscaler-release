@@ -53,7 +53,11 @@ func DeleteSpaces(orgName string, spaces []string, timeout time.Duration) {
 	fmt.Println(fmt.Sprintf("\nDeleting spaces: %s ", strings.Join(spaces, ", ")))
 
 	for _, spaceName := range spaces {
-		deleteSpace := cf.Cf("delete-space", "-f", "-o", orgName, spaceName).Wait(timeout)
-		Expect(deleteSpace).To(Exit(0), fmt.Sprintf("failed deleting space: %s in org: %s: %s", spaceName, orgName, string(deleteSpace.Err.Contents())))
+		if timeout.Seconds() == 0 {
+			deleteSpace := cf.Cf("delete-space", "-f", "-o", orgName, spaceName).Wait(timeout)
+			Expect(deleteSpace).To(Exit(0), fmt.Sprintf("failed deleting space: %s in org: %s: %s", spaceName, orgName, string(deleteSpace.Err.Contents())))
+		} else {
+			cf.Cf("delete-space", "-f", "-o", orgName, spaceName)
+		}
 	}
 }

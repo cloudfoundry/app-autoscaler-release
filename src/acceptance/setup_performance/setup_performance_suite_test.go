@@ -53,9 +53,10 @@ var _ = BeforeSuite(func() {
 	if cfg.IsServiceOfferingEnabled() {
 		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
+
 	fmt.Println("\ncreating droplet...")
 	nodeAppDropletPath = CreateDroplet(*cfg)
-
+	fmt.Print("done")
 })
 
 var _ = AfterSuite(func() {
@@ -123,7 +124,7 @@ func cleanup() {
 
 		if cfg.UseExistingOrganization {
 			orgGuid := GetOrgGuid(cfg, cfg.ExistingOrganization)
-			DeleteSpaces(cfg.ExistingOrganization, GetTestSpaces(orgGuid, cfg), cfg.DefaultTimeoutDuration())
+			DeleteSpaces(cfg.ExistingOrganization, GetTestSpaces(orgGuid, cfg), 0*time.Second)
 		}
 	})
 }
