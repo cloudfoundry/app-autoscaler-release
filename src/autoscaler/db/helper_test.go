@@ -1,11 +1,12 @@
 package db_test
 
 import (
+	"os"
+	"strings"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"os"
 )
 
 var _ = Describe("Helper", func() {
