@@ -5,8 +5,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"os"
-	//"strings"
 )
 
 var _ = Describe("Helper", func() {
@@ -14,7 +12,6 @@ var _ = Describe("Helper", func() {
 		dbUrl    string
 		err      error
 		database *Database
-		dbHost   = os.Getenv("DB_HOST")
 	)
 
 	Describe("GetConnection", func() {
@@ -24,16 +21,13 @@ var _ = Describe("Helper", func() {
 		})
 		Context("when mysql query parameters are provided", func() {
 			BeforeEach(func() {
-			/*	if strings.Contains(dbUrl, "postgres") {
-					Skip("Not configured for mysql")
-				} */
-				dbUrl = "root@tcp(" + dbHost + ":3306)/autoscaler?tls=preferred"
+				dbUrl = "root@tcp(localhost:3306)/autoscaler?tls=preferred"
 			})
 			It("returns mysql database object", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(database).To(Equal(&Database{
 					DriverName: "mysql",
-					DSN:        "root@tcp(" + dbHost + ":3306)/autoscaler?parseTime=true&tls=preferred",
+					DSN:        "root@tcp(localhost:3306)/autoscaler?parseTime=true&tls=preferred",
 				}))
 			})
 		})
