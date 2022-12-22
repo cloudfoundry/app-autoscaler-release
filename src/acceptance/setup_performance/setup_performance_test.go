@@ -6,6 +6,9 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Prepare test apps based on benchmark inputs", func() {
@@ -32,11 +35,10 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 		for i := 0; i < workerCount; i++ {
 			wg.Add(1)
 			go func() {
-				// Warms upe environment to not DDOS cf Cloud Controller when starting
-				time.Sleep(100)
+				// Warms up environment to not DDOS cf Cloud Controller when starting
+				time.Sleep(time.Duration(100*i) * time.Millisecond)
 				worker(appsChan, &runningAppsCount, &pendingApps, &wg)
 			}()
-
 		}
 
 		for i := 0; i < cfg.Performance.AppCount; i++ {
