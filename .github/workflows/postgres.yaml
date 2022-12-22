@@ -48,13 +48,12 @@ jobs:
           POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
         run: |
-          make build db_type=postgres
+          make build
 
       - name: make ${{ matrix.suite }}
         env:
           POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
           POSTGRES_DB: autoscaler
-          DB_HOST: postgres
         run: |
-          make ${{ matrix.suite }} DB_HOST=$DB_HOST
+          make ${{ matrix.suite }} DB_HOST=$POSTGRES_HOST
