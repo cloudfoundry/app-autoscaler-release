@@ -47,10 +47,10 @@ jobs:
 
       - name: Build
         run: |
-          set -euo pipefail
+          go install github.com/onsi/ginkgo/v2/ginkgo
+          go get github.com/onsi/gomega/...
           make build
 
       - name: ${{ matrix.suite }}
         run: |
-          set -euo pipefail
           make ${{ matrix.suite }}
