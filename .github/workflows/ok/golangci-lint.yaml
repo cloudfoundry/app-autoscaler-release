@@ -17,12 +17,13 @@ jobs:
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
       - uses: actions/checkout@v3
 
       - name: get golangci-lint version
         id: lint
         run: |
-          git config --global --add safe.directory ${PWD}
           version=$(cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2 | sed -E 's/(v[0-9]+\.[0-9]+.[0-9]+).*/\1/')
           echo "golangci-lint version: '${version}'"
           echo "version=${version}" >> $GITHUB_OUTPUT;
