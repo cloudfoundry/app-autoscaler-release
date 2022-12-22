@@ -1,0 +1,31 @@
+name: ARC - Dependabot Auto Merge
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+
+jobs:
+  dependabot-auto-merge:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+    permissions:
+      pull-requests: write
+      contents: write
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v3
+        name: Auto-approve
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          target: minor
+          approve-only: true
+      - uses: alexwilson/enable-github-automerge-action@1.0.0
+        name: Enable Auto-merge
+        with:
+          github-token: "${{ secrets.APP_AUTOSCALER_CI_TOKEN }}"
+          merge-method: "SQUASH"
