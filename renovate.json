@@ -24,6 +24,69 @@
     }
   ],
   "nix": { "enabled": true },
+  "regexManagers": [
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)act (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "nektos/act",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)actionlint (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "rhysd/actionlint",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)bosh (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "cloudfoundry/bosh-cli",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)cf (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "cloudfoundry/cli",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)gcloud (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "google/cloud-sdk",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)ginkgo (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "onsi/ginkgo",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)golangci-lint (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "golangci/golangci-lint",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)maven (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "apache/maven",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)yq (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "mikefarah/yq",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    }
+  ],
   "lockFileMaintenance": { "enabled": true },
   "schedule": ["after 1am and before 7am every weekday"],
   "timezone": "Europe/Berlin"
