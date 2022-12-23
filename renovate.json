@@ -88,6 +88,20 @@
     },
     {
       "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)terraform-lsp (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "juliosueiras/terraform-lsp",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
+      "matchStrings": ["(^|\\n)terragrunt (?<currentValue>.+?)\\n"],
+      "depNameTemplate": "gruntwork-io/terragrunt",
+      "datasourceTemplate": "github-releases",
+      "extractVersionTemplate": "^v(?<version>\\S+)"
+    },
+    {
+      "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)yq (?<currentValue>.+?)\\n"],
       "depNameTemplate": "mikefarah/yq",
       "datasourceTemplate": "github-releases",
