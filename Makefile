@@ -6,8 +6,8 @@ all_modules:= $(go_modules) db scheduler
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MVN_OPTS="-Dmaven.test.skip=true"
 OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
-db_type?=postgres
-DB_HOST?=localhost
+db_type:=postgres
+DB_HOST:=localhost
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@${DB_HOST}/autoscaler?sslmode=disable"; ;; \
  			 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)

@@ -25,8 +25,8 @@ github_repos:
     hpa_scaledown_delay_seconds: 120
     runners_min_replicas: 1
     runners_max_replicas: 16
-    runnerset_resource_request_cpu: 800m
-    runnerset_resource_request_mem: 1500Mi
+    runnerset_resource_request_cpu: 1600m
+    runnerset_resource_request_mem: 3000Mi
     runnerset_resource_limits_cpu: 2500m
     runnerset_resource_limits_mem: 3000Mi
     var_lib_docker_size: 20Gi
@@ -43,5 +43,5 @@ gke_arc_node_pool_ssd_count: 0
 gke_arc_runner_storage_type: pd-ssd
 
 tf_modules:
-  github_arc: "git@github.com:cloudfoundry/app-runtime-interfaces-infrastructure.git//terraform-modules/actions_runner_controller/team?ref=github-runners"
+  github_arc: "git@github.com:cloudfoundry/app-runtime-interfaces-infrastructure.git//terraform-modules/actions_runner_controller/team?ref=1.4.0"
 
