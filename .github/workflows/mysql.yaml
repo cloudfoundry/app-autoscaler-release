@@ -48,4 +48,4 @@ jobs:
         env:
           DB_HOST: mysql
         run: |
-          make ${{ matrix.suite }} db_type=mysql DB_HOST=$DB_HOST
+          make ${{ matrix.suite }} db_type=mysql DB_HOST="${DB_HOST}"
