@@ -188,4 +188,4 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/types/known/anypb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/durationpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/timestamppb/* # gosub
-- autoscaler/vendor/gopkg.in/yaml.v2/* # gosub
+- autoscaler/vendor/gopkg.in/yaml.v3/* # gosub

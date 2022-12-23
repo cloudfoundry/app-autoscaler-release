@@ -279,18 +279,15 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 	return string(marshaled)
 }
 
-func GenerateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, threshold int64,
-	timezone string, startDateTime, endDateTime time.Time,
-	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
+func GenerateSpecificDateSchedulePolicy(startDateTime, endDateTime time.Time, scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
 	scalingInRule := ScalingRule{
-		MetricType:            "memoryused",
+		MetricType:            "cpu",
 		BreachDurationSeconds: TestBreachDurationSeconds,
-		Threshold:             threshold,
+		Threshold:             80,
 		Operator:              "<",
 		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "-1",
 	}
-
 	specificDateSchedule := SpecificDateSchedule{
 		StartDateTime:         startDateTime.Round(1 * time.Minute).Format("2006-01-02T15:04"),
 		EndDateTime:           endDateTime.Round(1 * time.Minute).Format("2006-01-02T15:04"),
@@ -298,13 +295,12 @@ func GenerateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, 
 		ScheduledInstanceMax:  scheduledInstanceMax,
 		ScheduledInstanceInit: scheduledInstanceInit,
 	}
-
 	policy := ScalingPolicy{
-		InstanceMin:  instanceMin,
-		InstanceMax:  instanceMax,
+		InstanceMin:  1,
+		InstanceMax:  4,
 		ScalingRules: []*ScalingRule{&scalingInRule},
 		Schedules: &ScalingSchedules{
-			Timezone:              timezone,
+			Timezone:              "UTC",
 			SpecificDateSchedules: []*SpecificDateSchedule{&specificDateSchedule},
 		},
 	}
