@@ -56,4 +56,4 @@ jobs:
           POSTGRES_PORT: 5432
           POSTGRES_DB: autoscaler
         run: |
-          make ${{ matrix.suite }} DB_HOST=$POSTGRES_HOST
+          make ${{ matrix.suite }}
