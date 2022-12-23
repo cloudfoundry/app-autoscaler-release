@@ -4,7 +4,7 @@ bosh 7.0.1
 cf 8.5.0
 concourse 7.8.1
 direnv 2.32.2
-gcloud 403.0.0
+gcloud 412.0.0
 ginkgo 2.6.1
 golang 1.19.4
 golangci-lint 1.50.1
