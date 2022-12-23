@@ -19,7 +19,7 @@ jobs:
       DB_DATABASE: autoscaler
       DB_USER: root
       DB_PASSWORD: root
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     continue-on-error: true
