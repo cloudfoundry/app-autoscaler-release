@@ -1,3 +1,4 @@
+
 # golangci.com configuration
 # https://github.com/golangci/golangci/wiki/Configuration
 ---
@@ -7,6 +8,8 @@ linters-settings:
     packages-with-error-message:
       - github.com/alecthomas/assert: "use github.com/stretchr/testify/assert"
       - github.com/magiconair/properties/assert: "use github.com/stretchr/testify/assert"
+      - code.cloudfoundry.org/cfhttp/handlers: "use code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/handlers"
+      - code.cloudfoundry.org/cfhttp: "use code.cloudfoundry.org/cfhttp/v2 or code.cloudfoundry.org/tlsconfig"
       - github.com/lib/pq: "use github.com/jackc/pgx"
       - gopkg.in/yaml.v2: "use gopkg.in/yaml.v3"
   dupl:

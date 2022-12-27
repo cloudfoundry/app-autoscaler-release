@@ -12,6 +12,7 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
+- autoscaler/helpers/handlers/* # gosub
 - autoscaler/metricsforwarder/cmd/metricsforwarder/* # gosub
 - autoscaler/metricsforwarder/config/* # gosub
 - autoscaler/metricsforwarder/forwarder/* # gosub
@@ -23,7 +24,6 @@ files:
 - autoscaler/models/* # gosub
 - autoscaler/ratelimiter/* # gosub
 - autoscaler/routes/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/cfhttp/handlers/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-diodes/* # gosub
