@@ -54,9 +54,9 @@ var _ = BeforeSuite(func() {
 		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
 
-	fmt.Println("\ncreating droplet...")
+	fmt.Print("\ncreating droplet...")
 	nodeAppDropletPath = CreateDroplet(*cfg)
-	fmt.Print("done")
+	fmt.Println("done")
 })
 
 func updateOrgQuotaForPerformanceTest(orgGuid string) {

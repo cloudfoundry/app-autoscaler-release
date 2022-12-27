@@ -361,7 +361,6 @@ cf-login:
 setup-performance:
 	export GINKGO_OPTS="";\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="setup_performance";\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
@@ -370,7 +369,6 @@ run-performance:
 	export GINKGO_OPTS="";\
 	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 

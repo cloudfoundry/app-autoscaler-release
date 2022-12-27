@@ -3,6 +3,7 @@ package peformance_setup_test
 import (
 	"acceptance/helpers"
 	"fmt"
+	"math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -29,18 +30,16 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 		workerCount := cfg.Performance.SetupWorkers
 		appsChan := make(chan string)
 
-		By(fmt.Sprintf("Deploying %d apps", cfg.Performance.AppCount))
 		wg := sync.WaitGroup{}
 
+		fmt.Println(fmt.Sprintf("\nStarting %d workers...", cfg.Performance.SetupWorkers))
 		for i := 0; i < workerCount; i++ {
 			wg.Add(1)
-			go func() {
-				// Warms up environment to not DDOS cf Cloud Controller when starting
-				time.Sleep(time.Duration(100*i) * time.Millisecond)
-				worker(appsChan, &runningAppsCount, &pendingApps, &wg)
-			}()
+			time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+			go worker(appsChan, &runningAppsCount, &pendingApps, &wg)
 		}
 
+		fmt.Println(fmt.Sprintf("Deploying %d apps", cfg.Performance.AppCount))
 		for i := 0; i < cfg.Performance.AppCount; i++ {
 			appName = fmt.Sprintf("node-custom-metric-benchmark-%d", i)
 			pendingApps.Store(appName, 1)

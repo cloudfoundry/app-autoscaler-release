@@ -553,9 +553,19 @@ func GetHTTPClient(cfg *config.Config) *http.Client {
 }
 
 func GetAppGuid(cfg *config.Config, appName string) string {
-	guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find app guid for app: %s \n CLI Output:\n %s", appName, guid.Out.Contents()))
-	return strings.TrimSpace(string(guid.Out.Contents()))
+
+	getAppGuid := func() (string, error) {
+		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
+		if guid.ExitCode() == 0 {
+			return strings.TrimSpace(string(guid.Out.Contents())), nil
+		}
+
+		return "", errors.New(fmt.Sprintf("Failed to find app guid for app: %s \n CLI Output:\n %s", appName, guid.Err.Contents()))
+	}
+
+	appGuid, err := TRetry(2, 10, getAppGuid)
+	Expect(err).NotTo(HaveOccurred())
+	return appGuid
 }
 
 func FailOnCommandFailuref(command *Session, format string, args ...any) *Session {
