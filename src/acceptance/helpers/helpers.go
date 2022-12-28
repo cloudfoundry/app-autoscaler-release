@@ -486,7 +486,8 @@ func GetServiceInstanceParameters(cfg *config.Config, instanceName string) strin
 }
 
 func GetServiceCredentialBindingGuid(cfg *config.Config, instanceGuid string, appName string) string {
-	appGuid := GetAppGuid(cfg, appName)
+	appGuid, err := GetAppGuid(cfg, appName)
+	Expect(err).NotTo(HaveOccurred())
 	guid := cf.CfSilent("curl", fmt.Sprintf("/v3/service_credential_bindings?service_instance_guids=%s&app_guids=%s", instanceGuid, appGuid)).Wait(cfg.DefaultTimeoutDuration())
 
 	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find service credential binding guid for service instance guid : %s and app name %s \n CLI Output:\n %s", instanceGuid, appName, guid.Out.Contents()))
@@ -500,7 +501,7 @@ func GetServiceCredentialBindingGuid(cfg *config.Config, instanceGuid string, ap
 	var serviceCredentialBindings = struct {
 		Resources []ServiceCredentialBinding `json:"resources"`
 	}{}
-	err := json.Unmarshal(contents, &serviceCredentialBindings)
+	err = json.Unmarshal(contents, &serviceCredentialBindings)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	return serviceCredentialBindings.Resources[0].GUID
@@ -552,7 +553,7 @@ func GetHTTPClient(cfg *config.Config) *http.Client {
 	}
 }
 
-func GetAppGuid(cfg *config.Config, appName string) string {
+func GetAppGuid(cfg *config.Config, appName string) (string, error) {
 
 	getAppGuid := func() (string, error) {
 		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
@@ -563,9 +564,8 @@ func GetAppGuid(cfg *config.Config, appName string) string {
 		return "", errors.New(fmt.Sprintf("Failed to find app guid for app: %s \n CLI Output:\n %s", appName, guid.Err.Contents()))
 	}
 
-	appGuid, err := TRetry(2, 10, getAppGuid)
-	Expect(err).NotTo(HaveOccurred())
-	return appGuid
+	appGuid, err := TRetry(3, 60, getAppGuid)
+	return appGuid, err
 }
 
 func FailOnCommandFailuref(command *Session, format string, args ...any) *Session {

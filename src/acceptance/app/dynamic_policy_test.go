@@ -24,7 +24,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 	JustBeforeEach(func() {
 		appName = CreateTestApp(cfg, "dynamic-policy", initialInstanceCount)
-		appGUID = GetAppGuid(cfg, appName)
+		appGUID err:= GetAppGuid(cfg, appName)
+		Expect(err).NotTo(HaveOccurred())
 		StartApp(appName, cfg.CfPushTimeoutDuration())
 		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 	})

@@ -17,6 +17,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 		appName          string
 		runningAppsCount int32
 		pendingApps      sync.Map
+		errors           sync.Map
 	)
 
 	AfterEach(func() {
@@ -25,6 +26,10 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 			return true
 		})
 
+		errors.Range(func(appName, err interface{}) bool {
+			fmt.Printf("errors by app: %s: %s \n", appName, err.(error).Error() )
+			return true
+		})
 	})
 	BeforeEach(func() {
 		workerCount := cfg.Performance.SetupWorkers
@@ -36,7 +41,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 		for i := 0; i < workerCount; i++ {
 			wg.Add(1)
 			time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
-			go worker(appsChan, &runningAppsCount, &pendingApps, &wg)
+			go worker(appsChan, &runningAppsCount, &pendingApps, &errors, &wg)
 		}
 
 		fmt.Println(fmt.Sprintf("Deploying %d apps", cfg.Performance.AppCount))
@@ -57,14 +62,17 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 	})
 })
 
-func worker(appsChan chan string, runningApps *int32, pendingApps *sync.Map, wg *sync.WaitGroup) {
+func worker(appsChan chan string, runningApps *int32, pendingApps *sync.Map, errors *sync.Map, wg *sync.WaitGroup) {
 	// Decreasing internal counter for wait-group as soon as goroutine finishes
 	defer wg.Done()
 	defer GinkgoRecover()
 	for appName := range appsChan {
 		helpers.CreateTestAppFromDropletByName(cfg, nodeAppDropletPath, appName, 1)
 		policy := helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
-		appGUID := helpers.GetAppGuid(cfg, appName)
+		appGUID, err := helpers.GetAppGuid(cfg, appName)
+		if err != nil {
+			errors.Store(appName, err)
+		}
 		_ = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 		helpers.CreateCustomMetricCred(cfg, appName, appGUID)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())

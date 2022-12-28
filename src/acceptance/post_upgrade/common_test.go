@@ -9,7 +9,8 @@ func GetAppInfo(org, space, appType string) (fullAppName string, appGuid string)
 	apps := helpers.GetApps(cfg, org, space, "autoscaler-")
 	for _, app := range apps {
 		if strings.Contains(app, appType) {
-			return app, helpers.GetAppGuid(cfg, app)
+			appGuid , _ := GetAppGuid(cfg, app)
+			return app, appGuid
 		}
 	}
 	return "", ""

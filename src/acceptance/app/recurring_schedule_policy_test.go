@@ -13,6 +13,7 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 	var (
 		initialInstanceCount int
 		daysOfMonthOrWeek    Days
+		err error
 		startTime            time.Time
 		endTime              time.Time
 		policy               string
@@ -22,7 +23,8 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		instanceName = CreateService(cfg)
 		initialInstanceCount = 1
 		appName = CreateTestApp(cfg, "recurring-schedule", initialInstanceCount)
-		appGUID = GetAppGuid(cfg, appName)
+		appGUID , err = GetAppGuid(cfg, appName)
+		Expect(err).NotTo(HaveOccurred())
 	})
 	AfterEach(AppAfterEach)
 

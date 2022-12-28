@@ -16,7 +16,8 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 	BeforeEach(func() {
 		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 		appName = CreateTestApp(cfg, "node-custom-metric", 1)
-		appGUID = GetAppGuid(cfg, appName)
+		appGUID, err := GetAppGuid(cfg, appName)
+		Expect(err).NotTo(HaveOccurred())
 		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 		CreateCustomMetricCred(cfg, appName, appGUID)
 		StartApp(appName, cfg.CfPushTimeoutDuration())

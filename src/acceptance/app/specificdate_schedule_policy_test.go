@@ -15,13 +15,15 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		startDateTime        time.Time
 		endDateTime          time.Time
 		policy               string
+		err                  error
 	)
 
 	BeforeEach(func() {
 		instanceName = CreateService(cfg)
 		initialInstanceCount = 1
 		appName = CreateTestApp(cfg, "date-schedule", initialInstanceCount)
-		appGUID = GetAppGuid(cfg, appName)
+		appGUID, err = GetAppGuid(cfg, appName)
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	AfterEach(AppAfterEach)

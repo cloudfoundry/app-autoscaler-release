@@ -68,7 +68,8 @@ var _ = BeforeSuite(func() {
 	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
 
 	appName = CreateTestApp(cfg, "apitest", 1)
-	appGUID = GetAppGuid(cfg, appName)
+	appGUID, err := GetAppGuid(cfg, appName)
+	Expect(err).NotTo(HaveOccurred())
 
 	By("Creating test service")
 	instanceName = CreateService(cfg)

@@ -128,7 +128,8 @@ func DeleteTestApp(appName string, timeout time.Duration) {
 }
 
 func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url string) string {
-	appGuid := GetAppGuid(cfg, appName)
+	appGuid ,err := GetAppGuid(cfg, appName)
+	Expect(err).NotTo(HaveOccurred())
 	output := cfh.CurlAppWithTimeout(cfg, appName, url, 20*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGuid, appInstance),
 		"-f",
 		"--connect-timeout", "5",

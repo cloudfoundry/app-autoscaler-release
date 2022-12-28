@@ -22,6 +22,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 		experiment         *gmeasure.Experiment
 		doneAppsCount      int32
 		scaledOutAppsCount int32
+		errors             sync.Map
 	)
 
 	BeforeEach(func() {
@@ -47,7 +48,10 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 			experiment.Sample(func(i int) {
 				defer GinkgoRecover()
 				appName := fmt.Sprintf("node-custom-metric-benchmark-%d", i+1)
-				appGUID := helpers.GetAppGuid(cfg, appName)
+				appGUID, err := helpers.GetAppGuid(cfg, appName)
+				if err != nil {
+					errors.Store(appName, err)
+				}
 				pollTime := 10 * time.Second
 
 				wg := sync.WaitGroup{}
