@@ -8,7 +8,6 @@ groups:
   - destroy-infrastructure
   - bosh-cleanup
   - deploy-prometheus
-  - update-dns-servers
 
 - name: others
   jobs:
@@ -16,7 +15,7 @@ groups:
 
 resource_types:
 - name: gcs-resource
-  type: docker-image
+  type: registry-image
   source:
     repository: frodenas/gcs-resource
 
@@ -101,14 +100,15 @@ jobs:
     params:
       BBL_IAAS: gcp
       BBL_ENV_NAME: autoscaler
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
-      BBL_GCP_PROJECT_ID: cloud-foundry-310819
-      BBL_GCP_REGION: europe-west4
-      BBL_GCP_ZONE: europe-west4-a
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
+      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
+      BBL_GCP_REGION: europe-west3
+      BBL_GCP_ZONE: europe-west3-a
       DEBUG_MODE: true
       LB_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
       BBL_LB_CERT: ((autoscaler_lb_cert))
       BBL_LB_KEY: ((autoscaler_lb_key))
+      TF_VAR_parent_dns_zone: app-runtime-interfaces
     input_mapping:
       bbl-state: bbl-state
       bbl-config: bbl-state
@@ -117,29 +117,6 @@ jobs:
       params:
         repository: updated-bbl-state
         rebase: true
-          #- task: update-dns-servers
-          #  file: ci/ci/infrastructure/tasks/update-dns-servers.yml
-          #  params:e
-          #    BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
-          #    BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
-          #    GCP_DNS_ZONE: app-runtime-interfaces
-          #    GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-
-- name: update-dns-servers
-  serial_groups: [infra]
-  public: true
-  build_logs_to_retain: 100
-  plan:
-  - in_parallel:
-    - get: ci
-    - get: bbl-state
-  - task: update-dns-servers
-    file: ci/ci/infrastructure/tasks/update-dns-servers.yml
-    params:
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
-      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
-      GCP_DNS_ZONE: app-runtime-interfaces
-      GCP_DNS_NAME: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
 
 - name: delete-cf
   serial_groups: [infra]
@@ -172,8 +149,8 @@ jobs:
     params:
       BBL_IAAS: gcp
       BBL_ENV_NAME: autoscaler
-      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_deployer_key))
-      BBL_GCP_PROJECT_ID: cloud-foundry-310819
+      BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
+      BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
     input_mapping:
       bbl-state: bbl-state
     ensure:
@@ -209,6 +186,8 @@ jobs:
   - task: deploy-prometheus
     file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
     params:
+      BBL_GCP_REGION: europe-west3
+      BBL_GCP_ZONE: europe-west3-a
       SLACK_WEBHOOK: ((slack_webhook))
 
 - name: deploy-cf

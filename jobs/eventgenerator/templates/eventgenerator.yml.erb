@@ -24,10 +24,10 @@
   unless p("autoscaler.#{db_name}.tls.ca") == ""
     db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
   end
-  unless p("autoscaler.#{db_name}.tls.crt") == ""
+  unless p("autoscaler.#{db_name}.tls.certificate") == ""
     db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
   end
-  unless p("autoscaler.#{db_name}.tls.key") == ""
+  unless p("autoscaler.#{db_name}.tls.private_key") == ""
     db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key"
   end
   db_url
@@ -40,9 +40,16 @@ end
   policy_db_url = build_db_url('policy_db', job_name)
   app_metrics_db_url = build_db_url('appmetrics_db', job_name)
 
-  metric_collector_url = "https://" + p("autoscaler.eventgenerator.metricscollector.host") + ":" + p("autoscaler.eventgenerator.metricscollector.port").to_s
-  if p("autoscaler.eventgenerator.metricscollector.use_log_cache")
-    metric_collector_url.gsub!("https://", "")
+
+  unless p("autoscaler.eventgenerator.metricscollector.use_log_cache")
+    metric_collector_url = "https://" + p("autoscaler.eventgenerator.metricscollector.host")
+  else
+    metric_collector_url = p("autoscaler.eventgenerator.metricscollector.host")
+  end
+
+  metrics_collector_port = p("autoscaler.eventgenerator.metricscollector.port").to_s
+  unless metrics_collector_port.empty?
+    metric_collector_url += ":" + metrics_collector_port
   end
 
   sorted_instances=link("eventgenerator").instances.sort_by {|i|i.address}
@@ -109,7 +116,13 @@ metricCollector:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.crt
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/ca.crt
-
+  <% if_p("autoscaler.eventgenerator.metricscollector.uaa.url") do %>
+  uaa:
+    url: <%= p("autoscaler.eventgenerator.metricscollector.uaa.url") %>
+    client_id: <%= p("autoscaler.eventgenerator.metricscollector.uaa.client_id") %>
+    client_secret: <%= p("autoscaler.eventgenerator.metricscollector.uaa.client_secret") %>
+    skip_ssl_validation: <%= p("autoscaler.eventgenerator.metricscollector.uaa.skip_ssl_validation") %>
+  <% end %>
 
 defaultStatWindowSecs: <%= p("autoscaler.eventgenerator.defaultStatWindowSecs") %>
 defaultBreachDurationSecs: <%= p("autoscaler.eventgenerator.defaultBreachDurationSecs") %>

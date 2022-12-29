@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.cloudfoundry.autoscaler.scheduler.dao.ActiveScheduleDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.PolicyJsonDao;
 import org.cloudfoundry.autoscaler.scheduler.dao.RecurringScheduleDao;
@@ -162,7 +164,6 @@ public class ScheduleManager {
    */
   @Transactional
   public void createSchedules(Schedules schedules) {
-
     List<RecurringScheduleEntity> recurringSchedules = schedules.getRecurringSchedule();
     List<SpecificDateScheduleEntity> specificDateSchedules = schedules.getSpecificDate();
 
@@ -366,13 +367,12 @@ public class ScheduleManager {
     int createCount = 0;
     int updateCount = 0;
     int deleteCount = 0;
-    Map<String, ApplicationSchedules> policySchedulesMap =
-        new HashMap<String, ApplicationSchedules>();
-    Map<String, String> appIdAndGuidMap = new HashMap<String, String>();
-    Map<String, String> scheduleAppIdGuidMap = new HashMap<String, String>();
+    Map<String, ApplicationSchedules> policySchedulesMap = new HashMap<>();
+    Map<String, String> appIdAndGuidMap;
+    Map<String, String> scheduleAppIdGuidMap = new HashMap<>();
     List<PolicyJsonEntity> policyList = null;
-    List recurringScheduleList = null;
-    List specificDateScheduleList = null;
+    Map<String, String> recurringScheduleList = null;
+    Map<String, String> specificDateScheduleList = null;
     try {
       policyList = policyJsonDao.getAllPolicies();
       recurringScheduleList = recurringScheduleDao.getDistinctAppIdAndGuidList();
@@ -390,22 +390,14 @@ public class ScheduleManager {
       }
     }
 
-    if (recurringScheduleList.size() > 0) {
-      for (Object ro : recurringScheduleList) {
-        Object[] roArray = (Object[]) ro;
-        appIdAndGuidMap.put((String) (roArray[0]), (String) (roArray[1]));
-      }
-    }
+    appIdAndGuidMap =
+        Stream.concat(
+                recurringScheduleList.entrySet().stream(),
+                specificDateScheduleList.entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v2));
 
-    if (specificDateScheduleList.size() > 0) {
-      for (Object so : specificDateScheduleList) {
-        Object[] soArray = (Object[]) so;
-        appIdAndGuidMap.put((String) (soArray[0]), (String) (soArray[1]));
-      }
-    }
-
-    List<ApplicationSchedules> toCreateScheduleList = new ArrayList<ApplicationSchedules>();
-    Set<String> toDeletedAppIds = new HashSet<String>();
+    List<ApplicationSchedules> toCreateScheduleList = new ArrayList<>();
+    Set<String> toDeletedAppIds = new HashSet<>();
     for (String appIdInPolicy : policySchedulesMap.keySet()) {
       if (policySchedulesMap.get(appIdInPolicy).getSchedules() != null
           && policySchedulesMap.get(appIdInPolicy).getSchedules().hasSchedules()) {

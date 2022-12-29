@@ -1,4 +1,4 @@
-name: Dependabot Auto Merge
+name: Dependency Updates Auto Merge
 
 on:
   pull_request:
@@ -9,15 +9,16 @@ on:
       - labeled
 
 jobs:
-  dependabot-auto-merge:
+  dependency-updates-auto-merge:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       contents: write
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && contains(github.event.pull_request.labels.*.name, 'dependencies')
+    if: contains(fromJson('["dependabot[bot]", "renovate[bot]"]'), github.event.pull_request.user.login) && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
       - uses: fastify/github-action-merge-dependabot@v3
         name: Auto-approve
+        if: github.event.pull_request.user.login == 'dependabot[bot]'
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           target: minor

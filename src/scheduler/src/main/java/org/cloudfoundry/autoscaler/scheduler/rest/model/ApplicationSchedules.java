@@ -3,19 +3,26 @@ package org.cloudfoundry.autoscaler.scheduler.rest.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 /** */
 @ApiModel
 public class ApplicationSchedules {
   @ApiModelProperty(required = true)
+  @NotNull
+  @Min(value = 1)
   @JsonProperty(value = "instance_min_count")
   Integer instanceMinCount;
 
   @ApiModelProperty(required = true)
+  @NotNull
+  @Min(value = 1)
   @JsonProperty(value = "instance_max_count")
   Integer instanceMaxCount;
 
   @ApiModelProperty(required = true)
+  @NotNull
   Schedules schedules;
 
   public Integer getInstanceMinCount() {

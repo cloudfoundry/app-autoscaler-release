@@ -6,6 +6,7 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
 bosh_deploy_opts=${BOSH_DEPLOY_OPTS:-}
+bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
 deployment_name="${DEPLOYMENT_NAME:-prometheus}"
 bosh_cert_ca_file=${BOSH_CERT_CA_FILE:-"${HOME}/.ssh/bosh.ca.crt"}
 uaa_ssl_ca_file="${UAA_SSL_CA_FILE:-$(mktemp)}"
@@ -66,6 +67,23 @@ credhub get -n /bosh-autoscaler/cf/uaa_ssl -k private_key > $uaa_ssl_key_file
 credhub set -n /bosh-autoscaler/prometheus/alertmanager_slack_channel -t value -v "${slack_channel}"
 credhub set -n /bosh-autoscaler/prometheus/alertmanager_slack_api_url -t value -v "${slack_webhook}"
 
+
+function find_or_upload_stemcell(){
+  # Determine if we need to upload a stemcell at this point.
+  stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
+  stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
+  stemcell_name="bosh-google-kvm-${stemcell_os}-go_agent"
+
+  if ! bosh stemcells | grep "${stemcell_name}" >/dev/null; then
+    URL="https://bosh.io/d/stemcells/${stemcell_name}"
+    if [ "${stemcell_version}" != "latest" ]; then
+	    URL="${URL}?v=${stemcell_version}"
+    fi
+    wget "$URL" -O stemcell.tgz
+    bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
+  fi
+}
+
 function deploy () {
   OPS_FILES_TO_USE=""
   for OPS_FILE in ${ops_files}; do
@@ -105,4 +123,5 @@ function deploy () {
     -v uaa_clients_grafana_secret="$UAA_CLIENTS_GRAFANA_SECRET"
 }
 
+find_or_upload_stemcell
 deploy

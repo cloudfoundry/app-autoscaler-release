@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
+
 	. "github.com/onsi/ginkgo/v2"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/generator"
@@ -94,48 +96,59 @@ func OauthToken(cfg *config.Config) string {
 	return strings.TrimSpace(string(cmd.Out.Contents()))
 }
 
-func EnableServiceAccess(cfg *config.Config, orgName string) {
-	if orgName == "" {
-		Fail(fmt.Sprintf("Org must not be an empty string. Using broker:%s, serviceName:%s", cfg.ServiceBroker, cfg.ServiceName))
+func EnableServiceAccess(setup *workflowhelpers.ReproducibleTestSuiteSetup, cfg *config.Config, orgName string) {
+	if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			if orgName == "" {
+				Fail(fmt.Sprintf("Org must not be an empty string. Using broker:%s, serviceName:%s", cfg.ServiceBroker, cfg.ServiceName))
+			}
+			enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
+		})
 	}
-	enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
 }
 
-func DisableServiceAccess(cfg *config.Config, orgName string) {
-	enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
+func DisableServiceAccess(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup) {
+	if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			orgName := setup.GetOrganizationName()
+			enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
+		})
+	}
 }
 
 func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
-	spaceCmd := cf.Cf("space", spaceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
-	spaceGuid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
+	if cfg.IsServiceOfferingEnabled() {
+		spaceCmd := cf.Cf("space", spaceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
+		Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
+		spaceGuid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
 
-	serviceCmd := cf.CfSilent("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
-	if serviceCmd.ExitCode() != 0 {
-		Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
-	}
-
-	var services = struct {
-		Included struct {
-			ServiceOfferings []struct{ Name string } `json:"service_offerings"`
+		serviceCmd := cf.CfSilent("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
+		if serviceCmd.ExitCode() != 0 {
+			Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
 		}
-	}{}
-	contents := serviceCmd.Out.Contents()
-	err := json.Unmarshal(contents, &services)
-	if err != nil {
-		AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
-	}
-	GinkgoWriter.Printf("\nFound services: %s\n", services.Included.ServiceOfferings)
-	for _, service := range services.Included.ServiceOfferings {
-		if service.Name == serviceName {
-			return
-		}
-	}
 
-	cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-	Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
+		var services = struct {
+			Included struct {
+				ServiceOfferings []struct{ Name string } `json:"service_offerings"`
+			}
+		}{}
+		contents := serviceCmd.Out.Contents()
+		err := json.Unmarshal(contents, &services)
+		if err != nil {
+			AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
+		}
+		GinkgoWriter.Printf("\nFound services: %s\n", services.Included.ServiceOfferings)
+		for _, service := range services.Included.ServiceOfferings {
+			if service.Name == serviceName {
+				return
+			}
+		}
+
+		cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
+		Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
+	}
 }
 
 func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
@@ -266,18 +279,15 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 	return string(marshaled)
 }
 
-func GenerateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, threshold int64,
-	timezone string, startDateTime, endDateTime time.Time,
-	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
+func GenerateSpecificDateSchedulePolicy(startDateTime, endDateTime time.Time, scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
 	scalingInRule := ScalingRule{
-		MetricType:            "memoryused",
+		MetricType:            "cpu",
 		BreachDurationSeconds: TestBreachDurationSeconds,
-		Threshold:             threshold,
+		Threshold:             80,
 		Operator:              "<",
 		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "-1",
 	}
-
 	specificDateSchedule := SpecificDateSchedule{
 		StartDateTime:         startDateTime.Round(1 * time.Minute).Format("2006-01-02T15:04"),
 		EndDateTime:           endDateTime.Round(1 * time.Minute).Format("2006-01-02T15:04"),
@@ -285,13 +295,12 @@ func GenerateDynamicAndSpecificDateSchedulePolicy(instanceMin, instanceMax int, 
 		ScheduledInstanceMax:  scheduledInstanceMax,
 		ScheduledInstanceInit: scheduledInstanceInit,
 	}
-
 	policy := ScalingPolicy{
-		InstanceMin:  instanceMin,
-		InstanceMax:  instanceMax,
+		InstanceMin:  1,
+		InstanceMax:  4,
 		ScalingRules: []*ScalingRule{&scalingInRule},
 		Schedules: &ScalingSchedules{
-			Timezone:              timezone,
+			Timezone:              "UTC",
 			SpecificDateSchedules: []*SpecificDateSchedule{&specificDateSchedule},
 		},
 	}
@@ -306,7 +315,7 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 	timezone string, startTime, endTime time.Time, daysOfMonthOrWeek Days,
 	scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
 	scalingInRule := ScalingRule{
-		MetricType:            "memoryused",
+		MetricType:            "cpu",
 		BreachDurationSeconds: TestBreachDurationSeconds,
 		Threshold:             threshold,
 		Operator:              "<",
@@ -367,6 +376,7 @@ func RunningInstances(appGUID string, timeout time.Duration) int {
 func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Duration) {
 	By(fmt.Sprintf("Waiting for %d instances of app: %s", instances, appGUID))
 	Eventually(getAppInstances(appGUID, 8*time.Second)).
+		WithOffset(1).
 		WithTimeout(timeout).
 		WithPolling(10 * time.Second).
 		Should(Equal(instances))
@@ -416,14 +426,67 @@ func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName
 func CreateService(cfg *config.Config) string {
 	return CreateServiceWithPlan(cfg, cfg.ServicePlan)
 }
+
 func CreateServiceWithPlan(cfg *config.Config, servicePlan string) string {
+	return CreateServiceWithPlanAndParameters(cfg, servicePlan, "")
+}
+
+func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string) string {
 	if cfg.IsServiceOfferingEnabled() {
 		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		createService := cf.Cf("create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker).Wait(cfg.DefaultTimeoutDuration())
+		cfCommand := []string{"create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker}
+		if defaultPolicy != "" {
+			cfCommand = append(cfCommand, "-c", defaultPolicy)
+		}
+		createService := cf.Cf(cfCommand...).Wait(cfg.DefaultTimeoutDuration())
 		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s \n Command Error: %s %s", instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
 		return instanceName
 	}
 	return ""
+}
+
+func GetServiceInstanceGuid(cfg *config.Config, instanceName string) string {
+	guid := cf.Cf("service", instanceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
+	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find service instance guid for service instance: %s \n CLI Output:\n %s", instanceName, guid.Out.Contents()))
+	return strings.TrimSpace(string(guid.Out.Contents()))
+}
+
+func GetServiceInstanceParameters(cfg *config.Config, instanceName string) string {
+	instanceGuid := GetServiceInstanceGuid(cfg, instanceName)
+
+	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/service_instances/%s/parameters", instanceGuid)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(cmd).To(Exit(0))
+	return strings.TrimSpace(string(cmd.Out.Contents()))
+}
+
+func GetServiceCredentialBindingGuid(cfg *config.Config, instanceGuid string, appName string) string {
+	appGuid := GetAppGuid(cfg, appName)
+	guid := cf.CfSilent("curl", fmt.Sprintf("/v3/service_credential_bindings?service_instance_guids=%s&app_guids=%s", instanceGuid, appGuid)).Wait(cfg.DefaultTimeoutDuration())
+
+	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find service credential binding guid for service instance guid : %s and app name %s \n CLI Output:\n %s", instanceGuid, appName, guid.Out.Contents()))
+
+	contents := guid.Out.Contents()
+
+	type ServiceCredentialBinding struct {
+		GUID string `json:"guid"`
+	}
+
+	var serviceCredentialBindings = struct {
+		Resources []ServiceCredentialBinding `json:"resources"`
+	}{}
+	err := json.Unmarshal(contents, &serviceCredentialBindings)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	return serviceCredentialBindings.Resources[0].GUID
+}
+
+func GetServiceCredentialBindingParameters(cfg *config.Config, instanceName string, appName string) string {
+	instanceGuid := GetServiceInstanceGuid(cfg, instanceName)
+	serviceCredentialBindingGuid := GetServiceCredentialBindingGuid(cfg, instanceGuid, appName)
+
+	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/service_credential_bindings/%s/parameters", serviceCredentialBindingGuid)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(cmd).To(Exit(0))
+	return strings.TrimSpace(string(cmd.Out.Contents()))
 }
 
 func CreatePolicyWithAPI(cfg *config.Config, appGUID, policy string) {

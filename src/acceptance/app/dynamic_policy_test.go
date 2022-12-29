@@ -4,8 +4,6 @@ import (
 	"acceptance"
 	. "acceptance/helpers"
 	"fmt"
-	"math"
-
 	"time"
 
 	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"
@@ -20,6 +18,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		doneChan       chan bool
 		doneAcceptChan chan bool
 		ticker         *time.Ticker
+		maxHeapLimitMb int
 	)
 
 	JustBeforeEach(func() {
@@ -28,28 +27,26 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		StartApp(appName, cfg.CfPushTimeoutDuration())
 		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 	})
+	BeforeEach(func() {
+		maxHeapLimitMb = cfg.NodeMemoryLimit - 28
+	})
 
 	AfterEach(AppAfterEach)
 
 	Context("when scaling by memoryused", func() {
 
 		Context("There is a scale out and scale in policy", func() {
-			var heapToUse int64
+			var heapToUse int
 			BeforeEach(func() {
-				heapToUse = int64(math.Min(float64(cfg.NodeMemoryLimit-20), 200))
-
-				if AppResidentSize+30 >= heapToUse {
-					Fail("There is not enough app memory in the app to run this test.\n - app resident size %d\n - app memory limit: %d\n - heap to use: %d", AppResidentSize, cfg.NodeMemoryLimit, int(heapToUse))
-				}
-
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", 80, 80)
+				heapToUse = min(maxHeapLimitMb, 200)
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", 78, 80)
 				initialInstanceCount = 1
 			})
 
 			It("should scale out and then back in.", Label(acceptance.LabelSmokeTests), func() {
-				url := fmt.Sprintf("/memory/%d/5", heapToUse)
 				By(fmt.Sprintf("Use heap %d mb of heap on app", heapToUse))
-				CurlAppInstance(cfg, appName, 0, url)
+				CurlAppInstance(cfg, appName, 0, fmt.Sprintf("/memory/%d/5", heapToUse))
+
 				By("wait for scale to 2")
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
@@ -67,14 +64,15 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when memoryutil", func() {
 			BeforeEach(func() {
 				//current app resident size is 66mb so 66/128mb is 55%
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryutil", 58, 65)
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryutil", 58, 63)
 				initialInstanceCount = 1
 			})
 
 			It("should scale out and back in", func() {
-				By("use 90% of memory in app")
-				heapToUse := int(float32(cfg.NodeMemoryLimit) * 0.8)
+				heapToUse := min(maxHeapLimitMb, int(float64(cfg.NodeMemoryLimit)*0.80))
+				By(fmt.Sprintf("use 80%% or %d of memory in app", heapToUse))
 				CurlAppInstance(cfg, appName, 0, fmt.Sprintf("/memory/%d/5", heapToUse))
+
 				By("Wait for scale to 2 instances")
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
@@ -253,3 +251,10 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		})
 	})
 })
+
+func min(a int, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}

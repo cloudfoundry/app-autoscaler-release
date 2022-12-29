@@ -19,7 +19,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
-	"code.cloudfoundry.org/cfhttp/handlers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/handlers"
 	"code.cloudfoundry.org/lager"
 	uuid "github.com/nu7hatch/gouuid"
 )
@@ -68,7 +68,7 @@ func writeErrorResponse(w http.ResponseWriter, statusCode int, message string) {
 		Message: message})
 }
 
-func (h *PublicApiHandler) GetScalingPolicy(w http.ResponseWriter, _ *http.Request, vars map[string]string) {
+func (h *PublicApiHandler) GetScalingPolicy(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	appId := vars["appId"]
 	if appId == "" {
 		h.logger.Error("AppId is missing", nil, nil)
@@ -78,7 +78,7 @@ func (h *PublicApiHandler) GetScalingPolicy(w http.ResponseWriter, _ *http.Reque
 
 	h.logger.Info("Get Scaling Policy", lager.Data{"appId": appId})
 
-	scalingPolicy, err := h.policydb.GetAppPolicy(appId)
+	scalingPolicy, err := h.policydb.GetAppPolicy(r.Context(), appId)
 	if err != nil {
 		h.logger.Error("Failed to retrieve scaling policy from database", err, lager.Data{"appId": appId, "err": err})
 		writeErrorResponse(w, http.StatusInternalServerError, "Error retrieving scaling policy")

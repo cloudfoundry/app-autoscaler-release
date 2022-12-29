@@ -10,6 +10,7 @@ db_type:=postgres
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"; ;; \
  			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
+DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
 SUITES?=broker api app
@@ -123,7 +124,7 @@ target/scheduler_test_certs:
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
 test-autoscaler: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
-	@make -C src/$(patsubst test-%,%,$@) test DBURL="${DBURL}" OPTS="${OPTS}"
+	@make -C src/autoscaler test DBURL="${DBURL}" OPTS="${OPTS}"
 test-autoscaler-suite: check-db_type init init-db test-certs
 	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
@@ -319,15 +320,17 @@ uaac:
 markdownlint-cli:
 	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
-.PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh
-deploy-autoscaler: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
+.PHONY: deploy deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
+deploy-autoscaler: deploy
+deploy: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
-
 deploy-autoscaler-bosh:
 	echo " - deploying autoscaler"
-	${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+deploy-cleanup:
+	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 
 deploy-prometheus:
@@ -338,11 +341,8 @@ deploy-prometheus:
 .PHONY: acceptance-tests
 acceptance-tests: vendor-app
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
-
-.PHONY: deploy-cleanup
-deploy-cleanup:
-	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'";\
-	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
+acceptance-cleanup:
+	${CI_DIR}/autoscaler/scripts/cleanup-acceptance.sh;
 
 
 .PHONY: cleanup-concourse
@@ -405,3 +405,4 @@ docker-image: docker-login
 .PHONY: build-tools
 build-tools:
 	make -C src/autoscaler buildtools
+

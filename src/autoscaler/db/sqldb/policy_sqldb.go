@@ -11,8 +11,8 @@ import (
 
 	"code.cloudfoundry.org/lager"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 )
 
 var _ db.PolicyDB = &PolicySQLDB{}
@@ -47,8 +47,8 @@ func NewPolicySQLDB(dbConfig db.DatabaseConfig, logger lager.Logger) (*PolicySQL
 	}
 
 	sqldb.SetConnMaxLifetime(dbConfig.ConnectionMaxLifetime)
-	sqldb.SetMaxIdleConns(dbConfig.MaxIdleConnections)
-	sqldb.SetMaxOpenConns(dbConfig.MaxOpenConnections)
+	sqldb.SetMaxIdleConns(int(dbConfig.MaxIdleConnections))
+	sqldb.SetMaxOpenConns(int(dbConfig.MaxOpenConnections))
 	sqldb.SetConnMaxIdleTime(dbConfig.ConnectionMaxIdleTime)
 
 	return &PolicySQLDB{
@@ -118,10 +118,10 @@ func (pdb *PolicySQLDB) RetrievePolicies() ([]*models.PolicyJson, error) {
 	return policyList, rows.Err()
 }
 
-func (pdb *PolicySQLDB) GetAppPolicy(appId string) (*models.ScalingPolicy, error) {
+func (pdb *PolicySQLDB) GetAppPolicy(ctx context.Context, appId string) (*models.ScalingPolicy, error) {
 	var policyJson []byte
 	query := pdb.sqldb.Rebind("SELECT policy_json FROM policy_json WHERE app_id =?")
-	err := pdb.sqldb.QueryRow(query, appId).Scan(&policyJson)
+	err := pdb.sqldb.QueryRowContext(ctx, query, appId).Scan(&policyJson)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -145,7 +145,7 @@ func (pdb *PolicySQLDB) SaveAppPolicy(ctx context.Context, appId string, policyJ
 	var query string
 	queryPrefix := "INSERT INTO policy_json (app_id, policy_json, guid) VALUES (?,?,?) "
 	switch pdb.sqldb.DriverName() {
-	case "postgres":
+	case "pgx":
 		query = pdb.sqldb.Rebind(queryPrefix + "ON CONFLICT(app_id) DO UPDATE SET policy_json=EXCLUDED.policy_json, guid=EXCLUDED.guid")
 	case "mysql":
 		query = pdb.sqldb.Rebind(queryPrefix + "ON DUPLICATE KEY UPDATE policy_json=VALUES(policy_json), guid=VALUES(guid)")
@@ -233,7 +233,7 @@ func (pdb *PolicySQLDB) SetOrUpdateDefaultAppPolicy(ctx context.Context, boundAp
 		var query string
 		queryPrefix := "INSERT INTO policy_json (app_id, policy_json, guid) VALUES (?, ?, ?)"
 		switch pdb.sqldb.DriverName() {
-		case "postgres":
+		case "pgx":
 			query = tx.Rebind(queryPrefix + " ON CONFLICT DO NOTHING")
 		case "mysql":
 			query = tx.Rebind(queryPrefix + " ON DUPLICATE KEY UPDATE app_id = app_id")
@@ -357,7 +357,7 @@ func (pdb *PolicySQLDB) SaveCredential(ctx context.Context, appId string, cred m
 	var query string
 	queryPrefix := "INSERT INTO credentials (id, username, password, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP) "
 	switch pdb.sqldb.DriverName() {
-	case "postgres":
+	case "pgx":
 		query = pdb.sqldb.Rebind(queryPrefix + "ON CONFLICT(id) DO UPDATE SET username=EXCLUDED.username, password=EXCLUDED.password, updated_at=CURRENT_TIMESTAMP")
 	case "mysql":
 		query = pdb.sqldb.Rebind(queryPrefix + "ON DUPLICATE KEY UPDATE username=VALUES(username), password=VALUES(password), updated_at=CURRENT_TIMESTAMP")

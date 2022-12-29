@@ -13,6 +13,19 @@ let mfPassword = ''
 const serviceName = process.env.SERVICE_NAME
 let cpuWorkers = []
 let memWorker = null
+let timer = null
+
+function gc () {
+  try {
+    if (global.gc) {
+      global.gc()
+    } else {
+      console.log('There is no gc exposed to the worker thread.')
+    }
+  } catch (e) {
+    console.log("Tried to garbage collect Failed please start with the option '--expose-gc'")
+  }
+}
 
 function getCredentials () {
   // NOTE: the way we check for credentials existence might be further improved.
@@ -218,15 +231,20 @@ app.get('/memory/:megabytes/:minute', async function (req, res) {
   }
   megabytes = Math.max(1, megabytes)
   memWorker.postMessage({ action: 'chew', totalMemoryUsage: megabytes, source: '/memory/:megabytes/:minute' })
-  setTimeout(async () => stopMemWorker('timer'), minute * 60 * 1000)
+  timer = setTimeout(async () => stopMemWorker('timer'), minute * 60 * 1000)
   res.status(200).json({ result: 'success', msg: `using worker to allocate ${megabytes}MB of heap for ${minute} minutes` })
 })
 
 function stopMemWorker (src) {
+  if (timer) {
+    clearTimeout(timer)
+    timer = null
+  }
   if (memWorker) {
     memWorker.postMessage({ action: 'stop', source: src })
   }
   memWorker = null
+  gc()
 }
 
 function stopCpuWorkers (src) {
@@ -274,3 +292,5 @@ app.get('/cpu/close', async function (req, res) {
   stopCpuWorkers()
   res.status(200).json({ status: 'close cpu test' })
 })
+
+gc()

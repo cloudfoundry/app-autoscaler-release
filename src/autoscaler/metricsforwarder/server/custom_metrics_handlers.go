@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +14,7 @@ import (
 	"net/http"
 	"time"
 
-	"code.cloudfoundry.org/cfhttp/handlers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/handlers"
 	"code.cloudfoundry.org/lager"
 	"github.com/patrickmn/go-cache"
 )
@@ -135,7 +136,7 @@ func (mh *CustomMetricsHandler) validateCustomMetricTypes(appGUID string, metric
 		allowedMetricTypeSet = res.(map[string]struct{})
 	} else {
 		//  AllowedMetrics not found in cache, find AllowedMetrics from Database
-		scalingPolicy, err := mh.policyDB.GetAppPolicy(appGUID)
+		scalingPolicy, err := mh.policyDB.GetAppPolicy(context.TODO(), appGUID)
 		if err != nil {
 			mh.logger.Error("error-getting-policy", err, lager.Data{"appId": appGUID})
 			return errors.New("not able to get policy details")

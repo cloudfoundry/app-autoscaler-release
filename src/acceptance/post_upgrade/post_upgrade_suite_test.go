@@ -2,7 +2,7 @@ package post_upgrade_test
 
 import (
 	"acceptance/config"
-	"acceptance/helpers"
+	. "acceptance/helpers"
 	"fmt"
 	"os"
 	"testing"
@@ -39,10 +39,10 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewSmokeTestSuiteSetup(cfg)
 
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		orgs := helpers.GetTestOrgs(cfg)
+		orgs := GetTestOrgs(cfg)
 		Expect(len(orgs)).To(Equal(1))
 		orgName = orgs[0]
-		_, orgGUID, spaceName, spaceGUID = helpers.GetOrgSpaceNamesAndGuids(cfg, orgName)
+		_, orgGUID, spaceName, spaceGUID = GetOrgSpaceNamesAndGuids(cfg, orgName)
 	})
 
 	Expect(orgName).ToNot(Equal(""), "orgName has not been determined")
@@ -60,7 +60,7 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 
 	if cfg.IsServiceOfferingEnabled() {
-		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
+		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
 })
 
@@ -68,11 +68,7 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-			orgs := helpers.GetTestOrgs(cfg)
-			for _, org := range orgs {
-				helpers.DeleteOrg(cfg, org)
-			}
-		})
+		CleanupOrgs(cfg, setup)
+		setup.Teardown()
 	}
 })

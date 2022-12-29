@@ -1,14 +1,15 @@
 package org.cloudfoundry.autoscaler.scheduler.dao;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import jakarta.transaction.Transactional;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import javax.transaction.Transactional;
 import org.cloudfoundry.autoscaler.scheduler.entity.RecurringScheduleEntity;
 import org.cloudfoundry.autoscaler.scheduler.util.RecurringScheduleEntitiesBuilder;
 import org.cloudfoundry.autoscaler.scheduler.util.TestDataDbUtil;
@@ -111,20 +112,16 @@ public class RecurringScheduleDaoImplTest {
     ;
     testDataDbUtil.insertRecurringSchedule(entities);
 
-    List foundEntityList = recurringScheduleDao.getDistinctAppIdAndGuidList();
+    Map<String, String> foundEntityList = recurringScheduleDao.getDistinctAppIdAndGuidList();
 
     assertThat("It should have two record", foundEntityList.size(), is(2));
-    Set<String> appIdSet =
-        new HashSet<String>() {
-          {
-            add((String) ((Object[]) (foundEntityList.get(0)))[0]);
-            add((String) ((Object[]) (foundEntityList.get(1)))[0]);
-          }
-        };
+
+    Set<String> appIdSet = foundEntityList.keySet();
+
     assertThat(
         "It should contains the two inserted entities",
-        appIdSet.contains(appId1) && appIdSet.contains(appId2),
-        is(true));
+        appIdSet,
+        containsInAnyOrder(appId1, appId2));
   }
 
   @Test

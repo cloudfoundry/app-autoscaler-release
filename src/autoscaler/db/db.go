@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	PostgresDriverName = "postgres"
+	PostgresDriverName = "pgx"
 	MysqlDriverName    = "mysql"
 	PolicyDb           = "policy_db"
 	BindingDb          = "binding_db"
@@ -37,8 +37,8 @@ var ErrConflict = fmt.Errorf("conflicting entry exists")
 
 type DatabaseConfig struct {
 	URL                   string        `yaml:"url"`
-	MaxOpenConnections    int           `yaml:"max_open_connections"`
-	MaxIdleConnections    int           `yaml:"max_idle_connections"`
+	MaxOpenConnections    int32         `yaml:"max_open_connections"`
+	MaxIdleConnections    int32         `yaml:"max_idle_connections"`
 	ConnectionMaxLifetime time.Duration `yaml:"connection_max_lifetime"`
 	ConnectionMaxIdleTime time.Duration `yaml:"connection_max_idletime"`
 }
@@ -56,7 +56,7 @@ type PolicyDB interface {
 	healthendpoint.DatabaseStatus
 	healthendpoint.Pinger
 	GetAppIds() (map[string]bool, error)
-	GetAppPolicy(appId string) (*models.ScalingPolicy, error)
+	GetAppPolicy(ctx context.Context, appId string) (*models.ScalingPolicy, error)
 	SaveAppPolicy(ctx context.Context, appId string, policy string, policyGuid string) error
 	SetOrUpdateDefaultAppPolicy(ctx context.Context, appIds []string, oldPolicyGuid string, newPolicy string, newPolicyGuid string) ([]string, error)
 	DeletePoliciesByPolicyGuid(ctx context.Context, policyGuid string) ([]string, error)
@@ -82,6 +82,7 @@ type BindingDB interface {
 	GetAppIdByBindingId(ctx context.Context, bindingId string) (string, error)
 	GetAppIdsByInstanceId(ctx context.Context, instanceId string) ([]string, error)
 	CountServiceInstancesInOrg(orgId string) (int, error)
+	GetServiceBinding(ctx context.Context, serviceBindingId string) (*models.ServiceBinding, error)
 	GetBindingIdsByInstanceId(ctx context.Context, instanceId string) ([]string, error)
 	io.Closer
 }
@@ -126,6 +127,6 @@ type StoredProcedureDB interface {
 	io.Closer
 	CreateCredentials(ctx context.Context, credOptions models.CredentialsOptions) (*models.Credential, error)
 	DeleteCredentials(ctx context.Context, credOptions models.CredentialsOptions) error
-	DeleteAllInstanceCredentials(instanceId string) error
-	ValidateCredentials(creds models.Credential) (*models.CredentialsOptions, error)
+	DeleteAllInstanceCredentials(ctx context.Context, instanceId string) error
+	ValidateCredentials(ctx context.Context, creds models.Credential) (*models.CredentialsOptions, error)
 }

@@ -75,8 +75,9 @@ func registerConfig(cfg *MySQLConfig) error {
 			return err
 		}
 
-		// #nosec G402
-		tlsConfig := tls.Config{}
+		tlsConfig := tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
 		tlsConfig.RootCAs = caCertPool
 		if tlsValue == "verify_identity" {
 			tlsConfig.ServerName = strings.Split(cfg.config.Addr, ":")[0]

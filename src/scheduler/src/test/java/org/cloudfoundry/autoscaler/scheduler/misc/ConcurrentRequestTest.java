@@ -1,7 +1,7 @@
 package org.cloudfoundry.autoscaler.scheduler.misc;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class ConcurrentRequestTest {
     String appId = "appId";
     long scheduleId = 0L;
 
-    embeddedTomcatUtil.setup(appId, scheduleId, 200, null);
+    embeddedTomcatUtil.addScalingEngineMockForAppAndScheduleId(appId, scheduleId, 200, null);
 
     String scalingEnginePathActiveSchedule =
         ScalingEngineUtil.getScalingEngineActiveSchedulePath(scalingEngineUrl, appId, scheduleId);

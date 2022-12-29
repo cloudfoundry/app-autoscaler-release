@@ -35,7 +35,8 @@ RUN \
       apt-get clean
 
 # get maven
-ENV MAVEN_VERSION 3.6.3
+# renovate: datasource=maven depName=org.apache.maven:maven-core
+ENV MAVEN_VERSION 3.8.6
 RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
 	tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \
 	ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
@@ -44,6 +45,7 @@ RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archiv
 ENV MAVEN_HOME /opt/maven
 
 # install golang
+# renovate: datasource=golang-version depName=golang
 ARG GO_VERSION=1.18
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
@@ -54,7 +56,8 @@ RUN \
   rm -rf /tmp/*
 
 # Install bosh_cli
-ENV BOSH_VERSION 6.4.4
+# renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
+ENV BOSH_VERSION 7.1.0
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
@@ -68,7 +71,8 @@ RUN sed -i 's/peer/trust/' ${PGCONFIG}/pg_hba.conf \
   	&& sed -i 's/md5/trust/' ${PGCONFIG}/pg_hba.conf
 
 # Install jq
-ENV JQ_VERSION 1.6
-RUN wget -q https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 && \
+# renovate: datasource=github-releases depName=jq lookupName=stedolan/jq
+ENV JQ_VERSION jq-1.6
+RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-linux64 && \
   mv jq-linux64 /usr/local/bin/jq && \
   chmod +x /usr/local/bin/jq

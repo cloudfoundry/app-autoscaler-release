@@ -92,10 +92,10 @@ func GetOrgGuid(cfg *config.Config, org string) string {
 }
 
 func DeleteOrg(cfg *config.Config, org string) {
-	DeleteOrgWithTimeout(cfg, org, cfg.DefaultTimeoutDuration())
+	DeleteOrgWithTimeout(org, cfg.DefaultTimeoutDuration())
 }
 
-func DeleteOrgWithTimeout(cfg *config.Config, org string, timeout time.Duration) {
+func DeleteOrgWithTimeout(org string, timeout time.Duration) {
 	deleteOrg := cf.Cf("delete-org", org, "-f").Wait(timeout)
 	Expect(deleteOrg).To(Exit(0), fmt.Sprintf("unable to delete org %s", org))
 }

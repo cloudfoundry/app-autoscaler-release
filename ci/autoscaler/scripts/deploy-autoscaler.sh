@@ -1,5 +1,5 @@
-#!/bin/bash
-# shellcheck disable=SC2086
+#! /usr/bin/env bash
+# shellcheck disable=SC2086,SC2034,SC2155
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
@@ -11,6 +11,7 @@ bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
  ${autoscaler_dir}/operations/add-postgres-variables.yml\
+ ${autoscaler_dir}/operations/connect_to_postgres_with_certs.yml\
  ${autoscaler_dir}/operations/enable-nats-tls.yml\
  ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
  ${autoscaler_dir}/operations/add-extra-plan.yml\
@@ -19,15 +20,13 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
  ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
  ${autoscaler_dir}/operations/remove-metricsserver.yml\
  ${autoscaler_dir}/operations/remove-metricsgateway.yml\
- ${autoscaler_dir}/operations/enable-scaling-engine-route.yml"}
+ ${autoscaler_dir}/operations/enable-scaling-engine-route.yml\
+ ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml\
+ ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
 
-if [[ ! -d ${bbl_state_path} ]]; then
-  echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
-  echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
-  exit 1;
-  fi
 
-if [[ ${buildin_mode} == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
+
+if [[ "${buildin_mode}" == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
 
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
@@ -36,32 +35,65 @@ pushd "${bbl_state_path}" > /dev/null
   eval "$(bbl print-env)"
 popd > /dev/null
 
-echo "# Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
+function setup_autoscaler_uaac(){
+  local uaac_authorities="cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
+  local autoscaler_secret="autoscaler_client_secret"
+  local uaa_client_secret=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
+  uaac target "https://uaa.${system_domain}" --skip-ssl-validation > /dev/null
+  uaac token client get admin -s "$uaa_client_secret" > /dev/null
 
-UAA_CLIENT_SECRET=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
-export UAA_CLIENT_SECRET
-CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+  if uaac client get autoscaler_client_id >/dev/null; then
+    step "updating autoscaler uaac client"
+    uaac client update "autoscaler_client_id" \
+      --authorities "$uaac_authorities" > /dev/null
+  else
+    step "creating autoscaler uaac client"
+    uaac client add "autoscaler_client_id" \
+      --authorized_grant_types "client_credentials" \
+      --authorities "$uaac_authorities" \
+      --secret "$autoscaler_secret" > /dev/null
+  fi
+}
 
-uaac target "https://uaa.${system_domain}" --skip-ssl-validation
-uaac token client get admin -s "$UAA_CLIENT_SECRET"
+function create_manifest(){
+  # Set the local tmp_dir depending on if we run on github-actions or not, see:
+  # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
+  local tmp_dir
+  local perform_as_gh_action
+  perform_as_gh_action="${GITHUB_ACTIONS:-false}"
+  if "${perform_as_gh_action}" != 'false'
+  then
+    tmp_dir="${RUNNER_TEMP}"
+  else # local system
+    tmp_dir="$(pwd)/dev_releases"
+    mkdir -p "${tmp_dir}"
+  fi
 
-set +e
-exist=$(uaac client get autoscaler_client_id | grep -c NotFound)
-set -e
+  # on MacOS mktemp does not know the --tmpdir option
+  tmp_manifest_file="$(mktemp "${tmp_dir}/${deployment_name}.bosh-manifest.yaml.XXX")"
 
-if [[ $exist == 0 ]]; then
-  echo "Updating client token"
-  uaac client update "autoscaler_client_id" \
-	    --authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
-else
-  echo "Creating client token"
-  uaac client add "autoscaler_client_id" \
-	--authorized_grant_types "client_credentials" \
-	--authorities "cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read" \
-	--secret "autoscaler_client_secret"
-fi
+  bosh -n -d "${deployment_name}" \
+      interpolate "${deployment_manifest}" \
+      ${OPS_FILES_TO_USE} \
+      ${bosh_deploy_opts} \
+      -v system_domain="${system_domain}" \
+      -v deployment_name="${deployment_name}" \
+      -v app_autoscaler_version="${bosh_release_version}" \
+      -v admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)" \
+      -v cf_client_id=autoscaler_client_id \
+      -v cf_client_secret=autoscaler_client_secret \
+      -v eventgenerator_uaa_client_id=firehose_exporter \
+      -v eventgenerator_uaa_client_secret="$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)"\
+      -v eventgenerator_uaa_skip_ssl_validation=true \
+    -v skip_ssl_validation=true \
+      > "${tmp_manifest_file}"
 
-function deploy () {
+    # shellcheck disable=SC2064
+  if [ -z "${debug}" ] || [ "${debug}" = "false" ] ; then  trap "rm ${tmp_manifest_file}" EXIT ; fi
+}
+
+function check_ops_files(){
+  step "Using Ops files: '${ops_files}'"
   OPS_FILES_TO_USE=""
   for OPS_FILE in ${ops_files}; do
     if [ -f "${OPS_FILE}" ]; then
@@ -71,36 +103,24 @@ function deploy () {
       exit 1
     fi
   done
-
-  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-
-  # Try to silence Prometheus but do not fail deployment if there's an error
-  set +e
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill"
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy"
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy"
-  set -e
-
-  echo "# creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
-  echo " - Using Ops files: '${OPS_FILES_TO_USE}'"
-  echo " - Deploy options: '${bosh_deploy_opts}'"
-
-  bosh -n -d "${deployment_name}" \
-    deploy "${deployment_manifest}" \
-    ${OPS_FILES_TO_USE} \
-    ${bosh_deploy_opts} \
-    -v system_domain="${system_domain}" \
-    -v deployment_name="${deployment_name}" \
-    -v app_autoscaler_version="${bosh_release_version}" \
-    -v admin_password="${CF_ADMIN_PASSWORD}" \
-    -v cf_client_id=autoscaler_client_id \
-    -v cf_client_secret=autoscaler_client_secret \
-    -v skip_ssl_validation=true
-
-  echo "# deployment finished: '${deployment_name}'"
 }
 
-function find_or_upload_stemcell(){
+function deploy() {
+  # Try to silence Prometheus but do not fail deployment if there's an error
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill" || true
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy" || true
+  ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy" || true
+
+  create_manifest
+
+  log "creating Bosh deployment '${deployment_name}' with version '${bosh_release_version}' in system domain '${system_domain}'   "
+  debug "tmp_manifest_file=${tmp_manifest_file}"
+  step "Using Ops files: '${OPS_FILES_TO_USE}'"
+  step "Deploy options: '${bosh_deploy_opts}'"
+  bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
+}
+
+function find_or_upload_stemcell() {
   # Determine if we need to upload a stemcell at this point.
   stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
   stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
@@ -111,25 +131,37 @@ function find_or_upload_stemcell(){
     if [ "${stemcell_version}" != "latest" ]; then
 	    URL="${URL}?v=${stemcell_version}"
     fi
-    wget "$URL" -O stemcell.tgz
+    wget "${URL}" -O stemcell.tgz
     bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
   fi
 }
 
-function find_or_upload_release(){
+function find_or_upload_release() {
   if ! bosh releases | grep -E "${bosh_release_version}[*]*\s" > /dev/null; then
-    echo "Creating Release with bosh version ${bosh_release_version}"
-    bosh create-release --force --version="${bosh_release_version}"
+
+    local -r release_desc_file="dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
+    if [ ! -f "${release_desc_file}" ]
+    then
+      echo "Creating Release with bosh version ${bosh_release_version}"
+      bosh create-release --force --version="${bosh_release_version}"
+    else
+      # shellcheck disable=SC2006
+      echo -e "Release with bosh-version ${bosh_release_version} already locally present. Reusing it."\
+        "\n\tIf this does not work, please consider executing `bosh reset-release`."
+    fi
 
     echo "Uploading Release"
-    bosh upload-release $bosh_upload_release_opts "dev_releases/app-autoscaler/app-autoscaler-${bosh_release_version}.yml"
+    bosh upload-release ${bosh_upload_release_opts} "${release_desc_file}"
   else
     echo "the app-autoscaler release is already uploaded with the commit ${bosh_release_version}"
     echo "Attempting redeploy..."
   fi
 }
 
+log "Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}' "
+setup_autoscaler_uaac
 pushd "${autoscaler_dir}" > /dev/null
+  check_ops_files
   find_or_upload_stemcell
   find_or_upload_release
   deploy

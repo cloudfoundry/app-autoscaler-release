@@ -16,7 +16,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
 	"code.cloudfoundry.org/lager"
-	"github.com/lib/pq"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -115,7 +114,7 @@ var _ = Describe("BindingSqldb", func() {
 			})
 			It("should throw an error", func() {
 				abdb, err := NewBindingSQLDB(dbConfig, logger)
-				Expect(err).To(BeAssignableToTypeOf(&pq.Error{}))
+				Expect(err).To(HaveOccurred())
 				if abdb != nil {
 					err = bdb.Close()
 					Expect(err).NotTo(HaveOccurred())
@@ -381,6 +380,37 @@ var _ = Describe("BindingSqldb", func() {
 				})
 			})
 
+		})
+	})
+
+	Describe("GetServiceBinding", func() {
+		var retrievedServiceBinding *models.ServiceBinding
+		JustBeforeEach(func() {
+			retrievedServiceBinding, err = bdb.GetServiceBinding(context.Background(), testBindingId)
+		})
+		Context("when the service Binding does not exist", func() {
+			It("should return an error", func() {
+				Expect(err).To(HaveOccurred())
+				Expect(err).To(Equal(db.ErrDoesNotExist))
+				Expect(retrievedServiceBinding).To(BeNil())
+			})
+		})
+
+		Context("when the service Binding exists", func() {
+			BeforeEach(func() {
+				err = bdb.CreateServiceInstance(context.Background(), models.ServiceInstance{ServiceInstanceId: testInstanceId, OrgId: testOrgGuid, SpaceId: testSpaceGuid, DefaultPolicy: policyJsonStr, DefaultPolicyGuid: policyGuid})
+				Expect(err).NotTo(HaveOccurred())
+				err = bdb.CreateServiceBinding(context.Background(), testBindingId, testInstanceId, testAppId)
+				Expect(err).NotTo(HaveOccurred())
+			})
+			It("should return what was created", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(retrievedServiceBinding).To(Equal(&models.ServiceBinding{
+					ServiceBindingID:  testBindingId,
+					ServiceInstanceID: testInstanceId,
+					AppID:             testAppId,
+				}))
+			})
 		})
 	})
 

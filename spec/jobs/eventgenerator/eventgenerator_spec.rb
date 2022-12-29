@@ -67,6 +67,8 @@ describe "eventgenerator" do
         before do
           properties["autoscaler"]["eventgenerator"] = {
             "metricscollector" => {
+              "host" => "logcache",
+              "port" => "8080",
               "use_log_cache" => true
             }
           }
@@ -80,6 +82,40 @@ describe "eventgenerator" do
         it "should not add https protocol to metric_collector_url" do
           expect(rendered_template["metricCollector"]["metric_collector_url"])
             .not_to include("http")
+        end
+
+        describe "when using log-cache via https/uaa" do
+          before do
+            properties["autoscaler"]["eventgenerator"] = {
+              "metricscollector" => {
+                "host" => "logcache.cf.test.com",
+                "port" => "",
+                "use_log_cache" => true,
+                "uaa" => {
+                  "client_id" => "logs_admin_client_id",
+                  "client_secret" => "logs_admin_client_secret",
+                  "url" => "uaa.cf.test.com"
+                }
+              }
+            }
+          end
+
+          it "should not add metric_collector_port to metric_collector_url" do
+            expect(rendered_template["metricCollector"]["metric_collector_url"])
+              .not_to include(":")
+          end
+
+          it "should add uaa credentials" do
+            expect(rendered_template["metricCollector"]["uaa"]).to include({
+              "client_id" => "logs_admin_client_id",
+              "client_secret" => "logs_admin_client_secret",
+              "url" => "uaa.cf.test.com"
+            })
+          end
+
+          it "should set uaa skip ssl validation to false by default" do
+            expect(rendered_template["metricCollector"]["uaa"]["skip_ssl_validation"]).to be_falsey
+          end
         end
       end
     end
