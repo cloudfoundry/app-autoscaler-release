@@ -412,14 +412,26 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 }
 
 func CreatePolicy(cfg *config.Config, appName, appGUID, policy string) string {
+	instanceName, _ := createPolicy(cfg, appName, appGUID, policy)
+	return instanceName
+}
+
+func CreatePolicyWithErr(cfg *config.Config, appName, appGUID, policy string) (string, error) {
+	return createPolicy(cfg, appName, appGUID, policy)
+}
+
+func createPolicy(cfg *config.Config, appName, appGUID, policy string) (string, error) {
 	if cfg.IsServiceOfferingEnabled() {
 		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		Retry(3, 60, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
-		Retry(3, 60, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
-		return instanceName
+		err := Retry(3, 60, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
+		if err != nil {
+			return instanceName, err
+		}
+		err = Retry(3, 60, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
+		return instanceName, err
 	}
 	CreatePolicyWithAPI(cfg, appGUID, policy)
-	return ""
+	return "", nil
 }
 
 func BindServiceToApp(cfg *config.Config, appName string, instanceName string) {

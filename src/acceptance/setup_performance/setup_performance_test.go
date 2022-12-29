@@ -27,7 +27,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 		})
 
 		errors.Range(func(appName, err interface{}) bool {
-			fmt.Printf("errors by app: %s: %s \n", appName, err.(error).Error() )
+			fmt.Printf("errors by app: %s: %s \n", appName, err.(error).Error())
 			return true
 		})
 	})
@@ -67,13 +67,22 @@ func worker(appsChan chan string, runningApps *int32, pendingApps *sync.Map, err
 	defer wg.Done()
 	defer GinkgoRecover()
 	for appName := range appsChan {
-		helpers.CreateTestAppFromDropletByName(cfg, nodeAppDropletPath, appName, 1)
+		err := helpers.CreateTestAppFromDropletByName(cfg, nodeAppDropletPath, appName, 1)
+		if err != nil {
+			errors.Store(appName, err)
+			continue
+		}
 		policy := helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 		appGUID, err := helpers.GetAppGuid(cfg, appName)
 		if err != nil {
 			errors.Store(appName, err)
+			continue
 		}
-		_ = helpers.CreatePolicy(cfg, appName, appGUID, policy)
+		_, err = helpers.CreatePolicyWithErr(cfg, appName, appGUID, policy)
+		if err != nil {
+			errors.Store(appName, err)
+			continue
+		}
 		helpers.CreateCustomMetricCred(cfg, appName, appGUID)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
 		atomic.AddInt32(runningApps, 1)

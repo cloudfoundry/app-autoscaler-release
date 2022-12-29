@@ -79,11 +79,11 @@ func CreateDroplet(cfg config.Config) string {
 	return dropletPath
 }
 
-func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) {
-	createTestApp(*cfg, appName, initialInstanceCount, "--droplet", dropletPath)
+func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) error {
+	return createTestApp(*cfg, appName, initialInstanceCount, "--droplet", dropletPath)
 }
 
-func createTestApp(cfg config.Config, appName string, initialInstanceCount int, args ...string) {
+func createTestApp(cfg config.Config, appName string, initialInstanceCount int, args ...string) error {
 	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
 	if cfg.GetSkipSSLValidation() {
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
@@ -108,15 +108,13 @@ func createTestApp(cfg config.Config, appName string, initialInstanceCount int, 
 		createApp := cf.Cf(params...).Wait(cfg.CfPushTimeoutDuration())
 		if createApp.ExitCode() != 0 {
 			err = errors.New(fmt.Sprintf("failed to push an app: %s  %s", appName, string(createApp.Err.Contents())))
-			cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
 			return err
-
 		}
 		return err
 	}
-	Retry(2, 60, pushApp)
-
+	err := Retry(2, 60, pushApp)
 	GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
+	return err
 }
 
 func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
@@ -128,7 +126,7 @@ func DeleteTestApp(appName string, timeout time.Duration) {
 }
 
 func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url string) string {
-	appGuid ,err := GetAppGuid(cfg, appName)
+	appGuid, err := GetAppGuid(cfg, appName)
 	Expect(err).NotTo(HaveOccurred())
 	output := cfh.CurlAppWithTimeout(cfg, appName, url, 20*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGuid, appInstance),
 		"-f",
