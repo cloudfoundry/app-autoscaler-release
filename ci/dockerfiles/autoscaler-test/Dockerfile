@@ -36,7 +36,7 @@ RUN \
 
 # get maven
 # renovate: datasource=maven depName=org.apache.maven:maven-core
-ENV MAVEN_VERSION 3.8.6
+ENV MAVEN_VERSION 3.8.7
 RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
 	tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \
 	ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
