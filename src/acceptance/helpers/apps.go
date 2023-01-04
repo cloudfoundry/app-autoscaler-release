@@ -51,6 +51,18 @@ func SendMetric(cfg *config.Config, appName string, metric int) {
 	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), "-f")
 }
 
+func StartAppWithErr(appName string, timeout time.Duration) error {
+	startApp := func() error {
+		var err error
+		var startApp = cf.Cf("start", appName).Wait(timeout)
+		if startApp.ExitCode() != 0 {
+			err = errors.New(fmt.Sprintf("failed to start an app: %s  %s", appName, string(startApp.Err.Contents())))
+		}
+		return err
+	}
+	return Retry(2, 60, startApp)
+
+}
 func StartApp(appName string, timeout time.Duration) bool {
 	startApp := cf.Cf("start", appName).Wait(timeout)
 	if startApp.ExitCode() != 0 {

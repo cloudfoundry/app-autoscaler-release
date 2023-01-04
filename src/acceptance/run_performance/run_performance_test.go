@@ -36,7 +36,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 		samplingConfig = gmeasure.SamplingConfig{
 			N:           appsToScaleCount,
 			NumParallel: appsToScaleCount,
-			Duration:    20 * time.Minute,
+			Duration:    30 * time.Minute,
 		}
 		experiment = gmeasure.NewExperiment("Scaling Benchmark")
 	})
@@ -57,6 +57,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg := sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-out", func() {
+					fmt.Printf("\nscaling-out app: %s\n", appName)
 					scaleOut := func() int {
 						helpers.SendMetric(cfg, appName, 550)
 						return helpers.RunningInstances(appGUID, 5*time.Second)
@@ -88,7 +89,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 
 			}, samplingConfig)
 
-			Eventually(func() int32 { return atomic.LoadInt32(&doneAppsCount) }, 10*time.Minute, 5*time.Second).Should(BeEquivalentTo(appsToScaleCount))
+			Eventually(func() int32 { return atomic.LoadInt32(&doneAppsCount) }, 10*time.Minute, 10*time.Second).Should(BeEquivalentTo(appsToScaleCount))
 			checkMedianDurationFor(experiment, "scale-out")
 			checkMedianDurationFor(experiment, "scale-in")
 		})

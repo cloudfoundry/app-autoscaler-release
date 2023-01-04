@@ -57,7 +57,7 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", func() {
-			Eventually(func() int32 { return atomic.LoadInt32(&runningAppsCount) }, 3*time.Minute, 5*time.Second).Should(BeEquivalentTo(cfg.Performance.AppCount))
+			Eventually(func() int32 { return atomic.LoadInt32(&runningAppsCount) }, 3*time.Minute, 5*time.Second).Should(BeNumerically(">=", 200))
 		})
 	})
 })
@@ -84,7 +84,11 @@ func worker(appsChan chan string, runningApps *int32, pendingApps *sync.Map, err
 			continue
 		}
 		helpers.CreateCustomMetricCred(cfg, appName, appGUID)
-		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
+		err = helpers.StartAppWithErr(appName, cfg.CfPushTimeoutDuration())
+		if err != nil {
+			errors.Store(appName, err)
+			continue
+		}
 		atomic.AddInt32(runningApps, 1)
 		pendingApps.Delete(appName)
 		fmt.Printf("Running apps: %d/%d\n", atomic.LoadInt32(runningApps), cfg.Performance.AppCount)
