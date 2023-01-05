@@ -10,11 +10,11 @@ popd
 
 cf api "https://api.${system_domain}" --skip-ssl-validation
 
-cf_admin_password=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+cf_admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)"
 cf auth admin "${cf_admin_password}"
 
 set +e
-existing_service_broker=$(cf service-brokers | grep "${service_broker_name}.${system_domain}" |  cut -d' ' -f1)
+existing_service_broker="$(cf service-brokers | grep "${service_broker_name}.${system_domain}" |  cut -d' ' -f1)"
 set -e
 
 if [[ -n "$existing_service_broker" ]]; then

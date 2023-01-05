@@ -120,8 +120,8 @@ function deploy() {
 
 function find_or_upload_stemcell() {
   # Determine if we need to upload a stemcell at this point.
-  stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
-  stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
+  stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' ${deployment_manifest})
+  stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' ${deployment_manifest})
   stemcell_name="bosh-google-kvm-${stemcell_os}-go_agent"
 
   if ! bosh stemcells | grep "${stemcell_name}" >/dev/null; then
