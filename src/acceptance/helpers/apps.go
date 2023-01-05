@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
@@ -18,6 +19,30 @@ import (
 )
 
 const AppResidentSize = 55
+
+type AppInfo struct {
+	Name  string
+	Guid  string
+	State string
+}
+
+func GetAllStartedApp(cfg *config.Config, org, space, appPrefix string) []AppInfo {
+	var startedApps []AppInfo
+	rawApps := getRawApps(space, org, cfg.DefaultTimeoutDuration())
+	for _, rawApp := range rawApps {
+		appName := rawApp.Name
+		appState := rawApp.State
+		if strings.Contains(appName, appPrefix) && appState == "STARTED" {
+			appInfo := &AppInfo{
+				Name:  appName,
+				Guid:  rawApp.GUID,
+				State: appState,
+			}
+			startedApps = append(startedApps, *appInfo)
+		}
+	}
+	return startedApps
+}
 
 func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
 	rawApps := getRawApps(spaceGuid, orgGuid, cfg.DefaultTimeoutDuration())

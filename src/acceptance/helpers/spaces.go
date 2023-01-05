@@ -22,6 +22,12 @@ type Space struct {
 	Name string `json:"name"`
 }
 
+func GetSpaceGuid(cfg *config.Config, orgGuid string) string {
+	testSpace := GetTestSpaces(orgGuid, cfg)[0]
+	spaceGuidByte := cf.Cf("space", testSpace, "--guid").Wait(cfg.DefaultTimeoutDuration())
+	return strings.TrimSuffix(string(spaceGuidByte.Out.Contents()), "\n")
+}
+
 func GetTestSpaces(orgGuid string, cfg *config.Config) []string {
 	rawSpaces := GetRawSpaces(orgGuid, cfg.DefaultTimeoutDuration())
 
