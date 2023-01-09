@@ -76,7 +76,7 @@ function cleanup_bosh(){
 
 function cleanup_credhub(){
   step "cleaning up credhub: '/bosh-autoscaler/${deployment_name}/*'"
-  retry 3 credhub delete -p "/bosh-autoscaler/${deployment_name}"
+  retry 3 credhub delete --path="/bosh-autoscaler/${deployment_name}"
 }
 
 function unset_vars() {
