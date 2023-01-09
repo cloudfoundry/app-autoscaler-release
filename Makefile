@@ -320,15 +320,17 @@ uaac:
 markdownlint-cli:
 	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
-.PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh
-deploy-autoscaler: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
+.PHONY: deploy deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
+deploy-autoscaler: deploy
+deploy: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
-
 deploy-autoscaler-bosh:
 	echo " - deploying autoscaler"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+deploy-cleanup:
+	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 
 deploy-prometheus:
@@ -336,15 +338,9 @@ deploy-prometheus:
 	export BBL_STATE_PATH=$${BBL_STATE_PATH:-$(shell realpath "../app-autoscaler-env-bbl-state/bbl-state/")};\
 	${CI_DIR}/infrastructure/scripts/deploy-prometheus.sh;
 
-.PHONY: deploy-cleanup
-deploy-cleanup:
-	@echo " - Cleaning up deployment '${DEPLOYMENT_NAME}'";\
-	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
-
 .PHONY: acceptance-tests
 acceptance-tests: vendor-app
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
-
 acceptance-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-acceptance.sh;
 

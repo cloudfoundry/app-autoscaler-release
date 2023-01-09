@@ -9,7 +9,6 @@ import (
 	. "changeloglockcleaner/sqldb"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -50,7 +49,7 @@ var _ = AfterSuite(func() {
 func insertLock(id int, locked bool, durationSecond int, lockedby string) (sql.Result, error) {
 	var query string
 	switch dbHelper.DriverName() {
-	case "postgres":
+	case "pgx":
 		query = dbHelper.Rebind(fmt.Sprintf("INSERT INTO databasechangeloglock (id,locked,lockgranted,lockedby) VALUES (?,?,now()::timestamp + interval '%d second',?)", durationSecond))
 	case "mysql":
 		query = dbHelper.Rebind(fmt.Sprintf("INSERT INTO DATABASECHANGELOGLOCK (id,locked,lockgranted,lockedby) VALUES (?,?,date_add(now(),interval %d second) ,?)", durationSecond))
@@ -63,7 +62,7 @@ func checkChanglogLockExistenceById(id int) bool {
 	var rowCount int
 	var query string
 	switch dbHelper.DriverName() {
-	case "postgres":
+	case "pgx":
 		query = dbHelper.Rebind("SELECT COUNT(*) FROM databasechangeloglock WHERE id=?")
 	case "mysql":
 		query = dbHelper.Rebind("SELECT COUNT(*) FROM DATABASECHANGELOGLOCK WHERE id=?")
@@ -76,7 +75,7 @@ func checkChanglogLockExistenceById(id int) bool {
 func cleanChanglogLockTable() error {
 	var query string
 	switch dbHelper.DriverName() {
-	case "postgres":
+	case "pgx":
 		query = "DELETE FROM databasechangeloglock"
 	case "mysql":
 		query = "DELETE FROM DATABASECHANGELOGLOCK"

@@ -9,6 +9,7 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
+      operations/enable-scheduler-logging.yml
 
   app-autoscaler-ops-files-log-cache: &app-autoscaler-ops-files-log-cache
     OPS_FILES: |
@@ -23,6 +24,7 @@ anchors:
       operations/log-cache-syslog-server.yml
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
+      operations/enable-scheduler-logging.yml
 
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
@@ -50,6 +52,7 @@ anchors:
       operations/use_buildin_mode.yml
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
+      operations/enable-scheduler-logging.yml
 
 groups:
 - name: all
@@ -100,6 +103,11 @@ resource_types:
 resources:
 - name: every-night
   type: time
+  source:
+    start: 10:00 PM
+    stop: 11:00 PM
+    location: "Europe/Berlin"
+
 - name: ci
   type: git
   icon: github
@@ -222,7 +230,6 @@ jobs:
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name))
-      DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state
@@ -269,7 +276,6 @@ jobs:
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-params
       DEPLOYMENT_NAME: ((logcache_acceptance_deployment_name))
-      DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state
@@ -318,7 +324,6 @@ jobs:
       DEPLOYMENT_NAME: ((builtin_acceptance_deployment_name))
       BUILDIN_MODE: true
       SERVICE_OFFERING_ENABLED: false
-      DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state
@@ -394,7 +399,6 @@ jobs:
       file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
       params: &upgrade-test-params
         DEPLOYMENT_NAME: "upgrade-test"
-        DEBUG: true
   plan:
   - in_parallel:
     - get: bbl-state

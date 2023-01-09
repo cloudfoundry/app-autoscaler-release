@@ -26,7 +26,6 @@ ops_files=${OPS_FILES:-"${prometheus_ops}/monitor-bosh.yml\
                         ${prometheus_ops}/enable-cf-loggregator-v2.yml\
                         ${prometheus_ops}/monitor-bosh-director.yml\
                         ${prometheus_ops}/alertmanager-slack-receiver.yml\
-                        ${prometheus_ops}/use-jammy-stemcell.yml\
                         ${ci_dir}/operations/prometheus-customize-alerts.yml\
                         ${ci_dir}/operations/slack-receiver-template.yml\
                         ${ci_dir}/operations/prometheus-nats-tls.yml\

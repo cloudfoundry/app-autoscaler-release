@@ -5,6 +5,7 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/common.sh"
 
 function main(){
+  step "cleaning up deployment ${DEPLOYMENT_NAME}"
   bosh_login
   cf_login
 

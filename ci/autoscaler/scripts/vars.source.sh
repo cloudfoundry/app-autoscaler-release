@@ -11,6 +11,17 @@ if [ -z "${BASH_SOURCE[0]}" ]; then
   return
 fi
 
+write_error_state() {
+  echo "Error failed execution of \"$1\" at line $2"
+  local frame=0
+  while true ; do
+    caller $frame && break
+    ((frame++));
+  done
+}
+
+trap 'write_error_state "$BASH_COMMAND" "$LINENO"' ERR
+
 debug=${DEBUG:-}
 if [ -n "${debug}" ] && [ ! "${debug}" = "false" ]; then
   function debug(){ echo "  -> $1"; }
@@ -34,9 +45,11 @@ script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir=$(realpath -e "${script_dir}/../../..")
 
 export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
-debug "PR_NUMBER: ${PR_NUMBER}"
+debug "PR_NUMBER: '${PR_NUMBER}'"
+user=${USER:-"test"}
 
 export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
+[ "${DEPLOYMENT_NAME}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
 debug "DEPLOYMENT_NAME: ${DEPLOYMENT_NAME}"
 log "set up vars: DEPLOYMENT_NAME=${DEPLOYMENT_NAME}"
 # shellcheck disable=SC2034
