@@ -49,7 +49,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 		actualAppsToScaleCount = int(math.RoundToEven(float64(len(startedApps) * percentageToScale / 100)))
 
 		fmt.Printf("\nDesired Scaling %d apps: \n", appsToScaleCount)
-		fmt.Printf("\nActual Scaling %d apps (based on apps pushed): \n", actualAppsToScaleCount)
+		fmt.Printf("Actual Scaling %d apps (based on sucessuful apps pushed): \n\n", actualAppsToScaleCount)
 
 		samplingConfig = gmeasure.SamplingConfig{
 			N:           actualAppsToScaleCount,
@@ -72,6 +72,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				}
 				pollTime := 10 * time.Second
 
+				fmt.Println("\nScale-Out Apps Started...")
 				wg := sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-out", func() {
@@ -88,8 +89,9 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg.Wait()
 
 				atomic.AddInt32(&scaledOutAppsCount, 1)
-				fmt.Printf("\nScaled-Out apps: %d/%d\n", atomic.LoadInt32(&scaledOutAppsCount), actualAppsToScaleCount)
+				fmt.Printf("Scaled-Out apps: %d/%d\n", atomic.LoadInt32(&scaledOutAppsCount), actualAppsToScaleCount)
 
+				fmt.Println("Scale-In Apps Started...")
 				wg = sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-in", func() {
