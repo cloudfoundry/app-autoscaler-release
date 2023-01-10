@@ -4,12 +4,13 @@ import (
 	"acceptance/config"
 	. "acceptance/helpers"
 	"fmt"
-	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 	"os"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -77,7 +78,6 @@ func updateOrgQuotaForPerformanceTest(orgGuid string) {
 }
 
 func cleanUpServiceInstanceInParallel(setup *workflowhelpers.ReproducibleTestSuiteSetup, orgGuid string, spaceGuid string) {
-
 	waitGroup := sync.WaitGroup{}
 	servicesChan := make(chan string)
 

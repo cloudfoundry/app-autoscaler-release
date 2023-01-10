@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -uo pipefail
+set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/common.sh"
 

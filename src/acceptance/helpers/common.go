@@ -1,8 +1,9 @@
 package helpers
 
 import (
-	. "github.com/onsi/ginkgo/v2"
 	"strings"
+
+	. "github.com/onsi/ginkgo/v2"
 )
 
 func getNames(resources []cfResource) []string {
@@ -27,5 +28,4 @@ func FailOnError(err error) {
 	if err != nil {
 		Fail(err.Error())
 	}
-
 }

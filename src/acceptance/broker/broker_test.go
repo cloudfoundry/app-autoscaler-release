@@ -4,10 +4,11 @@ import (
 	"acceptance/helpers"
 	"encoding/json"
 	"fmt"
-	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 	url2 "net/url"
 	"os"
 	"strings"
+
+	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 
 	"github.com/onsi/gomega/gbytes"
 

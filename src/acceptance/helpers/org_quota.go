@@ -46,7 +46,7 @@ func UpdateOrgQuota(orgQuota OrgQuota, timeout time.Duration) {
 func GetOrgQuota(orgGuid string, timeout time.Duration) (orgQuota OrgQuota) {
 	rawQuota := getRawOrgQuota(orgGuid, timeout).Resources[0]
 	orgQuota = OrgQuota{Name: rawQuota.Name}
-	// TODO - refactor this part
+
 	if rawQuota.Apps.TotalMemoryInMb != 0 {
 		orgQuota.TotalMemory = strconv.Itoa(rawQuota.Apps.TotalMemoryInMb) + "MB"
 	}

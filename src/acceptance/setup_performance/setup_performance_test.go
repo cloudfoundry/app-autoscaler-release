@@ -3,10 +3,11 @@ package peformance_setup_test
 import (
 	"acceptance/helpers"
 	"fmt"
-	. "github.com/onsi/ginkgo/v2"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	. "github.com/onsi/ginkgo/v2"
 )
 
 var _ = Describe("Prepare test apps based on benchmark inputs", func() {
@@ -88,7 +89,6 @@ var _ = Describe("Prepare test apps based on benchmark inputs", func() {
 })
 
 func appNameGenerator(ch chan<- string, desiredApps []string) {
-
 	for _, app := range desiredApps {
 		msg := fmt.Sprintf("Start [ %s ] ", app)
 		fmt.Println(msg)
@@ -135,7 +135,6 @@ func pushAppAndBindService(appName string, runningApps *int32, errors *sync.Map)
 	atomic.AddInt32(runningApps, 1)
 	//pendingApps.Delete(appName)
 	fmt.Printf("- Running apps: %d/%d - %s\n", atomic.LoadInt32(runningApps), cfg.Performance.AppCount, appName)
-
 }
 
 /*func worker(appsChan chan string, runningApps *int32, pendingApps *sync.Map, errors *sync.Map, wg *sync.WaitGroup) {

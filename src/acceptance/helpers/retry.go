@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+const defaultRetryAttempt = 2
+const defaultRetryAfter = 60
+
 func Retry(attempts int, sleep int, f func() error) (err error) {
 	for i := 0; i < attempts; i++ {
 		if i > 0 {

@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"acceptance/config"
+
 	"github.com/onsi/ginkgo/v2"
 
 	. "github.com/onsi/gomega"
@@ -11,7 +12,7 @@ func FindExistingOrgAndSpace(cfg *config.Config) (orgName string, spaceName stri
 	organizations := GetTestOrgs(cfg)
 	Expect(len(organizations)).To(Equal(1))
 	orgName = organizations[0]
-	_, _, spaceName, _ = GetOrgSpaceNamesAndGuids(cfg, orgName)
+	orgName, _, spaceName, _ = GetOrgSpaceNamesAndGuids(cfg, orgName)
 
 	return orgName, spaceName
 }

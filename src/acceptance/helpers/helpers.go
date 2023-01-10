@@ -358,7 +358,7 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 	return string(marshaled)
 }
 
-func RunningInstances(appGUID string, timeout time.Duration) int {
+func RunningInstances(appGUID string, timeout time.Duration) (int, error) {
 	defer GinkgoRecover()
 	var cmd *Session
 	getAppProcesses := func() error {
@@ -370,17 +370,20 @@ func RunningInstances(appGUID string, timeout time.Duration) int {
 		return err
 	}
 
-	Retry(2, 60, getAppProcesses)
+	err := Retry(defaultRetryAttempt, defaultRetryAfter, getAppProcesses)
+	if err != nil {
+		return 0, err
+	}
 
 	var process = struct {
 		Instances int `json:"instances"`
 	}{}
 
-	err := json.Unmarshal(cmd.Out.Contents(), &process)
+	err = json.Unmarshal(cmd.Out.Contents(), &process)
 	Expect(err).ToNot(HaveOccurred())
 	webInstances := process.Instances
 	GinkgoWriter.Printf("\nFound %d app instances\n", webInstances)
-	return webInstances
+	return webInstances, nil
 }
 
 func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Duration) {
@@ -393,7 +396,13 @@ func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Durati
 }
 
 func getAppInstances(appGUID string, timeout time.Duration) func() int {
-	return func() int { return RunningInstances(appGUID, timeout) }
+	return func() int {
+		instances, err := RunningInstances(appGUID, timeout)
+		if err != nil {
+			fmt.Println("error while computing running instances count: %w", err)
+		}
+		return instances
+	}
 }
 
 func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
@@ -420,11 +429,11 @@ func CreatePolicyWithErr(cfg *config.Config, appName, appGUID, policy string) (s
 func createPolicy(cfg *config.Config, appName, appGUID, policy string) (string, error) {
 	if cfg.IsServiceOfferingEnabled() {
 		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		err := Retry(3, 60, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
+		err := Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
 		if err != nil {
 			return instanceName, err
 		}
-		err = Retry(3, 60, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
+		err = Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
 		return instanceName, err
 	}
 	CreatePolicyWithAPI(cfg, appGUID, policy)
@@ -563,7 +572,6 @@ func GetHTTPClient(cfg *config.Config) *http.Client {
 }
 
 func GetAppGuid(cfg *config.Config, appName string) (string, error) {
-
 	getAppGuid := func() (string, error) {
 		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
 		if guid.ExitCode() == 0 {

@@ -85,8 +85,7 @@ func StartAppWithErr(appName string, timeout time.Duration) error {
 		}
 		return err
 	}
-	return Retry(2, 60, startApp)
-
+	return Retry(defaultRetryAttempt, defaultRetryAfter, startApp)
 }
 func StartApp(appName string, timeout time.Duration) bool {
 	startApp := cf.Cf("start", appName).Wait(timeout)
@@ -149,7 +148,7 @@ func createTestApp(cfg config.Config, appName string, initialInstanceCount int, 
 		}
 		return err
 	}
-	err := Retry(2, 60, pushApp)
+	err := Retry(defaultRetryAttempt, defaultRetryAfter, pushApp)
 	GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
 	return err
 }

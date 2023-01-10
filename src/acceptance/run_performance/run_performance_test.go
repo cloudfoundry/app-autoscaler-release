@@ -77,7 +77,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg.Add(1)
 				experiment.MeasureDuration("scale-out", func() {
 					//fmt.Printf("\nstarted scaling-out app: %s at index %d\n", appName, i)
-					scaleOut := func() int {
+					scaleOut := func() (int, error) {
 						helpers.SendMetric(cfg, appName, 550)
 						return helpers.RunningInstances(appGUID, 5*time.Second)
 					}
@@ -96,7 +96,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg.Add(1)
 				experiment.MeasureDuration("scale-in", func() {
 					//fmt.Printf("\nstarted scaling-in app: %s at index %d\n", appName, i)
-					scaleIn := func() int {
+					scaleIn := func() (int, error) {
 						helpers.SendMetric(cfg, appName, 100)
 						return helpers.RunningInstances(appGUID, 5*time.Second)
 					}
