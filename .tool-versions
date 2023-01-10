@@ -6,7 +6,7 @@ concourse 7.9.0
 direnv 2.32.2
 gcloud 412.0.0
 ginkgo 2.7.0
-golang 1.19.4
+golang 1.19.5
 golangci-lint 1.50.1
 java temurin-17.0.5+8
 make 4.4
