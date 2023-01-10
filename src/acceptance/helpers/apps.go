@@ -3,7 +3,6 @@ package helpers
 import (
 	"acceptance/config"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -81,7 +80,7 @@ func StartAppWithErr(appName string, timeout time.Duration) error {
 		var err error
 		var startApp = cf.Cf("start", appName).Wait(timeout)
 		if startApp.ExitCode() != 0 {
-			err = errors.New(fmt.Sprintf("failed to start an app: %s  %s", appName, string(startApp.Err.Contents())))
+			err = fmt.Errorf("failed to start an app: %s  %s", appName, string(startApp.Err.Contents()))
 		}
 		return err
 	}
@@ -143,7 +142,7 @@ func createTestApp(cfg config.Config, appName string, initialInstanceCount int, 
 		params = append(params, args...)
 		createApp := cf.Cf(params...).Wait(cfg.CfPushTimeoutDuration())
 		if createApp.ExitCode() != 0 {
-			err = errors.New(fmt.Sprintf("failed to push an app: %s  %s", appName, string(createApp.Err.Contents())))
+			err = fmt.Errorf("failed to push an app: %s  %s", appName, string(createApp.Err.Contents()))
 			return err
 		}
 		return err
@@ -154,7 +153,8 @@ func createTestApp(cfg config.Config, appName string, initialInstanceCount int, 
 }
 
 func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
-	createTestApp(cfg, appName, initialInstanceCount, "-p", config.NODE_APP)
+	err := createTestApp(cfg, appName, initialInstanceCount, "-p", config.NODE_APP)
+	Expect(err).ToNot(HaveOccurred())
 }
 
 func DeleteTestApp(appName string, timeout time.Duration) {

@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -365,7 +364,7 @@ func RunningInstances(appGUID string, timeout time.Duration) (int, error) {
 		var err error
 		cmd = cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID)).Wait(timeout)
 		if cmd.ExitCode() != 0 {
-			err = errors.New(fmt.Sprintf("failed to curl cloud controller api for app: %s  %s", appGUID, string(cmd.Err.Contents())))
+			err = fmt.Errorf("failed to curl cloud controller api for app: %s  %s", appGUID, string(cmd.Err.Contents()))
 		}
 		return err
 	}
@@ -441,7 +440,8 @@ func createPolicy(cfg *config.Config, appName, appGUID, policy string) (string, 
 }
 
 func BindServiceToApp(cfg *config.Config, appName string, instanceName string) {
-	BindServiceToAppWithPolicy(cfg, appName, instanceName, "")
+	err := BindServiceToAppWithPolicy(cfg, appName, instanceName, "")
+	Expect(err).ToNot(HaveOccurred())
 }
 
 func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName string, policy string) error {
@@ -455,8 +455,8 @@ func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName
 		bindService := cf.Cf(args...).Wait(cfg.DefaultTimeoutDuration())
 
 		if bindService.ExitCode() != 0 {
-			err = errors.New(fmt.Sprintf("failed binding service %s to app %s. \n Command Error: %s %s",
-				instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents()))
+			err = fmt.Errorf("failed binding service %s to app %s. \n Command Error: %s %s",
+				instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents())
 		}
 	}
 
@@ -482,8 +482,8 @@ func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, 
 		createService := cf.Cf(cfCommand...).Wait(cfg.DefaultTimeoutDuration())
 
 		if createService.ExitCode() != 0 {
-			err = errors.New(fmt.Sprintf("Failed to create service instance %s on service %s \n Command Error: %s %s",
-				instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents()))
+			err = fmt.Errorf("Failed to create service instance %s on service %s \n Command Error: %s %s",
+				instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
 		}
 	}
 	return err
@@ -578,7 +578,7 @@ func GetAppGuid(cfg *config.Config, appName string) (string, error) {
 			return strings.TrimSpace(string(guid.Out.Contents())), nil
 		}
 
-		return "", errors.New(fmt.Sprintf("Failed to find app guid for app: %s \n CLI Output:\n %s", appName, guid.Err.Contents()))
+		return "", fmt.Errorf("Failed to find app guid for app: %s \n CLI Output:\n %s", appName, guid.Err.Contents())
 	}
 
 	appGuid, err := TRetry(3, 60, getAppGuid)

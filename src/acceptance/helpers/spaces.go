@@ -57,7 +57,7 @@ func DeleteSpaces(orgName string, spaces []string, timeout time.Duration) {
 		return
 	}
 
-	fmt.Println(fmt.Sprintf("\nDeleting spaces: %s ", strings.Join(spaces, ", ")))
+	fmt.Printf("\nDeleting spaces: %s ", strings.Join(spaces, ", "))
 
 	for _, spaceName := range spaces {
 		if timeout.Seconds() != 0 {

@@ -42,7 +42,7 @@ func DeleteOrgs(orgs []string, timeout time.Duration) {
 		return
 	}
 
-	fmt.Println(fmt.Sprintf("Deleting orgs: %s ", strings.Join(orgs, ", ")))
+	fmt.Printf("\nDeleting orgs: %s ", strings.Join(orgs, ", "))
 
 	for _, org := range orgs {
 		deleteOrg := cf.Cf("delete-org", org, "-f").Wait(timeout)

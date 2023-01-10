@@ -76,10 +76,9 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				wg := sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-out", func() {
-					//fmt.Printf("\nstarted scaling-out app: %s at index %d\n", appName, i)
 					scaleOut := func() (int, error) {
 						helpers.SendMetric(cfg, appName, 550)
-						return helpers.RunningInstances(appGUID, 5*time.Second)
+						return helpers.RunningInstances(appGUID, 20*time.Second)
 					}
 					Eventually(scaleOut).WithPolling(pollTime).WithTimeout(5*time.Minute).Should(Equal(2),
 						fmt.Sprintf("Failed to scale out app: %s", appName))
@@ -91,14 +90,12 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				atomic.AddInt32(&scaledOutAppsCount, 1)
 				fmt.Printf("Scaled-Out apps: %d/%d\n", atomic.LoadInt32(&scaledOutAppsCount), actualAppsToScaleCount)
 
-				fmt.Println("Scale-In Apps Started...")
 				wg = sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-in", func() {
-					//fmt.Printf("\nstarted scaling-in app: %s at index %d\n", appName, i)
 					scaleIn := func() (int, error) {
 						helpers.SendMetric(cfg, appName, 100)
-						return helpers.RunningInstances(appGUID, 5*time.Second)
+						return helpers.RunningInstances(appGUID, 20*time.Second)
 					}
 					Eventually(scaleIn).WithPolling(pollTime).WithTimeout(5*time.Minute).Should(Equal(1),
 						fmt.Sprintf("Failed to scale in app: %s", appName))
@@ -122,5 +119,5 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 func checkMedianDurationFor(experiment *gmeasure.Experiment, statName string) {
 	scaleOutStats := experiment.GetStats(statName)
 	medianScaleOutDuration := scaleOutStats.DurationFor(gmeasure.StatMedian)
-	fmt.Printf("%d duration:\n", medianScaleOutDuration)
+	fmt.Printf("\nMedian duration: %d\n", medianScaleOutDuration)
 }
