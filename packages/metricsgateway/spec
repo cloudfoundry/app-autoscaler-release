@@ -20,6 +20,8 @@ files:
 - autoscaler/routes/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-diodes/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v9/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/internal/truncate/* # gosub
@@ -75,6 +77,7 @@ files:
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/pbkdf2/* # gosub
+- autoscaler/vendor/golang.org/x/net/context/* # gosub
 - autoscaler/vendor/golang.org/x/net/http/httpguts/* # gosub
 - autoscaler/vendor/golang.org/x/net/http2/* # gosub
 - autoscaler/vendor/golang.org/x/net/http2/hpack/* # gosub

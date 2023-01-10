@@ -16,6 +16,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsgateway/config"
 	mgHelpers "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsgateway/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"code.cloudfoundry.org/go-loggregator/v9"
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"

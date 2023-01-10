@@ -29,6 +29,7 @@ type FakeEventProducer struct {
 	keyFile            string
 	caCertFile         string
 	emitInterval       time.Duration
+	loggregator_v2.UnimplementedEgressServer
 }
 
 func NewFakeEventProducer(certFile string, keyFile string, caCertFile string, emitInterval time.Duration) (*FakeEventProducer, error) {

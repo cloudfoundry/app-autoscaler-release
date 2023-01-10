@@ -20,7 +20,8 @@ type TestIngressServer struct {
 	addr         string
 	tlsConfig    *tls.Config
 	grpcServer   *grpc.Server
-	grpc.Stream
+	grpc.ServerStream
+	loggregator_v2.UnimplementedIngressServer
 }
 
 func NewTestIngressServer(serverCert, serverKey, caCert string) (*TestIngressServer, error) {
