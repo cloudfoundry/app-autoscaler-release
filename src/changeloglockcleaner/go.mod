@@ -6,7 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/jackc/pgx/v5 v5.2.0
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/onsi/ginkgo/v2 v2.6.1
+	github.com/onsi/ginkgo/v2 v2.7.0
 	github.com/onsi/gomega v1.24.2
 )
 

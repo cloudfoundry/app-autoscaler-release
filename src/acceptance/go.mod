@@ -7,7 +7,7 @@ go 1.19
 require (
 	github.com/KevinJCross/cf-test-helpers/v2 v2.0.0
 	github.com/gin-gonic/gin v1.8.2
-	github.com/onsi/ginkgo/v2 v2.6.1
+	github.com/onsi/ginkgo/v2 v2.7.0
 	github.com/onsi/gomega v1.24.2
 	github.com/sirupsen/logrus v1.9.0
 	github.com/steinfletcher/apitest v1.5.14
