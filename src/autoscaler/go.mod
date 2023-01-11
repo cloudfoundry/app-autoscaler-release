@@ -2,7 +2,10 @@ module code.cloudfoundry.org/app-autoscaler/src/autoscaler
 
 go 1.19
 
-replace code.cloudfoundry.org/cfhttp => github.com/KevinJCross/cfhttp/v2 v2.0.0
+replace (
+	code.cloudfoundry.org/cfhttp => github.com/KevinJCross/cfhttp/v2 v2.0.0
+	code.cloudfoundry.org/lager => code.cloudfoundry.org/lager v1.1.1-0.20221206004056-ec47ef5d1a44
+)
 
 require (
 	code.cloudfoundry.org/cfhttp/v2 v2.0.0
@@ -157,9 +160,7 @@ require (
 	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
 	github.com/nishanths/exhaustive v0.8.3 // indirect
 	github.com/nishanths/predeclared v0.2.2 // indirect
-	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
@@ -227,7 +228,6 @@ require (
 	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	honnef.co/go/tools v0.3.3 // indirect
 	mvdan.cc/gofumpt v0.4.0 // indirect
