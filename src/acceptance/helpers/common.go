@@ -1,6 +1,10 @@
 package helpers
 
-import "strings"
+import (
+	"strings"
+
+	. "github.com/onsi/ginkgo/v2"
+)
 
 func getNames(resources []cfResource) []string {
 	var names []string
@@ -18,4 +22,10 @@ func filterByPrefix(prefix string, in []string) []string {
 		}
 	}
 	return filtered
+}
+
+func FailOnError(err error) {
+	if err != nil {
+		Fail(err.Error())
+	}
 }

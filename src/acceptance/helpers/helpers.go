@@ -14,11 +14,10 @@ import (
 
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
-	. "github.com/onsi/ginkgo/v2"
-
 	"github.com/KevinJCross/cf-test-helpers/v2/generator"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
 )
@@ -103,7 +102,7 @@ func EnableServiceAccess(setup *workflowhelpers.ReproducibleTestSuiteSetup, cfg 
 				Fail(fmt.Sprintf("Org must not be an empty string. Using broker:%s, serviceName:%s", cfg.ServiceBroker, cfg.ServiceName))
 			}
 			enableServiceAccess := cf.Cf("enable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s", cfg.ServiceName, orgName))
+			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to enable service %s for org %s: %s", cfg.ServiceName, orgName, enableServiceAccess.Err.Contents()))
 		})
 	}
 }
@@ -358,19 +357,32 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 	return string(marshaled)
 }
 
-func RunningInstances(appGUID string, timeout time.Duration) int {
+func RunningInstances(appGUID string, timeout time.Duration) (int, error) {
 	defer GinkgoRecover()
-	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID)).Wait(timeout)
-	Expect(cmd).To(Exit(0))
+	var cmd *Session
+	getAppProcesses := func() error {
+		var err error
+		cmd = cf.CfSilent("curl", fmt.Sprintf("/v3/apps/%s/processes/web", appGUID)).Wait(timeout)
+		if cmd.ExitCode() != 0 {
+			err = fmt.Errorf("failed to curl cloud controller api for app: %s  %s", appGUID, string(cmd.Err.Contents()))
+		}
+		return err
+	}
+
+	err := Retry(defaultRetryAttempt, defaultRetryAfter, getAppProcesses)
+	if err != nil {
+		return 0, err
+	}
+
 	var process = struct {
 		Instances int `json:"instances"`
 	}{}
 
-	err := json.Unmarshal(cmd.Out.Contents(), &process)
+	err = json.Unmarshal(cmd.Out.Contents(), &process)
 	Expect(err).ToNot(HaveOccurred())
 	webInstances := process.Instances
 	GinkgoWriter.Printf("\nFound %d app instances\n", webInstances)
-	return webInstances
+	return webInstances, nil
 }
 
 func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Duration) {
@@ -383,7 +395,13 @@ func WaitForNInstancesRunning(appGUID string, instances int, timeout time.Durati
 }
 
 func getAppInstances(appGUID string, timeout time.Duration) func() int {
-	return func() int { return RunningInstances(appGUID, timeout) }
+	return func() int {
+		instances, err := RunningInstances(appGUID, timeout)
+		if err != nil {
+			fmt.Println("error while computing running instances count: %w", err)
+		}
+		return instances
+	}
 }
 
 func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
@@ -399,50 +417,76 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 }
 
 func CreatePolicy(cfg *config.Config, appName, appGUID, policy string) string {
+	instanceName, _ := createPolicy(cfg, appName, appGUID, policy)
+	return instanceName
+}
+
+func CreatePolicyWithErr(cfg *config.Config, appName, appGUID, policy string) (string, error) {
+	return createPolicy(cfg, appName, appGUID, policy)
+}
+
+func createPolicy(cfg *config.Config, appName, appGUID, policy string) (string, error) {
 	if cfg.IsServiceOfferingEnabled() {
-		instanceName := CreateService(cfg)
-		BindServiceToAppWithPolicy(cfg, appName, instanceName, policy)
-		return instanceName
+		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+		err := Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
+		if err != nil {
+			return instanceName, err
+		}
+		err = Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
+		return instanceName, err
 	}
 	CreatePolicyWithAPI(cfg, appGUID, policy)
-	return ""
+	return "", nil
 }
 
 func BindServiceToApp(cfg *config.Config, appName string, instanceName string) {
-	BindServiceToAppWithPolicy(cfg, appName, instanceName, "")
+	err := BindServiceToAppWithPolicy(cfg, appName, instanceName, "")
+	Expect(err).ToNot(HaveOccurred())
 }
 
-func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName string, policy string) {
+func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName string, policy string) error {
+	var err error
+
 	if cfg.IsServiceOfferingEnabled() {
 		args := []string{"bind-service", appName, instanceName}
 		if policy != "" {
 			args = append(args, "-c", policy)
 		}
 		bindService := cf.Cf(args...).Wait(cfg.DefaultTimeoutDuration())
-		FailOnCommandFailuref(bindService, "failed binding service %s to app %s. \n Command Error: %s %s", instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents())
+
+		if bindService.ExitCode() != 0 {
+			err = fmt.Errorf("failed binding service %s to app %s. \n Command Error: %s %s",
+				instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents())
+		}
 	}
+
+	return err
 }
 
 func CreateService(cfg *config.Config) string {
-	return CreateServiceWithPlan(cfg, cfg.ServicePlan)
+	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+	FailOnError(CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName))
+	return instanceName
 }
 
-func CreateServiceWithPlan(cfg *config.Config, servicePlan string) string {
-	return CreateServiceWithPlanAndParameters(cfg, servicePlan, "")
+func CreateServiceWithPlan(cfg *config.Config, servicePlan string, instanceName string) error {
+	return CreateServiceWithPlanAndParameters(cfg, servicePlan, "", instanceName)
 }
 
-func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string) string {
+func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string, instanceName string) (err error) {
 	if cfg.IsServiceOfferingEnabled() {
-		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 		cfCommand := []string{"create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker}
 		if defaultPolicy != "" {
 			cfCommand = append(cfCommand, "-c", defaultPolicy)
 		}
 		createService := cf.Cf(cfCommand...).Wait(cfg.DefaultTimeoutDuration())
-		FailOnCommandFailuref(createService, "Failed to create service instance %s on service %s \n Command Error: %s %s", instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
-		return instanceName
+
+		if createService.ExitCode() != 0 {
+			err = fmt.Errorf("Failed to create service instance %s on service %s \n Command Error: %s %s",
+				instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
+		}
 	}
-	return ""
+	return err
 }
 
 func GetServiceInstanceGuid(cfg *config.Config, instanceName string) string {
@@ -460,7 +504,8 @@ func GetServiceInstanceParameters(cfg *config.Config, instanceName string) strin
 }
 
 func GetServiceCredentialBindingGuid(cfg *config.Config, instanceGuid string, appName string) string {
-	appGuid := GetAppGuid(cfg, appName)
+	appGuid, err := GetAppGuid(cfg, appName)
+	Expect(err).NotTo(HaveOccurred())
 	guid := cf.CfSilent("curl", fmt.Sprintf("/v3/service_credential_bindings?service_instance_guids=%s&app_guids=%s", instanceGuid, appGuid)).Wait(cfg.DefaultTimeoutDuration())
 
 	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find service credential binding guid for service instance guid : %s and app name %s \n CLI Output:\n %s", instanceGuid, appName, guid.Out.Contents()))
@@ -474,7 +519,7 @@ func GetServiceCredentialBindingGuid(cfg *config.Config, instanceGuid string, ap
 	var serviceCredentialBindings = struct {
 		Resources []ServiceCredentialBinding `json:"resources"`
 	}{}
-	err := json.Unmarshal(contents, &serviceCredentialBindings)
+	err = json.Unmarshal(contents, &serviceCredentialBindings)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	return serviceCredentialBindings.Resources[0].GUID
@@ -526,10 +571,18 @@ func GetHTTPClient(cfg *config.Config) *http.Client {
 	}
 }
 
-func GetAppGuid(cfg *config.Config, appName string) string {
-	guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-	Expect(guid).To(Exit(0), fmt.Sprintf("Failed to find app guid for app: %s \n CLI Output:\n %s", appName, guid.Out.Contents()))
-	return strings.TrimSpace(string(guid.Out.Contents()))
+func GetAppGuid(cfg *config.Config, appName string) (string, error) {
+	getAppGuid := func() (string, error) {
+		guid := cf.Cf("app", appName, "--guid").Wait(cfg.DefaultTimeoutDuration())
+		if guid.ExitCode() == 0 {
+			return strings.TrimSpace(string(guid.Out.Contents())), nil
+		}
+
+		return "", fmt.Errorf("Failed to find app guid for app: %s \n CLI Output:\n %s", appName, guid.Err.Contents())
+	}
+
+	appGuid, err := TRetry(3, 60, getAppGuid)
+	return appGuid, err
 }
 
 func FailOnCommandFailuref(command *Session, format string, args ...any) *Session {

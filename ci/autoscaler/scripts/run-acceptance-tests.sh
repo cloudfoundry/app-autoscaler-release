@@ -6,15 +6,19 @@ source "${script_dir}/vars.source.sh"
 
 cf_admin_password="${CF_ADMIN_PASSWORD:-}"
 service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
-skip_ssl_validation=${SKIP_SSL_VALIDATION:-'true'}
+skip_ssl_validation="${SKIP_SSL_VALIDATION:-true}"
 skip_teardown="${SKIP_TEARDOWN:-false}"
+use_existing_organization="${USE_EXISTING_ORGANIZATION:-false}"
+existing_organization="${EXISTING_ORGANIZATION:-}"
+use_existing_space="${USE_EXISTING_SPACE:-false}"
+existing_space="${EXISTING_SPACE:-}"
 suites=${SUITES:-"api app broker"}
 ginkgo_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
 performance_app_count="${PERFORMANCE_APP_COUNT:-}"
 performance_app_percentage_to_scale="${PERFORMANCE_APP_PERCENTAGE_TO_SCALE:-}"
 performance_setup_workers="${PERFORMANCE_SETUP_WORKERS:-}"
-performance_teardown=${PERFORMANCE_TEARDOWN:-true}
+performance_update_existing_org_quota=${PERFORMANCE_UPDATE_EXISTING_ORG_QUOTA:-true}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
@@ -41,6 +45,10 @@ cat > acceptance_config.json <<EOF
   "use_http": false,
   "service_name": "${deployment_name}",
   "service_broker": "${deployment_name}",
+	"use_existing_organization": ${use_existing_organization},
+  "existing_organization": "${existing_organization}",
+  "use_existing_space": ${use_existing_space},
+  "existing_space": "${existing_space}",
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
 	"default_timeout": 60,
@@ -53,7 +61,7 @@ cat > acceptance_config.json <<EOF
     "app_count": ${performance_app_count},
     "app_percentage_to_scale": ${performance_app_percentage_to_scale},
     "setup_workers": ${performance_setup_workers},
-    "teardown": ${performance_teardown}
+    "update_existing_org_quota": ${performance_update_existing_org_quota}
   }
 }
 EOF

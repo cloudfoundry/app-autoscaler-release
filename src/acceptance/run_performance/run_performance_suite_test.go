@@ -2,7 +2,7 @@ package run_performance_test
 
 import (
 	"acceptance/config"
-	"acceptance/helpers"
+	. "acceptance/helpers"
 	"fmt"
 	"os"
 	"testing"
@@ -17,45 +17,47 @@ var (
 	cfg       *config.Config
 	setup     *workflowhelpers.ReproducibleTestSuiteSetup
 	orgName   string
-	orgGUID   string
 	spaceName string
-	spaceGUID string
 )
 
 func TestSetup(t *testing.T) {
 	RegisterFailHandler(Fail)
 	cfg = config.LoadConfig()
+	cfg.Prefix = "autoscaler-performance"
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-	RunSpecs(t, "Pre Upgrade Test Suite")
+	RunSpecs(t, "Performance Test Suite")
 }
 
 var _ = BeforeSuite(func() {
 	// use smoke test to avoid creating a new user
 	setup = workflowhelpers.NewSmokeTestSuiteSetup(cfg)
 
-	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		organizations := helpers.GetTestOrgs(cfg)
-		Expect(len(organizations)).To(Equal(1))
-		orgName = organizations[0]
-		_, orgGUID, spaceName, spaceGUID = helpers.GetOrgSpaceNamesAndGuids(cfg, orgName)
-	})
+	if cfg.UseExistingOrganization && !cfg.UseExistingSpace {
+		orgGuid := GetOrgGuid(cfg, cfg.ExistingOrganization)
+		spaces := GetTestSpaces(orgGuid, cfg)
+		Expect(len(spaces)).To(Equal(1), "Found more than one space in existing org %s", cfg.ExistingOrganization)
+		cfg.ExistingSpace = spaces[0]
+	} else {
+		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+			orgName, spaceName = FindExistingOrgAndSpace(cfg)
+		})
 
-	Expect(orgName).ToNot(Equal(""), "orgName has not been determined")
-	Expect(spaceName).ToNot(Equal(""), "spaceName has not been determined")
+		Expect(orgName).ToNot(Equal(""), "orgName has not been determined")
+		Expect(spaceName).ToNot(Equal(""), "spaceName has not been determined")
 
-	// discover the org / space from the environment
+		cfg.ExistingOrganization = orgName
+		cfg.ExistingSpace = spaceName
+	}
+
 	cfg.UseExistingOrganization = true
 	cfg.UseExistingSpace = true
-
-	cfg.ExistingOrganization = orgName
-	cfg.ExistingSpace = spaceName
 
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 
 	setup.Setup()
 
 	if cfg.IsServiceOfferingEnabled() {
-		helpers.CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
+		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 	}
 })
 

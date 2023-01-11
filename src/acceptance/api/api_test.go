@@ -76,6 +76,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 	BeforeEach(func() {
 		oauthToken = OauthToken(cfg)
+		Expect(appGUID).NotTo(BeEmpty())
 	})
 
 	Context("when no policy defined", func() {
@@ -179,7 +180,6 @@ var _ = Describe("AutoScaler Public API", func() {
 		})
 
 		Context("When scale out is triggered ", func() {
-
 			BeforeEach(func() {
 				totalTime := time.Duration(cfg.AggregateInterval*2)*time.Second + 3*time.Minute
 				WaitForNInstancesRunning(appGUID, 2, totalTime)

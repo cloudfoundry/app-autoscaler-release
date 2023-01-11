@@ -13,12 +13,14 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		appName string
 		appGUID string
 		policy  string
+		err     error
 	)
 
 	BeforeEach(func() {
 		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 		appName = CreateTestApp(cfg, "node-custom-metric", 1)
-		appGUID = GetAppGuid(cfg, appName)
+		appGUID, err = GetAppGuid(cfg, appName)
+		Expect(err).NotTo(HaveOccurred())
 		_ = CreatePolicy(cfg, appName, appGUID, policy)
 		CreateCustomMetricCred(cfg, appName, appGUID)
 		StartApp(appName, cfg.CfPushTimeoutDuration())
@@ -29,14 +31,14 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", func() {
 			By("Scale out to 2 instances")
-			scaleOut := func() int {
+			scaleOut := func() (int, error) {
 				SendMetric(cfg, appName, 550)
 				return RunningInstances(appGUID, 5*time.Second)
 			}
 			Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
 
 			By("Scale in to 1 instances")
-			scaleIn := func() int {
+			scaleIn := func() (int, error) {
 				SendMetric(cfg, appName, 100)
 				return RunningInstances(appGUID, 5*time.Second)
 			}

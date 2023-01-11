@@ -229,7 +229,7 @@ golangci-lint_check:
 	if [ "$${current_major_version}" != "$${expected_version}" ]; then \
         echo "ERROR: Expected to have golangci-lint version '$${expected_version}.x' but we have $${current_version}";\
         exit 1;\
-    fi
+  fi
 
 rubocop:
 	@echo " - ruby scripts"
@@ -356,10 +356,9 @@ cf-login:
 .PHONY: setup-performance
 setup-performance:
 	export GINKGO_OPTS="";\
-	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
-	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="setup_performance";\
+	export DEPLOYMENT_NAME="autoscaler-performance";\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
 .PHONY: run-performance

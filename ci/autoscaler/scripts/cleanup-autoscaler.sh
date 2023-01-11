@@ -8,6 +8,7 @@ function main(){
   step "cleaning up deployment ${DEPLOYMENT_NAME}"
   bosh_login
   cf_login
+
   cleanup_acceptance_run
   cleanup_service_broker
   cleanup_bosh_deployment

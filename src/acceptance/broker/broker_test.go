@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/KevinJCross/cf-test-helpers/v2/generator"
+
 	"github.com/onsi/gomega/gbytes"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
@@ -19,11 +21,15 @@ import (
 type serviceInstance string
 
 func createService(onPlan string) serviceInstance {
-	return serviceInstance(helpers.CreateServiceWithPlan(cfg, onPlan))
+	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+	helpers.FailOnError(helpers.CreateServiceWithPlan(cfg, onPlan, instanceName))
+	return serviceInstance(instanceName)
 }
 
 func createServiceWithParameters(onPlan string, parameters string) serviceInstance {
-	return serviceInstance(helpers.CreateServiceWithPlanAndParameters(cfg, onPlan, parameters))
+	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+	helpers.FailOnError(helpers.CreateServiceWithPlanAndParameters(cfg, onPlan, parameters, instanceName))
+	return serviceInstance(instanceName)
 }
 
 func (s serviceInstance) updatePlan(toPlan string) {
@@ -89,7 +95,8 @@ var _ = Describe("AutoScaler Service Broker", func() {
 			policy, err := os.ReadFile(policyFile)
 			Expect(err).NotTo(HaveOccurred())
 
-			helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			err = helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			Expect(err).NotTo(HaveOccurred())
 
 			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
 			Expect(bindingParameters).Should(MatchJSON(policy))
@@ -116,6 +123,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 
 		BeforeEach(func() {
 			instance = createServiceWithParameters(cfg.ServicePlan, "../assets/file/policy/default_policy.json")
+			Expect(instance).NotTo(BeEmpty())
 			var err error
 			defaultPolicy, err = os.ReadFile("../assets/file/policy/default_policy.json")
 			Expect(err).NotTo(HaveOccurred())

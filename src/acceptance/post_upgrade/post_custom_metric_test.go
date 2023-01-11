@@ -34,14 +34,14 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		Expect(helpers.RunningInstances(appGUID, 5*time.Second)).To(Equal(1))
 
 		By("Scaling out to 2 instances")
-		scaleOut := func() int {
+		scaleOut := func() (int, error) {
 			helpers.SendMetric(cfg, appName, 550)
 			return helpers.RunningInstances(appGUID, 5*time.Second)
 		}
 		Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
 
 		By("Scaling in to 1 instance")
-		scaleIn := func() int {
+		scaleIn := func() (int, error) {
 			helpers.SendMetric(cfg, appName, 100)
 			return helpers.RunningInstances(appGUID, 5*time.Second)
 		}

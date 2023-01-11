@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/cf"
@@ -17,6 +18,30 @@ import (
 )
 
 const AppResidentSize = 55
+
+type AppInfo struct {
+	Name  string
+	Guid  string
+	State string
+}
+
+func GetAllStartedApp(cfg *config.Config, org, space, appPrefix string) []AppInfo {
+	var startedApps []AppInfo
+	rawApps := getRawApps(space, org, cfg.DefaultTimeoutDuration())
+	for _, rawApp := range rawApps {
+		appName := rawApp.Name
+		appState := rawApp.State
+		if strings.Contains(appName, appPrefix) && appState == "STARTED" {
+			appInfo := &AppInfo{
+				Name:  appName,
+				Guid:  rawApp.GUID,
+				State: appState,
+			}
+			startedApps = append(startedApps, *appInfo)
+		}
+	}
+	return startedApps
+}
 
 func GetApps(cfg *config.Config, orgGuid, spaceGuid string, prefix string) []string {
 	rawApps := getRawApps(spaceGuid, orgGuid, cfg.DefaultTimeoutDuration())
@@ -50,6 +75,17 @@ func SendMetric(cfg *config.Config, appName string, metric int) {
 	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), "-f")
 }
 
+func StartAppWithErr(appName string, timeout time.Duration) error {
+	startApp := func() error {
+		var err error
+		var startApp = cf.Cf("start", appName).Wait(timeout)
+		if startApp.ExitCode() != 0 {
+			err = fmt.Errorf("failed to start an app: %s  %s", appName, string(startApp.Err.Contents()))
+		}
+		return err
+	}
+	return Retry(defaultRetryAttempt, defaultRetryAfter, startApp)
+}
 func StartApp(appName string, timeout time.Duration) bool {
 	startApp := cf.Cf("start", appName).Wait(timeout)
 	if startApp.ExitCode() != 0 {
@@ -78,41 +114,47 @@ func CreateDroplet(cfg config.Config) string {
 	return dropletPath
 }
 
-func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) {
-	createTestApp(*cfg, appName, initialInstanceCount, "--droplet", dropletPath)
+func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) error {
+	return createTestApp(*cfg, appName, initialInstanceCount, "--droplet", dropletPath)
 }
 
-func createTestApp(cfg config.Config, appName string, initialInstanceCount int, args ...string) {
+func createTestApp(cfg config.Config, appName string, initialInstanceCount int, args ...string) error {
 	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
 	if cfg.GetSkipSSLValidation() {
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
 	}
 	countStr := strconv.Itoa(initialInstanceCount)
-	params := []string{
-		"push",
-		"--var", "app_name=" + appName,
-		"--var", "app_domain=" + cfg.AppsDomain,
-		"--var", "service_name=" + cfg.ServiceName,
-		"--var", "instances=" + countStr,
-		"--var", "buildpack=" + cfg.NodejsBuildpackName,
-		"--var", "node_tls_reject_unauthorized=" + setNodeTLSRejectUnauthorizedEnvironmentVariable,
-		"--var", "memory_mb=" + strconv.Itoa(cfg.NodeMemoryLimit),
-		"-f", config.NODE_APP + "/app_manifest.yml",
-		"--no-start",
-	}
-	params = append(params, args...)
-	createApp := cf.Cf(params...).Wait(cfg.CfPushTimeoutDuration())
 
-	if createApp.ExitCode() != 0 {
-		cf.Cf("logs", appName, "--recent").Wait(2 * time.Minute)
+	pushApp := func() error {
+		var err error
+		params := []string{
+			"push",
+			"--var", "app_name=" + appName,
+			"--var", "app_domain=" + cfg.AppsDomain,
+			"--var", "service_name=" + cfg.ServiceName,
+			"--var", "instances=" + countStr,
+			"--var", "buildpack=" + cfg.NodejsBuildpackName,
+			"--var", "node_tls_reject_unauthorized=" + setNodeTLSRejectUnauthorizedEnvironmentVariable,
+			"--var", "memory_mb=" + strconv.Itoa(cfg.NodeMemoryLimit),
+			"-f", config.NODE_APP + "/app_manifest.yml",
+			"--no-start",
+		}
+		params = append(params, args...)
+		createApp := cf.Cf(params...).Wait(cfg.CfPushTimeoutDuration())
+		if createApp.ExitCode() != 0 {
+			err = fmt.Errorf("failed to push an app: %s  %s", appName, string(createApp.Err.Contents()))
+			return err
+		}
+		return err
 	}
-	Expect(createApp).To(Exit(0), fmt.Sprintf("failed creating app: %s %s", appName, string(createApp.Err.Contents())))
-
+	err := Retry(defaultRetryAttempt, defaultRetryAfter, pushApp)
 	GinkgoWriter.Printf("\nfinish creating test app: %s\n", appName)
+	return err
 }
 
 func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
-	createTestApp(cfg, appName, initialInstanceCount, "-p", config.NODE_APP)
+	err := createTestApp(cfg, appName, initialInstanceCount, "-p", config.NODE_APP)
+	Expect(err).ToNot(HaveOccurred())
 }
 
 func DeleteTestApp(appName string, timeout time.Duration) {
@@ -120,7 +162,8 @@ func DeleteTestApp(appName string, timeout time.Duration) {
 }
 
 func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url string) string {
-	appGuid := GetAppGuid(cfg, appName)
+	appGuid, err := GetAppGuid(cfg, appName)
+	Expect(err).NotTo(HaveOccurred())
 	output := cfh.CurlAppWithTimeout(cfg, appName, url, 20*time.Second, "-H", fmt.Sprintf(`X-Cf-App-Instance: %s:%d`, appGuid, appInstance),
 		"-f",
 		"--connect-timeout", "5",
