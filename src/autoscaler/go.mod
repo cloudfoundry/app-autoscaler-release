@@ -9,7 +9,7 @@ require (
 	code.cloudfoundry.org/clock v1.0.0
 	code.cloudfoundry.org/go-log-cache v1.0.1-0.20230106184352-6dc0e9ab2e65
 	code.cloudfoundry.org/go-loggregator/v9 v9.0.3
-	code.cloudfoundry.org/lager v1.1.1-0.20221206004056-ec47ef5d1a44
+	code.cloudfoundry.org/lager v2.0.0+incompatible
 	code.cloudfoundry.org/tlsconfig v0.0.0-20220621140725-0e6fbd869921
 	github.com/cenkalti/backoff/v4 v4.2.0
 	github.com/go-sql-driver/mysql v1.7.0
@@ -26,7 +26,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.7.0
 	github.com/onsi/gomega v1.24.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/pivotal-cf/brokerapi/v8 v8.1.0
+	github.com/pivotal-cf/brokerapi/v8 v8.2.3
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
 	github.com/rubyist/circuitbreaker v2.2.1+incompatible
@@ -157,6 +157,7 @@ require (
 	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
 	github.com/nishanths/exhaustive v0.8.3 // indirect
 	github.com/nishanths/predeclared v0.2.2 // indirect
+	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
@@ -226,6 +227,7 @@ require (
 	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	honnef.co/go/tools v0.3.3 // indirect
 	mvdan.cc/gofumpt v0.4.0 // indirect
