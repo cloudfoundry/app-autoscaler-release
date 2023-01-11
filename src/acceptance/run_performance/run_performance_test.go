@@ -72,7 +72,6 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 				}
 				pollTime := 10 * time.Second
 
-				fmt.Println("\nScale-Out Apps Started...")
 				wg := sync.WaitGroup{}
 				wg.Add(1)
 				experiment.MeasureDuration("scale-out", func() {

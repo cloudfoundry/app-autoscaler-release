@@ -122,9 +122,10 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		var policy []byte
 
 		BeforeEach(func() {
-			_ = createServiceWithParameters(cfg.ServicePlan, "../assets/file/policy/default_policy.json")
-
-			defaultPolicy, err := os.ReadFile("../assets/file/policy/default_policy.json")
+			instance = createServiceWithParameters(cfg.ServicePlan, "../assets/file/policy/default_policy.json")
+			Expect(instance).NotTo(BeEmpty())
+			var err error
+			defaultPolicy, err = os.ReadFile("../assets/file/policy/default_policy.json")
 			Expect(err).NotTo(HaveOccurred())
 
 			var serviceParameters = struct {

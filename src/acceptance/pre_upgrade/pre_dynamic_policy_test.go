@@ -14,12 +14,13 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		appName              string
 		appGUID              string
 		policy               string
+		err                  error
 		initialInstanceCount = 1
 	)
 
 	JustBeforeEach(func() {
 		appName = helpers.CreateTestApp(cfg, "nodeapp-cpu", initialInstanceCount)
-		appGUID, err := helpers.GetAppGuid(cfg, appName)
+		appGUID, err = helpers.GetAppGuid(cfg, appName)
 		Expect(err).NotTo(HaveOccurred())
 		_ = helpers.CreatePolicy(cfg, appName, appGUID, policy)
 		helpers.StartApp(appName, cfg.CfPushTimeoutDuration())
