@@ -57,28 +57,29 @@ anchors:
 groups:
 - name: all
   jobs:
+  - acceptance
+  - acceptance-buildin
+  - acceptance-log-cache
+  - cleanup-autoscaler-deployments
+  - draft
+  - integration-tests
+  - performance
+  - release
   - set-pipeline
   - unit-tests
-  - integration-tests
-  - acceptance
-  - acceptance-log-cache
-  - acceptance-buildin
-  - draft
-  - release
   - upgrade-test
   - update-golang
   - update-java
-  - performance
 - name: autoscaler-release
   jobs:
+  - acceptance
+  - acceptance-buildin
+  - acceptance-log-cache
+  - draft
+  - integration-tests
+  - release
   - set-pipeline
   - unit-tests
-  - integration-tests
-  - acceptance
-  - acceptance-log-cache
-  - acceptance-buildin
-  - draft
-  - release
   - upgrade-test
 - name: update-sdks
   jobs:
