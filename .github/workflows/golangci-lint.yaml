@@ -38,7 +38,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3.3.1
         with:
           working-directory: src/autoscaler
-          args: --config ../../.golangci.yaml
+          args: --config='../../.golangci.yaml' --timeout='2m'
           version: ${{ steps.lint.outputs.version }}
           skip-cache: true
 
