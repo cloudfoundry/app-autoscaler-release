@@ -30,7 +30,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3.3.1
         with:
           working-directory: src/acceptance
-          args: --config ../../.golangci.yaml -v
+          args: --config='../../.golangci.yaml -v' --timeout='2m'
           version: ${{ steps.lint.outputs.version }}
           skip-cache: true
 
