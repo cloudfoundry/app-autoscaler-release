@@ -16,7 +16,6 @@ jobs:
 
       - name: Go Build
         run: |
-          source .envrc
           pushd src/autoscaler
             make buildtools
             make generate
