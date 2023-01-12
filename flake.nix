@@ -3,9 +3,16 @@
 
   inputs = {
     nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
+
+    # The following input is needed until PR https://github.com/NixOS/nixpkgs/pull/189079
+    # has been merged!
+    # Alternative solution: produce a package here locally that contains cf-uaac
+    # by making use of <https://nixos.org/manual/nixpkgs/stable/#developing-with-ruby>, see
+    # chapter: 17.30.2.5. Packaging applications
+    jdwpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, jdwpkgs }:
     let
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
@@ -14,10 +21,12 @@
 
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+      jdwpkgsFor = forAllSystems (system: import jdwpkgs { inherit system; });
     in {
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+          jdwpkgs = jdwpkgsFor.${system};
         in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
@@ -33,9 +42,7 @@
               maven
               nodejs
               ruby
-              ## The following line needs: `nixpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;`
-              ## until PR https://github.com/NixOS/nixpkgs/pull/189079 has been merged!
-              # rubyPackages.cf-uaac
+              jdwpkgs.rubyPackages.cf-uaac # comment for not compiling much
               shellcheck
               temurin-bin-11
             ];
