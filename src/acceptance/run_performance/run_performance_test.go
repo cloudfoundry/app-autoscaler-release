@@ -13,6 +13,9 @@ import (
 	"github.com/onsi/gomega/gmeasure"
 )
 
+const pollTime = 10 * time.Second
+const desiredScalingTime = 20 * time.Minute
+
 var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 	var (
 		appsToScaleCount       int
@@ -66,11 +69,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 			experiment.Sample(func(i int) {
 				defer GinkgoRecover()
 				appName := startedApps[i].Name
-				appGUID, err := helpers.GetAppGuid(cfg, appName)
-				if err != nil {
-					errors.Store(appName, err)
-				}
-				pollTime := 10 * time.Second
+				appGUID := startedApps[i].Guid
 
 				wg := sync.WaitGroup{}
 				wg.Add(1)
@@ -102,13 +101,12 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 					wg.Done()
 				})
 				wg.Wait()
-
 				atomic.AddInt32(&doneAppsCount, 1)
 				fmt.Printf("Scaled-in apps: %d/%d\n", atomic.LoadInt32(&doneAppsCount), actualAppsToScaleCount)
 
 			}, samplingConfig)
-
-			Eventually(func() int32 { return atomic.LoadInt32(&doneAppsCount) }, 10*time.Minute, 10*time.Second).Should(BeEquivalentTo(actualAppsToScaleCount))
+			fmt.Printf("\nWaiting %s minutes to finish scaling...", desiredScalingTime)
+			Eventually(func() int32 { return atomic.LoadInt32(&doneAppsCount) }, desiredScalingTime, 10*time.Second).Should(BeEquivalentTo(actualAppsToScaleCount))
 			checkMedianDurationFor(experiment, "scale-out")
 			checkMedianDurationFor(experiment, "scale-in")
 		})

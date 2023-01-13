@@ -4,6 +4,8 @@ import (
 	"acceptance/config"
 	. "acceptance/helpers"
 	"fmt"
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	"github.com/onsi/gomega/gexec"
 	"os"
 	"strconv"
 	"sync"
@@ -111,11 +113,47 @@ func deleteExistingServiceInstances(workerId int, servicesChan chan string, setu
 func cleanup() {
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
-		DeleteOrgs(GetTestOrgs(cfg), time.Duration(120)*time.Second)
 
 		if cfg.UseExistingOrganization {
+			// cf target to org
+			targetOrg(setup)
+
 			orgGuid := GetOrgGuid(cfg, cfg.ExistingOrganization)
-			DeleteSpaces(cfg.ExistingOrganization, GetTestSpaces(orgGuid, cfg), 0*time.Second)
+			spaceNames := GetTestSpaces(orgGuid, cfg)
+			if len(spaceNames) == 0 {
+				return
+			}
+			//TODO - Do it with multiple go processes1
+			deleteAllServices(orgGuid)
+			// delete all apps in a test space - only from first space - what if two spaces are present
+			deleteAllApps(spaceNames[0])
+			DeleteSpaces(cfg.ExistingOrganization, GetTestSpaces(orgGuid, cfg), cfg.DefaultTimeoutDuration())
+		} else {
+			DeleteOrgs(GetTestOrgs(cfg), time.Duration(120)*time.Second)
 		}
+
 	})
+}
+
+func deleteAllApps(spaceName string) {
+	apps := GetApps(cfg, setup.GetOrganizationName(), spaceName, "node-custom-metric-benchmark-")
+	fmt.Printf("\nExisting apps found %d", len(apps))
+	for _, appName := range apps {
+		fmt.Printf(" - deleting app %s\n", appName)
+		DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
+	}
+}
+
+func deleteAllServices(orgGuid string) {
+	services := GetServices(cfg, orgGuid, GetSpaceGuid(cfg, orgGuid))
+	fmt.Printf("\nExisting services found %d", len(services))
+	for _, service := range services {
+		fmt.Printf(" - deleting service instance %s\n", service)
+		DeleteServiceInstance(cfg, setup, service)
+	}
+}
+
+func targetOrg(setup *workflowhelpers.ReproducibleTestSuiteSetup) {
+	cmd := cf.Cf("target", "-o", setup.GetOrganizationName()).Wait(cfg.DefaultTimeoutDuration())
+	Expect(cmd).To(gexec.Exit(0), fmt.Sprintf("failed cf target org  %s : %s", setup.GetOrganizationName(), string(cmd.Err.Contents())))
 }

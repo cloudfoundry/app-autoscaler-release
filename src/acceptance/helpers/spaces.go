@@ -38,7 +38,7 @@ func GetTestSpaces(orgGuid string, cfg *config.Config) []string {
 			spaceNames = append(spaceNames, space.Name)
 		}
 	}
-	ginkgo.GinkgoWriter.Printf("\nGot orgs: %s\n", spaceNames)
+	ginkgo.GinkgoWriter.Printf("\nGot spaces: %s\n", spaceNames)
 	return spaceNames
 }
 
