@@ -6,7 +6,10 @@
 
     # The following input is needed until PR https://github.com/NixOS/nixpkgs/pull/189079
     # has been merged!
-    # Alternative solution: produce a package here locally that contains cf-uaac
+    # Alternative solution 1: `gem install …` using https://direnv.net/man/direnv-stdlib.1.html#codelayout-rubycode
+    # to create a project-specific ruby-gem-path
+    #
+    # Alternative solution 2: produce a package here locally that contains cf-uaac
     # by making use of <https://nixos.org/manual/nixpkgs/stable/#developing-with-ruby>, see
     # chapter: 17.30.2.5. Packaging applications
     jdwpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;
