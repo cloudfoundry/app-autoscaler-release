@@ -85,7 +85,9 @@ files:
 - autoscaler/vendor/golang.org/x/net/internal/timeseries/* # gosub
 - autoscaler/vendor/golang.org/x/net/trace/* # gosub
 - autoscaler/vendor/golang.org/x/sync/semaphore/* # gosub
+- autoscaler/vendor/golang.org/x/sys/internal/unsafeheader/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
+- autoscaler/vendor/golang.org/x/sys/windows/* # gosub
 - autoscaler/vendor/golang.org/x/text/cases/* # gosub
 - autoscaler/vendor/golang.org/x/text/internal/* # gosub
 - autoscaler/vendor/golang.org/x/text/internal/language/* # gosub
