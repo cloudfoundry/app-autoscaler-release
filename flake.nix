@@ -47,7 +47,7 @@
               ruby
               jdwpkgs.rubyPackages.cf-uaac # comment for not compiling much
               shellcheck
-              temurin-bin-11
+              temurin-bin
             ];
           };
       });
