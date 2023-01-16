@@ -14,7 +14,7 @@ import (
 )
 
 const pollTime = 10 * time.Second
-const desiredScalingTime = 20 * time.Minute
+const desiredScalingTime = 300 * time.Minute
 
 var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 	var (
@@ -52,12 +52,12 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 		actualAppsToScaleCount = int(math.RoundToEven(float64(len(startedApps) * percentageToScale / 100)))
 
 		fmt.Printf("\nDesired Scaling %d apps: \n", appsToScaleCount)
-		fmt.Printf("Actual Scaling %d apps (based on sucessuful apps pushed): \n\n", actualAppsToScaleCount)
+		fmt.Printf("Actual Scaling %d apps (based on sucessuful apps pushed) \n\n", actualAppsToScaleCount)
 
 		samplingConfig = gmeasure.SamplingConfig{
 			N:           actualAppsToScaleCount,
-			NumParallel: actualAppsToScaleCount,
-			Duration:    60 * time.Minute,
+			NumParallel: 100,
+			Duration:    300 * time.Minute,
 		}
 		experiment = gmeasure.NewExperiment("Scaling Benchmark")
 	})
