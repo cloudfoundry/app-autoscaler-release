@@ -82,7 +82,6 @@ func cleanup() {
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		fmt.Println("\nCleaning up test leftovers...")
 		if cfg.UseExistingOrganization {
-			// cf target to org
 			targetOrg(setup)
 			orgGuid := GetOrgGuid(cfg, cfg.ExistingOrganization)
 			spaceNames := GetTestSpaces(orgGuid, cfg)
@@ -135,7 +134,7 @@ func deleteAllApps(workersCount int, orgGuid string, spaceName string, parentWai
 	appsChan := make(chan string)
 
 	apps := GetApps(cfg, orgGuid, spaceName, "node-custom-metric-benchmark-")
-	fmt.Printf("\ndeleting existing app instances: %d", len(apps))
+	fmt.Printf("\n- deleting existing app instances: %d\n", len(apps))
 	if len(apps) == 0 {
 		return
 	}
@@ -154,24 +153,20 @@ func deleteExistingServiceInstances(workerId int, servicesChan chan string, setu
 	defer wg.Done()
 	defer GinkgoRecover()
 
-	//fmt.Printf("Worker %d  - Delete Service Instance starting...\n", workerId)
 	for instanceName := range servicesChan {
 		fmt.Printf("worker %d  - deleting service instance - %s\n", workerId, instanceName)
 		DeleteServiceInstance(cfg, setup, instanceName)
 	}
-	//fmt.Printf("worker %d  - Delete Service Instance finished...\n", workerId)
 }
 
 func deleteExistingApps(workerId int, appsChan chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	defer GinkgoRecover()
 
-	fmt.Printf("Worker %d  - Delete app starting...\n", workerId)
 	for appName := range appsChan {
 		fmt.Printf("worker %d  - deleting app instance - %s\n", workerId, appName)
 		DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 	}
-	fmt.Printf("worker %d  - Delete app finished...\n", workerId)
 }
 
 func targetOrg(setup *workflowhelpers.ReproducibleTestSuiteSetup) {
