@@ -4,13 +4,14 @@ import (
 	"acceptance/config"
 	. "acceptance/helpers"
 	"fmt"
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
-	"github.com/onsi/gomega/gexec"
 	"os"
 	"strconv"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/KevinJCross/cf-test-helpers/v2/cf"
+	"github.com/onsi/gomega/gexec"
 
 	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
 
@@ -88,7 +89,6 @@ func cleanup() {
 			if len(spaceNames) == 0 {
 				return
 			}
-			//TODO - Do it with multiple go processes
 			waitGroup := sync.WaitGroup{}
 			waitGroup.Add(2)
 

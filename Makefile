@@ -253,7 +253,8 @@ lint-actions:
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --path-prefix=src/$(patsubst lint_%,%,$@) --config ${lint_config} ${OPTS}
+	@echo " receiving OPTS ${OPTS}"
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS}
 
 .PHONY: spec-test
 spec-test:

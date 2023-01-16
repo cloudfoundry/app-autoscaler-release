@@ -56,7 +56,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", func() {
 
 		samplingConfig = gmeasure.SamplingConfig{
 			N:           actualAppsToScaleCount,
-			NumParallel: 100,
+			NumParallel: 100, // number of sample to execute at a time
 			Duration:    300 * time.Minute,
 		}
 		experiment = gmeasure.NewExperiment("Scaling Benchmark")
