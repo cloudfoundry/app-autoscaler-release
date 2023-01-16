@@ -38,7 +38,7 @@ func GetTestSpaces(orgGuid string, cfg *config.Config) []string {
 			spaceNames = append(spaceNames, space.Name)
 		}
 	}
-	ginkgo.GinkgoWriter.Printf("\nGot orgs: %s\n", spaceNames)
+	ginkgo.GinkgoWriter.Printf("\nGot spaces: %s\n", spaceNames)
 	return spaceNames
 }
 
@@ -56,9 +56,7 @@ func DeleteSpaces(orgName string, spaces []string, timeout time.Duration) {
 	if len(spaces) == 0 {
 		return
 	}
-
-	fmt.Printf("\nDeleting spaces: %s ", strings.Join(spaces, ", "))
-
+	fmt.Printf("\nDeleting spaces: %s \n", strings.Join(spaces, ", "))
 	for _, spaceName := range spaces {
 		if timeout.Seconds() != 0 {
 			deleteSpace := cf.Cf("delete-space", "-f", "-o", orgName, spaceName).Wait(timeout)
