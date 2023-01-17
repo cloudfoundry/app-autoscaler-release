@@ -706,11 +706,11 @@ variables:
 - name: service_broker_password
   type: password
   options:
-    length: 72
+    length: 128
 - name: service_broker_password_blue
   type: password
   options:
-    length: 72
+    length: 128
 - name: autoscaler_metricsforwarder_health_password
   type: password
 - name: autoscaler_metricsgateway_health_password
