@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "jdwpkgs": {
-      "locked": {
-        "lastModified": 1673513962,
-        "narHash": "sha256-nqlkc6WUGVGN96pMNm4l8tQZ7MA+JA87p9gHsr55kKI=",
-        "owner": "joergdw",
-        "repo": "nixpkgs",
-        "rev": "a3b840f638a818c9e089908b516264e4dd908bfd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "joergdw",
-        "ref": "rubyPackages.cf-uaac",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1673631141,
@@ -34,7 +18,6 @@
     },
     "root": {
       "inputs": {
-        "jdwpkgs": "jdwpkgs",
         "nixpkgs": "nixpkgs"
       }
     }

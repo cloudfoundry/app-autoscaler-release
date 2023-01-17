@@ -3,19 +3,9 @@
 
   inputs = {
     nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
-
-    # The following input is needed until PR https://github.com/NixOS/nixpkgs/pull/189079
-    # has been merged!
-    # Alternative solution 1: `gem install …` using https://direnv.net/man/direnv-stdlib.1.html#codelayout-rubycode
-    # to create a project-specific ruby-gem-path
-    #
-    # Alternative solution 2: produce a package here locally that contains cf-uaac
-    # by making use of <https://nixos.org/manual/nixpkgs/stable/#developing-with-ruby>, see
-    # chapter: 17.30.2.5. Packaging applications
-    jdwpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;
   };
 
-  outputs = { self, nixpkgs, jdwpkgs }:
+  outputs = { self, nixpkgs }:
     let
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
@@ -24,12 +14,10 @@
 
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
-      jdwpkgsFor = forAllSystems (system: import jdwpkgs { inherit system; });
     in {
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
-          jdwpkgs = jdwpkgsFor.${system};
         in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
@@ -45,7 +33,17 @@
               maven
               nodejs
               ruby
-              jdwpkgs.rubyPackages.cf-uaac # comment for not compiling much
+              # The following package for cf-uaac is needed by our makefile as well.
+              # Until PR https://github.com/NixOS/nixpkgs/pull/189079 has been merged, this requires
+              # as additional input: `jdwpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;`
+              # Alternative solution 1: `gem install …` using https://direnv.net/man/direnv-stdlib.1.html#codelayout-rubycode
+              # to create a project-specific ruby-gem-path – This solution is currently applied!
+              #
+              # Alternative solution 2: produce a package here locally that contains cf-uaac
+              # by making use of <https://nixos.org/manual/nixpkgs/stable/#developing-with-ruby>, see
+              # chapter: 17.30.2.5. Packaging applications
+              #
+              # jdwpkgs.rubyPackages.cf-uaac
               shellcheck
               temurin-bin
             ];
