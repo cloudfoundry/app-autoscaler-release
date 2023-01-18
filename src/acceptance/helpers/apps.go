@@ -158,7 +158,8 @@ func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount
 }
 
 func DeleteTestApp(appName string, timeout time.Duration) {
-	Expect(cf.Cf("delete", appName, "-f", "-r").Wait(timeout)).To(Exit(0))
+	deleteAppCmd := cf.Cf("delete", appName, "-f", "-r").Wait(timeout)
+	Expect(deleteAppCmd, Exit(0), fmt.Sprintf("unable to delete app %s", deleteAppCmd.Out.Contents()))
 }
 
 func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url string) string {
