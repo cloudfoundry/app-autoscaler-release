@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/cf"
-	"github.com/KevinJCross/cf-test-helpers/v2/generator"
-	cfh "github.com/KevinJCross/cf-test-helpers/v2/helpers"
+	"github.com/cloudfoundry/cf-test-helpers/v2/cf"
+	"github.com/cloudfoundry/cf-test-helpers/v2/generator"
+	cfh "github.com/cloudfoundry/cf-test-helpers/v2/helpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"

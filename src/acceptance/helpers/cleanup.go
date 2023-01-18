@@ -5,7 +5,7 @@ import (
 
 	"github.com/onsi/ginkgo/v2"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
+	"github.com/cloudfoundry/cf-test-helpers/v2/workflowhelpers"
 )
 
 func CleanupOrgs(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteSetup) {
