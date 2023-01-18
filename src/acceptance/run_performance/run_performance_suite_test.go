@@ -5,6 +5,7 @@ import (
 	. "acceptance/helpers"
 	"fmt"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/cloudfoundry/cf-test-helpers/v2/workflowhelpers"
@@ -14,10 +15,12 @@ import (
 )
 
 var (
-	cfg       *config.Config
-	setup     *workflowhelpers.ReproducibleTestSuiteSetup
-	orgName   string
-	spaceName string
+	cfg            *config.Config
+	setup          *workflowhelpers.ReproducibleTestSuiteSetup
+	orgName        string
+	spaceName      string
+	errorsScaleOut sync.Map
+	errorsScaleIn  sync.Map
 )
 
 func TestSetup(t *testing.T) {
@@ -62,6 +65,17 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
+
+	errorsScaleOut.Range(func(appName, err interface{}) bool {
+		fmt.Printf("scale-out app error: %s: %s \n", appName, err.(error).Error())
+		return true
+	})
+
+	errorsScaleOut.Range(func(appName, err interface{}) bool {
+		fmt.Printf("scale-in app error: %s: %s \n", appName, err.(error).Error())
+		return true
+	})
+
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
