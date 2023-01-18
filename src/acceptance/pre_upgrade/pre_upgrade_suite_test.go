@@ -5,9 +5,9 @@ import (
 	. "acceptance/helpers"
 	"testing"
 
-	cth "github.com/KevinJCross/cf-test-helpers/v2/helpers"
+	cth "github.com/cloudfoundry/cf-test-helpers/v2/helpers"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
+	"github.com/cloudfoundry/cf-test-helpers/v2/workflowhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/KevinJCross/cf-test-helpers/v2/workflowhelpers"
+	"github.com/cloudfoundry/cf-test-helpers/v2/workflowhelpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega/gexec"
 )
