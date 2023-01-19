@@ -373,6 +373,15 @@ run-performance:
 	export SUITES="run_performance";\
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
 
+.PHONY: run-performance_ak_test
+run_performance_ak_test:
+	export GINKGO_OPTS="";\
+	export SKIP_TEARDOWN=true;\
+	export NODES=1;\
+	export DEPLOYMENT_NAME="autoscaler-performance";\
+	export SUITES="run_performance_ak_test";\
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
+
 .PHONY: run-act
 run-act:
 	${AUTOSCALER_DIR}/scripts/run_act.sh;\

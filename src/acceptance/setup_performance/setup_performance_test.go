@@ -8,6 +8,7 @@ import (
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Prepare test apps based on performance inputs", func() {
@@ -37,11 +38,11 @@ var _ = Describe("Prepare test apps based on performance inputs", func() {
 		workerCount := cfg.Performance.SetupWorkers
 		var desiredApps []string
 
-		for i := 1; i <= workerCount; i++ {
+		for i := 0; i < workerCount; i++ {
 			wg.Add(1)
 			go appHandler(queue, &runningAppsCount, &pendingApps, &errors, &wg)
 		}
-		for i := 1; i <= cfg.Performance.AppCount; i++ {
+		for i := 0; i < cfg.Performance.AppCount; i++ {
 			appName = fmt.Sprintf("node-custom-metric-benchmark-%d", i)
 			desiredApps = append(desiredApps, appName)
 			pendingApps.Store(appName, 1)
@@ -57,11 +58,11 @@ var _ = Describe("Prepare test apps based on performance inputs", func() {
 
 	Context("App count", func() {
 		It(itSpecText, func() {
-			/*Eventually(func() int32 {
+			Eventually(func() int32 {
 				return atomic.LoadInt32(&runningAppsCount)
 			},
 				300*time.Minute, 5*time.Second).
-				Should(BeEquivalentTo(cfg.Performance.AppCount))*/
+				Should(BeEquivalentTo(cfg.Performance.AppCount))
 		})
 	})
 })
