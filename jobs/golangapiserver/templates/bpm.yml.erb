@@ -1,0 +1,10 @@
+processes:
+  - name: golangapiserver
+    executable: /var/vcap/packages/golangapiserver/api
+    args:
+      - -c
+      - /var/vcap/jobs/golangapiserver/config/apiserver.yml
+    env:
+      DT_MONITOR: true
+    hooks:
+      pre_start: /var/vcap/jobs/golangapiserver/bin/bpm-pre-start

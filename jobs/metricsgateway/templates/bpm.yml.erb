@@ -1,0 +1,10 @@
+processes:
+  - name: metricsgateway
+    executable: /var/vcap/packages/metricsgateway/metricsgateway
+    args:
+      - -c
+      - /var/vcap/jobs/metricsgateway/config/metricsgateway.yml
+    env:
+      DT_MONITOR: true
+    hooks:
+      pre_start: /var/vcap/jobs/metricsgateway/bin/bpm-pre-start

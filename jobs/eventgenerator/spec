@@ -1,9 +1,9 @@
 ---
 name: eventgenerator
 templates:
-  pre-start.erb: bin/pre-start
+  bpm.yml.erb: config/bpm.yml
+  bpm-pre-start.erb: bin/bpm-pre-start
   liquibase.properties: bin/liquibase.properties
-  eventgenerator_ctl: bin/eventgenerator_ctl
   eventgenerator.yml.erb: config/eventgenerator.yml
   eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
   eventgenerator_server.crt.erb: config/certs/eventgenerator/server.crt
@@ -20,10 +20,6 @@ templates:
   appmetrics_db_ca.crt.erb: config/certs/appmetrics_db/ca.crt
   appmetrics_db.crt.erb: config/certs/appmetrics_db/crt
   appmetrics_db.key.erb: config/certs/appmetrics_db/key
-  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
-  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
-  hooks/post-start.sh.erb: bin/hooks/post-start.sh
-  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 
 packages:
   - openjdk-17
@@ -108,9 +104,6 @@ properties:
   autoscaler.policy_db_connection_config.connection_max_lifetime:
     default: 60s
 
-  autoscaler.eventgenerator.require_consul:
-    description: "whether to start consul agent"
-    default: false
   autoscaler.eventgenerator.logging.level:
     description: "the level of logging"
     default: "info"
@@ -243,21 +236,3 @@ properties:
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"
-  autoscaler.eventgenerator.hooks.pre_start:
-    description: "Script to run before starting eventgenerator"
-    default: ''
-    example: |
-      #!/bin/bash
-      echo "Going to start eventgenerator"
-      echo "eventgenerator data directory is ${DATA_DIR}"
-      echo "eventgenerator port is ${PORT}"
-      echo "eventgenerator directory is ${PACKAGE_DIR}"
-  autoscaler.eventgenerator.hooks.post_start:
-    description: "Script to run after eventgenerator has started"
-    default: ''
-  autoscaler.eventgenerator.hooks.pre_stop:
-    description: "Script to run before stopping eventgenerator"
-    default: ''
-  autoscaler.eventgenerator.hooks.post_stop:
-    description: "Script to run after eventgenerator has stopped"
-    default: ''

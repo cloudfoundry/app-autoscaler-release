@@ -2,11 +2,9 @@
 name: common
 
 files:
-- common/utils.sh
-- common/consul-helper.sh
 - common/dns-helper.sh
 - common/retry-helper.sh
-- common/call-hooks.sh
+- common/cert-helper.sh
 - common/init-db-truststore.sh
 - common/install_cert.source.sh
 - common/databasechangelog-primarykey.yml

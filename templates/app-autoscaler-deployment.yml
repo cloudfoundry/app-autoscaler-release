@@ -554,7 +554,6 @@ instance_groups:
               ca_cert: ((loggregator_tls_agent.ca))
               cert: ((loggregator_tls_agent.certificate))
               key: ((loggregator_tls_agent.private_key))
-          require_consule: false
           cache_ttl: 900s
           cache_cleanup_interval: 6h
           policy_poller_interval: 60s

@@ -1,6 +1,6 @@
 check process golangapiserver
-  with pidfile /var/vcap/sys/run/golangapiserver/golangapiserver.pid
-  start program "/var/vcap/jobs/golangapiserver/bin/apiserver_ctl start"
-  stop program "/var/vcap/jobs/golangapiserver/bin/apiserver_ctl stop"
+  with pidfile /var/vcap/sys/run/bpm/golangapiserver/golangapiserver.pid
+  start program "/var/vcap/jobs/bpm/bin/bpm start golangapiserver"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop golangapiserver"
   group vcap
 

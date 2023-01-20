@@ -1,0 +1,10 @@
+processes:
+  - name: metricsserver
+    executable: /var/vcap/packages/metricsserver/metricsserver
+    args:
+      - -c
+      - /var/vcap/jobs/metricsserver/config/metricsserver.yml
+    env:
+      DT_MONITOR: true
+    hooks:
+      pre_start: /var/vcap/jobs/metricsserver/bin/bpm-pre-start

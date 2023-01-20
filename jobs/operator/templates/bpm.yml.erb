@@ -1,0 +1,10 @@
+processes:
+  - name: operator
+    executable: /var/vcap/packages/operator/operator
+    args:
+      - -c
+      - /var/vcap/jobs/operator/config/operator.yml
+    env:
+      DT_MONITOR: true
+    hooks:
+      pre_start: /var/vcap/jobs/operator/bin/bpm-pre-start

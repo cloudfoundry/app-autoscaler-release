@@ -14,12 +14,12 @@ manage_truststore () {
 
 cert_alias=$1
 cert_file=$2
+store_file=$3
 
-#create directory for trust store
-mkdir -p "/var/vcap/data/certs/${cert_alias}"
-
+# shellcheck source=src/common/install_cert.source.sh
 source "/var/vcap/packages/common/install_cert.source.sh"
-install_cert "/var/vcap/data/certs/${cert_alias}/cacerts" "123456" "${cert_file}" "${cert_alias}"
+install_cert "${store_file}" "123456" "${cert_file}" "${cert_alias}"
+chgrp vcap "$store_file"
+chmod g+r "$store_file"
 
 ## END CERTIFICATE INSTALLATION
-

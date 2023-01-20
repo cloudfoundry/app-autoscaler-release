@@ -10,21 +10,12 @@
 %>
 source /var/vcap/packages/common/dns-helper.sh
 source /var/vcap/packages/common/retry-helper.sh
+source /var/vcap/packages/common/cert-helper.sh
+
 DB_DIR=/var/vcap/packages/db
 operator_DIR=/var/vcap/packages/operator
 
 export PATH=/var/vcap/packages/openjdk-17/bin:$PATH
-
-require_consul='<%= p("autoscaler.operator.require_consul") %>'
-
-if [ $require_consul = 'true' ];then
-	echo "start consul agent"
-	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
-  source /var/vcap/packages/common/consul-helper.sh
-  start_consul_agent
-else
-	echo "consul agent is not needed"
-fi
 
 # Getting Database config
 HOST='<%= p("autoscaler.lock_db.address") %>'
@@ -46,16 +37,19 @@ SSLMODE='<%= p("autoscaler.lock_db.sslmode") %>'
     DBURI=$DBURI"&sslcert=/var/vcap/jobs/operator/config/certs/lock_db/crt"
   <% end %>
   <% unless p("autoscaler.lock_db.tls.private_key") == "" %>
-    openssl pkcs8 -topk8 -outform DER -in /var/vcap/jobs/operator/config/certs/lock_db/key -out /var/vcap/jobs/operator/config/certs/lock_db/key.pk8 -nocrypt
-    JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/operator/config/certs/lock_db/key.pk8"
-    DBURI=$DBURI"&sslkey=/var/vcap/jobs/operator/config/certs/lock_db/key"
+    declare -r rsa_key_file=/var/vcap/jobs/operator/config/certs/lock_db/key
+    declare -r pk8_file=/var/vcap/jobs/operator/config/certs/lock_db/key.pk8
+    convert_to_pk8 "$rsa_key_file" "$pk8_file"
+    JDBCDBURL=$JDBCDBURL"&sslkey=$pk8_file"
+    DBURI=$DBURI"&sslkey=$rsa_key_file"
   <% end %>
 <% else %>
   JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
   DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
   <% unless p('autoscaler.lock_db.tls.ca') == "" %>
-    /var/vcap/packages/common/init-db-truststore.sh lock_db /var/vcap/jobs/operator/config/certs/lock_db/ca.crt
-    JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/lock_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+    declare -r lock_db_trust_store=/var/vcap/jobs/operator/config/certs/lock_db/cacerts
+    /var/vcap/packages/common/init-db-truststore.sh lock_db /var/vcap/jobs/operator/config/certs/lock_db/ca.crt "$lock_db_trust_store"
+    JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:$lock_db_trust_store&trustCertificateKeyStoreType=pkcs12"
     DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/operator/config/certs/lock_db/ca.crt"
    <% end %>
  <% end %>
