@@ -1,8 +1,8 @@
 name: golangapiserver
 templates:
-  apiserver_ctl.erb: bin/apiserver_ctl
+  bpm.yml.erb: config/bpm.yml
   apiserver.yml.erb: config/apiserver.yml
-  pre-start.erb: bin/pre-start
+  bpm-pre-start.erb: bin/bpm-pre-start
   liquibase.properties: bin/liquibase.properties
   info.json.erb: config/info.json
   catalog.json.erb: config/catalog.json
@@ -30,10 +30,6 @@ templates:
   storedprocedure_db_ca.crt.erb: config/certs/storedprocedure_db/ca.crt
   storedprocedure_db.crt.erb: config/certs/storedprocedure_db/crt
   storedprocedure_db.key.erb: config/certs/storedprocedure_db/key
-  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
-  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
-  hooks/post-start.sh.erb: bin/hooks/post-start.sh
-  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 packages:
   - golang-1-linux
   - golangapiserver
@@ -266,24 +262,6 @@ properties:
   autoscaler.apiserver.rate_limit.max_amount:
     description: "The number of requests accepted by rate limit"
     default: 10
-  autoscaler.apiserver.hooks.pre_start:
-    description: "Script to run before starting apiserver"
-    default: ''
-    example: |
-      #!/bin/bash
-      echo "Going to start apiserver"
-      echo "apiserver data directory is ${DATA_DIR}"
-      echo "apiserver port is ${PORT}"
-      echo "apiserver directory is ${PACKAGE_DIR}"
-  autoscaler.apiserver.hooks.post_start:
-    description: "Script to run after apiserver has started"
-    default: ''
-  autoscaler.apiserver.hooks.pre_stop:
-    description: "Script to run before stopping apiserver"
-    default: ''
-  autoscaler.apiserver.hooks.post_stop:
-    description: "Script to run after apiserver has stopped"
-    default: ''
   autoscaler.apiserver.broker.plan_check:
     description: |
       The plan check config which consists of

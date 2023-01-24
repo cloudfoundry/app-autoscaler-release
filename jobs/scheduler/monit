@@ -1,6 +1,6 @@
 check process scheduler
-  with pidfile /var/vcap/sys/run/scheduler/scheduler.pid
-  start program "/var/vcap/jobs/scheduler/bin/scheduler start"
-  stop program "/var/vcap/jobs/scheduler/bin/scheduler stop"
+  with pidfile /var/vcap/sys/run/bpm/scheduler/scheduler.pid
+  start program "/var/vcap/jobs/bpm/bin/bpm start scheduler"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop scheduler"
   group vcap
 

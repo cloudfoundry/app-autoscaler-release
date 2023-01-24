@@ -1,0 +1,10 @@
+processes:
+  - name: scalingengine
+    executable: /var/vcap/packages/scalingengine/scalingengine
+    args:
+      - -c
+      - /var/vcap/jobs/scalingengine/config/scalingengine.yml
+    env:
+      DT_MONITOR: true
+    hooks:
+      pre_start: /var/vcap/jobs/scalingengine/bin/bpm-pre-start

@@ -10,18 +10,9 @@
 %>
 source /var/vcap/packages/common/dns-helper.sh
 source /var/vcap/packages/common/retry-helper.sh
+source /var/vcap/packages/common/cert-helper.sh
+
 export PATH=/var/vcap/packages/openjdk-17/bin:$PATH
-
-require_consul='<%= p("autoscaler.eventgenerator.require_consul") %>'
-
-if [ $require_consul = 'true' ];then
-	echo "start consul agent"
-	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
-	source /var/vcap/packages/common/consul-helper.sh
-	start_consul_agent
-else
-	echo "consul agent is not needed"
-fi
 
 HOST='<%= p("autoscaler.appmetrics_db.address") %>'
 DBNAME='<%= database['name'] %>'
@@ -41,17 +32,20 @@ DBURI="postgres://$USER:$PASSWORD@$HOST:$PORT/$DBNAME?sslmode=$SSLMODE"
 		DBURI=$DBURI"&sslcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/crt"
 	<% end %>
 	<% unless p("autoscaler.appmetrics_db.tls.private_key") == "" %>
-		openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/key -out /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/key.pk8 -nocrypt
-		JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/key.pk8"
-		DBURI=$DBURI"&sslkey=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/key"
+		declare -r rsa_key_file=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/key
+		declare -r pk8_file=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/key.pk8
+		convert_to_pk8 "$rsa_key_file" "$pk8_file"
+		JDBCDBURL=$JDBCDBURL"&sslkey=$pk8_file"
+		DBURI=$DBURI"&sslkey=$rsa_key_file"
 	<% end %>
 
 <% else %>
 JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 	<% unless p('autoscaler.appmetrics_db.tls.ca') == "" %>
-		/var/vcap/packages/common/init-db-truststore.sh appmetrics_db /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt
-		JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/appmetrics_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+		declare -r appmetrics_db_trust_store=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/cacerts
+		/var/vcap/packages/common/init-db-truststore.sh appmetrics_db /var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt "$appmetrics_db_trust_store"
+		JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:$appmetrics_db_trust_store&trustCertificateKeyStoreType=pkcs12"
 		DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt"
 	<% end %>
 <% end %>

@@ -1,0 +1,11 @@
+processes:
+  - name: scheduler
+    executable: /var/vcap/packages/openjdk-17/bin/java
+    args:
+      - -Dspring.config.location=/var/vcap/jobs/scheduler/config/application.properties
+      - -jar
+      - /var/vcap/packages/scheduler/scheduler-1.0-SNAPSHOT.war
+    env:
+      DT_MONITOR: true
+    hooks:
+      pre_start: /var/vcap/jobs/scheduler/bin/bpm-pre-start

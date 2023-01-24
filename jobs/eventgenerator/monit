@@ -1,5 +1,5 @@
 check process eventgenerator
-  with pidfile /var/vcap/sys/run/eventgenerator/eventgenerator.pid
-  start program "/var/vcap/jobs/eventgenerator/bin/eventgenerator_ctl start"
-  stop program "/var/vcap/jobs/eventgenerator/bin/eventgenerator_ctl stop"
+  with pidfile /var/vcap/sys/run/bpm/eventgenerator/eventgenerator.pid
+  start program "/var/vcap/jobs/bpm/bin/bpm start eventgenerator"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop eventgenerator"
   group vcap

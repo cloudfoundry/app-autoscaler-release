@@ -1,0 +1,10 @@
+processes:
+  - name: eventgenerator
+    executable: /var/vcap/packages/eventgenerator/eventgenerator
+    args:
+      - -c
+      - /var/vcap/jobs/eventgenerator/config/eventgenerator.yml
+    env:
+      DT_MONITOR: true
+    hooks:
+      pre_start: /var/vcap/jobs/eventgenerator/bin/bpm-pre-start

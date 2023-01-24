@@ -211,7 +211,6 @@ instance_groups:
               port: &scalingEngineHealthPort 6204
               username: scalingengine
               password: ((autoscaler_scalingengine_health_password))
-            require_consul: false
             logging:
               level: info
             ca_cert: ((app_autoscaler_ca_cert.ca))
@@ -344,7 +343,6 @@ instance_groups:
             basicAuthEnabled: true
             username: scheduler
             password: ((autoscaler_scheduler_health_password))
-          require_consul: false
           job_reschedule_interval_millisecond: 10000
           job_reschedule_maxcount: 6
           notification_reschedule_maxcount: 3
@@ -404,7 +402,6 @@ instance_groups:
             port: &operatorHealthPort 6208
             username: operator
             password: ((autoscaler_operator_health_password))
-          require_consul: false
           scaling_engine:
             ca_cert: ((!scalingengine_client_cert.ca))
             client_cert: ((!scalingengine_client_cert.certificate))
@@ -572,7 +569,6 @@ instance_groups:
             port: &eventGeneratorHealthPort 6205
             username: eventgenerator
             password: ((autoscaler_eventgenerator_health_password))
-          require_consul: false
           logging:
             level: info
           ca_cert: ((!eventgenerator_server_cert.ca))

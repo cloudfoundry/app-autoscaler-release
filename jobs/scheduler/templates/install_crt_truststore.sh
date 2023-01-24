@@ -31,9 +31,10 @@ function manage_truststore() {
 
 cert_alias=$1
 cert_file=$2
-#create directory for trust store
-mkdir -p "/var/vcap/data/certs/${cert_alias}"
+store_file=$3
 
 # shellcheck disable=SC1091
 source "/var/vcap/packages/common/install_cert.source.sh"
-install_cert "/var/vcap/data/certs/${cert_alias}/cacerts" "123456" "/var/vcap/jobs/scheduler/config/certs/${cert_file}" "${cert_alias}"
+install_cert "${store_file}" "123456" "/var/vcap/jobs/scheduler/config/certs/${cert_file}" "${cert_alias}"
+chgrp vcap "$store_file"
+chmod g+r "$store_file"

@@ -1,5 +1,5 @@
 check process scalingengine
-  with pidfile /var/vcap/sys/run/scalingengine/scalingengine.pid
-  start program "/var/vcap/jobs/scalingengine/bin/scalingengine_ctl start"
-  stop program "/var/vcap/jobs/scalingengine/bin/scalingengine_ctl stop"
+  with pidfile /var/vcap/sys/run/bpm/scalingengine/scalingengine.pid
+  start program "/var/vcap/jobs/bpm/bin/bpm start scalingengine"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop scalingengine"
   group vcap

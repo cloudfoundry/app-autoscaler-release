@@ -10,19 +10,9 @@
 %>
 source /var/vcap/packages/common/dns-helper.sh
 source /var/vcap/packages/common/retry-helper.sh
+source /var/vcap/packages/common/cert-helper.sh
 
 export PATH=/var/vcap/packages/openjdk-17/bin:$PATH
-
-require_consul='<%= p("autoscaler.scalingengine.require_consul") %>'
-
-if [ $require_consul = 'true' ];then
-	echo "start consul agent"
-	# Starting consul agent on pre-start so that we can connect to a database url provided by consul dns
-	source /var/vcap/packages/common/consul-helper.sh
-	start_consul_agent
-else
-	echo "consul agent is not needed"
-fi
 
 HOST='<%= p("autoscaler.scalingengine_db.address") %>'
 DBNAME='<%= database['name'] %>'
@@ -43,16 +33,19 @@ SSLMODE='<%= p("autoscaler.scalingengine_db.sslmode") %>'
 		DBURI=$DBURI"&sslcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/crt"
 	<% end %>
 	<% unless p("autoscaler.scalingengine_db.tls.private_key") == "" %>
-		openssl pkcs8 -topk8 -outform DER -in  /var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key -out /var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key.pk8 -nocrypt
-		JDBCDBURL=$JDBCDBURL"&sslkey=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key.pk8"
-		DBURI=$DBURI"&sslkey=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key"
+		declare -r rsa_key_file=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key
+		declare -r pk8_file=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/key.pk8
+		convert_to_pk8 "$rsa_key_file" "$pk8_file"
+		JDBCDBURL=$JDBCDBURL"&sslkey=$pk8_file"
+		DBURI=$DBURI"&sslkey=$rsa_key_file"
 	<% end %>
 <% else %>
 	JDBCDBURL="jdbc:mysql://$HOST:$PORT/$DBNAME?autoReconnect=true"
 	DBURI="$USER:$PASSWORD@tcp($HOST:$PORT)/$DBNAME?tls=$SSLMODE"
 	<%unless p('autoscaler.scalingengine_db.tls.ca') == "" %>
-		/var/vcap/packages/common/init-db-truststore.sh scalingengine_db /var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt
-		JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/data/certs/scalingengine_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+		declare -r scalingengine_db_trust_store=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/cacerts
+		/var/vcap/packages/common/init-db-truststore.sh scalingengine_db /var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt "$scalingengine_db_trust_store"
+		JDBCDBURL=$JDBCDBURL"&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:$scalingengine_db_trust_store&trustCertificateKeyStoreType=pkcs12"
 		DBURI=$DBURI"&sslrootcert=/var/vcap/jobs/scalingengine/config/certs/scalingengine_db/ca.crt"
  	<% end %>
 <% end %>

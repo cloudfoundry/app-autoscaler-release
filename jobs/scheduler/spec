@@ -1,28 +1,28 @@
 ---
 name: scheduler
 templates:
-  scheduler.erb: bin/scheduler
-  pre-start.erb: bin/pre-start
+  bpm-pre-start.erb: bin/bpm-pre-start
+  bpm.yml.erb: config/bpm.yml
   liquibase.properties: bin/liquibase.properties
   application.properties.erb: config/application.properties
   install_crt_keystore.sh: bin/install_crt_keystore
   install_crt_truststore.sh: bin/install_crt_truststore
+
   scheduler_ca.crt.erb: config/certs/ca.crt
   scheduler_server.crt.erb: config/certs/server.crt
   scheduler_server.key.erb: config/certs/server.key
+
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
+
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
+
   scheduler_db_ca.crt.erb: config/certs/scheduler_db/ca.crt
   scheduler_db.crt.erb: config/certs/scheduler_db/crt
   scheduler_db.key.erb: config/certs/scheduler_db/key
-  hooks/pre-start.sh.erb: bin/hooks/pre-start.sh
-  hooks/pre-stop.sh.erb: bin/hooks/pre-stop.sh
-  hooks/post-start.sh.erb: bin/hooks/post-start.sh
-  hooks/post-stop.sh.erb: bin/hooks/post-stop.sh
 
 packages:
   - scheduler
@@ -32,9 +32,6 @@ packages:
   - changeloglockcleaner
 
 properties:
-  autoscaler.scheduler.require_consul:
-    description: "whether to start consul agent"
-    default: false
   autoscaler.scheduler.port:
     description: "Scheduler's port"
     default: 6102
@@ -135,24 +132,6 @@ properties:
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"
-  autoscaler.scheduler.hooks.pre_start:
-    description: "Script to run before starting scheduler"
-    default: ''
-    example: |
-      #!/bin/bash
-      echo "Going to start scheduler"
-      echo "scheduler data directory is ${DATA_DIR}"
-      echo "scheduler port is ${PORT}"
-      echo "scheduler directory is ${PACKAGE_DIR}"
-  autoscaler.scheduler.hooks.post_start:
-    description: "Script to run after scheduler has started"
-    default: ''
-  autoscaler.scheduler.hooks.pre_stop:
-    description: "Script to run before stopping scheduler"
-    default: ''
-  autoscaler.scheduler.hooks.post_stop:
-    description: "Script to run after scheduler has stopped"
-    default: ''
   autoscaler.scheduler.jvm_options:
     description: "Java Virtual Machine parameters to be used when start scheduler process"
     default: ''
