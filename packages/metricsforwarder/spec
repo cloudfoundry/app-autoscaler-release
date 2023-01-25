@@ -114,7 +114,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/backoff/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/base/* # gosub
-- autoscaler/vendor/google.golang.org/grpc/balancer/grpclb/grpclbstate/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/balancer/grpclb/state/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/roundrobin/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/binarylog/grpc_binarylog_v1/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/channelz/* # gosub
