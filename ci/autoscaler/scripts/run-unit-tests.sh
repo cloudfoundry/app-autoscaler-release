@@ -3,6 +3,8 @@
 
 set -euo pipefail
 
+export DB_HOST="localhost"
+
 pg_ctlcluster "$(pg_lsclusters -j | jq -r '.[0].version')" main start
 
 psql postgres://postgres@127.0.0.1:5432 -c 'DROP DATABASE IF EXISTS autoscaler'

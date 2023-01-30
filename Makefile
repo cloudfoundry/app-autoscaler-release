@@ -7,9 +7,10 @@ all_modules:= $(go_modules) db scheduler
 MVN_OPTS="-Dmaven.test.skip=true"
 OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
 db_type:=postgres
+DB_HOST:=localhost
 DBURL := $(shell case "${db_type}" in\
-			 (postgres) printf "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"; ;; \
- 			 (mysql) printf "root@tcp(localhost)/autoscaler?tls=false"; ;; esac)
+			 (postgres) printf "postgres://postgres:postgres@${DB_HOST}/autoscaler?sslmode=disable"; ;; \
+ 			 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)
 DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
@@ -34,7 +35,7 @@ list-modules:
 .PHONY: check-type
 check-db_type:
 	@case "${db_type}" in\
-	 (mysql|postgres) echo " - using bd:${db_type}"; ;;\
+	 (mysql|postgres) echo " - using db_type:${db_type}"; ;;\
 	 (*) echo "ERROR: db_type needs to be one of mysql|postgres"; exit 1;;\
 	 esac
 
@@ -195,15 +196,15 @@ waitfor_mysql_CI_false:
 	@echo -n " - Waiting for table creation ."
 	@until [[ ! -z `docker exec mysql mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null` ]]; do echo -n "."; sleep 1; done
 waitfor_mysql_CI_true:
-	@echo -n " - Waiting for table creation "
+	@echo -n " - Waiting for table creation"
 	@which mysql >/dev/null &&\
 	 {\
 	   T=0;\
-	   until [[ ! -z "$(shell mysql -u "root" -h "127.0.0.1"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
+	   until [[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
 	     || [[ $${T} -gt 30 ]];\
 	   do echo -n "."; sleep 1; T=$$((T+1)); done;\
 	 }
-	@[ ! -z "$(shell mysql -u "root" -h "127.0.0.1" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
+	@[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
 	  || { echo "ERROR: Mysql timed out creating database"; exit 1; }
 
 

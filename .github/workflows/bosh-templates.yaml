@@ -10,13 +10,18 @@ on:
 jobs:
   templates:
     name: Bosh Templates Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
+        env:
+          # Needed for self-hosted runner
+          ImageOS: "ubuntu22"
         with:
           # runs 'bundle install' and caches installed gems automatically
           bundler-cache: true

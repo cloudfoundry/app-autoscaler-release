@@ -2,6 +2,10 @@ name: generate
 on:
   pull_request:
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: "${{ github.workflow }}/${{ github.ref }}"
   cancel-in-progress: true
@@ -9,13 +13,15 @@ concurrency:
 jobs:
   generate:
     name: ensure fakes are up to date
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup-go
-
       - name: Go Build
         run: |
+          git config --global --add safe.directory ${GITHUB_WORKSPACE}
+
           pushd src/autoscaler
             make buildtools
             make generate
@@ -25,7 +31,7 @@ jobs:
 
       - name: Check if there is any change
         id: get_changes
-        run: echo "changed=$(git status --porcelain | wc -l)"  >> $GITHUB_OUTPUT
+        run: echo "changed=$(git status --porcelain | wc -l)"  >> "${GITHUB_OUTPUT}"
       - name: Process changes
         if: steps.get_changes.outputs.changed != 0
         run: |

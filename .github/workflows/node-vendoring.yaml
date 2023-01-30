@@ -9,14 +9,21 @@ concurrency:
 
 jobs:
   check-node-vendoring:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+
     steps:
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version-file: '.tool-versions'
 
-      - run: |
+      - name: NPM install
+        run: |
           cd src/acceptance/assets/app/nodeApp
           npm install
           git status

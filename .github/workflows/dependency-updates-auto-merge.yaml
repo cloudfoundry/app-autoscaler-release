@@ -9,8 +9,10 @@ on:
       - labeled
 
 jobs:
-  dependency-updates-auto-merge:
-    runs-on: ubuntu-latest
+  dependabot-auto-merge:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     permissions:
       pull-requests: write
       contents: write
