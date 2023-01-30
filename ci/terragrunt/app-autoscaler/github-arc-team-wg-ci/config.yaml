@@ -29,13 +29,13 @@ github_repos:
     runnerset_resource_request_mem: 3000Mi
     runnerset_resource_limits_cpu: 2500m
     runnerset_resource_limits_mem: 3000Mi
-    var_lib_docker_size: 20Gi
+    var_lib_docker_size: 30Gi
 
 
 # Github ARC runners node-pool config
-gke_arc_node_pool_disk_size_gb: 30
+gke_arc_node_pool_disk_size_gb: 128
 gke_arc_node_pool_count: 1
-gke_arc_node_pool_autoscaling_max: 4
+gke_arc_node_pool_autoscaling_max: 10
 gke_arc_node_pool_ssd_count: 0
 
 # Regional storage class type for runners PVs
