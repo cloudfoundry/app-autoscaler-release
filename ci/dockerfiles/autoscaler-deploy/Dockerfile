@@ -91,7 +91,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   gcloud version
 
 # renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
-ARG GINKGO_VERSION=v2.7.0
+ARG GINKGO_VERSION=v2.8.0
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} &&\
     ginkgo version
 
