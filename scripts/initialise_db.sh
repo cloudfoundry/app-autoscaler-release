@@ -1,6 +1,8 @@
 #!/bin/bash
 
 set -e
+echo "Running $0"
+DB_HOST=${DB_HOST:-"localhost"}
 LOG_FILE=liqubase.log
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 ROOT="$SCRIPT_DIR/.."
@@ -19,14 +21,14 @@ fi
 case $1 in
 mysql)
   DB_USER=${DB_USER:-"root"}
-  URL="jdbc:mysql://127.0.0.1/autoscaler"
+  URL="jdbc:mysql://${DB_HOST}/autoscaler"
   DRIVER="com.mysql.cj.jdbc.Driver"
   PASSWORD_OPT=""
   ;;
 postgres)
   DB_USER=${DB_USER:-"postgres"}
   DB_PASSWORD=${DB_PASSWORD:-"postgres"}
-  URL="jdbc:postgresql://127.0.0.1/autoscaler"
+  URL="jdbc:postgresql://${DB_HOST}/autoscaler"
   DRIVER="org.postgresql.Driver"
   PASSWORD_OPT="--password=${DB_PASSWORD}"
   ;;

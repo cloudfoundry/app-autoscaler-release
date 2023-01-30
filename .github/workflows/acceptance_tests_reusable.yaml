@@ -2,6 +2,9 @@ name: Acceptance Tests – Reusable
 on:
   workflow_call:
     inputs:
+      self_hosted_image:
+        type: string
+        default: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
       buildin_mode:
         required: false
         type: boolean
@@ -21,17 +24,18 @@ on:
       bbl_ssh_key:
         required: true
 
+defaults:
+  run:
+    shell: bash
+
 env:
-  MAVEN_VERSION: 3.6.3
-  MAVEN_SHA: c35a1803a6e70a126e80b2b3ae33eed961f83ed74d18fcd16909b2d44d7dada3203f1ffe726c17ef8dcca2dcaa9fca676987befeadc9b9f759967a8cb77181c0
   BUILDIN_MODE: "${{ inputs.buildin_mode }}"
-  GITHUB_TOKEN: "${{ secrets.github_token }}" # ToDo: Remove because there is no point to have this in env, see ${{ github.token }} in: https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
   SERVICE_OFFERING_ENABLED: "${{ inputs.service_offering_enabled }}"
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "${{ inputs.deployment_name }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   GINKGO_OPTS: "--fail-fast"
-  NODES: 4
+  NODES: 16
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
   CHECK_NAME: "${{ github.workflow }}_Check"
@@ -50,7 +54,7 @@ jobs:
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
     name: "Create pending check"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
       # but supposed to be provided via the defaults, see:
@@ -69,7 +73,10 @@ jobs:
   deploy_autoscaler:
     needs: [ create_pending_check ]
     name: Deploy for ${{ github.workflow }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: "${{ inputs.self_hosted_image }}"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -81,7 +88,7 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Deploy autoscaler
         run: |
-          cd ${AUTOSCALER_DIR}
+          cd "${AUTOSCALER_DIR}"
           make deploy-autoscaler
 
   acceptance_tests:
@@ -89,7 +96,9 @@ jobs:
     strategy:
       matrix:
         suite: "${{ fromJSON(inputs.suites) }}"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: "${{ inputs.self_hosted_image }}"
     continue-on-error: true
     name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
@@ -105,14 +114,15 @@ jobs:
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
         run: |
-          cd ${AUTOSCALER_DIR}
+          cd "${AUTOSCALER_DIR}"
           make acceptance-tests SUITES="${MATRIX_SUITE,,}"
+
 
   acceptance_tests_verify:
     name: "${{ github.workflow }} Result"
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
       # but supposed to be provided via the defaults, see:
@@ -132,7 +142,10 @@ jobs:
   deployment_cleanup:
     needs: [ acceptance_tests_verify ]
     name: Deployment cleanup
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: "${{ inputs.self_hosted_image }}"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -144,5 +157,5 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Perform deployment cleanup
         run: |
-          cd ${AUTOSCALER_DIR}
+          cd "${AUTOSCALER_DIR}"
           make deploy-cleanup

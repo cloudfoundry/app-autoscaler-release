@@ -14,7 +14,6 @@ metricsgateway_instance_group="${METRICSGATEWAY_INSTANCE_GROUP:-metricsgateway}"
 
 # this is a really basic check to validate that the peristent disk value is set.
 # FIXME we need a much better way of doing this.
-echo "no ops files"
 ACTUAL=$(bosh int "$manifest_path" | yq e '.instance_groups[] | select(.jobs[].name == "postgres").persistent_disk_type' -)
 if [ "${ACTUAL}" != "null" ]; then
 	echo "FAILED: default has no persistent disk"
@@ -31,7 +30,6 @@ fi
 
 COMPONENTS="scheduler eventgenerator metricsforwarder metricsgateway metricsserver operator scalingengine"
 for COMPONENT in $COMPONENTS; do
-  echo "no ops files - ${COMPONENT}"
   ACTUAL=$(bosh int "$manifest_path" | yq e ".variables[] | select(.name == \"autoscaler_${COMPONENT}_health_password\").type" -)
   if [ "${ACTUAL}" != "password" ]; then
 	  echo "FAILED: autoscaler_${COMPONENT}_health_password should be set"

@@ -27,7 +27,10 @@ concurrency:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+
     permissions:
       actions: read
       contents: read
@@ -42,8 +45,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    - uses: ./.github/actions/setup-go
-    - uses: ./.github/actions/setup-java
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
