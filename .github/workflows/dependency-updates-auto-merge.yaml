@@ -11,8 +11,6 @@ on:
 jobs:
   dependabot-auto-merge:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     permissions:
       pull-requests: write
       contents: write

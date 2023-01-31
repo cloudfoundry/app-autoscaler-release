@@ -63,7 +63,7 @@ jobs:
 
       - name: Build and push
         id: build-and-push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: ci/dockerfiles/autoscaler-${{ matrix.image_suffix }}
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
