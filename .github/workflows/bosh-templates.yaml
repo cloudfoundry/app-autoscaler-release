@@ -10,7 +10,7 @@ on:
 jobs:
   templates:
     name: Bosh Templates Test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:

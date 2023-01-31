@@ -54,7 +54,7 @@ jobs:
           && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
       )
     name: "Create pending check"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
       # but supposed to be provided via the defaults, see:
@@ -73,7 +73,7 @@ jobs:
   deploy_autoscaler:
     needs: [ create_pending_check ]
     name: Deploy for ${{ github.workflow }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: "${{ inputs.self_hosted_image }}"
 
@@ -96,7 +96,7 @@ jobs:
     strategy:
       matrix:
         suite: "${{ fromJSON(inputs.suites) }}"
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: "${{ inputs.self_hosted_image }}"
     continue-on-error: true
@@ -122,7 +122,7 @@ jobs:
     name: "${{ github.workflow }} Result"
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: ${{ always() }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
       # but supposed to be provided via the defaults, see:
@@ -142,7 +142,7 @@ jobs:
   deployment_cleanup:
     needs: [ acceptance_tests_verify ]
     name: Deployment cleanup
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: "${{ inputs.self_hosted_image }}"
 

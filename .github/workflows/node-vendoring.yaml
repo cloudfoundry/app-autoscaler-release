@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   check-node-vendoring:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
 

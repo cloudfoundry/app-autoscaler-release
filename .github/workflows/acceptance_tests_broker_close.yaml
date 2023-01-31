@@ -12,7 +12,7 @@ env:
 jobs:
   deployment_cleanup:
     name: Cleanup deployments
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
