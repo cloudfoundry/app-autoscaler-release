@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:jammy
 MAINTAINER autoscaler-team
 
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/London"
