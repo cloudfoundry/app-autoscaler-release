@@ -10,145 +10,37 @@ import (
 
 var _ = Describe("AutoScaler Basic Auth Tests", func() {
 
-	Context("API Server: basic auth tests", func() {
-		It("should succeed to check health", func() {
-			req, err := http.NewRequest("GET", healthURL, nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := client.Do(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(resp.StatusCode).To(Equal(200))
-		})
-	})
-
-	Context("Eventgenerator: basic auth tests", func() {
-		It("should fail to check health without basic auth credentials", func() {
-			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-eventgenerator", 1), nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := client.Do(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-			Expect(err).ShouldNot(HaveOccurred())
-			if cfg.HealthEndpointsBasicAuthEnabled {
-				Expect(resp.StatusCode).To(Equal(401))
-			} else {
-				Expect(resp.StatusCode).To(Equal(200))
-			}
-		})
-	})
-
-	Context("Scaling Engine: basic auth tests", func() {
-		It("should fail to check health without basic auth credentials", func() {
-			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-scalingengine", 1), nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := client.Do(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			Expect(err).ShouldNot(HaveOccurred())
-			if cfg.HealthEndpointsBasicAuthEnabled {
-				Expect(resp.StatusCode).To(Equal(401))
-			} else {
-				Expect(resp.StatusCode).To(Equal(200))
-			}
-		})
-	})
-
-	Context("Operator: basic auth tests", func() {
-		It("should fail to check health without basic auth credentials", func() {
-			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-operator", 1), nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := client.Do(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			Expect(err).ShouldNot(HaveOccurred())
-			if cfg.HealthEndpointsBasicAuthEnabled {
-				Expect(resp.StatusCode).To(Equal(401))
-			} else {
-				Expect(resp.StatusCode).To(Equal(200))
-			}
-		})
-	})
-
-	// TODO: Deprecate this test with Metrics Server code
-	Context("Metrics Server: basic auth tests", Pending, func() {
-		It("should fail to check health without basic auth credentials", func() {
-			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-metricsserver", 1), nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := client.Do(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			Expect(err).ShouldNot(HaveOccurred())
-			if cfg.HealthEndpointsBasicAuthEnabled {
-				Expect(resp.StatusCode).To(Equal(401))
-			} else {
-				Expect(resp.StatusCode).To(Equal(200))
-			}
-		})
-	})
-
-	// TODO: Deprecate this test with Metrics Gateway code
-	Context("Metrics Gateway: basic auth tests", Pending, func() {
-		It("should fail to check health without basic auth credentials", func() {
-			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-metricsgateway", 1), nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := client.Do(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			Expect(err).ShouldNot(HaveOccurred())
-			if cfg.HealthEndpointsBasicAuthEnabled {
-				Expect(resp.StatusCode).To(Equal(401))
-			} else {
-				Expect(resp.StatusCode).To(Equal(200))
-			}
-		})
-	})
-
-	Context("Metrics Forwarder: basic auth tests", func() {
-		It("should fail to check health without basic auth credentials", func() {
-			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-metricsforwarder", 1), nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := client.Do(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			Expect(err).ShouldNot(HaveOccurred())
-			if cfg.HealthEndpointsBasicAuthEnabled {
-				Expect(resp.StatusCode).To(Equal(401))
-			} else {
-				Expect(resp.StatusCode).To(Equal(200))
-			}
-		})
-	})
-
-	Context("Scheduler: basic auth tests", func() {
-		It("should fail to check health without basic auth credentials", func() {
-			req, err := http.NewRequest("GET", strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-scheduler", 1), nil)
-			Expect(err).ShouldNot(HaveOccurred())
-			resp, err := client.Do(req)
-			Expect(err).ShouldNot(HaveOccurred())
-
-			defer func() { _ = resp.Body.Close() }()
-
-			Expect(err).ShouldNot(HaveOccurred())
-			if cfg.HealthEndpointsBasicAuthEnabled {
-				Expect(resp.StatusCode).To(Equal(401))
-			} else {
-				Expect(resp.StatusCode).To(Equal(200))
-			}
-		})
-	})
+	urlfor := func(name string) func() string {
+		return func() string { return strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-"+name, 1) }
+	}
+	DescribeTable("basic auth tests",
+		func(url func() string, statusCode func() int) {
+			Expect(Get(url())).To(Equal(statusCode()), "to get status code %d when getting %s", statusCode(), url())
+		},
+		Entry("API Server", func() string { return healthURL }, func() int { return 200 }),
+		Entry("Eventgenerator", urlfor("eventgenerator"), getStatus),
+		Entry("Scaling Engine", urlfor("scalingengine"), getStatus),
+		Entry("Operator", urlfor("operator"), getStatus),
+		Entry("Metrics Forwarder", urlfor("metricsforwarder"), getStatus),
+		Entry("Scheduler", urlfor("scheduler"), getStatus),
+	)
 
 })
+
+func getStatus() int {
+	if cfg.HealthEndpointsBasicAuthEnabled {
+		return 401
+	} else {
+		return 200
+	}
+}
+
+func Get(url string) int {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	Expect(err).ShouldNot(HaveOccurred())
+	resp, err := client.Do(req)
+	Expect(err).ShouldNot(HaveOccurred())
+	defer func() { _ = resp.Body.Close() }()
+	Expect(err).ShouldNot(HaveOccurred())
+	return resp.StatusCode
+}
