@@ -8,6 +8,7 @@ files:
 - autoscaler/*
 - autoscaler/vendor/*
 - autoscaler/eventgenerator/db/*
+- autoscaler/cf/* # gosub
 - autoscaler/collection/* # gosub
 - autoscaler/db/* # gosub
 - autoscaler/db/sqldb/* # gosub
@@ -50,6 +51,8 @@ files:
 - autoscaler/vendor/github.com/grpc-ecosystem/grpc-gateway/v2/internal/httprule/* # gosub
 - autoscaler/vendor/github.com/grpc-ecosystem/grpc-gateway/v2/runtime/* # gosub
 - autoscaler/vendor/github.com/grpc-ecosystem/grpc-gateway/v2/utilities/* # gosub
+- autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
+- autoscaler/vendor/github.com/hashicorp/go-retryablehttp/* # gosub
 - autoscaler/vendor/github.com/imdario/mergo/* # gosub
 - autoscaler/vendor/github.com/jackc/pgpassfile/* # gosub
 - autoscaler/vendor/github.com/jackc/pgservicefile/* # gosub
