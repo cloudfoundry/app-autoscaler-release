@@ -18,7 +18,7 @@ files:
 - autoscaler/api/plancheck/* # gosub
 - autoscaler/api/policyvalidator/* # gosub
 - autoscaler/api/publicapiserver/* # gosub
-- autoscaler/api/schedulerutil/* # gosub
+- autoscaler/api/schedulerclient/* # gosub
 - autoscaler/cf/* # gosub
 - autoscaler/cred_helper/* # gosub
 - autoscaler/db/* # gosub
