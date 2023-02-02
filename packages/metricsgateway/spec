@@ -77,6 +77,7 @@ files:
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/pbkdf2/* # gosub
+- autoscaler/vendor/golang.org/x/exp/maps/* # gosub
 - autoscaler/vendor/golang.org/x/net/context/* # gosub
 - autoscaler/vendor/golang.org/x/net/http/httpguts/* # gosub
 - autoscaler/vendor/golang.org/x/net/http2/* # gosub
