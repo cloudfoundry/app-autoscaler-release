@@ -67,6 +67,7 @@ resources:
   source:
     uri: https://github.com/cloudfoundry/cf-deployment.git
     branch: main
+    tag_filter: v*
 
 - name: cf-deployment-concourse-tasks
   type: git
@@ -198,6 +199,7 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
+      trigger: true
     - get: prometheus-boshrelease
       trigger: true
     - get: bbl-state
