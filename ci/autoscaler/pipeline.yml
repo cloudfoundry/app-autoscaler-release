@@ -172,6 +172,7 @@ resources:
     uri: https://github.com/bosh-packages/golang-release.git
     branch: master
     version_depth: 20
+    tag_filter: v0.*
 
 - name: java-release
   type: git
