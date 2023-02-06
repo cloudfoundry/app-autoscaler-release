@@ -4,7 +4,7 @@
     "config:js-app",
     "regexManagers:dockerfileVersions",
     ":label(dependencies)",
-    ":automergeMinor"
+    ":automergeAll"
   ],
   "transitiveRemediation": true,
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
