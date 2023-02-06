@@ -25,11 +25,12 @@ jobs:
         env:
           # Needed for self-hosted runner
           ImageOS: "ubuntu22"
-      - uses: reviewdog/action-eslint@v1
-        with:
-          workdir: "src/acceptance/assets/app/nodeApp"
-          eslint_flags: ''
-          reporter: github-pr-review # Default is github-pr-check # github-pr-review
+# Temporarily disabled due to https://github.com/reviewdog/action-eslint/issues/152
+#      - uses: reviewdog/action-eslint@v1
+#        with:
+#          workdir: "src/acceptance/assets/app/nodeApp"
+#          eslint_flags: ''
+#          reporter: github-pr-review # Default is github-pr-check # github-pr-review
       - name: shellcheck
         uses: reviewdog/action-shellcheck@v1
         with:
