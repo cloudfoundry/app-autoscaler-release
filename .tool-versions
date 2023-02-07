@@ -2,7 +2,7 @@ act 0.2.42
 actionlint 1.6.23
 bosh 7.1.2
 cf 8.5.0
-concourse 7.9.0
+concourse 7.9.1
 direnv 2.32.2
 gcloud 416.0.0
 ginkgo 2.8.0
