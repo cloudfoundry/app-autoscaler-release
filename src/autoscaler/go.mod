@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/app-autoscaler/src/autoscaler
 
-go 1.19
+go 1.20
 
 replace code.cloudfoundry.org/lager => code.cloudfoundry.org/lager v1.1.1-0.20221206004056-ec47ef5d1a44
 
