@@ -381,7 +381,7 @@ func RunningInstances(appGUID string, timeout time.Duration) (int, error) {
 	err = json.Unmarshal(cmd.Out.Contents(), &process)
 	Expect(err).ToNot(HaveOccurred())
 	webInstances := process.Instances
-	GinkgoWriter.Printf("\nFound %d app instances for app %d \n", webInstances, appGUID)
+	GinkgoWriter.Printf("\nFound %d app instances for app %s \n", webInstances, appGUID)
 	return webInstances, nil
 }
 

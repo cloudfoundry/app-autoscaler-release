@@ -51,7 +51,7 @@ var _ = Describe("Prepare test apps based on performance inputs", func() {
 		appNameGenerator(queue, desiredApps)
 		itSpecText = fmt.Sprintf(" should be equal to %d", cfg.Performance.AppCount)
 		close(queue)
-		fmt.Println("\nWaiting for app to finish...")
+		fmt.Println("\nWaiting for apps to finish...")
 		wg.Wait()
 		fmt.Printf("\nTotal Running apps: %d/%d\n", atomic.LoadInt32(&runningAppsCount), cfg.Performance.AppCount)
 	})

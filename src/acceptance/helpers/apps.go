@@ -71,6 +71,12 @@ func getRawApps(spaceGuid string, orgGuid string, timeout time.Duration) []cfRes
 	return rawApps
 }
 
+func SendMetricWithTimeout(cfg *config.Config, appName string, metric int, timeOut time.Duration) {
+	cfh.CurlAppWithTimeout(cfg, appName,
+		fmt.Sprintf("/custom-metrics/test_metric/%d", metric),
+		timeOut, "-f")
+}
+
 func SendMetric(cfg *config.Config, appName string, metric int) {
 	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), "-f")
 }
