@@ -10,7 +10,6 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Client Suite")
 }
