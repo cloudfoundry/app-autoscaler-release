@@ -76,7 +76,6 @@ files:
 - autoscaler/vendor/github.com/tedsuo/ifrit/grouper/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/http_server/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/sigmon/* # gosub
-- autoscaler/vendor/go.uber.org/atomic/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/pbkdf2/* # gosub
