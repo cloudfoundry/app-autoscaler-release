@@ -35,16 +35,16 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", Ordered, func(
 	AfterEach(func() {
 		fmt.Println("\n\nSummary...")
 
-		/*		fmt.Println("\nSuccessful Scale-Out...")
-				scaleOutApps.Range(func(appName, appGuid interface{}) bool {
-					fmt.Printf("scale-out successful: %s: %s \n", appName, appGuid)
-					return true
-				})
-				fmt.Println("\nSuccessful Scale-In")
-				scaleInApps.Range(func(appName, appGuid interface{}) bool {
-					fmt.Printf("scale-In successful: %s: %s \n", appName, appGuid)
-					return true
-				})*/
+		fmt.Println("\nSuccessful Scale-Out...")
+		scaleOutApps.Range(func(appName, appGuid interface{}) bool {
+			fmt.Printf("scale-out successful: %s: %s \n", appName, appGuid)
+			return true
+		})
+		fmt.Println("\nSuccessful Scale-In")
+		scaleInApps.Range(func(appName, appGuid interface{}) bool {
+			fmt.Printf("scale-In successful: %s: %s \n", appName, appGuid)
+			return true
+		})
 
 		fmt.Println("\nScale-Out Errors")
 		pendingScaleOuts.Range(func(appName, appGuid interface{}) bool {
@@ -77,7 +77,7 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", Ordered, func(
 
 	})
 
-	Context("when scaling by custom metrics", func() {
+	Context("when scaling out by custom metrics", func() {
 		JustBeforeEach(func() {
 			fmt.Printf("=====running JustBeforeEach=======")
 			// Now calculate appsToScaleCount based on the actual startedApps
@@ -140,7 +140,10 @@ var _ = Describe("Scale in and out (eg: 30%) percentage of apps", Ordered, func(
 				Should(BeEquivalentTo(actualAppsToScaleCount))
 		})
 	})
-	Context("scale-In", func() {
+	Context("when scaling In by custom metrics", func() {
+		JustBeforeEach(func() {
+			fmt.Printf("\nsuccessfull scale-out count: %d\n", lenOfSyncMap(&scaleOutApps))
+		})
 		It("should scale in", Label("measurement"), func() {
 			AddReportEntry(experiment.Name, experiment)
 			wg := sync.WaitGroup{}
@@ -197,9 +200,9 @@ func scaleOutApp(appName string, appGUID string, scaleOutApps *sync.Map,
 	pendingScaleOuts *sync.Map, scaledOutAppsCount *atomic.Int32, actualAppsToScaleCount int, workerIndex int, wg *sync.WaitGroup) func() {
 	return func() {
 		scaleOut := func() (int, error) {
-			helpers.SendMetricWithTimeout(cfg, appName, 550, 10*time.Minute)
+			cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 550, 10*time.Minute)
+			fmt.Printf("worker %d -  %s with App %s %s\n\n", workerIndex, cmdOutput, appName, appGUID)
 			instances, err := helpers.RunningInstances(appGUID, 10*time.Minute)
-
 			if err != nil {
 				fmt.Printf("		error running instances for app %s %s\n", appName, appGUID)
 				return 0, err
@@ -228,7 +231,8 @@ func scaleInApp(appName string, appGUID string, scaleInApps *sync.Map, pendingSc
 	scaledInAppsCount *atomic.Int32, actualAppsToScaleCount int, workerIndex int, wg *sync.WaitGroup) func() {
 	return func() {
 		scaleIn := func() (int, error) {
-			helpers.SendMetricWithTimeout(cfg, appName, 100, 10*time.Minute)
+			cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 100, 10*time.Minute)
+			fmt.Printf("worker %d -  %s with App %s %s\n\n", workerIndex, cmdOutput, appName, appGUID)
 			return helpers.RunningInstances(appGUID, 10*time.Minute)
 		}
 		fmt.Printf("		worker %d - scale-in starts for app %s with AppGuid %s\n", workerIndex, appName, appGUID)
