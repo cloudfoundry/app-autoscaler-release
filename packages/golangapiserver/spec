@@ -93,7 +93,6 @@ files:
 - autoscaler/vendor/github.com/xeipuuv/gojsonpointer/* # gosub
 - autoscaler/vendor/github.com/xeipuuv/gojsonreference/* # gosub
 - autoscaler/vendor/github.com/xeipuuv/gojsonschema/* # gosub
-- autoscaler/vendor/go.uber.org/atomic/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/pbkdf2/* # gosub
