@@ -111,7 +111,9 @@ func main() {
 	healthendpoint.RegisterCollectors(promRegistry, prometheusCollectors, true, logger.Session("golangapiserver-prometheus"))
 
 	publicApiHttpServer := createApiServer(conf, logger, policyDb, credentialProvider, checkBindingFunc, cfClient, httpStatusCollector, bindingDB)
-	healthServer, err := healthendpoint.NewServerWithBasicAuth(conf.Health, []healthendpoint.Checker{}, logger.Session("health-server"), promRegistry, time.Now)
+	healthServer, err := healthendpoint.NewServerWithBasicAuth(conf.Health, // TODO: Create similarly a liveliness endpoint.
+		[]healthendpoint.Checker{}, logger.Session("health-server"), promRegistry, time.Now,
+	)
 	if err != nil {
 		logger.Fatal("Failed to create health server:", err)
 		os.Exit(1)
@@ -120,7 +122,7 @@ func main() {
 
 	members = append(members,
 		grouper.Member{"public_api_http_server", publicApiHttpServer},
-		grouper.Member{"health_server", healthServer},
+		grouper.Member{"health_server", healthServer}, // TODO: Add similarly a liveliness endpoint.
 	)
 
 	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))
@@ -137,7 +139,11 @@ func main() {
 	logger.Info("exited")
 }
 
-func createApiServer(conf *config.Config, logger lager.Logger, policyDb *sqldb.PolicySQLDB, credentialProvider cred_helper.Credentials, checkBindingFunc api.CheckBindingFunc, cfClient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector, bindingDB db.BindingDB) ifrit.Runner {
+func createApiServer(conf *config.Config, logger lager.Logger, policyDb *sqldb.PolicySQLDB,
+	credentialProvider cred_helper.Credentials, checkBindingFunc api.CheckBindingFunc,
+	cfClient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector,
+	bindingDB db.BindingDB) ifrit.Runner {
+
 	rateLimiter := ratelimiter.DefaultRateLimiter(conf.RateLimit.MaxAmount, conf.RateLimit.ValidDuration, logger.Session("api-ratelimiter"))
 	publicApiHttpServer, err := publicapiserver.NewPublicApiServer(logger.Session("public_api_http_server"), conf, policyDb, credentialProvider, checkBindingFunc, cfClient, httpStatusCollector, rateLimiter, bindingDB)
 	if err != nil {
