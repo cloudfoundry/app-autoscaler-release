@@ -7,7 +7,7 @@ direnv 2.32.2
 gcloud 418.0.0
 ginkgo 2.8.1
 golang 1.20.1
-golangci-lint 1.51.1
+golangci-lint 1.51.2
 java temurin-17.0.5+8
 make 4.4
 maven 3.8.6
