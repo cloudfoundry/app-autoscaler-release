@@ -5,7 +5,7 @@ cf 8.6.0
 concourse 7.9.1
 direnv 2.32.2
 gcloud 418.0.0
-ginkgo 2.8.1
+ginkgo 2.8.3
 golang 1.20.1
 golangci-lint 1.51.2
 java temurin-17.0.5+8
