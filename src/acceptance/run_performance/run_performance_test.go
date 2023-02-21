@@ -338,11 +338,13 @@ func scaleOutApp(appName string, appGUID string, scaleOutApps *sync.Map,
 	actualAppsToScaleCount int, workerIndex int, wg *sync.WaitGroup) func() {
 
 	fmt.Printf("		worker %d - scale-out starts for app %s with AppGuid %s\n", workerIndex, appName, appGUID)
-	cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 550, 10*time.Minute)
-	fmt.Printf("worker %d - scale-out  %s with App %s %s\n", workerIndex, cmdOutput, appName, appGUID)
-
 	return func() {
 		scaleOut := func() (int, error) {
+			// Q. why sending post request to autoscaler after every pollTime.
+			// A. It is observed that sometime cf does not pick the cf scale event. Therefore,
+			// sending the metric again(and again) is the way to go at the moment
+			cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 550, 5*time.Minute)
+			fmt.Printf("worker %d - scale-out %s with App %s %s\n", workerIndex, cmdOutput, appName, appGUID)
 			instances, err := helpers.RunningInstances(appGUID, 10*time.Minute)
 			if err != nil {
 				err = fmt.Errorf("	error running instances for app %s %s %w\n", appName, appGUID, err)
@@ -372,12 +374,11 @@ func scaleInApp(appName string, appGUID string, scaleInApps *sync.Map, pendingSc
 	scaledInAppsCount *atomic.Int32, actualAppsToScaleCount int, workerIndex int, wg *sync.WaitGroup) func() {
 
 	fmt.Printf("		worker %d - scale-in starts for app %s with AppGuid %s\n", workerIndex, appName, appGUID)
-	cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 100, 10*time.Minute)
-	fmt.Printf("worker %d - scale-in %s with App %s %s\n", workerIndex, cmdOutput, appName, appGUID)
 
 	return func() {
 		scaleIn := func() (int, error) {
-
+			cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 100, 5*time.Minute)
+			fmt.Printf("worker %d - scale-in %s with App %s %s\n", workerIndex, cmdOutput, appName, appGUID)
 			instances, err := helpers.RunningInstances(appGUID, 10*time.Minute)
 			if err != nil {
 				err = fmt.Errorf("	error running instances for app %s %s %w\n", appName, appGUID, err)
