@@ -45,7 +45,7 @@ ginkgo_check:
 	expected_version=$(shell grep "ginkgo"  "../../.tool-versions" | cut -d " " -f 2 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/');\
 	if [ "$${current_version}" != "$${expected_version}" ]; then \
         echo "WARNING: Expected to have ginkgo version '$${expected_version}.x' but we have $(shell ginkgo version)";\
-    fi
+  fi
 
 test: ginkgo_check
 	@echo "Running tests"
