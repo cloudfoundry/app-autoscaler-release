@@ -22,11 +22,13 @@
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               act
+              actionlint
               bosh-cli
               cloudfoundry-cli
               fly
               ginkgo
               gh
+              gnumake
               go
               golangci-lint
               google-cloud-sdk
@@ -46,6 +48,7 @@
               # jdwpkgs.rubyPackages.cf-uaac
               shellcheck
               temurin-bin
+              yq-go
             ];
           };
       });
