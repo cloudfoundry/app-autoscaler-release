@@ -176,7 +176,7 @@ var _ = Describe("Health Readiness", func() {
 						Expect(t).
 						Status(http.StatusOK).
 						Header("Content-Type", "application/json").
-						Body(`{ 
+						Body(`{
 	"overall_status" : "UP",
 	"checks" : [ {"name": "policy", "type": "database", "status": "UP" } ]
 }`).

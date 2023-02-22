@@ -57,60 +57,77 @@ func NewServerWithBasicAuth(conf models.HealthConfig, healthCheckers []Checker, 
 	return http_server.New(addr, healthRouter), nil
 }
 
-func NewHealthRouter(conf models.HealthConfig, healthCheckers []Checker, logger lager.Logger, gatherer prometheus.Gatherer, time func() time.Time) (*mux.Router, error) {
-	var healthRouter *mux.Router
-	var err error
+func NewHealthRouter(conf models.HealthConfig, healthCheckers []Checker, logger lager.Logger,
+	gatherer prometheus.Gatherer, time func() time.Time) (*mux.Router, error) {
+
 	username := conf.HealthCheckUsername
 	password := conf.HealthCheckPassword
 	usernameHash := conf.HealthCheckUsernameHash
 	passwordHash := conf.HealthCheckPasswordHash
-	if username == "" && password == "" && usernameHash == "" && passwordHash == "" {
-		//when username and password are not set then don't use basic authentication
-		healthRouter = mux.NewRouter()
-		if conf.ReadinessCheckEnabled {
-			healthRouter.Handle("/health/readiness", common.VarsFunc(readiness(healthCheckers, time)))
-		}
-		healthRouter.PathPrefix("").Handler(promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{}))
-	} else {
-		healthRouter, err = healthBasicAuthRouter(conf, healthCheckers, logger, gatherer, time)
-		if err != nil {
-			return nil, err
-		}
+	readinessCheckProtected :=
+		(username != "" || usernameHash != "") && (password != "" || passwordHash != "")
+
+	if conf.ReadinessCheckEnabled && !readinessCheckProtected {
+		// TODO: Clarify if we should log out an error message instead due to backwards compatibility.
+		msg := "Readiness checks intended in configuration but not all parameters provided for basic auth!"
+		return nil, fmt.Errorf("%s", msg)
 	}
-	return healthRouter, nil
+
+	return routerWithBasicAuth(conf, healthCheckers, logger, gatherer, time)
 }
 
-func healthBasicAuthRouter(conf models.HealthConfig, healthCheckers []Checker, logger lager.Logger, gatherer prometheus.Gatherer, time func() time.Time) (*mux.Router, error) {
+func routerWithBasicAuth(conf models.HealthConfig, healthCheckers []Checker, logger lager.Logger,
+	gatherer prometheus.Gatherer, time func() time.Time) (*mux.Router, error) {
+
 	basicAuthentication, err := createBasicAuthMiddleware(logger, conf.HealthCheckUsernameHash, conf.HealthCheckUsername, conf.HealthCheckPasswordHash, conf.HealthCheckPassword)
 	if err != nil {
 		return nil, err
 	}
-	promHandler := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
 
-	// /health
 	router := mux.NewRouter()
+
 	// unauthenticated paths
 	if conf.ReadinessCheckEnabled {
-		router.Handle("/health/readiness", common.VarsFunc(readiness(healthCheckers, time)))
+		router.Handle("/health/liveliness", common.VarsFunc(readiness([]Checker{}, time)))
 	}
-	//authenticated paths
-	health := router.Path("/health").Subrouter()
-	health.Use(basicAuthentication.middleware)
 
-	pprofRouter := router.PathPrefix("/debug/pprof").Subrouter()
-	pprofRouter.Use(basicAuthentication.middleware)
+	//authenticated paths
+	if conf.ReadinessCheckEnabled {
+		addReadinessWithBasicAuth(router, basicAuthentication, healthCheckers, time)
+	}
+	addPprofWithBasicAuth(router, basicAuthentication)
+	addPrometheusWithBasicAuth(router, basicAuthentication, gatherer)
+
+	return router, nil
+}
+
+func addReadinessWithBasicAuth(mainRouter *mux.Router, authMiddleware *basicAuthenticationMiddleware,
+	healthCheckers []Checker, time func() time.Time) {
+
+	mainRouter.Handle("/health/readiness", common.VarsFunc(readiness(healthCheckers, time)))
+	readiness := mainRouter.Path("/health/readiness").Subrouter()
+	readiness.Use(authMiddleware.middleware)
+}
+
+func addPprofWithBasicAuth(mainRouter *mux.Router, authMiddleware *basicAuthenticationMiddleware) {
+	pprofRouter := mainRouter.PathPrefix("/debug/pprof").Subrouter()
+	pprofRouter.Use(authMiddleware.middleware)
 
 	pprofRouter.HandleFunc("/cmdline", pprof.Cmdline)
 	pprofRouter.HandleFunc("/profile", pprof.Profile)
 	pprofRouter.HandleFunc("/symbol", pprof.Symbol)
 	pprofRouter.HandleFunc("/trace", pprof.Trace)
 	pprofRouter.PathPrefix("").HandlerFunc(pprof.Index)
+}
 
-	everything := router.PathPrefix("").Subrouter()
-	everything.Use(basicAuthentication.middleware)
+func addPrometheusWithBasicAuth(mainRouter *mux.Router, authMiddleware *basicAuthenticationMiddleware,
+	gatherer prometheus.Gatherer) {
+
+	promHandler := promhttp.HandlerFor(gatherer, promhttp.HandlerOpts{})
+
+	everything := mainRouter.PathPrefix("").Subrouter()
+	everything.Use(authMiddleware.middleware) // TODO: could be a problem: we don't want /health/liveliness to be protected
 	everything.PathPrefix("").Handler(promHandler)
-
-	return router, nil
 }
 
 func createBasicAuthMiddleware(logger lager.Logger, usernameHash string, username string, passwordHash string, password string) (*basicAuthenticationMiddleware, error) {
