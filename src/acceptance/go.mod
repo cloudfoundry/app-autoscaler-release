@@ -3,7 +3,7 @@ module acceptance
 go 1.19
 
 require (
-	github.com/cloudfoundry/cf-test-helpers/v2 v2.4.0
+	github.com/cloudfoundry/cf-test-helpers/v2 v2.5.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/onsi/ginkgo/v2 v2.8.3
 	github.com/onsi/gomega v1.27.1
