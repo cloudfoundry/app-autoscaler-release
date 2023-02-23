@@ -255,7 +255,6 @@ lint-actions:
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@echo " receiving OPTS ${OPTS}"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS}
 
 .PHONY: spec-test
@@ -358,7 +357,6 @@ cf-login:
 
 .PHONY: setup-performance
 setup-performance:
-	export GINKGO_OPTS="";\
 	export NODES=1;\
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
@@ -366,8 +364,6 @@ setup-performance:
 
 .PHONY: run-performance
 run-performance:
-	export GINKGO_OPTS="";\
-	export SKIP_TEARDOWN=true;\
 	export NODES=1;\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\

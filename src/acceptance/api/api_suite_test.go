@@ -107,7 +107,7 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		DeleteService(cfg, setup, instanceName, appName)
+		DeleteService(cfg, instanceName, appName)
 		DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 		DisableServiceAccess(cfg, setup)
 		otherSetup.Teardown()
