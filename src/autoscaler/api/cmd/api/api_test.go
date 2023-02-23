@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
@@ -240,8 +241,8 @@ var _ = Describe("Api", func() {
 		})
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.LIVELINESS_PATH)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -254,8 +255,8 @@ var _ = Describe("Api", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.LIVELINESS_PATH)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)

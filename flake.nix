@@ -25,6 +25,7 @@
               actionlint
               bosh-cli
               cloudfoundry-cli
+              delve
               fly
               ginkgo
               gh
@@ -50,6 +51,17 @@
               temurin-bin
               yq-go
             ];
+
+            # For development purposes, we should set this, otherwise we will see the error
+            # ```
+            # warning _FORTIFY_SOURCE requires compiling with optimization (-O)
+            # […]
+            # cc1: all warnings being treated as errors
+            # exit status 2
+            # ```
+            # For more information about this, see:
+            # <https://discourse.nixos.org/t/golang-delve-debugger-with-nix-flake-issue/22740/2>
+            hardeningDisable = [ "all" ];
           };
       });
   };
