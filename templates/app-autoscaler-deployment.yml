@@ -8,7 +8,7 @@ releases:
   version: latest
 - name: "postgres"
   version: "44"
-  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=36"
+  url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=44"
   sha1: "582b1de9522077102dfa44ff7164cd8f499dbfc8"
 - name: bosh-dns-aliases
   url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.3
