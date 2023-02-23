@@ -6,13 +6,13 @@ import (
 	"time"
 )
 
-const defaultRetryAttempt = 2
+const defaultRetryAttempt = 3
 const defaultRetryAfter = 60
 
 func Retry(attempts int, sleep int, f func() error) (err error) {
 	for i := 0; i < attempts; i++ {
 		if i > 0 {
-			log.Println(fmt.Sprintf("retrying after error in %d", sleep), err)
+			log.Println(fmt.Sprintf("attempt %d/%d - retrying in %d seconds error ", i, attempts, sleep), err)
 			time.Sleep(time.Duration(sleep) * time.Second)
 			sleep *= 2
 		}
@@ -27,7 +27,7 @@ func Retry(attempts int, sleep int, f func() error) (err error) {
 func TRetry[T any](attempts int, sleep int, f func() (T, error)) (result T, err error) {
 	for i := 0; i < attempts; i++ {
 		if i > 0 {
-			log.Println("retrying after error:", err)
+			log.Println(fmt.Sprintf("attempt %d/%d - retrying in %d seconds error ", i, attempts, sleep), err)
 			time.Sleep(time.Duration(sleep) * time.Second)
 			sleep *= 2
 		}

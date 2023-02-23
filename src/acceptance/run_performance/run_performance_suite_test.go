@@ -62,6 +62,7 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
+
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {

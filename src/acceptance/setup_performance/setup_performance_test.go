@@ -38,22 +38,22 @@ var _ = Describe("Prepare test apps based on performance inputs", func() {
 		workerCount := cfg.Performance.SetupWorkers
 		var desiredApps []string
 
-		for i := 1; i <= workerCount; i++ {
+		for i := 0; i < workerCount; i++ {
 			wg.Add(1)
 			go appHandler(queue, &runningAppsCount, &pendingApps, &errors, &wg)
 		}
-		for i := 1; i <= cfg.Performance.AppCount; i++ {
+		for i := 0; i < cfg.Performance.AppCount; i++ {
 			appName = fmt.Sprintf("node-custom-metric-benchmark-%d", i)
 			desiredApps = append(desiredApps, appName)
-			//pendingApps.Store(appName, 1)
+			pendingApps.Store(appName, 1)
 		}
 		fmt.Printf("desired app count: %d\n", len(desiredApps))
 		appNameGenerator(queue, desiredApps)
 		itSpecText = fmt.Sprintf(" should be equal to %d", cfg.Performance.AppCount)
 		close(queue)
-		fmt.Println("\nWaiting for app to finish...")
+		fmt.Println("\nWaiting for apps to finish...")
 		wg.Wait()
-		fmt.Printf("\nTotal Running apps: %d/%dn", atomic.LoadInt32(&runningAppsCount), cfg.Performance.AppCount)
+		fmt.Printf("\nTotal Running apps: %d/%d\n", atomic.LoadInt32(&runningAppsCount), cfg.Performance.AppCount)
 	})
 
 	Context("App count", func() {
