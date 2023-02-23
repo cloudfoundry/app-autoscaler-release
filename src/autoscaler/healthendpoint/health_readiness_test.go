@@ -61,7 +61,8 @@ var _ = Describe("Health Readiness", func() {
 
 	JustBeforeEach(func() {
 		var err error
-		healthRoute, err = healthendpoint.NewHealthRouter(config, checkers, logger, prometheus.NewRegistry(), func() time.Time { return *timesetter })
+		healthRoute, err = healthendpoint.NewHealthRouterWithBasicAuth(config, checkers, logger,
+			prometheus.NewRegistry(), func() time.Time { return *timesetter })
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 
