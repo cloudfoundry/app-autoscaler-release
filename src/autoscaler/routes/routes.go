@@ -165,3 +165,6 @@ func ApiPolicyRoutes() *mux.Router {
 func ApiCredentialRoutes() *mux.Router {
 	return autoScalerRouteInstance.apiCredentialRoutes
 }
+
+// TODO: Add the generation for the health endpoints? At least to the constants
+// at the top of this file?
