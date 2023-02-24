@@ -19,11 +19,9 @@ type HealthConfig struct {
 var ErrConfiguration = fmt.Errorf("configuration error")
 
 func (c *HealthConfig) BasicAuthPossible() bool {
-	username := c.HealthCheckUsername
-	password := c.HealthCheckPassword
-	usernameHash := c.HealthCheckUsernameHash
-	passwordHash := c.HealthCheckPasswordHash
-	return (username != "" || usernameHash != "") && (password != "" || passwordHash != "")
+	usernameVerifiable := c.HealthCheckUsername != "" || c.HealthCheckUsernameHash != ""
+	passwordVerifiable := c.HealthCheckPassword != "" || c.HealthCheckPasswordHash != ""
+	return usernameVerifiable && passwordVerifiable
 }
 
 func (c *HealthConfig) Validate() error {
