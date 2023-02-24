@@ -170,11 +170,11 @@ func addPprofHandlers(conf models.HealthConfig, mainRouter *mux.Router,
 		pprofRouter.Use(authMiddleware.middleware)
 	}
 
+	pprofRouter.HandleFunc("", pprof.Index)
 	pprofRouter.HandleFunc("/cmdline", pprof.Cmdline)
 	pprofRouter.HandleFunc("/profile", pprof.Profile)
 	pprofRouter.HandleFunc("/symbol", pprof.Symbol)
 	pprofRouter.HandleFunc("/trace", pprof.Trace)
-	pprofRouter.PathPrefix("").HandlerFunc(pprof.Index)
 
 	return nil
 }
@@ -196,7 +196,7 @@ func addPrometheusHandler(mainRouter *mux.Router, conf models.HealthConfig,
 		}
 		prometheusRouter.Use(authMiddleware.middleware)
 	}
-	prometheusRouter.PathPrefix(path).Handler(promHandler)
+	prometheusRouter.PathPrefix("").Handler(promHandler)
 
 	return nil
 }
