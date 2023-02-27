@@ -9,7 +9,7 @@ require (
 	github.com/onsi/gomega v1.27.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/steinfletcher/apitest v1.5.14
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 )
 
 require (
