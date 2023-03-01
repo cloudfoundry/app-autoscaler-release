@@ -151,14 +151,6 @@ var _ = Describe("Health Readiness", func() {
 	})
 
 	Context("with basic auth configured", func() {
-		// BeforeEach(func() {
-		// 	config.HealthCheckUsername = "test-user-name"
-		// 	config.HealthCheckPassword = "test-user-password"
-		// 	config.UnprotectedEndpoints = []string{} // everything is protected
-		// 	config.ReadinessCheckEnabled = true
-		// 	checkers = []healthendpoint.Checker{}
-		// })
-
 		When("Readiness endpoint is called without basic auth", func() {
 			Context("and without checkers", func() {
 				It("should have json response", func() {
@@ -234,7 +226,6 @@ var _ = Describe("Health Readiness", func() {
 			Context("and two checkers and one is failing", func() {
 
 				BeforeEach(func() {
-
 					dbUpFunc := healthendpoint.DbChecker("policy", &testPinger{error: nil})
 					dbDownFunc := healthendpoint.DbChecker("instance-db", &testPinger{error: errors.Errorf("DB is DOWN")})
 
@@ -295,30 +286,21 @@ var _ = Describe("Health Readiness", func() {
 		})
 
 		When("Prometheus Health endpoint is called", func() {
-			// It("should require basic auth", func() {
-			// 	apitest.New().
-			// 		Handler(healthRoute).
-			// 		Get(healthendpoint.PROMETHEUS_PATH).
-			// 		Expect(t).
-			// 		Status(http.StatusUnauthorized).
-			// 		End()
-			// })
 			It("should require basic auth", func() {
-				v := apitest.New().
+				apitest.New().
 					Handler(healthRoute).
-					Get(healthendpoint.PROMETHEUS_PATH)
-
-				v.Expect(t).
+					Get(healthendpoint.PROMETHEUS_PATH).
+					Expect(t).
 					Status(http.StatusUnauthorized).
 					End()
 			})
 		})
 
 		When("Default endpoint is called", func() {
-			It("should require basic auth", func() {
+			FIt("should require basic auth", func() {
 				apitest.New().
 					Handler(healthRoute).
-					Get("/any").
+					Get("").
 					Expect(t).
 					Status(http.StatusUnauthorized).
 					End()

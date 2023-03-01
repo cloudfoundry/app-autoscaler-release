@@ -113,9 +113,8 @@ func addLivelinessHandlers(conf models.HealthConfig, mainRouter *mux.Router, tim
 	authMiddleware *basicAuthenticationMiddleware) error {
 
 	livelinessHandler := common.VarsFunc(readiness([]Checker{}, time))
-	paths := []string{"/", LIVELINESS_PATH}
+	paths := []string{"", LIVELINESS_PATH}
 	for _, path := range paths {
-		mainRouter.Handle(path, livelinessHandler)
 		if endpointsNeedsProtection(path, conf) {
 			if !conf.BasicAuthPossible() {
 				msg := "Basic authentication required for endpoint %s, but credentials not set up properly."
@@ -123,6 +122,7 @@ func addLivelinessHandlers(conf models.HealthConfig, mainRouter *mux.Router, tim
 			}
 			sr := mainRouter.Path(path).Subrouter()
 			sr.Use(authMiddleware.middleware)
+			sr.Handle("", livelinessHandler) // TODO: This does not work for the default-route "" and we get a 301
 		}
 	}
 
