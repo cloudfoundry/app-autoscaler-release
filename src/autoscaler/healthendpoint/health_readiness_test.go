@@ -53,7 +53,6 @@ var _ = Describe("Health Readiness", func() {
 		config.HealthCheckPassword = "test-user-password"
 		config.HealthCheckPasswordHash = ""
 		config.HealthCheckUsernameHash = ""
-		config.UnprotectedEndpoints = []string{}
 		config.ReadinessCheckEnabled = true
 		checkers = []healthendpoint.Checker{}
 		tmsttr := time.Now()
@@ -62,8 +61,7 @@ var _ = Describe("Health Readiness", func() {
 
 	JustBeforeEach(func() {
 		var err error
-		healthRoute, err = healthendpoint.NewHealthRouterWithBasicAuth(config, checkers, logger,
-			prometheus.NewRegistry(), func() time.Time { return *timesetter })
+		healthRoute, err = healthendpoint.NewHealthRouter(config, checkers, logger, prometheus.NewRegistry(), func() time.Time { return *timesetter })
 		Expect(err).ShouldNot(HaveOccurred())
 	})
 
@@ -79,7 +77,7 @@ var _ = Describe("Health Readiness", func() {
 				It("should require basic auth", func() {
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.PROMETHEUS_PATH).
+						Get("/health").
 						Expect(t).
 						Status(http.StatusUnauthorized).
 						End()
@@ -97,7 +95,7 @@ var _ = Describe("Health Readiness", func() {
 				It("should require basic auth", func() {
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.PROMETHEUS_PATH).
+						Get("/health").
 						Expect(t).
 						Status(http.StatusUnauthorized).
 						End()
@@ -110,41 +108,48 @@ var _ = Describe("Health Readiness", func() {
 		BeforeEach(func() {
 			config.HealthCheckUsername = ""
 			config.HealthCheckPassword = ""
-			config.UnprotectedEndpoints = []string{"/", healthendpoint.LIVELINESS_PATH,
-				healthendpoint.READINESS_PATH, healthendpoint.PPROF_PATH, healthendpoint.PROMETHEUS_PATH}
 		})
 		When("Prometheus Health endpoint is called", func() {
-			It("should respond OK", func() {
+			It("should respond unauthorized (401)", func() {
 				apitest.New().
-					Handler(healthRoute).
-					Get(healthendpoint.PROMETHEUS_PATH).
+					Handler(healthRoute).Debug().
+					Get("/anything").
 					Expect(t).
-					Status(http.StatusOK).
-					Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8").
+					Status(http.StatusUnauthorized).
 					End()
 			})
 		})
 		When("/health/readiness endpoint is called", func() {
-			It("should response OK", func() {
-				apitest.New().
+			It("should response unauthorized(401)", func() {
+				apitest.New().Debug().
 					Handler(healthRoute).
-					Get(healthendpoint.READINESS_PATH).
+					Get("/health/readiness").
 					Expect(t).
-					Status(http.StatusOK).
-					Header("Content-Type", "application/json").
-					Body(`{"overall_status" : "UP", "checks" : [] }`).
+					Status(http.StatusUnauthorized).
 					End()
 			})
 		})
 		When("readiness is disabled", func() {
 			BeforeEach(func() { config.ReadinessCheckEnabled = false })
-
-			It("should respond with 404", func() {
+			It("should respond Prometheus Health endpoint", func() {
 				apitest.New().
 					Handler(healthRoute).
-					Get(healthendpoint.READINESS_PATH).
+					Get("/health/readiness").
 					Expect(t).
-					Status(http.StatusNotFound).
+					Status(http.StatusUnauthorized).
+					End()
+			})
+		})
+		When("/health/liveness endpoint is called", func() {
+			It("should response OK", func() {
+				v := apitest.New().Debug().
+					Handler(healthRoute).
+					Get(healthendpoint.LivenessPath)
+
+				v.Expect(t).
+					Status(http.StatusOK).
+					Header("Content-Type", "application/json").
+					Body(`{"overall_status" : "UP", "checks" : [] }`).
 					End()
 			})
 		})
@@ -156,7 +161,22 @@ var _ = Describe("Health Readiness", func() {
 				It("should have json response", func() {
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.READINESS_PATH).
+						Get(healthendpoint.ReadinessPath).
+						Expect(t).
+						Status(http.StatusUnauthorized).
+						/*Header("Content-Type", "application/json").
+						Body(`{"overall_status" : "UP", "checks" : [] }`).*/
+						End()
+				})
+			})
+		})
+		When("Readiness endpoint is called with basic auth", func() {
+			Context("and without checkers", func() {
+				It("should have json response", func() {
+					apitest.New().
+						Handler(healthRoute).
+						Get(healthendpoint.ReadinessPath).
+						BasicAuth("test-user-name", "test-user-password").
 						Expect(t).
 						Status(http.StatusOK).
 						Header("Content-Type", "application/json").
@@ -175,11 +195,12 @@ var _ = Describe("Health Readiness", func() {
 				It("should have database check passing", func() {
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.READINESS_PATH).
+						Get(healthendpoint.ReadinessPath).
+						BasicAuth("test-user-name", "test-user-password").
 						Expect(t).
 						Status(http.StatusOK).
 						Header("Content-Type", "application/json").
-						Body(`{
+						Body(`{ 
 	"overall_status" : "UP",
 	"checks" : [ {"name": "policy", "type": "database", "status": "UP" } ]
 }`).
@@ -188,7 +209,8 @@ var _ = Describe("Health Readiness", func() {
 				It("should cache health result", func() {
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.READINESS_PATH).
+						Get(healthendpoint.ReadinessPath).
+						BasicAuth("test-user-name", "test-user-password").
 						Expect(t).
 						Status(http.StatusOK).
 						End()
@@ -197,7 +219,8 @@ var _ = Describe("Health Readiness", func() {
 					timesetter = &(tmsttr)
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.READINESS_PATH).
+						Get(healthendpoint.ReadinessPath).
+						BasicAuth("test-user-name", "test-user-password").
 						Expect(t).
 						Status(http.StatusOK).
 						End()
@@ -206,7 +229,8 @@ var _ = Describe("Health Readiness", func() {
 				It("should expire the cache entry after 30 seconds", func() {
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.READINESS_PATH).
+						Get(healthendpoint.ReadinessPath).
+						BasicAuth("test-user-name", "test-user-password").
 						Expect(t).
 						Status(http.StatusOK).
 						End()
@@ -215,20 +239,35 @@ var _ = Describe("Health Readiness", func() {
 					timesetter = &(tmsttr)
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.READINESS_PATH).
+						Get(healthendpoint.ReadinessPath).
+						BasicAuth("test-user-name", "test-user-password").
 						Expect(t).
 						Status(http.StatusOK).
 						End()
 					Expect(pinger.counter).To(Equal(2))
 				})
 			})
+			Context("and a checker is supplied but readiness is disabled", func() {
 
+				BeforeEach(func() {
+					checkers = []healthendpoint.Checker{healthendpoint.DbChecker("policy", &testPinger{error: nil})}
+					config.ReadinessCheckEnabled = false
+				})
+
+				It("should respond with 401 due fallthough to Prometheus health", func() {
+					apitest.New().Debug().
+						Handler(healthRoute).
+						Get(healthendpoint.ReadinessPath).
+						Expect(t).
+						Status(http.StatusUnauthorized).
+						End()
+				})
+			})
 			Context("and two checkers and one is failing", func() {
 
 				BeforeEach(func() {
 					dbUpFunc := healthendpoint.DbChecker("policy", &testPinger{error: nil})
 					dbDownFunc := healthendpoint.DbChecker("instance-db", &testPinger{error: errors.Errorf("DB is DOWN")})
-
 					serverDownFunc := func() healthendpoint.ReadinessCheck {
 						return healthendpoint.ReadinessCheck{Name: "instance", Type: "server", Status: "DOWN"}
 					}
@@ -237,13 +276,14 @@ var _ = Describe("Health Readiness", func() {
 				It("should have overall status down", func() {
 					apitest.New().
 						Handler(healthRoute).
-						Get(healthendpoint.READINESS_PATH).
+						Get(healthendpoint.ReadinessPath).
+						BasicAuth("test-user-name", "test-user-password").
 						Expect(t).
 						Status(http.StatusOK).
 						Header("Content-Type", "application/json").
-						Body(`{
+						Body(`{ 
 							"overall_status" : "DOWN",
-							"checks" : [
+							"checks" : [ 
 									{"name": "policy", "type": "database", "status": "UP" },
 									{"name": "instance-db", "type": "database", "status": "DOWN" },
 									{"name": "instance", "type": "server", "status": "DOWN" }
@@ -271,7 +311,8 @@ var _ = Describe("Health Readiness", func() {
 							mu.RLock()
 							apitest.New().
 								Handler(healthRoute).
-								Get(healthendpoint.READINESS_PATH).
+								Get(healthendpoint.ReadinessPath).
+								BasicAuth("test-user-name", "test-user-password").
 								Expect(t).
 								Status(http.StatusOK).
 								End()
@@ -284,28 +325,37 @@ var _ = Describe("Health Readiness", func() {
 				})
 			})
 		})
-
 		When("Prometheus Health endpoint is called", func() {
+			It("should require basic auth", func() {
+				apitest.New().Debug().
+					Handler(healthRoute).
+					Get(healthendpoint.PrometheusPath).
+					Expect(t).
+					Status(http.StatusUnauthorized).
+					End()
+			})
+			It("should respond OK", func() {
+				apitest.New().
+					Handler(healthRoute).Debug().
+					Get(healthendpoint.PrometheusPath).
+					BasicAuth("test-user-name", "test-user-password").
+					Expect(t).
+					Status(http.StatusOK).
+					Header("Content-Type", "text/plain; version=0.0.4; charset=utf-8").
+					End()
+			})
+		})
+		When("Default endpoint \"/\" is called", func() {
 			It("should require basic auth", func() {
 				apitest.New().
 					Handler(healthRoute).
-					Get(healthendpoint.PROMETHEUS_PATH).
+					Get("/any").
 					Expect(t).
 					Status(http.StatusUnauthorized).
 					End()
 			})
 		})
 
-		When("Default endpoint is called", func() {
-			FIt("should require basic auth", func() {
-				apitest.New().
-					Handler(healthRoute).
-					Get("").
-					Expect(t).
-					Status(http.StatusUnauthorized).
-					End()
-			})
-		})
 	})
 
 	Context("pprof endpoint", func() {
@@ -314,25 +364,22 @@ var _ = Describe("Health Readiness", func() {
 				config.HealthCheckUsername = ""
 				config.HealthCheckPassword = ""
 			})
-			It("should not be available", func() {
+			It("should response unauthorized (401)", func() {
 				apitest.New().
 					Handler(healthRoute).
-					Get("/debug/pprof").
+					Get(healthendpoint.PprofPath).
 					Expect(t).
-					Assert(assertBody(func(body string) bool {
-						return Expect(body).To(Not(ContainSubstring("Types of profiles available")))
-					})).
-					Status(http.StatusOK).
+					Status(http.StatusUnauthorized).
 					End()
 			})
 		})
 
 		When("basic auth is configured", func() {
-			When("no credentials are sent", func() {
+			When("no basic auth credentials are sent", func() {
 				It("should return unauthorized and not be available", func() {
 					apitest.New().
 						Handler(healthRoute).
-						Get("/debug/pprof").
+						Get(healthendpoint.PprofPath).
 						Expect(t).
 						Assert(assertBody(func(body string) bool {
 							return Expect(body).To(Not(ContainSubstring("Types of profiles available")))
@@ -342,7 +389,7 @@ var _ = Describe("Health Readiness", func() {
 				})
 			})
 
-			When("the correct credentials are sent", func() {
+			When("the correct basic auth credentials are sent", func() {
 				It("should be available", func() {
 					By("returning the index page", func() {
 						testPprofEndpoint(healthRoute, "", "Types of profiles available", t)
@@ -365,7 +412,7 @@ func testPprofEndpoint(handler http.Handler, page string, expectedBodySubstring 
 
 	return apitest.New().
 		Handler(handler).
-		Get("/debug/pprof"+u.Path).
+		Get(healthendpoint.PprofPath+u.Path).
 		QueryCollection(m).
 		BasicAuth("test-user-name", "test-user-password").
 		Expect(t).
