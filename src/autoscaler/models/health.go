@@ -7,13 +7,13 @@ import (
 )
 
 type HealthConfig struct {
-	Port                    int    `yaml:"port"`
-	HealthCheckUsername     string `yaml:"username"`
-	HealthCheckUsernameHash string `yaml:"username_hash"`
-	HealthCheckPassword     string `yaml:"password"`
-	HealthCheckPasswordHash string `yaml:"password_hash"`
-	ReadinessCheckEnabled   bool   `yaml:"readiness_enabled"`
-	UnprotectedEndpoints    []string `yaml:unprotected_endpoints`
+	Port                    int      `yaml:"port"`
+	HealthCheckUsername     string   `yaml:"username"`
+	HealthCheckUsernameHash string   `yaml:"username_hash"`
+	HealthCheckPassword     string   `yaml:"password"`
+	HealthCheckPasswordHash string   `yaml:"password_hash"`
+	ReadinessCheckEnabled   bool     `yaml:"readiness_enabled"`
+	UnprotectedEndpoints    []string `yaml:"unprotected_endpoints"`
 }
 
 var ErrConfiguration = fmt.Errorf("configuration error")
