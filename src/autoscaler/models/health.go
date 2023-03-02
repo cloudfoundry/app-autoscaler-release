@@ -18,6 +18,12 @@ type HealthConfig struct {
 
 var ErrConfiguration = fmt.Errorf("configuration error")
 
+func (c *HealthConfig) BasicAuthPossible() bool {
+	usernameVerifiable := c.HealthCheckUsername != "" || c.HealthCheckUsernameHash != ""
+	passwordVerifiable := c.HealthCheckPassword != "" || c.HealthCheckPasswordHash != ""
+	return usernameVerifiable && passwordVerifiable
+}
+
 func (c *HealthConfig) Validate() error {
 	if c.HealthCheckUsername != "" && c.HealthCheckUsernameHash != "" {
 		return fmt.Errorf("%w: both healthcheck username and healthcheck username_hash are set, please provide only one of them", ErrConfiguration)

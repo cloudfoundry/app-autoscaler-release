@@ -202,11 +202,14 @@ var _ = Describe("Api", func() {
 		})
 	})
 
-	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
+	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
 			basicAuthConfig := cfg
-			basicAuthConfig.Health.HealthCheckUsername = "correct_username"
-			basicAuthConfig.Health.HealthCheckPassword = "correct_password"
+			basicAuthConfig.Health.HealthCheckUsername = ""
+			basicAuthConfig.Health.HealthCheckPassword = ""
+			basicAuthConfig.Health.ReadinessCheckEnabled = true
+			basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", healthendpoint.LIVELINESS_PATH,
+				healthendpoint.READINESS_PATH, healthendpoint.PPROF_PATH, healthendpoint.PROMETHEUS_PATH}
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 			runner.Start()
 		})
@@ -214,108 +217,65 @@ var _ = Describe("Api", func() {
 			runner.Interrupt()
 			Eventually(runner.Session, 5).Should(Exit(0))
 		})
-		Context("Health check endpoint is called without basic authentication", func() {
-			Context("/health/liveness is called", func() {
-				It("should return OK", func() {
-					url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.LivenessPath)
-					req, err := http.NewRequest(http.MethodGet, url, nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					rsp, err := healthHttpClient.Do(req)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-				})
+		Context("when a request to query health comes", func() {
+			It("returns with a 200", func() {
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.PROMETHEUS_PATH)
+				rsp, err := healthHttpClient.Get(url)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+				raw, _ := io.ReadAll(rsp.Body)
+				healthData := string(raw)
+				Expect(healthData).To(ContainSubstring("autoscaler_golangapiserver_concurrent_http_request"))
+				Expect(healthData).To(ContainSubstring("autoscaler_golangapiserver_policyDB"))
+				Expect(healthData).To(ContainSubstring("autoscaler_golangapiserver_bindingDB"))
+				Expect(healthData).To(ContainSubstring("go_goroutines"))
+				Expect(healthData).To(ContainSubstring("go_memstats_alloc_bytes"))
+				rsp.Body.Close()
 			})
-			Context("/health/readiness is called", func() {
-				It("should return unauthorized", func() {
-					url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.ReadinessPath)
-					req, err := http.NewRequest(http.MethodGet, url, nil)
-					Expect(err).NotTo(HaveOccurred())
+		})
+	})
 
-					req.SetBasicAuth("wrong_username", "wrong_password")
+	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
+		BeforeEach(func() {
+			basicAuthConfig := cfg
+			basicAuthConfig.Health.HealthCheckUsername = "correct_username"
+			basicAuthConfig.Health.HealthCheckPassword = "correct_password"
+			// basicAuthConfig.Health.ReadinessCheckEnabled = true
+			// basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", healthendpoint.LIVELINESS_PATH,
+			// 	healthendpoint.READINESS_PATH, healthendpoint.PPROF_PATH, healthendpoint.PROMETHEUS_PATH}
+			runner.configPath = writeConfig(&basicAuthConfig).Name()
+			runner.Start()
+		})
+		AfterEach(func() {
+			runner.Interrupt()
+			Eventually(runner.Session, 5).Should(Exit(0))
+		})
+		Context("when username and password are incorrect for basic authentication during health check", func() {
+			It("should return 401", func() {
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.LIVELINESS_PATH)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				Expect(err).NotTo(HaveOccurred())
 
-					rsp, err := healthHttpClient.Do(req)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
-				})
-			})
-			Context("/debug/pprof is called", func() {
-				It("should return unauthorized", func() {
-					url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.PprofPath)
-					req, err := http.NewRequest(http.MethodGet, url, nil)
-					Expect(err).NotTo(HaveOccurred())
+				req.SetBasicAuth("wrong_username", "wrong_password")
 
-					req.SetBasicAuth("wrong_username", "wrong_password")
-
-					rsp, err := healthHttpClient.Do(req)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
-				})
-			})
-			Context("/health/prometheus is called", func() {
-				It("should return unauthorized", func() {
-					url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.PrometheusPath)
-					req, err := http.NewRequest(http.MethodGet, url, nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					req.SetBasicAuth("wrong_username", "wrong_password")
-
-					rsp, err := healthHttpClient.Do(req)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
-				})
+				rsp, err := healthHttpClient.Do(req)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 			})
 		})
 
-		Context("Health check is called with correct username and password for basic authentication", func() {
-			Context("/health/readiness is called", func() {
-				It("should return 200", func() {
-					url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.ReadinessPath)
-					req, err := http.NewRequest(http.MethodGet, url, nil)
-					Expect(err).NotTo(HaveOccurred())
+		Context("when username and password are correct for basic authentication during health check", func() {
+			It("should return 200", func() {
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.LIVELINESS_PATH)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				Expect(err).NotTo(HaveOccurred())
 
-					req.SetBasicAuth("correct_username", "correct_password")
+				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
 
-					rsp, err := healthHttpClient.Do(req)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-				})
+				rsp, err := healthHttpClient.Do(req)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 			})
-			Context("/debug/pprof is called", func() {
-				It("should return 200", func() {
-					url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.PprofPath)
-					req, err := http.NewRequest(http.MethodGet, url, nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					req.SetBasicAuth("correct_username", "correct_password")
-
-					rsp, err := healthHttpClient.Do(req)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-				})
-			})
-			Context("/health/prometheus is called", func() {
-				It("should return 200", func() {
-					url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.PrometheusPath)
-					req, err := http.NewRequest(http.MethodGet, url, nil)
-					Expect(err).NotTo(HaveOccurred())
-
-					req.SetBasicAuth("correct_username", "correct_password")
-
-					rsp, err := healthHttpClient.Do(req)
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-					raw, _ := io.ReadAll(rsp.Body)
-					healthData := string(raw)
-					Expect(healthData).To(ContainSubstring("autoscaler_golangapiserver_concurrent_http_request"))
-					Expect(healthData).To(ContainSubstring("autoscaler_golangapiserver_policyDB"))
-					Expect(healthData).To(ContainSubstring("autoscaler_golangapiserver_bindingDB"))
-					Expect(healthData).To(ContainSubstring("go_goroutines"))
-					Expect(healthData).To(ContainSubstring("go_memstats_alloc_bytes"))
-					rsp.Body.Close()
-				})
-			})
-
 		})
 	})
 
