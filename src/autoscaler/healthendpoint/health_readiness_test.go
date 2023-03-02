@@ -113,7 +113,7 @@ var _ = Describe("Health Readiness", func() {
 			It("should respond unauthorized (401)", func() {
 				apitest.New().
 					Handler(healthRoute).Debug().
-					Get("/anything").
+					Get(healthendpoint.PrometheusPath).
 					Expect(t).
 					Status(http.StatusUnauthorized).
 					End()
@@ -153,6 +153,17 @@ var _ = Describe("Health Readiness", func() {
 					End()
 			})
 		})
+		When("Default endpoint \"/\" is called", func() {
+			It("should require basic auth", func() {
+				apitest.New().
+					Handler(healthRoute).
+					Get("/any").
+					Expect(t).
+					Status(http.StatusUnauthorized).
+					End()
+			})
+		})
+
 	})
 
 	Context("with basic auth configured", func() {
