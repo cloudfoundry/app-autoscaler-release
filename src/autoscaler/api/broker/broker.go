@@ -19,8 +19,8 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/lager"
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/pivotal-cf/brokerapi/v8/domain"
-	"github.com/pivotal-cf/brokerapi/v8/domain/apiresponses"
+	"github.com/pivotal-cf/brokerapi/v9/domain"
+	"github.com/pivotal-cf/brokerapi/v9/domain/apiresponses"
 	"golang.org/x/exp/slices"
 )
 

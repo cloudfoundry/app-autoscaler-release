@@ -26,7 +26,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.8.4
 	github.com/onsi/gomega v1.27.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/pivotal-cf/brokerapi/v8 v8.2.3
+	github.com/pivotal-cf/brokerapi/v9 v9.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
 	github.com/rubyist/circuitbreaker v2.2.1+incompatible
@@ -47,6 +47,7 @@ require (
 	4d63.com/gocheckcompilerdirectives v1.2.1 // indirect
 	4d63.com/gochecknoglobals v0.2.1 // indirect
 	code.cloudfoundry.org/go-diodes v0.0.0-20221212174934-b8cb650f2489 // indirect
+	code.cloudfoundry.org/lager/v3 v3.0.0 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
 	github.com/Abirdcfly/dupword v0.0.9 // indirect
 	github.com/Antonboom/errname v0.1.7 // indirect
@@ -161,6 +162,7 @@ require (
 	github.com/nishanths/predeclared v0.2.2 // indirect
 	github.com/nunnatsa/ginkgolinter v0.8.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
+	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
