@@ -20,7 +20,7 @@ import (
 	"github.com/pivotal-cf/brokerapi/v9"
 	"github.com/pivotal-cf/brokerapi/v9/domain"
 
-	"code.cloudfoundry.org/lager"
+	"code.cloudfoundry.org/lager/v3"
 	"github.com/gorilla/mux"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/http_server"
