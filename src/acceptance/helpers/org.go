@@ -8,21 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/onsi/ginkgo/v2"
-
 	"github.com/cloudfoundry/cf-test-helpers/v2/cf"
+	"github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gexec"
+	"github.com/onsi/gomega/gexec"
 )
-
-func GetOrgQuotaNameFrom(orgGuid string, timeout time.Duration) string {
-	var quota cfResourceObject
-	rawQuota := cf.Cf("curl", "/v3/organization_quotas?organization_guids="+orgGuid).Wait(timeout)
-	Expect(rawQuota).To(Exit(0), "unable to get services")
-	err := json.Unmarshal(rawQuota.Out.Contents(), &quota)
-	Expect(err).NotTo(HaveOccurred())
-	return quota.Resources[0].Name
-}
 
 func GetTestOrgs(cfg *config.Config) []string {
 	rawOrgs := getRawOrgs(cfg.DefaultTimeoutDuration())
@@ -42,10 +32,10 @@ func DeleteOrgs(orgs []string, timeout time.Duration) {
 		return
 	}
 
-	fmt.Printf("\nDeleting orgs: %s ", strings.Join(orgs, ", "))
+	fmt.Printf("\n - Deleting orgs: %s ", strings.Join(orgs, ", "))
 	for _, org := range orgs {
 		deleteOrg := cf.Cf("delete-org", org, "-f").Wait(timeout)
-		Expect(deleteOrg).To(Exit(0), fmt.Sprintf("unable to delete org %s", org))
+		Expect(deleteOrg).To(gexec.Exit(0), fmt.Sprintf("unable to delete org %s", org))
 	}
 }
 
@@ -57,7 +47,7 @@ func GetOrgGuid(cfg *config.Config, org string) string {
 func getRawOrgsByPage(page int, timeout time.Duration) cfResourceObject {
 	var response cfResourceObject
 	rawResponse := cf.Cf("curl", "/v3/organizations?&page="+strconv.Itoa(page)).Wait(timeout)
-	Expect(rawResponse).To(Exit(0), "unable to get orgs")
+	Expect(rawResponse).To(gexec.Exit(0), "unable to get orgs")
 	err := json.Unmarshal(rawResponse.Out.Contents(), &response)
 	Expect(err).ShouldNot(HaveOccurred())
 	return response
@@ -74,4 +64,9 @@ func getRawOrgs(timeout time.Duration) []cfResource {
 	}
 
 	return rawOrgs
+}
+
+func targetOrgWithSpace(orgName string, spaceName string, defaultTimeOutDuration time.Duration) {
+	cmd := cf.Cf("target", "-o", orgName, "-s", spaceName).Wait(defaultTimeOutDuration)
+	Expect(cmd).To(gexec.Exit(0), fmt.Sprintf("failed cf target org  %s : %s", orgName, string(cmd.Err.Contents())))
 }

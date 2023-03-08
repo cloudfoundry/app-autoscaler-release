@@ -90,7 +90,8 @@ func pushAppAndBindService(appName string, runningApps *int32, pendingApps *sync
 		errors.Store(appName, err)
 		return
 	}
-	policy := helpers.GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+	policy := helpers.GenerateDynamicScaleOutAndInPolicy(
+		1, 2, "test_metric", 500, 500)
 	appGUID, err := helpers.GetAppGuid(cfg, appName)
 	if err != nil {
 		errors.Store(appName, err)
@@ -109,5 +110,5 @@ func pushAppAndBindService(appName string, runningApps *int32, pendingApps *sync
 	}
 	atomic.AddInt32(runningApps, 1)
 	pendingApps.Delete(appName)
-	fmt.Printf("- Running apps: %d/%d - %s\n", atomic.LoadInt32(runningApps), cfg.Performance.AppCount, appName)
+	fmt.Printf("  - Running apps: %d/%d - %s\n", atomic.LoadInt32(runningApps), cfg.Performance.AppCount, appName)
 }

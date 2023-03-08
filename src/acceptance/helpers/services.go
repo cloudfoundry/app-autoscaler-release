@@ -10,8 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudfoundry/cf-test-helpers/v2/workflowhelpers"
-
 	"github.com/cloudfoundry/cf-test-helpers/v2/cf"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -137,31 +135,31 @@ func DeleteCustomMetricCred(cfg *config.Config, appGUID string) {
 	}
 }
 
-func DeleteService(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup, instanceName, appName string) {
+func DeleteService(cfg *config.Config, instanceName, appName string) {
 	if cfg.IsServiceOfferingEnabled() {
 		if appName != "" && instanceName != "" {
 			UnbindService(cfg, instanceName, appName)
 		}
-		DeleteServiceInstance(cfg, setup, instanceName)
+		DeleteServiceInstance(cfg, instanceName)
 	}
 }
 
-func DeleteServiceInstance(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup, instanceName string) {
+func DeleteServiceInstance(cfg *config.Config, instanceName string) {
 	if instanceName != "" {
 		deleteService := cf.Cf("delete-service", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 		if deleteService.ExitCode() != 0 {
-			PurgeService(cfg, setup, instanceName)
+			PurgeService(cfg, instanceName)
 		}
 	}
 }
 func UnbindService(cfg *config.Config, instanceName string, appName string) {
 	unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
 	if unbindService.ExitCode() != 0 {
-		PurgeService(cfg, nil, instanceName)
+		PurgeService(cfg, instanceName)
 	}
 }
 
-func PurgeService(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup, instanceName string) {
+func PurgeService(cfg *config.Config, instanceName string) {
 	purgeService := cf.Cf("purge-service-instance", instanceName, "-f").Wait(cfg.DefaultTimeoutDuration())
 	Expect(purgeService).To(Exit(0), fmt.Sprintf("failed to purge service instance %s: %s: %s", instanceName, purgeService.Out.Contents(), purgeService.Err.Contents()))
 }

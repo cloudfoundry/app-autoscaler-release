@@ -35,12 +35,12 @@ var _ = Describe("Scale-out and scale-in (eg: 30%) percentage of apps", Ordered,
 	)
 	AfterAll(func() {
 		fmt.Println("\n\nSummary...")
-		fmt.Println("\nScale-Out Errors")
+		fmt.Print("\nScale-Out Errors\n")
 		pendingScaleOuts.Range(func(appName, appGuid interface{}) bool {
 			fmt.Printf("scale-out app error: %s: %s \n", appName, appGuid)
 			return true
 		})
-		fmt.Println("\nScale-In Errors")
+		fmt.Print("\nScale-In Errors\n")
 		pendingScaleIns.Range(func(appName, appGuid interface{}) bool {
 			fmt.Printf("scale-in app error: %s: %s \n", appName, appGuid)
 			return true
@@ -66,7 +66,7 @@ var _ = Describe("Scale-out and scale-in (eg: 30%) percentage of apps", Ordered,
 			desiredAppsToScaleCount := calculateAppsToScaleCount(appCount, percentageToScale)
 			// Now calculate desiredAppsToScaleCount based on the actual startedApps
 			actualAppsToScaleCount = calculateAppsToScaleCount(len(startedApps), percentageToScale)
-			fmt.Printf("\nDesired Scaling %d apps \n", desiredAppsToScaleCount)
+			fmt.Printf("\n\nDesired Scaling %d apps \n", desiredAppsToScaleCount)
 			fmt.Printf("Actual Scaling %d apps (based on successful apps pushed) \n\n", actualAppsToScaleCount)
 
 			samplingConfig = gmeasure.SamplingConfig{
@@ -99,7 +99,7 @@ var _ = Describe("Scale-out and scale-in (eg: 30%) percentage of apps", Ordered,
 
 			}, samplingConfig)
 
-			fmt.Printf("Waiting for scale-out workers to finish scaling...\n\n")
+			fmt.Printf("Waiting for scale-out workers to finish scaling. This may take few minutes...\n\n")
 			wg.Wait()
 			fmt.Printf("\nTotal scale out apps: %d/%d\n", scaledOutAppsCount.Load(), actualAppsToScaleCount)
 			// append all apps in the apps from scale-out Map
@@ -160,7 +160,7 @@ var _ = Describe("Scale-out and scale-in (eg: 30%) percentage of apps", Ordered,
 				NumParallel: len(apps),
 				Duration:    1 * time.Hour,
 			})
-			fmt.Printf("Waiting for more scale-out workers to finish scaling...\n\n")
+			fmt.Printf("Waiting for more scale-out workers to finish scaling. This may take few minutes...\n\n")
 			wg.Wait()
 			//build slice with all scaleout apps so that scale-In can happen on allApps
 			allApps = append(allApps, apps...)
@@ -182,7 +182,7 @@ var _ = Describe("Scale-out and scale-in (eg: 30%) percentage of apps", Ordered,
 
 	Context("when scaling In by custom metrics", func() {
 		JustBeforeEach(func() {
-			fmt.Printf("\nscale-in start for %d apps....\n", scaledOutAppsCount.Load())
+			fmt.Printf("\nScale-In start for %d apps....\n", scaledOutAppsCount.Load())
 			samplingConfig.N = int(scaledOutAppsCount.Load())
 		})
 		It("should scale in", Label("measurement"), func() {
@@ -208,7 +208,7 @@ var _ = Describe("Scale-out and scale-in (eg: 30%) percentage of apps", Ordered,
 
 			}, samplingConfig)
 
-			fmt.Printf("Waiting for scale-In workers to finish scaling...\n\n")
+			fmt.Printf("Waiting for scale-In workers to finish scaling.This may take few minutes...\n\n")
 			wg.Wait()
 			fmt.Printf("\nTotal scale In apps: %d/%d\n", scaledInAppsCount.Load(), actualAppsToScaleCount)
 
@@ -276,7 +276,7 @@ var _ = Describe("Scale-out and scale-in (eg: 30%) percentage of apps", Ordered,
 				NumParallel: len(apps),
 				Duration:    1 * time.Hour,
 			})
-			fmt.Printf("Waiting for more scale-out workers to finish scaling...\n\n")
+			fmt.Printf("Waiting for more scale-out workers to finish scaling. This may take few minutes...\n\n")
 			wg.Wait()
 			fmt.Printf("\nTotal scale out apps: %d/%d\n", scaledInAppsCount.Load(), actualAppsToScaleCount)
 
@@ -325,8 +325,9 @@ func scaleOutApp(appName string, appGUID string, scaleOutApps *sync.Map,
 			// Q. why sending post request to autoscaler after every pollTime.
 			// A. It is observed that sometime cf does not pick the cf scale event. Therefore,
 			// sending the metric again(and again) is the way to go at the moment
-			_ = helpers.SendMetricWithTimeout(cfg, appName, 550, 5*time.Minute)
-			//fmt.Printf("worker %d - scale-out %s with App %s %s\n", workerIndex, cmdOutput, appName, appGUID)
+			cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 550, 5*time.Minute)
+			GinkgoWriter.Printf("worker %d - scale-out %s with App %s %s\n",
+				workerIndex, cmdOutput, appName, appGUID)
 			instances, err := helpers.RunningInstances(appGUID, 10*time.Minute)
 			if err != nil {
 				err = fmt.Errorf("	error running instances for app %s %s %w\n", appName, appGUID, err)
@@ -342,6 +343,7 @@ func scaleOutApp(appName string, appGUID string, scaleOutApps *sync.Map,
 				fmt.Sprintf("Failed to scale out app: %s", appName))
 		scaledOutAppsCount.Add(1)
 		scaleOutApps.LoadOrStore(appGUID, helpers.AppInfo{Name: appName, Guid: appGUID})
+		fmt.Printf("Scaled-Out apps: %d/%d\n", scaledOutAppsCount.Load(), actualAppsToScaleCount)
 		pendingScaleOuts.LoadAndDelete(appGUID)
 
 		defer wg.Done()
@@ -352,7 +354,9 @@ func scaleInApp(appName string, appGUID string, scaleInApps *sync.Map, pendingSc
 	scaledInAppsCount *atomic.Int32, actualAppsToScaleCount int, workerIndex int, wg *sync.WaitGroup) func() {
 	return func() {
 		scaleIn := func() (int, error) {
-			helpers.SendMetricWithTimeout(cfg, appName, 100, 5*time.Minute)
+			cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 100, 5*time.Minute)
+			GinkgoWriter.Printf("worker %d - scale-in %s with App %s %s\n",
+				workerIndex, cmdOutput, appName, appGUID)
 			instances, err := helpers.RunningInstances(appGUID, 10*time.Minute)
 			if err != nil {
 				err = fmt.Errorf("	error running instances for app %s %s %w\n", appName, appGUID, err)
@@ -369,6 +373,7 @@ func scaleInApp(appName string, appGUID string, scaleInApps *sync.Map, pendingSc
 
 		scaledInAppsCount.Add(1)
 		scaleInApps.LoadOrStore(appGUID, helpers.AppInfo{Name: appName, Guid: appGUID})
+		fmt.Printf("Scaled-In apps: %d/%d\n", scaledInAppsCount.Load(), actualAppsToScaleCount)
 		pendingScaleIns.LoadAndDelete(appGUID)
 
 		defer wg.Done()
