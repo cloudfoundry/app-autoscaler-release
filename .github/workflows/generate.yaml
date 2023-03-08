@@ -35,5 +35,6 @@ jobs:
       - name: Process changes
         if: steps.get_changes.outputs.changed != 0
         run: |
+          git status
           echo "::error::Fakes are out of date, run make generate to update"
           exit 1

@@ -61,7 +61,7 @@ func AppAfterEach() {
 	} else {
 		DebugInfo(cfg, setup, appName)
 		if appName != "" {
-			DeleteService(cfg, nil, instanceName, appName)
+			DeleteService(cfg, instanceName, appName)
 			DeletePolicy(appGUID)
 			DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 			DeleteCustomMetricCred(cfg, appGUID)
