@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/cloudfoundry/cf-test-helpers/v2/workflowhelpers"
 
@@ -53,7 +54,6 @@ var _ = BeforeSuite(func() {
 	cfg.UseExistingSpace = true
 
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
-
 	setup.Setup()
 
 	if cfg.IsServiceOfferingEnabled() {
@@ -66,7 +66,18 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		fmt.Println("TODO: Cleanup test...")
+		cleanup(cfg)
 		setup.Teardown()
 	}
 })
+
+func cleanup(cfg *config.Config) {
+	fmt.Printf("\n\nCleaning up test leftovers...\n")
+	if cfg.UseExistingOrganization {
+		CleanupInExistingOrg(cfg)
+	} else {
+		DeleteOrgs(GetTestOrgs(cfg), time.Duration(120)*time.Second)
+	}
+
+	fmt.Printf("\n\nCleaning up test leftovers...completed")
+}
