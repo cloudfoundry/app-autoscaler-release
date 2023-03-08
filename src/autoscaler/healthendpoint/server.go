@@ -2,11 +2,12 @@ package healthendpoint
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"net/http/pprof"
 	"os"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
@@ -159,18 +160,18 @@ func addPprofHandlers(conf models.HealthConfig, mainRouter *mux.Router,
 	pprofRouter := mainRouter.PathPrefix(PPROF_PATH).Subrouter()
 
 	if endpointsNeedsProtection(PPROF_PATH, conf) {
-		pprofRouter.Use(authMiddleware.middleware)
 		if !conf.BasicAuthPossible() {
 			msg := "Basic authentication required for endpoint %s, but credentials not set up properly."
 			return fmt.Errorf(msg, PPROF_PATH)
 		}
+		pprofRouter.Use(authMiddleware.middleware)
 	}
 
-	pprofRouter.HandleFunc("", pprof.Index)
 	pprofRouter.HandleFunc("/cmdline", pprof.Cmdline)
 	pprofRouter.HandleFunc("/profile", pprof.Profile)
 	pprofRouter.HandleFunc("/symbol", pprof.Symbol)
 	pprofRouter.HandleFunc("/trace", pprof.Trace)
+	pprofRouter.PathPrefix("").HandlerFunc(pprof.Index)
 
 	return nil
 }
@@ -196,7 +197,7 @@ func addPrometheusHandler(mainRouter *mux.Router, conf models.HealthConfig,
 	// /health/prometheus
 	prometheusRouter.Path("").Handler(promHandler)
 	// http://<health_server:port>/
-	mainRouter.Path("/").Handler(promHandler)
+	// mainRouter.Path("/").Handler(promHandler)
 	return nil
 }
 
