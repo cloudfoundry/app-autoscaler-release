@@ -4,9 +4,9 @@ bosh 7.1.3
 cf 8.6.1
 concourse 7.9.1
 direnv 2.32.2
-gcloud 420.0.0
+gcloud 421.0.0
 ginkgo 2.9.0
-golang 1.20.1
+golang 1.20.2
 golangci-lint 1.51.2
 java temurin-17.0.5+8
 make 4.4
