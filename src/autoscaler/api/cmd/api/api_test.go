@@ -1,13 +1,13 @@
 package main_test
 
 import (
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
@@ -208,8 +208,8 @@ var _ = Describe("Api", func() {
 			basicAuthConfig.Health.HealthCheckUsername = ""
 			basicAuthConfig.Health.HealthCheckPassword = ""
 			basicAuthConfig.Health.ReadinessCheckEnabled = true
-			basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", healthendpoint.LIVELINESS_PATH,
-				healthendpoint.READINESS_PATH, healthendpoint.PPROF_PATH, healthendpoint.PROMETHEUS_PATH}
+			basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PprofPath, routes.PrometheusPath}
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 			runner.Start()
 		})
@@ -219,7 +219,7 @@ var _ = Describe("Api", func() {
 		})
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.PROMETHEUS_PATH)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.PrometheusPath)
 				rsp, err := healthHttpClient.Get(url)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
@@ -243,16 +243,21 @@ var _ = Describe("Api", func() {
 			// basicAuthConfig.Health.ReadinessCheckEnabled = true
 			// basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", healthendpoint.LIVELINESS_PATH,
 			// 	healthendpoint.READINESS_PATH, healthendpoint.PPROF_PATH, healthendpoint.PROMETHEUS_PATH}
-			runner.configPath = writeConfig(&basicAuthConfig).Name()
+
+			cfg = basicAuthConfig // Setting password only for `basicAuthConfig` is not sufficient,
+														// since the server-process does not use that configuration.
+														// Alternatively, basiAuthConfig could be just a pointer.
+			runner.configPath = writeConfig(&cfg).Name()
 			runner.Start()
 		})
 		AfterEach(func() {
 			runner.Interrupt()
 			Eventually(runner.Session, 5).Should(Exit(0))
 		})
+
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.LIVELINESS_PATH)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
@@ -266,7 +271,7 @@ var _ = Describe("Api", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, healthendpoint.LIVELINESS_PATH)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
 				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
