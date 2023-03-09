@@ -243,13 +243,18 @@ var _ = Describe("Api", func() {
 			// basicAuthConfig.Health.ReadinessCheckEnabled = true
 			// basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", healthendpoint.LIVELINESS_PATH,
 			// 	healthendpoint.READINESS_PATH, healthendpoint.PPROF_PATH, healthendpoint.PROMETHEUS_PATH}
-			runner.configPath = writeConfig(&basicAuthConfig).Name()
+
+			cfg = basicAuthConfig // Setting password only for `basicAuthConfig` is not sufficient,
+														// since the server-process does not use that configuration.
+														// Alternatively, basiAuthConfig could be just a pointer.
+			runner.configPath = writeConfig(&cfg).Name()
 			runner.Start()
 		})
 		AfterEach(func() {
 			runner.Interrupt()
 			Eventually(runner.Session, 5).Should(Exit(0))
 		})
+
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
 				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
