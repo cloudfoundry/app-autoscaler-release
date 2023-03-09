@@ -451,7 +451,8 @@ func deleteSchedule(appId string) (*http.Response, error) {
 
 func getActiveSchedule(appId string) (*http.Response, error) {
 	By("getActiveSchedule")
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/active_schedules", components.Ports[ScalingEngine], appId), strings.NewReader(""))
+	url := fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/active_schedules", components.Ports[ScalingEngine], appId)
+	req, err := http.NewRequest("GET", url, strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	return httpClient.Do(req)

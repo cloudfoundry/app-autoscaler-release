@@ -128,6 +128,7 @@ test-autoscaler: check-db_type init init-db test-certs
 	@make -C src/autoscaler test DBURL="${DBURL}" OPTS="${OPTS}"
 
 # ⚠ The target dependencies "autoscaler" and "scheduler" are needed by the integration tests.
+# TODO: Introduce make-target for the .war-file and the needed autoscaler-files instead?
 test-autoscaler-suite: check-db_type init init-db test-certs autoscaler scheduler
 	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
