@@ -1,13 +1,14 @@
 package healthendpoint_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"io"
 	"net/http"
 	"net/url"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -103,28 +104,29 @@ var _ = Describe("MetricsServer", func() {
 			})
 
 			It("returns with a 200", func() {
-				rsp, err := httpClient.Get(fmt.Sprintf("http://127.0.0.1:%d/v1/apps/an-app-id/metric_histories/a-metric-type", msPort))
+				url := fmt.Sprintf("http://127.0.0.1:%d/v1/apps/an-app-id/metric_histories/a-metric-type", msPort)
+				rsp, err := httpClient.Get(url)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
 			})
 		})
-
 	})
 
 	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
-
 			basicAuthConfig := cfg
 			basicAuthConfig.Health.HealthCheckUsername = ""
 			basicAuthConfig.Health.HealthCheckPassword = ""
+			basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 			runner.Start()
-
 		})
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", healthport))
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.PrometheusPath)
+				rsp, err := healthHttpClient.Get(url)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
@@ -135,7 +137,6 @@ var _ = Describe("MetricsServer", func() {
 				Expect(healthData).To(ContainSubstring("go_goroutines"))
 				Expect(healthData).To(ContainSubstring("go_memstats_alloc_bytes"))
 				rsp.Body.Close()
-
 			})
 		})
 	})
@@ -147,8 +148,8 @@ var _ = Describe("MetricsServer", func() {
 
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -161,8 +162,8 @@ var _ = Describe("MetricsServer", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
@@ -180,9 +181,10 @@ var _ = Describe("MetricsServer", func() {
 		})
 
 		Context("when username and password are incorrect for basic authentication during health check", func() {
-			It("should return 401", func() {
+			url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+			It("should return 401", func() {
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -195,8 +197,8 @@ var _ = Describe("MetricsServer", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
