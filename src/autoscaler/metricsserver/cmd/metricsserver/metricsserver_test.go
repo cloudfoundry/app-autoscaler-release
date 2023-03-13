@@ -104,8 +104,9 @@ var _ = Describe("MetricsServer", func() {
 			})
 
 			It("returns with a 200", func() {
-				url := fmt.Sprintf("http://127.0.0.1:%d/v1/apps/an-app-id/metric_histories/a-metric-type", msPort)
-				rsp, err := httpClient.Get(url)
+				metricsHistoryUrl := fmt.Sprintf(
+					"http://127.0.0.1:%d/v1/apps/an-app-id/metric_histories/a-metric-type", msPort)
+				rsp, err := httpClient.Get(metricsHistoryUrl)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
@@ -113,7 +114,7 @@ var _ = Describe("MetricsServer", func() {
 		})
 	})
 
-	Describe("when Health server is ready to serve RESTful API", func() {
+	Describe("when Health server is ready to serve RESTful API without basic auth", func() {
 		BeforeEach(func() {
 			basicAuthConfig := cfg
 			basicAuthConfig.Health.HealthCheckUsername = ""
@@ -123,7 +124,7 @@ var _ = Describe("MetricsServer", func() {
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 			runner.Start()
 		})
-		Context("when a request to query health comes", func() {
+		Context("when a request to query prometheus comes", func() {
 			It("returns with a 200", func() {
 				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.PrometheusPath)
 				rsp, err := healthHttpClient.Get(url)
@@ -148,8 +149,8 @@ var _ = Describe("MetricsServer", func() {
 
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
-				req, err := http.NewRequest(http.MethodGet, url, nil)
+				livenessUrl := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, livenessUrl, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -162,8 +163,8 @@ var _ = Describe("MetricsServer", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
-				req, err := http.NewRequest(http.MethodGet, url, nil)
+				livenessUrl := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, livenessUrl, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
@@ -174,41 +175,5 @@ var _ = Describe("MetricsServer", func() {
 			})
 		})
 	})
-
-	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
-		BeforeEach(func() {
-			runner.Start()
-		})
-
-		Context("when username and password are incorrect for basic authentication during health check", func() {
-			url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
-
-			It("should return 401", func() {
-				req, err := http.NewRequest(http.MethodGet, url, nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth("wrongusername", "wrongpassword")
-
-				rsp, err := healthHttpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
-			})
-		})
-
-		Context("when username and password are correct for basic authentication during health check", func() {
-			It("should return 200", func() {
-				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
-				req, err := http.NewRequest(http.MethodGet, url, nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
-
-				rsp, err := healthHttpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-			})
-		})
-	})
-
 	//TODO : Add test cases for testing WebServer endpoints
 })
