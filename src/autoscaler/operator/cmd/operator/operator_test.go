@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
@@ -134,6 +136,8 @@ var _ = Describe("Operator", Serial, func() {
 				secondRunner.startCheck = ""
 				cfg.Health.HealthCheckUsername = ""
 				cfg.Health.HealthCheckPassword = ""
+				cfg.Health.UnprotectedEndpoints = []string{"/", routes.LivenessPath,
+					routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}
 				cfg.Health.Port = 9000 + GinkgoParallelProcess()
 				secondRunner.configPath = writeConfig(&cfg).Name()
 				secondRunner.Start()
@@ -149,15 +153,13 @@ var _ = Describe("Operator", Serial, func() {
 				Consistently(secondRunner.Session.Buffer, 5*time.Second).ShouldNot(Say("operator.successfully-acquired-lock"))
 
 				By("checking the health endpoint of the standing-by instance")
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d/health", cfg.Health.Port))
+				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d%s", cfg.Health.Port, routes.LivenessPath))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-
 			})
 		})
 
 		Context("When more than one instances of operator try to get the lock simultaneously", func() {
-
 			var runnerAcquiredLock bool
 
 			BeforeEach(func() {
@@ -340,13 +342,14 @@ var _ = Describe("Operator", Serial, func() {
 		})
 	})
 
-	Describe("when Health server is ready to serve RESTful API", func() {
+	Describe("when Health server is ready to serve RESTful API without basic Auth", func() {
 		BeforeEach(func() {
 			basicAuthConfig := cfg
 			basicAuthConfig.Health.HealthCheckUsername = ""
 			basicAuthConfig.Health.HealthCheckPassword = ""
+			basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
-
 			runner.Start()
 			Eventually(runner.Session.Buffer, 2*time.Second).Should(Say("operator.started"))
 		})
@@ -355,9 +358,10 @@ var _ = Describe("Operator", Serial, func() {
 			runner.ClearLockDatabase()
 		})
 
-		Context("when a request to query health comes", func() {
+		Context("when a request to query prometheus comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", healthport))
+				prometheusUrl := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.PrometheusPath)
+				rsp, err := healthHttpClient.Get(prometheusUrl)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
@@ -387,8 +391,8 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				livenessUrl := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, livenessUrl, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -401,48 +405,9 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
+				livenessUrl := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
-
-				rsp, err := healthHttpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-			})
-		})
-	})
-
-	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
-		BeforeEach(func() {
-			runner.Start()
-
-			Eventually(runner.Session.Buffer, 2*time.Second).Should(Say("operator.started"))
-		})
-
-		AfterEach(func() {
-			runner.ClearLockDatabase()
-		})
-
-		Context("when username and password are incorrect for basic authentication during health check", func() {
-			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth("wrongusername", "wrongpassword")
-
-				rsp, err := healthHttpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
-			})
-		})
-
-		Context("when username and password are correct for basic authentication during health check", func() {
-			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, livenessUrl, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)

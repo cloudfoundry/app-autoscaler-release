@@ -1,12 +1,13 @@
 package main_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"time"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
@@ -245,8 +246,8 @@ var _ = Describe("Api", func() {
 			// 	healthendpoint.READINESS_PATH, healthendpoint.PPROF_PATH, healthendpoint.PROMETHEUS_PATH}
 
 			cfg = basicAuthConfig // Setting password only for `basicAuthConfig` is not sufficient,
-														// since the server-process does not use that configuration.
-														// Alternatively, basiAuthConfig could be just a pointer.
+			// since the server-process does not use that configuration.
+			// Alternatively, basiAuthConfig could be just a pointer.
 			runner.configPath = writeConfig(&cfg).Name()
 			runner.Start()
 		})
