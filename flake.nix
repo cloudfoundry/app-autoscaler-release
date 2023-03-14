@@ -48,6 +48,7 @@
               #
               # jdwpkgs.rubyPackages.cf-uaac
               shellcheck
+              sonar-scanner-cli
               temurin-bin
               yq-go
             ];
