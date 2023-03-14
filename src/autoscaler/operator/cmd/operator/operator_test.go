@@ -1,12 +1,13 @@
 package main_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"time"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
