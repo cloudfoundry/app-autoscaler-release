@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -45,13 +46,31 @@ func (c *HealthConfig) Validate() error {
 		}
 	}
 
-	if c.HealthCheckUsername == "" && c.HealthCheckPassword != "" {
-		return fmt.Errorf("%w: healthcheck username is empty", ErrConfiguration)
-	}
-
-	if c.HealthCheckUsername != "" && c.HealthCheckPassword == "" {
-		return fmt.Errorf("%w: healthcheck password is empty", ErrConfiguration)
+	if c.basicAuthIntended() && ! c.BasicAuthPossible() {
+		msg := "some endpoints configured to use basic auth but, but credentials not properly set up"
+		return fmt.Errorf("%w: %s", ErrConfiguration, msg)
 	}
 
 	return nil
+}
+
+func (c *HealthConfig) basicAuthIntended() bool {
+	basicAuthIntended := false
+	allEndpointsList := []string{"/", routes.LivenessPath, routes.PrometheusPath, routes.PprofPath}
+	if c.ReadinessCheckEnabled {
+		allEndpointsList = append(allEndpointsList, routes.ReadinessPath)
+	}
+
+	unprotectedEndpointsSet := make(map[string]bool, len(c.UnprotectedEndpoints))
+	for _, endpoint := range c.UnprotectedEndpoints {
+		unprotectedEndpointsSet[endpoint] = true
+	}
+
+	for _, endpoint := range allEndpointsList {
+		if _, protectedEndpointFound := unprotectedEndpointsSet[endpoint]; protectedEndpointFound {
+			basicAuthIntended = true
+		}
+	}
+
+	return basicAuthIntended
 }

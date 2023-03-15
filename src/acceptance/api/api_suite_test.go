@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	HealthPath           = "/health"
+	LivenessPath           = "/health/liveness"
 	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
 	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
 )
@@ -95,7 +95,7 @@ var _ = BeforeSuite(func() {
 		Timeout: 30 * time.Second,
 	}
 
-	healthURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, HealthPath)
+	healthURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, LivenessPath)
 	policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
 	metricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(metricURL, "{appId}", appGUID, -1))
 	aggregatedMetricURL = strings.Replace(AggregatedMetricPath, "{metric_type}", "memoryused", -1)
