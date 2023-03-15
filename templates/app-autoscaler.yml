@@ -246,6 +246,9 @@ instance_groups:
     properties:
       autoscaler:
         apiserver:
+          health:
+            username: "test_user"
+            password_hash: "$2y$04$MpZgNdLuGN.v7wvBsVPMKODvIhG885mp2.QZONkwMeR.PIO3AMJMC" # "test_password"
           public_api:
             server:
               port: &publicApiServerPort 6101

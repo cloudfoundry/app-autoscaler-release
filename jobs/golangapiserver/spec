@@ -78,6 +78,33 @@ properties:
     description: "PEM-encoded server key"
   autoscaler.apiserver.health.port:
     default: 1080
+  autoscaler.apiserver.health.username:
+    default: ""
+    description: |
+      Username used for basic access authentication to connect to the protected health-endpoints.
+      Alternative of setting username_hash.
+  autoscaler.apiserver.health.username_hash:
+    default: ""
+    description: |
+      Hash-Value of the username used for basic access authentication to connect to the protected health-endpoints.
+      The hash-value MUST be computed via Bcrypt, with cost-parameter `4`.
+      Alternative of setting the username.
+  autoscaler.apiserver.health.password:
+    default: ""
+    description: |
+      Password used for basic access authentication to connect to the protected health-endpoints.
+      Prefer usage of password_hash instead.
+  autoscaler.apiserver.health.password_hash:
+    description: |
+      Hash-Value of the password used for basic access authentication to connect to the protected health-endpoints.
+      The hash-value MUST be computed via Bcrypt, with cost-parameter `4`.
+      More secure alternative of setting the password. Set to `""` if you don't want to use it.
+  autoscaler.apiserver.health.unprotected_endpoints:
+    description: "List of all health-endpoints, that run _without_ basic access authentication."
+    default: [] # protect everything
+  autoscaler.apiserver.health.readiness_enabled:
+    default: false
+    description: "Set to true if you want to enable the endpoint on /health/readiness"
   autoscaler.apiserver.use_buildin_mode:
     default: true
     description: ""
