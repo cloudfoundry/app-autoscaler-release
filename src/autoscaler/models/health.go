@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"golang.org/x/crypto/bcrypt"
@@ -47,7 +48,11 @@ func (c *HealthConfig) Validate() error {
 	}
 
 	if c.basicAuthIntended() && ! c.BasicAuthPossible() {
-		msg := "some endpoints configured to use basic auth but, but credentials not properly set up"
+		protectedHealthEndpoints := c.protectedHealthEndpoints()
+		msg :=
+			"some endpoints configured to use basic auth but, but credentials not properly set up\n" +
+			"\tprotected endpoints according to health-configuration: " +
+			strings.Join(protectedHealthEndpoints, ", ")
 		return fmt.Errorf("%w: %s", ErrConfiguration, msg)
 	}
 
@@ -55,7 +60,12 @@ func (c *HealthConfig) Validate() error {
 }
 
 func (c *HealthConfig) basicAuthIntended() bool {
-	basicAuthIntended := false
+	return len(c.protectedHealthEndpoints()) > 0
+}
+
+func (c *HealthConfig) protectedHealthEndpoints() []string {
+	protectedEndpoints := []string{}
+
 	allEndpointsList := []string{"/", routes.LivenessPath, routes.PrometheusPath, routes.PprofPath}
 	if c.ReadinessCheckEnabled {
 		allEndpointsList = append(allEndpointsList, routes.ReadinessPath)
@@ -68,9 +78,9 @@ func (c *HealthConfig) basicAuthIntended() bool {
 
 	for _, endpoint := range allEndpointsList {
 		if _, enpointIsUnprotected := unprotectedEndpointsSet[endpoint]; !enpointIsUnprotected {
-			basicAuthIntended = true
+			protectedEndpoints = append(protectedEndpoints, endpoint)
 		}
 	}
 
-	return basicAuthIntended
+	return protectedEndpoints
 }
