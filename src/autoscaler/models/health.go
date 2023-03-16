@@ -67,7 +67,7 @@ func (c *HealthConfig) basicAuthIntended() bool {
 	}
 
 	for _, endpoint := range allEndpointsList {
-		if _, protectedEndpointFound := unprotectedEndpointsSet[endpoint]; protectedEndpointFound {
+		if _, enpointIsUnprotected := unprotectedEndpointsSet[endpoint]; !enpointIsUnprotected {
 			basicAuthIntended = true
 		}
 	}

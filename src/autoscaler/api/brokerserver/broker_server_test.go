@@ -135,7 +135,7 @@ var _ = Describe("BrokerServer", func() {
 
 	Context("when requesting the health endpoint", func() {
 		BeforeEach(func() {
-			serverUrl.Path = "/health"
+			serverUrl.Path = "/health" // TODO: Go on routes.Liveness!
 		})
 		JustBeforeEach(func() {
 			req, err := http.NewRequest(http.MethodGet, serverUrl.String(), nil)
@@ -149,5 +149,4 @@ var _ = Describe("BrokerServer", func() {
 			Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 		})
 	})
-
 })

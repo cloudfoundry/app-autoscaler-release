@@ -37,32 +37,31 @@ fi
 pushd "${autoscaler_dir}/src/acceptance" >/dev/null
 cat > acceptance_config.json <<EOF
 {
-  "api": "api.${system_domain}",
   "admin_user": "admin",
   "admin_password": "${cf_admin_password}",
-  "apps_domain": "${system_domain}",
-  "skip_ssl_validation": ${skip_ssl_validation},
-  "use_http": false,
-  "service_name": "${deployment_name}",
-  "service_broker": "${deployment_name}",
-	"use_existing_organization": ${use_existing_organization},
-  "existing_organization": "${existing_organization}",
-  "use_existing_space": ${use_existing_space},
-  "existing_space": "${existing_space}",
-  "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
-	"default_timeout": 60,
-  "name_prefix": "${name_prefix}",
-
+  "api": "api.${system_domain}",
+  "apps_domain": "${system_domain}",
   "autoscaler_api": "${deployment_name}.${system_domain}",
-  "service_offering_enabled": ${service_offering_enabled},
-
+	"default_timeout": 60,
+  "existing_organization": "${existing_organization}",
+  "existing_space": "${existing_space}",
+  "health_endpoints_basic_auth_enabled": true,
+  "name_prefix": "${name_prefix}",
   "performance": {
     "app_count": ${performance_app_count},
     "app_percentage_to_scale": ${performance_app_percentage_to_scale},
     "setup_workers": ${performance_setup_workers},
     "update_existing_org_quota": ${performance_update_existing_org_quota}
-  }
+  },
+  "service_broker": "${deployment_name}",
+  "service_name": "${deployment_name}",
+  "service_offering_enabled": ${service_offering_enabled},
+  "service_plan": "autoscaler-free-plan",
+  "skip_ssl_validation": ${skip_ssl_validation},
+	"use_existing_organization": ${use_existing_organization},
+  "use_existing_space": ${use_existing_space},
+  "use_http": false
 }
 EOF
 
