@@ -514,7 +514,7 @@ var _ = Describe("PublicApiServer", func() {
 		})
 		Context("when calling health endpoint", func() {
 			It("should succeed", func() {
-				verifyResponse(httpClient, serverUrl, "/health", nil, http.MethodGet, "", http.StatusOK)
+				verifyResponse(httpClient, serverUrl, "/health", nil, http.MethodGet, "", http.StatusOK) // TODO: Use routes.LivenessPath
 			})
 		})
 	})

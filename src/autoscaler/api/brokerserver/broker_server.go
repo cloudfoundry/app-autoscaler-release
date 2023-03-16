@@ -47,7 +47,7 @@ type basicAuthenticationMiddleware struct {
 
 func (bam *basicAuthenticationMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/health" {
+		if r.URL.Path == "/health" { // TODO: This could be an issue. Is it the reason why the actual health-endpoint never reacts accordingly?
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -129,7 +129,7 @@ func NewBrokerServer(logger lager.Logger, conf *config.Config, bindingdb db.Bind
 	r.Use(httpStatusCollectMiddleware.Collect)
 	brokerapi.AttachRoutes(r, autoscalerBroker, logger.Session("broker_handler"))
 
-	r.HandleFunc(routes.BrokerHealthPath, GetHealth)
+	r.HandleFunc(routes.BrokerHealthPath, GetHealth) // TODO: Let's call our dedicated health-router.
 
 	var addr string
 	if os.Getenv("APP_AUTOSCALER_TEST_RUN") == "true" {
@@ -167,6 +167,6 @@ func restrictToMaxBcryptLength(logger lager.Logger, brokerCredential config.Brok
 	return brokerCredential
 }
 
-func GetHealth(w http.ResponseWriter, _ *http.Request) {
+func GetHealth(w http.ResponseWriter, _ *http.Request) { // TODO: This should be done instead aby our health-router.
 	handlers.WriteJSONResponse(w, http.StatusOK, []byte(`{"alive":"true"}`))
 }

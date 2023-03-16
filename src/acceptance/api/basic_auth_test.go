@@ -17,14 +17,13 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		func(url func() string, statusCode func() int) {
 			Expect(Get(url())).To(Equal(statusCode()), "to get status code %d when getting %s", statusCode(), url())
 		},
-		Entry("API Server", func() string { return healthURL }, func() int { return 200 }),
+		Entry("API Server", func() string { return healthURL }, func() int { return 200 }), // Why not: Entry("API Server", urlfor("api"), at list this --> getStatus),
 		Entry("Eventgenerator", urlfor("eventgenerator"), getStatus),
 		Entry("Scaling Engine", urlfor("scalingengine"), getStatus),
 		Entry("Operator", urlfor("operator"), getStatus),
 		Entry("Metrics Forwarder", urlfor("metricsforwarder"), getStatus),
 		Entry("Scheduler", urlfor("scheduler"), getStatus),
 	)
-
 })
 
 func getStatus() int {

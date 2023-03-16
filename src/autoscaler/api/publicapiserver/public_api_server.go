@@ -38,7 +38,7 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policydb db.Po
 	r := routes.ApiOpenRoutes()
 	r.Use(httpStatusCollectMiddleware.Collect)
 	r.Get(routes.PublicApiInfoRouteName).Handler(VarsFunc(pah.GetApiInfo))
-	r.Get(routes.PublicApiHealthRouteName).Handler(VarsFunc(pah.GetHealth))
+	r.Get(routes.PublicApiHealthRouteName).Handler(VarsFunc(pah.GetHealth)) // TODO: We probably need to remove everything here.
 
 	rp := routes.ApiRoutes()
 	rp.Use(rateLimiterMiddleware.CheckRateLimit)
