@@ -56,7 +56,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 	JustBeforeEach(func() {
 		operatorConfPath = components.PrepareOperatorConfig(
 			dbUrl, fakeCCNOAAUAA.URL(), fmt.Sprintf("https://127.0.0.1:%d",
-			components.Ports[ScalingEngine]),
+				components.Ports[ScalingEngine]),
 			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
 			10*time.Second, 1*24*time.Hour, defaultHttpClientTimeout, tmpDir)
 		startOperator()
