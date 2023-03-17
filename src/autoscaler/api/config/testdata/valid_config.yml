@@ -31,6 +31,8 @@ db:
 catalog_schema_path: '../schemas/catalog.schema.json'
 catalog_path: '../exampleconfig/catalog-example.json'
 policy_schema_path: '../exampleconfig/policy.schema.json'
+health:
+  unprotected_endpoints: ["/", "/health/liveness", "/health/prometheus", "/debug/pprof"]
 scheduler:
   scheduler_url: https://localhost:8083
   tls:

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
@@ -113,8 +114,10 @@ var _ = Describe("Config", func() {
 					},
 				))
 				Expect(conf.CredHelperImpl).To(Equal("default"))
-			})
-		})
+				Expect(conf.Health.UnprotectedEndpoints).To(
+					ContainElements("/", "/health/liveness", "/health/prometheus", "/debug/pprof"))
+			}) // It
+		}) // Context
 
 		Context("with partial config", func() {
 			BeforeEach(func() {
@@ -257,6 +260,11 @@ rate_limit:
 			conf.RateLimit.ValidDuration = 1 * time.Second
 
 			conf.CredHelperImpl = "path/to/plugin"
+
+			conf.Health = models.HealthConfig{
+				UnprotectedEndpoints: []string{"/", routes.LivenessPath,
+					routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath},
+			}
 		})
 		JustBeforeEach(func() {
 			err = conf.Validate()

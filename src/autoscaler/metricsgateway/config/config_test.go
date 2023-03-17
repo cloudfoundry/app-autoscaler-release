@@ -7,6 +7,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsgateway/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -844,6 +845,8 @@ health:
 				},
 				Health: models.HealthConfig{
 					Port: 8081,
+					UnprotectedEndpoints: []string{"/", routes.LivenessPath, routes.PrometheusPath,
+						routes.PprofPath},
 				},
 			}
 		})

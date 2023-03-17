@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
@@ -201,6 +202,9 @@ health:
 			conf.DefaultCoolDownSecs = 300
 			conf.LockSize = 32
 			conf.HttpClientTimeout = 10 * time.Second
+			conf.Health.UnprotectedEndpoints = []string{
+				"/", routes.LivenessPath, routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath,
+			}
 		})
 
 		JustBeforeEach(func() {

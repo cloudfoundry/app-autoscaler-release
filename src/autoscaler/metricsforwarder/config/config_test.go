@@ -6,6 +6,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -67,6 +68,7 @@ db:
     connection_max_lifetime: 60s
 health:
   port: 9999
+  unprotected_endpoints: ["/", "/health/liveness", "/health/prometheus", "/debug/pprof"]
 cred_helper_impl: default
 `)
 			})
@@ -75,6 +77,8 @@ cred_helper_impl: default
 				Expect(conf.Server.Port).To(Equal(8081))
 				Expect(conf.Logging.Level).To(Equal("debug"))
 				Expect(conf.Health.Port).To(Equal(9999))
+				Expect(conf.Health.UnprotectedEndpoints).To(
+					ContainElements("/", "/health/liveness", "/health/prometheus", "/debug/pprof"))
 				Expect(conf.LoggregatorConfig.MetronAddress).To(Equal("127.0.0.1:3457"))
 				Expect(conf.Db[db.PolicyDb]).To(Equal(
 					db.DatabaseConfig{
@@ -288,6 +292,9 @@ rate_limit:
 			conf.Server.Port = 8081
 			conf.Logging.Level = "debug"
 			conf.Health.Port = 8081
+			conf.Health.UnprotectedEndpoints = []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}
+
 			conf.LoggregatorConfig.MetronAddress = "127.0.0.1:3458"
 			conf.LoggregatorConfig.TLS.CACertFile = "../testcerts/ca.crt"
 			conf.LoggregatorConfig.TLS.CertFile = "../testcerts/client.crt"

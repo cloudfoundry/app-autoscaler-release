@@ -9,6 +9,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/config"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 )
 
 var _ = Describe("Config", func() {
@@ -212,6 +213,8 @@ db:
 			conf.Collector.EnvelopeChannelSize = 300
 			conf.Collector.MetricChannelSize = 300
 			conf.Health.Port = 8081
+			conf.Health.UnprotectedEndpoints = []string{
+				"/", routes.LivenessPath, routes.PrometheusPath, routes.PprofPath}
 		})
 
 		JustBeforeEach(func() {

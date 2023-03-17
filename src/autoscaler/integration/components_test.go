@@ -215,7 +215,7 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 			Level: LOGLEVEL,
 		},
 		Health: models.HealthConfig{
-			UnprotectedEndpoints: []string{"", routes.LivenessPath,
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
 				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		PublicApiServer: apiConfig.ServerConfig{
 			Port: publicApiPort,
@@ -396,7 +396,7 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 			Level: LOGLEVEL,
 		},
 		Health: models.HealthConfig{
-			UnprotectedEndpoints: []string{"", routes.LivenessPath,
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
 				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		Server: egConfig.ServerConfig{
 			Port: port,
@@ -461,7 +461,7 @@ func (components *Components) PrepareScalingEngineConfig(dbURI string, port int,
 			Secret:   "admin",
 		},
 		Health: models.HealthConfig{
-			UnprotectedEndpoints: []string{"", routes.LivenessPath,
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
 				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		Server: seConfig.ServerConfig{
 			Port: port,
@@ -499,7 +499,7 @@ func (components *Components) PrepareOperatorConfig(dbURI string, ccUAAURL strin
 			Level: LOGLEVEL,
 		},
 		Health: models.HealthConfig{
-			UnprotectedEndpoints: []string{"", routes.LivenessPath,
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
 				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		CF: cf.Config{
 			API:      ccUAAURL,
@@ -569,7 +569,7 @@ func (components *Components) PrepareMetricsGatewayConfig(dbURI string, metricSe
 			Level: LOGLEVEL,
 		},
 		Health: models.HealthConfig{
-			UnprotectedEndpoints: []string{"", routes.LivenessPath,
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
 				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		EnvelopChanSize:   500,
 		NozzleCount:       1,
@@ -615,7 +615,7 @@ func (components *Components) PrepareMetricsServerConfig(dbURI string, httpClien
 			Level: LOGLEVEL,
 		},
 		Health: models.HealthConfig{
-			UnprotectedEndpoints: []string{"", routes.LivenessPath,
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
 				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		HttpClientTimeout: httpClientTimeout,
 		NodeAddrs:         []string{"localhost"},

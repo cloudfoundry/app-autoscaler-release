@@ -42,16 +42,23 @@ var _ = Describe("Integration_Operator_Others", func() {
 			tmpDir)
 		startGolangApiServer()
 
-		scalingEngineConfPath = components.PrepareScalingEngineConfig(dbUrl, components.Ports[ScalingEngine], fakeCCNOAAUAA.URL(), defaultHttpClientTimeout, tmpDir)
+		scalingEngineConfPath = components.PrepareScalingEngineConfig(
+			dbUrl, components.Ports[ScalingEngine], fakeCCNOAAUAA.URL(), defaultHttpClientTimeout,
+			tmpDir)
 		startScalingEngine()
 
-		schedulerConfPath = components.PrepareSchedulerConfig(dbUrl, fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), tmpDir, defaultHttpClientTimeout)
+		schedulerConfPath = components.PrepareSchedulerConfig(
+			dbUrl, fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), tmpDir,
+			defaultHttpClientTimeout)
 		startScheduler()
-
 	})
 
 	JustBeforeEach(func() {
-		operatorConfPath = components.PrepareOperatorConfig(dbUrl, fakeCCNOAAUAA.URL(), fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]), 10*time.Second, 1*24*time.Hour, defaultHttpClientTimeout, tmpDir)
+		operatorConfPath = components.PrepareOperatorConfig(
+			dbUrl, fakeCCNOAAUAA.URL(), fmt.Sprintf("https://127.0.0.1:%d",
+			components.Ports[ScalingEngine]),
+			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
+			10*time.Second, 1*24*time.Hour, defaultHttpClientTimeout, tmpDir)
 		startOperator()
 	})
 
@@ -65,9 +72,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 	})
 
 	Describe("Synchronizer", func() {
-
 		Describe("Synchronize the active schedules to scaling engine", func() {
-
 			Context("ScalingEngine Server is down when active_schedule changes", func() {
 				JustBeforeEach(func() {
 					stopScalingEngine()
@@ -107,11 +112,9 @@ var _ = Describe("Integration_Operator_Others", func() {
 						Consistently(func() bool { return activeScheduleExists(testAppId) }).
 							WithTimeout(10 * time.Second).
 							WithPolling(1 * time.Second).Should(BeTrue())
-
 					})
 
 					It("should delete an active schedule in scaling engine after restart", func() {
-
 						By("ensure scaling server is down when the active schedule is deleted from scheduler")
 						//TODO there is a better check than waiting 80 seconds for consecutive errors.
 						Consistently(func() error {
@@ -128,7 +131,6 @@ var _ = Describe("Integration_Operator_Others", func() {
 							WithPolling(5*time.Second).
 							ShouldNot(BeTrue(), "Active schedule should be removed after restart")
 					})
-
 				})
 			})
 		})
@@ -244,7 +246,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 
 		})
 
-		It("opeator should remove the staled records ", func() {
+		It("operator should remove the staled records ", func() {
 			Eventually(func() bool {
 				return getAppInstanceMetricTotalCount(testAppId) == 0 &&
 					getScalingHistoryTotalCount(testAppId) == 0 && getScalingHistoryTotalCount(testAppId) == 0
