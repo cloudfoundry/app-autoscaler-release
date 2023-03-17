@@ -47,12 +47,12 @@ func (c *HealthConfig) Validate() error {
 		}
 	}
 
-	if c.basicAuthIntended() && ! c.BasicAuthPossible() {
+	if c.basicAuthIntended() && !c.BasicAuthPossible() {
 		protectedHealthEndpoints := c.protectedHealthEndpoints()
 		msg :=
 			"some endpoints configured to use basic auth but, but credentials not properly set up\n" +
-			"\tprotected endpoints according to health-configuration: " +
-			strings.Join(protectedHealthEndpoints, ", ")
+				"\tprotected endpoints according to health-configuration: " +
+				strings.Join(protectedHealthEndpoints, ", ")
 		return fmt.Errorf("%w: %s", ErrConfiguration, msg)
 	}
 

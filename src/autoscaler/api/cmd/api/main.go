@@ -146,7 +146,6 @@ func createApiServer(conf *config.Config, logger lager.Logger, policyDb *sqldb.P
 	credentialProvider cred_helper.Credentials, checkBindingFunc api.CheckBindingFunc,
 	cfClient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector,
 	bindingDB db.BindingDB) ifrit.Runner {
-
 	rateLimiter := ratelimiter.DefaultRateLimiter(
 		conf.RateLimit.MaxAmount, conf.RateLimit.ValidDuration, logger.Session("api-ratelimiter"))
 	publicApiHttpServer, err := publicapiserver.NewPublicApiServer(
