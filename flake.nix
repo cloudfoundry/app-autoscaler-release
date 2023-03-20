@@ -36,7 +36,7 @@
               google-cloud-sdk
               maven
               nodejs
-              ruby
+              ruby_3_1
               # The following package for cf-uaac is needed by our makefile as well.
               # Until PR https://github.com/NixOS/nixpkgs/pull/189079 has been merged, this requires
               # as additional input: `jdwpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;`
@@ -65,6 +65,6 @@
             # <https://discourse.nixos.org/t/golang-delve-debugger-with-nix-flake-issue/22740/2>
             hardeningDisable = [ "all" ];
           };
-      });
+      }); # devShells
   };
 }
