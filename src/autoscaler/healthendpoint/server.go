@@ -44,7 +44,8 @@ func (bam *basicAuthenticationMiddleware) middleware(next http.Handler) http.Han
 }
 
 // NewServerWithBasicAuth open the healthcheck port with basic authentication.
-// Make sure that username and password is not empty
+// Make sure that username and password is not empty.
+// Parameter `healthCheckers` determines the information provided by the readiness-endpoint.
 func NewServerWithBasicAuth(conf models.HealthConfig, healthCheckers []Checker, logger lager.Logger,
 	gatherer prometheus.Gatherer, time func() time.Time) (ifrit.Runner, error) {
 	healthRouter, err := NewHealthRouterWithBasicAuth(conf, healthCheckers, logger, gatherer, time)
@@ -62,6 +63,8 @@ func NewServerWithBasicAuth(conf models.HealthConfig, healthCheckers []Checker, 
 	return http_server.New(addr, healthRouter), nil
 }
 
+// Make sure that username and password is not empty.
+// Parameter `healthCheckers` determines the information provided by the readiness-endpoint.
 func NewHealthRouterWithBasicAuth(conf models.HealthConfig, healthCheckers []Checker, logger lager.Logger,
 	gatherer prometheus.Gatherer, time func() time.Time) (*mux.Router, error) {
 	router := mux.NewRouter()

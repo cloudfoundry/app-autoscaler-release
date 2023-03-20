@@ -113,17 +113,6 @@ var _ = Describe("PublicApiHandler", func() {
 		})
 	})
 
-	Describe("GetHealth", func() {
-		JustBeforeEach(func() {
-			handler.GetHealth(resp, req, map[string]string{})
-		})
-		Context("When GetHealth is called", func() {
-			It("succeeds with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-				Expect(resp.Body.String()).To(Equal(`{"alive":"true"}`))
-			})
-		})
-	})
 	Describe("GetScalingPolicy", func() {
 		JustBeforeEach(func() {
 			handler.GetScalingPolicy(resp, req, pathVariables)

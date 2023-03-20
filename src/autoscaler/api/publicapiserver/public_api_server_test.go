@@ -506,15 +506,11 @@ var _ = Describe("PublicApiServer", func() {
 			})
 		})
 	})
+
 	Describe("UnProtected Routes", func() {
 		Context("when calling info endpoint", func() {
 			It("should succeed", func() {
 				verifyResponse(httpClient, serverUrl, "/v1/info", nil, http.MethodGet, "", http.StatusOK)
-			})
-		})
-		Context("when calling health endpoint", func() {
-			It("should succeed", func() {
-				verifyResponse(httpClient, serverUrl, "/health", nil, http.MethodGet, "", http.StatusOK) // TODO: Use routes.LivenessPath
 			})
 		})
 	})

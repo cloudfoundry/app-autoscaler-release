@@ -325,12 +325,13 @@ func (h *PublicApiHandler) GetApiInfo(w http.ResponseWriter, _ *http.Request, _ 
 	}
 }
 
-func (h *PublicApiHandler) GetHealth(w http.ResponseWriter, _ *http.Request, _ map[string]string) {
-	_, err := w.Write([]byte(`{"alive":"true"}`))
-	if err != nil {
-		h.logger.Error("failed-to-write-body", err)
-	}
-}
+// // TODO: Remove me:
+// func (h *PublicApiHandler) GetHealth(w http.ResponseWriter, _ *http.Request, _ map[string]string) {
+// 	_, err := w.Write([]byte(`{"alive":"true"}`))
+// 	if err != nil {
+// 		h.logger.Error("failed-to-write-body", err)
+// 	}
+// }
 
 func (h *PublicApiHandler) CreateCredential(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	appId := vars["appId"]
