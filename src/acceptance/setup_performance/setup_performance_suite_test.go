@@ -35,7 +35,7 @@ var _ = BeforeSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		cleanup(cfg)
+		cleanup(cfg, setup)
 	}
 	setup = workflowhelpers.NewRunawayAppTestSuiteSetup(cfg)
 	setup.Setup()
@@ -52,7 +52,7 @@ var _ = BeforeSuite(func() {
 	}
 
 	fmt.Print("\ncreating droplet...")
-	nodeAppDropletPath = CreateDroplet(*cfg)
+	nodeAppDropletPath = CreateDroplet(cfg)
 	fmt.Println("done")
 })
 
@@ -73,12 +73,14 @@ func updateOrgQuotaForPerformanceTest(orgGuid string) {
 	}
 }
 
-func cleanup(cfg *config.Config) {
+func cleanup(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup) {
 	fmt.Printf("\nCleaning up test leftovers...")
-	if cfg.UseExistingOrganization {
-		CleanupInExistingOrg(cfg)
-	} else {
-		DeleteOrgs(GetTestOrgs(cfg), time.Duration(120)*time.Second)
-	}
+	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+		if cfg.UseExistingOrganization {
+			CleanupInExistingOrg(cfg, setup)
+		} else {
+			DeleteOrgs(GetTestOrgs(cfg), time.Duration(120)*time.Second)
+		}
+	})
 	fmt.Printf("\nCleaning up test leftovers...completed")
 }

@@ -66,18 +66,19 @@ var _ = AfterSuite(func() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		cleanup(cfg)
+		cleanup(cfg, setup)
 		setup.Teardown()
 	}
 })
 
-func cleanup(cfg *config.Config) {
-	fmt.Printf("\n\nCleaning up test leftovers...\n")
-	if cfg.UseExistingOrganization {
-		CleanupInExistingOrg(cfg)
-	} else {
-		DeleteOrgs(GetTestOrgs(cfg), time.Duration(120)*time.Second)
-	}
-
-	fmt.Printf("\n\nCleaning up test leftovers...completed")
+func cleanup(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup) {
+	fmt.Printf("\nCleaning up test leftovers...")
+	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+		if cfg.UseExistingOrganization {
+			CleanupInExistingOrg(cfg, setup)
+		} else {
+			DeleteOrgs(GetTestOrgs(cfg), time.Duration(120)*time.Second)
+		}
+	})
+	fmt.Printf("\nCleaning up test leftovers...completed")
 }

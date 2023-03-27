@@ -18,8 +18,7 @@ func CleanupOrgs(cfg *config.Config, wfh *workflowhelpers.ReproducibleTestSuiteS
 	By("Clearing down existing test orgs/spaces... Complete")
 }
 
-func CleanupInExistingOrg(cfg *config.Config) {
-	setup := workflowhelpers.NewTestSuiteSetup(cfg)
+func CleanupInExistingOrg(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup) {
 	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 		if cfg.UseExistingOrganization {
 			targetOrgWithSpace(setup.GetOrganizationName(), "", cfg.DefaultTimeoutDuration())
