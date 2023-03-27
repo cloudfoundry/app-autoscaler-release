@@ -35,40 +35,11 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policydb db.Po
 	mw := NewMiddleware(logger, cfclient, checkBindingFunc, conf.APIClientId)
 	rateLimiterMiddleware := ratelimiter.NewRateLimiterMiddleware("appId", rateLimiter, logger.Session("api-ratelimiter-middleware"))
 	httpStatusCollectMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
-	r := routes.ApiOpenRoutes()
-	r.Use(httpStatusCollectMiddleware.Collect)
-	r.Get(routes.PublicApiInfoRouteName).Handler(VarsFunc(pah.GetApiInfo))
 
-	rp := routes.ApiRoutes()
-	rp.Use(rateLimiterMiddleware.CheckRateLimit)
-	rp.Use(mw.HasClientToken)
-	rp.Use(mw.Oauth)
-	// rp.Use(httpStatusCollectMiddleware.Collect)
-	rp.Get(routes.PublicApiScalingHistoryRouteName).Handler(VarsFunc(pah.GetScalingHistories))
-	rp.Get(routes.PublicApiAggregatedMetricsHistoryRouteName).Handler(VarsFunc(pah.GetAggregatedMetricsHistories))
-
-	rpolicy := routes.ApiPolicyRoutes()
-	rpolicy.Use(rateLimiterMiddleware.CheckRateLimit)
-	rpolicy.Use(mw.HasClientToken)
-	rpolicy.Use(mw.Oauth)
-	if !conf.UseBuildInMode {
-		rpolicy.Use(mw.CheckServiceBinding)
-	}
-	// rpolicy.Use(httpStatusCollectMiddleware.Collect)
-	rpolicy.Get(routes.PublicApiGetPolicyRouteName).Handler(VarsFunc(pah.GetScalingPolicy))
-	rpolicy.Get(routes.PublicApiAttachPolicyRouteName).Handler(VarsFunc(pah.AttachScalingPolicy))
-	rpolicy.Get(routes.PublicApiDetachPolicyRouteName).Handler(VarsFunc(pah.DetachScalingPolicy))
-
-	rcredential := routes.ApiCredentialRoutes()
-	rcredential.Use(rateLimiterMiddleware.CheckRateLimit)
-	if !conf.UseBuildInMode {
-		rcredential.Use(mw.RejectCredentialOperationInServiceOffering)
-	}
-	// rcredential.Use(httpStatusCollectMiddleware.Collect)
-	rcredential.Use(mw.HasClientToken)
-	rcredential.Use(mw.Oauth)
-	rcredential.Get(routes.PublicApiCreateCredentialRouteName).Handler(VarsFunc(pah.CreateCredential))
-	rcredential.Get(routes.PublicApiDeleteCredentialRouteName).Handler(VarsFunc(pah.DeleteCredential))
+	r := createApiOpenRoutes(httpStatusCollectMiddleware, pah)
+	createApiRoutes(rateLimiterMiddleware, mw, httpStatusCollectMiddleware, pah)
+	createApiPolicyRoutes(conf.UseBuildInMode, rateLimiterMiddleware, mw, httpStatusCollectMiddleware, pah)
+	createApiCredentialsRoutes(conf.UseBuildInMode, rateLimiterMiddleware, mw, httpStatusCollectMiddleware, pah)
 
 	var addr string
 	if os.Getenv("APP_AUTOSCALER_TEST_RUN") == "true" {
@@ -93,4 +64,80 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policydb db.Po
 
 	logger.Info("public-api-http-server-created", lager.Data{"serverConfig": conf.PublicApiServer})
 	return runner, nil
+}
+
+
+func createApiOpenRoutes(
+	httpStatusCollectMiddleware *healthendpoint.HTTPStatusCollectMiddleware,
+	publicApiHandler *PublicApiHandler) *mux.Router {
+
+	r := routes.ApiOpenRoutes()
+	r.Use(httpStatusCollectMiddleware.Collect)
+	r.Get(routes.PublicApiInfoRouteName).Handler(VarsFunc(publicApiHandler.GetApiInfo))
+
+	return r
+}
+
+func createApiRoutes(
+	rateLimiterMiddleware *ratelimiter.RateLimiterMiddleware,
+	middleWare *Middleware,
+	httpStatusCollectMiddleware *healthendpoint.HTTPStatusCollectMiddleware,
+	publicApiHandler *PublicApiHandler) *mux.Router {
+
+	rp := routes.ApiRoutes()
+	rp.Use(rateLimiterMiddleware.CheckRateLimit)
+	rp.Use(middleWare.HasClientToken)
+	rp.Use(middleWare.Oauth)
+	rp.Use(httpStatusCollectMiddleware.Collect)
+	rp.Get(routes.PublicApiScalingHistoryRouteName).Handler(VarsFunc(publicApiHandler.GetScalingHistories))
+	rp.Get(routes.PublicApiAggregatedMetricsHistoryRouteName).Handler(VarsFunc(publicApiHandler.GetAggregatedMetricsHistories))
+
+	return rp
+}
+
+func createApiPolicyRoutes(
+	isBuildInMode bool,
+	rateLimiterMiddleware *ratelimiter.RateLimiterMiddleware,
+	middleWare *Middleware,
+	httpStatusCollectMiddleware *healthendpoint.HTTPStatusCollectMiddleware,
+	publicApiHandler *PublicApiHandler) *mux.Router {
+
+	rpolicy := routes.ApiPolicyRoutes()
+
+	rpolicy.Use(rateLimiterMiddleware.CheckRateLimit)
+	rpolicy.Use(middleWare.HasClientToken)
+	rpolicy.Use(middleWare.Oauth)
+	if !isBuildInMode {
+		rpolicy.Use(middleWare.CheckServiceBinding)
+	}
+	rpolicy.Use(httpStatusCollectMiddleware.Collect)
+
+	rpolicy.Get(routes.PublicApiGetPolicyRouteName).Handler(VarsFunc(publicApiHandler.GetScalingPolicy))
+	rpolicy.Get(routes.PublicApiAttachPolicyRouteName).Handler(VarsFunc(publicApiHandler.AttachScalingPolicy))
+	rpolicy.Get(routes.PublicApiDetachPolicyRouteName).Handler(VarsFunc(publicApiHandler.DetachScalingPolicy))
+
+	return rpolicy
+}
+
+func createApiCredentialsRoutes(
+	isBuildInMode bool,
+	rateLimiterMiddleware *ratelimiter.RateLimiterMiddleware,
+	middleWare *Middleware,
+	httpStatusCollectMiddleware *healthendpoint.HTTPStatusCollectMiddleware,
+	publicApiHandler *PublicApiHandler) *mux.Router {
+
+	rcredential := routes.ApiCredentialRoutes()
+
+	rcredential.Use(rateLimiterMiddleware.CheckRateLimit)
+	if !isBuildInMode {
+		rcredential.Use(middleWare.RejectCredentialOperationInServiceOffering)
+	}
+	rcredential.Use(httpStatusCollectMiddleware.Collect)
+	rcredential.Use(middleWare.HasClientToken)
+	rcredential.Use(middleWare.Oauth)
+
+	rcredential.Get(routes.PublicApiCreateCredentialRouteName).Handler(VarsFunc(publicApiHandler.CreateCredential))
+	rcredential.Get(routes.PublicApiDeleteCredentialRouteName).Handler(VarsFunc(publicApiHandler.DeleteCredential))
+
+	return rcredential
 }
