@@ -103,28 +103,48 @@ func StartApp(appName string, timeout time.Duration) bool {
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
 	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
 	By("Creating test app")
-	CreateTestAppByName(*cfg, appName, initialInstanceCount)
+	CreateTestAppByName(cfg, appName, initialInstanceCount)
 	return appName
 }
-func CreateDroplet(cfg config.Config) string {
+func CreateDroplet(cfg *config.Config) string {
 	appName := "deleteme"
 	tmpDir, err := os.CreateTemp("", "droplet")
 	dropletPath := fmt.Sprintf("%s.tgz", tmpDir.Name())
 	Expect(err).NotTo(HaveOccurred())
 	CreateTestAppByName(cfg, appName, 1)
 	StartApp(appName, cfg.CfPushTimeoutDuration())
-	downloadDroplet := cf.Cf("download-droplet", appName, "--path", dropletPath).Wait(cfg.DefaultTimeoutDuration())
+	appGUID, err := GetAppGuid(cfg, appName)
+	Expect(err).NotTo(HaveOccurred())
+	downloadDroplet := downloadAppDroplet(appGUID, dropletPath, cfg.DefaultTimeoutDuration())
 	DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 	Expect(downloadDroplet).To(Exit(0), "failed download droplet")
 
 	return dropletPath
 }
 
-func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) error {
-	return createTestApp(*cfg, appName, initialInstanceCount, "--droplet", dropletPath)
+func downloadAppDroplet(appName string, dropletPath string, timeOut time.Duration) *Session {
+	currentDroplet := cf.CfSilent("curl",
+		fmt.Sprintf("/v3/apps/%s/droplets/current/", appName)).Wait(timeOut)
+	Expect(currentDroplet).To(Exit(0),
+		fmt.Sprintf("failed getting current droplet for app %s plans", appName))
+
+	var droplet = struct {
+		Guid string `json:"guid"`
+	}{}
+	err := json.Unmarshal(currentDroplet.Out.Contents(), &droplet)
+	Expect(err).ToNot(HaveOccurred())
+
+	downloadDroplet := cf.CfSilent("curl",
+		fmt.Sprintf("/v3/droplets/%s/download", droplet.Guid), "--output", dropletPath).Wait(timeOut)
+	GinkgoWriter.Printf("\nFound droplet for app %s \n %s \n", appName, currentDroplet.Out.Contents())
+	return downloadDroplet
 }
 
-func createTestApp(cfg config.Config, appName string, initialInstanceCount int, args ...string) error {
+func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) error {
+	return createTestApp(cfg, appName, initialInstanceCount, "--droplet", dropletPath)
+}
+
+func createTestApp(cfg *config.Config, appName string, initialInstanceCount int, args ...string) error {
 	setNodeTLSRejectUnauthorizedEnvironmentVariable := "1"
 	if cfg.GetSkipSSLValidation() {
 		setNodeTLSRejectUnauthorizedEnvironmentVariable = "0"
@@ -158,7 +178,7 @@ func createTestApp(cfg config.Config, appName string, initialInstanceCount int, 
 	return err
 }
 
-func CreateTestAppByName(cfg config.Config, appName string, initialInstanceCount int) {
+func CreateTestAppByName(cfg *config.Config, appName string, initialInstanceCount int) {
 	err := createTestApp(cfg, appName, initialInstanceCount, "-p", config.NODE_APP)
 	Expect(err).ToNot(HaveOccurred())
 }
