@@ -8,13 +8,30 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("AutoScaler Basic Auth Tests", func() {
+var _ = Describe("AutoScaler Health Endpoints with Basic Auth", func() {
 
 	urlfor := func(name string) func() string {
-		return func() string { return strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-"+name, 1) }
+		return func() string {
+			healthURL := strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-"+name, 1)
+			return healthURL
+		}
 	}
-	DescribeTable("basic auth tests",
+	DescribeTable("Basic Auth Credentials not provided",
 		func(url func() string, statusCode func() int) {
+			Expect(Get(url())).To(Equal(statusCode()), "to get status code %d when getting %s", statusCode(), url())
+		},
+		Entry("API Server", func() string { return healthURL }, getStatus()),
+		Entry("Eventgenerator", urlfor("eventgenerator"), getStatus),
+		Entry("Scaling Engine", urlfor("scalingengine"), getStatus),
+		Entry("Operator", urlfor("operator"), getStatus),
+		Entry("Metrics Forwarder", urlfor("metricsforwarder"), getStatus),
+		Entry("Scheduler", urlfor("scheduler"), getStatus),
+	)
+
+	DescribeTable("Basic Auth Credentials Provided",
+
+		func(url func() string, statusCode func() int) {
+			cfg.HealthEndpointsBasicAuthEnabled = true
 			Expect(Get(url())).To(Equal(statusCode()), "to get status code %d when getting %s", statusCode(), url())
 		},
 		Entry("API Server", func() string { return healthURL }, getStatus),
