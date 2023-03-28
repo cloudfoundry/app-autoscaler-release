@@ -66,11 +66,9 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policydb db.Po
 	return runner, nil
 }
 
-
 func createApiOpenRoutes(
 	httpStatusCollectMiddleware *healthendpoint.HTTPStatusCollectMiddleware,
 	publicApiHandler *PublicApiHandler) *mux.Router {
-
 	r := routes.ApiOpenRoutes()
 	r.Use(httpStatusCollectMiddleware.Collect)
 	r.Get(routes.PublicApiInfoRouteName).Handler(VarsFunc(publicApiHandler.GetApiInfo))
@@ -83,7 +81,6 @@ func createApiRoutes(
 	middleWare *Middleware,
 	httpStatusCollectMiddleware *healthendpoint.HTTPStatusCollectMiddleware,
 	publicApiHandler *PublicApiHandler) *mux.Router {
-
 	rp := routes.ApiRoutes()
 	rp.Use(rateLimiterMiddleware.CheckRateLimit)
 	rp.Use(middleWare.HasClientToken)
@@ -101,7 +98,6 @@ func createApiPolicyRoutes(
 	middleWare *Middleware,
 	httpStatusCollectMiddleware *healthendpoint.HTTPStatusCollectMiddleware,
 	publicApiHandler *PublicApiHandler) *mux.Router {
-
 	rpolicy := routes.ApiPolicyRoutes()
 
 	rpolicy.Use(rateLimiterMiddleware.CheckRateLimit)
@@ -125,7 +121,6 @@ func createApiCredentialsRoutes(
 	middleWare *Middleware,
 	httpStatusCollectMiddleware *healthendpoint.HTTPStatusCollectMiddleware,
 	publicApiHandler *PublicApiHandler) *mux.Router {
-
 	rcredential := routes.ApiCredentialRoutes()
 
 	rcredential.Use(rateLimiterMiddleware.CheckRateLimit)

@@ -247,8 +247,9 @@ instance_groups:
       autoscaler:
         apiserver:
           health:
-            username: "test_user"
-            password_hash: "$2y$04$MpZgNdLuGN.v7wvBsVPMKODvIhG885mp2.QZONkwMeR.PIO3AMJMC" # "test_password"
+            port: &apiServerHealthPort 6202
+            username: api_server
+            password: ((autoscaler_api_server_health_password))
           public_api:
             server:
               port: &publicApiServerPort 6101
@@ -323,6 +324,13 @@ instance_groups:
             component: autoscaler_service_broker
           uris:
             - *servicebroker_public_domain
+        - name: autoscaler_api_server_health
+          registration_interval: 20s
+          port: *apiServerHealthPort
+          tags:
+            component: api_server
+          uris:
+            - ((deployment_name)).((system_domain))
 
   # Scheduler Instance Group
 - name: scheduler
@@ -710,6 +718,8 @@ variables:
   type: password
   options:
     length: 128
+- name: autoscaler_api_server_health_password
+  type: password
 - name: autoscaler_metricsforwarder_health_password
   type: password
 - name: autoscaler_metricsgateway_health_password

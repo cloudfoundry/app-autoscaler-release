@@ -203,7 +203,7 @@ var _ = Describe("Api", func() {
 		})
 	})
 
-	Describe("when Health server is ready to serve RESTful API", func() {
+	Describe("when Health server is ready to serve RESTful API without basic Auth", func() {
 		BeforeEach(func() {
 			basicAuthConfig := cfg
 			basicAuthConfig.Health.HealthCheckUsername = ""
@@ -218,7 +218,7 @@ var _ = Describe("Api", func() {
 			runner.Interrupt()
 			Eventually(runner.Session, 5).Should(Exit(0))
 		})
-		Context("when a request to query health comes", func() {
+		Context("when a request to query health/prometheus comes without credentials", func() {
 			It("returns with a 200", func() {
 				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.PrometheusPath)
 				rsp, err := healthHttpClient.Get(url)
@@ -234,6 +234,19 @@ var _ = Describe("Api", func() {
 				rsp.Body.Close()
 			})
 		})
+		Context("when a request to /health/liveness comes with without credentials", func() {
+			It("should return 200", func() {
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
+				Expect(err).NotTo(HaveOccurred())
+
+				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
+
+				rsp, err := healthHttpClient.Do(req)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+			})
+		})
 	})
 
 	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
@@ -241,9 +254,6 @@ var _ = Describe("Api", func() {
 			basicAuthConfig := cfg
 			basicAuthConfig.Health.HealthCheckUsername = "correct_username"
 			basicAuthConfig.Health.HealthCheckPassword = "correct_password"
-			// basicAuthConfig.Health.ReadinessCheckEnabled = true
-			// basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", healthendpoint.LIVELINESS_PATH,
-			// 	healthendpoint.READINESS_PATH, healthendpoint.PPROF_PATH, healthendpoint.PROMETHEUS_PATH}
 
 			cfg = basicAuthConfig // Setting password only for `basicAuthConfig` is not sufficient,
 			// since the server-process does not use that configuration.
@@ -283,6 +293,7 @@ var _ = Describe("Api", func() {
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 			})
 		})
+
 	})
 
 	Describe("can start with default plugin", func() {
