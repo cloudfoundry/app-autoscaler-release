@@ -247,7 +247,7 @@ instance_groups:
       autoscaler:
         apiserver:
           health:
-            port: &apiServerHealthPort 6202
+            port: &apiServerHealthPort 6206
             username: api_server
             password: ((autoscaler_api_server_health_password))
           public_api:
