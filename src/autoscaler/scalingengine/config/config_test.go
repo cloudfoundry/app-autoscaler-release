@@ -57,6 +57,8 @@ var _ = Describe("Config", func() {
 				Expect(conf.Server.TLS.CACertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/ca.crt"))
 
 				Expect(conf.Health.Port).To(Equal(9999))
+				Expect(conf.Health.UnprotectedEndpoints).To(
+					ContainElements("/health/liveness", "/health/readiness", "/health/prometheus", "/debug/pprof"))
 				Expect(conf.Logging.Level).To(Equal("debug"))
 
 				Expect(conf.DB.PolicyDB).To(Equal(

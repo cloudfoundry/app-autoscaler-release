@@ -115,9 +115,9 @@ var _ = Describe("Config", func() {
 				))
 				Expect(conf.CredHelperImpl).To(Equal("default"))
 				Expect(conf.Health.UnprotectedEndpoints).To(
-					ContainElements("/", "/health/liveness", "/health/prometheus", "/debug/pprof"))
-			}) // It
-		}) // Context
+					ContainElements("/health/liveness", "/health/prometheus", "/debug/pprof"))
+			})
+		})
 
 		Context("with partial config", func() {
 			BeforeEach(func() {

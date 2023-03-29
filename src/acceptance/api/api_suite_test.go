@@ -94,7 +94,6 @@ var _ = BeforeSuite(func() {
 		},
 		Timeout: 30 * time.Second,
 	}
-
 	healthURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, LivenessPath)
 	policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
 	metricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(metricURL, "{appId}", appGUID, -1))

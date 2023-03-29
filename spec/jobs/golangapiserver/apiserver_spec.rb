@@ -156,6 +156,33 @@ describe "golangapiserver" do
       end
     end
 
+    context "health_server" do
+      it "default port exist" do
+        expect(rendered_template["health"]["port"]).to eq(6206)
+      end
+
+      it "credentials are defined" do
+        expect(rendered_template["health"]["username"]).to eq("basic_auth_username")
+        expect(rendered_template["health"]["password"]).to eq("basic_auth_secret")
+      end
+
+      it "readiness enabled is set to false by default" do
+        expect(rendered_template["health"]["readiness_enabled"]).to eq(false)
+      end
+
+      it "unprotected_endpoint config is empty by default" do
+        expect(rendered_template["health"]["unprotected_endpoints"]).to match_array([])
+      end
+
+      it "has valid endpoints in unprotected_endpoint config" do
+        properties["autoscaler"]["apiserver"]["health"]["unprotected_endpoints"] = %w[/debug/pprof /health/liveness /health/prometheus /health/readiness]
+        expect(rendered_template["health"]["unprotected_endpoints"]).to contain_exactly("/health/liveness",
+          "/health/prometheus",
+          "/health/readiness",
+          "/debug/pprof")
+      end
+    end
+
     context "cred_helper_impl" do
       it "has a cred helper impl by default" do
         expect(rendered_template).to include(

@@ -60,5 +60,7 @@ autoscaler:
         dashboard_redirect_uri: https://application-autoscaler-dashboard.cf.domain
     health:
       username: "basic_auth_username"
+      username_hash: ""
       password: "basic_auth_secret"
       password_hash: ""
+      unprotected_endpoints: []

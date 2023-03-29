@@ -18,7 +18,7 @@ type HealthConfig struct {
 	UnprotectedEndpoints    []string `yaml:"unprotected_endpoints"`
 }
 
-var ErrConfiguration = fmt.Errorf("configuration error")
+var ErrConfiguration = fmt.Errorf("health configuration error")
 
 func (c *HealthConfig) BasicAuthPossible() bool {
 	usernameVerifiable := c.HealthCheckUsername != "" || c.HealthCheckUsernameHash != ""
@@ -50,7 +50,7 @@ func (c *HealthConfig) Validate() error {
 	if c.basicAuthIntended() && !c.BasicAuthPossible() {
 		protectedHealthEndpoints := c.protectedHealthEndpoints()
 		msg :=
-			"some endpoints configured to use basic auth but, but credentials not properly set up\n" +
+			"some endpoints configured to use basic auth but, credentials not properly set up\n" +
 				"\tprotected endpoints according to health-configuration: " +
 				strings.Join(protectedHealthEndpoints, ", ")
 		return fmt.Errorf("%w: %s", ErrConfiguration, msg)
@@ -64,7 +64,7 @@ func (c *HealthConfig) basicAuthIntended() bool {
 }
 
 func (c *HealthConfig) protectedHealthEndpoints() []string {
-	protectedEndpoints := []string{}
+	var protectedEndpoints []string
 
 	allEndpointsList := []string{"/", routes.LivenessPath, routes.PrometheusPath, routes.PprofPath}
 	if c.ReadinessCheckEnabled {
@@ -77,7 +77,7 @@ func (c *HealthConfig) protectedHealthEndpoints() []string {
 	}
 
 	for _, endpoint := range allEndpointsList {
-		if _, enpointIsUnprotected := unprotectedEndpointsSet[endpoint]; !enpointIsUnprotected {
+		if _, endpointIsUnprotected := unprotectedEndpointsSet[endpoint]; !endpointIsUnprotected {
 			protectedEndpoints = append(protectedEndpoints, endpoint)
 		}
 	}

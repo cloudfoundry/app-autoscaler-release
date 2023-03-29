@@ -68,7 +68,7 @@ db:
     connection_max_lifetime: 60s
 health:
   port: 9999
-  unprotected_endpoints: ["/", "/health/liveness", "/health/prometheus", "/debug/pprof"]
+  unprotected_endpoints: ["/health/liveness", "/health/readiness", "/health/prometheus", "/debug/pprof"]
 cred_helper_impl: default
 `)
 			})
@@ -78,7 +78,7 @@ cred_helper_impl: default
 				Expect(conf.Logging.Level).To(Equal("debug"))
 				Expect(conf.Health.Port).To(Equal(9999))
 				Expect(conf.Health.UnprotectedEndpoints).To(
-					ContainElements("/", "/health/liveness", "/health/prometheus", "/debug/pprof"))
+					ContainElements("/health/liveness", "/health/readiness", "/health/prometheus", "/debug/pprof"))
 				Expect(conf.LoggregatorConfig.MetronAddress).To(Equal("127.0.0.1:3457"))
 				Expect(conf.Db[db.PolicyDb]).To(Equal(
 					db.DatabaseConfig{

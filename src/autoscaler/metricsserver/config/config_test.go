@@ -87,6 +87,7 @@ server:
     ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
 health:
   port: 9999
+  unprotected_endpoints: []
 `)
 			})
 
@@ -132,7 +133,7 @@ health:
 				Expect(conf.Server.TLS.CACertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/ca.crt"))
 
 				Expect(conf.Health.Port).To(Equal(9999))
-
+				Expect(conf.Health.UnprotectedEndpoints).To(BeEmpty())
 			})
 		})
 
@@ -181,6 +182,7 @@ db:
 				Expect(conf.Server.Port).To(Equal(DefaultHTTPServerPort))
 
 				Expect(conf.Health.Port).To(Equal(DefaultHealthPort))
+				Expect(conf.Health.UnprotectedEndpoints).To(BeNil())
 
 			})
 		})
