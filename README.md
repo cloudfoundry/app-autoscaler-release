@@ -350,17 +350,18 @@ cf delete-service-broker autoscaler
 
 ## Monitoring the service
 
-The app-autoscaler provides a number of health endpoints that are available externally that can be used to check the state of each component. Each health endpoint is protected with basic auth (apart from the api server), the usernames are listed in the table below, but the passwords are available in credhub.
+The app-autoscaler provides a number of health endpoints that are available externally that can be used to check the state of each component. Each health endpoint is protected with basic auth, the usernames are listed in the table below, but the passwords are available in credhub.
 
-Component | Health URL | Username | Password Key |
---------- | -----------| ---------| -------------|
-eventgenerator|https://autoscaler-eventgenerator.((system_domain))/health|eventgenerator|/autoscaler_eventgenerator_health_password|
-metricsforwarder|https://autoscaler-metricsforwarder.((system_domain))/health|metricsforwarder|/autoscaler_metricsforwarder_health_password|
-metricsgateway|https://autoscaler-metricsgateway.((system_domain))/health|metricsgateway|/autoscaler_metricsgateway_health_password|
-metricsserver|https://autoscaler-metricsserver.((system_domain))/health|metricsserver|/autoscaler_metricsserver_health_password|
-scalingengine|https://autoscaler-scalingengine.((system_domain))/health|scalingengine|/autoscaler_scalingengine_health_password|
-operator|https://autoscaler-operator.((system_domain))/health|operator|/autoscaler_operator_health_password|
-scheduler|https://autoscaler-scheduler.((system_domain))/health|scheduler|/autoscaler_scheduler_health_password|
+Component | Health URL                                                               | Username         | Password Key                                 |
+--------- |--------------------------------------------------------------------------|------------------|----------------------------------------------|
+apiserver | https://autoscaler-apiserver.((system_domain))/health/liveness           | apiserver        | /autoscaler_api_server_health_password   |
+eventgenerator| https://autoscaler-eventgenerator.((system_domain))/health/liveness      | eventgenerator   | /autoscaler_eventgenerator_health_password   |
+metricsforwarder| https://autoscaler-metricsforwarder.((system_domain))/health/liveness    | metricsforwarder | /autoscaler_metricsforwarder_health_password |
+metricsgateway| https://autoscaler-metricsgateway.((system_domain))/health/liveness      | metricsgateway   | /autoscaler_metricsgateway_health_password   |
+metricsserver| https://autoscaler-metricsserver.((system_domain))/health/liveness       | metricsserver    | /autoscaler_metricsserver_health_password    |
+scalingengine| https://autoscaler-scalingengine.((system_domain))/health/liveness       | scalingengine    | /autoscaler_scalingengine_health_password    |
+operator| https://autoscaler-operator.((system_domain))/health/liveness            | operator         | /autoscaler_operator_health_password         |
+scheduler| https://autoscaler-scheduler.((system_domain))/health/liveness           | scheduler        | /autoscaler_scheduler_health_password        |
 
 These endpoints can be disabled by using the ops file `example/operations/disable-basicauth-on-health-endpoints.yml`
 

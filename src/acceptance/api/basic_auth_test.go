@@ -20,7 +20,7 @@ var _ = Describe("AutoScaler Health Endpoints with Basic Auth", func() {
 		func(url func() string, statusCode func() int) {
 			Expect(Get(url())).To(Equal(statusCode()), "to get status code %d when getting %s", statusCode(), url())
 		},
-		Entry("API Server", func() string { return healthURL }, getStatus),
+		Entry("API Server", urlfor("apiserver"), getStatus),
 		Entry("Eventgenerator", urlfor("eventgenerator"), getStatus),
 		Entry("Scaling Engine", urlfor("scalingengine"), getStatus),
 		Entry("Operator", urlfor("operator"), getStatus),
@@ -34,7 +34,7 @@ var _ = Describe("AutoScaler Health Endpoints with Basic Auth", func() {
 			cfg.HealthEndpointsBasicAuthEnabled = true
 			Expect(Get(url())).To(Equal(statusCode()), "to get status code %d when getting %s", statusCode(), url())
 		},
-		Entry("API Server", func() string { return healthURL }, getStatus),
+		Entry("API Server", urlfor("apiserver"), getStatus),
 		Entry("Eventgenerator", urlfor("eventgenerator"), getStatus),
 		Entry("Scaling Engine", urlfor("scalingengine"), getStatus),
 		Entry("Operator", urlfor("operator"), getStatus),

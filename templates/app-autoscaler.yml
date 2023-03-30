@@ -330,7 +330,7 @@ instance_groups:
           tags:
             component: api_server
           uris:
-            - ((deployment_name)).((system_domain))
+            - ((deployment_name))-apiserver.((system_domain))
 
   # Scheduler Instance Group
 - name: scheduler
