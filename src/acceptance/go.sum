@@ -60,8 +60,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/rogpeppe/go-internal v1.8.0 h1:FCbCCtXNOY3UtUuHUYaghJg4y7Fd14rXifAYUAtL9R8=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
-github.com/steinfletcher/apitest v1.5.14 h1:18t0UtxdKf0OPfeP5omB85m23l1E3/tN3i93Rtw9Kp4=
-github.com/steinfletcher/apitest v1.5.14/go.mod h1:mF+KnYaIkuHM0C4JgGzkIIOJAEjo+EA5tTjJ+bHXnQc=
+github.com/steinfletcher/apitest v1.5.15 h1:AAdTN0yMbf0VMH/PMt9uB2I7jljepO6i+5uhm1PjH3c=
+github.com/steinfletcher/apitest v1.5.15/go.mod h1:mF+KnYaIkuHM0C4JgGzkIIOJAEjo+EA5tTjJ+bHXnQc=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
