@@ -6,26 +6,30 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
+
+import java.util.List;
 
 @ConfigurationProperties(prefix = "scheduler.healthserver")
 @Data
 @Component
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetricsConfiguration {
+public class HealthServerConfiguration {
   private String username;
   private String password;
   private int port;
-  private boolean basicAuthEnabled = false;
+  private List<String> unprotectedEndpoints;
 
   @PostConstruct
   public void init() {
-    if (this.basicAuthEnabled
+    boolean basicAuthEnabled = (unprotectedEndpoints != null || ObjectUtils.isEmpty(unprotectedEndpoints));
+    if (basicAuthEnabled
         && (this.username == null
             || this.password == null
             || this.username.isEmpty()
             || this.password.isEmpty())) {
-      throw new IllegalStateException("Heath Server Basic Auth Username or password is not set");
+      throw new IllegalArgumentException("Heath Server Basic Auth Username or password is not set");
     }
   }
 }

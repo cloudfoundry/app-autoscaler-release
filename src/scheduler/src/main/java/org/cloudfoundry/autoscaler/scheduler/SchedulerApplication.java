@@ -1,6 +1,5 @@
 package org.cloudfoundry.autoscaler.scheduler;
 
-import org.cloudfoundry.autoscaler.scheduler.conf.MetricsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -24,7 +23,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.event.EventListener;
 
-@ConfigurationPropertiesScan(basePackageClasses = MetricsConfig.class)
 @SpringBootApplication(
     exclude = {
       AopAutoConfiguration.class,
