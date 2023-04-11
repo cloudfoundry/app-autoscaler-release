@@ -75,6 +75,12 @@ type Config struct {
 	ServiceOfferingEnabled bool   `json:"service_offering_enabled"`
 	EnableServiceAccess    bool   `json:"enable_service_access"`
 
+	EventgeneratorHealthEndpoint   string `json:"eventgenerator_health_endpoint"`
+	ScalingengineHealthEndpoint    string `json:"scalingengine_health_endpoint"`
+	OperatorHealthEndpoint         string `json:"operator_health_endpoint"`
+	MetricsforwarderHealthEndpoint string `json:"metricsforwarder_health_endpoint"`
+	SchedulerHealthEndpoint        string `json:"scheduler_health_endpoint"`
+
 	HealthEndpointsBasicAuthEnabled bool `json:"health_endpoints_basic_auth_enabled"`
 
 	CPUUpperThreshold int64 `json:"cpu_upper_threshold"`
@@ -112,6 +118,12 @@ var defaults = Config{
 
 	UseExistingOrganization: false,
 	ExistingOrganization:    "",
+
+	EventgeneratorHealthEndpoint:   "",
+	ScalingengineHealthEndpoint:    "",
+	OperatorHealthEndpoint:         "",
+	MetricsforwarderHealthEndpoint: "",
+	SchedulerHealthEndpoint:        "",
 
 	Performance: PerformanceConfig{
 		AppCount:                      100,
@@ -178,15 +190,55 @@ func validate(c *Config) {
 	if c.ASApiEndpoint == "" {
 		AbortSuite("missing configuration 'autoscaler_api'")
 	} else {
-		c.ASApiEndpoint = strings.TrimSuffix(c.ASApiEndpoint, "/")
-		if !strings.HasPrefix(c.ASApiEndpoint, "http") {
-			if c.UseHttp {
-				c.ASApiEndpoint = "http://" + c.ASApiEndpoint
-			} else {
-				c.ASApiEndpoint = "https://" + c.ASApiEndpoint
-			}
+		c.ASApiEndpoint = normalizeURL(c.ASApiEndpoint, c.UseHttp)
+	}
+
+	if c.EventgeneratorHealthEndpoint != "" {
+		c.EventgeneratorHealthEndpoint = normalizeURL(
+			c.EventgeneratorHealthEndpoint,
+			c.UseHttp,
+		)
+	}
+
+	if c.ScalingengineHealthEndpoint != "" {
+		c.ScalingengineHealthEndpoint = normalizeURL(
+			c.ScalingengineHealthEndpoint,
+			c.UseHttp,
+		)
+	}
+
+	if c.OperatorHealthEndpoint != "" {
+		c.OperatorHealthEndpoint = normalizeURL(
+			c.OperatorHealthEndpoint,
+			c.UseHttp,
+		)
+	}
+
+	if c.MetricsforwarderHealthEndpoint != "" {
+		c.MetricsforwarderHealthEndpoint = normalizeURL(
+			c.MetricsforwarderHealthEndpoint,
+			c.UseHttp,
+		)
+	}
+
+	if c.SchedulerHealthEndpoint != "" {
+		c.SchedulerHealthEndpoint = normalizeURL(
+			c.SchedulerHealthEndpoint,
+			c.UseHttp,
+		)
+	}
+}
+
+func normalizeURL(url string, useHttp bool) string {
+	url = strings.TrimSuffix(url, "/")
+	if !strings.HasPrefix(url, "http") {
+		if useHttp {
+			url = "http://" + url
+		} else {
+			url = "https://" + url
 		}
 	}
+	return url
 }
 
 func loadConfigFromPath(path string, config *Config) error {
