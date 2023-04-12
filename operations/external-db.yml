@@ -1,10 +1,10 @@
 
 - type: remove
-  path: /instance_groups/name=postgres_autoscaler
+  path: /instance_groups/name=postgres
 
-# asactors/scalingengine
+# scalingengine/scalingengine
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine_db
   value: &external_database
     sslmode: &sslmode ((database.sslmode))
     tls: &database_tls
@@ -15,143 +15,147 @@
     address: ((database.host))
     db_scheme: ((database.scheme))
     port: ((database.port))
-    sslmode: ((database.sslmode))
     roles:
     - name: ((database.username))
       password: ((database.password))
-      tag: default 
+      tag: default
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db_connection_config
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine_db_connection_config?
   value: &databaseConnectionConfig
     max_open_connections: 100
     max_idle_connections: 10
     connection_max_lifetime: 60s
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scheduler_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scheduler_db_connection_config
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scheduler_db_connection_config?
   value: *databaseConnectionConfig
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/policy_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/policy_db_connection_config
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/policy_db_connection_config?
   value: *databaseConnectionConfig
 
-# asactors/scheduler
+# scheduler/scheduler
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/policy_db
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/policy_db
   value: *external_database
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=scheduler/properties/autoscaler/scheduler_db
+  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler_db
   value: *external_database
 
-#asactors/operator
+# operator/operator
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/policy_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/policy_db_connection_config
-  value: *databaseConnectionConfig
-
-- type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db
-  value: *external_database
-- type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/appmetrics_db_connection_config
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/policy_db_connection_config?
   value: *databaseConnectionConfig
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/appmetrics_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/instancemetrics_db_connection_config
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/appmetrics_db_connection_config?
   value: *databaseConnectionConfig
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/instancemetrics_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/scalingengine_db_connection_config
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/instancemetrics_db_connection_config?
   value: *databaseConnectionConfig
 
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/scalingengine_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db_connection_config
-  value: *databaseConnectionConfig
-
-# asmetrics/metricsserver
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db
-  value: *external_database
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db_connection_config
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/scalingengine_db_connection_config?
   value: *databaseConnectionConfig
 
 - type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/lock_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db_connection_config
+  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/lock_db_connection_config?
   value: *databaseConnectionConfig
 
-# asmetrics/eventgenerator
+# metricsserver/metricsserver
 - type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db
+  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db_connection_config
+  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db_connection_config?
   value: *databaseConnectionConfig
 
 - type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db
+  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/policy_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db_connection_config
+  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/policy_db_connection_config?
   value: *databaseConnectionConfig
 
-# asnozzle/metricsgateway
+# eventgenerator/eventgenerator
 - type: replace
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db_connection_config
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db_connection_config?
   value: *databaseConnectionConfig
 
-# asapi/golangapiserver
 - type: replace
-  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/policy_db
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/policy_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/policy_db_connection_config
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/policy_db_connection_config?
   value: *databaseConnectionConfig
+
 - type: replace
-  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/binding_db
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/lock_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/binding_db_connection_config
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/lock_db_connection_config?
   value: *databaseConnectionConfig
-# asapi/metricsforwarder
+
+# metricsgateway/metricsgateway
 - type: replace
-  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db
+  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/policy_db
   value: *external_database
 - type: replace
-  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db_connection_config
+  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/policy_db_connection_config?
   value: *databaseConnectionConfig
 
+# apiserver/golangapiserver
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/policy_db
+  value: *external_database
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/policy_db_connection_config?
+  value: *databaseConnectionConfig
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/binding_db
+  value: *external_database
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/binding_db_connection_config?
+  value: *databaseConnectionConfig
 
+# metricsforwarder/metricsforwarder
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/policy_db
+  value: *external_database
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/policy_db_connection_config?
+  value: *databaseConnectionConfig
 
-
-
-
-
-
-
-
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/storedprocedure_db
+  value: *external_database
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/storedprocedure_db_connection_config?
+  value: *databaseConnectionConfig
