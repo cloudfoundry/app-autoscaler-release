@@ -3,4 +3,4 @@ helm 3.11.3
 python 3
 terraform 1.4.5
 terraform-lsp
-terragrunt 0.45.2
+terragrunt 0.45.3
