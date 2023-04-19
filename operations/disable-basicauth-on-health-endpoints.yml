@@ -28,9 +28,6 @@
   path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine/health/password
 
 - type: remove
-  path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler/health/basicAuthEnabled
-
-- type: remove
   path: /instance_groups/name=scheduler/jobs/name=scheduler/properties/autoscaler/scheduler/health/username
 
 - type: remove

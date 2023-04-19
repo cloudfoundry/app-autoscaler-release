@@ -1,153 +1,92 @@
 package org.cloudfoundry.autoscaler.scheduler.rest;
 
-import java.io.IOException;
-import jakarta.servlet.*;
-import java.util.Arrays;
-
-import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerConfiguration;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.commons.codec.binary.Base64;
-
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import java.io.IOException;
+import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerConfiguration;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 public class MultiPortFilterTest {
-  String username = "user";
-  String password = "pw";
 
-  @Test
-  public void denyRequestIfPortNot8081orURIDoesNotContainHealth() throws IOException, ServletException {
-    MockHttpServletRequest req = new MockHttpServletRequest();
-    MockHttpServletResponse res = new MockHttpServletResponse();
+  private MockHttpServletRequest req;
+  private MockHttpServletResponse res;
 
-    MultiPortFilter filter = new MultiPortFilter(null);
-    filter.doFilter(req, res, null);
-    assertEquals(80, req.getLocalPort());
-    assertEquals(404, res.getStatus());    
+  @MockBean private FilterChain filterChainMock;
+
+  @Before
+  public void setUp() {
+    req = new MockHttpServletRequest();
+    res = new MockHttpServletResponse();
   }
 
   @Test
-  public void allowRequestIfPort8081andURIContainHealthWithoutUnprotectedEndpoints() throws IOException, ServletException {
-    HealthServerConfiguration healthServerConfig = new HealthServerConfiguration(username, password, 8081, Arrays.asList());
+  public void shouldRespondTo8080IfURLContainsPort8080() throws IOException, ServletException {
 
-    MockHttpServletRequest req = new MockHttpServletRequest();
-    FilterChain filterChainMock = Mockito.mock(FilterChain.class);
-    req.setLocalPort(8081);
-    req.setRequestURI("some/health/uri");
-    String auth = username + ":" + password;
-    req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));//Base64.encodeBase64(auth.getBytes()));
-    MockHttpServletResponse res = new MockHttpServletResponse();
+    req.setLocalPort(8080);
 
-    MultiPortFilter filter = new MultiPortFilter(healthServerConfig);
-        
+    MultiPortFilter filter = new MultiPortFilter(new HealthServerConfiguration("", "", 8081, null));
     filter.doFilter(req, res, filterChainMock);
+    assertEquals(8080, req.getLocalPort());
     assertEquals(200, res.getStatus());
-    Mockito.verify(filterChainMock, Mockito.times(1)).doFilter(req, res);
   }
 
   @Test
-  public void denyRequestIfPort8081andURIContainHealthWithoutUnprotectedEndpointsUserNotAuthenticated() throws IOException, ServletException {
-    MockHttpServletRequest req = new MockHttpServletRequest();
-    FilterChain filterChainMock = Mockito.mock(FilterChain.class);
-    req.setLocalPort(8081);
-    req.setRequestURI("some/health/uri");
-    String auth = username + ":" + password;
-    req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));//Base64.encodeBase64(auth.getBytes()));
-    MockHttpServletResponse res = new MockHttpServletResponse();
+  public void shouldRespond8080IfSchedulersURL() throws IOException, ServletException {
 
-    HealthServerConfiguration healthServerConfig = new HealthServerConfiguration(null, null, 8081, Arrays.asList());
-    MultiPortFilter userPwNullFilter = new MultiPortFilter(healthServerConfig);
-    userPwNullFilter.doFilter(req, res, filterChainMock);
-    assertEquals(401, res.getStatus());
-    Mockito.verify(filterChainMock, Mockito.times(0)).doFilter(req, res);
-    assertEquals(res.getHeader("WWW-Authenticate"), "Basic");
+    req.setLocalPort(8080);
 
-    res = new MockHttpServletResponse();
-    healthServerConfig = new HealthServerConfiguration(username, password, 8081, Arrays.asList());
-    MultiPortFilter malformedHeaderFilter = new MultiPortFilter(healthServerConfig);
-    req.removeHeader("Authorization");
-    String malformedCreds = "some-malformed-creds";
-    req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(malformedCreds.getBytes()));//Base64.encodeBase64(auth.getBytes()));
-    malformedHeaderFilter.doFilter(req, res, filterChainMock);
-    assertEquals(400, res.getStatus());
-    Mockito.verify(filterChainMock, Mockito.times(0)).doFilter(req, res);
-    assertEquals(res.getHeader("WWW-Authenticate"), null);
+    req.setRequestURI("/v1/syncSchedules");
 
-    res = new MockHttpServletResponse();
-    healthServerConfig = new HealthServerConfiguration(username, password, 8081, Arrays.asList());
-    MultiPortFilter wrongCredsFilter = new MultiPortFilter(healthServerConfig);
-    req.removeHeader("Authorization");
-    String wrongCreds = "wrong-user:pw";
-    req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(wrongCreds.getBytes()));//Base64.encodeBase64(auth.getBytes()));
-    wrongCredsFilter.doFilter(req, res, filterChainMock);
-    assertEquals(401, res.getStatus());
-    Mockito.verify(filterChainMock, Mockito.times(0)).doFilter(req, res);
-    assertEquals(res.getHeader("WWW-Authenticate"), "Basic");
-
-    res = new MockHttpServletResponse();
-    healthServerConfig = new HealthServerConfiguration(username, password, 8081, Arrays.asList());
-    MultiPortFilter noAuthHeaderFilter = new MultiPortFilter(healthServerConfig);
-    req.removeHeader("Authorization");
-    noAuthHeaderFilter.doFilter(req, res, filterChainMock);
-    assertEquals(401, res.getStatus());
-    Mockito.verify(filterChainMock, Mockito.times(0)).doFilter(req, res);
-    assertEquals(res.getHeader("WWW-Authenticate"), "Basic");
+    req.setMethod("PUT");
+    MultiPortFilter filter = new MultiPortFilter(new HealthServerConfiguration("", "", 8081, null));
+    filter.doFilter(req, res, filterChainMock);
+    assertEquals(8080, req.getLocalPort());
+    assertEquals(200, res.getStatus());
   }
 
   @Test
-  public void allowRequestIfPort8081andURIContainHealthWithUnprotectedEndpoints() throws IOException, ServletException {
-    HealthServerConfiguration healthServerConfig = new HealthServerConfiguration(username, password, 8081, Arrays.asList("/health/liveness"));
+  public void allowRequestIfPort8081WithHealthEndpoint() throws IOException, ServletException {
 
-    MockHttpServletRequest req = new MockHttpServletRequest();
-    FilterChain filterChainMock = Mockito.mock(FilterChain.class);
     req.setLocalPort(8081);
-    req.setRequestURI("/health/liveness");
-    String auth = username + ":" + password;
-    req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));//Base64.encodeBase64(auth.getBytes()));
-    MockHttpServletResponse res = new MockHttpServletResponse();
 
-    MultiPortFilter filter = new MultiPortFilter(healthServerConfig);
-        
+    req.setRequestURI("/health/");
+
+    MultiPortFilter filter = new MultiPortFilter(new HealthServerConfiguration("", "", 8081, null));
     filter.doFilter(req, res, filterChainMock);
-
-    Mockito.verify(filterChainMock, Mockito.times(1)).doFilter(req, res);
+    assertEquals(8081, req.getLocalPort());
+    assertEquals(200, res.getStatus());
   }
 
   @Test
-  public void denyRequestIfPort8081andURIContainHealthWithUnprotectedEndpoints() throws IOException, ServletException {
-    MockHttpServletRequest req = new MockHttpServletRequest();
-    FilterChain filterChainMock = Mockito.mock(FilterChain.class);
+  public void shouldRespond404IfPort8081WithNoHealthEndpoint()
+      throws IOException, ServletException {
     req.setLocalPort(8081);
-    req.setRequestURI("/health/liveness");
-    String auth = username + ":" + password;
-    req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));//Base64.encodeBase64(auth.getBytes()));
-    MockHttpServletResponse res = new MockHttpServletResponse();
 
-    
-    HealthServerConfiguration healthServerConfig = new HealthServerConfiguration(username, password, 8081, Arrays.asList("/health/wrong-endpoint"));
-    MultiPortFilter filter = new MultiPortFilter(healthServerConfig);
-        
+    MultiPortFilter filter = new MultiPortFilter(new HealthServerConfiguration("", "", 8081, null));
+    filter.doFilter(req, res, null);
+    assertEquals(8081, req.getLocalPort());
+    assertEquals(404, res.getStatus());
+  }
+
+  @Test
+  public void shouldRespond404IfPort8081WithNoHealthEndpointButWithSchedules()
+      throws IOException, ServletException {
+    req.setLocalPort(8081);
+    req.setRequestURI("/v1/syncSchedules");
+    req.setMethod("PUT");
+
+    MultiPortFilter filter = new MultiPortFilter(new HealthServerConfiguration("", "", 8081, null));
     filter.doFilter(req, res, filterChainMock);
-
-    Mockito.verify(filterChainMock, Mockito.times(0)).doFilter(req, res);
-    assertEquals(401, res.getStatus());
-    assertEquals(res.getHeader("WWW-Authenticate"), "Basic");
-
-    healthServerConfig = new HealthServerConfiguration(username, password, 8081, Arrays.asList("/health/liveness"));
-    filter = new MultiPortFilter(healthServerConfig);
-    req.setRequestURI("/health/wrong-endpoint");
-    res = new MockHttpServletResponse();    
-    filter.doFilter(req, res, filterChainMock);
-
-    Mockito.verify(filterChainMock, Mockito.times(0)).doFilter(req, res);
-    assertEquals(401, res.getStatus());
-    assertEquals(res.getHeader("WWW-Authenticate"), "Basic");
+    assertEquals(8081, req.getLocalPort());
+    assertEquals(404, res.getStatus());
   }
 }

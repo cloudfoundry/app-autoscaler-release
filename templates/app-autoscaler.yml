@@ -352,8 +352,7 @@ instance_groups:
         scheduler_db: *database
         scheduler:
           health:
-            port: &schedulerHealthPort 6202
-            basicAuthEnabled: true
+            port: &schedulerHealthPort 6204
             username: scheduler
             password: ((autoscaler_scheduler_health_password))
           job_reschedule_interval_millisecond: 10000

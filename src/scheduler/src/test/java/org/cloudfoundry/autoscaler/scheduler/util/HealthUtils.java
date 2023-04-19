@@ -7,20 +7,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class HealthUtils {
 
-    @Autowired
-    static
-    HealthServerConfiguration HealthServerConfig;
+  @Autowired static HealthServerConfiguration healthServerConfig;
 
-    private HealthUtils() {
+  private HealthUtils() {}
 
-    }
+  public static String livenessUrl() {
+    return "http://localhost:" + healthServerConfig.getPort() + "/health/liveness";
+  }
 
-    public static String livenessUrl() {
-        return "http://localhost:" + HealthServerConfig.getPort() + "/health/liveness";
-    }
-
-    public static String prometheusMetricsUrl() {
-        return "http://localhost:" + HealthServerConfig.getPort() + "/health/prometheus";
-    }
-
+  public static String prometheusMetricsUrl() {
+    return "http://localhost:" + healthServerConfig.getPort() + "/health/prometheus";
+  }
 }

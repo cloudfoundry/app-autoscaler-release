@@ -26,4 +26,11 @@ public class ScheduleSyncRestController {
     SynchronizeResult result = scheduleManager.synchronizeSchedules();
     return new ResponseEntity<>(result, null, HttpStatus.OK);
   }
+
+  @RequestMapping(method = RequestMethod.GET)
+  @ResponseStatus(HttpStatus.OK)
+  public ResponseEntity<String> testingGET() {
+    logger.info("synchronize schedules");
+    return new ResponseEntity<>("working", null, HttpStatus.OK);
+  }
 }

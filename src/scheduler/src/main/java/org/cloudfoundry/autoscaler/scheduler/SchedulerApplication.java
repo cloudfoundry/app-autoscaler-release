@@ -20,7 +20,6 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.autoconfigure.transaction.jta.JtaAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.event.EventListener;
 
 @SpringBootApplication(
@@ -52,6 +51,5 @@ public class SchedulerApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(SchedulerApplication.class, args);
-
   }
 }
