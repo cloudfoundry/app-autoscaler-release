@@ -31,6 +31,7 @@
               gnumake
               go
               golangci-lint
+              gopls # See: <https://github.com/golang/vscode-go/blob/master/docs/tools.md>
               google-cloud-sdk
               maven
               nodejs
