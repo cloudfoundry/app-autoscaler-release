@@ -102,6 +102,7 @@ func getRawServicesByPage(spaceGuid string, orgGuid string, page int, timeout ti
 	return appsResponse
 }
 func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
+	GinkgoHelper()
 	if !cfg.IsServiceOfferingEnabled() {
 		oauthToken := OauthToken(cfg)
 		customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))

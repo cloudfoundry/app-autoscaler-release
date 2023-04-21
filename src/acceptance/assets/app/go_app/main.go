@@ -1,7 +1,6 @@
 package main
 
 import (
-	"acceptance/assets/app/go_app/internal/app"
 	"context"
 	"errors"
 	"net/http"
@@ -10,22 +9,53 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func main() {
-	logger := logrus.New()
-	address := os.Getenv("SERVER_ADDRESS") + ":" + getPort(logger)
-	logger.Infof("Starting test-app : %s\n", address)
+	logger := createLogger()
+	sugar := logger.Sugar()
+
+	gin.SetMode(gin.ReleaseMode)
+
+	address := os.Getenv("SERVER_ADDRESS") + ":" + getPort(sugar)
+	sugar.Infof("Starting test-app : %s\n", address)
 	server := app.New(logger, address)
-	enableGracefulShutdown(logger, server)
+	enableGracefulShutdown(sugar, server)
 	err := server.ListenAndServe()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		logger.Panicf("Error while exiting server: %s", err.Error())
+		sugar.Panicf("Error while exiting server: %s", err.Error())
 	}
 }
 
-func enableGracefulShutdown(logger *logrus.Logger, server *http.Server) {
+func createLogger() *zap.Logger {
+	highPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl >= zapcore.ErrorLevel
+	})
+	lowPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl < zapcore.ErrorLevel
+	})
+
+	consoleDebugging := zapcore.Lock(os.Stdout)
+	consoleErrors := zapcore.Lock(os.Stderr)
+
+	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(consoleEncoder, consoleErrors, highPriority),
+		zapcore.NewCore(consoleEncoder, consoleDebugging, lowPriority),
+	)
+
+	// From a zapcore.Core, it's easy to construct a Logger.
+	logger := zap.New(core)
+
+	return logger
+}
+
+func enableGracefulShutdown(logger *zap.SugaredLogger, server *http.Server) {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
@@ -46,7 +76,7 @@ func enableGracefulShutdown(logger *logrus.Logger, server *http.Server) {
 	}()
 }
 
-func getPort(logger *logrus.Logger) string {
+func getPort(logger *zap.SugaredLogger) string {
 	port := os.Getenv("PORT")
 	if port == "" {
 		logger.Infof("No Env var PORT specified using 8080")

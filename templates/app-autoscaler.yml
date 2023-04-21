@@ -289,6 +289,8 @@ instance_groups:
                   bindable: true
                   instances_retrievable: true
                   bindings_retrievable: true
+                  tags:
+                    - app-autoscaler
                   plans:
                     - id: autoscaler-free-plan-id
                       name: autoscaler-free-plan

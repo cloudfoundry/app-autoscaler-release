@@ -78,7 +78,13 @@ func SendMetricWithTimeout(cfg *config.Config, appName string, metric int, timeO
 }
 
 func SendMetric(cfg *config.Config, appName string, metric int) {
+	GinkgoHelper()
 	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), "-f")
+}
+
+func SendMetricMTLS(cfg *config.Config, appName string, metric int) {
+	GinkgoHelper()
+	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/mtls/test_metric/%d", metric), "-f")
 }
 
 func StartAppWithErr(appName string, timeout time.Duration) error {
@@ -159,10 +165,11 @@ func createTestApp(cfg *config.Config, appName string, initialInstanceCount int,
 			"--var", "app_domain=" + cfg.AppsDomain,
 			"--var", "service_name=" + cfg.ServiceName,
 			"--var", "instances=" + countStr,
-			"--var", "buildpack=" + cfg.NodejsBuildpackName,
+			"--var", "buildpack=" + cfg.BinaryBuildpackName,
 			"--var", "node_tls_reject_unauthorized=" + setNodeTLSRejectUnauthorizedEnvironmentVariable,
 			"--var", "memory_mb=" + strconv.Itoa(cfg.NodeMemoryLimit),
-			"-f", config.NODE_APP + "/app_manifest.yml",
+			"-f", config.GO_APP + "/manifest.yml",
+			"-c", "./app",
 			"--no-start",
 		}
 		params = append(params, args...)
@@ -179,7 +186,7 @@ func createTestApp(cfg *config.Config, appName string, initialInstanceCount int,
 }
 
 func CreateTestAppByName(cfg *config.Config, appName string, initialInstanceCount int) {
-	err := createTestApp(cfg, appName, initialInstanceCount, "-p", config.NODE_APP)
+	err := createTestApp(cfg, appName, initialInstanceCount, "-p", config.GO_APP)
 	Expect(err).ToNot(HaveOccurred())
 }
 
@@ -203,7 +210,8 @@ func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url st
 }
 
 func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int) {
-	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/cpu/%d/%d", percent, minutes), 10*time.Second)).Should(ContainSubstring(`set app cpu utilization`))
+	GinkgoHelper()
+	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/cpu/%d/%d", percent, minutes), 10*time.Second)).Should(MatchJSON("{\"minutes\":5,\"utilization\":90}"))
 }
 
 func AppEndCpuTest(cfg *config.Config, appName string, instance int) {

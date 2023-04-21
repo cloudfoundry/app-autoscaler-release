@@ -48,7 +48,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 			By("adding policy so test_metric is allowed")
 			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 			By("sending metric via mtls endpoint")
-			SendMetric(cfg, appName, 10)
+			SendMetricMTLS(cfg, appName, 10)
 			GinkgoWriter.Println("")
 		})
 	})

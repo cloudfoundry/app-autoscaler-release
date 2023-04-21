@@ -7,7 +7,7 @@ applications:
       SERVICE_NAME: ((service_name))
       NODE_ENV: production
       MEMORY_MAX: ((memory_mb))
-    stack: cflinuxfs3
+    stack: cflinuxfs4
     routes:
       - route: ((app_name)).((app_domain))
         protocol: http1

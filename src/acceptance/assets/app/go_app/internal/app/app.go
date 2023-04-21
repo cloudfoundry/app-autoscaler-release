@@ -1,36 +1,49 @@
 package app
 
 import (
-	"log"
+	"context"
+	"github.com/cloudfoundry-community/go-cfenv"
 	"net/http"
 	"time"
 
+	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	"github.com/go-logr/zapr"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	"go.opentelemetry.io/contrib/propagators/b3"
+	"go.opentelemetry.io/otel"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-type logrusErrorWriter struct{ *logrus.Logger }
+func Router(logger *zap.Logger, sleep func(duration time.Duration), useMem func(useMb uint64), useCPU func(utilization uint64, duration time.Duration), postCustomMetrics func(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error) *gin.Engine {
+	r := gin.New()
 
-func (w logrusErrorWriter) Write(p []byte) (n int, err error) {
-	w.Error(string(p))
-	return len(p), nil
-}
+	otel.SetTextMapPropagator(b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader)))
+	r.Use(otelgin.Middleware("acceptance-tests-go-app"))
 
-func Router(logger *logrus.Logger, sleep func(duration time.Duration), useMem func(useMb uint64)) *gin.Engine {
-	r := gin.Default()
+	r.Use(ginzap.GinzapWithConfig(logger, &ginzap.Config{TimeFormat: time.RFC3339, UTC: true, TraceID: true}))
+	r.Use(ginzap.RecoveryWithZap(logger, true))
+
+	logr := zapr.NewLogger(logger)
+
 	r.GET("/", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"name": "test-app"}) })
 	r.GET("/health", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"status": "ok"}) })
-	MemoryTests(logger, r.Group("/memory"), sleep, useMem)
+	MemoryTests(logr, r.Group("/memory"), sleep, useMem)
+	ResponseTimeTests(logr, r.Group("/responsetime"), sleep)
+	CPUTests(logr, r.Group("/cpu"), sleep, useCPU)
+	CustomMetricsTests(logr, r.Group("/custom-metrics"), postCustomMetrics)
 	return r
 }
 
-func New(logger *logrus.Logger, address string) *http.Server {
+func New(logger *zap.Logger, address string) *http.Server {
+	errorLog, _ := zap.NewStdLogAt(logger, zapcore.ErrorLevel)
 	return &http.Server{
 		Addr:         address,
-		Handler:      Router(logger, nil, nil),
+		Handler:      Router(logger, nil, nil, nil, nil),
 		ReadTimeout:  5 * time.Second,
 		IdleTimeout:  2 * time.Second,
 		WriteTimeout: 30 * time.Second,
-		ErrorLog:     log.New(logrusErrorWriter{logger}, "", 0),
+		ErrorLog:     errorLog,
 	}
 }
