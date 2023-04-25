@@ -21,15 +21,14 @@ cf target -o test
 cf create-space test_app
 cf target -s test_app
 
-cf enable-service-access "$service_name" -b "$(getConfItem service_broker)" -p  "$(getConfItem service_plan)" -o test
-cf create-service "$service_name" "$(getConfItem service_plan)" "$service_name" -b "$(getConfItem service_broker)" --wait
-#cf unbind-service test_app "$service_name" --wait
+cf enable-service-access "${service_name}" -b "$(getConfItem service_broker)" -p  "$(getConfItem service_plan)" -o test
+cf create-service "${service_name}" "$(getConfItem service_plan)" "${service_name}" -b "$(getConfItem service_broker)" --wait
 
-pushd "$app_dir" >/dev/null
+pushd "${app_dir}" >/dev/null
 cf push\
   --var app_name=test_app\
   --var app_domain="$(getConfItem apps_domain)"\
-  --var service_name="$service_name"\
+  --var service_name="${service_name}"\
   --var instances=1\
   --var memory_mb="$(getConfItem node_memory_limit||echo 128)"\
   --var buildpack="binary_buildpack"\
