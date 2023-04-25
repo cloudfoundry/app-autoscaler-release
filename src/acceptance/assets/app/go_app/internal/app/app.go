@@ -1,8 +1,6 @@
 package app
 
 import (
-	"context"
-	"github.com/cloudfoundry-community/go-cfenv"
 	"net/http"
 	"time"
 
@@ -16,7 +14,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func Router(logger *zap.Logger, sleep func(duration time.Duration), useMem func(useMb uint64), useCPU func(utilization uint64, duration time.Duration), postCustomMetrics func(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error) *gin.Engine {
+func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler, cpuTest CPUWaster, customMetricTest CustomMetricClient) *gin.Engine {
 	r := gin.New()
 
 	otel.SetTextMapPropagator(b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader)))
@@ -29,10 +27,10 @@ func Router(logger *zap.Logger, sleep func(duration time.Duration), useMem func(
 
 	r.GET("/", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"name": "test-app"}) })
 	r.GET("/health", func(c *gin.Context) { c.JSON(http.StatusOK, gin.H{"status": "ok"}) })
-	MemoryTests(logr, r.Group("/memory"), sleep, useMem)
-	ResponseTimeTests(logr, r.Group("/responsetime"), sleep)
-	CPUTests(logr, r.Group("/cpu"), sleep, useCPU)
-	CustomMetricsTests(logr, r.Group("/custom-metrics"), postCustomMetrics)
+	MemoryTests(logr, r.Group("/memory"), memoryTest)
+	ResponseTimeTests(logr, r.Group("/responsetime"), timewaster)
+	CPUTests(logr, r.Group("/cpu"), cpuTest)
+	CustomMetricsTests(logr, r.Group("/custom-metrics"), customMetricTest)
 	return r
 }
 
@@ -40,7 +38,7 @@ func New(logger *zap.Logger, address string) *http.Server {
 	errorLog, _ := zap.NewStdLogAt(logger, zapcore.ErrorLevel)
 	return &http.Server{
 		Addr:         address,
-		Handler:      Router(logger, nil, nil, nil, nil),
+		Handler:      Router(logger, &Sleeper{}, &ListBasedMemoryGobbler{}, &ConcurrentBusyLoopCPUWaster{}, &CustomMetricAPIClient{}),
 		ReadTimeout:  5 * time.Second,
 		IdleTimeout:  2 * time.Second,
 		WriteTimeout: 30 * time.Second,

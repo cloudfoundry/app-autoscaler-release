@@ -12,24 +12,24 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-type CPUTest struct {
+//counterfeiter:generate . CPUWaster
+type CPUWaster interface {
+	UseCPU(utilisation uint64, duration time.Duration)
+	IsRunning() bool
+	StopTest()
+}
+
+type ConcurrentBusyLoopCPUWaster struct {
 	mu        sync.Mutex
 	isRunning bool
 }
 
-func CPUTests(logger logr.Logger, r *gin.RouterGroup, sleep func(duration time.Duration), useCPU func(utilization uint64, duration time.Duration)) *gin.RouterGroup {
+var _ CPUWaster = &ConcurrentBusyLoopCPUWaster{}
 
-	var m *CPUTest
-	if sleep == nil || useCPU == nil {
-		m = &CPUTest{}
-		sleep = m.Sleep
-		useCPU = func(utilization uint64, duration time.Duration) {
-			m.UseCPU(utilization, duration)
-		}
-	}
+func CPUTests(logger logr.Logger, r *gin.RouterGroup, cpuTest CPUWaster) *gin.RouterGroup {
 
 	r.GET("/:utilization/:minutes", func(c *gin.Context) {
-		if m != nil && m.IsRunning() {
+		if cpuTest.IsRunning() {
 			Error(c, http.StatusConflict, "CPU test is already running")
 			return
 		}
@@ -47,15 +47,15 @@ func CPUTests(logger logr.Logger, r *gin.RouterGroup, sleep func(duration time.D
 		}
 		duration := time.Duration(minutes) * time.Minute
 		go func() {
-			useCPU(utilization, duration)
+			cpuTest.UseCPU(utilization, duration)
 		}()
 		c.JSON(http.StatusOK, gin.H{"utilization": utilization, "minutes": minutes})
 	})
 
 	r.GET("/close", func(c *gin.Context) {
-		if m != nil && m.IsRunning() {
+		if cpuTest.IsRunning() {
 			logger.Info("stop CPU test")
-			m.StopTest()
+			cpuTest.StopTest()
 			c.JSON(http.StatusOK, gin.H{"status": "close cpu test"})
 		} else {
 			Error(c, http.StatusBadRequest, "CPU test not running")
@@ -64,14 +64,14 @@ func CPUTests(logger logr.Logger, r *gin.RouterGroup, sleep func(duration time.D
 	return r
 }
 
-func (m *CPUTest) UseCPU(utilisation uint64, duration time.Duration) {
+func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.Duration) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.isRunning = true
 
 	for utilisation > 0 {
-		perProcessUtilisation := min(utilisation, 100)
-		utilisation = utilisation - perProcessUtilisation
+		perGoRoutineUtilisation := min(utilisation, 100)
+		utilisation = utilisation - perGoRoutineUtilisation
 
 		go func(util uint64) {
 			run := time.Duration(util) * time.Microsecond / 10
@@ -84,7 +84,7 @@ func (m *CPUTest) UseCPU(utilisation uint64, duration time.Duration) {
 				}
 				time.Sleep(sleep)
 			}
-		}(perProcessUtilisation)
+		}(perGoRoutineUtilisation)
 	}
 	// how long
 	go func() {
@@ -93,20 +93,13 @@ func (m *CPUTest) UseCPU(utilisation uint64, duration time.Duration) {
 	}()
 }
 
-func (m *CPUTest) Sleep(sleepTime time.Duration) {
-	sleepTill := time.Now().Add(sleepTime)
-	for m.IsRunning() && time.Now().Before(sleepTill) {
-		time.Sleep(100 * time.Millisecond)
-	}
-}
-
-func (m *CPUTest) IsRunning() bool {
+func (m *ConcurrentBusyLoopCPUWaster) IsRunning() bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	return m.isRunning
 }
 
-func (m *CPUTest) StopTest() {
+func (m *ConcurrentBusyLoopCPUWaster) StopTest() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.isRunning = false

@@ -52,7 +52,7 @@ deploy: build
 	./deploy.sh
 
 generate: go.mod ../../../../../api/custom-metrics-api.yaml
-	go generate internal/generate.go
+	go generate ./...
 
 .PHONY: clean
 clean:

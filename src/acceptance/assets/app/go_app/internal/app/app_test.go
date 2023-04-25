@@ -1,10 +1,8 @@
 package app_test
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"github.com/cloudfoundry-community/go-cfenv"
 	"net"
 	"net/http"
 	"time"
@@ -28,7 +26,7 @@ var _ = Describe("Ginkgo/Server", func() {
 
 	Context("basic endpoint tests", func() {
 		It("Root should respond correctly", func() {
-			apiTest(NoOpSleep, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, nil, nil, nil).
 				Get("/").
 				Expect(t).
 				Status(http.StatusOK).
@@ -36,7 +34,7 @@ var _ = Describe("Ginkgo/Server", func() {
 				End()
 		})
 		It("health", func() {
-			apiTest(NoOpSleep, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, nil, nil, nil).
 				Get("/health").
 				Expect(t).
 				Status(http.StatusOK).
@@ -76,16 +74,12 @@ var _ = Describe("Ginkgo/Server", func() {
 	})
 })
 
-func NoOpSleep(_ time.Duration)            {}
-func NoOpUseMem(_ uint64)                  {}
-func NoOpUseCPU(_ uint64, _ time.Duration) {}
-func NoOpPostCustomMetrics(_ context.Context, _ *cfenv.App, _ float64, _ string, _ bool) error {
-	return nil
-}
+func NoOpSleep(_ time.Duration) {}
 
-func apiTest(sleep func(duration time.Duration), useMem func(useMb uint64), useCPU func(utilization uint64, duration time.Duration), postCustomMetrics func(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMTLS bool) error) *apitest.APITest {
+func apiTest(timeWaster app.TimeWaster, memoryGobbler app.MemoryGobbler, cpuWaster app.CPUWaster, customMetricClient app.CustomMetricClient) *apitest.APITest {
 	GinkgoHelper()
 	logger := zaptest.LoggerWriter(GinkgoWriter)
+
 	return apitest.New().
-		Handler(app.Router(logger, sleep, useMem, useCPU, postCustomMetrics))
+		Handler(app.Router(logger, timeWaster, memoryGobbler, cpuWaster, customMetricClient))
 }

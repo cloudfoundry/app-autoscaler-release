@@ -2,10 +2,10 @@ package app_test
 
 import (
 	"net/http"
-	"sync"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -13,17 +13,10 @@ import (
 var _ = Describe("CPU tests", func() {
 
 	Context("CPU handler", func() {
-		var cpuUsed uint64
-		var cpuRuntime time.Duration
-		cpuLock := &sync.Mutex{}
-		cpuLock.Lock()
-		useCPUFn := func(utilization uint64, duration time.Duration) {
-			cpuUsed = utilization
-			cpuRuntime = duration
-			cpuLock.Unlock()
-		}
+		fakeCPUWaster := &appfakes.FakeCPUWaster{}
+
 		It("should err if utilization not an int64", func() {
-			apiTest(NoOpSleep, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, nil, fakeCPUWaster, nil).
 				Get("/cpu/invalid/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -31,7 +24,7 @@ var _ = Describe("CPU tests", func() {
 				End()
 		})
 		It("should err if cpu out of bounds", func() {
-			apiTest(NoOpSleep, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, nil, fakeCPUWaster, nil).
 				Get("/cpu/100001010101010249032897287298719874687936483275648273632429479827398798271/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -39,7 +32,7 @@ var _ = Describe("CPU tests", func() {
 				End()
 		})
 		It("should err if cpu not an int", func() {
-			apiTest(NoOpSleep, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, nil, fakeCPUWaster, nil).
 				Get("/cpu/5/invalid").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -47,15 +40,17 @@ var _ = Describe("CPU tests", func() {
 				End()
 		})
 		It("should return ok and sleep correctDuration", func() {
-			apiTest(NoOpSleep, NoOpUseMem, useCPUFn, NoOpPostCustomMetrics).
+			apiTest(nil, nil, fakeCPUWaster, nil).
 				Get("/cpu/5/4").
 				Expect(GinkgoT()).
 				Status(http.StatusOK).
 				Body(`{"utilization":5, "minutes":4 }`).
 				End()
-			cpuLock.Lock()
-			Expect(cpuRuntime).Should(Equal(4 * time.Minute))
-			Expect(cpuUsed).Should(Equal(uint64(5)))
+
+			Eventually(func() int { return fakeCPUWaster.UseCPUCallCount() }).Should(Equal(1))
+			utilization, duration := fakeCPUWaster.UseCPUArgsForCall(0)
+			Expect(duration).Should(Equal(4 * time.Minute))
+			Expect(utilization).Should(Equal(uint64(5)))
 		})
 	})
 	Context("UseCPU", func() {
@@ -64,7 +59,7 @@ var _ = Describe("CPU tests", func() {
 			oldCpu := getTotalCPUUsage("before cpuTest info test")
 
 			By("allocating cpu")
-			cpuInfo := &app.CPUTest{}
+			cpuInfo := &app.ConcurrentBusyLoopCPUWaster{}
 			cpuInfo.UseCPU(100, time.Second)
 			Expect(cpuInfo.IsRunning()).To(Equal(true))
 			Eventually(cpuInfo.IsRunning, "2s").Should(Equal(false))

@@ -9,13 +9,16 @@ import (
 	"github.com/go-logr/logr"
 )
 
-func ResponseTimeTests(logger logr.Logger, r *gin.RouterGroup, sleep func(duration time.Duration)) *gin.RouterGroup {
+//counterfeiter:generate . TimeWaster
+type TimeWaster interface {
+	Sleep(sleepTime time.Duration)
+}
 
-	var m *MemTest
-	if sleep == nil {
-		sleep = Sleep
-	}
+type Sleeper struct{}
 
+var _ TimeWaster = Sleeper{}
+
+func ResponseTimeTests(logger logr.Logger, r *gin.RouterGroup, timeWaster TimeWaster) *gin.RouterGroup {
 	r.GET("/slow/:delayInMS", func(c *gin.Context) {
 		var milliseconds uint64
 		var err error
@@ -24,18 +27,16 @@ func ResponseTimeTests(logger logr.Logger, r *gin.RouterGroup, sleep func(durati
 			return
 		}
 		duration := time.Duration(milliseconds) * time.Millisecond
-		sleep(duration)
+		timeWaster.Sleep(duration)
 		c.JSON(http.StatusOK, gin.H{"duration": duration.String()})
 	})
 
 	r.GET("/fast", func(c *gin.Context) {
-		if m != nil && m.IsRunning() {
-			c.JSON(http.StatusOK, gin.H{"fast": true})
-		}
+		c.JSON(http.StatusOK, gin.H{"fast": true})
 	})
 	return r
 }
 
-func Sleep(sleepTime time.Duration) {
+func (_ Sleeper) Sleep(sleepTime time.Duration) {
 	time.Sleep(sleepTime)
 }

@@ -1,37 +1,25 @@
 package app_test
 
 import (
-	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
-	api "code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/custommetrics"
 	"context"
+	"net/http"
+
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
+	api "code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/custommetrics"
 	"github.com/cloudfoundry-community/go-cfenv"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/ghttp"
-	"net/http"
-	"sync"
 )
 
 var _ = Describe("custom metrics tests", func() {
 
 	Context("custom metrics handler", func() {
-		var (
-			sentValue  float64
-			sentMetric string
-			mtlsUsed   bool
-		)
-		customMetricsLock := &sync.Mutex{}
-		customMetricsLock.Lock()
-		postCustomMetrics := func(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error {
-			sentValue = metricsValue
-			sentMetric = metricName
-			mtlsUsed = useMtls
-			customMetricsLock.Unlock()
-			return nil
-		}
+		fakeCustomMetricClient := &appfakes.FakeCustomMetricClient{}
 
 		It("should err if value out of bounds", func() {
-			apiTest(NoOpSleep, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, nil, nil, nil).
 				Get("/custom-metrics/test/100001010101010249032897287298719874687936483275648273632429479827398798271").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -39,7 +27,7 @@ var _ = Describe("custom metrics tests", func() {
 				End()
 		})
 		It("should err if value not a number", func() {
-			apiTest(NoOpSleep, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, nil, nil, nil).
 				Get("/custom-metrics/test/invalid").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -47,13 +35,14 @@ var _ = Describe("custom metrics tests", func() {
 				End()
 		})
 		It("should post the custom metric", func() {
-			apiTest(NoOpSleep, NoOpUseMem, NoOpUseCPU, postCustomMetrics).
+			apiTest(nil, nil, nil, fakeCustomMetricClient).
 				Get("/custom-metrics/test/4").
 				Expect(GinkgoT()).
 				Status(http.StatusOK).
 				Body(`{"mtls":false}`).
 				End()
-			customMetricsLock.Lock()
+			Expect(fakeCustomMetricClient.PostCustomMetricCallCount()).To(Equal(1))
+			_, _, sentValue, sentMetric, mtlsUsed := fakeCustomMetricClient.PostCustomMetricArgsForCall(0)
 			Expect(sentMetric).Should(Equal("test"))
 			Expect(sentValue).Should(Equal(4.0))
 			Expect(mtlsUsed).Should(Equal(false))
@@ -64,13 +53,28 @@ var _ = Describe("custom metrics tests", func() {
 
 			testAppId := "test-app-id"
 			fakeServer := ghttp.NewServer()
+			username := "test-user"
+			password := "test-pass"
 			fakeServer.AppendHandlers(
-				ghttp.VerifyRequest("POST", "/v1/apps/"+testAppId+"/metrics"),
+				ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", "/v1/apps/"+testAppId+"/metrics"),
+					ghttp.VerifyBasicAuth(username, password),
+					ghttp.VerifyJSON(`{
+													  "instance_index": 0,
+													  "metrics": [
+														{
+														  "name": "test",
+														  "value": 42
+														}
+													  ]
+													}`,
+					),
+				),
 			)
 
 			customMetricsCredentials := api.CustomMetricsCredentials{
-				Username: "user",
-				Password: "pass",
+				Username: username,
+				Password: password,
 				URL:      fakeServer.URL(),
 			}
 			service := cfenv.Service{
@@ -85,7 +89,8 @@ var _ = Describe("custom metrics tests", func() {
 				Services: map[string][]cfenv.Service{"autoscaler": {service}},
 			}
 
-			err := app.PostCustomMetric(context.TODO(), &appEnv, 42, "test", false)
+			client := &app.CustomMetricAPIClient{}
+			err := client.PostCustomMetric(context.TODO(), &appEnv, 42, "test", false)
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(len(fakeServer.ReceivedRequests())).To(Equal(1))

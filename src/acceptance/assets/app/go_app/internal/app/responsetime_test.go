@@ -1,8 +1,8 @@
 package app_test
 
 import (
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
 	"net/http"
-	"sync"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -12,12 +12,9 @@ import (
 var _ = Describe("Responsetime tests", func() {
 
 	Context("Responsetime tests", func() {
-		var amountSlept time.Duration
-		sleepLock := &sync.Mutex{}
-		sleepLock.Lock()
-		sleepFn := func(duration time.Duration) { amountSlept = duration; sleepLock.Unlock() }
+		fakeTimeWaster := &appfakes.FakeTimeWaster{}
 		It("should err if delayInMS not an int64", func() {
-			apiTest(sleepFn, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(fakeTimeWaster, nil, nil, nil).
 				Get("/responsetime/slow/yes").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -25,7 +22,7 @@ var _ = Describe("Responsetime tests", func() {
 				End()
 		})
 		It("should err if memory out of bounds", func() {
-			apiTest(sleepFn, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(fakeTimeWaster, nil, nil, nil).
 				Get("/responsetime/slow/100001010101010249032897287298719874687936483275648273632429479827398798271").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -34,14 +31,14 @@ var _ = Describe("Responsetime tests", func() {
 		})
 
 		It("should return ok and sleep correctDuration", func() {
-			apiTest(sleepFn, NoOpUseMem, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(fakeTimeWaster, nil, nil, nil).
 				Get("/responsetime/slow/4000").
 				Expect(GinkgoT()).
 				Status(http.StatusOK).
 				Body(`{"duration":"4s"}`).
 				End()
-			sleepLock.Lock()
-			Expect(amountSlept).Should(Equal(4000 * time.Millisecond))
+			Expect(fakeTimeWaster.SleepCallCount()).To(Equal(1))
+			Expect(fakeTimeWaster.SleepArgsForCall(0)).Should(Equal(4000 * time.Millisecond))
 		})
 	})
 })

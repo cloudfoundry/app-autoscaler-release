@@ -22,25 +22,26 @@ const (
 	Mebi
 )
 
-type MemTest struct {
+//counterfeiter:generate . MemoryGobbler
+type MemoryGobbler interface {
+	UseMemory(numBytes uint64)
+	Sleep(sleepTime time.Duration)
+	IsRunning() bool
+	StopTest()
+}
+
+type ListBasedMemoryGobbler struct {
 	mu        sync.RWMutex
 	used      *list.List
 	isRunning bool
 }
 
-func MemoryTests(logger logr.Logger, r *gin.RouterGroup, sleep func(duration time.Duration), useMem func(useMb uint64)) *gin.RouterGroup {
+var _ MemoryGobbler = &ListBasedMemoryGobbler{}
 
-	var m *MemTest
-	if sleep == nil || useMem == nil {
-		m = &MemTest{}
-		sleep = m.Sleep
-		useMem = func(useMb uint64) {
-			m.UseMemory(useMb * Mebi)
-		}
-	}
+func MemoryTests(logger logr.Logger, r *gin.RouterGroup, memoryTest MemoryGobbler) *gin.RouterGroup {
 
 	r.GET("/:memoryMiB/:minutes", func(c *gin.Context) {
-		if m != nil && m.IsRunning() {
+		if memoryTest.IsRunning() {
 			Error(c, http.StatusConflict, "memory test is already running")
 			return
 		}
@@ -60,17 +61,17 @@ func MemoryTests(logger logr.Logger, r *gin.RouterGroup, sleep func(duration tim
 		logger := logger.WithValues("memoryMiB", memoryMiB, "duration", duration)
 		go func() {
 			logMemoryUsage(logger, "before memory test")
-			useMem(memoryMiB)
+			memoryTest.UseMemory(memoryMiB * Mebi)
 			logMemoryUsage(logger, "after allocating memory")
-			sleep(duration)
+			memoryTest.Sleep(duration)
 		}()
 		c.JSON(http.StatusOK, gin.H{"memoryMiB": memoryMiB, "minutes": minutes})
 	})
 
 	r.GET("/close", func(c *gin.Context) {
-		if m != nil && m.IsRunning() {
+		if memoryTest.IsRunning() {
 			logger.Info("stop mem test")
-			m.StopTest()
+			memoryTest.StopTest()
 			logMemoryUsage(logger, "after freeing memory")
 			c.JSON(http.StatusOK, gin.H{"status": "close memory test"})
 		} else {
@@ -96,7 +97,7 @@ func Error(c *gin.Context, status int, descriptionf string, args ...any) {
 
 const chunkSize = 4 * Kibi
 
-func (m *MemTest) UseMemory(numBytes uint64) {
+func (m *ListBasedMemoryGobbler) UseMemory(numBytes uint64) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.isRunning = true
@@ -108,20 +109,20 @@ func (m *MemTest) UseMemory(numBytes uint64) {
 	}
 }
 
-func (m *MemTest) Sleep(sleepTime time.Duration) {
+func (m *ListBasedMemoryGobbler) Sleep(sleepTime time.Duration) {
 	sleepTill := time.Now().Add(sleepTime)
 	for m.IsRunning() && time.Now().Before(sleepTill) {
 		time.Sleep(100 * time.Millisecond)
 	}
 }
 
-func (m *MemTest) IsRunning() bool {
+func (m *ListBasedMemoryGobbler) IsRunning() bool {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.isRunning
 }
 
-func (m *MemTest) StopTest() {
+func (m *ListBasedMemoryGobbler) StopTest() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.isRunning = false

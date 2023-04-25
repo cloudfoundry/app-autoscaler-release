@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"sync"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/prometheus/procfs"
@@ -16,16 +16,11 @@ import (
 var _ = Describe("Memory tests", func() {
 
 	Context("Memory tests", func() {
-		var amountSlept time.Duration
-		var memUsed uint64
-		memLock := &sync.Mutex{}
-		memLock.Lock()
-		sleepLock := &sync.Mutex{}
-		sleepLock.Lock()
-		sleepFn := func(duration time.Duration) { amountSlept = duration; sleepLock.Unlock() }
-		useMemFn := func(useMb uint64) { memUsed = useMb; memLock.Unlock() }
+
+		fakeMemoryTest := &appfakes.FakeMemoryGobbler{}
+
 		It("should err if memory not an int64", func() {
-			apiTest(sleepFn, useMemFn, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, fakeMemoryTest, nil, nil).
 				Get("/memory/invalid/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -33,7 +28,7 @@ var _ = Describe("Memory tests", func() {
 				End()
 		})
 		It("should err if memory out of bounds", func() {
-			apiTest(sleepFn, useMemFn, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, fakeMemoryTest, nil, nil).
 				Get("/memory/100001010101010249032897287298719874687936483275648273632429479827398798271/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -41,7 +36,7 @@ var _ = Describe("Memory tests", func() {
 				End()
 		})
 		It("should err if memory not an int", func() {
-			apiTest(sleepFn, useMemFn, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, fakeMemoryTest, nil, nil).
 				Get("/memory/5/invalid").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -49,16 +44,16 @@ var _ = Describe("Memory tests", func() {
 				End()
 		})
 		It("should return ok and sleep correctDuration", func() {
-			apiTest(sleepFn, useMemFn, NoOpUseCPU, NoOpPostCustomMetrics).
+			apiTest(nil, fakeMemoryTest, nil, nil).
 				Get("/memory/5/4").
 				Expect(GinkgoT()).
 				Status(http.StatusOK).
 				Body(`{"memoryMiB":5, "minutes":4 }`).
 				End()
-			sleepLock.Lock()
-			Expect(amountSlept).Should(Equal(4 * time.Minute))
-			memLock.Lock()
-			Expect(memUsed).Should(Equal(uint64(5)))
+			Eventually(func() int { return fakeMemoryTest.UseMemoryCallCount() }).Should(Equal(1))
+			Expect(fakeMemoryTest.UseMemoryArgsForCall(0)).To(Equal(uint64(5 * app.Mebi)))
+			Expect(fakeMemoryTest.SleepCallCount()).To(Equal(1))
+			Expect(fakeMemoryTest.SleepArgsForCall(0)).To(Equal(4 * time.Minute))
 		})
 	})
 	Context("memTest info tests", func() {
@@ -68,7 +63,7 @@ var _ = Describe("Memory tests", func() {
 			slack := getMemorySlack()
 
 			By("allocating memory")
-			memInfo := &app.MemTest{}
+			memInfo := &app.ListBasedMemoryGobbler{}
 			memInfo.UseMemory(5 * app.Mebi)
 			Expect(memInfo.IsRunning()).To(Equal(true))
 

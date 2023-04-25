@@ -17,18 +17,24 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-func CustomMetricsTests(logger logr.Logger, r *gin.RouterGroup, postCustomMetricFn func(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error) *gin.RouterGroup {
+//counterfeiter:generate . CustomMetricClient
+type CustomMetricClient interface {
+	PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error
+}
 
-	if postCustomMetricFn == nil {
-		postCustomMetricFn = PostCustomMetric
-	}
-	r.GET("/mtls/:name/:value", handleCustomMetricsEndpoint(postCustomMetricFn, true))
-	r.GET("/:name/:value", handleCustomMetricsEndpoint(postCustomMetricFn, false))
+type CustomMetricAPIClient struct{}
+
+var _ CustomMetricClient = &CustomMetricAPIClient{}
+
+func CustomMetricsTests(logger logr.Logger, r *gin.RouterGroup, customMetricTest CustomMetricClient) *gin.RouterGroup {
+
+	r.GET("/mtls/:name/:value", handleCustomMetricsEndpoint(customMetricTest, true))
+	r.GET("/:name/:value", handleCustomMetricsEndpoint(customMetricTest, false))
 
 	return r
 }
 
-func handleCustomMetricsEndpoint(postCustomMetricsFn func(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error, useMtls bool) func(c *gin.Context) {
+func handleCustomMetricsEndpoint(customMetricTest CustomMetricClient, useMtls bool) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var (
 			metricName  string
@@ -44,7 +50,7 @@ func handleCustomMetricsEndpoint(postCustomMetricsFn func(ctx context.Context, a
 			return
 		}
 
-		err = postCustomMetricsFn(c, nil, float64(metricValue), metricName, useMtls)
+		err = customMetricTest.PostCustomMetric(c, nil, float64(metricValue), metricName, useMtls)
 		if err != nil {
 			Error(c, http.StatusInternalServerError, "failed to submit custom metric: %s", err.Error())
 			return
@@ -53,7 +59,7 @@ func handleCustomMetricsEndpoint(postCustomMetricsFn func(ctx context.Context, a
 	}
 }
 
-func PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
+func (_ *CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
 	var err error
 	if appConfig == nil {
 		appConfig, err = cfenv.Current()
