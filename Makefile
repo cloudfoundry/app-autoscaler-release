@@ -363,7 +363,7 @@ cf-login:
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
 
 .PHONY: setup-performance
-setup-performance:
+setup-performance: build-test-app
 	export NODES=1;\
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
