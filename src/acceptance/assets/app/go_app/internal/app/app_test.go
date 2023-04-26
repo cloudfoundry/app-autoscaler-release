@@ -1,13 +1,16 @@
 package app_test
 
 import (
-	"acceptance/assets/app/go_app/internal/app"
 	"errors"
+	"fmt"
+	"net"
 	"net/http"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
+	"github.com/fgrosse/zaptest"
 	. "github.com/onsi/ginkgo/v2"
-	"github.com/sirupsen/logrus"
+	. "github.com/onsi/gomega"
 	"github.com/steinfletcher/apitest"
 )
 
@@ -23,7 +26,7 @@ var _ = Describe("Ginkgo/Server", func() {
 
 	Context("basic endpoint tests", func() {
 		It("Root should respond correctly", func() {
-			apiTest(NoOpSleep, NoOpUseMem).
+			apiTest(nil, nil, nil, nil).
 				Get("/").
 				Expect(t).
 				Status(http.StatusOK).
@@ -31,7 +34,7 @@ var _ = Describe("Ginkgo/Server", func() {
 				End()
 		})
 		It("health", func() {
-			apiTest(NoOpSleep, NoOpUseMem).
+			apiTest(nil, nil, nil, nil).
 				Get("/health").
 				Expect(t).
 				Status(http.StatusOK).
@@ -43,13 +46,17 @@ var _ = Describe("Ginkgo/Server", func() {
 	Context("Basic startup", func() {
 		var testApp *http.Server
 		var client *http.Client
+		var port int
 		BeforeEach(func() {
-			logger := logrus.New()
-			testApp = app.New(logger, "localhost:31253")
+			logger := zaptest.LoggerWriter(GinkgoWriter)
+			l, err := net.Listen("tcp", ":0")
+			Expect(err).ToNot(HaveOccurred())
+			port = l.Addr().(*net.TCPAddr).Port
+			testApp = app.New(logger, "")
 			DeferCleanup(testApp.Close)
 			go func() {
 				defer GinkgoRecover()
-				if err := testApp.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				if err := testApp.Serve(l); err != nil && !errors.Is(err, http.ErrServerClosed) {
 					panic(err)
 				}
 			}()
@@ -57,7 +64,7 @@ var _ = Describe("Ginkgo/Server", func() {
 		})
 
 		It("should start up", func() {
-			apitest.New().EnableNetworking(client).Get("http://localhost:31253/").
+			apitest.New().EnableNetworking(client).Get(fmt.Sprintf("http://localhost:%d/", port)).
 				Expect(t).
 				Status(http.StatusOK).
 				Body(`{"name":"test-app"}`).
@@ -68,9 +75,11 @@ var _ = Describe("Ginkgo/Server", func() {
 })
 
 func NoOpSleep(_ time.Duration) {}
-func NoOpUseMem(_ uint64)       {}
 
-func apiTest(sleep func(duration time.Duration), useMem func(useMb uint64)) *apitest.APITest {
+func apiTest(timeWaster app.TimeWaster, memoryGobbler app.MemoryGobbler, cpuWaster app.CPUWaster, customMetricClient app.CustomMetricClient) *apitest.APITest {
+	GinkgoHelper()
+	logger := zaptest.LoggerWriter(GinkgoWriter)
+
 	return apitest.New().
-		Handler(app.Router(logrus.New(), sleep, useMem))
+		Handler(app.Router(logger, timeWaster, memoryGobbler, cpuWaster, customMetricClient))
 }

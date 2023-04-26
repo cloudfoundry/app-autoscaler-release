@@ -417,6 +417,7 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 }
 
 func CreatePolicy(cfg *config.Config, appName, appGUID, policy string) string {
+	GinkgoHelper()
 	instanceName, _ := createPolicy(cfg, appName, appGUID, policy)
 	return instanceName
 }
@@ -426,6 +427,7 @@ func CreatePolicyWithErr(cfg *config.Config, appName, appGUID, policy string) (s
 }
 
 func createPolicy(cfg *config.Config, appName, appGUID, policy string) (string, error) {
+	GinkgoHelper()
 	if cfg.IsServiceOfferingEnabled() {
 		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 		err := Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
@@ -535,6 +537,7 @@ func GetServiceCredentialBindingParameters(cfg *config.Config, instanceName stri
 }
 
 func CreatePolicyWithAPI(cfg *config.Config, appGUID, policy string) {
+	GinkgoHelper()
 	oauthToken := OauthToken(cfg)
 	client := GetHTTPClient(cfg)
 
@@ -547,8 +550,7 @@ func CreatePolicyWithAPI(cfg *config.Config, appGUID, policy string) {
 	resp, err := client.Do(req)
 	Expect(err).ShouldNot(HaveOccurred())
 	defer func() { _ = resp.Body.Close() }()
-	Expect(resp.StatusCode == 200 || resp.StatusCode == 201).Should(BeTrue())
-	Expect([]int{http.StatusOK, http.StatusCreated}).To(ContainElement(resp.StatusCode))
+	Expect(resp).Should(HaveHTTPStatus(200, 201), "assigning policy by putting to %s", policyURL)
 }
 
 func GetHTTPClient(cfg *config.Config) *http.Client {

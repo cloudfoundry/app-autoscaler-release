@@ -1,41 +1,42 @@
 package app_test
 
 import (
-	"acceptance/assets/app/go_app/internal/app"
 	"net/http"
+	"os"
 	"runtime"
-	"runtime/debug"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/prometheus/procfs"
 )
 
 var _ = Describe("Memory tests", func() {
 
 	Context("Memory tests", func() {
-		var amountSlept time.Duration
-		var memUsed uint64
-		sleepFn := func(duration time.Duration) { amountSlept = duration }
-		useMemFn := func(useMb uint64) { memUsed = useMb }
+
+		fakeMemoryTest := &appfakes.FakeMemoryGobbler{}
+
 		It("should err if memory not an int64", func() {
-			apiTest(sleepFn, useMemFn).
+			apiTest(nil, fakeMemoryTest, nil, nil).
 				Get("/memory/invalid/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
-				Body(`{"error":{"description":"invalid memoryMb: strconv.ParseUint: parsing \"invalid\": invalid syntax"}}`).
+				Body(`{"error":{"description":"invalid memoryMiB: strconv.ParseUint: parsing \"invalid\": invalid syntax"}}`).
 				End()
 		})
 		It("should err if memory out of bounds", func() {
-			apiTest(sleepFn, useMemFn).
+			apiTest(nil, fakeMemoryTest, nil, nil).
 				Get("/memory/100001010101010249032897287298719874687936483275648273632429479827398798271/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
-				Body(`{"error":{"description":"invalid memoryMb: strconv.ParseUint: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
+				Body(`{"error":{"description":"invalid memoryMiB: strconv.ParseUint: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
 				End()
 		})
 		It("should err if memory not an int", func() {
-			apiTest(sleepFn, useMemFn).
+			apiTest(nil, fakeMemoryTest, nil, nil).
 				Get("/memory/5/invalid").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
@@ -43,42 +44,79 @@ var _ = Describe("Memory tests", func() {
 				End()
 		})
 		It("should return ok and sleep correctDuration", func() {
-			apiTest(sleepFn, useMemFn).
+			apiTest(nil, fakeMemoryTest, nil, nil).
 				Get("/memory/5/4").
 				Expect(GinkgoT()).
 				Status(http.StatusOK).
-				Body(`{"memoryMb":5, "minutes":4 }`).
+				Body(`{"memoryMiB":5, "minutes":4 }`).
 				End()
-			Eventually(amountSlept).Should(Equal(4 * time.Minute))
-			Eventually(memUsed).Should(Equal(uint64(5)))
+			Eventually(func() int { return fakeMemoryTest.UseMemoryCallCount() }).Should(Equal(1))
+			Expect(fakeMemoryTest.UseMemoryArgsForCall(0)).To(Equal(uint64(5 * app.Mebi)))
+			Expect(fakeMemoryTest.SleepCallCount()).To(Equal(1))
+			Expect(fakeMemoryTest.SleepArgsForCall(0)).To(Equal(4 * time.Minute))
 		})
 	})
 	Context("memTest info tests", func() {
 		It("should gobble memory and release when stopped", func() {
-			memInfo := &app.MemTestInfo{}
-			runtime.GC()
-			var ms runtime.MemStats
-			runtime.ReadMemStats(&ms)
-			memInfo.UseMemory(5 * app.Megabyte)
-			runtime.GC()
 
-			var msNew runtime.MemStats
-			runtime.ReadMemStats(&msNew)
+			oldMem := getTotalMemoryUsage("before memTest info test")
+			slack := getMemorySlack()
+
+			By("allocating memory")
+			memInfo := &app.ListBasedMemoryGobbler{}
+			memInfo.UseMemory(5 * app.Mebi)
 			Expect(memInfo.IsRunning()).To(Equal(true))
-			Expect(msNew.HeapInuse - ms.HeapInuse).To(BeNumerically(">=", 5*app.Megabyte))
 
+			newMem := getTotalMemoryUsage("during memTest info test")
+			Expect(newMem - oldMem).To(BeNumerically(">=", 5*app.Mebi-slack))
+
+			By("and releasing it after the test ends")
 			memInfo.StopTest()
-			runtime.GC()
-			runtime.ReadMemStats(&ms)
 			Expect(memInfo.IsRunning()).To(Equal(false))
-			Eventually(func() uint64 {
-				var stat runtime.MemStats
-				runtime.GC()
-				debug.FreeOSMemory()
-				runtime.ReadMemStats(&stat)
-				return msNew.HeapInuse - stat.HeapInuse
-			}).Should(BeNumerically(">=", 5*app.Megabyte))
 
+			slack = getMemorySlack()
+			GinkgoWriter.Printf("slack: %d MiB\n", slack/app.Mebi)
+
+			Eventually(getTotalMemoryUsage).WithArguments("after memTest info test").Should(BeNumerically("<=", newMem-5*app.Mebi+slack))
 		})
 	})
 })
+
+func getTotalMemoryUsage(action string) uint64 {
+	GinkgoHelper()
+
+	proc := getProcessInfo()
+
+	stat, err := proc.NewStatus()
+	Expect(err).ToNot(HaveOccurred())
+
+	result := stat.VmRSS + stat.VmSwap
+
+	GinkgoWriter.Printf("total memory usage %s: %d MiB\n", action, result/app.Mebi)
+
+	return result
+}
+
+// HeapInuse minus HeapAlloc estimates the amount of memory
+// that has been dedicated to particular size classes, but is
+// not currently being used. This is an upper bound on
+// fragmentation, but in general this memory can be reused
+// efficiently.
+func getMemorySlack() uint64 {
+	runtime.GC()
+	var ms runtime.MemStats
+	runtime.ReadMemStats(&ms)
+
+	return ms.HeapInuse - ms.HeapAlloc
+}
+
+func getProcessInfo() procfs.Proc {
+	GinkgoHelper()
+	fs, err := procfs.NewFS("/proc")
+	Expect(err).ToNot(HaveOccurred())
+
+	proc, err := fs.Proc(os.Getpid())
+	Expect(err).ToNot(HaveOccurred())
+
+	return proc
+}

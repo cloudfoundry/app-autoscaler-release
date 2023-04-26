@@ -117,7 +117,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							cfh.CurlApp(cfg, appName, "/slow/3000", "-f")
+							cfh.CurlApp(cfg, appName, "/responsetime/slow/3000", "-f")
 						}
 					}
 				}(doneChan)
@@ -146,7 +146,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							cfh.CurlApp(cfg, appName, "/fast", "-f")
+							cfh.CurlApp(cfg, appName, "/responsetime/fast", "-f")
 						}
 					}
 				}(doneChan)
@@ -189,7 +189,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							cfh.CurlApp(cfg, appName, "/fast", "-f")
+							cfh.CurlApp(cfg, appName, "/responsetime/fast", "-f")
 						}
 					}
 				}(doneChan)
@@ -219,7 +219,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							cfh.CurlApp(cfg, appName, "/fast", "-f")
+							cfh.CurlApp(cfg, appName, "/responsetime/fast", "-f")
 						}
 					}
 				}(doneChan)
@@ -232,7 +232,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	})
 
 	// To check existing aggregated cpu metrics do: cf asm APP_NAME cpu
-	// See: https://www.ibm.com/docs/de/cloud-private/3.2.0?topic=SSBS6K_3.2.0/cloud_foundry/integrating/cfee_autoscaler.html
 	Context("when scaling by cpu", func() {
 
 		BeforeEach(func() {

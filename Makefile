@@ -138,6 +138,7 @@ test-changeloglockcleaner: init init-db test-certs
 	@make -C src/changeloglockcleaner test DBURL="${DBURL}"
 test-acceptance-unit:
 	@make -C src/acceptance test-unit
+	@make -C src/acceptance/assets/app/go_app test
 
 
 .PHONY: start-db
@@ -278,8 +279,9 @@ target/vendor-app:
 	 && npm prune --omit=dev
 	@touch $@
 
+
 .PHONY: acceptance-release
-acceptance-release: clean-acceptance mod-tidy vendor vendor-app
+acceptance-release: clean-acceptance mod-tidy vendor vendor-app build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
@@ -340,8 +342,13 @@ deploy-prometheus:
 	export BBL_STATE_PATH=$${BBL_STATE_PATH:-$(shell realpath "../app-autoscaler-env-bbl-state/bbl-state/")};\
 	${CI_DIR}/infrastructure/scripts/deploy-prometheus.sh;
 
+
+.PHONY: build-test-app
+build-test-app:
+	@make -C src/acceptance/assets/app/go_app build
+
 .PHONY: acceptance-tests
-acceptance-tests: vendor-app
+acceptance-tests: vendor-app build-test-app
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
 acceptance-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-acceptance.sh;

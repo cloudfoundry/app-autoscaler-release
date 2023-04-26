@@ -40,24 +40,19 @@ test:
 	@echo "Running tests"
 	ginkgo run ${GINKGO_OPTS} ./...
 
-.PHONY: buildtools
-buildtools:
-	@echo "# Installing build tools"
-	@go mod download
-	@which certstrap >/dev/null || go install github.com/square/certstrap
-	@which ginkgo >/dev/null || go install github.com/onsi/ginkgo/v2/ginkgo
-	@which counterfeiter >/dev/null || go install github.com/maxbrunsfeld/counterfeiter/v6
-
 lint:
 	@cd ../../../../../; make lint_acceptance OPTS=${OPTS}
 
 .PHONY: start
 start: build
-	docker  run -it --name go_app -v $$PWD/build/:/cf/bin -p 8080:8080 --rm cloudfoundry/cflinuxfs3 /cf/bin/app
+	docker  run -it --name go_app -v $$PWD/build/:/cf/bin -p 8080:8080 --rm cloudfoundry/cflinuxfs4 /cf/bin/app
 
 .PHONY: deploy
 deploy: build
 	./deploy.sh
+
+generate: go.mod ../../../../../api/custom-metrics-api.yaml
+	go generate ./...
 
 .PHONY: clean
 clean:

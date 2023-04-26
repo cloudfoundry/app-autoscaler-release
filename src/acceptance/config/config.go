@@ -11,6 +11,7 @@ import (
 )
 
 const NODE_APP = "../assets/app/nodeApp"
+const GO_APP = "../assets/app/go_app/build"
 
 type PerformanceConfig struct {
 	AppCount                      int  `json:"app_count"`
@@ -51,6 +52,7 @@ type Config struct {
 	TimeoutScale                   float64 `json:"timeout_scale"`
 	JavaBuildpackName              string  `json:"java_buildpack_name"`
 	NodejsBuildpackName            string  `json:"nodejs_buildpack_name"`
+	BinaryBuildpackName            string  `json:"binary_buildpack_name"`
 	NamePrefix                     string  `json:"name_prefix"`
 	InstancePrefix                 string  `json:"instance_prefix"`
 	AppPrefix                      string  `json:"app_prefix"`
@@ -83,6 +85,7 @@ type Config struct {
 var defaults = Config{
 	AddExistingUserToExistingSpace: true,
 
+	BinaryBuildpackName:          "binary_buildpack",
 	JavaBuildpackName:            "java_buildpack",
 	NodejsBuildpackName:          "nodejs_buildpack",
 	DefaultTimeout:               30, // seconds
