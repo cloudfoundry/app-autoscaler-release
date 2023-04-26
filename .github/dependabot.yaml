@@ -55,15 +55,6 @@ updates:
       time: "05:30"
       timezone: "Europe/Berlin"
 
-  # The ASATS app
-  - package-ecosystem: "npm"
-    directory: "/src/acceptance/assets/app/nodeApp/"
-    labels: [ "dependencies" ]
-    schedule:
-      interval: "daily"
-      time: "06:00"
-      timezone: "Europe/Berlin"
-
   # Dependencies update for ci
   - package-ecosystem: "docker"
     directory: "/ci/dockerfiles/autoscaler-deploy"
