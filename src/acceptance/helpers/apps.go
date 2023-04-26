@@ -165,7 +165,6 @@ func createTestApp(cfg *config.Config, appName string, initialInstanceCount int,
 			"--var", "app_domain=" + cfg.AppsDomain,
 			"--var", "service_name=" + cfg.ServiceName,
 			"--var", "instances=" + countStr,
-			"--var", "buildpack=" + cfg.BinaryBuildpackName,
 			"--var", "node_tls_reject_unauthorized=" + setNodeTLSRejectUnauthorizedEnvironmentVariable,
 			"--var", "memory_mb=" + strconv.Itoa(cfg.NodeMemoryLimit),
 			"-f", config.GO_APP + "/manifest.yml",
@@ -186,7 +185,7 @@ func createTestApp(cfg *config.Config, appName string, initialInstanceCount int,
 }
 
 func CreateTestAppByName(cfg *config.Config, appName string, initialInstanceCount int) {
-	err := createTestApp(cfg, appName, initialInstanceCount, "-p", config.GO_APP)
+	err := createTestApp(cfg, appName, initialInstanceCount, "-p", config.GO_APP, "--buildpack", cfg.BinaryBuildpackName)
 	Expect(err).ToNot(HaveOccurred())
 }
 
