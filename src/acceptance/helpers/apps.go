@@ -210,7 +210,7 @@ func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url st
 
 func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int) {
 	GinkgoHelper()
-	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/cpu/%d/%d", percent, minutes), 10*time.Second)).Should(MatchJSON("{\"minutes\":5,\"utilization\":90}"))
+	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/cpu/%d/%d", percent, minutes), 10*time.Second)).Should(MatchJSON(fmt.Sprintf("{\"minutes\":%d,\"utilization\":%d}", minutes, percent)))
 }
 
 func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
