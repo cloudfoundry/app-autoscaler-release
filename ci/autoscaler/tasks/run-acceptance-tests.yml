@@ -18,6 +18,5 @@ outputs:
 run:
   path: make
   args:
-    - -C
-    - app-autoscaler-release
+    - --directory=app-autoscaler-release
     - acceptance-tests
