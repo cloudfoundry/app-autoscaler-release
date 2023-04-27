@@ -25,13 +25,3 @@ repos:
           files: '\.rb$'
           pass_filenames: false #https://github.com/pre-commit/pre-commit/issues/836
           stages: [ commit ]
-        - id: eslint
-          name: eslint
-          entry: style-guide/eslint-0.1.sh
-          language: script
-          files: '^src/acceptance/assets/app/nodeApp'
-          pass_filenames: false #https://github.com/pre-commit/pre-commit/issues/836
-          stages: [ commit ]
-
-
-

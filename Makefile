@@ -52,7 +52,7 @@ target/init:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-node clean-build clean-acceptance
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 clean-build:
@@ -74,9 +74,6 @@ clean-scheduler:
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f testcerts/*
-clean-node:
-	@echo " - cleaning node modules"
-	@rm -rf src/acceptance/assets/app/nodeApp/node_modules
 clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
@@ -239,11 +236,6 @@ rubocop:
 	@bundle install
 	@bundle exec rubocop ./spec ./packages
 
-.PHONY: eslint
-eslint:
-	@echo " - linting testApp"
-	@cd src/acceptance/assets/app/nodeApp && npm install && npm run lint
-
 .PHONY: markdownlint
 markdownlint: markdownlint-cli
 	@echo " - linting markdown files"
@@ -270,18 +262,8 @@ build/autoscaler-test.tgz:
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
 
-.PHONY: vendor-app
-vendor-app: target/vendor-app
-target/vendor-app:
-	@echo " - installing node modules to package node app"
-	@cd src/acceptance/assets/app/nodeApp > /dev/null\
-	 && npm install --omit=dev\
-	 && npm prune --omit=dev
-	@touch $@
-
-
 .PHONY: acceptance-release
-acceptance-release: clean-acceptance mod-tidy vendor vendor-app build-test-app
+acceptance-release: clean-acceptance mod-tidy vendor build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
@@ -348,7 +330,7 @@ build-test-app:
 	@make -C src/acceptance/assets/app/go_app build
 
 .PHONY: acceptance-tests
-acceptance-tests: vendor-app build-test-app
+acceptance-tests: build-test-app
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
 acceptance-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-acceptance.sh;
@@ -363,7 +345,7 @@ cf-login:
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
 
 .PHONY: setup-performance
-setup-performance:
+setup-performance: build-test-app
 	export NODES=1;\
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\

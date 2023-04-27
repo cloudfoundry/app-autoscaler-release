@@ -16,4 +16,7 @@ inputs:
 outputs:
 
 run:
-  path: app-autoscaler-release/ci/autoscaler/scripts/run-acceptance-tests.sh
+  path: make
+  args:
+    - --directory=app-autoscaler-release
+    - acceptance-tests

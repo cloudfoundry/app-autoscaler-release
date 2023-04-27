@@ -74,8 +74,6 @@ var _ = Describe("Ginkgo/Server", func() {
 	})
 })
 
-func NoOpSleep(_ time.Duration) {}
-
 func apiTest(timeWaster app.TimeWaster, memoryGobbler app.MemoryGobbler, cpuWaster app.CPUWaster, customMetricClient app.CustomMetricClient) *apitest.APITest {
 	GinkgoHelper()
 	logger := zaptest.LoggerWriter(GinkgoWriter)

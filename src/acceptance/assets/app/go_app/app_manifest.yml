@@ -1,8 +1,6 @@
 ---
 applications:
   - name: ((app_name))
-    buildpacks:
-      - ((buildpack))
     stack: cflinuxfs4
     command: ./app
     routes:
