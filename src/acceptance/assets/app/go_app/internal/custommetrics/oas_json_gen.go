@@ -102,12 +102,10 @@ func (s *Metric) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Metric) encodeFields(e *jx.Encoder) {
 	{
-
 		e.FieldStart("name")
 		e.Str(s.Name)
 	}
 	{
-
 		e.FieldStart("value")
 		e.Float64(s.Value)
 	}
@@ -234,12 +232,10 @@ func (s *Metrics) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Metrics) encodeFields(e *jx.Encoder) {
 	{
-
 		e.FieldStart("instance_index")
 		e.Int64(s.InstanceIndex)
 	}
 	{
-
 		e.FieldStart("metrics")
 		e.ArrStart()
 		for _, elem := range s.Metrics {
