@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/cloudfoundry-community/go-cfenv v1.18.0
-	github.com/fgrosse/zaptest v1.1.0
+	github.com/fgrosse/zaptest v1.2.1
 	github.com/gin-contrib/zap v0.1.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-faster/errors v0.6.1
