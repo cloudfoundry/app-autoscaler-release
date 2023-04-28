@@ -14,7 +14,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func decodeV1AppsAppGuidMetricsPostResponse(resp *http.Response) (res *V1AppsAppGuidMetricsPostOK, err error) {
+func decodeV1AppsAppGuidMetricsPostResponse(resp *http.Response) (res *V1AppsAppGuidMetricsPostOK, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -60,7 +60,7 @@ func decodeV1AppsAppGuidMetricsPostResponse(resp *http.Response) (res *V1AppsApp
 		}
 	}()
 	if err != nil {
-		return res, errors.Wrap(err, "default")
+		return res, errors.Wrapf(err, "default (code %d)", resp.StatusCode)
 	}
 	return res, errors.Wrap(defRes, "error")
 }

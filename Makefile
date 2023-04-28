@@ -220,7 +220,7 @@ integration: build init-db test-certs
 
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
-lint: golangci-lint_check $(addprefix lint_,$(go_modules)) eslint rubocop
+lint: golangci-lint_check $(addprefix lint_,$(go_modules))  rubocop
 
 golangci-lint_check:
 	@current_version=$(shell golangci-lint version | cut -d " " -f 4);\

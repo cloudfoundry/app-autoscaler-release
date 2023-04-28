@@ -137,7 +137,7 @@ func (c *Client) sendV1AppsAppGuidMetricsPost(ctx context.Context, request *Metr
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u, nil)
+	r, err := ht.NewRequest(ctx, "POST", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
