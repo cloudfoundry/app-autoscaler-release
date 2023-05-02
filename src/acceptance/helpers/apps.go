@@ -122,7 +122,7 @@ func CreateDroplet(cfg *config.Config) string {
 	appGUID, err := GetAppGuid(cfg, appName)
 	Expect(err).NotTo(HaveOccurred())
 	downloadDroplet := downloadAppDroplet(appGUID, dropletPath, cfg.DefaultTimeoutDuration())
-	DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
+	// DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 	Expect(downloadDroplet).To(Exit(0), "failed download droplet")
 
 	return dropletPath
@@ -140,7 +140,7 @@ func downloadAppDroplet(appName string, dropletPath string, timeOut time.Duratio
 	err := json.Unmarshal(currentDroplet.Out.Contents(), &droplet)
 	Expect(err).ToNot(HaveOccurred())
 
-	downloadDroplet := cf.CfSilent("curl",
+	downloadDroplet := cf.CfSilent("curl", // TODO: Catch error
 		fmt.Sprintf("/v3/droplets/%s/download", droplet.Guid), "--output", dropletPath).Wait(timeOut)
 	GinkgoWriter.Printf("\nFound droplet for app %s \n %s \n", appName, currentDroplet.Out.Contents())
 	return downloadDroplet
