@@ -122,14 +122,15 @@ func CreateDroplet(cfg *config.Config) string {
 	appGUID, err := GetAppGuid(cfg, appName)
 	Expect(err).NotTo(HaveOccurred())
 	downloadDroplet := downloadAppDroplet(appGUID, dropletPath, cfg)
-	// DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
+	DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
 	Expect(downloadDroplet).To(Exit(0),
-		fmt.Errorf("curl exited with code: %d", downloadDroplet.ExitCode()))
+		fmt.Sprintf("curl exited with code: %d", downloadDroplet.ExitCode()))
 
 	return dropletPath
 }
 
 func downloadAppDroplet(appName string, dropletPath string, cfg *config.Config) *Session {
+	oauthToken := OauthToken(cfg)
 	timeOut := cfg.DefaultTimeoutDuration()
 	currentDroplet := cf.CfSilent("curl",
 		fmt.Sprintf("/v3/apps/%s/droplets/current/", appName)).Wait(timeOut)
@@ -147,7 +148,8 @@ func downloadAppDroplet(appName string, dropletPath string, cfg *config.Config) 
 	downloadCurl := cfh.Curl(
 		cfg,
 		"--verbose", downloadURL,
-		// "--header", fmt.Sprintf("Authorization: %s", oauthToken),
+		"--header", fmt.Sprintf("Authorization: %s", oauthToken),
+		"--location",
 		"--output", dropletPath,
 		"--fail",
 	).Wait(timeOut)
