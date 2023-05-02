@@ -121,14 +121,16 @@ func CreateDroplet(cfg *config.Config) string {
 	StartApp(appName, cfg.CfPushTimeoutDuration())
 	appGUID, err := GetAppGuid(cfg, appName)
 	Expect(err).NotTo(HaveOccurred())
-	downloadDroplet := downloadAppDroplet(appGUID, dropletPath, cfg.DefaultTimeoutDuration())
+	downloadDroplet := downloadAppDroplet(appGUID, dropletPath, cfg)
 	// DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
-	Expect(downloadDroplet).To(Exit(0), "failed download droplet")
+	Expect(downloadDroplet).To(Exit(0),
+		fmt.Errorf("curl exited with code: %d", downloadDroplet.ExitCode()))
 
 	return dropletPath
 }
 
-func downloadAppDroplet(appName string, dropletPath string, timeOut time.Duration) *Session {
+func downloadAppDroplet(appName string, dropletPath string, cfg *config.Config) *Session {
+	timeOut := cfg.DefaultTimeoutDuration()
 	currentDroplet := cf.CfSilent("curl",
 		fmt.Sprintf("/v3/apps/%s/droplets/current/", appName)).Wait(timeOut)
 	Expect(currentDroplet).To(Exit(0),
@@ -140,10 +142,19 @@ func downloadAppDroplet(appName string, dropletPath string, timeOut time.Duratio
 	err := json.Unmarshal(currentDroplet.Out.Contents(), &droplet)
 	Expect(err).ToNot(HaveOccurred())
 
-	downloadDroplet := cf.CfSilent("curl", // TODO: Catch error
-		fmt.Sprintf("/v3/droplets/%s/download", droplet.Guid), "--output", dropletPath).Wait(timeOut)
+	downloadURL := fmt.Sprintf("%s%s/v3/droplets/%s/download",
+		cfg.Protocol(), cfg.GetApiEndpoint(), droplet.Guid)
+	downloadCurl := cfh.Curl(
+		cfg,
+		"--verbose", downloadURL,
+		// "--header", fmt.Sprintf("Authorization: %s", oauthToken),
+		"--output", dropletPath,
+		"--fail",
+	).Wait(timeOut)
+
 	GinkgoWriter.Printf("\nFound droplet for app %s \n %s \n", appName, currentDroplet.Out.Contents())
-	return downloadDroplet
+
+	return downloadCurl
 }
 
 func CreateTestAppFromDropletByName(cfg *config.Config, dropletPath string, appName string, initialInstanceCount int) error {
