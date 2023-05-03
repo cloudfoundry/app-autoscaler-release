@@ -4,7 +4,7 @@ MAKEFLAGS=
 GO_VERSION := $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
 PACKAGE_DIRS := $(shell go list ./... | grep -v /vendor/ | grep -v e2e)
-CGO_ENABLED = 1
+CGO_ENABLED = 0
 
 binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
@@ -17,7 +17,7 @@ build:
 	echo "# building  test-app"
 	rm -rf build/* || true
 	mkdir -p build/
-	GOOS=linux GOARCH=amd64 CGO=1 go build -o build/app
+	GOOS=linux GOARCH=amd64 go build -o build/app
 	cp app_manifest.yml build/manifest.yml
 
 

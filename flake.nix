@@ -35,6 +35,10 @@
               google-cloud-sdk
               maven
               nodejs
+              # We use the binary-buildpack and nix-build-results have set the wrong ELF-Interpreter.
+              # For more background, see:
+              # <https://blog.thalheim.io/2022/12/31/nix-ld-a-clean-solution-for-issues-with-pre-compiled-executables-on-nixos>
+              patchelf
               ruby
               # The following package for cf-uaac is needed by our makefile as well.
               # Until PR https://github.com/NixOS/nixpkgs/pull/189079 has been merged, this requires

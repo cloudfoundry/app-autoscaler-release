@@ -53,7 +53,7 @@ var _ = BeforeSuite(func() {
 
 	fmt.Print("\ncreating droplet...")
 	nodeAppDropletPath = CreateDroplet(cfg)
-	fmt.Println("done")
+	fmt.Printf("done and downloaded to %s\n", nodeAppDropletPath)
 })
 
 func updateOrgQuotaForPerformanceTest(orgGuid string) {
