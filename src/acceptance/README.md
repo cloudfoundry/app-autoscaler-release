@@ -78,8 +78,7 @@ The full set of config parameters is explained below:
 | **timeout_scale**                       |  optional   |        1.0         | Used primarily to scale default timeouts for test setup and teardown actions (e.g. creating an org) as opposed to main test actions (e.g. pushing an app).                                                                                                                                                                   |
 | **use_http**                            |  optional   |       false        | Set to true if you would like CF Acceptance Tests to use HTTP when making api and application requests. (default is HTTPS)                                                                                                                                                                                                   |
 | **node_memory_limit**                   |  optional   |        128         | Default memory limit (in MB) of node.js test application, should be greater than 128 (MB).This is currently useful for the cpu quota given that directly relates to the memory given in some environments.                                                                                                                   |
-| **java_buildpack_name**                 |  optional   |  "java_buildpack"  | [See below](#buildpack-names).                                                                                                                                                                                                                                                                                               |
-| **nodejs_buildpack_name**               |  optional   | "nodejs_buildpack" | [See below](#buildpack-names).                                                                                                                                                                                                                                                                                               |
+| **binary_buildpack_name**               |  optional   | "binary_buildpack" | [See below](#buildpack-names).                                                                                                                                                                                                                                                                                               |
  | **cpu_upper_threshold**                 |  optional   |        100         |                                                                                                                                                                                                                                                                                                                              |
  | **broker_start_timeout**                |  optional   |         5          | Default time (in minutes)                                                                                                                                                                                                                                                                                                    |
  | **async_service_operation_timeout**     |  optional   |         2          | Default time (in minutes)                                                                                                                                                                                                                                                                                                    |
@@ -97,10 +96,9 @@ The full set of config parameters is explained below:
  | **use_existing_space**                  |  optional   |        alse        |                                                                                                                                                                                                                                                                                                                              |
 
 #### Buildpack Names
-Many tests specify a buildpack when pushing an app, so that on diego the app staging process completes in less time. The default names for the buildpacks are as follows; if you have buildpacks with different names, you can override them by setting different names:
+Many tests specify the buildpack when pushing an app, so that the app staging process completes faster. The default name for the buildpack is as follows; if you have a "binary buildpack" with a different name, you can override it by setting a different name:
 
-* `java_buildpack_name: java_buildpack`
-* `nodejs_buildpack_name: nodejs_buildpack`
+* `binary_buildpack_name: binary_buildpack`
 
 #### Capturing Test Output
 If you set a value for `artifacts_directory` in your `$CONFIG` file, then you will be able to capture `cf` trace output from failed test runs.  When a test fails, look for the node id and suite name ("*Applications*" and "*2*" in the example below) in the test output:
@@ -117,6 +115,15 @@ Parallel test node 2/10. Assigned 14 of 137 specs.
 The `cf` trace output for the tests in these specs will be found in `CF-TRACE-Applications-2.txt` in the `artifacts_directory`.
 
 ### Test Execution
+
+Before executing the tests, the compiled test app needs to be available to the test suite.
+If you are running the test suite from the checked out repository you can compile the test app by running
+
+```bash
+make build-test-app
+```
+
+Alternatively, you can use the acceptance test package that is released in conjunction with the BOSH releases and can be found on the [GitHub releases page](https://github.com/cloudfoundry/app-autoscaler-release/releases/tag/v10.0.3),e.g., https://github.com/cloudfoundry/app-autoscaler-release/releases/download/v10.0.3/app-autoscaler-acceptance-tests-v10.0.3.tgz. This package just contains the acceptance test suite and the pre-compiled test app.
 
 There are several different test suites, and you may not wish to run all the tests in all contexts, and sometimes you may want to focus individual test suites to pinpoint a failure.  The default set of tests can be run via:
 
