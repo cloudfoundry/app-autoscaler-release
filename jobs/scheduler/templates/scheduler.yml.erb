@@ -38,16 +38,16 @@
 
   #datasource for application and quartz
   if p("autoscaler.scheduler_db.db_scheme") == "postgres"
-    datasource_driver_class_name=org.postgresql.Driver
+    datasource_driver_class_name="org.postgresql.Driver"
   else
-    datasource_driver_class_name=com.mysql.cj.jdbc.Driver
+    datasource_driver_class_name="com.mysql.cj.jdbc.Driver"
   end
 
   #datasource for policy
  if p("autoscaler.policy_db.db_scheme") == "postgres"
-    datasource_policy_db_class_name=org.postgresql.Driver
+    datasource_policy_db_class_name="org.postgresql.Driver"
  else
-    datasource_policy_db_class_name=com.mysql.cj.jdbc.Driver
+    datasource_policy_db_class_name="com.mysql.cj.jdbc.Driver"
  end
 %>
 ###########################################
@@ -131,10 +131,10 @@ scalingenginejob:
 ############################################################
 scheduler:
   healthserver:
-    basicAuthEnabled: <%=p('autoscaler.scheduler.health.basicAuthEnabled') %>
     password: <%=p('autoscaler.scheduler.health.password') %>
     port: <%=p('autoscaler.scheduler.health.port') %>
     username: <%=p('autoscaler.scheduler.health.username') %>
+    unprotected_endpoints: <%=p('autoscaler.scheduler.health.unprotected_endpoints') %>
 schedulerdb_role: p_arr("autoscaler.scheduler_db.roles").find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
 schedulerdb_url: generate_db_url('scheduler_db', job_name)
 ############################################################
