@@ -15,12 +15,11 @@ import (
 
 	"github.com/cloudfoundry/cf-test-helpers/v2/helpers"
 	"github.com/cloudfoundry/cf-test-helpers/v2/workflowhelpers"
-	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 const (
-	HealthPath           = "/health"
+	HealthPath           = "/health/liveness"
 	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
 	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
 )
