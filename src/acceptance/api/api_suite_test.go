@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	HealthPath           = "/health/liveness"
+	HealthPath           = "/health"
 	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
 	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
 )

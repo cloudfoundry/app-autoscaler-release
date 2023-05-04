@@ -28,6 +28,7 @@ describe "scheduler" do
             "port" => 1234,
             "username" => nil,
             "password" => nil,
+            "basicAuthEnabled" => false,
             "unprotected_endpoints" => []
           }
         }}
@@ -52,6 +53,7 @@ describe "scheduler" do
             "port" => 1234,
             "username" => "test-user",
             "password" => "test-user-password",
+            "basicAuthEnabled" => false,
             "unprotected_endpoints" => ["/health/liveness"]
           }
         }}

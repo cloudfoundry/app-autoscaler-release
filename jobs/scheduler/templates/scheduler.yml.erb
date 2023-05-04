@@ -134,6 +134,7 @@ scheduler:
     password: <%=p('autoscaler.scheduler.health.password') %>
     port: <%=p('autoscaler.scheduler.health.port') %>
     username: <%=p('autoscaler.scheduler.health.username') %>
+    basicAuthEnabled: <%=p('autoscaler.scheduler.health.basicAuthEnabled') %>
     unprotected_endpoints: <%=p('autoscaler.scheduler.health.unprotected_endpoints') %>
 schedulerdb_role: p_arr("autoscaler.scheduler_db.roles").find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
 schedulerdb_url: generate_db_url('scheduler_db', job_name)
