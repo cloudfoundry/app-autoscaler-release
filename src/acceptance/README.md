@@ -123,7 +123,7 @@ If you are running the test suite from the checked out repository you can compil
 make build-test-app
 ```
 
-Alternatively, you can use the acceptance test package that is released in conjunction with the BOSH releases and can be found on the [GitHub releases page](https://github.com/cloudfoundry/app-autoscaler-release/releases/tag/v10.0.3),e.g., https://github.com/cloudfoundry/app-autoscaler-release/releases/download/v10.0.3/app-autoscaler-acceptance-tests-v10.0.3.tgz. This package just contains the acceptance test suite and the pre-compiled test app.
+Alternatively, you can use the acceptance test package that is released in conjunction with the BOSH releases and can be found on the [GitHub releases page](https://github.com/cloudfoundry/app-autoscaler-release/releases/tag/v10.0.3),e.g., https://github.com/cloudfoundry/app-autoscaler-release/releases/download/v10.0.3/app-autoscaler-acceptance-tests-v10.0.3.tgz. This package only contains the acceptance test suite and the pre-compiled test app.
 
 There are several different test suites, and you may not wish to run all the tests in all contexts, and sometimes you may want to focus individual test suites to pinpoint a failure.  The default set of tests can be run via:
 
