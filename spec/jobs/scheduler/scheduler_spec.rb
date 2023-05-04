@@ -20,7 +20,7 @@ describe "scheduler" do
         }
       }
 
-      rendered_template = YAML.safe_load(template.render(properties)) # klappt nicht
+      rendered_template = YAML.safe_load(template.render(properties))
 
       expect(rendered_template).to include(
         {"scheduler" => {
