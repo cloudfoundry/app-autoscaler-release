@@ -1,0 +1,156 @@
+<%
+  def p_arr(property)
+      p(property,nil) || []
+  end
+
+  def generate_db_url(db_name, job_name)
+    db_scheme = p("autoscaler.#{db_name}.db_scheme")
+    db_address = p("autoscaler.#{db_name}.address")
+    db_port = p("autoscaler.#{db_name}.port")
+    db_role = p_arr("autoscaler.#{db_name}.roles").find { |role| role['tag'] == db_name.tr('_', '') or role['tag'] == 'default' }
+    db_database = p_arr("autoscaler.#{db_name}.databases").find { |database| database['tag'] == db_name.tr('_', '') or database['tag'] == 'default' }
+
+   if db_scheme == "postgres"
+      db_url = "jdbc:postgresql://#{db_address}:#{db_port}/#{db_database["name"]}?ApplicationName=#{job_name}&sslmode=" + p("autoscaler.#{db_name}.sslmode")
+      unless p("autoscaler.#{db_name}.tls.ca") == ""
+        db_url = "#{db_url}&sslrootcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/ca.crt"
+      end
+      unless p("autoscaler.#{db_name}.tls.certificate") == ""
+        db_url = "#{db_url}&sslcert=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/crt"
+      end
+      unless p("autoscaler.#{db_name}.tls.private_key") == ""
+        db_url = "#{db_url}&sslkey=/var/vcap/jobs/#{job_name}/config/certs/#{db_name}/key.pk8"
+      end
+   else #mysql case
+      db_url = "jdbc:mysql://" + db_address + ":" + db_port.to_s + "/" + db_database['name'] + "?autoReconnect=true"
+      unless p('autoscaler.scheduler_db.tls.ca') == ""
+        db_url = "#{db_url}&useSSL=true&requireSSL=true&verifyServerCertificate=true&enabledTLSProtocols=TLSv1.2&trustCertificateKeyStorePassword=123456&trustCertificateKeyStoreUrl=file:/var/vcap/jobs/scheduler/config/certs/scheduler_db/cacerts&trustCertificateKeyStoreType=pkcs12"
+      end
+   end
+    db_url
+  end
+
+  job_name = 'scheduler'
+  schedulerdb_role = p_arr("autoscaler.scheduler_db.roles").find { |role| role['tag'] == 'schedulerdb' or role['tag'] == 'default' }
+  policydb_role = p_arr("autoscaler.policy_db.roles").find { |role| role['tag'] == 'policydb' or role['tag'] == 'default' }
+  schedulerdb_url = generate_db_url('scheduler_db', job_name)
+  policydb_url = generate_db_url('policy_db', job_name)
+
+  #datasource for application and quartz
+  if p("autoscaler.scheduler_db.db_scheme") == "postgres"
+    datasource_driver_class_name="org.postgresql.Driver"
+  else
+    datasource_driver_class_name="com.mysql.cj.jdbc.Driver"
+  end
+
+  #datasource for policy
+ if p("autoscaler.policy_db.db_scheme") == "postgres"
+    datasource_policy_db_class_name="org.postgresql.Driver"
+ else
+    datasource_policy_db_class_name="com.mysql.cj.jdbc.Driver"
+ end
+%>
+###########################################
+#           Template Main                 #
+###########################################
+management:
+  endpoints:
+    enabled: false
+spring:
+  application:
+    name: scheduler
+  mvc:
+    servlet:
+      load-on-startup: 1
+  aop:
+    auto: false
+  data:
+    jpa:
+      repositories:
+        enabled: false
+  main:
+    allow-bean-definition-overriding: true
+  ############################################################
+  #    DataSources
+  ############################################################
+  datasource:
+    driverClassName: <%=datasource_driver_class_name%>
+    password: <%=schedulerdb_role['password'] %>
+    url: <%=schedulerdb_url %>
+    username: <%=schedulerdb_role['name'] %>
+  policy-db-datasource:
+    driverClassName: <%=datasource_policy_db_class_name%>
+    password: <%=policydb_role['password'] %>
+    url: <%=policydb_url %>
+    username: <%=policydb_role['name'] %>
+  ############################################################
+  #    Quartz Properties
+  ############################################################
+  quartz:
+    properties:
+      org:
+        quartz:
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            isClustered: true
+            misfireThreshold: 120000
+          scheduler:
+            instanceId: <%= spec.id %>
+            instanceName: app-autoscaler
+          threadPool:
+            threadCount: 10
+############################################################
+#    Client SSL keys
+############################################################
+client:
+  httpClientTimeout: <%=p('autoscaler.scheduler.http_client_timeout') %>
+  ssl:
+    key-store: /var/vcap/jobs/scheduler/config/certs/scalingengine/client.p12
+    key-store-password: 123456
+    key-store-type: PKCS12
+    protocol: TLSv1.2
+    trust-store: /var/vcap/jobs/scheduler/config/certs/scalingengine/cacerts
+    trust-store-password: 123456
+############################################################
+#    Scalingengine
+############################################################
+autoscaler:
+  scalingengine:
+    url: https://<%=p('autoscaler.scheduler.scaling_engine.host') %>:<%=p('autoscaler.scheduler.scaling_engine.port') %>
+scalingengine:
+  notification:
+    reschedule:
+      maxcount: <%=p('autoscaler.scheduler.notification_reschedule_maxcount') %>
+scalingenginejob:
+  reschedule:
+    interval:
+      millisecond: <%=p('autoscaler.scheduler.job_reschedule_interval_millisecond') %>
+    maxcount: <%=p('autoscaler.scheduler.job_reschedule_maxcount') %>
+############################################################
+#    Scheduler Health Server
+############################################################
+scheduler:
+  healthserver:
+    password: <%=p('autoscaler.scheduler.health.password') %>
+    port: <%=p('autoscaler.scheduler.health.port') %>
+    username: <%=p('autoscaler.scheduler.health.username') %>
+    basicAuthEnabled: <%=p('autoscaler.scheduler.health.basicAuthEnabled') %>
+    unprotected_endpoints: <%=p('autoscaler.scheduler.health.unprotected_endpoints') %>
+############################################################
+#    Server SSL keys
+############################################################
+server:
+  port: <%=p('autoscaler.scheduler.port') %>
+  ssl:
+    ciphers: TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_RC4_128_SHA,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,SSL_RSA_WITH_RC4_128_SHA
+    enabled-protocols: TLSv1.2
+    key-alias: scheduler
+    key-store: /var/vcap/jobs/scheduler/config/certs/server.p12
+    key-store-password: 123456
+    key-store-type: PKCS12
+    trust-store: /var/vcap/jobs/scheduler/config/certs/cacerts
+    trust-store-password: 123456
+
+
+#User added properties
+<%=p('autoscaler.scheduler.application.props')%>
