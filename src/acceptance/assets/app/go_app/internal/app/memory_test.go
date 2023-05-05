@@ -58,26 +58,33 @@ var _ = Describe("Memory tests", func() {
 	})
 	Context("memTest info tests", func() {
 		It("should gobble memory and release when stopped", func() {
+			var allocInMB uint64 = 50
 
 			oldMem := getTotalMemoryUsage("before memTest info test")
 			slack := getMemorySlack()
 
 			By("allocating memory")
 			memInfo := &app.ListBasedMemoryGobbler{}
-			memInfo.UseMemory(5 * app.Mebi)
+			memInfo.UseMemory(allocInMB * app.Mebi)
 			Expect(memInfo.IsRunning()).To(Equal(true))
 
 			newMem := getTotalMemoryUsage("during memTest info test")
-			Expect(newMem - oldMem).To(BeNumerically(">=", 5*app.Mebi-slack))
+			msg :=
+			`
+			If this test fails, please consider to rewrite internal/app/memory.go.UseMemory()
+			to make use of syscalls directly (e.g. “malloc”) to make sure of not
+			having issues due to the go-runtime.
+			`
+			GinkgoWriter.Printf(msg)
+			Expect(newMem - oldMem).To(BeNumerically(">=", allocInMB * app.Mebi-slack))
 
 			By("and releasing it after the test ends")
 			memInfo.StopTest()
 			Expect(memInfo.IsRunning()).To(Equal(false))
 
 			slack = getMemorySlack()
-			GinkgoWriter.Printf("slack: %d MiB\n", slack/app.Mebi)
 
-			Eventually(getTotalMemoryUsage).WithArguments("after memTest info test").Should(BeNumerically("<=", newMem-5*app.Mebi+slack))
+			Eventually(getTotalMemoryUsage).WithArguments("after memTest info test").Should(BeNumerically("<=", newMem - allocInMB * app.Mebi + slack))
 		})
 	})
 })
@@ -85,6 +92,7 @@ var _ = Describe("Memory tests", func() {
 func getTotalMemoryUsage(action string) uint64 {
 	GinkgoHelper()
 
+	runtime.GC()
 	proc := getProcessInfo()
 
 	stat, err := proc.NewStatus()
@@ -107,7 +115,11 @@ func getMemorySlack() uint64 {
 	var ms runtime.MemStats
 	runtime.ReadMemStats(&ms)
 
-	return ms.HeapInuse - ms.HeapAlloc
+	slack := ms.HeapInuse - ms.HeapAlloc
+
+	GinkgoWriter.Printf("slack: %d MiB\n", slack/app.Mebi)
+
+	return slack
 }
 
 func getProcessInfo() procfs.Proc {
