@@ -50,9 +50,15 @@ var _ = Describe("Memory tests", func() {
 				Status(http.StatusOK).
 				Body(`{"memoryMiB":5, "minutes":4 }`).
 				End()
+
+			// In the following lines we sometimes use “Eventually” instead of “Expect” to ensure that
+			// these checks are run after the asynchronous go-routines in memory.go.MemoryTests
+			// have been finished. Usually this would require making use of asynchronous
+			// http-features (i.e. returing http-status-code 202 etc.) which would involve a lot of
+			// new lines of code.
 			Eventually(func() int { return fakeMemoryTest.UseMemoryCallCount() }).Should(Equal(1))
 			Expect(fakeMemoryTest.UseMemoryArgsForCall(0)).To(Equal(uint64(5 * app.Mebi)))
-			Expect(fakeMemoryTest.SleepCallCount()).To(Equal(1))
+			Eventually(func() int { return fakeMemoryTest.SleepCallCount() }).Should(Equal(1))
 			Expect(fakeMemoryTest.SleepArgsForCall(0)).To(Equal(4 * time.Minute))
 		})
 	})
