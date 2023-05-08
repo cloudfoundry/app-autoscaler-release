@@ -55,6 +55,16 @@
               temurin-bin
               yq-go
             ];
+
+            shellHook = ''
+              cat << 'EOF'
+                If `whoami` does not work properly on your computer, `bosh ssh` commands may fail.
+                The solution is to provide your nix dev-shell the path to the `libnss_sss.so.2` of
+                your host system, see: <https://github.com/NixOS/nixpkgs/issues/230110>
+                Execute for example this in your shell:
+                `export LD_PRELOAD='/lib/x86_64-linux-gnu/libnss_sss.so.2'`
+              EOF
+            '';
           };
       });
   };
