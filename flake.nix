@@ -57,10 +57,10 @@
             ];
 
             shellHook = ''
-              echo -ne '\033[0;33m'
+              echo -ne '\033[1;33m' '\033[5m'
               cat << 'EOF'
-                If `whoami` does not work properly on your computer, `bosh ssh` commands may fail.
-                The solution is to provide your nix dev-shell the path to the `libnss_sss.so.2` of
+                ⚠️ If `whoami` does not work properly on your computer, `bosh ssh` commands may fail.
+                The solution is, to provide your nix dev-shell the path to the `libnss_sss.so.2` of
                 your host system, see: <https://github.com/NixOS/nixpkgs/issues/230110>
 
                 Adapt the following line to contain the correct path:
