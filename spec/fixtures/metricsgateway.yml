@@ -25,3 +25,7 @@ autoscaler:
     nozzle:
       rlp_addr:
         some_addr
+    health:
+      username: "basic_auth_username"
+      password: "basic_auth_secret"
+      unprotected_endpoints: []

@@ -63,7 +63,7 @@ func NewServerWithBasicAuth(conf models.HealthConfig, healthCheckers []Checker, 
 	return http_server.New(addr, healthRouter), nil
 }
 
-// Make sure that username and password is not empty.
+// NewHealthRouterWithBasicAuth Make sure that username and password is not empty.
 // Parameter `healthCheckers` determines the information provided by the readiness-endpoint.
 func NewHealthRouterWithBasicAuth(conf models.HealthConfig, healthCheckers []Checker, logger lager.Logger,
 	gatherer prometheus.Gatherer, time func() time.Time) (*mux.Router, error) {

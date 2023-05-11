@@ -32,20 +32,16 @@
   end
   db_url
 end
-
-###########################################
-#           Template Main                 #
-###########################################
   job_name = 'metricsgateway'
   policy_db_url = build_db_url('policy_db', job_name)
 
   metricsserver_sorted_instances=link("metricsserver").instances.sort_by {|i|i.address}
   metricsserver_addrs=metricsserver_sorted_instances.map{|i| "'wss://#{i.address}:#{link("metricsserver").p('autoscaler.metricsserver.collector.port')}'"}
   metricsserver_nodeAddrs="[" + metricsserver_addrs.join(",") +"]"  
-
 %>
-
-
+###########################################
+#           Template Main                 #
+###########################################
 logging:
   level: <%= p("autoscaler.metricsgateway.logging.level") %>
 envelop_chan_size: <%= p("autoscaler.metricsgateway.envelop_chan_size") %>
@@ -80,3 +76,6 @@ health:
   port: <%= p("autoscaler.metricsgateway.health.port") %>
   username: <%= p("autoscaler.metricsgateway.health.username") %>
   password: <%= p("autoscaler.metricsgateway.health.password") %>
+  unprotected_endpoints: <%= p("autoscaler.metricsgateway.health.unprotected_endpoints") %>
+  readiness_enabled: <%= p("autoscaler.metricsgateway.health.readiness_enabled") %>
+

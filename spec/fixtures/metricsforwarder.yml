@@ -25,4 +25,4 @@ autoscaler:
     health:
       username: "basic_auth_username"
       password: "basic_auth_secret"
-      unprotected_endpoints: [ ]
+      unprotected_endpoints: []
