@@ -32,10 +32,6 @@
   end
   db_url
 end
-
-###########################################
-#           Template Main                 #
-###########################################
   job_name = 'metricsforwarder'
   policy_db_url = build_db_url('policy_db', job_name)
   if p("autoscaler.storedprocedure_db.address") != ''
@@ -43,7 +39,9 @@ end
   end
 
 %>
-
+###########################################
+#           Template Main                 #
+###########################################
 server:
   port: <%= p("autoscaler.metricsforwarder.server.port") %>
 logging:
@@ -74,7 +72,8 @@ health:
   port:  <%= p("autoscaler.metricsforwarder.health.port") %>
   username: <%= p("autoscaler.metricsforwarder.health.username") %>
   password: <%= p("autoscaler.metricsforwarder.health.password") %>
-
+  unprotected_endpoints: <%= p("autoscaler.metricsforwarder.health.unprotected_endpoints") %>
+  readiness_enabled: <%= p("autoscaler.metricsforwarder.health.readiness_enabled") %>
 rate_limit:
   valid_duration: <%= p("autoscaler.metricsforwarder.rate_limit.valid_duration") %>
   max_amount: <%= p("autoscaler.metricsforwarder.rate_limit.max_amount") %>
