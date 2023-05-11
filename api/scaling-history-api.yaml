@@ -27,11 +27,49 @@ paths:
       in: query
       description: |
         The start time in the number of nanoseconds elapsed since January 1, 1970 UTC.
-
-        The default value is 0.
       schema:
-        type: int
+        type: integer
+        default: 0
       example: start-time=1494989539138350432
+    - name: end-time
+      in: query
+      description: |
+        The end time in the number of nanoseconds elapsed since January 1, 1970 UTC.
+      schema:
+        type: integer
+        default: 0
+      example: end-time=1494989549117047288
+    - name: order-direction
+      in: query
+      description: |
+        The sorting order. The scaling history will be order by timestamp ascending or descending.
+      schema:
+        type: string
+        enum: ["asc", "desc"]
+        default: desc
+      example: order-direction=desc
+    - name: page
+      in: query
+      description: The page number to query
+      schema:
+        type: integer
+        minimum: 1 # Or Should it be "1"?
+        default: 1
+        example: page=1
+    - name: results-per-page
+      in: query
+      description: Number of entries shown per page.
+      schema:
+        type: integer
+        minimum: 0 # Or Should it be "1"?
+        default: 50
+      example: results-per-page=10
+    - name: Authorization
+      in: header
+      schema:
+        type: string
+      example: |
+        bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5\_Iu\_o
     get:
       summary: Retrieves the scaling history of an application.
       description: |
@@ -51,21 +89,22 @@ paths:
 components:
   schemas:
     ErrorResponse:
-    type: object
-    properties:
-      code:
-        type: string
-        description: The textual error code.
-      message:
-        type: string
-        description: The message describing the cause of the error.
+      type: object
+      properties:
+        code:
+          type: string
+          description: The textual error code.
+        message:
+          type: string
+          description: The message describing the cause of the error.
     GUID:
       description: |
         Identificator used by Cloud Foundry for entities.
 
         Anything is an entity. Apps, services, service-bindings, …
       type: string
-      pattern: /(\d|[a-f]){8}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){12}/
+      pattern: (\d|[a-f]){8}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){12}
+      example: 8d0cee08-23ad-4813-a779-ad8118ea0b91
     History:
       description: Object containing scaling history.
       type: object
@@ -73,44 +112,88 @@ components:
         total_results:
           type: integer
           format: int64
-          description:
+          description: Number of history entries found for the given query.
           example: 2
         total_pages:
           type: integer
           format: int64
-          description:
+          description: Number of Pages from the query
           example: 1
         page:
           type: integer
           format: int64
-          description:
+          description: Number of the current page.
           example: 1
         prev_url:
-          schema:
-            type: string
-            format: uri # TODO: Check, if valid in openapi?
+          type: string
+          format: uri
         next_url:
-          schema:
-            type: string
-            format: uri # TODO: Check, if valid in openapi?
+          type: string
+          format: uri
         resources:
           type: array
           items:
             $ref: '#/components/schemas/HistoryEntry'
-      HistoryEntry:
-        description: todo
-        type: object
-        properties:
-          app_guid:
-            $ref: '#/components/schemas/GUID'
-          timestamp:
-          scaling_type:
-          status:
-          old_instances:
-          new_instances:
-          reason:
-          message:
-          error:
+    HistoryEntry:
+      description: Description of a history event.
+      type: object
+      properties:
+        app_guid:
+          $ref: '#/components/schemas/GUID'
+        timestamp:
+          type: integer
+          description: |
+            The scaling time in the number of nanoseconds elapsed since January 1, 1970 UTC.
+          example: 1494989539138350432
+        scaling_type:
+          type: integer
+          format: int64
+          enum: [0, 1]
+          description: |
+            There are two different scaling types:
+             + 0: This represents `ScalingTypeDynamic`. The scaling has been done due to a dynamic
+                  scaling rule, reacting on metrics provided by the app.
+             + 1: This represents `ScalingTypeSchedule`. The scaling has been done due to a
+                  scheduled period changing the default instance limits.
+          example: 0
+        status:
+          type: integer
+          format: int64
+          enum: [0, 1, 2]
+          description: |
+            Following stati are possible:
+             + 0: The scaling was done successfully.
+             + 1: The scaling failed explicitly.
+             + 2: The scaling was ignored.
+
+            This field is as well a selector of which of the other ones are used and which not.
+          example: 0
+        old_instances:
+          type: integer
+          format: int64
+          minimum: 0
+          description: The number of instances before the scaling.
+          example: 1
+        new_instances:
+          type: integer
+          format: int64
+          minimum: 0
+          description: The number of instances after the scaling.
+          example: 2
+        reason:
+          type: string
+          description: Textual information about what triggered the scaling event.
+          example: -1 instance(s) because cpu < 20% for 60 seconds
+        message: # Why not `scaling_ignoration_reason`?
+          type: string
+          description: |
+            In case the scaling was ignored, the reason is provided in this field.
+          example: app in cooldown period
+        error:
+          type: string
+          description: |
+            In case the scaling failed, the reason is provided in this field.
+          example: failed to compute new app instances
   responses:
     Error:
         description: |
