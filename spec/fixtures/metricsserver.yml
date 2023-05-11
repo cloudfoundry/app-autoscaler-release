@@ -37,3 +37,8 @@ autoscaler:
     secret: uaa_secret
     uaa_api: https://login.cf.domain/uaa
     grant_type: ALLOW_ALL
+  metricsserver:
+    health:
+      username: "basic_auth_username"
+      password: "basic_auth_secret"
+      unprotected_endpoints: []

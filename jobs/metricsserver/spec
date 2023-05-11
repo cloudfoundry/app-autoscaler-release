@@ -156,6 +156,12 @@ properties:
   autoscaler.metricsserver.health.password:
     description: "the password of health endpoint"
     default: ''
+  autoscaler.metricsserver.health.unprotected_endpoints:
+    description: "List of all health-endpoints, that run _without_ basic access authentication.Valid endpoints are /debug/pprof, /health/liveness, /health/prometheus, /health/readiness"
+    default: [] # protect everything
+  autoscaler.metricsserver.health.readiness_enabled:
+    default: false
+    description: "Set to true if you want to enable the endpoint on /health/readiness"
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"

@@ -32,10 +32,6 @@
   end
   db_url
 end
-
-###########################################
-#           Template Main                 #
-###########################################
   job_name = 'metricsserver'
   instance_metrics_db_url = build_db_url('instancemetrics_db', job_name)
   policy_db_url = build_db_url('policy_db', job_name)
@@ -43,10 +39,11 @@ end
   sorted_instances=link("metricsserver").instances.sort_by {|i|i.address}
   nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
   addrs=sorted_instances.map{|i| "'#{i.address}'"}
-  nodeAddrs="[" + addrs.join(",") +"]"  
-
+  nodeAddrs="[" + addrs.join(",") +"]"
 %>
-
+###########################################
+#           Template Main                 #
+###########################################
 logging:
   level: <%= p("autoscaler.metricsserver.logging.level") %>
 http_client_timeout: <%= p("autoscaler.metricsserver.http_client_timeout") %>
@@ -89,6 +86,9 @@ health:
   port: <%= p("autoscaler.metricsserver.health.port") %>
   username: <%= p("autoscaler.metricsserver.health.username") %>
   password: <%= p("autoscaler.metricsserver.health.password") %>
+  unprotected_endpoints: <%= p("autoscaler.metricsserver.health.unprotected_endpoints") %>
+  readiness_enabled: <%= p("autoscaler.metricsserver.health.readiness_enabled") %>
+
 
 
 
