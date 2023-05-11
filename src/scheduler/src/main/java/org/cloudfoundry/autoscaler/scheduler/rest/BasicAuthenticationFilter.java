@@ -30,8 +30,7 @@ public class BasicAuthenticationFilter implements Filter {
     protectedEndpointsMap =
         Map.of(
             "/health/prometheus", true,
-            "/health/liveness", true,
-            "/health/protected", true);
+            "/health/liveness", true);
   }
 
   final HealthServerConfiguration healthServerConfiguration;
@@ -150,8 +149,7 @@ public class BasicAuthenticationFilter implements Filter {
     Map<String, Boolean> resultUnprotectedEndpoints = new HashMap<>();
     for (Map.Entry<String, Boolean> protectedEndpoint : protectedEndpointsMap.entrySet()) {
       if (unprotectedEndpointsConfig.containsKey(protectedEndpoint.getKey())) {
-        resultUnprotectedEndpoints.put(
-            protectedEndpoint.getKey(), false); // rename to unProtectedEndpoints
+        resultUnprotectedEndpoints.put(protectedEndpoint.getKey(), false);
       }
     }
     List<String> allowedEndpointsWithoutBasicAuth =

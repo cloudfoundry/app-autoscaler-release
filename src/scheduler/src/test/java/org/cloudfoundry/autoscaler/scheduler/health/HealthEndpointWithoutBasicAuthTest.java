@@ -26,16 +26,10 @@ import org.springframework.test.context.junit4.SpringRunner;
     properties =
         "scheduler.healthserver.unprotectedEndpoints=" + "/health/liveness,/health/prometheus")
 public class HealthEndpointWithoutBasicAuthTest {
-  /*
-  FIXMe refactor topic: use the mvcMock to not actually start the server. Also use WebMVC to test the web layer without starting the whole application context
-   example : https://spring.io/guides/gs/testing-web/
-  */
-
   @Autowired private TestRestTemplate restTemplate;
 
   @Autowired private HealthServerConfiguration healthServerConfig;
 
-  // Tests with unprotectedConfiguration
   @Test
   public void givenUnprotectedConfigsShouldLivenessReturn200() {
 

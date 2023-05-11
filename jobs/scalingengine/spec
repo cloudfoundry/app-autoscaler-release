@@ -175,6 +175,12 @@ properties:
   autoscaler.scalingengine.health.password:
     description: "the password of health endpoint"
     default: ''
+  autoscaler.scalingengine.health.unprotected_endpoints:
+    description: "List of all health-endpoints, that run _without_ basic access authentication.Valid endpoints are /debug/pprof, /health/liveness, /health/prometheus, /health/readiness"
+    default: [] # protect everything
+  autoscaler.scalingengine.health.readiness_enabled:
+    default: false
+    description: "Set to true if you want to enable the endpoint on /health/readiness"
   autoscaler.scalingengine.defaultCoolDownSecs:
     description: "Default value for cool_down_secs"
     default: 300

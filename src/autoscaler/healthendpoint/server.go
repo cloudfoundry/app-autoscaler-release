@@ -23,6 +23,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var basicAuthErrorMsg = "basic authentication required for endpoint %s, but credentials not set up properly"
+
 // basic authentication credentials struct
 type basicAuthenticationMiddleware struct {
 	usernameHash []byte
@@ -112,8 +114,7 @@ func addLivelinessHandlers(conf models.HealthConfig, mainRouter *mux.Router, tim
 
 	if endpointsNeedsProtection(routes.LivenessPath, conf) {
 		if !conf.BasicAuthPossible() {
-			msg := "Basic authentication required for endpoint %s, but credentials not set up properly."
-			return fmt.Errorf(msg, routes.LivenessPath)
+			return fmt.Errorf(basicAuthErrorMsg, routes.LivenessPath)
 		}
 		livenessRouter.Use(authMiddleware.middleware)
 	}
@@ -133,8 +134,7 @@ func addReadinessHandler(conf models.HealthConfig, mainRouter *mux.Router,
 	if endpointsNeedsProtection(routes.ReadinessPath, conf) {
 		readinessRouter.Use(authMiddleware.middleware)
 		if !conf.BasicAuthPossible() {
-			msg := "Basic authentication required for endpoint %s, but credentials not set up properly."
-			return fmt.Errorf(msg, routes.ReadinessPath)
+			return fmt.Errorf(basicAuthErrorMsg, routes.ReadinessPath)
 		}
 	}
 	// unauthenticated route
@@ -153,8 +153,7 @@ func addPprofHandlers(conf models.HealthConfig, mainRouter *mux.Router,
 
 	if endpointsNeedsProtection(routes.PprofPath, conf) {
 		if !conf.BasicAuthPossible() {
-			msg := "Basic authentication required for endpoint %s, but credentials not set up properly."
-			return fmt.Errorf(msg, routes.PprofPath)
+			return fmt.Errorf(basicAuthErrorMsg, routes.PprofPath)
 		}
 		pprofRouter.Use(authMiddleware.middleware)
 	}
@@ -180,15 +179,12 @@ func addPrometheusHandler(mainRouter *mux.Router, conf models.HealthConfig,
 	if endpointsNeedsProtection(routes.PrometheusPath, conf) {
 		prometheusRouter.Use(authMiddleware.middleware)
 		if !conf.BasicAuthPossible() {
-			msg := "Basic authentication required for endpoint %s, but credentials not set up properly."
-			return fmt.Errorf(msg, routes.PrometheusPath)
+			return fmt.Errorf(basicAuthErrorMsg, routes.PrometheusPath)
 		}
 	}
 	// unauthenticated routes
 	// /health/prometheus
 	prometheusRouter.Path("").Handler(promHandler)
-	// http://<health_server:port>/
-	// mainRouter.Path("/").Handler(promHandler)
 	return nil
 }
 

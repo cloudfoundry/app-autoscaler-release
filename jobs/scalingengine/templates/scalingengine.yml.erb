@@ -32,15 +32,14 @@
   end
   db_url
 end
-
-###########################################
-#           Template Main                 #
-###########################################
   job_name = 'scalingengine'
   scaling_engine_db_url = build_db_url('scalingengine_db', job_name)
   policy_db_url = build_db_url('policy_db', job_name)
-  scheduler_db_url = build_db_url('scheduler_db', job_name)%>
-
+  scheduler_db_url = build_db_url('scheduler_db', job_name)
+%>
+###########################################
+#           Template Main                 #
+###########################################
 cf:
   api:  <%= p("autoscaler.cf.api") %>
   client_id: <%= p("autoscaler.cf.client_id") %>
@@ -66,6 +65,8 @@ health:
   port: <%= p("autoscaler.scalingengine.health.port") %>
   username: <%= p("autoscaler.scalingengine.health.username") %>
   password: <%= p("autoscaler.scalingengine.health.password") %>
+  unprotected_endpoints: <%= p("autoscaler.scalingengine.health.unprotected_endpoints") %>
+  readiness_enabled: <%= p("autoscaler.scalingengine.health.readiness_enabled") %>
 
 db:
   policy_db:
