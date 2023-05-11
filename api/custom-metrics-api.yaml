@@ -24,7 +24,7 @@ paths:
       example: 58d162ad-87d5-4f52-8abf-e56a63a67292
       required: true
       schema:
-        type: string
+        $ref: "./shared_schemas.yaml#/GUID"
     post:
       summary: Submits application-specific custom metrics to app-autoscaler.
       description: |
@@ -45,19 +45,11 @@ paths:
         '200':
           description: Metrics were successfully submitted.
         default:
-          $ref: '#/components/responses/Error'
+          $ref: "./shared_schemas.yaml#/Error"
       security:
       - mtls: []
       x-codegen-request-body-name: body
 components:
-  responses:
-    Error:
-      description: |
-        Error, the response body may contain further information.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
   schemas:
     Metrics:
       required:
@@ -93,15 +85,6 @@ components:
           type: string
           description: An optional unit for the metric, for display purposes only.
           example: jobs
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-          description: The textual error code.
-        message:
-          type: string
-          description: The message describing the cause of the error.
   securitySchemes:
     mtls:
       type: mutualTLS

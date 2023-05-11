@@ -1,9 +1,9 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   title: Scaling History API
   description: List scaling history of an application
   version: 1.0.0
-security:
+security: # Do we need that?
 - mtls: []
 - basicAuthentication: []
 tags:
@@ -22,7 +22,7 @@ paths:
         It can be found in the `application_id` property of the JSON object stored in the
         `VCAP_APPLICATION` environment variable.
       schema:
-       $ref: '#/components/schemas/GUID'
+       $ref: "./shared_schemas.yaml#/GUID"
     - name: start-time
       in: query
       description: |
@@ -82,21 +82,12 @@ paths:
          content:
           application/json:
            schema:
-             $ref: '#/components/schemas/History'
+             $ref: "#/components/schemas/History"
         default:
-           $ref: '#/components/responses/Error'
+           $ref: "./shared_schemas.yaml#/Error"
 
 components:
   schemas:
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-          description: The textual error code.
-        message:
-          type: string
-          description: The message describing the cause of the error.
     GUID:
       description: |
         Identificator used by Cloud Foundry for entities.
@@ -194,11 +185,3 @@ components:
           description: |
             In case the scaling failed, the reason is provided in this field.
           example: failed to compute new app instances
-  responses:
-    Error:
-        description: |
-          Error, the response body may contain further information.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ErrorResponse'
