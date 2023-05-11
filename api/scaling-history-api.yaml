@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: Scaling History API
+  description: List scaling history of an application
+  version: 1.0.0
+security:
+- mtls: []
+- basicAuthentication: []
+tags:
+- name: Scaling History API V1
+  description: List the scaling history of an Application
+
+paths:
+  /v1/apps/{guid}/scaling_histories:
+    parameters:
+    - name: guid
+      in: path
+      required: true
+      description: |
+        The GUID identifying the application for which the scaling history is fetched.
+
+        It can be found in the `application_id` property of the JSON object stored in the
+        `VCAP_APPLICATION` environment variable.
+      schema:
+       $ref: '#/components/schemas/GUID'
+    - name: start-time
+      in: query
+      description: |
+        The start time in the number of nanoseconds elapsed since January 1, 1970 UTC.
+
+        The default value is 0.
+      schema:
+        type: int
+      example: start-time=1494989539138350432
+    get:
+      summary: Retrieves the scaling history of an application.
+      description: |
+         Use to retrieve scaling history for an app.
+      tags:
+      - Scaling History API V1
+      responses:
+        "200":
+         description: "OK"
+         content:
+          application/json:
+           schema:
+             $ref: '#/components/schemas/History'
+        default:
+           $ref: '#/components/responses/Error'
+
+components:
+  schemas:
+    ErrorResponse:
+    type: object
+    properties:
+      code:
+        type: string
+        description: The textual error code.
+      message:
+        type: string
+        description: The message describing the cause of the error.
+    GUID:
+      description: |
+        Identificator used by Cloud Foundry for entities.
+
+        Anything is an entity. Apps, services, service-bindings, …
+      type: string
+      pattern: /(\d|[a-f]){8}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){12}/
+    History:
+      description: Object containing scaling history.
+      type: object
+      properties:
+        total_results:
+          type: integer
+          format: int64
+          description:
+          example: 2
+        total_pages:
+          type: integer
+          format: int64
+          description:
+          example: 1
+        page:
+          type: integer
+          format: int64
+          description:
+          example: 1
+        prev_url:
+          schema:
+            type: string
+            format: uri # TODO: Check, if valid in openapi?
+        next_url:
+          schema:
+            type: string
+            format: uri # TODO: Check, if valid in openapi?
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoryEntry'
+      HistoryEntry:
+        description: todo
+        type: object
+        properties:
+          app_guid:
+            $ref: '#/components/schemas/GUID'
+          timestamp:
+          scaling_type:
+          status:
+          old_instances:
+          new_instances:
+          reason:
+          message:
+          error:
+  responses:
+    Error:
+        description: |
+          Error, the response body may contain further information.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'

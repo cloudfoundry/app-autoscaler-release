@@ -16,7 +16,11 @@ paths:
     parameters:
     - in: path
       name: appGuid
-      description: The GUID identifying the application the custom metrics are submitted for. Can be found in the `application_id` property of the JSON object stored in the `VCAP_APPLICATION` environment variable.
+      description: |
+        The GUID identifying the application the custom metrics are submitted for.
+
+        It can be found in the `application_id` property of the JSON object stored in the
+        `VCAP_APPLICATION` environment variable.
       example: 58d162ad-87d5-4f52-8abf-e56a63a67292
       required: true
       schema:
@@ -24,7 +28,10 @@ paths:
     post:
       summary: Submits application-specific custom metrics to app-autoscaler.
       description: |
-        Use to submit custom metrics to app-autoscaler which are defined and used in a dynamic scaling policy to enable automatic scaling based on application-specific metrics. We recommend submitting the custom metrics every 40 seconds from every application instance.
+        Use to submit custom metrics to app-autoscaler which are defined and used in a dynamic
+        scaling policy to enable automatic scaling based on application-specific metrics.
+
+        We recommend submitting the custom metrics every 40 seconds from every application instance.
       tags:
       - Custom Metrics API V1
       requestBody:
