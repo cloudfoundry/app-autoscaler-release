@@ -24,7 +24,7 @@ paths:
       example: 58d162ad-87d5-4f52-8abf-e56a63a67292
       required: true
       schema:
-        $ref: "./shared_schemas.yaml#/GUID"
+        $ref: "./shared_definitions.yaml#/schemas/GUID"
     post:
       summary: Submits application-specific custom metrics to app-autoscaler.
       description: |
@@ -45,7 +45,7 @@ paths:
         '200':
           description: Metrics were successfully submitted.
         default:
-          $ref: "./shared_schemas.yaml#/Error"
+          $ref: "./shared_definitions.yaml#/responses/Error"
       security:
       - mtls: []
       x-codegen-request-body-name: body
