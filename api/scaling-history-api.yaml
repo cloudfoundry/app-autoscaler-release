@@ -118,21 +118,40 @@ components:
           items:
             $ref: '#/components/schemas/HistoryEntry'
     HistoryEntry:
-      # Here we create manually a tagged union comparable to:
-      # <https://jsontypedef.com/docs/jtd-in-5-minutes/#discriminator-schemas>
-      # For discrimination, we use the property "status".
+      # Here we create manually a tagged union. For discrimination, we use the property "status".
       #
-      # TODO: Re-write this, making use of <https://spec.openapis.org/oas/v3.1.0#schemaComposition>
+      # See as well:
+      #  + <https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object>
+      #  + <https://spec.openapis.org/oas/v3.1.0#schemaComposition>
+      #  + <https://jsontypedef.com/docs/jtd-in-5-minutes/#discriminator-schemas>
       allOf:
         - $ref: "#/components/schemas/HistoryEntryCommon"
         - oneOf:
           - $ref: "#/components/schemas/HistoryErrorEntry"
           - $ref: "#/components/schemas/HistoryIgnoreEntry"
           - $ref: "#/components/schemas/HistorySuccessEntry"
+          discriminator:
+            propertyName: status
+            mapping:
+              0: "#/components/schemas/HistorySuccessEntry"
+              1: "#/components/schemas/HistoryErrorEntry"
+              2: "#/components/schemas/HistoryIgnoreEntry"
     HistoryEntryCommon:
       description: "Properties common for each entry in the scaling history."
       type: object
       properties:
+        status:
+          type: integer
+          format: int64
+          enum: [0, 1, 2]
+          description: |
+            Following stati are possible:
+             + 0: The scaling was done successfully.
+             + 1: The scaling failed explicitly.
+             + 2: The scaling was ignored.
+
+            This field is as well a selector of which of the other ones are used and which not.
+          example: 0
         app_guid:
           $ref: "./shared_definitions.yaml#/schemas/GUID"
         timestamp:
@@ -171,18 +190,6 @@ components:
       description: Description of a failed scaling even in history.
       type: object
       properties:
-        status:
-          type: integer
-          format: int64
-          enum: [1]
-          description: |
-            Following stati are possible:
-             + 0: The scaling was done successfully.
-             + 1: The scaling failed explicitly.
-             + 2: The scaling was ignored.
-
-            This field is as well a selector of which of the other ones are used and which not.
-          example: 1
         error:
           type: string
           description: |
@@ -192,18 +199,6 @@ components:
       description: Description of an ignored scaling event in history.
       type: object
       properties:
-        status:
-          type: integer
-          format: int64
-          enum: [2]
-          description: |
-            Following stati are possible:
-             + 0: The scaling was done successfully.
-             + 1: The scaling failed explicitly.
-             + 2: The scaling was ignored.
-
-            This field is as well a selector of which of the other ones are used and which not.
-          example: 2
         message: # Why not `scaling_ignoration_reason`?
           type: string
           description: |
@@ -212,16 +207,4 @@ components:
     HistorySuccessEntry:
       description: Description of a successful scaling event event in history.
       type: object
-      properties:
-        status:
-          type: integer
-          format: int64
-          enum: [0]
-          description: |
-            Following stati are possible:
-             + 0: The scaling was done successfully.
-             + 1: The scaling failed explicitly.
-             + 2: The scaling was ignored.
-
-            This field is as well a selector of which of the other ones are used and which not.
-          example: 0
+      properties: {} # No extra fields needed in this variant.
