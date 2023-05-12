@@ -118,7 +118,67 @@ components:
           items:
             $ref: '#/components/schemas/HistoryEntry'
     HistoryEntry:
-      description: Description of a history event.
+      oneOf:
+        - $ref: "#/components/schemas/HistoryErrorEntry"
+        - $ref: "#/components/schemas/HistoryIgnoreEntry"
+        - $ref: "#/components/schemas/HistorySuccessEntry"
+    HistoryErrorEntry:
+      description: Description of a failed scaling even in history.
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int64
+          enum: [1]
+          description: |
+            Following stati are possible:
+             + 0: The scaling was done successfully.
+             + 1: The scaling failed explicitly.
+             + 2: The scaling was ignored.
+
+            This field is as well a selector of which of the other ones are used and which not.
+          example: 1
+        app_guid:
+          $ref: "./shared_definitions.yaml#/schemas/GUID"
+        timestamp:
+          type: integer
+          description: |
+            The scaling time in the number of nanoseconds elapsed since January 1, 1970 UTC.
+          example: 1494989539138350432
+        scaling_type:
+          type: integer
+          format: int64
+          enum: [0, 1]
+          description: |
+            There are two different scaling types:
+             + 0: This represents `ScalingTypeDynamic`. The scaling has been done due to a dynamic
+                  scaling rule, reacting on metrics provided by the app.
+             + 1: This represents `ScalingTypeSchedule`. The scaling has been done due to a
+                  scheduled period changing the default instance limits.
+          example: 0
+        old_instances:
+          type: integer
+          format: int64
+          minimum: 0
+          description: The number of instances before the scaling.
+          example: 1
+        new_instances:
+          type: integer
+          format: int64
+          minimum: 0
+          description: The number of instances after the scaling.
+          example: 2
+        reason:
+          type: string
+          description: Textual information about what triggered the scaling event.
+          example: -1 instance(s) because cpu < 20% for 60 seconds
+        error:
+          type: string
+          description: |
+            In case the scaling failed, the reason is provided in this field.
+          example: failed to compute new app instances
+    HistoryIgnoreEntry:
+      description: Description of an ignored scaling event in history.
       type: object
       properties:
         app_guid:
@@ -142,7 +202,7 @@ components:
         status:
           type: integer
           format: int64
-          enum: [0, 1, 2]
+          enum: [2]
           description: |
             Following stati are possible:
              + 0: The scaling was done successfully.
@@ -172,8 +232,53 @@ components:
           description: |
             In case the scaling was ignored, the reason is provided in this field.
           example: app in cooldown period
-        error:
-          type: string
+    HistorySuccessEntry:
+      description: Description of a successful scaling event event in history.
+      type: object
+      properties:
+        app_guid:
+          $ref: "./shared_definitions.yaml#/schemas/GUID"
+        timestamp:
+          type: integer
           description: |
-            In case the scaling failed, the reason is provided in this field.
-          example: failed to compute new app instances
+            The scaling time in the number of nanoseconds elapsed since January 1, 1970 UTC.
+          example: 1494989539138350432
+        scaling_type:
+          type: integer
+          format: int64
+          enum: [0, 1]
+          description: |
+            There are two different scaling types:
+             + 0: This represents `ScalingTypeDynamic`. The scaling has been done due to a dynamic
+                  scaling rule, reacting on metrics provided by the app.
+             + 1: This represents `ScalingTypeSchedule`. The scaling has been done due to a
+                  scheduled period changing the default instance limits.
+          example: 0
+        status:
+          type: integer
+          format: int64
+          enum: [0]
+          description: |
+            Following stati are possible:
+             + 0: The scaling was done successfully.
+             + 1: The scaling failed explicitly.
+             + 2: The scaling was ignored.
+
+            This field is as well a selector of which of the other ones are used and which not.
+          example: 0
+        old_instances:
+          type: integer
+          format: int64
+          minimum: 0
+          description: The number of instances before the scaling.
+          example: 1
+        new_instances:
+          type: integer
+          format: int64
+          minimum: 0
+          description: The number of instances after the scaling.
+          example: 2
+        reason:
+          type: string
+          description: Textual information about what triggered the scaling event.
+          example: -1 instance(s) because cpu < 20% for 60 seconds
