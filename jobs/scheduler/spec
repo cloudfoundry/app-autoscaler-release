@@ -4,7 +4,7 @@ templates:
   bpm-pre-start.erb: bin/bpm-pre-start
   bpm.yml.erb: config/bpm.yml
   liquibase.properties: bin/liquibase.properties
-  application.properties.erb: config/application.properties
+  scheduler.yml.erb: config/scheduler.yml
   install_crt_keystore.sh: bin/install_crt_keystore
   install_crt_truststore.sh: bin/install_crt_truststore
 
@@ -116,7 +116,6 @@ properties:
   autoscaler.policy_db.sslmode:
     default: disable
     description: "sslmode to connect to postgres server"
-
   autoscaler.scheduler.health.port:
     description: "the listening port of health endpoint"
     default: 6204
@@ -129,6 +128,11 @@ properties:
   autoscaler.scheduler.health.password:
     description: "the password to protect the health endpoint"
     default: ''
+  autoscaler.scheduler.health.unprotected_endpoints:
+    description: |
+      List of all health-endpoints, that run _without_ basic access authentication.
+      Valid endpoints are /health/liveness, /health/prometheus
+    default: [] # protect everything
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"

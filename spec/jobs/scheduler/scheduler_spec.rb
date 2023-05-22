@@ -7,57 +7,81 @@ require "yaml"
 describe "scheduler" do
   let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), "../../..")) }
   let(:job) { release.job("scheduler") }
-  let(:template) { job.template("config/application.properties") }
+  let(:template) { job.template("config/scheduler.yml") }
   let(:properties) { YAML.safe_load(fixture("scheduler.yml").read) }
-  let(:rendered_template) { template.render(properties) }
+  let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
-  context "config/application.properties" do
-    it "does not set username nor password if not configured" do
-      properties["autoscaler"]["scheduler"] = {
-        "health" => {
-          "port" => 1234
-        }
-      }
-      rendered_template = template.render(properties)
-
-      expect(rendered_template).to include("scheduler.healthserver.port=1234")
-      expect(rendered_template).to include("scheduler.healthserver.basicAuthEnabled=false")
-      expect(rendered_template).to include("scheduler.healthserver.username=")
-      expect(rendered_template).to include("scheduler.healthserver.password=")
-    end
-
-    it "check scheduler username and password" do
+  context "config/scheduler.yml" do
+    it "does set neither username nor password if not configured" do
       properties["autoscaler"]["scheduler"] = {
         "health" => {
           "port" => 1234,
-          "basicAuthEnabled" => "true",
-          "username" => "test-user",
-          "password" => "test-user-password"
+          "unprotected_endpoints" => []
         }
       }
-      rendered_template = template.render(properties)
 
-      expect(rendered_template).to include("scheduler.healthserver.port=1234")
-      expect(rendered_template).to include("scheduler.healthserver.basicAuthEnabled=true")
-      expect(rendered_template).to include("scheduler.healthserver.username=test-user")
-      expect(rendered_template).to include("scheduler.healthserver.password=test-user-password")
+      rendered_template = YAML.safe_load(template.render(properties))
+
+      expect(rendered_template).to include(
+        {"scheduler" => {
+          "healthserver" => {
+            "port" => 1234,
+            "username" => nil,
+            "password" => nil,
+            "basicAuthEnabled" => false,
+            "unprotected_endpoints" => []
+          }
+        }}
+      )
+    end
+
+    it "check scheduler username and password and allow access with basic auth" do
+      properties["autoscaler"]["scheduler"] = {
+        "health" => {
+          "port" => 1234,
+          "username" => "test-user",
+          "password" => "test-user-password",
+          "unprotected_endpoints" => ["/health/liveness"]
+        }
+      }
+
+      rendered_template = YAML.safe_load(template.render(properties))
+
+      expect(rendered_template).to include(
+        {"scheduler" => {
+          "healthserver" => {
+            "port" => 1234,
+            "username" => "test-user",
+            "password" => "test-user-password",
+            "basicAuthEnabled" => false,
+            "unprotected_endpoints" => ["/health/liveness"]
+          }
+        }}
+      )
     end
 
     it "extension properties are added to the properties file" do
       properties["autoscaler"]["scheduler"] = {
         "application" => {
-          "props" => <<-HEREDOC
-          logging.level.org.hibernate=error
-          logging.level.org.cloudfoundry.autoscaler.scheduler=info
-          logging.level.org.quartz=info
+          "props" => <<~HEREDOC
+            logging:
+              level:
+                scheduler: "info"
+                quartz: "info"
           HEREDOC
         }
       }
-      rendered_template = template.render(properties)
 
-      expect(rendered_template).to include("logging.level.org.hibernate=error")
-      expect(rendered_template).to include("logging.level.org.cloudfoundry.autoscaler.scheduler=info")
-      expect(rendered_template).to include("logging.level.org.quartz=info")
+      rendered_template = YAML.safe_load(template.render(properties))
+
+      expect(rendered_template).to include(
+        {"logging" => {
+          "level" => {
+            "quartz" => "info",
+            "scheduler" => "info"
+          }
+        }}
+      )
     end
   end
 end

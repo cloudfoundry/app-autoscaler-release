@@ -53,14 +53,14 @@ RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_V
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
-ENV BBL_VERSION v9.0.0
+ENV BBL_VERSION v9.0.1
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_x86-64 && \
   mv bbl-* /usr/local/bin/bbl && \
   chmod +x /usr/local/bin/bbl
 
 # Install credhub
 # renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
-ENV CREDHUB_VERSION 2.9.14
+ENV CREDHUB_VERSION 2.9.15
 RUN wget -q https://github.com/cloudfoundry-incubator/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-${CREDHUB_VERSION}.tgz && \
   mv credhub /usr/local/bin/credhub
@@ -91,7 +91,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.c
   gcloud version
 
 # renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
-ARG GINKGO_VERSION=v2.9.3
+ARG GINKGO_VERSION=v2.9.5
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} &&\
     ginkgo version
 
