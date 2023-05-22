@@ -101,12 +101,11 @@ func NewHealthRouterWithBasicAuth(conf models.HealthConfig, healthCheckers []Che
 	return router, nil
 }
 
-// Adds liveliness handlers on the paths
-// "/" and LIVELINESS_PATH and adds a authentication
-// middleware for BasicAuth, for all paths that are not
-// in "unprotectedPaths".
+// Adds addLivelinessHandlers responds to the "/health" and "/health/liveness" endpoints.
+// By default, endpoints are protected by Basic authentication. However, endpoints can be accessed
+// without basic authentication by defining UnprotectedEndpoints in models.HealthConfig.UnprotectedEndpoints.
 //
-// Returns an error in case BasicAuth is required but the configuration is not set up properly.
+// addLivelinessHandlers Returns an error in case BasicAuth is required but the configuration is not set up properly.
 func addLivelinessHandlers(conf models.HealthConfig, mainRouter *mux.Router, time func() time.Time,
 	authMiddleware *basicAuthenticationMiddleware) error {
 	livenessHandler := common.VarsFunc(readiness([]Checker{}, time))
@@ -124,7 +123,7 @@ func addLivelinessHandlers(conf models.HealthConfig, mainRouter *mux.Router, tim
 }
 
 // Adds a readiness handler on the path READINESS_PATH and adds authentication middleware
-// for BasicAuth, if and only if READINESS_PATH is not included in the models.HealthConfig.
+// for BasicAuth, if and only if READINESS_PATH is not included in the models.HealthConfig.UnprotectedEndpoints.
 //
 // Returns an error in case BasicAuth is required but the configuration is not set up properly.
 func addReadinessHandler(conf models.HealthConfig, mainRouter *mux.Router,
@@ -137,14 +136,13 @@ func addReadinessHandler(conf models.HealthConfig, mainRouter *mux.Router,
 			return fmt.Errorf(basicAuthErrorMsg, routes.ReadinessPath)
 		}
 	}
-	// unauthenticated route
 	readinessRouter.Handle("/readiness", common.VarsFunc(readiness(healthCheckers, time)))
 	return nil
 }
 
 // Adds a pprof handler on the path PPROF_PATH featuring several endpoints.
 // Adds authentication middleware for BasiAuth, if and only if PPROF_PATH
-// is not excluded in the HealthConfig.
+// is not excluded in the models.HealthConfig.UnprotectedEndpoints.
 //
 // Returns an error in case BasicAuth is required but the configuration is not set up properly.
 func addPprofHandlers(conf models.HealthConfig, mainRouter *mux.Router,
@@ -168,7 +166,7 @@ func addPprofHandlers(conf models.HealthConfig, mainRouter *mux.Router,
 }
 
 // Adds a prometheus handler on the path PROMETHEUS_PATH and adds authentication middleware
-// for BasicAuth, if and only if PROMETHEUS_PATH is not excluded in the HealthConfig.
+// for BasicAuth, if and only if PROMETHEUS_PATH is not excluded in the models.HealthConfig.
 //
 // Returns an error in case BasicAuth is required but the configuration is not set up properly.
 func addPrometheusHandler(mainRouter *mux.Router, conf models.HealthConfig,
@@ -182,8 +180,6 @@ func addPrometheusHandler(mainRouter *mux.Router, conf models.HealthConfig,
 			return fmt.Errorf(basicAuthErrorMsg, routes.PrometheusPath)
 		}
 	}
-	// unauthenticated routes
-	// /health/prometheus
 	prometheusRouter.Path("").Handler(promHandler)
 	return nil
 }
