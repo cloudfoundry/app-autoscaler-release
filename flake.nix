@@ -23,7 +23,6 @@
             buildInputs = with pkgs; [
               act
               actionlint
-              apacheHttpd # temporarily needed to calc bcrypt-hash on command-line
               bosh-cli
               cloudfoundry-cli
               fly
@@ -53,7 +52,6 @@
               #
               # jdwpkgs.rubyPackages.cf-uaac
               shellcheck
-              sonar-scanner-cli # temporarily needed to use the sonar-scanner-cli
               temurin-bin
               yq-go
             ];

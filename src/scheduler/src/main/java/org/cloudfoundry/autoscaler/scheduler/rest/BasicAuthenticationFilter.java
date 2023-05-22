@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerConfiguration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
@@ -24,10 +25,11 @@ import org.springframework.util.ObjectUtils;
 @Component
 @Order(2)
 public class BasicAuthenticationFilter implements Filter {
-  private static final Map<String, Boolean> protectedEndpointsMap;
+  private static final String WWW_AUTHENTICATE_VALUE = "Basic";
+  private static final Map<String, Boolean> validProtectedEndpointsMap;
 
   static {
-    protectedEndpointsMap =
+    validProtectedEndpointsMap =
         Map.of(
             "/health/prometheus", true,
             "/health/liveness", true);
@@ -61,7 +63,7 @@ public class BasicAuthenticationFilter implements Filter {
         log.warn(
             "Health configuration: invalid unprotectedEndpoints provided: "
                 + validateMap.get("invalidEndpoints"));
-        httpResponse.setHeader("WWW-Authenticate", "Basic");
+        httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, WWW_AUTHENTICATE_VALUE);
         httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         return;
       }
@@ -75,7 +77,7 @@ public class BasicAuthenticationFilter implements Filter {
                 + httpRequest.getRequestURI()
                 + " \nValid unprotected endpoints are: "
                 + allowedEndpointsWithoutBasicAuth);
-        httpResponse.setHeader("WWW-Authenticate", "Basic");
+        httpResponse.setHeader("WWW-Authenticate", WWW_AUTHENTICATE_VALUE);
         httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         return;
       }
@@ -91,18 +93,19 @@ public class BasicAuthenticationFilter implements Filter {
     if (healthServerConfiguration.getUsername() == null
         || healthServerConfiguration.getPassword() == null) {
       log.error("Health configuration: username || password not set");
-      httpResponse.setHeader("WWW-Authenticate", "Basic");
+      httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, WWW_AUTHENTICATE_VALUE);
       httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
     if (authorizationHeader == null) {
       log.error("Basic authentication not provided with the request");
-      httpResponse.setHeader("WWW-Authenticate", "Basic");
+      httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, WWW_AUTHENTICATE_VALUE);
       httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
 
-    String base64Credentials = authorizationHeader.substring("Basic".length()).trim();
+    String base64Credentials =
+        authorizationHeader.substring(WWW_AUTHENTICATE_VALUE.length()).trim();
     byte[] credDecoded = Base64.decodeBase64(base64Credentials);
     String credentials = new String(credDecoded);
     String[] tokens = credentials.split(":");
@@ -115,16 +118,16 @@ public class BasicAuthenticationFilter implements Filter {
     String password = tokens[1];
 
     if (!areBasicAuthCredentialsCorrect(username, password)) {
-      httpResponse.setHeader("WWW-Authenticate", "Basic");
+      httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, WWW_AUTHENTICATE_VALUE);
       httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return;
     }
 
-    if (authorizationHeader != null && isUserAuthenticated(authorizationHeader)) {
+    if (isUserAuthenticated(authorizationHeader)) {
       // allow access to health endpoints
       filterChain.doFilter(httpRequest, httpResponse);
     } else {
-      httpResponse.setHeader("WWW-Authenticate", "Basic");
+      httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, WWW_AUTHENTICATE_VALUE);
       httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
   }
@@ -133,7 +136,7 @@ public class BasicAuthenticationFilter implements Filter {
 
     Map<String, Boolean> invalidEndpointsMap = new HashMap<>();
     for (String unprotectedEndpoint : unprotectedEndpointsConfig) {
-      if (!protectedEndpointsMap.containsKey(unprotectedEndpoint)) {
+      if (!validProtectedEndpointsMap.containsKey(unprotectedEndpoint)) {
         invalidEndpointsMap.put(unprotectedEndpoint, true);
       }
     }
@@ -145,9 +148,10 @@ public class BasicAuthenticationFilter implements Filter {
         .collect(Collectors.toMap(endpoint -> endpoint, endpoint -> true, (a, b) -> b));
   }
 
-  private List<String> areEndpointsAuthorized(Map unprotectedEndpointsConfig, String requestURI) {
+  private List<String> areEndpointsAuthorized(
+      Map<String, Boolean> unprotectedEndpointsConfig, String requestURI) {
     Map<String, Boolean> resultUnprotectedEndpoints = new HashMap<>();
-    for (Map.Entry<String, Boolean> protectedEndpoint : protectedEndpointsMap.entrySet()) {
+    for (Map.Entry<String, Boolean> protectedEndpoint : validProtectedEndpointsMap.entrySet()) {
       if (unprotectedEndpointsConfig.containsKey(protectedEndpoint.getKey())) {
         resultUnprotectedEndpoints.put(protectedEndpoint.getKey(), false);
       }
