@@ -39,11 +39,8 @@ const (
 	UpdateScheduleRouteName    = "UpdateSchedule"
 	DeleteScheduleRouteName    = "DeleteSchedule"
 
-	PublicApiScalingHistoryPath      = "/{appId}/scaling_histories"
-	PublicApiScalingHistoryRouteName = "GetPublicApiScalingHistories"
-
-	PublicApiMetricsHistoryPath = "/{appId}/metric_histories/{metricType}"
-
+	PublicApiScalingHistoryPath                = "/{appId}/scaling_histories"
+	PublicApiScalingHistoryRouteName           = "GetPublicApiScalingHistories"
 	PublicApiAggregatedMetricsHistoryPath      = "/{appId}/aggregated_metric_histories/{metricType}"
 	PublicApiAggregatedMetricsHistoryRouteName = "GetPublicApiAggregatedMetricsHistories"
 
@@ -58,13 +55,10 @@ const (
 
 	PublicApiInfoPath      = "/v1/info"
 	PublicApiInfoRouteName = "GetPublicApiInfo"
-
-	PublicApiHealthPath      = "/health"
-	LivenessPath             = "/health/liveness"
-	ReadinessPath            = "/health/readiness"
-	PrometheusPath           = "/health/prometheus"
-	PprofPath                = "/debug/pprof"
-	PublicApiHealthRouteName = "GetPublicApiHealth"
+	LivenessPath           = "/health/liveness"
+	ReadinessPath          = "/health/readiness"
+	PrometheusPath         = "/health/prometheus"
+	PprofPath              = "/debug/pprof"
 )
 
 type AutoScalerRoute struct {
@@ -114,7 +108,6 @@ func newRouters() *AutoScalerRoute {
 	instance.schedulerRoutes.Path(SchedulePath).Methods(http.MethodPut).Name(UpdateScheduleRouteName)
 	instance.schedulerRoutes.Path(SchedulePath).Methods(http.MethodDelete).Name(DeleteScheduleRouteName)
 	instance.apiOpenRoutes.Path(PublicApiInfoPath).Methods(http.MethodGet).Name(PublicApiInfoRouteName)
-	instance.apiOpenRoutes.Path(PublicApiHealthPath).Methods(http.MethodGet).Name(PublicApiHealthRouteName)
 
 	instance.apiRoutes = instance.apiOpenRoutes.PathPrefix("/v1/apps").Subrouter()
 	instance.apiRoutes.Path(PublicApiScalingHistoryPath).Methods(http.MethodGet).Name(PublicApiScalingHistoryRouteName)
