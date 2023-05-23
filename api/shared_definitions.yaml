@@ -25,3 +25,43 @@ schemas:
     type: string
     pattern: (\d|[a-f]){8}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){12}
     example: 8d0cee08-23ad-4813-a779-ad8118ea0b91
+  
+  metric_type:
+    description: |
+      One of system-default metric types memoryused,memoryutil,responsetime, throughput, cpu or user-defined custom metric type
+    type: string
+    enum: ["memoryused", "memoryutil", "responsetime", "throughput", "cpu or custom metric's name"]
+    example: memoryused
+  
+  threshold:
+    description: |
+      The boundary when metric value exceeds is considered as a breach
+    type: int
+    format: int64
+    example: 30
+  operator:
+    description: Used for standard operting signs - ">", "<", ">=", "<="
+    type: string
+    enum: [">", "<", ">=", "<="]
+    example: <
+  adjustment:
+    description: |
+      The adjustment approach for instance count with each scaling.
+
+      +5 means adding 5 instances, -50% means shrinking to the half of current size.
+    type: string
+    pattern: ^[-+][1-9]+[0-9]*[%]?$
+    example: -1
+  breach_duration_secs:
+    description: |
+      Time duration(in seconds) to fire scaling event if it keeps breaching
+    type: integer
+    format: int64  # this is time in seconds
+    example: 600
+  cool_down_secs:
+    description: |
+      The time duration (in seconds) to wait before the next scaling kicks in
+    type: integer
+    format: int64  # this is time in seconds
+    example: 300
+
