@@ -7,8 +7,6 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/global"
-	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/trace"
 
 	ht "github.com/ogen-go/ogen/http"
@@ -37,7 +35,7 @@ func (cfg *otelConfig) initOTEL() {
 		cfg.TracerProvider = otel.GetTracerProvider()
 	}
 	if cfg.MeterProvider == nil {
-		cfg.MeterProvider = global.MeterProvider()
+		cfg.MeterProvider = otel.GetMeterProvider()
 	}
 	cfg.Tracer = cfg.TracerProvider.Tracer(otelogen.Name,
 		trace.WithInstrumentationVersion(otelogen.SemVersion()),
@@ -81,9 +79,9 @@ func newClientConfig(opts ...ClientOption) clientConfig {
 
 type baseClient struct {
 	cfg      clientConfig
-	requests instrument.Int64Counter
-	errors   instrument.Int64Counter
-	duration instrument.Int64Histogram
+	requests metric.Int64Counter
+	errors   metric.Int64Counter
+	duration metric.Int64Histogram
 }
 
 func (cfg clientConfig) baseClient() (c baseClient, err error) {
