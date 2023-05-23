@@ -27,13 +27,11 @@ public class EmbeddedTomcatConfiguration {
   }
 
   private Connector[] additionalConnector() {
-    if (healthServerConfig.getPort() == 0) {
-      return new Connector[0];
-    }
     List<Connector> result = new ArrayList<>();
     Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
     connector.setScheme("http");
     connector.setPort(healthServerConfig.getPort());
+
     result.add(connector);
     return result.toArray(new Connector[] {});
   }

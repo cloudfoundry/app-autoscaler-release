@@ -12,6 +12,7 @@ import (
 	opConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	seConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
+	"github.com/go-sql-driver/mysql"
 
 	"fmt"
 	"net/url"
@@ -21,7 +22,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	. "github.com/onsi/gomega"
 	"github.com/tedsuo/ifrit/ginkgomon_v2"
 	"gopkg.in/yaml.v3"
@@ -355,7 +355,7 @@ server.ssl.ciphers=TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_CBC_SHA2
 
 server.port=%d
 # Health Server
-scheduler.healthserver.port=0
+scheduler.healthserver.port=7000
 scheduler.healthserver.username=test-user
 scheduler.healthserver.password=test-password
 client.httpClientTimeout=%d
