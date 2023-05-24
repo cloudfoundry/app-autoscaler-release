@@ -51,6 +51,8 @@ builds:
     version: 3.7.3
   8b04ebf3-1984-4e90-40ae-12514ff970d4:
     version: 5.2.3
+  8b453a8e-5bee-4d06-5431-cacbadba5336:
+    version: 10.0.5
   909b98d5-75c6-4ceb-64b9-a1552e8e2366:
     version: 9.3.0
   9468790b-7ba8-4b98-469c-3a9413b62934:
