@@ -1,0 +1,149 @@
+openapi: 3.0.0
+info: 
+  title: Policy API
+  description: This API is used to create, delete, retrieve the policy
+  version: 1.0.0
+  security: 
+- mtls: []
+- basicAuthentication: []
+tags:
+- name: Policy API V1
+  description: This API is used to create, delete, retrieve the policy
+
+paths: 
+  /v1/apps/{guid}/policy:
+    parameters:
+    - name: guid
+      in: path
+      required: true
+      description: |
+
+        The GUID identifying the application for which the scaling history is fetched.
+
+        It can be found in the `application_id` property of the JSON object stored in the
+        `VCAP_APPLICATION` environment variable.
+      schema:
+        $ref: "./shared_definitions.yaml#/schemas/GUID"
+    
+    - name: Authorization
+      in: header
+      schema: 
+        type: string
+        example: |
+          bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5_Iu_o
+    put:
+      summary: Retrieves the Policy 
+      description: This API is used to create the policy
+      tags:
+      - Create Policy API V1
+      response: 
+        "200":
+          description: "OK"
+          content:
+           application/json:
+            schema:
+              $ref: "#/components/schemas/Policy/CreatePolicy"
+        default: 
+          $ref: "./shared_definitons.yaml#/responses/Error" 
+components:
+  schemas:
+    CreatePolicy:
+      description: Object creating Policy 
+      type: object
+      properties:
+        instance_min_count:
+          type: integer
+          format: int64
+          description: minimal number of instance count
+          example: 1
+        instance_max_count: 
+          type: integer
+          format: int64
+          description: maximal number of instance count
+          example: 4
+        scaling_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScalingRules'
+    ScalingRules:
+      AnyOf:
+        - $ref: "./shared_definitions.yaml#/schemas/metric_type"
+        - $ref: "./shared_definitions.yaml#/schemas/threshold"
+        - $ref: "./shared_definitions.yaml#/schemas/operator"
+        - $ref: "./shared_definitions.yaml#/schemas/adjustment"
+        - $ref: "./shared_definitions.yaml#/schemas/breach_duration_secs"
+        - $ref: "./shared_definitions.yaml#/schemas/cool_down_secs"
+        schedules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedules'
+    Schedules:
+      AnyOf:
+        - $ref: "./shared_definitions.yaml#/schemas/timezone"
+        - $ref: "./shared_definitions.yaml#/schemas/recurring_schedule"
+        - $ref: "./shared_definitions.yaml#/schemas/specific_date"
+    delete:
+      summary: Deletes the policy 
+      description: This API is used to delete the policy
+      tags: 
+      - Delete Policy API V1
+      response: 
+        "200":
+          description: "OK"
+          content:
+           application/json:
+            schema:
+              $ref: "#/components/schemas/Policy/DeletePolicy"
+        default: 
+          $ref: "./shared_definitons.yaml#/responses/Error"
+    get:
+      summary: Retrieves the Policy 
+      description: This API is used to retrieve the policy
+      tags:
+      - Get Policy API V1
+      response: 
+        "200":
+          description: "OK"
+          content:
+           application/json:
+            schema:
+              $ref: "#/components/schemas/Policy/GetPolicy"
+        default: 
+          $ref: "./shared_definitons.yaml#/responses/Error"
+components:
+  schemas:
+    GetPolicy:
+      description: Object containing Policy 
+      type: object
+      properties:
+        instance_min_count:
+          type: integer
+          format: int64
+          description: minimal number of instance count
+          example: 2
+        instance_max_count: 
+          type: integer
+          format: int64
+          description: maximal number of instance count
+          example: 4
+        scaling_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScalingRules'
+    ScalingRules:
+      AnyOf:
+        - $ref: "./shared_definitions.yaml#/schemas/metric_type"
+        - $ref: "./shared_definitions.yaml#/schemas/threshold"
+        - $ref: "./shared_definitions.yaml#/schemas/operator"
+        - $ref: "./shared_definitions.yaml#/schemas/adjustment"
+        - $ref: "./shared_definitions.yaml#/schemas/breach_duration_secs"
+        - $ref: "./shared_definitions.yaml#/schemas/cool_down_secs"
+        schedules:
+          type: array
+          items:
+            $ref: '#/components/schemas/Schedules'
+    Schedules:
+      AnyOf:
+        - $ref: "./shared_definitions.yaml#/schemas/timezone"
+        - $ref: "./shared_definitions.yaml#/schemas/recurring_schedule"
+        - $ref: "./shared_definitions.yaml#/schemas/specific_date"

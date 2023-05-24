@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: Application Metric API
+  description: |
+    AutoScaler collects the instances' metrics of an application, and aggregate the raw data into an accumulated value for evaluation. 
+    
+    This API is used to return the aggregated metric result of an application.
+  version: 1.0.0
+security: # Do we need that?
+- mtls: []
+- basicAuthentication: []
+tags:
+- name: Application Metric API V1
+  description: This API is used to return the aggregated metric result of an application.
+
+paths:
+  /v1/apps/{guid}/aggregated_metric_histories/metric_type:
+    parameters:
+    - name: guid
+      in: path
+      required: true
+      description: |
+        The GUID identifying the application for which the scaling history is fetched.
+
+        It can be found in the `application_id` property of the JSON object stored in the
+        `VCAP_APPLICATION` environment variable.
+      schema:
+       $ref: "./shared_definitions.yaml#/schemas/GUID"
+    - name: metric_type
+      in: query
+      required: true
+      description: The metric type
+      schema:
+        type: string
+        enum: ["memoryused", "memoryutil", "responsetime", "throughput or custom metric's name"]
+      example: metric_type=memoryused
+    - name: start-time
+      in: query
+      description: |
+        The start time in the number of nanoseconds elapsed since January 1, 1970 UTC.
+      schema:
+        type: integer
+        default: 0
+      example: start-time=1494989539138350432
+    - name: end-time
+      in: query
+      description: |
+        The end time in the number of nanoseconds elapsed since January 1, 1970 UTC.
+      schema:
+        type: integer
+        default: 0
+      example: end-time=1494989549117047288
+    - name: order-direction
+      in: query
+      description: |
+        The sorting order. The scaling history will be order by timestamp ascending or descending.
+      schema:
+        type: string
+        enum: ["asc", "desc"]
+        default: desc
+      example: order-direction=desc
+    - name: page
+      in: query
+      description: The page number to query
+      schema:
+        type: integer
+        minimum: 1 # Or Should it be "1"?
+        default: 1
+        example: page=1
+    - name: results-per-page
+      in: query
+      description: Number of entries shown per page.
+      schema:
+        type: integer
+        minimum: 0 # Or Should it be "1"?
+        default: 50
+      example: results-per-page=10
+    - name: Authorization
+      in: header
+      schema:
+        type: string
+      example: |
+        bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5\_Iu\_o
+    get:
+      summary: Retrieves the aggregated metric result of an application
+      description: |
+         Use to retrieve aggregated metric result of an app.
+      tags:
+      - Application Metric API V1
+      responses:
+        "200":
+         description: "OK"
+         content:
+          application/json:
+           schema:
+             $ref: "#/components/schemas/Application_Metrics"
+        default:
+           $ref: "./shared_definitions.yaml#/responses/Error"
+components:
+  schemas:
+    Application_Metrics:
+      description: Object containing Application Metrics.
+      type: object
+      properties:
+        total_results:
+          type: integer
+          format: int64
+          description: Number of history entries found for the given query.
+          example: 2
+        total_pages:
+          type: integer
+          format: int64
+          description: Number of Pages from the query
+          example: 1
+        page:
+          type: integer
+          format: int64
+          description: Number of the current page.
+          example: 1
+        prev_url:
+          type: string
+          format: uri
+        next_url:
+          type: string
+          format: uri
