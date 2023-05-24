@@ -68,10 +68,6 @@ var _ = Describe("Health Readiness", func() {
 			prometheus.NewRegistry(), func() time.Time { return *timesetter })
 		Expect(err).ShouldNot(HaveOccurred())
 	})
-
-	// TODO: Check that `NewHealthRouterWithBasicAuth` returns an error if and only if
-	// the configuration is bad, i.e.: protection needed but parameters for basic auth insufficient
-
 	Context("Authentication parameter checks", func() {
 		When("username and password are defined", func() {
 			BeforeEach(func() {
@@ -142,6 +138,18 @@ var _ = Describe("Health Readiness", func() {
 				apitest.New().Debug().
 					Handler(healthRoute).
 					Get(routes.LivenessPath).
+					Expect(t).
+					Status(http.StatusOK).
+					Header("Content-Type", "application/json").
+					Body(`{"overall_status" : "UP", "checks" : [] }`).
+					End()
+			})
+		})
+		When("/health endpoint is called", func() {
+			It("should response with liveness", func() {
+				apitest.New().Debug().
+					Handler(healthRoute).
+					Get(routes.LivenessBasePath).
 					Expect(t).
 					Status(http.StatusOK).
 					Header("Content-Type", "application/json").
@@ -362,6 +370,17 @@ var _ = Describe("Health Readiness", func() {
 						Body(`{"overall_status" : "UP", "checks" : [] }`).
 						End()
 				})
+				It("should have json response", func() {
+					apitest.New().
+						Handler(healthRoute).
+						Get(routes.LivenessBasePath).
+						BasicAuth("test-user-name", "test-user-password").
+						Expect(t).
+						Status(http.StatusOK).
+						Header("Content-Type", "application/json").
+						Body(`{"overall_status" : "UP", "checks" : [] }`).
+						End()
+				})
 			})
 
 		})
@@ -385,8 +404,6 @@ var _ = Describe("Health Readiness", func() {
 					End()
 			})
 		})
-		// TODO Q. The same endpoint, we would like to offer as with and without basic auth.
-		//look's complex
 		When("Default / endpoint is called", func() {
 			It("should require basic auth", func() {
 				apitest.New().

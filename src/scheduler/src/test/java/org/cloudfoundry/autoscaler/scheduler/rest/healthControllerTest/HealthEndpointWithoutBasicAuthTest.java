@@ -1,4 +1,4 @@
-package org.cloudfoundry.autoscaler.scheduler.health;
+package org.cloudfoundry.autoscaler.scheduler.rest.healthControllerTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

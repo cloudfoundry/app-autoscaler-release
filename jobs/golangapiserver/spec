@@ -99,7 +99,9 @@ properties:
       Hash-Value of the password used for basic access authentication to connect to the protected health-endpoints.
       More secure alternative of setting the password. Set to `""` if you don't want to use it.
   autoscaler.apiserver.health.unprotected_endpoints:
-    description: "List of all health-endpoints, that run _without_ basic access authentication.Valid endpoints are /debug/pprof, /health/liveness, /health/prometheus, /health/readiness"
+    description: |
+      List of all health-endpoints, that run _without_ basic access authentication.
+      Valid endpoints are /debug/pprof, /health, /health/liveness, /health/prometheus, /health/readiness
     default: [] # protect everything
   autoscaler.apiserver.health.readiness_enabled:
     default: false

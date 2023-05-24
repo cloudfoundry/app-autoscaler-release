@@ -128,7 +128,7 @@ properties:
   autoscaler.scheduler.health.unprotected_endpoints:
     description: |
       List of all health-endpoints, that run _without_ basic access authentication.
-      Valid endpoints are /health/liveness, /health/prometheus
+      Valid endpoints are /health, /health/liveness, /health/prometheus
     default: [] # protect everything
   autoscaler.changeloglock_timeout_seconds:
     default: 180

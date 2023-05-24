@@ -143,7 +143,9 @@ properties:
     description: "the password of health endpoint"
     default: ''
   autoscaler.metricsforwarder.health.unprotected_endpoints:
-    description: "List of all health-endpoints, that run _without_ basic access authentication.Valid endpoints are /debug/pprof, /health/liveness, /health/prometheus, /health/readiness"
+    description: |
+      List of all health-endpoints, that run _without_ basic access authentication.
+      Valid endpoints are /debug/pprof, /health, /health/liveness, /health/prometheus, /health/readiness
     default: [] # protect everything
   autoscaler.metricsforwarder.health.readiness_enabled:
     default: false

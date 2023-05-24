@@ -29,8 +29,6 @@ const (
 	SyncActiveSchedulesPath      = "/v1/syncSchedules"
 	SyncActiveSchedulesRouteName = "SyncActiveSchedules"
 
-	BrokerHealthPath = "/health"
-
 	EnvelopePath               = "/v1/envelopes"
 	EnvelopeReportRouteName    = "ReportEnvelope"
 	CustomMetricsPath          = "/v1/apps/{appid}/metrics"
@@ -56,6 +54,7 @@ const (
 	PublicApiInfoPath      = "/v1/info"
 	PublicApiInfoRouteName = "GetPublicApiInfo"
 	LivenessPath           = "/health/liveness"
+	LivenessBasePath       = "/health"
 	ReadinessPath          = "/health/readiness"
 	PrometheusPath         = "/health/prometheus"
 	PprofPath              = "/debug/pprof"

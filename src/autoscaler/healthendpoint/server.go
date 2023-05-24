@@ -109,7 +109,7 @@ func NewHealthRouterWithBasicAuth(conf models.HealthConfig, healthCheckers []Che
 func addLivelinessHandlers(conf models.HealthConfig, mainRouter *mux.Router, time func() time.Time,
 	authMiddleware *basicAuthenticationMiddleware) error {
 	livenessHandler := common.VarsFunc(readiness([]Checker{}, time))
-	livenessRouter := mainRouter.PathPrefix(routes.LivenessPath).Subrouter()
+	livenessRouter := mainRouter.PathPrefix(routes.LivenessBasePath).Subrouter()
 
 	if endpointsNeedsProtection(routes.LivenessPath, conf) {
 		if !conf.BasicAuthPossible() {
@@ -118,6 +118,7 @@ func addLivelinessHandlers(conf models.HealthConfig, mainRouter *mux.Router, tim
 		livenessRouter.Use(authMiddleware.middleware)
 	}
 	livenessRouter.Handle("", livenessHandler)
+	livenessRouter.Handle("/liveness", livenessHandler)
 
 	return nil
 }

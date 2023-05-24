@@ -1,4 +1,4 @@
-package org.cloudfoundry.autoscaler.scheduler.health;
+package org.cloudfoundry.autoscaler.scheduler.rest.healthControllerTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -106,6 +106,20 @@ public class HealthEndpointWithBasicAuthTest {
   }
 
   @Test
+  public void givenCorrectCredentialsLivenessBaseUrlShouldBeAvailable() {
+
+    ResponseEntity<String> response =
+        this.restTemplate
+            .withBasicAuth("prometheus", "someHash")
+            .getForEntity(baseLivenessUrl(), String.class);
+    assertThat(response.getStatusCode().value())
+        .describedAs("Http status code should be OK")
+        .isEqualTo(200);
+    assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+    assertThat(response.getBody()).isEqualTo("{\"status\":\"Up\"}");
+  }
+
+  @Test
   public void givenNoCredentialsLivenessShouldReturn401() {
 
     ResponseEntity<String> response = this.restTemplate.getForEntity(livenessUrl(), String.class);
@@ -128,6 +142,10 @@ public class HealthEndpointWithBasicAuthTest {
   }
 
   private String livenessUrl() {
-    return "http://localhost:" + healthServerConfig.getPort() + "/health/liveness";
+    return baseLivenessUrl() + "/liveness";
+  }
+
+  private String baseLivenessUrl() {
+    return "http://localhost:" + healthServerConfig.getPort() + "/health";
   }
 }

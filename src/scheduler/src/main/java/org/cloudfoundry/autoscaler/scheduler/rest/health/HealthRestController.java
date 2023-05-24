@@ -28,7 +28,7 @@ public class HealthRestController {
     return new ResponseEntity<>(stream.toString(), HttpStatus.OK);
   }
 
-  @GetMapping(value = "/liveness")
+  @GetMapping(value = {"", "/liveness"})
   public ResponseEntity<Map<String, Object>> getLiveness() {
     Map<String, Object> body = new HashMap<>();
     body.put("status", "Up");
