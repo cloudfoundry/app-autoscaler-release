@@ -143,11 +143,30 @@ schemas:
       - $ref: '#/schemas/initial_min_instance_count'
   start_date_time:
     description: the start time of the schedule. Must be a future time
+    required: true
     type: string
     pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
     example: 2015-01-04T20:00
   end_date_time: # the doc has this as a start_date_time 
     description: the start time of the schedule. Must be a future time
+    required: true
     type: string
     pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
     example: 2015-01-04T20:00
+  instance_min_count:
+    description: minimal number of instance count for this schedule
+    required: true
+    type: integer
+    format: int64
+    example: 2
+  instance_max_count:
+    description: maximal number of instance count for this schedule
+    required: true
+    type: integer
+    format: int64
+    example: 5
+  instance_min_instance_count:
+    description: the initial minimal number of instance count for this schedule
+    type: integer
+    format: int64
+    example: 3
