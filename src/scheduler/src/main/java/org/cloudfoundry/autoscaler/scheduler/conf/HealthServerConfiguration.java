@@ -19,7 +19,7 @@ public class HealthServerConfiguration {
   private String username;
   private String password;
   private Integer port;
-  private List<String> unprotectedEndpoints;
+  private Set<String> unprotectedEndpoints;
 
   @PostConstruct
   public void init() {
