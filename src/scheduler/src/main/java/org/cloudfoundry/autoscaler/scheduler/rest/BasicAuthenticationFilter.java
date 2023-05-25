@@ -55,7 +55,8 @@ public class BasicAuthenticationFilter implements Filter {
       return;
     }
 
-    if (ObjectUtils.isEmpty(unprotectedEndpointsConfig)) { // health endpoints are authorized
+    final allEndpointsRequireAuthorization = ObjectUtils.isEmpty(unprotectedEndpointsConfig);
+    if (allEndpointsRequireAuthorization) {
       isUserAuthenticatedOrSendError(chain, httpRequest, httpResponse);
     } else if (!ObjectUtils.isEmpty(unprotectedEndpointsConfig)) {
       Map<String, Boolean> validateMap = checkValidEndpoints(unprotectedEndpointsConfig);
