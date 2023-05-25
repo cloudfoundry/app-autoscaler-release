@@ -41,7 +41,7 @@ public class HealthServerConfiguration {
     Optional<Integer> healthPortOptional = Optional.ofNullable(this.port);
     if (!healthPortOptional.isPresent() || healthPortOptional.get() == 0) {
       throw new IllegalArgumentException(
-          "Health Configuration: health server port not defined or port=0");
+          "Health Configuration: health server port not defined or set to unsupported port-number `0`");
     }
   }
 }
