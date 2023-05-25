@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class BasicAuthenticationFilter implements Filter {
       throws IOException, ServletException {
     HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
     HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-    List<String> unprotectedEndpointsConfig = healthServerConfiguration.getUnprotectedEndpoints();
+    Set<String> unprotectedEndpointsConfig = healthServerConfiguration.getUnprotectedEndpoints();
 
     if (!httpRequest.getRequestURI().contains("/health")) {
       log.debug("Not a health request: " + httpRequest.getRequestURI());
@@ -55,7 +56,8 @@ public class BasicAuthenticationFilter implements Filter {
       return;
     }
 
-    final allEndpointsRequireAuthorization = ObjectUtils.isEmpty(unprotectedEndpointsConfig);
+    final boolean allEndpointsRequireAuthorization =
+        ObjectUtils.isEmpty(unprotectedEndpointsConfig);
     if (allEndpointsRequireAuthorization) {
       isUserAuthenticatedOrSendError(chain, httpRequest, httpResponse);
     } else if (!ObjectUtils.isEmpty(unprotectedEndpointsConfig)) {
@@ -133,7 +135,7 @@ public class BasicAuthenticationFilter implements Filter {
     }
   }
 
-  private Map<String, Boolean> checkValidEndpoints(List<String> unprotectedEndpointsConfig) {
+  private Map<String, Boolean> checkValidEndpoints(Set<String> unprotectedEndpointsConfig) {
 
     Map<String, Boolean> invalidEndpointsMap = new HashMap<>();
     for (String unprotectedEndpoint : unprotectedEndpointsConfig) {
@@ -144,7 +146,7 @@ public class BasicAuthenticationFilter implements Filter {
     return invalidEndpointsMap;
   }
 
-  private static Map<String, Boolean> getMapFromList(List<String> unprotectedEndpointsConfig) {
+  private static Map<String, Boolean> getMapFromList(Set<String> unprotectedEndpointsConfig) {
     return unprotectedEndpointsConfig.stream()
         .collect(Collectors.toMap(endpoint -> endpoint, endpoint -> true, (a, b) -> b));
   }

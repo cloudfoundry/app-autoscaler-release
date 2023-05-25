@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerConfiguration;
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class BasicAuthenticationFilterTest {
   public void allowRequestIfPort8081andURIContainHealthWithoutUnprotectedEndpoints()
       throws IOException, ServletException {
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(username, password, 8081, List.of());
+        new HealthServerConfiguration(username, password, 8081, Set.of());
 
     req.setRequestURI("some/health/uri");
     String auth = username + ":" + password;
@@ -59,7 +59,7 @@ public class BasicAuthenticationFilterTest {
     String auth = username + ":" + password;
     req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(null, null, 8081, List.of());
+        new HealthServerConfiguration(null, null, 8081, Set.of());
     BasicAuthenticationFilter userPwNullFilter = new BasicAuthenticationFilter(healthServerConfig);
     userPwNullFilter.doFilter(req, res, filterChainMock);
 
@@ -68,7 +68,7 @@ public class BasicAuthenticationFilterTest {
     assertEquals(res.getHeader("WWW-Authenticate"), "Basic");
 
     res = new MockHttpServletResponse();
-    healthServerConfig = new HealthServerConfiguration(username, password, 8081, List.of());
+    healthServerConfig = new HealthServerConfiguration(username, password, 8081, Set.of());
     BasicAuthenticationFilter wrongCredsFilter = new BasicAuthenticationFilter(healthServerConfig);
     req.removeHeader("Authorization");
     String wrongCreds = "wrong-user:pw";
@@ -80,7 +80,7 @@ public class BasicAuthenticationFilterTest {
     assertEquals(res.getHeader("WWW-Authenticate"), "Basic");
 
     res = new MockHttpServletResponse();
-    healthServerConfig = new HealthServerConfiguration(username, password, 8081, List.of());
+    healthServerConfig = new HealthServerConfiguration(username, password, 8081, Set.of());
     BasicAuthenticationFilter noAuthHeaderFilter =
         new BasicAuthenticationFilter(healthServerConfig);
     req.removeHeader("Authorization");
@@ -97,7 +97,7 @@ public class BasicAuthenticationFilterTest {
     req.setRequestURI("some/health/uri");
 
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(username, password, 8081, List.of());
+        new HealthServerConfiguration(username, password, 8081, Set.of());
     BasicAuthenticationFilter malformedHeaderFilter =
         new BasicAuthenticationFilter(healthServerConfig);
     req.removeHeader("Authorization");
@@ -114,7 +114,7 @@ public class BasicAuthenticationFilterTest {
       throws IOException, ServletException {
 
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(username, password, 8081, List.of("/health/liveness"));
+        new HealthServerConfiguration(username, password, 8081, Set.of("/health/liveness"));
     req.setRequestURI("/health/liveness");
     String auth = username + ":" + password;
     req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));
@@ -134,7 +134,7 @@ public class BasicAuthenticationFilterTest {
     req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));
 
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(username, password, 8081, List.of("/health/wrong-endpoint"));
+        new HealthServerConfiguration(username, password, 8081, Set.of("/health/wrong-endpoint"));
     BasicAuthenticationFilter filter = new BasicAuthenticationFilter(healthServerConfig);
     filter.doFilter(req, res, filterChainMock);
 
@@ -155,7 +155,7 @@ public class BasicAuthenticationFilterTest {
     req.setRequestURI(requestURI);
 
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(username, password, 8081, List.of());
+        new HealthServerConfiguration(username, password, 8081, Set.of());
     BasicAuthenticationFilter basicAuthenticationFilter =
         new BasicAuthenticationFilter(healthServerConfig);
 
@@ -170,7 +170,7 @@ public class BasicAuthenticationFilterTest {
   public void denyHealthRequestIfBasicAuthRequired() throws IOException, ServletException {
 
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(username, password, 8081, List.of("/health/prometheus"));
+        new HealthServerConfiguration(username, password, 8081, Set.of("/health/prometheus"));
     req.setRequestURI("/health/liveness");
 
     BasicAuthenticationFilter noBasicAuthFilter = new BasicAuthenticationFilter(healthServerConfig);
@@ -187,7 +187,7 @@ public class BasicAuthenticationFilterTest {
     req.setRequestURI("/routeTo8080");
 
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(username, password, 8081, List.of("/health/wrong-endpoint"));
+        new HealthServerConfiguration(username, password, 8081, Set.of("/health/wrong-endpoint"));
     BasicAuthenticationFilter filter = new BasicAuthenticationFilter(healthServerConfig);
     filter.doFilter(req, res, filterChainMock);
 

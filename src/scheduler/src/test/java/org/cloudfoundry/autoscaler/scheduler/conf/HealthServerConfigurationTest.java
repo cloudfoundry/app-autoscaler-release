@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
+import org.mockito.internal.util.collections.Sets;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -18,29 +18,28 @@ class HealthServerConfigurationTest {
   void givenUnprotectedEndpointListAndUsernameOrPasswordIsNull() {
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new HealthServerConfiguration(null, null, 8081, Arrays.asList("test_endpoint")).init());
+        () -> new HealthServerConfiguration(null, null, 8081, Sets.newSet("test_endpoint")).init());
   }
 
   @Test
   void givenUnprotectedEndpointListAndUsernameOrPasswordIsEmpty() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new HealthServerConfiguration("", "", 8081, Arrays.asList("test_endpoint")).init());
+        () -> new HealthServerConfiguration("", "", 8081, Sets.newSet("test_endpoint")).init());
   }
 
   @Test
   void givenEmptyUnprotectedEndpointListAndUsernameOrPasswordIsNull() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new HealthServerConfiguration(null, null, 8081, List.of()).init());
+        () -> new HealthServerConfiguration(null, null, 8081, Set.of()).init());
   }
 
   @Test
   void givenEmptyUnprotectedEndpointListAndUsernameOrPasswordIsEmpty() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new HealthServerConfiguration("", "", 8081, List.of()).init());
+        () -> new HealthServerConfiguration("", "", 8081, Set.of()).init());
   }
 
   @Test
@@ -52,7 +51,7 @@ class HealthServerConfigurationTest {
   @Test
   void givenEmptyUnprotectedEndpointListWithUsernameOrPassword() {
     assertDoesNotThrow(
-        () -> new HealthServerConfiguration("some-user", "some-test", 8081, List.of()).init());
+        () -> new HealthServerConfiguration("some-user", "some-test", 8081, Set.of()).init());
   }
 
   @ParameterizedTest
@@ -61,14 +60,13 @@ class HealthServerConfigurationTest {
 
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            new HealthServerConfiguration("", "", Integer.parseInt(healthPort), List.of()).init());
+        () -> new HealthServerConfiguration("", "", Integer.parseInt(healthPort), Set.of()).init());
   }
 
   @Test
   void givenValidReturnsPort() {
     HealthServerConfiguration healthServerConfiguration =
-        new HealthServerConfiguration("s", "s", 888, List.of());
+        new HealthServerConfiguration("s", "s", 888, Set.of());
     healthServerConfiguration.init();
     assertEquals(healthServerConfiguration.getPort(), 888);
   }
@@ -77,6 +75,6 @@ class HealthServerConfigurationTest {
   void givenEmptyPortThrowsException() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> new HealthServerConfiguration("", "", null, List.of()).init());
+        () -> new HealthServerConfiguration("", "", null, Set.of()).init());
   }
 }

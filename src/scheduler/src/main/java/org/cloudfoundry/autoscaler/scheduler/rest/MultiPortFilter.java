@@ -30,12 +30,11 @@ public class MultiPortFilter implements Filter {
     HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
     HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
 
-    // FIXME : refactor this duplicate block
     if (isMainRequest(httpRequest)) {
-      log.debug("Main server request received on port " + healthServerConfiguration.getPort());
+      log.debug("Main server request received on port " + httpRequest.getLocalPort());
       filterChain.doFilter(servletRequest, servletResponse);
     } else if (isHealthRequest(httpRequest)) {
-      log.debug("Main server request received on port " + healthServerConfiguration.getPort());
+      log.debug("Health server request received on port " + httpRequest.getLocalPort());
       filterChain.doFilter(servletRequest, servletResponse);
     } else {
       httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "Health endpoints do not exist");
