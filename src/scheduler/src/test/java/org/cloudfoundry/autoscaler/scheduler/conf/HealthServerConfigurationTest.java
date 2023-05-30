@@ -77,4 +77,20 @@ class HealthServerConfigurationTest {
         IllegalArgumentException.class,
         () -> new HealthServerConfiguration("", "", null, Set.of()).init());
   }
+
+  @Test
+  void givenInvalidConfiguredEndpointsThrowsException() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new HealthServerConfiguration("", "", 8888, Set.of("/info")).init());
+  }
+
+  @Test
+  void givenValidConfiguredEndpoints() {
+    assertDoesNotThrow(
+        () ->
+            new HealthServerConfiguration(
+                    "some-user", "some-password", 8888, Set.of("/health/prometheus"))
+                .init());
+  }
 }

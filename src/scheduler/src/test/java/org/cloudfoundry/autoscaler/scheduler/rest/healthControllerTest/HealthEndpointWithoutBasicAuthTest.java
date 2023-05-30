@@ -2,8 +2,11 @@ package org.cloudfoundry.autoscaler.scheduler.rest.healthControllerTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerConfiguration;
+import org.cloudfoundry.autoscaler.scheduler.util.HealthUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +34,11 @@ public class HealthEndpointWithoutBasicAuthTest {
   @Autowired private HealthServerConfiguration healthServerConfig;
 
   @Test
-  public void givenUnprotectedConfigsShouldLivenessReturn200() {
+  public void givenUnprotectedConfigsShouldLivenessReturn200()
+      throws MalformedURLException, URISyntaxException {
 
-    ResponseEntity<String> response = this.restTemplate.getForEntity(livenessUrl(), String.class);
+    ResponseEntity<String> response =
+        this.restTemplate.getForEntity(HealthUtils.livenessUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be OK")
         .isEqualTo(200);
@@ -42,10 +47,11 @@ public class HealthEndpointWithoutBasicAuthTest {
   }
 
   @Test
-  public void givenUnprotectedConfigsShouldPrometheusReturn200() {
+  public void givenUnprotectedConfigsShouldPrometheusReturn200()
+      throws MalformedURLException, URISyntaxException {
 
     ResponseEntity<String> response =
-        this.restTemplate.getForEntity(prometheusMetricsUrl(), String.class);
+        this.restTemplate.getForEntity(HealthUtils.prometheusMetricsUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be OK")
         .isEqualTo(200);
@@ -66,13 +72,5 @@ public class HealthEndpointWithoutBasicAuthTest {
         .contains("jvm_memory_pool_bytes")
         .contains("autoscaler_scheduler_data_source")
         .contains("autoscaler_scheduler_policy_db_data_source");
-  }
-
-  private String prometheusMetricsUrl() {
-    return "http://localhost:" + healthServerConfig.getPort() + "/health/prometheus";
-  }
-
-  private String livenessUrl() {
-    return "http://localhost:" + healthServerConfig.getPort() + "/health/liveness";
   }
 }

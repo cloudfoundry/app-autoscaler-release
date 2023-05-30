@@ -2,7 +2,10 @@ package org.cloudfoundry.autoscaler.scheduler.rest.healthControllerTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerConfiguration;
+import org.cloudfoundry.autoscaler.scheduler.util.HealthUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +32,13 @@ public class HealthEndpointWithBasicAuthTest {
   @Autowired private HealthServerConfiguration healthServerConfig;
 
   @Test
-  public void givenCorrectCredentialsPrometheusShouldBeAvailable() {
+  public void givenCorrectCredentialsPrometheusShouldBeAvailable()
+      throws MalformedURLException, URISyntaxException {
 
     ResponseEntity<String> response =
         this.restTemplate
             .withBasicAuth("prometheus", "someHash")
-            .getForEntity(prometheusMetricsUrl(), String.class);
+            .getForEntity(HealthUtils.prometheusMetricsUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be OK")
         .isEqualTo(200);
@@ -65,39 +69,42 @@ public class HealthEndpointWithBasicAuthTest {
   }
 
   @Test
-  public void givenIncorrectCredentialsShouldReturn401() {
+  public void givenIncorrectCredentialsShouldReturn401()
+      throws MalformedURLException, URISyntaxException {
     ResponseEntity<String> response =
         this.restTemplate
             .withBasicAuth("bad", "auth")
-            .getForEntity(prometheusMetricsUrl(), String.class);
+            .getForEntity(HealthUtils.prometheusMetricsUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be Unauthorized")
         .isEqualTo(401);
   }
 
   @Test
-  public void givenNoCredentialsShouldReturn401() {
+  public void givenNoCredentialsShouldReturn401() throws MalformedURLException, URISyntaxException {
     ResponseEntity<String> response =
-        this.restTemplate.getForEntity(prometheusMetricsUrl(), String.class);
+        this.restTemplate.getForEntity(HealthUtils.prometheusMetricsUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value()).isEqualTo(401);
   }
 
   @Test
-  public void givenCorrectPasswordAndWrongUsernameFailsWith401() {
+  public void givenCorrectPasswordAndWrongUsernameFailsWith401()
+      throws MalformedURLException, URISyntaxException {
     ResponseEntity<String> response =
         this.restTemplate
             .withBasicAuth("bad", "someHash")
-            .getForEntity(prometheusMetricsUrl(), String.class);
+            .getForEntity(HealthUtils.prometheusMetricsUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value()).isEqualTo(401);
   }
 
   @Test
-  public void givenCorrectCredentialsLivenessShouldBeAvailable() {
+  public void givenCorrectCredentialsLivenessShouldBeAvailable()
+      throws MalformedURLException, URISyntaxException {
 
     ResponseEntity<String> response =
         this.restTemplate
             .withBasicAuth("prometheus", "someHash")
-            .getForEntity(livenessUrl(), String.class);
+            .getForEntity(HealthUtils.livenessUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be OK")
         .isEqualTo(200);
@@ -106,12 +113,13 @@ public class HealthEndpointWithBasicAuthTest {
   }
 
   @Test
-  public void givenCorrectCredentialsLivenessBaseUrlShouldBeAvailable() {
+  public void givenCorrectCredentialsLivenessBaseUrlShouldBeAvailable()
+      throws MalformedURLException, URISyntaxException {
 
     ResponseEntity<String> response =
         this.restTemplate
             .withBasicAuth("prometheus", "someHash")
-            .getForEntity(baseLivenessUrl(), String.class);
+            .getForEntity(HealthUtils.baseLivenessUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be OK")
         .isEqualTo(200);
@@ -120,32 +128,25 @@ public class HealthEndpointWithBasicAuthTest {
   }
 
   @Test
-  public void givenNoCredentialsLivenessShouldReturn401() {
+  public void givenNoCredentialsLivenessShouldReturn401()
+      throws MalformedURLException, URISyntaxException {
 
-    ResponseEntity<String> response = this.restTemplate.getForEntity(livenessUrl(), String.class);
+    ResponseEntity<String> response =
+        this.restTemplate.getForEntity(HealthUtils.livenessUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be Unauthorized")
         .isEqualTo(401);
   }
 
   @Test
-  public void givenIncorrectCredentialsShouldLivenessReturn401() {
+  public void givenIncorrectCredentialsShouldLivenessReturn401()
+      throws MalformedURLException, URISyntaxException {
     ResponseEntity<String> response =
-        this.restTemplate.withBasicAuth("bad", "auth").getForEntity(livenessUrl(), String.class);
+        this.restTemplate
+            .withBasicAuth("bad", "auth")
+            .getForEntity(HealthUtils.livenessUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be Unauthorized")
         .isEqualTo(401);
-  }
-
-  private String prometheusMetricsUrl() {
-    return "http://localhost:" + healthServerConfig.getPort() + "/health/prometheus";
-  }
-
-  private String livenessUrl() {
-    return baseLivenessUrl() + "/liveness";
-  }
-
-  private String baseLivenessUrl() {
-    return "http://localhost:" + healthServerConfig.getPort() + "/health";
   }
 }

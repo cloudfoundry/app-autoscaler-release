@@ -51,7 +51,7 @@ public class BasicAuthenticationFilterTest {
   }
 
   @Test
-  public void denyHealthRequestWithoutUnprotectedEndpointsAndInvalidCredentials()
+  public void denyHealthRequesWithAllSecuredEndpointsAndInvalidCredentials()
       throws ServletException, IOException {
 
     req.setRequestURI("some/health/uri");
@@ -59,7 +59,7 @@ public class BasicAuthenticationFilterTest {
     String auth = username + ":" + password;
     req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));
     HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(null, null, 8081, Set.of());
+        new HealthServerConfiguration("", "", 8081, Set.of());
     BasicAuthenticationFilter userPwNullFilter = new BasicAuthenticationFilter(healthServerConfig);
     userPwNullFilter.doFilter(req, res, filterChainMock);
 
