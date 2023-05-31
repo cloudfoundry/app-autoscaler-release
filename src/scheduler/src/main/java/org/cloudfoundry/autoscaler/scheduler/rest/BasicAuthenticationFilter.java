@@ -8,11 +8,11 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerConfiguration;
+import org.cloudfoundry.autoscaler.scheduler.util.health.EndpointsEnum;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -63,7 +63,8 @@ public class BasicAuthenticationFilter implements Filter {
       // BasicAuthenticationFilterTest#denyHealthRequestWithWrongUnprotectedEndpoints()
       // Suggestion: THe following block should be part of HealthConfiguration.
       // Move this block to Health Configuration/Or adjust test
-      if (!healthConfigsExists()) {
+      if (!EndpointsEnum.configuredEndpointsExists(
+          healthServerConfiguration.getUnprotectedEndpoints())) {
         log.error("Health Configuration: Invalid endpoints defined");
         httpResponse.setHeader(HttpHeaders.WWW_AUTHENTICATE, WWW_AUTHENTICATE_VALUE);
         httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
@@ -79,19 +80,6 @@ public class BasicAuthenticationFilter implements Filter {
         chain.doFilter(servletRequest, servletResponse);
       }
     }
-  }
-
-  private boolean healthConfigsExists() {
-    boolean found = false;
-    Map<String, Boolean> validProtectedEndpoints =
-        healthServerConfiguration.getValidProtectedEndpoints();
-    for (String configuredEndpoint : healthServerConfiguration.getUnprotectedEndpoints()) {
-      found = validProtectedEndpoints.containsKey(configuredEndpoint);
-    }
-    if (!found) {
-      return false;
-    }
-    return true;
   }
 
   private void allowAuthenticatedRequest(
@@ -128,11 +116,9 @@ public class BasicAuthenticationFilter implements Filter {
   }
 
   private boolean isEndpointRequireAuthentication(String requestURI) {
-    Map<String, Boolean> protectedEndpoints =
-        healthServerConfiguration.getValidProtectedEndpoints();
-    boolean isProtected = protectedEndpoints.containsKey(requestURI);
+    boolean isProtected = EndpointsEnum.isValidEndpoint(requestURI);
     boolean isUnprotectedByConfiguration =
-        healthServerConfiguration.getUnprotectedEndpoints().contains(requestURI);
+        healthServerConfiguration.isUnprotectedByConfiguration(requestURI);
 
     return isProtected && !isUnprotectedByConfiguration;
   }

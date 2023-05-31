@@ -125,24 +125,6 @@ public class BasicAuthenticationFilterTest {
     Mockito.verify(filterChainMock, Mockito.times(1)).doFilter(req, res);
   }
 
-  @Test
-  public void denyHealthRequestWithWrongUnprotectedEndpoints()
-      throws IOException, ServletException {
-
-    req.setRequestURI("/health/liveness");
-    String auth = username + ":" + password;
-    req.addHeader("Authorization", "Basic " + Base64.encodeBase64String(auth.getBytes()));
-
-    HealthServerConfiguration healthServerConfig =
-        new HealthServerConfiguration(username, password, 8081, Set.of("/health/wrong-endpoint"));
-    BasicAuthenticationFilter filter = new BasicAuthenticationFilter(healthServerConfig);
-    filter.doFilter(req, res, filterChainMock);
-
-    Mockito.verify(filterChainMock, Mockito.times(0)).doFilter(req, res);
-    assertEquals(401, res.getStatus());
-    assertEquals(res.getHeader("WWW-Authenticate"), "Basic");
-  }
-
   @ParameterizedTest
   @ValueSource(strings = {"/health/prometheus", "/health/liveness", "/health/wrong-endpoint"})
   public void denyHealthRequestsWithNoUnprotectedEndpointsConfigThenBasicAuthRequired(

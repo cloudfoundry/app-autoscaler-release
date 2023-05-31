@@ -8,6 +8,7 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.cloudfoundry.autoscaler.scheduler.util.health.EndpointsEnum;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -23,17 +24,15 @@ public class HealthServerConfiguration {
   private Integer port;
   private Set<String> unprotectedEndpoints;
 
-  final Map<String, Boolean> validProtectedEndpoints =
-      Map.of(
-          "/health/prometheus", true,
-          "/health/liveness", true);
-
   @PostConstruct
   public void init() {
 
     validatePort();
     validateConfiguredEndpoints();
 
+    // We need the username and password in health configuration if and only if
+    // -  atleast one endpoints exists in the unprotectedEndpoints configuration
+    // -  and the unprotectedEndpoints is empty => all endpoints are protected
     boolean basicAuthEnabled =
         (unprotectedEndpoints != null || ObjectUtils.isEmpty(unprotectedEndpoints));
     if (basicAuthEnabled
@@ -62,7 +61,8 @@ public class HealthServerConfiguration {
       return;
     }
     for (String unprotectedEndpoint : unprotectedEndpoints) {
-      if (!validProtectedEndpoints.containsKey(unprotectedEndpoint)) {
+
+      if (!EndpointsEnum.isValidEndpoint(unprotectedEndpoint)) {
         invalidEndpointsMap.put(unprotectedEndpoint, true);
       }
     }
@@ -72,7 +72,11 @@ public class HealthServerConfiguration {
               + invalidEndpointsMap
               + "\n"
               + "validate endpoints are: "
-              + validProtectedEndpoints);
+              + EndpointsEnum.displayAllEndpointValues());
     }
+  }
+
+  public boolean isUnprotectedByConfiguration(String requestURI) {
+    return this.getUnprotectedEndpoints().contains(requestURI);
   }
 }

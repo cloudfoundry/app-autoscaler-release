@@ -4,7 +4,7 @@ MAKEFLAGS = -s
 go_modules:= $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules:= $(go_modules) db scheduler
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
-MVN_OPTS="-Dmaven.test.skip=true"
+MVN_OPTS="-Dmaven.test.skip=true -Dmaven.plugin.validation=VERBOSE"
 OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
 db_type:=postgres
 DB_HOST:=localhost
