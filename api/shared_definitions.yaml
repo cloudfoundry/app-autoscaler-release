@@ -27,10 +27,10 @@ schemas:
     example: 8d0cee08-23ad-4813-a779-ad8118ea0b91
   metric_type:
     description: |
-      One of system-default metric types memoryused,memoryutil,responsetime, throughput, cpu or user-defined custom metric type
+      One user-defined custom metric type or one of the system-default metric types, which are: 
+      "memoryused", "memoryutil", "responsetime", "throughput" and "cpu"
     required: true
     type: string
-    enum: ["memoryused", "memoryutil", "responsetime", "throughput", "cpu or custom metric's name"]
     example: memoryused
   threshold:
     description: |
