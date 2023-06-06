@@ -32,45 +32,6 @@ schemas:
     required: true
     type: string
     example: memoryused
-  threshold:
-    description: |
-      The boundary when metric value exceeds is considered as a breach
-    required: true
-    type: int
-    format: int64
-    example: 30
-  operator:
-    description: Used for standard operting signs - ">", "<", ">=", "<="
-    required: true
-    type: string
-    enum: [">", "<", ">=", "<="]
-    example: <
-  adjustment:
-    description: |
-      The adjustment approach for instance count with each scaling.
-
-      +5 means adding 5 instances, -50% means shrinking to the half of current size.
-    required: true
-    type: string
-    pattern: ^[-+][1-9]+[0-9]*[%]?$
-    example: -1
-  breach_duration_secs:
-    description: |
-      Time duration(in seconds) to fire scaling event if it keeps breaching
-    type: integer
-    format: int64  # this is time in seconds
-    example: 600
-  cool_down_secs:
-    description: |
-      The time duration (in seconds) to wait before the next scaling kicks in
-    type: integer
-    format: int64  # this is time in seconds
-    example: 300
-  timezone:
-    description: Using timezone definition of Java #https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html - Do we need to implement it?
-    required: true
-    type: string
-    example: Asia/Shanghai
   recurring_schedule: 
     type: array
     items:

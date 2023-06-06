@@ -64,25 +64,60 @@ components:
         scaling_rules:
           type: array
           items:
-            $ref: '#/components/schemas/ScalingRules'
-    ScalingRules:
-      AnyOf:
-        - $ref: "./shared_definitions.yaml#/schemas/metric_type"
-        - $ref: "./shared_definitions.yaml#/schemas/threshold"
-        - $ref: "./shared_definitions.yaml#/schemas/operator"
-        - $ref: "./shared_definitions.yaml#/schemas/adjustment"
-        - $ref: "./shared_definitions.yaml#/schemas/breach_duration_secs"
-        - $ref: "./shared_definitions.yaml#/schemas/cool_down_secs"
+            $ref: '#/components/schemas/ScalingRule'
+    ScalingRule:
+      properties:
+        metric_type:
+          - $ref: "./shared_definitions.yaml#/schemas/metric_type"
+        threshold:
+          description: |
+            The boundary when metric value exceeds is considered as a breach
+          required: true
+          type: int
+          format: int64
+          example: 30
+        operator:
+          description: Used for standard operting signs - ">", "<", ">=", "<="
+          required: true
+          type: string
+          enum: [">", "<", ">=", "<="]
+          example: <
+        adjustment:
+          description: |
+            The adjustment approach for instance count with each scaling.
+
+            +5 means adding 5 instances, -50% means shrinking to the half of current size.
+          required: true
+          type: string
+          pattern: ^[-+][1-9]+[0-9]*[%]?$
+          example: -1
+        breach_duration_secs:
+          description: |
+            Time duration(in seconds) to fire scaling event if it keeps breaching
+          type: integer
+          format: int64  # this is time in seconds
+          example: 600
+        cool_down_secs:
+          description: |
+            The time duration (in seconds) to wait before the next scaling kicks in
+          type: integer
+          format: int64  # this is time in seconds
+          example: 300
         schedules:
           type: array
           items:
             $ref: '#/components/schemas/Schedules'
     Schedules:
-      AnyOf:
-        - $ref: "./shared_definitions.yaml#/schemas/timezone"
+      timezone:
+        description: Using timezone definition of Java #https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html - Do we need to implement it?
+        required: true
+        type: string
+        example: Asia/Shanghai
         # TODO: Try to make use of <https://stackoverflow.com/a/71121905>
-        - $ref: "../../src/autoscaler/api/policyvalidator/policy_json.schema.json#/" # TODO:
+        #- $ref: "../../src/autoscaler/api/policyvalidator/policy_json.schema.json#/" # TODO:
+      recurring_schedule:
         - $ref: "./shared_definitions.yaml#/schemas/recurring_schedule"
+      specific_date:
         - $ref: "./shared_definitions.yaml#/schemas/specific_date"
     delete:
       summary: Deletes the policy 
@@ -133,19 +168,26 @@ components:
           items:
             $ref: '#/components/schemas/ScalingRules'
     ScalingRules:
-      AnyOf:
+      metric_type:
         - $ref: "./shared_definitions.yaml#/schemas/metric_type"
+      threshold:
         - $ref: "./shared_definitions.yaml#/schemas/threshold"
+      operator:
         - $ref: "./shared_definitions.yaml#/schemas/operator"
+      adjustment:
         - $ref: "./shared_definitions.yaml#/schemas/adjustment"
+      breach_duration_secs:
         - $ref: "./shared_definitions.yaml#/schemas/breach_duration_secs"
+      cool_down_secs:
         - $ref: "./shared_definitions.yaml#/schemas/cool_down_secs"
         schedules:
           type: array
           items:
             $ref: '#/components/schemas/Schedules'
     Schedules:
-      AnyOf:
+      timezone:
         - $ref: "./shared_definitions.yaml#/schemas/timezone"
+      recurring_schedule:
         - $ref: "./shared_definitions.yaml#/schemas/recurring_schedule"
+      specific_date:
         - $ref: "./shared_definitions.yaml#/schemas/specific_date"

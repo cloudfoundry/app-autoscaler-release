@@ -1,0 +1,8 @@
+{
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.json": [
+            "file:///Users/I545003/SAPDevelop/app-autoscaler-release/api/shared_definitions.yaml",
+            "file:///Users/I545003/SAPDevelop/app-autoscaler-release/api/policy-api.yaml"
+        ]
+    }
+}
