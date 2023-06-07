@@ -1,11 +1,11 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info: 
   title: Policy API
   description: This API is used to create, delete, retrieve the policy
   version: 1.0.0
-  security: 
-- mtls: []
-- basicAuthentication: []
+#security: 
+#- mtls: []
+#- basicAuthentication: [] #TODO
 tags:
 - name: Policy API V1
   description: This API is used to create, delete, retrieve the policy
@@ -17,7 +17,6 @@ paths:
       in: path
       required: true
       description: |
-
         The GUID identifying the application for which the scaling history is fetched.
 
         It can be found in the `application_id` property of the JSON object stored in the
@@ -35,8 +34,14 @@ paths:
       summary: Retrieves the Policy 
       description: This API is used to create the policy
       tags:
-      - Create Policy API V1
-      response: 
+        - Create Policy API V1
+      requestBody:
+        type: array
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Policy/Policy" #TODO
+      responses: 
         "200":
           description: "OK"
           content:
@@ -44,10 +49,38 @@ paths:
             schema:
               $ref: "#/components/schemas/Policy/CreatePolicy"
         default: 
-          $ref: "./shared_definitons.yaml#/responses/Error" 
+          $ref: "./shared_definitons.yaml#/responses/Error"
+    delete:
+      summary: Deletes the policy 
+      description: This API is used to delete the policy
+      tags: 
+        - Delete Policy API V1
+      response: 
+        "200":
+          description: "OK"
+          content:
+           application/json:
+            schema:
+              $ref: "#/components/schemas/Policy/DeletePolicy"
+        default: 
+          $ref: "./shared_definitons.yaml#/responses/Error"
+    get:
+      summary: Retrieves the Policy 
+      description: This API is used to retrieve the policy
+      tags:
+        - Get Policy API V1
+      response: 
+        "200":
+          description: "OK"
+          content:
+           application/json:
+            schema:
+              $ref: "#/components/schemas/Policy/Policy"
+        default: 
+          $ref: "./shared_definitons.yaml#/responses/Error"
 components:
   schemas:
-    CreatePolicy:
+    Policy:
       description: Object creating Policy 
       type: object
       properties:
@@ -108,86 +141,96 @@ components:
           items:
             $ref: '#/components/schemas/Schedules'
     Schedules:
-      timezone:
-        description: Using timezone definition of Java #https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html - Do we need to implement it?
-        required: true
-        type: string
-        example: Asia/Shanghai
-        # TODO: Try to make use of <https://stackoverflow.com/a/71121905>
-        #- $ref: "../../src/autoscaler/api/policyvalidator/policy_json.schema.json#/" # TODO:
-      recurring_schedule:
-        - $ref: "./shared_definitions.yaml#/schemas/recurring_schedule"
-      specific_date:
-        - $ref: "./shared_definitions.yaml#/schemas/specific_date"
-    delete:
-      summary: Deletes the policy 
-      description: This API is used to delete the policy
-      tags: 
-      - Delete Policy API V1
-      response: 
-        "200":
-          description: "OK"
-          content:
-           application/json:
-            schema:
-              $ref: "#/components/schemas/Policy/DeletePolicy"
-        default: 
-          $ref: "./shared_definitons.yaml#/responses/Error"
-    get:
-      summary: Retrieves the Policy 
-      description: This API is used to retrieve the policy
-      tags:
-      - Get Policy API V1
-      response: 
-        "200":
-          description: "OK"
-          content:
-           application/json:
-            schema:
-              $ref: "#/components/schemas/Policy/GetPolicy"
-        default: 
-          $ref: "./shared_definitons.yaml#/responses/Error"
-components:
-  schemas:
-    GetPolicy:
-      description: Object containing Policy 
-      type: object
       properties:
+        timezone:
+          description: Using timezone definition of Java #https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html - Do we need to implement it?
+          required: true
+          type: string
+          example: Asia/Shanghai
+          # TODO: Try to make use of <https://stackoverflow.com/a/71121905>
+          #- $ref: "../../src/autoscaler/api/policyvalidator/policy_json.schema.json#/" # TODO:
+        recurring_schedule:
+          type: array
+          items:
+          $ref: '#/schemas/RecurringSchedule'
+    RecurringSchedule:
+      properties:
+        start_date:
+          description: the start date of the schedule. Must be a future time
+          type: string
+          format: date
+          example: 2016-06-27
+        end_date:
+          description: the end date of the schedule. Must be a future time.
+          type: string
+          format: date
+          example: 2016-07-23  
+        start_time:
+          description: the start time of the schedule in HH:MM format
+          required: true
+          type: string
+          pattern: ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+          example: 11:00
+        end_time:
+          description: the end time of the schedule in HH:MM format
+          required: true
+          type: string
+          pattern: ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+          example: 19:30
+        end time of the schedule:
+          description: |
+            recurring days of a week or month. Use [1,2,..,7] or [1,2,...,31] to define it
+          type: array
+          example: [5, 15, 25]
         instance_min_count:
+          description: minimal number of instance count for this schedule
+          required: true
           type: integer
           format: int64
-          description: minimal number of instance count
+          example: 3
+        instance_max_count:
+          description: maximal number of instance count for this schedule
+          required: true
+          type: integer
+          format: int64
+          example: 10
+        instance_min_instance_count:
+          description: the initial minimal number of instance count for this schedule
+          type: integer
+          format: int64
+          example: 5
+        specific_date:
+          type: array
+          items:
+            $ref: '#/schemas/SpecificDate'
+    SpecificDate:
+      properties: 
+        start_date_time:
+          description: the start time of the schedule. Must be a future time
+          required: true
+          type: string
+          pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
+          example: 2015-01-04T20:00
+        end_date_time: # the doc has this as a start_date_time 
+          description: the start time of the schedule. Must be a future time
+          required: true
+          type: string
+          pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
+          example: 2015-01-04T20:00
+        instance_min_count:
+          description: minimal number of instance count for this schedule
+          required: true
+          type: integer
+          format: int64
           example: 2
-        instance_max_count: 
+        instance_max_count:
+          description: maximal number of instance count for this schedule
+          required: true
           type: integer
           format: int64
-          description: maximal number of instance count
-          example: 4
-        scaling_rules:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScalingRules'
-    ScalingRules:
-      metric_type:
-        - $ref: "./shared_definitions.yaml#/schemas/metric_type"
-      threshold:
-        - $ref: "./shared_definitions.yaml#/schemas/threshold"
-      operator:
-        - $ref: "./shared_definitions.yaml#/schemas/operator"
-      adjustment:
-        - $ref: "./shared_definitions.yaml#/schemas/adjustment"
-      breach_duration_secs:
-        - $ref: "./shared_definitions.yaml#/schemas/breach_duration_secs"
-      cool_down_secs:
-        - $ref: "./shared_definitions.yaml#/schemas/cool_down_secs"
-        schedules:
-          type: array
-          items:
-            $ref: '#/components/schemas/Schedules'
-    Schedules:
-      timezone:
-        - $ref: "./shared_definitions.yaml#/schemas/timezone"
-      recurring_schedule:
-        - $ref: "./shared_definitions.yaml#/schemas/recurring_schedule"
-      specific_date:
-        - $ref: "./shared_definitions.yaml#/schemas/specific_date"
+          example: 5
+        instance_min_instance_count:
+          description: the initial minimal number of instance count for this schedule
+          type: integer
+          format: int64
+          example: 3
