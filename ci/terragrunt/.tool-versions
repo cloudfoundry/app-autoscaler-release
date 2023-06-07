@@ -1,4 +1,4 @@
-gcloud 433.0.1
+gcloud 434.0.0
 helm 3.12.0
 python 3
 terraform 1.4.6
