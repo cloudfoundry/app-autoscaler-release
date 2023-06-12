@@ -1,3 +1,10 @@
+openapi: 3.1.0
+info:
+  title: app-autoscaler custom metrics API
+  description: |
+    app-autoscaler lets you automatically increase or decrease the number of your application instances based on the policies you have defined. Your applications can call the app-autoscaler custom metrics API to submit custom metrics defined and used in a dynamic scaling policy to enable automatic scaling based on application-specific metrics.
+  version: 1.0.0
+paths: {}
 parameters: {}
 responses:
   Error:

@@ -51,7 +51,7 @@ start: build
 deploy: build
 	./deploy.sh
 
-generate: go.mod ../../../../../api/custom-metrics-api.yaml
+generate: go.mod ../../../../../api/custom-metrics-api.yaml ../../../../../api/scaling-history-api.yaml ../../../../../api/policy-api.yaml ../../../../../api/application-metric-api.yaml
 	go generate ./...
 
 .PHONY: clean
