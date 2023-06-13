@@ -13,6 +13,31 @@ func (s *ErrorResponseStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+type BasicAuthentication struct {
+	Username string
+	Password string
+}
+
+// GetUsername returns the value of Username.
+func (s *BasicAuthentication) GetUsername() string {
+	return s.Username
+}
+
+// GetPassword returns the value of Password.
+func (s *BasicAuthentication) GetPassword() string {
+	return s.Password
+}
+
+// SetUsername sets the value of Username.
+func (s *BasicAuthentication) SetUsername(val string) {
+	s.Username = val
+}
+
+// SetPassword sets the value of Password.
+func (s *BasicAuthentication) SetPassword(val string) {
+	s.Password = val
+}
+
 // Ref: #/components/schemas/ErrorResponse
 type ErrorResponse struct{}
 

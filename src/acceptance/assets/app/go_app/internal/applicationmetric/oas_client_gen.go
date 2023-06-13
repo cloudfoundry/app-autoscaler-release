@@ -65,18 +65,18 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 	return u
 }
 
-// V1AppsGUIDScalingHistoriesGet invokes GET /v1/apps/{guid}/scaling_histories operation.
+// V1AppsGUIDAggregatedMetricHistoriesMetricTypeGet invokes GET /v1/apps/{guid}/aggregated_metric_histories/{metric_type} operation.
 //
-// Use to retrieve scaling history for an app.
+// Use to retrieve instance metrics of an application.
 //
-// GET /v1/apps/{guid}/scaling_histories
-func (c *Client) V1AppsGUIDScalingHistoriesGet(ctx context.Context, params V1AppsGUIDScalingHistoriesGetParams) (*History, error) {
-	res, err := c.sendV1AppsGUIDScalingHistoriesGet(ctx, params)
+// GET /v1/apps/{guid}/aggregated_metric_histories/{metric_type}
+func (c *Client) V1AppsGUIDAggregatedMetricHistoriesMetricTypeGet(ctx context.Context, params V1AppsGUIDAggregatedMetricHistoriesMetricTypeGetParams) (*ApplicationMetrics, error) {
+	res, err := c.sendV1AppsGUIDAggregatedMetricHistoriesMetricTypeGet(ctx, params)
 	_ = res
 	return res, err
 }
 
-func (c *Client) sendV1AppsGUIDScalingHistoriesGet(ctx context.Context, params V1AppsGUIDScalingHistoriesGetParams) (res *History, err error) {
+func (c *Client) sendV1AppsGUIDAggregatedMetricHistoriesMetricTypeGet(ctx context.Context, params V1AppsGUIDAggregatedMetricHistoriesMetricTypeGetParams) (res *ApplicationMetrics, err error) {
 	var otelAttrs []attribute.KeyValue
 
 	// Run stopwatch.
@@ -90,7 +90,7 @@ func (c *Client) sendV1AppsGUIDScalingHistoriesGet(ctx context.Context, params V
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "V1AppsGUIDScalingHistoriesGet",
+	ctx, span := c.cfg.Tracer.Start(ctx, "V1AppsGUIDAggregatedMetricHistoriesMetricTypeGet",
 		clientSpanKind,
 	)
 	// Track stage for error reporting.
@@ -106,7 +106,7 @@ func (c *Client) sendV1AppsGUIDScalingHistoriesGet(ctx context.Context, params V
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
+	var pathParts [4]string
 	pathParts[0] = "/v1/apps/"
 	{
 		// Encode "guid" parameter.
@@ -126,7 +126,25 @@ func (c *Client) sendV1AppsGUIDScalingHistoriesGet(ctx context.Context, params V
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/scaling_histories"
+	pathParts[2] = "/aggregated_metric_histories/"
+	{
+		// Encode "metric_type" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "metric_type",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.MetricType))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeQueryParams"
@@ -229,7 +247,7 @@ func (c *Client) sendV1AppsGUIDScalingHistoriesGet(ctx context.Context, params V
 		var satisfied bitset
 		{
 			stage = "Security:BasicAuthentication"
-			switch err := c.securityBasicAuthentication(ctx, "V1AppsGUIDScalingHistoriesGet", r); {
+			switch err := c.securityBasicAuthentication(ctx, "V1AppsGUIDAggregatedMetricHistoriesMetricTypeGet", r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -265,7 +283,7 @@ func (c *Client) sendV1AppsGUIDScalingHistoriesGet(ctx context.Context, params V
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeV1AppsGUIDScalingHistoriesGetResponse(resp)
+	result, err := decodeV1AppsGUIDAggregatedMetricHistoriesMetricTypeGetResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

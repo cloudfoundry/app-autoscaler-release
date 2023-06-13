@@ -7,8 +7,8 @@ info:
     This API is used to return the aggregated metric result of an application.
   version: 1.0.0
 security: # Do we need that?
-- mtls: []
-- basicAuthentication: [] #TODO
+#- mtls: []
+- basicAuthentication: [] 
 tags:
 - name: Application Metric API V1
   description: List instance metrics of an application.
@@ -30,7 +30,7 @@ paths:
       example: 8d0cee08-23ad-4813-a779-ad8118ea0b91
        #$ref: "./shared_definitions.yaml#/schemas/GUID"
     - name: metric_type
-      in: query
+      in: path
       required: true
       description: The metric type
       schema:
@@ -81,12 +81,12 @@ paths:
         minimum: 0 # Or Should it be "1"?
         default: 50
       example: results-per-page=10
-    - name: Authorization
-      in: header
-      schema:
-        type: string
-      example: |
-        bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5\_Iu\_o
+    #- name: Authorization
+      #in: header
+      #schema:
+        #type: string
+      #example: |
+        #bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5\_Iu\_o
     get:
       summary: Retrieves the instance metrics of an application
       description: |
@@ -108,6 +108,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
            #$ref: "./shared_definitions.yaml#/responses/Error"
+      security:
+      - basicAuthentication: []
+      x-codegen-request-body-name: body
 components:
   schemas:
     ErrorResponse:
@@ -190,3 +193,7 @@ components:
         unit:
           type: string 
           example: megabytes
+  securitySchemes:
+    basicAuthentication:
+      type: http
+      scheme: basic
