@@ -7,7 +7,6 @@ all_modules:= $(go_modules) db scheduler
 MVN_OPTS="-Dmaven.test.skip=true -Dmaven.plugin.validation=VERBOSE"
 OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
 db_type:=postgres
-DB_HOST:=localhost
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@${DB_HOST}/autoscaler?sslmode=disable"; ;; \
  			 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)
@@ -25,6 +24,7 @@ DEST?=build
 export BUILDIN_MODE?=false
 export DEBUG?=false
 export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+export DB_HOST:=localhost
 
 $(shell mkdir -p target)
 $(shell mkdir -p build)
@@ -131,7 +131,6 @@ test-autoscaler-suite: check-db_type init init-db test-certs autoscaler schedule
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
 
 test-scheduler: check-db_type init init-db test-certs
-	@export DB_HOST=${DB_HOST}; \
 	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
 test-changelog: init
 	@make -C src/changelog test
