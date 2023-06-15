@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.6</version>
+        <version>3.1.0</version>
         <relativePath/>
     </parent>
 
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.6.10</version>
+            <version>1.6.11</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -140,7 +140,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>1.18.28</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -183,7 +183,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.3.0</version>
                 <configuration>
 		    <propertyExpansion>checkstyle.config.path=${basedir}/../../style-guide</propertyExpansion>
 		    <configLocation>${basedir}/../../style-guide/google_checks.xml</configLocation>
@@ -194,7 +194,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>10.10.0</version>
+                        <version>10.12.0</version>
                     </dependency>
                 </dependencies>
             </plugin>

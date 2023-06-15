@@ -1,6 +1,6 @@
-gcloud 430.0.0
-helm 3.11.3
+gcloud 435.0.1
+helm 3.12.1
 python 3
-terraform 1.4.6
+terraform 1.5.0
 terraform-lsp
-terragrunt 0.45.10
+terragrunt 0.46.3
