@@ -95,12 +95,6 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-- name: pull-request
-  type: registry-image
-  source:
-    repository: ghcr.io/bonzofenix/github-pr-resource
-    tag: master
-
 resources:
 - name: every-night
   type: time
