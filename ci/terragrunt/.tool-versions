@@ -1,6 +1,6 @@
 gcloud 436.0.0
 helm 3.12.1
 python 3
-terraform 1.5.0
+terraform 1.5.1
 terraform-lsp
 terragrunt 0.47.0
