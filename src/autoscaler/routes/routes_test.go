@@ -51,14 +51,6 @@ var _ = Describe("Routes", func() {
 				Expect(path.Path).To(Equal("/v1/info"))
 			})
 		})
-
-		Context("PublicApiHealthRouteName", func() {
-			It("should return the correct path", func() {
-				path, err := routes.ApiOpenRoutes().Get(routes.PublicApiHealthRouteName).URLPath()
-				Expect(err).NotTo(HaveOccurred())
-				Expect(path.Path).To(Equal("/health"))
-			})
-		})
 	})
 
 	Describe("ApiRoutes", func() {

@@ -5,12 +5,14 @@
         "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-    <suppress checks="MissingJavadocMethod" />
-    <suppress checks="MissingJavadocType" />
-    <suppress checks="SummaryJavadoc" />
+    <suppress checks="MissingJavadocMethod"/>
+    <suppress checks="MissingJavadocType"/>
+    <suppress checks="SummaryJavadoc"/>
     <suppress checks="NonEmptyAtclauseDescription"/>
     <suppress checks="PackageName"/>
     <suppress checks="LineLength"/>
     <suppress checks="VariableDeclarationUsageDistance"/>
     <suppress checks="EmptyLineSeparator"/>
+    <suppress checks="AbbreviationAsWordInName"/>
+
 </suppressions>

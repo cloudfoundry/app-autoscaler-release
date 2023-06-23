@@ -32,10 +32,6 @@
   end
   db_url
 end
-
-###########################################
-#           Template Main                 #
-###########################################
   job_name = 'operator'
   policy_db_url = build_db_url('policy_db', job_name)
   instance_metrics_db_url = build_db_url('instancemetrics_db', job_name)
@@ -43,7 +39,9 @@ end
   scaling_engine_db_url = build_db_url('scalingengine_db', job_name)
   lock_db_url = build_db_url('lock_db', job_name)
 %>
-
+###########################################
+#           Template Main                 #
+###########################################
 cf:
   api:  <%= p("autoscaler.cf.api") %>
   client_id: <%= p("autoscaler.cf.client_id") %>
@@ -54,14 +52,15 @@ cf:
   idle_connection_timeout_ms: <%= p("autoscaler.cf.idle_connection_timeout_ms") %>
   max_idle_conns_per_host_ms: <%= p("autoscaler.cf.max_idle_conns_per_host_ms") %>
 
-
-
 logging:
   level: <%= p("autoscaler.operator.logging.level") %>
+
 health:
   port: <%= p("autoscaler.operator.health.port") %>
   username: <%= p("autoscaler.operator.health.username") %>
   password: <%= p("autoscaler.operator.health.password") %>
+  unprotected_endpoints: <%= p("autoscaler.operator.health.unprotected_endpoints") %>
+  readiness_enabled: <%= p("autoscaler.operator.health.readiness_enabled") %>
 http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
 instance_metrics_db:
   db:

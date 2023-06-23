@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -241,8 +242,10 @@ scheduler:
 			conf.AppSyncer.DB.URL = "postgres://pqgotest:password@exampl.com/pqgotest"
 			conf.DBLock.DB.URL = "postgres://pqgotest:password@exampl.com/pqgotest"
 			conf.HttpClientTimeout = 10 * time.Second
-			conf.Health.Port = 8081
 
+			conf.Health.Port = 8081
+			conf.Health.UnprotectedEndpoints = []string{"/", routes.LivenessPath,
+				routes.PrometheusPath, routes.PprofPath}
 		})
 
 		JustBeforeEach(func() {

@@ -96,6 +96,12 @@ use_buildin_mode: <%= p("autoscaler.apiserver.use_buildin_mode") %>
 
 health:
   port: <%= p("autoscaler.apiserver.health.port") %>
+  username: <%= p("autoscaler.apiserver.health.username") %>
+  username_hash: <%= p("autoscaler.apiserver.health.username_hash") %>
+  password: <%= p("autoscaler.apiserver.health.password") %>
+  password_hash: <%= p("autoscaler.apiserver.health.password_hash") %>
+  unprotected_endpoints: <%= p("autoscaler.apiserver.health.unprotected_endpoints") %>
+  readiness_enabled: <%= p("autoscaler.apiserver.health.readiness_enabled") %>
 
 db:
   policy_db:

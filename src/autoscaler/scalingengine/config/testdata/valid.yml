@@ -11,6 +11,7 @@ server:
     ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
 health:
   port: 9999
+  unprotected_endpoints: ["/health/liveness", "/health/readiness", "/health/prometheus", "/debug/pprof"]
 
 logging:
   level: DeBug

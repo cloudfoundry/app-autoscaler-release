@@ -10,7 +10,9 @@ import (
 	msConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	opConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/config"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	seConfig "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
+	"github.com/go-sql-driver/mysql"
 
 	"fmt"
 	"net/url"
@@ -20,7 +22,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	. "github.com/onsi/gomega"
 	"github.com/tedsuo/ifrit/ginkgomon_v2"
 	"gopkg.in/yaml.v3"
@@ -213,6 +214,9 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
+		Health: models.HealthConfig{
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		PublicApiServer: apiConfig.ServerConfig{
 			Port: publicApiPort,
 			TLS: models.TLSCerts{
@@ -350,7 +354,10 @@ server.ssl.enabled-protocols=TLSv1,TLSv1.1,TLSv1.2
 server.ssl.ciphers=TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_RC4_128_SHA,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,SSL_RSA_WITH_RC4_128_SHA
 
 server.port=%d
-scheduler.healthserver.port=0
+# Health Server
+scheduler.healthserver.port=7000
+scheduler.healthserver.username=test-user
+scheduler.healthserver.password=test-password
 client.httpClientTimeout=%d
 #Quartz
 org.quartz.scheduler.instanceName=app-autoscaler
@@ -391,6 +398,9 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
+		Health: models.HealthConfig{
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		Server: egConfig.ServerConfig{
 			Port: port,
 			TLS: models.TLSCerts{
@@ -453,6 +463,9 @@ func (components *Components) PrepareScalingEngineConfig(dbURI string, port int,
 			ClientID: "admin",
 			Secret:   "admin",
 		},
+		Health: models.HealthConfig{
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		Server: seConfig.ServerConfig{
 			Port: port,
 			TLS: models.TLSCerts{
@@ -488,6 +501,9 @@ func (components *Components) PrepareOperatorConfig(dbURI string, ccUAAURL strin
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
+		Health: models.HealthConfig{
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		CF: cf.Config{
 			API:      ccUAAURL,
 			ClientID: "admin",
@@ -555,6 +571,9 @@ func (components *Components) PrepareMetricsGatewayConfig(dbURI string, metricSe
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
+		Health: models.HealthConfig{
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		EnvelopChanSize:   500,
 		NozzleCount:       1,
 		MetricServerAddrs: metricServerAddresses,
@@ -598,6 +617,9 @@ func (components *Components) PrepareMetricsServerConfig(dbURI string, httpClien
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
+		Health: models.HealthConfig{
+			UnprotectedEndpoints: []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 		HttpClientTimeout: httpClientTimeout,
 		NodeAddrs:         []string{"localhost"},
 		NodeIndex:         0,

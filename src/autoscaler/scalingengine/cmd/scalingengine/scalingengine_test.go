@@ -6,6 +6,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -149,7 +150,6 @@ var _ = Describe("Main", func() {
 	})
 
 	Describe("when http server is ready to serve RESTful API", func() {
-
 		JustBeforeEach(func() {
 			Eventually(runner.Session.Buffer, 2).Should(gbytes.Say("scalingengine.started"))
 		})
@@ -206,6 +206,8 @@ var _ = Describe("Main", func() {
 			basicAuthConfig := conf
 			basicAuthConfig.Health.HealthCheckUsername = ""
 			basicAuthConfig.Health.HealthCheckPassword = ""
+			basicAuthConfig.Health.UnprotectedEndpoints = []string{"/", routes.LivenessPath,
+				routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 		})
 
@@ -215,7 +217,8 @@ var _ = Describe("Main", func() {
 
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", healthport))
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.PrometheusPath)
+				rsp, err := healthHttpClient.Get(url)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
@@ -239,8 +242,8 @@ var _ = Describe("Main", func() {
 
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -253,8 +256,8 @@ var _ = Describe("Main", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
@@ -273,8 +276,8 @@ var _ = Describe("Main", func() {
 
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -287,8 +290,8 @@ var _ = Describe("Main", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				url := fmt.Sprintf("http://127.0.0.1:%d%s", healthport, routes.LivenessPath)
+				req, err := http.NewRequest(http.MethodGet, url, nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)

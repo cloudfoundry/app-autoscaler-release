@@ -7,6 +7,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsgateway/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -78,6 +79,7 @@ nozzle:
   shard_id: autoscaler
 health:
   port: 8081
+  unprotected_endpoints: ["/health/liveness", "/health/readiness", "/health/prometheus", "/debug/pprof"]
 `)
 			})
 			It("returns the config", func() {
@@ -110,7 +112,8 @@ health:
 					CACertFile: "autoscaler_ca.cert",
 				}))
 				Expect(conf.Health.Port).To(Equal(8081))
-
+				Expect(conf.Health.UnprotectedEndpoints).To(
+					ContainElements("/health/liveness", "/health/readiness", "/health/prometheus", "/debug/pprof"))
 			})
 		})
 
@@ -844,6 +847,8 @@ health:
 				},
 				Health: models.HealthConfig{
 					Port: 8081,
+					UnprotectedEndpoints: []string{"/", routes.LivenessPath, routes.ReadinessPath, routes.PrometheusPath,
+						routes.PprofPath},
 				},
 			}
 		})

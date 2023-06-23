@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
@@ -56,6 +57,8 @@ var _ = Describe("Config", func() {
 				Expect(conf.Server.TLS.CACertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/ca.crt"))
 
 				Expect(conf.Health.Port).To(Equal(9999))
+				Expect(conf.Health.UnprotectedEndpoints).To(
+					ContainElements("/health/liveness", "/health/readiness", "/health/prometheus", "/debug/pprof"))
 				Expect(conf.Logging.Level).To(Equal("debug"))
 
 				Expect(conf.DB.PolicyDB).To(Equal(
@@ -201,6 +204,9 @@ health:
 			conf.DefaultCoolDownSecs = 300
 			conf.LockSize = 32
 			conf.HttpClientTimeout = 10 * time.Second
+			conf.Health.UnprotectedEndpoints = []string{
+				"/", routes.LivenessPath, routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath,
+			}
 		})
 
 		JustBeforeEach(func() {

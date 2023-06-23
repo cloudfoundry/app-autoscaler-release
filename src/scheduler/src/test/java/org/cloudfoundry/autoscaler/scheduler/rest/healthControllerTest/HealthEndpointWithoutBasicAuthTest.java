@@ -1,42 +1,63 @@
-package org.cloudfoundry.autoscaler.scheduler.health;
+package org.cloudfoundry.autoscaler.scheduler.rest.healthControllerTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.cloudfoundry.autoscaler.scheduler.conf.MetricsConfiguration;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerConfiguration;
+import org.cloudfoundry.autoscaler.scheduler.util.HealthUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @ActiveProfiles("HealthAuth")
-public class SchedulerHealthEndpointTest {
-
+@TestPropertySource(
+    properties =
+        "scheduler.healthserver.unprotectedEndpoints=" + "/health/liveness,/health/prometheus")
+public class HealthEndpointWithoutBasicAuthTest {
   @Autowired private TestRestTemplate restTemplate;
 
-  @Autowired private MetricsConfiguration metricsConfig;
+  @Autowired private HealthServerConfiguration healthServerConfig;
 
   @Test
-  public void givenCorrectCredentialsStandardMetricsShouldBeAvailable() {
+  public void givenUnprotectedConfigsShouldLivenessReturn200()
+      throws MalformedURLException, URISyntaxException {
 
     ResponseEntity<String> response =
-        this.restTemplate
-            .withBasicAuth("prometheus", "someHash")
-            .getForEntity(metricsUrl(), String.class);
+        this.restTemplate.getForEntity(HealthUtils.livenessUrl().toURI(), String.class);
     assertThat(response.getStatusCode().value())
         .describedAs("Http status code should be OK")
         .isEqualTo(200);
-    String result = response.toString();
-    assertThat(result)
+    assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_JSON);
+    assertThat(response.getBody()).isEqualTo("{\"status\":\"Up\"}");
+  }
+
+  @Test
+  public void givenUnprotectedConfigsShouldPrometheusReturn200()
+      throws MalformedURLException, URISyntaxException {
+
+    ResponseEntity<String> response =
+        this.restTemplate.getForEntity(HealthUtils.prometheusMetricsUrl().toURI(), String.class);
+    assertThat(response.getStatusCode().value())
+        .describedAs("Http status code should be OK")
+        .isEqualTo(200);
+    assertThat(response.getHeaders().getContentType())
+        .isEqualTo(new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8));
+    assertThat(response.toString())
         .contains("jvm_info")
         .contains("jvm_buffer_pool_used_bytes")
         .contains("jvm_buffer_pool_capacity_bytes")
@@ -51,29 +72,5 @@ public class SchedulerHealthEndpointTest {
         .contains("jvm_memory_pool_bytes")
         .contains("autoscaler_scheduler_data_source")
         .contains("autoscaler_scheduler_policy_db_data_source");
-  }
-
-  @Test
-  public void givenIncorrectCredentials401ResultShouldBeGiven() {
-    ResponseEntity<String> response =
-        this.restTemplate.withBasicAuth("bad", "auth").getForEntity(metricsUrl(), String.class);
-    assertThat(response.getStatusCode().value()).isEqualTo(401);
-  }
-
-  private String metricsUrl() {
-    return "http://localhost:" + metricsConfig.getPort() + "/metrics";
-  }
-
-  @Test
-  public void givenNoCredentials401ResultShouldBeGiven() {
-    ResponseEntity<String> response = this.restTemplate.getForEntity(metricsUrl(), String.class);
-    assertThat(response.getStatusCode().value()).isEqualTo(401);
-  }
-
-  @Test
-  public void givenCorrectPasswordAndWrongUsernameFailsWith401() {
-    ResponseEntity<String> response =
-        this.restTemplate.withBasicAuth("bad", "someHash").getForEntity(metricsUrl(), String.class);
-    assertThat(response.getStatusCode().value()).isEqualTo(401);
   }
 }

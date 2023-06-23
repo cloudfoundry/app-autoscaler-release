@@ -3,6 +3,8 @@ package config_test
 import (
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
@@ -43,6 +45,7 @@ server:
   node_index: 1
 health:
   port: 9999
+  unprotected_endpoints: ["/health/liveness", "/health/prometheus", "/health/readiness", "/debug/pprof"]
 db:
   policy_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
@@ -104,7 +107,8 @@ circuitBreaker:
 						NodeIndex: 1,
 					},
 					Health: models.HealthConfig{
-						Port: 9999,
+						Port:                 9999,
+						UnprotectedEndpoints: []string{"/health/liveness", "/health/prometheus", "/health/readiness", "/debug/pprof"},
 					},
 					DB: DBConfig{
 						PolicyDB: db.DatabaseConfig{
@@ -229,7 +233,8 @@ defaultBreachDurationSecs: 600
 						TLS:  models.TLSCerts{},
 					},
 					Health: models.HealthConfig{
-						Port: 8081,
+						Port:                 8081,
+						UnprotectedEndpoints: nil,
 					},
 					DB: DBConfig{
 						PolicyDB: db.DatabaseConfig{
@@ -1107,6 +1112,8 @@ health:
 				DefaultBreachDurationSecs: 600,
 				DefaultStatWindowSecs:     300,
 				HttpClientTimeout:         10 * time.Second,
+				Health: models.HealthConfig{UnprotectedEndpoints: []string{routes.LivenessPath,
+					routes.ReadinessPath, routes.PrometheusPath, routes.PprofPath}},
 			}
 		})
 

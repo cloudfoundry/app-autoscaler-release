@@ -9,6 +9,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsserver/config"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 )
 
 var _ = Describe("Config", func() {
@@ -86,6 +87,7 @@ server:
     ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
 health:
   port: 9999
+  unprotected_endpoints: []
 `)
 			})
 
@@ -131,7 +133,7 @@ health:
 				Expect(conf.Server.TLS.CACertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/ca.crt"))
 
 				Expect(conf.Health.Port).To(Equal(9999))
-
+				Expect(conf.Health.UnprotectedEndpoints).To(BeEmpty())
 			})
 		})
 
@@ -180,6 +182,7 @@ db:
 				Expect(conf.Server.Port).To(Equal(DefaultHTTPServerPort))
 
 				Expect(conf.Health.Port).To(Equal(DefaultHealthPort))
+				Expect(conf.Health.UnprotectedEndpoints).To(BeNil())
 
 			})
 		})
@@ -212,6 +215,8 @@ db:
 			conf.Collector.EnvelopeChannelSize = 300
 			conf.Collector.MetricChannelSize = 300
 			conf.Health.Port = 8081
+			conf.Health.UnprotectedEndpoints = []string{
+				"/", routes.LivenessPath, routes.PrometheusPath, routes.PprofPath}
 		})
 
 		JustBeforeEach(func() {

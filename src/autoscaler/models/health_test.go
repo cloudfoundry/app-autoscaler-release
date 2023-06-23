@@ -84,7 +84,7 @@ password_hash: password_hash
 			err = healthConfig.Validate()
 			Expect(err).To(HaveOccurred())
 			Expect(errors.Is(err, models.ErrConfiguration)).To(BeTrue())
-			Expect(err.Error()).To(Equal("configuration error: both healthcheck password and healthcheck password_hash are provided, please provide only one of them"))
+			Expect(err.Error()).To(Equal("health configuration error: both healthcheck password and healthcheck password_hash are provided, please provide only one of them"))
 		})
 	})
 })
