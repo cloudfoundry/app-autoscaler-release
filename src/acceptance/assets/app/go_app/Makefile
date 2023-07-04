@@ -17,7 +17,7 @@ build:
 	echo "# building  test-app"
 	rm -rf build/* || true
 	mkdir -p build/
-	GOOS=linux GOARCH=amd64 go build -o build/app
+	CGO_ENABLED='${CGO_ENABLED}' GOOS='linux' GOARCH='amd64' go build -o build/app
 	cp app_manifest.yml build/manifest.yml
 
 
