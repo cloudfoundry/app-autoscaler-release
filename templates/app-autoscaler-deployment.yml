@@ -19,9 +19,9 @@ releases:
   sha1: "0024f2d9f8bb3c624a162db4c3a5919388c6d800"
   version: "0.237.0"
 - name: loggregator-agent
-  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=6.4.1
-  version: 6.4.1
-  sha1: 02ec285cce8fef717ab7baee79a5ed9210a7391c
+  url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=7.2.1
+  version: 7.2.1
+  sha1: 623e45f6c19a68d01c313a9a1a504dabc39ac1cf
 - name: bpm
   url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.1.18
   version: 1.1.18
