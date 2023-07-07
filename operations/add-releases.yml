@@ -14,9 +14,9 @@
     version: '0.0.4'
     sha1: 55b3dced813ff9ed92a05cda02156e4b5604b273
   - name: "routing"
-    url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.238.0"
-    sha1: "3e5a0d0dd09facf6582d7d8ba769297b0b6811b2"
-    version: "0.238.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.274.0"
+    sha1: "3cc22aaf3d7484ed59171091c7c315229275a831"
+    version: "0.274.0"
   - name: loggregator-agent
     url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=7.2.1
     version: 7.2.1
