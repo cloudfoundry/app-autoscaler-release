@@ -38,7 +38,6 @@ paths:
       tags:
         - Create Policy API V1
       requestBody:
-        type: array
         content:
           application/json:
             schema:

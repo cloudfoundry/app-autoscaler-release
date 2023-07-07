@@ -22,10 +22,7 @@ paths:
         It can be found in the `application_id` property of the JSON object stored in the
         `VCAP_APPLICATION` environment variable.
       schema:
-        type: string
-        pattern: (\d|[a-f]){8}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){12}
-      example: 8d0cee08-23ad-4813-a779-ad8118ea0b91
-       #$ref: "shared_definitions.yaml#/schemas/GUID"
+        $ref: "shared_definitions.yaml#/schemas/GUID"
     - name: start-time
       in: query
       description: |
@@ -87,13 +84,7 @@ paths:
            schema:
              $ref: "#/components/schemas/History"
         default:
-            # $ref: "#/parameters/Error" #"./shared_definitions.yaml#/responses/Error"
-          description: |
-            Error, the response body may contain further information.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
+            $ref: "./shared_definitions.yaml#/responses/Error"
       security:
       - basicAuthentication: []
       x-codegen-request-body-name: body
@@ -180,10 +171,7 @@ components:
             It can be found in the `application_id` property of the JSON object stored in the
             `VCAP_APPLICATION` environment variable.
           schema:
-          type: string
-          pattern: (\d|[a-f]){8}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){12}
-          example: 8d0cee08-23ad-4813-a779-ad8118ea0b91
-          #$ref: "./shared_definitions.yaml#/schemas/GUID"
+            $ref: "./shared_definitions.yaml#/schemas/GUID"
         timestamp:
           type: integer
           description: |
