@@ -28,6 +28,7 @@ files:
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/internal/truncate/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/tlsconfig/* # gosub
+- autoscaler/vendor/dario.cat/mergo/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
 - autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
@@ -41,7 +42,6 @@ files:
 - autoscaler/vendor/github.com/gorilla/websocket/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-retryablehttp/* # gosub
-- autoscaler/vendor/github.com/imdario/mergo/* # gosub
 - autoscaler/vendor/github.com/jackc/pgpassfile/* # gosub
 - autoscaler/vendor/github.com/jackc/pgservicefile/* # gosub
 - autoscaler/vendor/github.com/jackc/pgx/v5/* # gosub
