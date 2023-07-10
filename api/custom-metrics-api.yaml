@@ -16,11 +16,15 @@ paths:
     parameters:
     - in: path
       name: appGuid
-      description: The GUID identifying the application the custom metrics are submitted for. Can be found in the `application_id` property of the JSON object stored in the `VCAP_APPLICATION` environment variable.
-      example: 58d162ad-87d5-4f52-8abf-e56a63a67292
+      description: |
+        The GUID identifying the application for which the scaling history is fetched.
+
+        It can be found in the `application_id` property of the JSON object stored in the
+        `VCAP_APPLICATION` environment variable.
       required: true
       schema:
-        type: string
+        # type: string
+        $ref: "shared_definitions.yaml#/schemas/GUID"
     post:
       summary: Submits application-specific custom metrics to app-autoscaler.
       description: |
@@ -38,7 +42,7 @@ paths:
         '200':
           description: Metrics were successfully submitted.
         default:
-          $ref: '#/components/responses/Error'
+          $ref: "./shared_definitions.yaml#/responses/Error"
       security:
       - mtls: []
       x-codegen-request-body-name: body
