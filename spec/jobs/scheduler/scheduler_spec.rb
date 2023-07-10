@@ -11,7 +11,7 @@ describe "scheduler" do
   let(:properties) { YAML.safe_load(fixture("scheduler.yml").read) }
   let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
-  context "config/scheduler.yml" do
+  context "Health Configuration" do
     it "does set neither username nor password if not configured" do
       properties["autoscaler"]["scheduler"] = {
         "health" => {
@@ -26,8 +26,8 @@ describe "scheduler" do
         {"scheduler" => {
           "healthserver" => {
             "port" => 1234,
-            "username" => nil,
-            "password" => nil,
+            "username" => "",
+            "password" => "",
             "basicAuthEnabled" => false,
             "unprotected_endpoints" => []
           }
@@ -82,6 +82,22 @@ describe "scheduler" do
           }
         }}
       )
+    end
+  end
+
+  context "Datasource Configuration" do
+    it "verify database username and password have string types" do
+      rendered_template = YAML.safe_load(template.render(properties))
+
+      print rendered_template
+      expect(rendered_template["spring"]["datasource"]["username"]).to be_kind_of(String)
+      expect(rendered_template["spring"]["datasource"]["username"]).not_to be_kind_of(Float)
+      expect(rendered_template["spring"]["datasource"]["username"]).not_to eq(2222e123)
+      expect(rendered_template["spring"]["datasource"]["username"]).to eq("2222e123")
+
+      expect(rendered_template["spring"]["datasource"]["password"]).to be_kind_of(String)
+      expect(rendered_template["spring"]["datasource"]["password"]).not_to be_kind_of(Float)
+      expect(rendered_template["spring"]["datasource"]["password"]).to eq("default")
     end
   end
 end
