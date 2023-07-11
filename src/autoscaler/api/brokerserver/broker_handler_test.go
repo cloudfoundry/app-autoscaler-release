@@ -14,7 +14,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/broker"
 
 	"github.com/gorilla/mux"
-	"github.com/pivotal-cf/brokerapi/v9/handlers"
+	"github.com/pivotal-cf/brokerapi/v10/handlers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
