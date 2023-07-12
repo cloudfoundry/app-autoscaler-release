@@ -1,15 +1,16 @@
-openapi: 3.1.0
-info: 
+openapi: 3.0.0
+info:
   title: Policy API
   description: This API is used to create, delete, retrieve the policy
   version: 1.0.0
-security: 
-- basicAuthentication: [] #TODO
+security:
+# - mtls: []
+- basicAuthentication: []
 tags:
 - name: Policy API V1
   description: This API is used to create, delete, retrieve the policy
 
-paths: 
+paths:
   /v1/apps/{guid}/policy:
     parameters:
     - name: guid
@@ -21,19 +22,15 @@ paths:
         It can be found in the `application_id` property of the JSON object stored in the
         `VCAP_APPLICATION` environment variable.
       schema:
-      #   type: string
-      #   pattern: (\d|[a-f]){8}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){4}-(\d|[a-f]){12}
-      # example: 8d0cee08-23ad-4813-a779-ad8118ea0b91
         $ref: "./shared_definitions.yaml#/schemas/GUID"
-    
-    #- name: Authorization
-      #in: header
-      #schema: 
-        #type: string
-        #example: |
-          #bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5_Iu_o
+    # - name: Authorization
+    #   in: header
+    #   schema:
+    #     type: string
+    #     example: |
+    #       bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5_Iu_o
     put:
-      summary: Retrieves the Policy 
+      summary: Retrieves the Policy
       description: This API is used to create the policy
       tags:
         - Create Policy API V1
@@ -42,91 +39,61 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/Policy" #TODO
-      responses: 
+      responses:
         "200":
           description: "OK"
           content:
            application/json:
             schema:
               $ref: "#/components/schemas/Policy"
-        default: 
-          # description: |
-          #   Error, the response body may contain further information.
-          # content:
-          #   application/json:
-          #     schema:
-          #       $ref: "#/components/schemas/ErrorResponse"
-          $ref: "./shared_definitons.yaml#/responses/Error"
+        default:
+          $ref: "./shared_definitions.yaml#/responses/Error"
       security:
       - basicAuthentication: []
       x-codegen-request-body-name: body
     delete:
-      summary: Deletes the policy 
+      summary: Deletes the policy
       description: This API is used to delete the policy
-      tags: 
+      tags:
         - Delete Policy API V1
-      responses: 
+      responses:
         "200":
           description: "OK"
           content:
            application/json:
             schema:
               $ref: "#/components/schemas/Policy"
-        default: 
-          # description: |
-          #   Error, the response body may contain further information.
-          # content:
-          #   application/json:
-          #     schema:
-          #       $ref: "#/components/schemas/ErrorResponse"
-          $ref: "./shared_definitons.yaml#/responses/Error"
+        default:
+          $ref: "./shared_definitions.yaml#/responses/Error"
       security:
       - basicAuthentication: []
       x-codegen-request-body-name: body
     get:
-      summary: Retrieves the Policy 
+      summary: Retrieves the Policy
       description: This API is used to retrieve the policy
       tags:
-        - Get Policy API V1
-      responses: 
+      - Get Policy API V1
+      responses:
         "200":
           description: "OK"
           content:
            application/json:
             schema:
               $ref: "#/components/schemas/Policy"
-        default: 
-          # description: |
-          #   Error, the response body may contain further information.
-          # content:
-          #   application/json:
-          #     schema:
-          #       $ref: "#/components/schemas/ErrorResponse"
-          $ref: "./shared_definitons.yaml#/responses/Error"
-      security:
-      - basicAuthentication: []
-      x-codegen-request-body-name: body
+        default:
+          $ref: "./shared_definitions.yaml#/responses/Error"
 components:
   schemas:
-    ErrorResponse:
-      type: object
-    properties:
-      code:
-        type: string
-        description: The textual error code.
-      message:
-        type: string
-        description: The message describing the cause of the error.
     Policy:
-      description: Object creating Policy 
+      description: Object containing Policy
       type: object
       properties:
         instance_min_count:
           type: integer
           format: int64
           description: minimal number of instance count
-          example: 1
-        instance_max_count: 
+          example: 2
+        instance_max_count:
           type: integer
           format: int64
           description: maximal number of instance count
@@ -142,20 +109,20 @@ components:
         - adjustment
       properties:
         metric_type:
-          schema:
+          # schema:
           # description: |
-          #   One user-defined custom metric type or one of the system-default metric types, which are: 
+          #   One user-defined custom metric type or one of the system-default metric types, which are:
           #   "memoryused", "memoryutil", "responsetime", "throughput" and "cpu"
           # type: string
           # example: memoryused
-            $ref: "./shared_definitions.yaml#/schemas/metric_type"
+          $ref: "./shared_definitions.yaml#/schemas/metric_type"
         threshold:
           description: |
             The boundary when metric value exceeds is considered as a breach
-          #required: true
-          schema:
-            type: int
-            format: int64
+          # required: true
+          # schema:
+          type: integer
+          format: int64
           example: 30
         operator:
           description: Used for standard operting signs - ">", "<", ">=", "<="
@@ -195,8 +162,8 @@ components:
         timezone:
           description: Using timezone definition of Java #https://docs.oracle.com/javase/8/docs/api/java/util/TimeZone.html - Do we need to implement it?
           #required: true
-          schema:
-            type: string
+          # schema:
+          type: string
           example: Asia/Shanghai
           # TODO: Try to make use of <https://stackoverflow.com/a/71121905>
           #- $ref: "../../src/autoscaler/api/policyvalidator/policy_json.schema.json#/" # TODO:
@@ -220,20 +187,20 @@ components:
           description: the end date of the schedule. Must be a future time.
           type: string
           format: date
-          example: 2016-07-23  
+          example: 2016-07-23
         start_time:
           description: the start time of the schedule in HH:MM format
           #required: true
-          schema:
-            type: string
-            pattern: ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+          # schema:
+          type: string
+          pattern: ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
           example: 11:00
         end_time:
           description: the end time of the schedule in HH:MM format
           #required: true
-          schema:
-            type: string
-            pattern: ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+          # schema:
+          type: string
+          pattern: ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
           example: 19:30
         end time of the schedule:
           description: |
@@ -243,16 +210,16 @@ components:
         instance_min_count:
           description: minimal number of instance count for this schedule
           #required: true
-          schema:
-            type: integer
-            format: int64
+          # schema:
+          type: integer
+          format: int64
           example: 3
         instance_max_count:
           description: maximal number of instance count for this schedule
           #required: true
-          schema:
-            type: integer
-            format: int64
+          # schema:
+          type: integer
+          format: int64
           example: 10
         instance_min_instance_count:
           description: the initial minimal number of instance count for this schedule
@@ -273,30 +240,30 @@ components:
         start_date_time:
           description: the start time of the schedule. Must be a future time
           #required: true
-          schema:
-            type: string
-            pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
+          # schema:
+          type: string
+          pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
           example: 2015-01-04T20:00
-        end_date_time:  
+        end_date_time:
           description: the start time of the schedule. Must be a future time
           #required: true
-          schema:
-            type: string
-            pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
+          # schema:
+          type: string
+          pattern: /[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]/
           example: 2015-01-04T20:00
         instance_min_count:
           description: minimal number of instance count for this schedule
           #required: true
-          schema:
-            type: integer
-            format: int64
+          # schema:
+          type: integer
+          format: int64
           example: 2
         instance_max_count:
           description: maximal number of instance count for this schedule
           #required: true
-          schema:
-            type: integer
-            format: int64
+          # schema:
+          type: integer
+          format: int64
           example: 5
         instance_min_instance_count:
           description: the initial minimal number of instance count for this schedule

@@ -1,10 +1,3 @@
-openapi: 3.1.0
-info:
-  title: app-autoscaler custom metrics API
-  description: |
-    app-autoscaler lets you automatically increase or decrease the number of your application instances based on the policies you have defined. Your applications can call the app-autoscaler custom metrics API to submit custom metrics defined and used in a dynamic scaling policy to enable automatic scaling based on application-specific metrics.
-  version: 1.0.0
-paths: {}
 parameters: {}
 responses:
   Error:
@@ -34,9 +27,7 @@ schemas:
     example: 8d0cee08-23ad-4813-a779-ad8118ea0b91
   metric_type:
     description: |
-      One user-defined custom metric type or one of the system-default metric types, which are: 
+      One user-defined custom metric type or one of the system-default metric types, which are:
       "memoryused", "memoryutil", "responsetime", "throughput" and "cpu"
     type: string
     example: memoryused
-  
-  
