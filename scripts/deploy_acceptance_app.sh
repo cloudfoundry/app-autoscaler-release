@@ -14,18 +14,18 @@ app_location="${script_dir}/../src/acceptance/assets/app/nodeApp"
 service_offering="app-autoscaler-${pr_number}"
 
 function create_app {
-   local app_name=$1
-   cf push --var app_name="${app_name}"\
-      --var app_domain=autoscaler.app-runtime-interfaces.ci.cloudfoundry.org\
-      --var service_name="${service_offering}"\
-      --var instances=1\
-      --var node_tls_reject_unauthorized=0\
-      -p "${app_location}"\
-      -f "${app_location}/app_manifest.yml"\
-      --no-start &
-  
-#  cf bind-service "${app_name}" "${test_service_name}"
-  }
+  local app_name=$1
+  cf push --var app_name="${app_name}"\
+    --var app_domain=autoscaler.app-runtime-interfaces.ci.cloudfoundry.org\
+    --var service_name="${service_offering}"\
+    --var instances=1\
+    --var node_tls_reject_unauthorized=0\
+    -p "${app_location}"\
+    -f "${app_location}/app_manifest.yml"\
+    --no-start &
+
+  #  cf bind-service "${app_name}" "${test_service_name}"
+}
 
 # shellcheck disable=SC1091
 cf create-org "${test_org}"
