@@ -12,6 +12,10 @@ function print_parameters () {
   done
 }
 
+function print_help_for_parameters () {
+  # TODO
+}
+
 # When called as a script
 if [ "${0}" = "${BASH_SOURCE[0]}" ]
 then
