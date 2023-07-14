@@ -27,8 +27,8 @@ function print_parameters () {
 # ('name' 'description').
 function describe_parameter () {
   local -a -r param=${1}
-  local -r name=${param[0]}
-  local -r description=${param[1]}
+  local -r name="${param[0]}"
+  local -r description="${param[1]}"
 
   echo -ne "${TERM_STYLE_YELLOW}"
   echo "${name}: ${description}"
@@ -38,7 +38,7 @@ function describe_parameter () {
 }
 
 function describe_all_parameters () {
-  local -a -r param_desc_list=("$@")
+  local -a param_desc_list=("$@")
 
   for param_desc in "${param_desc_list[@]}"
   do
@@ -49,20 +49,22 @@ function describe_all_parameters () {
 }
 
 function print_help_for_parameters () {
-  local -a -r param_desc_list=("$@")
-  describe_all_parameters "${param_desc_list[@]}"
+  local -A -r -n param_desc_list=$@
+  echo "Raw parameter: " "$@"
+  echo "Parsed raw parameter" "${param_desc_list[test]}"
+  # describe_all_parameters "${param_desc_list[@]}"
 
-  local -a param_list
-  for param_desc in "${param_desc_list[@]}"
-  do
-    local -a pd=("${param_desc[@]}")
-    local param=${pd[0]}
-    echo "!!!pd=${pd}"
-    echo "!!!param = ${param}"
-    param_list+="${param}"
-  done
+  # local -a param_list
+  # for param_desc in "${param_desc_list[@]}"
+  # do
+  #   local -a pd=("${param_desc[@]}")
+  #   local param=${pd[0]}
+  #   echo "!!!pd=${pd}"
+  #   echo "!!!param = ${param}"
+  #   param_list+="${param}"
+  # done
 
-  print_parameters "${param_list[@]}"
+  # print_parameters "${param_list[@]}"
 
   return 0
 }
@@ -71,7 +73,8 @@ function print_help_for_parameters () {
 if [ "${0}" = "${BASH_SOURCE[0]}" ]
 then
   # TODO: Try associative array: <https://stackoverflow.com/a/3113285>
-  declare -a -r input=("$@")
+  declare -A -r input=("$@")
+  echo "${input}"
   # https://stackoverflow.com/a/3816747
-  print_help_for_parameters "${input[@]}"
+  # print_help_for_parameters "${input[@]}"
 fi

@@ -313,11 +313,11 @@ deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
 deploy-autoscaler-bosh:
-	# declare -a -r parameters=(('test' 'a') ('test_2' 'parameter'))
-	declare -a -r parameters=('test' 'test_2') ;\
-	echo "$${parameters[1]}"
 	declare -A -r param_desc=([test]='a' [test_2]='nice' [test_3]='parameter') ;\
-	echo "$${param_desc[test_2]}"
+	source ./scripts/print_parameters.sh && print_help_for_parameters "$${param_desc[@]}"
+	# test='A' test_2='nice' test_3='value!' ./scripts/print_parameters.sh "$$(declare -p param_desc)"
+	# test='A' test_2='nice' test_3='value!' ./scripts/print_parameters.sh "$${param_desc[@]}"
+	# echo "$${param_desc[test_2]}"
 
 	# TODO: Remove everything above the following lines in this recipe.
 	echo " - deploying autoscaler"
