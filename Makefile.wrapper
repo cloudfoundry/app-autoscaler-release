@@ -1,0 +1,33 @@
+.ONESHELL:
+
+# SHELL := /bin/bash
+# .SHELLFLAGS = -euo pipefail -c
+
+# Possible used technologies as bash-substitute:
+#  + For staying in a shell: [nushell](<https://www.nushell.sh>)
+#  + Tech-minimizing using [rust](<https://www.rust-lang.org>) or go with
+#    [duct](<https://crates.io/crates/duct>) or [xshell](<https://crates.io/crates/xshell>)
+#    using [include!](<https://github.com/fornwall/rust-script/issues/61#issuecomment-1484084472>)
+#    and <https://github.com/fornwall/rust-script/issues/6#issuecomment-721441977>
+#    and potentially using [scriptisto](<https://github.com/igor-petruk/scriptisto>)
+#  + For staying in shell-like syntax: [haskell](<https://www.haskell.org>) with
+#    [turtle](<https://hackage.haskell.org/package/turtle>)
+#  + Syntactically like python/ruby: [scala](<https://scala-lang.org>) with
+#    [os-lib](<https://github.com/com-lihaoyi/os-lib>) porentially using
+#    [scripting](<https://scala-cli.virtuslab.org/scripting>)
+
+MAKE_PARAM := 'unmodified'
+
+########## nushell version #########
+deploy-autoscaler-bosh:
+
+# # scala-version:
+# SHELL := scala-cli
+# .SHELLFLAGS = shebang --
+
+
+# deploy-autoscaler-bosh:
+# 	@println("Hello World!")
+
+# println(args.size)
+# println(args.headOption)

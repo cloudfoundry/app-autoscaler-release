@@ -53,6 +53,15 @@
               # chapter: 17.30.2.5. Packaging applications
               #
               # jdwpkgs.rubyPackages.cf-uaac
+
+              ########## For experimenting:
+              dotty
+              nushell
+              rust-script
+              rustup
+              scala-cli
+              ########## End experimenting
+
               shellcheck
               temurin-bin
               yq-go
