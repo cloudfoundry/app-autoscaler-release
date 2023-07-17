@@ -2,13 +2,13 @@ autoscaler:
   scheduler_db:
     address: 10.11.137.101
     databases:
-      - name: foo
-        password: default
+      - name: "2222e123"
+        password: "default"
         tag: default
     db_scheme: postgres
     port: 5432
     roles:
-      - name: foo
+      - name: 2222e123
         password: default
         tag: default
     tls:

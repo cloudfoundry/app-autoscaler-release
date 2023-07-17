@@ -22,14 +22,14 @@ spring:
     ############################################################
     datasource:
         driverClassName: org.postgresql.Driver
-        password: postgres
+        password: "postgres"
         url: jdbc:postgresql://${DB_HOST}/autoscaler
-        username: postgres
+        username: "postgres"
     policy-db-datasource:
         driverClassName: org.postgresql.Driver
-        password: postgres
+        password: "postgres"
         url: jdbc:postgresql://${DB_HOST}/autoscaler
-        username: postgres
+        username: "postgres"
 
     ############################################################
     #    Quartz Properties
@@ -100,10 +100,10 @@ scalingenginejob:
 ############################################################
 scheduler:
     healthserver:
-        password: test-password
+        password: "test-password"
         port: 8081
         unprotectedEndpoints: /health/prometheus,/health/liveness
-        username: test-user
+        username: "test-user"
 ############################################################
 #    Server SSL keys
 ############################################################
