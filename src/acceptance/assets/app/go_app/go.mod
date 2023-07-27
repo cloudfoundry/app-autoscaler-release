@@ -14,7 +14,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.6.2
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/ogen-go/ogen v0.71.1
+	github.com/ogen-go/ogen v0.72.0
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.10
 	github.com/prometheus/procfs v0.11.1
@@ -25,7 +25,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.16.0
 	go.opentelemetry.io/otel/trace v1.16.0
 	go.uber.org/zap v1.24.0
-	golang.org/x/exp v0.0.0-20230724220655-d98519c11495
+	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090
 )
 
 require (
