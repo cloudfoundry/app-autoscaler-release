@@ -1,0 +1,321 @@
+ - go mod tidying './src/autoscaler'
+go: downloading google.golang.org/grpc v1.57.0
+go: downloading golang.org/x/net v0.13.0
+go: downloading google.golang.org/genproto/googleapis/api v0.0.0-20230525234035-dd9d682886f9
+go: downloading google.golang.org/genproto v0.0.0-20230526161137-0005af68ea54
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19
+ - go mod tidying './src/acceptance'
+ - go mod tidying './src/changeloglockcleaner'
+ - go mod tidying './src/changelog'
+ - go mod vendor './src/autoscaler'
+ - go mod vendor './src/acceptance'
+ - go mod vendor './src/changeloglockcleaner'
+ - go mod vendor './src/changelog'
+/home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/.direnv/ruby/bin/uaac
+# building scheduler
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< org.cloudfoundry.autoscaler:scheduler >----------------
+[INFO] Building scheduler 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ scheduler ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] Copying 4 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ scheduler ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ scheduler ---
+[INFO] Not copying test resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ scheduler ---
+[INFO] Not compiling test sources
+[INFO] 
+[INFO] --- surefire:3.0.0:test (default-test) @ scheduler ---
+[WARNING]  Parameter 'disableXmlReport' (user property 'disableXmlReport') is deprecated: No reason given
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- war:3.3.2:war (default-war) @ scheduler ---
+[INFO] Packaging webapp
+[INFO] Assembling webapp [scheduler] in [/home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/src/scheduler/target/scheduler-1.0-SNAPSHOT]
+[INFO] Processing war project
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-autoconfigure-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-logging-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-core-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-jcl-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-web-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-json-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-web-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-webmvc-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-aop-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-expression-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-web-services-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-oxm-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-data-jpa-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-aop-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-jdbc-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-jdbc-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/hibernate-core-6.2.5.Final.jar
+[INFO] deleting outdated resource WEB-INF/lib/jboss-logging-3.5.1.Final.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-data-jpa-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-data-commons-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-orm-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-aspects-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-actuator-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-actuator-autoconfigure-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-actuator-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/micrometer-observation-1.11.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/micrometer-commons-1.11.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/micrometer-core-1.11.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-validation-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/tomcat-embed-el-10.1.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/hibernate-validator-8.0.0.Final.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-boot-starter-quartz-3.1.1.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-tx-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-context-support-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-beans-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/spring-context-6.0.10.jar
+[INFO] deleting outdated resource WEB-INF/lib/mysql-connector-j-8.0.33.jar
+[INFO] Building war: /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/src/scheduler/target/scheduler-1.0-SNAPSHOT.war
+[INFO] 
+[INFO] --- spring-boot:3.1.2:repackage (repackage) @ scheduler ---
+[INFO] Replacing main artifact /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/src/scheduler/target/scheduler-1.0-SNAPSHOT.war with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/src/scheduler/target/scheduler-1.0-SNAPSHOT.war.original
+[INFO] 
+[INFO] --- spring-boot:3.1.2:repackage (default) @ scheduler ---
+[INFO] Replacing main artifact /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/src/scheduler/target/scheduler-1.0-SNAPSHOT.war with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/src/scheduler/target/scheduler-1.0-SNAPSHOT.war.original
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.253 s
+[INFO] Finished at: 2023-08-03T14:41:41+02:00
+[INFO] ------------------------------------------------------------------------
+ - deploying autoscaler
+ - set up vars: DEPLOYMENT_NAME=jdw-pr-2015
+ - Deploying autoscaler 'dc91c7f661d2a76905bb6990c76d8722f875fc8b-jdw-pr-2015' with name 'jdw-pr-2015' 
+WARNING: Decoding token without verifying it was signed by its authoring UAA
+# updating autoscaler uaac client
+# Using Ops files: '/home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/add-releases.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/instance-identity-cert-from-cf.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/add-postgres-variables.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/connect_to_postgres_with_certs.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/enable-nats-tls.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/loggregator-certs-from-cf.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/add-extra-plan.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/set-release-version.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/enable-log-cache.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/log-cache-syslog-server.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/remove-metricsserver.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/remove-metricsgateway.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/enable-log-cache-via-uaa.yml /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/enable-scheduler-logging.yml'
+Creating Release with bosh version dc91c7f661d2a76905bb6990c76d8722f875fc8b-jdw-pr-2015
+app-autoscaler	
+dc91c7f661d2a76905bb6990c76d8722f875fc8b-jdw-pr-2015	
+dc91c7f66+	
+
+eventgenerator/b2d2b8153753c2db2a166a851c62b51e7cb1a3b6f9c05c48ab3461299a8c4f23  	sha256:8f2f5bf042a0b3d9e6946538084a0fd0ecfce39fa57961556529d33ca7ed46b2	openjdk-17	
+                                                                                 	                                                                       	db	
+                                                                                 	                                                                       	eventgenerator	
+                                                                                 	                                                                       	common	
+                                                                                 	                                                                       	changeloglockcleaner	
+golangapiserver/33bf25e3b9e8723a001be08892f4624f484f467d77d3726086487ee25f1135e5 	sha256:28f9cc6807efbd8f33edd3218a8ef840b734fbc49c0992fffdbe0861ae503543	golang-1-linux	
+                                                                                 	                                                                       	golangapiserver	
+                                                                                 	                                                                       	db	
+                                                                                 	                                                                       	openjdk-17	
+                                                                                 	                                                                       	common	
+                                                                                 	                                                                       	changeloglockcleaner	
+metricsforwarder/a1f9aff41f3280ba09cf01ff2b94fba006e393aae7250c1e7a24c3f5db8cfc14	sha256:8abb357807ce50a10f666c272fcaa8bd830adf8733de878510666ff59cc7f100	db	
+                                                                                 	                                                                       	metricsforwarder	
+                                                                                 	                                                                       	common	
+metricsgateway/a32ac8746733a6b38429d9396ffad3e91bcd752bebd70575760da12a7b952116  	sha256:c68ffbe7b56539c83c2a1a45e1d95e505c936cdbaadb83c0b18923a59a4d288c	openjdk-17	
+                                                                                 	                                                                       	db	
+                                                                                 	                                                                       	metricsgateway	
+                                                                                 	                                                                       	common	
+metricsserver/9dd076e50c33a9d28562ec0ce44216530cf027bba605d68a87025ec5af35dac9   	sha256:7b206a85eeaa9653145f23ce86d06b56a197fa194c9fb77d7302498fcf4ebc9a	openjdk-17	
+                                                                                 	                                                                       	db	
+                                                                                 	                                                                       	metricsserver	
+                                                                                 	                                                                       	common	
+                                                                                 	                                                                       	changeloglockcleaner	
+operator/d9d2e4b01775c9cfdeb6d08e51a8359825e7e58dd9287ef8ed7c0e92079f545b        	sha256:2a28db8de40e66c49884669d48f61574e5fcf2150ad6e7d35710b6c663b34b53	operator	
+                                                                                 	                                                                       	common	
+                                                                                 	                                                                       	db	
+                                                                                 	                                                                       	openjdk-17	
+                                                                                 	                                                                       	changeloglockcleaner	
+scalingengine/79452b9f8b4e3f973ffe2cd2c7451a6eafe8d9f305ccb72fc05caf58cb848c50   	sha256:5346cd7f63627aad66253e035fbc7f08679de2941d2fbb2fb55933df6ae32012	openjdk-17	
+                                                                                 	                                                                       	db	
+                                                                                 	                                                                       	scalingengine	
+                                                                                 	                                                                       	common	
+                                                                                 	                                                                       	changeloglockcleaner	
+scheduler/96284fc271b871ecb496fff4a2b7674bddf07e2c62acc3c853954d4259b7ec17       	sha256:13757c46cd45cd96b0848600c3034a6c30afac34a4467b5ce2cd9e532731663e	scheduler	
+                                                                                 	                                                                       	db	
+                                                                                 	                                                                       	openjdk-17	
+                                                                                 	                                                                       	common	
+                                                                                 	                                                                       	changeloglockcleaner	
+
+changeloglockcleaner/7d068b8b75ea68b3d6e84f3037e7324ccf6965011aade841173c7c9ef9f5a3a6	sha256:4142ad7de5f24282d35957d758cbf083d3d99ae498a596b54a598dcae47c1046	golang-1-linux	
+common/9d7726aa454227e3087cd4a04425acae72d883a5bb19d314930ab58e83f04d0e              	sha256:979ff40c6e44031bec55344aa4a522cac3d265ab23deaea0f7bc7541aa2b4124	-	
+db/bb650c3f8219589e96311b0f7671688761a55cd41b6ae7cfecb3bad990f48955                  	sha256:503ff50be659ae5030ada1ebdab49dd6213945b39be53d9af3f6c32aadd0109b	openjdk-17	
+eventgenerator/d2e9cf7d996646622a76c0a7b2ea6dd62175abc3f57b1169d90d7e00470fcc8e      	sha256:89df5e569cb4810641bd5936c0b5e39812583e0aae7848032676ba0fbf85bb25	golang-1-linux	
+golang-1-linux/8c04109541f4d504f5be559da433998bd459b0f45cd3654557cc3642cc4d2f60      	sha256:efdf65bca81264d9110ec764be7edea1de341781a1ffe59c219db064d71d9fc3	-	
+golangapiserver/875bfaa70da351dc990b12fe80793495f6f03537db6f5300b04da51152cf5d0c     	sha256:47acd4d155e8ad73fde3d29a12e8f38236a90f28ed08441cedc394a3d5ce5212	golang-1-linux	
+metricsforwarder/e43d327c6b406378f1dce18af862c7984532400cb2fd6f09a05807e287454a5d    	sha256:df1f5d8b8a08615934938c5adb170ae48e28ca7e3da9eb16c3b567e3e989f29f	golang-1-linux	
+metricsgateway/32719b424e2ba0455347271efb3e4feaa8239bd56ff8d9f59cb3286ec15d9c4b      	sha256:9dad586da95680eedb07cfd95348a50edea3e697f31fb06e494ed69df85f18b3	golang-1-linux	
+metricsserver/aecc4e5a2f84f55d818b4fb2d99947a308e44523b52418f58901579f3b793b4a       	sha256:354aa958ce155dd92e6b33bf0734be374d5861b5ba8f7a4041691b8133755711	golang-1-linux	
+openjdk-17/c3119e0fe852da44c771e907a1c79d80103ac1e0a127ec4c30c90aa9c11459e0          	sha256:ad449f24f5a9e6971b8c9e3bb8e9500bbd5115a6872d3b95d8e0d96a60e896ed	-	
+operator/bc3c29aa74325ee0c31625a6ff87f7c8439168202d49e621cea58d24e40e1af6            	sha256:f0f54e568b63dec8a69d4f85dd0868d10af69761248d70a728c4f26eabfcd0bb	golang-1-linux	
+scalingengine/5cdfb09d75ae26eac1be049e64f5f5645a5dbd2032c36699f98bf698e510dce6       	sha256:e7df7c95ef02f5cd083df6354355c6ed6a80888c7b425201e46f851fa01cb570	golang-1-linux	
+scheduler/3d1ceb584206f40586931eb5428322cc28e33e0665e835a31a6b2da211bbac04           	sha256:d085ab5e7957f312b516cd803dda571dc525fbff56ae36dae7472135bae1ad51	openjdk-17	
+Uploading Release
+
+Task 766844 | 12:49:34 | Extracting release: Extracting release (00:00:04)
+Task 766844 | 12:49:38 | Verifying manifest: Verifying manifest (00:00:00)
+Task 766844 | 12:49:38 | Resolving package dependencies: Resolving package dependencies (00:00:00)
+Task 766844 | 12:49:38 | Creating new packages: changeloglockcleaner/7d068b8b75ea68b3d6e84f3037e7324ccf6965011aade841173c7c9ef9f5a3a6 (00:00:00)
+Task 766844 | 12:49:38 | Creating new packages: db/bb650c3f8219589e96311b0f7671688761a55cd41b6ae7cfecb3bad990f48955 (00:00:00)
+Task 766844 | 12:49:38 | Creating new packages: eventgenerator/d2e9cf7d996646622a76c0a7b2ea6dd62175abc3f57b1169d90d7e00470fcc8e (00:00:01)
+Task 766844 | 12:49:39 | Creating new packages: golang-1-linux/8c04109541f4d504f5be559da433998bd459b0f45cd3654557cc3642cc4d2f60 (00:00:05)
+Task 766844 | 12:49:44 | Creating new packages: golangapiserver/875bfaa70da351dc990b12fe80793495f6f03537db6f5300b04da51152cf5d0c (00:00:00)
+Task 766844 | 12:49:44 | Creating new packages: metricsforwarder/e43d327c6b406378f1dce18af862c7984532400cb2fd6f09a05807e287454a5d (00:00:00)
+Task 766844 | 12:49:44 | Creating new packages: metricsgateway/32719b424e2ba0455347271efb3e4feaa8239bd56ff8d9f59cb3286ec15d9c4b (00:00:01)
+Task 766844 | 12:49:45 | Creating new packages: metricsserver/aecc4e5a2f84f55d818b4fb2d99947a308e44523b52418f58901579f3b793b4a (00:00:00)
+Task 766844 | 12:49:45 | Creating new packages: openjdk-17/c3119e0fe852da44c771e907a1c79d80103ac1e0a127ec4c30c90aa9c11459e0 (00:00:03)
+Task 766844 | 12:49:48 | Creating new packages: operator/bc3c29aa74325ee0c31625a6ff87f7c8439168202d49e621cea58d24e40e1af6 (00:00:01)
+Task 766844 | 12:49:49 | Creating new packages: scalingengine/5cdfb09d75ae26eac1be049e64f5f5645a5dbd2032c36699f98bf698e510dce6 (00:00:00)
+Task 766844 | 12:49:49 | Creating new packages: scheduler/3d1ceb584206f40586931eb5428322cc28e33e0665e835a31a6b2da211bbac04 (00:00:03)
+Task 766844 | 12:49:52 | Processing 1 existing package: Processing 1 existing package (00:00:00)
+Task 766844 | 12:49:52 | Creating new jobs: golangapiserver/33bf25e3b9e8723a001be08892f4624f484f467d77d3726086487ee25f1135e5 (00:00:00)
+Task 766844 | 12:49:52 | Creating new jobs: scheduler/96284fc271b871ecb496fff4a2b7674bddf07e2c62acc3c853954d4259b7ec17 (00:00:01)
+Task 766844 | 12:49:53 | Processing 6 existing jobs: Processing 6 existing jobs (00:00:00)
+Task 766844 | 12:49:53 | Release has been created: app-autoscaler/dc91c7f661d2a76905bb6990c76d8722f875fc8b-jdw-pr-2015 (00:00:00) - set up vars: DEPLOYMENT_NAME=jdw-pr-2015
+# silencing alert 'BOSHJobEphemeralDiskPredictWillFill' on deployment 'jdw-pr-2015' for 45 mins (2023-08-03T12:49:55+00:00 -> 2023-08-03T13:34:55+00:00)
+ - set up vars: DEPLOYMENT_NAME=jdw-pr-2015
+# silencing alert 'BOSHJobProcessUnhealthy' on deployment 'jdw-pr-2015' for 45 mins (2023-08-03T12:49:56+00:00 -> 2023-08-03T13:34:56+00:00)
+ - set up vars: DEPLOYMENT_NAME=jdw-pr-2015
+# silencing alert 'BOSHJobUnhealthy' on deployment 'jdw-pr-2015' for 45 mins (2023-08-03T12:49:56+00:00 -> 2023-08-03T13:34:56+00:00)
+ - creating Bosh deployment 'jdw-pr-2015' with version 'dc91c7f661d2a76905bb6990c76d8722f875fc8b-jdw-pr-2015' in system domain 'autoscaler.app-runtime-interfaces.ci.cloudfoundry.org'   
+# Using Ops files: ' -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/add-releases.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/instance-identity-cert-from-cf.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/add-postgres-variables.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/connect_to_postgres_with_certs.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/enable-nats-tls.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/loggregator-certs-from-cf.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/add-extra-plan.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/set-release-version.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/enable-log-cache.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/log-cache-syslog-server.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/remove-metricsserver.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/remove-metricsgateway.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/enable-log-cache-via-uaa.yml -o /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/operations/enable-scheduler-logging.yml'
+# Deploy options: ''
+
+Task 766845 | 12:50:04 | Preparing deployment: Preparing deployment (00:00:23)
+Task 766845 | 12:50:27 | Preparing deployment: Rendering templates (00:00:03)
+Task 766845 | 12:50:31 | Preparing package compilation: Finding packages to compile (00:00:00)
+Task 766845 | 12:50:31 | Compiling packages: golang-1-linux/8c04109541f4d504f5be559da433998bd459b0f45cd3654557cc3642cc4d2f60
+Task 766845 | 12:50:31 | Compiling packages: openjdk-17/c3119e0fe852da44c771e907a1c79d80103ac1e0a127ec4c30c90aa9c11459e0
+Task 766845 | 12:51:43 | Compiling packages: golang-1-linux/8c04109541f4d504f5be559da433998bd459b0f45cd3654557cc3642cc4d2f60 (00:01:12)
+Task 766845 | 12:51:43 | Compiling packages: metricsforwarder/e43d327c6b406378f1dce18af862c7984532400cb2fd6f09a05807e287454a5d
+Task 766845 | 12:51:43 | Compiling packages: eventgenerator/d2e9cf7d996646622a76c0a7b2ea6dd62175abc3f57b1169d90d7e00470fcc8e
+Task 766845 | 12:51:43 | Compiling packages: golangapiserver/875bfaa70da351dc990b12fe80793495f6f03537db6f5300b04da51152cf5d0c
+Task 766845 | 12:51:43 | Compiling packages: operator/bc3c29aa74325ee0c31625a6ff87f7c8439168202d49e621cea58d24e40e1af6
+Task 766845 | 12:51:43 | Compiling packages: changeloglockcleaner/7d068b8b75ea68b3d6e84f3037e7324ccf6965011aade841173c7c9ef9f5a3a6
+Task 766845 | 12:51:49 | Compiling packages: openjdk-17/c3119e0fe852da44c771e907a1c79d80103ac1e0a127ec4c30c90aa9c11459e0 (00:01:18)
+Task 766845 | 12:51:49 | Compiling packages: scalingengine/5cdfb09d75ae26eac1be049e64f5f5645a5dbd2032c36699f98bf698e510dce6 (00:00:41)
+Task 766845 | 12:52:30 | Compiling packages: scheduler/3d1ceb584206f40586931eb5428322cc28e33e0665e835a31a6b2da211bbac04
+Task 766845 | 12:52:31 | Compiling packages: eventgenerator/d2e9cf7d996646622a76c0a7b2ea6dd62175abc3f57b1169d90d7e00470fcc8e (00:00:48)
+Task 766845 | 12:52:31 | Compiling packages: db/bb650c3f8219589e96311b0f7671688761a55cd41b6ae7cfecb3bad990f48955 (00:00:12)
+Task 766845 | 12:52:52 | Compiling packages: scheduler/3d1ceb584206f40586931eb5428322cc28e33e0665e835a31a6b2da211bbac04 (00:00:22)
+Task 766845 | 12:53:02 | Compiling packages: changeloglockcleaner/7d068b8b75ea68b3d6e84f3037e7324ccf6965011aade841173c7c9ef9f5a3a6 (00:01:19)
+Task 766845 | 12:53:14 | Compiling packages: operator/bc3c29aa74325ee0c31625a6ff87f7c8439168202d49e621cea58d24e40e1af6 (00:01:31)
+Task 766845 | 12:53:15 | Compiling packages: golangapiserver/875bfaa70da351dc990b12fe80793495f6f03537db6f5300b04da51152cf5d0c (00:01:32)
+Task 766845 | 12:53:18 | Compiling packages: metricsforwarder/e43d327c6b406378f1dce18af862c7984532400cb2fd6f09a05807e287454a5d (00:01:35)
+Task 766845 | 12:53:43 | Creating missing vms: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0)
+Task 766845 | 12:53:43 | Creating missing vms: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0)
+Task 766845 | 12:53:43 | Creating missing vms: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0)
+Task 766845 | 12:53:43 | Creating missing vms: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0)
+Task 766845 | 12:53:43 | Creating missing vms: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0)
+Task 766845 | 12:53:43 | Creating missing vms: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0)
+Task 766845 | 12:53:43 | Creating missing vms: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0)
+Task 766845 | 12:54:30 | Creating missing vms: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (00:00:47)
+Task 766845 | 12:54:32 | Creating missing vms: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (00:00:49)
+Task 766845 | 12:54:33 | Creating missing vms: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (00:00:50)
+Task 766845 | 12:54:33 | Creating missing vms: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (00:00:50)
+Task 766845 | 12:54:33 | Creating missing vms: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (00:00:50)
+Task 766845 | 12:54:34 | Creating missing vms: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (00:00:51)
+Task 766845 | 12:54:35 | Creating missing vms: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (00:00:52)
+Task 766845 | 12:54:35 | Updating instance postgres: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:54:37 | L executing pre-stop: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:54:37 | L executing drain: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:54:37 | L stopping jobs: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:54:38 | L executing post-stop: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:54:40 | L installing packages: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:54:42 | L configuring jobs: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:54:42 | L executing pre-start: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:54:44 | L starting jobs: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary)
+Task 766845 | 12:55:00 | L executing post-start: postgres/7eb4033b-cb20-4eae-a7e4-b50f49ded6a9 (0) (canary) (00:00:26)
+Task 766845 | 12:55:01 | Updating instance scalingengine: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:09 | L executing pre-stop: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:09 | L executing drain: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:10 | L stopping jobs: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:11 | L executing post-stop: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:14 | L installing packages: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:15 | L configuring jobs: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:15 | L executing pre-start: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:16 | L starting jobs: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary)
+Task 766845 | 12:55:33 | L executing post-start: scalingengine/4bee661c-9e3b-465e-8d35-7e39f5e0ce13 (0) (canary) (00:00:33)
+Task 766845 | 12:55:34 | Updating instance apiserver: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:55:44 | L executing pre-stop: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:55:44 | L executing drain: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:55:45 | L stopping jobs: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:55:46 | L executing post-stop: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:55:48 | L installing packages: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:55:49 | L configuring jobs: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:55:49 | L executing pre-start: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:55:50 | L starting jobs: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary)
+Task 766845 | 12:56:07 | L executing post-start: apiserver/c230966b-80df-4265-8ff0-83aaac8f3f8f (0) (canary) (00:00:34)
+Task 766845 | 12:56:08 | Updating instance scheduler: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:17 | L executing pre-stop: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:17 | L executing drain: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:18 | L stopping jobs: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:19 | L executing post-stop: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:21 | L installing packages: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:23 | L configuring jobs: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:23 | L executing pre-start: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:24 | L starting jobs: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary)
+Task 766845 | 12:56:40 | L executing post-start: scheduler/f5767486-cb59-49be-ab82-0018b883918f (0) (canary) (00:00:33)
+Task 766845 | 12:56:41 | Updating instance operator: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:56:50 | L executing pre-stop: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:56:50 | L executing drain: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:56:50 | L stopping jobs: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:56:51 | L executing post-stop: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:56:53 | L installing packages: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:56:54 | L configuring jobs: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:56:54 | L executing pre-start: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:56:55 | L starting jobs: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary)
+Task 766845 | 12:57:12 | L executing post-start: operator/ffcf3746-a900-49f4-9f1e-73f00265597c (0) (canary) (00:00:32)
+Task 766845 | 12:57:13 | Updating instance eventgenerator: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:21 | L executing pre-stop: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:21 | L executing drain: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:22 | L stopping jobs: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:23 | L executing post-stop: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:25 | L installing packages: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:27 | L configuring jobs: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:27 | L executing pre-start: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:28 | L starting jobs: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary)
+Task 766845 | 12:57:45 | L executing post-start: eventgenerator/4d5a6b2c-cd01-4745-a60d-c7feb77fb6a5 (0) (canary) (00:00:33)
+Task 766845 | 12:57:47 | Updating instance metricsforwarder: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:57:49 | L executing pre-stop: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:57:49 | L executing drain: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:57:50 | L stopping jobs: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:57:51 | L executing post-stop: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:57:53 | L installing packages: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:57:54 | L configuring jobs: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:57:54 | L executing pre-start: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:57:55 | L starting jobs: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary)
+Task 766845 | 12:58:42 | L executing post-start: metricsforwarder/92c7a64d-29d6-4a87-bf47-aecfeed428a2 (0) (canary) (00:00:56) - registering broker with cf
+ - set up vars: DEPLOYMENT_NAME=jdw-pr-2015
+~/SAPDevelop/Produktiv/app-autoscaler-env-bbl-state/bbl-state ~/SAPDevelop/Produktiv/app-autoscaler-release
+~/SAPDevelop/Produktiv/app-autoscaler-release
+Setting API endpoint to https://api.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org...
+OK
+
+API endpoint:   https://api.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+API version:    3.139.0
+
+Not logged in. Use 'cf login' or 'cf login --sso' to log in.
+API endpoint: https://api.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
+
+Authenticating...
+OK
+
+Use 'cf target' to view or set your target org and space.
+Error failed execution of "existing_service_broker="$(cf service-brokers | grep "${service_broker_name}.${system_domain}" |  cut -d' ' -f1)"" at line 17
+17 main /home/i539286/SAPDevelop/Produktiv/app-autoscaler-release/ci/autoscaler/scripts/register-broker.sh
+Creating service broker jdw-pr-2015 at 'https://jdw-pr-2015servicebroker.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org'
+Creating service broker jdw-pr-2015 as admin...
+OK
+
+Logging out admin...
+OK
+
