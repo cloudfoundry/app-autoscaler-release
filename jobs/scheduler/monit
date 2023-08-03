@@ -1,7 +1,7 @@
 check host scheduler with address localhost
   if failed url "http://<%=p('autoscaler.scheduler.health.username') %>:<%=p('autoscaler.scheduler.health.password') %>@localhost:<%=p('autoscaler.scheduler.health.port') %>"
      timeout 30 seconds
-     then alert
+     then restart scheduler
 
   start program "/var/vcap/jobs/bpm/bin/bpm start scheduler"
   stop program "/var/vcap/jobs/bpm/bin/bpm stop scheduler"
