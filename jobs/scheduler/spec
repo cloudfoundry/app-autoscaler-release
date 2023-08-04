@@ -9,6 +9,8 @@ templates:
 
   liquibase.properties: bin/liquibase.properties
 
+  monit.erb: /var/vcap/jobs/scheduler/monit
+
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
