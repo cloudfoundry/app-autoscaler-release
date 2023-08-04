@@ -1,12 +1,13 @@
 <%
   require 'erb'
 
-  health_url = "http://#{p('autoscaler.scheduler.health.username')}:#{p('autoscaler.scheduler.health.password')}@localhost:#{p('autoscaler.scheduler.health.port')}"
-  health_url_encoded = url_encode(health_url)
-%>
+  user = ERB::Util.url_encode(p('autoscaler.scheduler.health.username'))
+  password = ERB::Util.url_encode(p('autoscaler.scheduler.health.password'))
+  port = p('autoscaler.scheduler.health.port')
 
-check host scheduler with address localhost
-  if failed url <%=health_url_encoded%>
+  health_url = "http://#{user}:#{password}@localhost:#{port}"
+%>check host scheduler with address localhost
+  if failed url <%=health_url%>
      timeout 30 seconds
      then restart
 

@@ -100,4 +100,26 @@ describe "scheduler" do
       expect(rendered_template["spring"]["datasource"]["password"]).to eq("default")
     end
   end
+
+  context "Scheduler monit" do
+    def p(v)
+      case v
+      when 'autoscaler.scheduler.health.username' 
+        "user"
+      when 'autoscaler.scheduler.health.password' 
+        "my password"
+      when 'autoscaler.scheduler.health.port' 
+        1234
+      else
+        "Error: param not supported (#{v})"
+      end
+    end
+
+    it "renders the monit file" do
+      template = ERB.new File.read("jobs/scheduler/monit"), nil, "%"
+      expected = File.read('spec/fixtures/monit')
+      expect(template.result(binding)).to eq(expected)
+    end
+
+  end
 end

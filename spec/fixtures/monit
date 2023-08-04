@@ -1,0 +1,8 @@
+check host scheduler with address localhost
+  if failed url http://user:my%20password@localhost:1234
+     timeout 30 seconds
+     then restart
+
+  start program "/var/vcap/jobs/bpm/bin/bpm start scheduler"
+  stop program "/var/vcap/jobs/bpm/bin/bpm stop scheduler"
+  group vcap
