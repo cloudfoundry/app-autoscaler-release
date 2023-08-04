@@ -1,5 +1,12 @@
+<%
+  require "erb"
+  include ERB::Util
+
+  heatlh_url = "http://#{p('autoscaler.scheduler.health.username')}:#{p('autoscaler.scheduler.health.password')}@localhost:#{p('autoscaler.scheduler.health.port')}"
+%>
+
 check host scheduler with address localhost
-  if failed url http://<%=p('autoscaler.scheduler.health.username') %>:<%=p('autoscaler.scheduler.health.password') %>@localhost:<%=p('autoscaler.scheduler.health.port') %>
+  if failed url <%=url_encode(heatlh_url)%>
      timeout 30 seconds
      then alert
 
