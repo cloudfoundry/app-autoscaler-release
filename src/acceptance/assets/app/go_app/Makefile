@@ -51,7 +51,10 @@ start: build
 deploy: build
 	./deploy.sh
 
-generate: go.mod ../../../../../api/custom-metrics-api.yaml ../../../../../api/scaling-history-api.yaml ../../../../../api/policy-api.yaml ../../../../../api/application-metric-api.yaml
+openapi-spec-path := ../../../../../api
+openapi-specs := $(wildcard ${openapi-spec-path}/*.yaml)
+
+generate: go.mod ${openapi-specs}
 	go generate ./...
 
 .PHONY: clean

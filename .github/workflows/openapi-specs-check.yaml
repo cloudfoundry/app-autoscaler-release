@@ -1,0 +1,34 @@
+name: "Validate OpenAPI-Specifications"
+on:
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get OpenAPI files
+      id: getfiles
+      uses: actions/checkout@v3
+    - name: Determine schema-files
+      id: schema-files
+      shell: bash
+      run: |
+        #! /usr/bin/env bash
+
+        set -eu -o pipefail
+
+        # Using step output (space separated file list)
+        FILES="$(find api -type f -iname '*.yaml')"
+        echo 'I am living!'
+        {
+          echo 'file_list<<EOF'
+          echo "${FILES}"
+          echo 'EOF'
+        } >> ${GITHUB_OUTPUT}
+        echo 'I am done!'; cat "${GITHUB_OUTPUT}"
+        # echo "file_list=${FILES}" >> ${GITHUB_OUTPUT} # echo "::set-output name=file_list::$FILES"
+    - name: swagger-validator
+      uses: mbowman100/swagger-validator-action@master
+      # if: env.FILE_COUNT != '0' # Comment out if you want it to fail if no files found
+      with:
+        # files: ${{ env.FILE_LIST }}
+        files: ${{ steps.schema-files.outputs.file_list }} # For if you're using output
