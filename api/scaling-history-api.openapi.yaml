@@ -3,9 +3,6 @@ info:
   title: Scaling History API
   description: List scaling history of an application
   version: 1.0.0
-security: # Do we need that?
-# - mtls: []
-- basicAuthentication: []
 tags:
 - name: Scaling History API V1
   description: List the scaling history of an Application
@@ -64,12 +61,6 @@ paths:
         minimum: 0 # Or Should it be "1"?
         default: 50
       example: results-per-page=10
-    # - name: Authorization
-    #   in: header
-    #   schema:
-    #     type: string
-    #   example: |
-    #     bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5\_Iu\_o
     get:
       summary: Retrieves the scaling history of an application.
       description: |
@@ -86,7 +77,7 @@ paths:
         default:
            $ref: "./shared_definitions.yaml#/responses/Error"
       security:
-      - basicAuthentication: []
+      - bearerAuth: []
       x-codegen-request-body-name: body
 
 components:
@@ -212,6 +203,7 @@ components:
       type: object
       properties: {} # No extra fields needed in this variant.
   securitySchemes:
-    basicAuthentication:
+    bearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
+      bearerFormat: JWT

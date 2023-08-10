@@ -7,9 +7,6 @@ info:
 
     This API is used to return the aggregated metric result of an application.
   version: 1.0.0
-security: # Do we need that?
-# - mtls: []
-- basicAuthentication: []
 tags:
 - name: Application Metric API V1
   description: List aggregated metrics of an application.
@@ -74,12 +71,6 @@ paths:
         minimum: 0 # Or Should it be "1"?
         default: 50
       example: results-per-page=10
-    # - name: Authorization
-    #   in: header
-    #   schema:
-    #     type: string
-    #   example: |
-    #     bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5\_Iu\_o
     get:
       summary: Retrieves the instance metrics of an application.
       description: |
@@ -96,7 +87,7 @@ paths:
         default:
            $ref: "./shared_definitions.yaml#/responses/Error"
       security:
-      - basicAuthentication: []
+      - bearerAuth: []
       x-codegen-request-body-name: body
 components:
   schemas:
@@ -162,6 +153,7 @@ components:
           type: string
           example: megabytes
   securitySchemes:
-    basicAuthentication:
+    bearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
+      bearerFormat: JWT

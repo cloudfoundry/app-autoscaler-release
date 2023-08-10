@@ -4,9 +4,6 @@ info:
   description: |
     app-autoscaler lets you automatically increase or decrease the number of your application instances based on the policies you have defined. Your applications can call the app-autoscaler custom metrics API to submit custom metrics defined and used in a dynamic scaling policy to enable automatic scaling based on application-specific metrics.
   version: 1.0.0
-security:
-# - mtls: []
-- basicAuthentication: []
 tags:
 - name: Custom Metrics API V1
   description: Work with application-specific custom metrics to scale your application.
@@ -47,7 +44,7 @@ paths:
         default:
           $ref: "./shared_definitions.yaml#/responses/Error"
       security:
-      - mtls: []
+      - basicAuthentication: []
       x-codegen-request-body-name: body
 components:
   schemas:
@@ -86,9 +83,6 @@ components:
           description: An optional unit for the metric, for display purposes only.
           example: jobs
   securitySchemes:
-    # mtls:
-    #   type: mutualTLS
-    #   description: Use the Instance Identity Credentials provided by the Cloud Foundry runtime
     basicAuthentication:
       type: http
       scheme: basic
