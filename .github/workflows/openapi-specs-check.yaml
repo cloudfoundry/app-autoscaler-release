@@ -26,7 +26,7 @@ jobs:
           echo 'file_list<<EOF'
           echo "${FILES}"
           echo 'EOF'
-        } >> ${GITHUB_OUTPUT}
+        } >> "${GITHUB_OUTPUT}"
     - name: swagger-validator
       uses: mbowman100/swagger-validator-action@master
       # if: env.FILE_COUNT != '0' # Comment out if you want it to fail if no files found
