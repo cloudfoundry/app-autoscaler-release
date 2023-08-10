@@ -4,7 +4,7 @@ info:
   description: |
     List aggregated metrics of an application. AutoScaler collects the instances' metrics of an
     application, and aggregate the raw data into an accumulated value for evaluation.
-    
+
     This API is used to return the aggregated metric result of an application.
   version: 1.0.0
 security: # Do we need that?
