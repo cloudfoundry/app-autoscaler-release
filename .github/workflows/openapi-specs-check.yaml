@@ -17,18 +17,18 @@ jobs:
         set -eu -o pipefail
 
         # Using step output (space separated file list)
-        FILES="$(find api -type f -iname '*.yaml')"
-        echo 'I am living!'
+        FILES="$(find api -type f -iname '*.openapi.yaml')"
+
+        # Github documentation on multiline-strings does not work
+        # (<https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings>).
+        # Here, we successfully use <https://stackoverflow.com/a/74232400> instead.
         {
           echo 'file_list<<EOF'
           echo "${FILES}"
           echo 'EOF'
         } >> ${GITHUB_OUTPUT}
-        echo 'I am done!'; cat "${GITHUB_OUTPUT}"
-        # echo "file_list=${FILES}" >> ${GITHUB_OUTPUT} # echo "::set-output name=file_list::$FILES"
     - name: swagger-validator
       uses: mbowman100/swagger-validator-action@master
       # if: env.FILE_COUNT != '0' # Comment out if you want it to fail if no files found
       with:
-        # files: ${{ env.FILE_LIST }}
-        files: ${{ steps.schema-files.outputs.file_list }} # For if you're using output
+        files: ${{ steps.schema-files.outputs.file_list }}
