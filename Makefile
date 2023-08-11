@@ -25,6 +25,7 @@ DEST?=build
 export BUILDIN_MODE?=false
 export DEBUG?=false
 export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+export GOWORK=off
 
 $(shell mkdir -p target)
 $(shell mkdir -p build)
