@@ -34,3 +34,12 @@ privkey.pem
 app-autoscaler-release
 docs/*.bkp
 build/*
+
+# Generated, intermediate openapi-specs:
+src/acceptance/assets/app/go_app/internal/openapi-specs.bundled
+
+# Generated api-clients:
+src/acceptance/assets/app/go_app/internal/applicationmetric
+src/acceptance/assets/app/go_app/internal/custommetrics
+src/acceptance/assets/app/go_app/internal/policy
+src/acceptance/assets/app/go_app/internal/scalinghistory

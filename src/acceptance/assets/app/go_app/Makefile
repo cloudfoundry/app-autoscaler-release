@@ -1,5 +1,8 @@
+.ONESHELL:
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
+
+
 MAKEFLAGS=
 GO_VERSION := $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
@@ -13,7 +16,7 @@ GINKGO_OPTS=-r --race --require-suite --randomize-all --cover ${OPTS}
 export CONFIG?=../../../../acceptance_config.json
 
 .PHONY: build
-build:
+build: generate
 	echo "# building  test-app"
 	rm -rf build/* || true
 	mkdir -p build/
@@ -52,9 +55,29 @@ deploy: build
 	./deploy.sh
 
 openapi-spec-path := ../../../../../api
-openapi-specs := $(wildcard ${openapi-spec-path}/*.yaml)
+openapi-specs := $(wildcard ${openapi-spec-path}/*.openapi.yaml)
+openapi-specs-bundled-path := ./internal/openapi-specs.bundled
 
-generate: go.mod ${openapi-specs}
+bundled-openapi-specs: ${bundled-openapi-specs-list}
+bundled-openapi-specs-list := \
+        ${openapi-specs-bundled-path}/application-metric-api.openapi.bundled.yaml \
+        ${openapi-specs-bundled-path}/custom-metrics-api.openapi.bundled.yaml \
+        ${openapi-specs-bundled-path}/policy-api.openapi.bundled.yaml \
+        ${openapi-specs-bundled-path}/scaling-history-api.openapi.bundled.yaml
+
+# # Treat these files as intermediate ones and don't rebuild everything
+# # just because they are missing.
+.SECONDARY: ${bundled-openapi-specs-list}
+
+${bundled-openapi-specs-list}: ${openapi-specs}
+	swagger-cli bundle \
+		'${openapi-spec-path}/$(patsubst %.openapi.bundled.yaml,%.openapi.yaml,$(notdir $@))' \
+		--outfile '$@'
+
+openapi.go-client.target-directory := TODO
+openapi.go-client.generated = $(wildcard ${openapi.java-client.target-directory}/**/*.java)
+
+generate: go.mod ${bundled-openapi-specs-list}
 	go generate ./...
 
 .PHONY: clean
