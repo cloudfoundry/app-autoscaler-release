@@ -39,7 +39,7 @@ build/*
 src/acceptance/assets/app/go_app/internal/openapi-specs.bundled
 
 # Generated api-clients:
-src/acceptance/assets/app/go_app/internal/applicationmetric
-src/acceptance/assets/app/go_app/internal/custommetrics
-src/acceptance/assets/app/go_app/internal/policy
-src/acceptance/assets/app/go_app/internal/scalinghistory
+src/acceptance/assets/app/go_app/internal/applicationmetric/oas*gen.go
+src/acceptance/assets/app/go_app/internal/custommetrics/oas*gen.go
+src/acceptance/assets/app/go_app/internal/policy/oas*gen.go
+src/acceptance/assets/app/go_app/internal/scalinghistory/oas*gen.go
