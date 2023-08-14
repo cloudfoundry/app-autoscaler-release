@@ -25,11 +25,13 @@
               actionlint
               bosh-cli
               cloudfoundry-cli
+              delve
               fly
               ginkgo
               gh
               gnumake
               go
+              go-tools
               golangci-lint
               gopls # See: <https://github.com/golang/vscode-go/blob/master/docs/tools.md>
               google-cloud-sdk
