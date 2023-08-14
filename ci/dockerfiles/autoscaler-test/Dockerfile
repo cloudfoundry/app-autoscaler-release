@@ -36,7 +36,7 @@ RUN \
 
 # get maven
 # renovate: datasource=maven depName=org.apache.maven:maven-core
-ENV MAVEN_VERSION 3.9.2
+ENV MAVEN_VERSION 3.9.4
 RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
 	tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \
 	ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
@@ -57,7 +57,7 @@ RUN \
 
 # Install bosh_cli
 # renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
-ENV BOSH_VERSION 7.2.3
+ENV BOSH_VERSION 7.3.1
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh

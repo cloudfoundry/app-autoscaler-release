@@ -920,6 +920,8 @@ variables:
   options:
     common_name: metricScraperCA
     is_ca: true
+    key_length: 4096
+    duration: 180
 - name: loggregator_agent_metrics_tls
   type: certificate
   update_mode: converge
@@ -930,3 +932,6 @@ variables:
       - loggregator_agent_server
     extended_key_usage:
       - server_auth
+    key_length: 4096
+    duration: 180
+

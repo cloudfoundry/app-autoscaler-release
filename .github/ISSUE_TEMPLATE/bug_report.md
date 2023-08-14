@@ -13,7 +13,7 @@ Describe your issue here.
 ### Your environment
 * Version of app-autoscaler-release
 * Specify the database (postgres/mysql) along-with it's version
-* How did you deploy the release? 
+* How did you deploy the release?
   * Is your manifest based on [app-autoscaler-deployment.yml](https://github.com/cloudfoundry/app-autoscaler-release/blob/main/templates/app-autoscaler-deployment.yml)?
   * Which, if any, [ops-files](https://github.com/cloudfoundry/app-autoscaler-release/tree/main/example/operation) did you apply?
 * How did you run the acceptance-tests?

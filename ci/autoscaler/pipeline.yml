@@ -95,12 +95,6 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-- name: pull-request
-  type: registry-image
-  source:
-    repository: ghcr.io/bonzofenix/github-pr-resource
-    tag: master
-
 resources:
 - name: every-night
   type: time
@@ -169,8 +163,8 @@ resources:
   icon: github
   check_every: 5m
   source:
-    uri: https://github.com/bosh-packages/golang-release.git
-    branch: master
+    uri: https://github.com/cloudfoundry/bosh-package-golang-release.git
+    branch: main
     version_depth: 20
     tag_filter: v0.*
 
@@ -179,8 +173,8 @@ resources:
   icon: github
   check_every: 5m
   source:
-    uri:  https://github.com/bosh-packages/java-release.git
-    branch: master
+    uri: https://github.com/cloudfoundry/bosh-package-java-release.git
+    branch: main
     version_depth: 20
 
 jobs:

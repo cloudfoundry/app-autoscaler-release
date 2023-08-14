@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
+
 # NOTE: you can run this locally for testing !!!
 # you need a github token (GITHUB_TOKEN) and beware that it adds a commit you need to drop each time also you need to remove dev_releases from root.
 # GITHUB_TOKEN=ghp_[your token]   DEST=${PWD}/../../../build VERSION="8.0.0" BUILD_OPTS="--force" PREV_VERSION=6.0.0  ./release-autoscaler.sh

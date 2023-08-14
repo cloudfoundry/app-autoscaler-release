@@ -71,18 +71,18 @@ spring:
   main:
     allow-bean-definition-overriding: true
   ############################################################
-  #    DataSources
+  #    DataSources - #qoutes required to ensure data type safety
   ############################################################
   datasource:
     driverClassName: <%=datasource_driver_class_name%>
-    password: <%=schedulerdb_role['password'] %>
+    password: "<%=schedulerdb_role['password'] %>"
     url: <%=schedulerdb_url %>
-    username: <%=schedulerdb_role['name'] %>
+    username: "<%=schedulerdb_role['name'] %>"
   policy-db-datasource:
     driverClassName: <%=datasource_policy_db_class_name%>
-    password: <%=policydb_role['password'] %>
+    password: "<%=policydb_role['password'] %>"
     url: <%=policydb_url %>
-    username: <%=policydb_role['name'] %>
+    username: "<%=policydb_role['name'] %>"
   ############################################################
   #    Quartz Properties
   ############################################################
@@ -131,9 +131,9 @@ scalingenginejob:
 ############################################################
 scheduler:
   healthserver:
-    password: <%=p('autoscaler.scheduler.health.password') %>
+    password: "<%=p('autoscaler.scheduler.health.password') %>"
     port: <%=p('autoscaler.scheduler.health.port') %>
-    username: <%=p('autoscaler.scheduler.health.username') %>
+    username: "<%=p('autoscaler.scheduler.health.username') %>"
     basicAuthEnabled: <%=p('autoscaler.scheduler.health.basicAuthEnabled') %>
     unprotected_endpoints: <%=p('autoscaler.scheduler.health.unprotected_endpoints') %>
 ############################################################
