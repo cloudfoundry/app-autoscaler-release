@@ -69,13 +69,10 @@ bundled-openapi-specs-list := \
 # # just because they are missing.
 .SECONDARY: ${bundled-openapi-specs-list}
 
-${bundled-openapi-specs-list}: ${openapi-specs}
+${bundled-openapi-specs-list}: $(patsubst %.openapi.bundled.yaml,${openapi-spec-path}/%.openapi.yaml,$(notdir $@))
 	swagger-cli bundle \
-		'${openapi-spec-path}/$(patsubst %.openapi.bundled.yaml,%.openapi.yaml,$(notdir $@))' \
+		$(patsubst %.openapi.bundled.yaml,${openapi-spec-path}/%.openapi.yaml,$(notdir $@)) \
 		--outfile '$@'
-
-openapi.go-client.target-directory := TODO
-openapi.go-client.generated = $(wildcard ${openapi.java-client.target-directory}/**/*.java)
 
 generate: go.mod ${bundled-openapi-specs-list}
 	go generate ./...
