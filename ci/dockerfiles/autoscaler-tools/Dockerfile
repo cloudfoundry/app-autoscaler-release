@@ -141,6 +141,9 @@ RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && npm --version \
     && node -v
 
+# Install swagger-cli as described on <https://apitools.dev/swagger-cli>
+RUN npm install -g @apidevtools/swagger-cli
+
 ENV CF_PLUGIN_HOME "/cf_plugins"
 RUN mkdir -p "${CF_PLUGIN_HOME}" \
     && cf install-plugin -f -r CF-Community app-autoscaler-plugin \
