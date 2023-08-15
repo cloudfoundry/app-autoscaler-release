@@ -15,6 +15,40 @@
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
     in {
+      packages = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor.${system};
+        in {
+          swagger-cli = pkgs.buildNpmPackage rec {
+            pname = "swagger-cli";
+            version = "4.0.4";
+
+            src = pkgs.fetchFromGitHub {
+              owner = "empire-medical";
+              repo = pname;
+              rev = "v${version}";
+              hash = null; # "sha256-BR+ZGkBBfd0dSQqAvujsbgsEPFYw/ThrylxUbOksYxM=";
+            };
+
+            npmDepsHash = null; # "sha256-tuEfyePwlOy2/mOPdXbqJskO6IowvAP4DWg8xSZwbJw=";
+
+            # The prepack script runs the build script, which we'd rather do in the build phase.
+            npmPackFlags = [ "--ignore-scripts" ];
+
+            # NODE_OPTIONS = "--openssl-legacy-provider";
+
+            meta = {
+              description = ''
+                Validate Swagger/OpenAPI files in JSON or YAML format
+                Supports multi-file API definitions via $ref pointers
+                Bundle multiple Swagger/OpenAPI files into one combined file
+              '';
+              homepage = "<https://github.com/empire-medical/swagger-cli>";
+              # license = licenses.mit;
+            };
+          };
+      });
+
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
