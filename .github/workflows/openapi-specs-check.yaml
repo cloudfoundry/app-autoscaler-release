@@ -4,31 +4,15 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
-    - name: Get OpenAPI files
-      id: getfiles
+    - name: Get Repository content
       uses: actions/checkout@v3
-    - name: Determine schema-files
-      id: schema-files
+    - name: Validating OpenAPI Specifications
       shell: bash
       run: |
         #! /usr/bin/env bash
 
         set -eu -o pipefail
-
-        # Using step output (space separated file list)
-        FILES="$(find api -type f -iname '*.openapi.yaml')"
-
-        # Github documentation on multiline-strings does not work
-        # (<https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings>).
-        # Here, we successfully use <https://stackoverflow.com/a/74232400> instead.
-        {
-          echo 'file_list<<EOF'
-          echo "${FILES}"
-          echo 'EOF'
-        } >> "${GITHUB_OUTPUT}"
-    - name: swagger-validator
-      uses: mbowman100/swagger-validator-action@master
-      # if: env.FILE_COUNT != '0' # Comment out if you want it to fail if no files found
-      with:
-        files: ${{ steps.schema-files.outputs.file_list }}
+        make validate-openapi-specs
