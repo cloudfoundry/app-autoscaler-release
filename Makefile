@@ -394,3 +394,7 @@ docker-image: docker-login
 build-tools:
 	make -C src/autoscaler buildtools
 
+validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
+	for file in $^ ; do \
+		swagger-cli validate "$${file}" ; \
+	done
