@@ -1,5 +1,5 @@
-FROM ubuntu:jammy
-MAINTAINER autoscaler-team
+FROM ubuntu:jammy 
+LABEL org.opencontainers.image.authors="autoscaler-team"
 
 RUN apt-get update && \
     apt-get -qqy install --fix-missing gnupg apt-transport-https wget && \
