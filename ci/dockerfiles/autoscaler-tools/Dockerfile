@@ -142,7 +142,7 @@ RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && node -v
 
 # Install swagger-cli as described on <https://apitools.dev/swagger-cli>
-RUN npm install --global --ignore-scripts @apidevtools/swagger-cli
+RUN npm install --global --ignore-scripts 'https://github.com/empire-medical/swagger-cli'
 
 ENV CF_PLUGIN_HOME "/cf_plugins"
 RUN mkdir -p "${CF_PLUGIN_HOME}" \
