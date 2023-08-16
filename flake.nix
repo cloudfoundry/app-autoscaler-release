@@ -21,21 +21,34 @@
         in {
           swagger-cli = pkgs.buildNpmPackage rec {
             pname = "swagger-cli";
-            version = "4.0.4";
+            version = "4.0.5";
 
             src = pkgs.fetchFromGitHub {
               owner = "empire-medical";
               repo = pname;
-              rev = "v${version}";
-              hash = null; # "sha256-BR+ZGkBBfd0dSQqAvujsbgsEPFYw/ThrylxUbOksYxM=";
+              rev = "d2a9e4d9b6675a6003ba74669e69df23db979e07";
+              hash = "sha256-fvKWQibOume+r3ScLTxJMapdD/FUtKh9V6gBHH5dL7o="; # This is already correct!
             };
 
-            npmDepsHash = null; # "sha256-tuEfyePwlOy2/mOPdXbqJskO6IowvAP4DWg8xSZwbJw=";
+            npmDepsHash = "sha256-go9eYGCZmbwRArHVTVa6mxL+kjvBcrLxKw2iVv0a5hY=";
 
-            # The prepack script runs the build script, which we'd rather do in the build phase.
-            npmPackFlags = [ "--ignore-scripts" ];
+            # # The prepack script runs the build script, which we'd rather do in the build phase.
+            npmFlags = [ "--legacy-peer-deps" ];
+            makeCacheWritable = true;
 
-            # NODE_OPTIONS = "--openssl-legacy-provider";
+            # # NODE_OPTIONS = "--openssl-legacy-provider";
+            # src = pkgs.fetchFromGitHub {
+            #   owner = "APIDevTools";
+            #   repo = "swagger-cli";
+            #   rev = "v${version}";
+            #   sha256 = "sha256-WgzfSd57vRwa1HrSgNxD0F5ckczBkOaVmrEZ9tMAcRA=";
+            # };
+
+            # npmDepsHash = "sha256-go9eYGCZmbwRArHVTVa6mxL+kjvBcrLxKw2iVv0a5hY=";
+
+            buildPhase = ''
+              npm run bump
+            '';
 
             meta = {
               description = ''
@@ -88,7 +101,7 @@
               #
               # jdwpkgs.rubyPackages.cf-uaac
               shellcheck
-              swagger-cli
+              # swagger-cli
               temurin-bin
               yq-go
             ];
