@@ -69,7 +69,7 @@ func (_ *CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig 
 		}
 	}
 
-	appId := appConfig.AppID
+	appId := api.GUID(appConfig.AppID)
 	autoscalerCredentials, err := getAutoscalerCredentials(appConfig)
 	if err != nil {
 		return err

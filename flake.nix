@@ -2,7 +2,7 @@
   description = "Dependencies of app-autoscaler-release";
 
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-23.05;
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
   };
 
   outputs = { self, nixpkgs }:
@@ -15,58 +15,6 @@
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
     in {
-      packages = forAllSystems (system:
-        let
-          pkgs = nixpkgsFor.${system};
-        in {
-          swagger-cli = pkgs.buildNpmPackage rec {
-            pname = "swagger-cli";
-            version = "4.0.5";
-
-            src = pkgs.fetchFromGitHub {
-              owner = "empire-medical";
-              repo = pname;
-              rev = "d2a9e4d9b6675a6003ba74669e69df23db979e07";
-              hash = "sha256-fvKWQibOume+r3ScLTxJMapdD/FUtKh9V6gBHH5dL7o="; # This is already correct!
-            };
-            # npmDeps = pkgs.fetchNpmDeps {
-            #   inherit forceGitDeps src srcs sourceRoot prePatch patches postPatch;
-            #   name = "${name}-npm-deps";
-            #   hash = npmDepsHash;
-            # };
-
-            npmDepsHash = "sha256-go9eYGCZmbwRArHVTVa6mxL+kjvBcrLxKw2iVv0a5hY=";
-
-            # # The prepack script runs the build script, which we'd rather do in the build phase.
-            npmFlags = [ "--legacy-peer-deps" ];
-            makeCacheWritable = true;
-
-            # # NODE_OPTIONS = "--openssl-legacy-provider";
-            # src = pkgs.fetchFromGitHub {
-            #   owner = "APIDevTools";
-            #   repo = "swagger-cli";
-            #   rev = "v${version}";
-            #   sha256 = "sha256-WgzfSd57vRwa1HrSgNxD0F5ckczBkOaVmrEZ9tMAcRA=";
-            # };
-
-            # npmDepsHash = "sha256-go9eYGCZmbwRArHVTVa6mxL+kjvBcrLxKw2iVv0a5hY=";
-
-            buildPhase = ''
-              npm run bump
-            '';
-
-            meta = {
-              description = ''
-                Validate Swagger/OpenAPI files in JSON or YAML format
-                Supports multi-file API definitions via $ref pointers
-                Bundle multiple Swagger/OpenAPI files into one combined file
-              '';
-              homepage = "<https://github.com/empire-medical/swagger-cli>";
-              # license = licenses.mit;
-            };
-          };
-      });
-
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
@@ -106,7 +54,7 @@
               #
               # jdwpkgs.rubyPackages.cf-uaac
               shellcheck
-              # swagger-cli
+              swagger-cli
               temurin-bin
               yq-go
             ];

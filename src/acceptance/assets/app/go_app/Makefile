@@ -56,7 +56,7 @@ deploy: build
 	./deploy.sh
 
 openapi-spec-path := ../../../../../api
-openapi-specs := $(wildcard ${openapi-spec-path}/*.openapi.yaml)
+openapi-specs-list := $(wildcard ${openapi-spec-path}/*.openapi.yaml)
 openapi-specs-bundled-path := ./internal/openapi-specs.bundled
 
 bundled-openapi-specs: ${bundled-openapi-specs-list}
@@ -75,7 +75,7 @@ ${bundled-openapi-specs-list}: $(patsubst %.openapi.bundled.yaml,${openapi-spec-
 		$(patsubst %.openapi.bundled.yaml,${openapi-spec-path}/%.openapi.yaml,$(notdir $@)) \
 		--outfile '$@'
 
-generate: go.mod ${bundled-openapi-specs-list}
+generate: go.mod ${openapi-specs-list}
 	go generate ./...
 
 .PHONY: clean
