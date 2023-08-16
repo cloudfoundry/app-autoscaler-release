@@ -2,7 +2,7 @@
   description = "Dependencies of app-autoscaler-release";
 
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-23.05;
   };
 
   outputs = { self, nixpkgs }:
@@ -29,6 +29,11 @@
               rev = "d2a9e4d9b6675a6003ba74669e69df23db979e07";
               hash = "sha256-fvKWQibOume+r3ScLTxJMapdD/FUtKh9V6gBHH5dL7o="; # This is already correct!
             };
+            # npmDeps = pkgs.fetchNpmDeps {
+            #   inherit forceGitDeps src srcs sourceRoot prePatch patches postPatch;
+            #   name = "${name}-npm-deps";
+            #   hash = npmDepsHash;
+            # };
 
             npmDepsHash = "sha256-go9eYGCZmbwRArHVTVa6mxL+kjvBcrLxKw2iVv0a5hY=";
 
