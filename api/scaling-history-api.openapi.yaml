@@ -50,7 +50,7 @@ paths:
       description: The page number to query
       schema:
         type: integer
-        minimum: 1 # Or Should it be "1"?
+        minimum: 1
         default: 1
         example: page=1
     - name: results-per-page
@@ -58,7 +58,7 @@ paths:
       description: Number of entries shown per page.
       schema:
         type: integer
-        minimum: 0 # Or Should it be "1"?
+        minimum: 0
         default: 50
       example: results-per-page=10
     get:
@@ -112,12 +112,6 @@ components:
           items:
             $ref: '#/components/schemas/HistoryEntry'
     HistoryEntry:
-      # Here we create manually a tagged union. For discrimination, we use the property "status".
-      #
-      # See as well:
-      #  + <https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#discriminator-object>
-      #  + <https://spec.openapis.org/oas/v3.1.0#schemaComposition>
-      #  + <https://jsontypedef.com/docs/jtd-in-5-minutes/#discriminator-schemas>
       allOf:
         - $ref: "#/components/schemas/HistoryEntryCommon"
         - oneOf:
@@ -193,7 +187,7 @@ components:
       description: Description of an ignored scaling event in history.
       type: object
       properties:
-        message: # Why not `scaling_ignoration_reason`?
+        ignore_reason:
           type: string
           description: |
             In case the scaling was ignored, the reason is provided in this field.
@@ -201,7 +195,7 @@ components:
     HistorySuccessEntry:
       description: Description of a successful scaling event event in history.
       type: object
-      properties: {} # No extra fields needed in this variant.
+      properties: {}
   securitySchemes:
     bearerAuth:
       type: http
