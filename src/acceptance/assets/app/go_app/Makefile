@@ -57,23 +57,6 @@ deploy: build
 
 openapi-spec-path := ../../../../../api
 openapi-specs-list := $(wildcard ${openapi-spec-path}/*.openapi.yaml)
-openapi-specs-bundled-path := ./internal/openapi-specs.bundled
-
-bundled-openapi-specs: ${bundled-openapi-specs-list}
-bundled-openapi-specs-list := \
-        ${openapi-specs-bundled-path}/application-metric-api.openapi.bundled.yaml \
-        ${openapi-specs-bundled-path}/custom-metrics-api.openapi.bundled.yaml \
-        ${openapi-specs-bundled-path}/policy-api.openapi.bundled.yaml \
-        ${openapi-specs-bundled-path}/scaling-history-api.openapi.bundled.yaml
-
-# # Treat these files as intermediate ones and don't rebuild everything
-# # just because they are missing.
-.SECONDARY: ${bundled-openapi-specs-list}
-
-${bundled-openapi-specs-list}: $(patsubst %.openapi.bundled.yaml,${openapi-spec-path}/%.openapi.yaml,$(notdir $@))
-	swagger-cli bundle \
-		$(patsubst %.openapi.bundled.yaml,${openapi-spec-path}/%.openapi.yaml,$(notdir $@)) \
-		--outfile '$@'
 
 generate: go.mod ${openapi-specs-list}
 	go generate ./...
