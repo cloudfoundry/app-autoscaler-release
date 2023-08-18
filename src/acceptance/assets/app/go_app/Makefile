@@ -40,7 +40,7 @@ build_test-%:
 	 done;
 
 check: lint build test
-test:
+test: generate
 	@echo "Running tests"
 	ginkgo run ${GINKGO_OPTS} ./...
 
