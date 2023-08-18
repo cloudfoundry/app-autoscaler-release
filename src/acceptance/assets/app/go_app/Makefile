@@ -1,5 +1,8 @@
+.ONESHELL:
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
+
+
 MAKEFLAGS=
 GO_VERSION := $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
@@ -58,7 +61,10 @@ start: build
 deploy: build
 	./deploy.sh
 
-generate: go.mod ../../../../../api/custom-metrics-api.yaml
+openapi-spec-path := ../../../../../api
+openapi-specs-list := $(wildcard ${openapi-spec-path}/*.openapi.yaml)
+
+generate: go.mod ${openapi-specs-list}
 	go generate ./...
 
 .PHONY: clean

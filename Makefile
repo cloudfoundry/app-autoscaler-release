@@ -376,3 +376,7 @@ target/docker-login:
 docker-image: docker-login
 	docker build -t ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest  ci/dockerfiles/autoscaler-tools
 	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
+validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
+	for file in $^ ; do \
+		swagger-cli validate "$${file}" ; \
+	done

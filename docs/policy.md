@@ -16,7 +16,7 @@
 
 | Name                 | Type         | Required|Description                                                                      |
 |:---------------------|--------------|---------|---------------------------------------------------------------------------------|
-| metric_type          | String       | true    |one of system-default metric types `memoryused`,`memoryutil`,`responsetime`, `throughput`, `cpu` or user-defined custom metric type|
+| metric_type          | String       | true    |one of system-default metric types `memoryused`, `memoryutil`, `responsetime`, `throughput`, `cpu` or user-defined custom metric type|
 | threshold            | int          | true    |the boundary when metric value exceeds is considered as a breach                 |
 | operator             | String       | true    |>, <, >=, <=                                                                     |
 | adjustment           | String       | true    |the adjustment approach for instance count with each scaling.  Support regex format `^[-+][1-9]+[0-9]*[%]?$`, i.e. +5 means adding 5 instances, -50% means shrinking to the half of current size.  |
@@ -50,7 +50,7 @@
 | Name                                 | Type                       | Required| Description                                                                |
 |:-------------------------------------|----------------------------|---------|----------------------------------------------------------------------------|
 | start_date_time                      | String,"yyyy-mm-ddThh:mm"  | true    | the start time of the schedule. Must be a future time                      |
-| start_date_time                      | String,"yyyy-mm-ddThh:mm"  | true    | the end time of the schedule. Must be a future time                        |
+| end_date_time                      | String,"yyyy-mm-ddThh:mm"  | true    | the end time of the schedule. Must be a future time                        |
 | instance_min_count                   | int                        | true    | minimal number of instance count for this schedule                         |
 | instance_max_count                   | int                        | true    | maximal number of instance count for this schedule                         |
 | initial_min_instance_count           | int                        | false   | the initial minimal number of instance count for this schedule             |
