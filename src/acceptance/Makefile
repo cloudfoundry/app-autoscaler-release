@@ -11,6 +11,8 @@ CGO_ENABLED = 0
 export GOWORK=off
 BUILDTAGS :=
 
+GOLANGCI_LINT_VERSION=v$(shell cat ../../.tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+
 test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 build_tests: $(addprefix build_test-,$(test_dirs))
 build_test-%:
@@ -34,7 +36,7 @@ test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
 lint:
-	@golangci-lint run
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
 
 lint-fix:
-	golangci-lint run --fix
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --fix

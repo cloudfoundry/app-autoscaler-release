@@ -11,6 +11,8 @@ CGO_ENABLED = 0
 export GOWORK=off
 BUILDTAGS :=
 
+GOLANGCI_LINT_VERSION=v$(shell cat ../../.tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+
 build:
 	@echo "# building changeloglockcleaner"
 	@CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(BUILDTAGS) $(BUILDFLAGS) -o changeloglockcleaner main.go
@@ -46,7 +48,8 @@ fmt: importfmt
 	@([[ ! -z "$(FORMATTED)" ]] && printf "Fixed unformatted files:\n$(FORMATTED)") || true
 
 lint:
-	golangci-lint run
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
 
 lint-fix:
-	golangci-lint run --fix
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --fix
+
