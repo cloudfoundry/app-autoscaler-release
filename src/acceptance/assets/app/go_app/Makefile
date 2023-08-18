@@ -13,6 +13,8 @@ test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 
 GINKGO_OPTS=-r --race --require-suite --randomize-all --cover ${OPTS}
 export CONFIG?=../../../../acceptance_config.json
 
+GOLANGCI_LINT_VERSION=v$(shell cat ../../../../../.tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+
 .PHONY: build
 build: generate
 	echo "# building  test-app"
@@ -37,12 +39,15 @@ build_test-%:
 	 done;
 
 check: lint build test
-test:
+test: generate
 	@echo "Running tests"
 	ginkgo run ${GINKGO_OPTS} ./...
 
-lint:
-	@cd ../../../../../; make lint_acceptance OPTS=${OPTS}
+lint: generate
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
+
+lint-fix: generate
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --fix
 
 .PHONY: start
 start: build
