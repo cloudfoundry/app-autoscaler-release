@@ -62,7 +62,7 @@ RUN apt-get update && \
 
 # Install bosh_cli
 # renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
-ARG BOSH_VERSION=7.3.1
+ARG BOSH_VERSION=7.4.0
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
@@ -142,7 +142,7 @@ RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && node -v
 
 # Install swagger-cli as described on <https://apitools.dev/swagger-cli>
-RUN npm install --global --ignore-scripts @apidevtools/swagger-cli
+RUN npm install --global --ignore-scripts 'https://github.com/empire-medical/swagger-cli'
 
 ENV CF_PLUGIN_HOME "/cf_plugins"
 RUN mkdir -p "${CF_PLUGIN_HOME}" \
