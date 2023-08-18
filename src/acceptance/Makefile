@@ -11,6 +11,7 @@ CGO_ENABLED = 0
 export GOWORK=off
 BUILDTAGS :=
 
+GINKGO_VERSION=v$(shell cat ../../.tool-versions | grep ginkgo  | cut -d " " -f 2 )
 GOLANGCI_LINT_VERSION=v$(shell cat ../../.tool-versions | grep golangci-lint  | cut -d " " -f 2 )
 
 test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
@@ -30,7 +31,7 @@ build_test-%:
 check: lint build_tests
 
 test-unit:
-	ginkgo --race run helpers
+	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} --race run helpers
 
 test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))

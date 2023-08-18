@@ -13,6 +13,7 @@ test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 
 GINKGO_OPTS=-r --race --require-suite --randomize-all --cover ${OPTS}
 export CONFIG?=../../../../acceptance_config.json
 
+GINKGO_VERSION=v$(shell cat ../../../../../.tool-versions | grep ginkgo  | cut -d " " -f 2 )
 GOLANGCI_LINT_VERSION=v$(shell cat ../../../../../.tool-versions | grep golangci-lint  | cut -d " " -f 2 )
 
 .PHONY: build
@@ -41,7 +42,7 @@ build_test-%:
 check: lint build test
 test: generate
 	@echo "Running tests"
-	ginkgo run ${GINKGO_OPTS} ./...
+	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} run ${GINKGO_OPTS} ./...
 
 lint: generate
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run

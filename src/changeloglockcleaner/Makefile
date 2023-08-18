@@ -11,6 +11,7 @@ CGO_ENABLED = 0
 export GOWORK=off
 BUILDTAGS :=
 
+GINKGO_VERSION=v$(shell cat ../../.tool-versions | grep ginkgo  | cut -d " " -f 2 )
 GOLANGCI_LINT_VERSION=v$(shell cat ../../.tool-versions | grep golangci-lint  | cut -d " " -f 2 )
 
 build:
@@ -34,7 +35,7 @@ build_test-%:
 check: fmt lint build test
 
 test:
-	ginkgo -r --race --randomize-all --keep-going
+	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} -r --race --randomize-all --keep-going
 
 get-fmt-deps: ## Install goimports
 	$(GO_NOMOD) get golang.org/x/tools/cmd/goimports
