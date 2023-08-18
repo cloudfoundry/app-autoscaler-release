@@ -195,7 +195,7 @@ components:
     HistorySuccessEntry:
       description: Description of a successful scaling event event in history.
       type: object
-      properties: {}
+      properties: {} # No extra fields needed in this variant.
   securitySchemes:
     bearerAuth:
       type: http
