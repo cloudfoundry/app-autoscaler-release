@@ -14,7 +14,7 @@ GINKGO_OPTS=-r --race --require-suite --randomize-all --cover ${OPTS}
 export CONFIG?=../../../../acceptance_config.json
 
 .PHONY: build
-build:
+build: generate
 	echo "# building  test-app"
 	rm -rf build/* || true
 	mkdir -p build/
@@ -60,3 +60,4 @@ clean:
 	@echo "# cleaning autoscaler"
 	@go clean -cache -testcache
 	@rm -rf build
+	@rm -rf internal/app/appfakes
