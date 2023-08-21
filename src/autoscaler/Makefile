@@ -10,7 +10,7 @@ BUILDTAGS :=
 export GOWORK=off
 BUILDFLAGS := -ldflags '-linkmode=external'
 
-binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
+binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq | grep -v vendor)
 test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 export GO111MODULE=on
 
@@ -18,6 +18,7 @@ export GO111MODULE=on
 #GINKGO_OPTS=-r --race --require-suite -p --randomize-all --cover
 
 GINKGO_OPTS=-r --race --require-suite --randomize-all --cover ${OPTS}
+GINKGO_VERSION=v$(shell cat ../../.tool-versions | grep ginkgo  | cut -d " " -f 2 )
 
 build-%:
 	@echo "# building $*"
@@ -28,7 +29,7 @@ build: $(addprefix build-,$(binaries))
 
 build_tests: $(addprefix build_test-,$(test_dirs))
 
-build_test-%:
+build_test-%: generate
 	@echo " - building '$*' tests"
 	@export build_folder=${PWD}/build/tests/$* &&\
 	 mkdir -p $${build_folder} &&\
@@ -42,27 +43,19 @@ build_test-%:
 
 check: fmt lint build test
 
-ginkgo_check:
-	@ current_version=$(shell ginkgo version | cut -d " " -f 3 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/');\
-	expected_version=$(shell grep "ginkgo"  "../../.tool-versions" | cut -d " " -f 2 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/');\
-	if [ "$${current_version}" != "$${expected_version}" ]; then \
-        echo "WARNING: Expected to have ginkgo version '$${expected_version}.x' but we have $(shell ginkgo version)";\
-    fi
-
-test: ginkgo_check
+test: generate
 	@echo "Running tests"
-	@APP_AUTOSCALER_TEST_RUN=true ginkgo -p ${GINKGO_OPTS} --skip-package=integration
+	@APP_AUTOSCALER_TEST_RUN=true go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} -p ${GINKGO_OPTS} --skip-package=integration
 
-testsuite: ginkgo_check
-	APP_AUTOSCALER_TEST_RUN=true ginkgo -p ${GINKGO_OPTS} ${TEST}
+testsuite: generate
+	APP_AUTOSCALER_TEST_RUN=true go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} -p ${GINKGO_OPTS} ${TEST}
 
 .PHONY: integration
-integration: ginkgo_check
+integration: generate
 	@echo "# Running integration tests"
-	APP_AUTOSCALER_TEST_RUN=true ginkgo ${GINKGO_OPTS} integration
+	APP_AUTOSCALER_TEST_RUN=true go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} ${GINKGO_OPTS} integration
 
-.PHONY: fakes generate
-fakes: generate
+.PHONY: generate
 generate:
 	@echo "# Generating counterfeits"
 	@COUNTERFEITER_NO_GENERATE_WARNING=true go generate ./...
@@ -75,21 +68,6 @@ fmt: importfmt
 	@FORMATTED=`go fmt $(PACKAGE_DIRS)`
 	@([[ ! -z "$(FORMATTED)" ]] && printf "Fixed unformatted files:\n$(FORMATTED)") || true
 
-buildtools-force:
-	@echo "# Installing build tools"
-	go mod download
-	go install github.com/square/certstrap
-	go install github.com/onsi/ginkgo/v2/ginkgo
-	go install github.com/maxbrunsfeld/counterfeiter/v6
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint
-
-.PHONY: buildtools
-buildtools:
-	@echo "# Installing build tools"
-	@which certstrap >/dev/null || go install github.com/square/certstrap
-	@which ginkgo >/dev/null  && [ "v$(shell ginkgo version | awk '{ print $$3}')" = "$(shell cat go.mod | grep ginkgo | awk '{ print $$2}')" ] ||  go install github.com/onsi/ginkgo/v2/ginkgo
-	@which counterfeiter >/dev/null || go install github.com/maxbrunsfeld/counterfeiter/v6
-
 lint:
 	@cd ../../; make lint_autoscaler OPTS=${OPTS}
 
@@ -98,3 +76,4 @@ clean:
 	@echo "# cleaning autoscaler"
 	@go clean -cache -testcache
 	@rm -rf build
+	@rm -rf fakes/fake_*.go

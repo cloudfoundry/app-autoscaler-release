@@ -8,7 +8,7 @@ depot_path="${script_dir}/../test-certs"
 rm -rf "${depot_path}"
 mkdir -p "${depot_path}"
 
-CERTSTRAP="go run github.com/square/certstrap@v1.2.0"
+CERTSTRAP="go run github.com/square/certstrap@v1.3.0"
 
 # CA to distribute to autoscaler certs
 ${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name autoscalerCA --years "20"
