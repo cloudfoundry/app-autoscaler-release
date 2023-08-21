@@ -6,6 +6,7 @@
         "vmware.vscode-boot-dev-pack",
         "vscjava.vscode-java-pack",
         "pinage404.nix-extension-pack",
-        "golang.go"
+        "golang.go",
+        "trunk.io"
     ]
 }
