@@ -126,7 +126,7 @@ test-autoscaler-suite: check-db_type init-db test-certs
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
-test-changelog: init
+test-changelog:
 	@make -C src/changelog test
 test-changeloglockcleaner: init-db test-certs
 	@make -C src/changeloglockcleaner test DBURL="${DBURL}"
