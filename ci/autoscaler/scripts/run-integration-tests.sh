@@ -12,7 +12,6 @@ pushd app-autoscaler-release
 
   POSTGRES_OPTS='--username=postgres --url=jdbc:postgresql://127.0.0.1/autoscaler --driver=org.postgresql.Driver'
 
-  make -C src/autoscaler buildtools
   ./src/scheduler/scripts/generate_unit_test_certs.sh
   ./scripts/generate_test_certs.sh
 
