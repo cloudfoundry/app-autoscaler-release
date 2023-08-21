@@ -27,7 +27,6 @@ type ConcurrentBusyLoopCPUWaster struct {
 var _ CPUWaster = &ConcurrentBusyLoopCPUWaster{}
 
 func CPUTests(logger logr.Logger, r *gin.RouterGroup, cpuTest CPUWaster) *gin.RouterGroup {
-
 	r.GET("/:utilization/:minutes", func(c *gin.Context) {
 		if cpuTest.IsRunning() {
 			Error(c, http.StatusConflict, "CPU test is already running")
@@ -79,7 +78,7 @@ func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.D
 			runtime.LockOSThread()
 			for m.IsRunning() {
 				begin := time.Now()
-				for time.Now().Sub(begin) < run {
+				for time.Since(begin) < run {
 					// burn cpu time
 				}
 				time.Sleep(sleep)
