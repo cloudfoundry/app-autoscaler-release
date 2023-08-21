@@ -11,6 +11,9 @@ CGO_ENABLED = 0
 export GOWORK=off
 BUILDTAGS :=
 
+GINKGO_VERSION=v$(shell cat ../../.tool-versions | grep ginkgo  | cut -d " " -f 2 )
+GOLANGCI_LINT_VERSION=v$(shell cat ../../.tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+
 build:
 	@echo "# building changeloglockcleaner"
 	@CGO_ENABLED=$(CGO_ENABLED) $(GO) build $(BUILDTAGS) $(BUILDFLAGS) -o changeloglockcleaner main.go
@@ -32,7 +35,7 @@ build_test-%:
 check: fmt lint build test
 
 test:
-	ginkgo -r --race --randomize-all --keep-going
+	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} -r --race --randomize-all --keep-going
 
 get-fmt-deps: ## Install goimports
 	$(GO_NOMOD) get golang.org/x/tools/cmd/goimports
@@ -46,7 +49,8 @@ fmt: importfmt
 	@([[ ! -z "$(FORMATTED)" ]] && printf "Fixed unformatted files:\n$(FORMATTED)") || true
 
 lint:
-	golangci-lint run
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
 
 lint-fix:
-	golangci-lint run --fix
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --fix
+

@@ -24,7 +24,7 @@ jobs:
       - name: get golangci-lint version
         id: lint
         run: |
-          version=$(cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2 | sed -E 's/(v[0-9]+\.[0-9]+.[0-9]+).*/\1/')
+          version=v$(cat .tool-versions | grep golangci-lint  | cut -d " " -f 2 )
           echo "golangci-lint version: '${version}'"
           echo "version=${version}" >> $GITHUB_OUTPUT;
 

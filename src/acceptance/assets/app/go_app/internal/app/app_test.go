@@ -49,6 +49,7 @@ var _ = Describe("Ginkgo/Server", func() {
 		var port int
 		BeforeEach(func() {
 			logger := zaptest.LoggerWriter(GinkgoWriter)
+			/* #nosec G102 -- CF apps run in a container */
 			l, err := net.Listen("tcp", ":0")
 			Expect(err).ToNot(HaveOccurred())
 			port = l.Addr().(*net.TCPAddr).Port

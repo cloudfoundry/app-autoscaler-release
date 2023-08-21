@@ -39,7 +39,6 @@ type ListBasedMemoryGobbler struct {
 var _ MemoryGobbler = &ListBasedMemoryGobbler{}
 
 func MemoryTests(logger logr.Logger, r *gin.RouterGroup, memoryTest MemoryGobbler) *gin.RouterGroup {
-
 	r.GET("/:memoryMiB/:minutes", func(c *gin.Context) {
 		if memoryTest.IsRunning() {
 			Error(c, http.StatusConflict, "memory test is already running")

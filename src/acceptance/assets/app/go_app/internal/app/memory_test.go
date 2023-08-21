@@ -76,13 +76,13 @@ var _ = Describe("Memory tests", func() {
 
 			newMem := getTotalMemoryUsage("during memTest info test")
 			msg :=
-			`
+				`
 			If this test fails, please consider to rewrite internal/app/memory.go.UseMemory()
 			to make use of syscalls directly (e.g. “malloc”) to make sure of not
 			having issues due to the go-runtime.
 			`
 			GinkgoWriter.Printf(msg)
-			Expect(newMem - oldMem).To(BeNumerically(">=", allocInMebi - slack))
+			Expect(newMem - oldMem).To(BeNumerically(">=", allocInMebi-slack))
 
 			By("and releasing it after the test ends")
 			memInfo.StopTest()
@@ -90,7 +90,7 @@ var _ = Describe("Memory tests", func() {
 
 			slack = getMemorySlack()
 
-			Eventually(getTotalMemoryUsage).WithArguments("after memTest info test").Should(BeNumerically("<=", newMem - allocInMebi + slack))
+			Eventually(getTotalMemoryUsage).WithArguments("after memTest info test").Should(BeNumerically("<=", newMem-allocInMebi+slack))
 		})
 	})
 })
@@ -106,7 +106,7 @@ func getTotalMemoryUsage(action string) uint64 {
 
 	result := stat.VmRSS + stat.VmSwap
 
-	GinkgoWriter.Printf("total memory usage %s: %d MiB\n", action, result / app.Mebi)
+	GinkgoWriter.Printf("total memory usage %s: %d MiB\n", action, result/app.Mebi)
 
 	return result
 }
@@ -123,7 +123,7 @@ func getMemorySlack() uint64 {
 
 	slack := ms.HeapInuse - ms.HeapAlloc
 
-	GinkgoWriter.Printf("slack: %d MiB\n", slack / app.Mebi)
+	GinkgoWriter.Printf("slack: %d MiB\n", slack/app.Mebi)
 
 	return slack
 }

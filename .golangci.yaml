@@ -70,7 +70,7 @@ linters-settings:
   staticcheck:
     checks: ["all"]
   stylecheck:
-    go: "1.15"
+    go: "1.20"
     # https://staticcheck.io/docs/options#checks
     checks: ["all", "-ST1003", "-ST1005"]
     dot-import-whitelist:
@@ -101,7 +101,7 @@ linters:
     - goprintffuncname
     - gosec
     - gosimple
-      # - gomoddirectives - commented out to allow replace directives
+    - gomoddirectives
     - gomodguard
     - ineffassign
     - misspell

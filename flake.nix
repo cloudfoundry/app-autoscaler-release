@@ -54,6 +54,7 @@
               #
               # jdwpkgs.rubyPackages.cf-uaac
               shellcheck
+              swagger-cli
               temurin-bin
               yq-go
             ];
