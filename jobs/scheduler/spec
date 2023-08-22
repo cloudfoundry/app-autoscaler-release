@@ -3,22 +3,24 @@ name: scheduler
 templates:
   bpm-pre-start.erb: bin/bpm-pre-start
   bpm.yml.erb: config/bpm.yml
-  liquibase.properties: bin/liquibase.properties
-  scheduler.yml.erb: config/scheduler.yml
+
   install_crt_keystore.sh: bin/install_crt_keystore
   install_crt_truststore.sh: bin/install_crt_truststore
 
-  scheduler_ca.crt.erb: config/certs/ca.crt
-  scheduler_server.crt.erb: config/certs/server.crt
-  scheduler_server.key.erb: config/certs/server.key
-
-  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
-  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
-  scalingengine_client.key.erb: config/certs/scalingengine/client.key
+  liquibase.properties: bin/liquibase.properties
 
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
+
+  scheduler_ca.crt.erb: config/certs/ca.crt
+  scheduler_server.crt.erb: config/certs/server.crt
+  scheduler_server.key.erb: config/certs/server.key
+  scheduler.yml.erb: config/scheduler.yml
+
+  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
+  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
+  scalingengine_client.key.erb: config/certs/scalingengine/client.key
 
   scheduler_db_ca.crt.erb: config/certs/scheduler_db/ca.crt
   scheduler_db.crt.erb: config/certs/scheduler_db/crt
