@@ -10,7 +10,7 @@ type CustomMetricsCredentials struct {
 }
 
 func (c CustomMetricsCredentials) BasicAuthentication(ctx context.Context, operationName string) (BasicAuthentication, error) {
-	credentials := BasicAuthentication {
+	credentials := BasicAuthentication{
 		Username: c.Username,
 		Password: c.Password,
 	}
