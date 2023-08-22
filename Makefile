@@ -85,7 +85,7 @@ clean-acceptance:
 build: $(all_modules)
 build-tests: build-test
 build-test: $(addprefix test_,$(go_modules))
-build-all: build build-test
+build-all: build build-test build-test-app
 db: target/db
 target/db:
 	@echo "# building $@"
