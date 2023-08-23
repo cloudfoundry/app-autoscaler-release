@@ -92,6 +92,7 @@ components:
           items:
             $ref: '#/components/schemas/ScalingRule'
     ScalingRule:
+      type: object
       required:
         - threshold
         - operator
@@ -137,6 +138,7 @@ components:
           items:
             $ref: '#/components/schemas/Schedules'
     Schedules:
+      type: object
       required:
         - timezone
       properties:
@@ -151,6 +153,7 @@ components:
           items:
             $ref: "#/components/schemas/RecurringSchedule"
     RecurringSchedule:
+      type: object
       required:
         - start_time
         - end_time
@@ -181,6 +184,8 @@ components:
           description: |
             recurring days of a week or month. Use [1,2,..,7] or [1,2,...,31] to define it
           type: array
+          items:
+            type: integer
           example: [5, 15, 25]
         instance_min_count:
           description: minimal number of instance count for this schedule
@@ -202,6 +207,7 @@ components:
           items:
             $ref: '#/components/schemas/SpecificDate'
     SpecificDate:
+      type: object
       required:
         - start_date_time
         - end_date_time
