@@ -6,7 +6,6 @@ info:
 tags:
 - name: Scaling History API V1
   description: List the scaling history of an Application
-
 paths:
   /v1/apps/{guid}/scaling_histories:
     parameters:
@@ -79,7 +78,6 @@ paths:
       security:
       - bearerAuth: []
       x-codegen-request-body-name: body
-
 components:
   schemas:
     History:
@@ -112,21 +110,18 @@ components:
           items:
             $ref: '#/components/schemas/HistoryEntry'
     HistoryEntry:
-      allOf:
-        - $ref: "#/components/schemas/HistoryEntryCommon"
-        - oneOf:
-          - $ref: "#/components/schemas/HistoryErrorEntry"
-          - $ref: "#/components/schemas/HistoryIgnoreEntry"
-          - $ref: "#/components/schemas/HistorySuccessEntry"
-          discriminator:
-            propertyName: status
-            mapping:
-              0: "#/components/schemas/HistorySuccessEntry"
-              1: "#/components/schemas/HistoryErrorEntry"
-              2: "#/components/schemas/HistoryIgnoreEntry"
-    HistoryEntryCommon:
       description: "Properties common for each entry in the scaling history."
       type: object
+      oneOf:
+        - $ref: "#/components/schemas/HistoryErrorEntry"
+        - $ref: "#/components/schemas/HistoryIgnoreEntry"
+        - $ref: "#/components/schemas/HistorySuccessEntry"
+      discriminator:
+        propertyName: status
+        mapping:
+          0: "#/components/schemas/HistorySuccessEntry"
+          1: "#/components/schemas/HistoryErrorEntry"
+          2: "#/components/schemas/HistoryIgnoreEntry"
       properties:
         status:
           type: integer
@@ -137,7 +132,6 @@ components:
              + 0: The scaling was done successfully.
              + 1: The scaling failed explicitly.
              + 2: The scaling was ignored.
-
             This field is as well a selector of which of the other ones are used and which not.
           example: 0
         app_guid:
