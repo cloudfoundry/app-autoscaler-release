@@ -24,7 +24,7 @@ templates:
   scheduler_db.crt.erb: config/certs/scheduler_db/crt
   scheduler_db.key.erb: config/certs/scheduler_db/key
 
-  post_start_helath_check.erb: bin/post-start
+  post_start_health_check.erb: bin/post-start
 
 packages:
   - scheduler
