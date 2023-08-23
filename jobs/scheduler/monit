@@ -1,16 +1,6 @@
-<%
-  require 'erb'
-
-  user = ERB::Util.url_encode(p('autoscaler.scheduler.health.username'))
-  password = ERB::Util.url_encode(p('autoscaler.scheduler.health.password'))
-  port = p('autoscaler.scheduler.health.port')
-
-  health_url = "http://#{user}:#{password}@localhost:#{port}"
-%>check host scheduler with address localhost
-  if failed url <%=health_url%>
-     timeout 30 seconds
-     then restart
-
+check process scheduler
+  with pidfile /var/vcap/sys/run/bpm/scheduler/scheduler.pid
   start program "/var/vcap/jobs/bpm/bin/bpm start scheduler"
   stop program "/var/vcap/jobs/bpm/bin/bpm stop scheduler"
   group vcap
+
