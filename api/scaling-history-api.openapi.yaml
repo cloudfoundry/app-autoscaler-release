@@ -79,7 +79,6 @@ paths:
       security:
       - bearerAuth: []
       x-codegen-request-body-name: body
-
 components:
   schemas:
     History:

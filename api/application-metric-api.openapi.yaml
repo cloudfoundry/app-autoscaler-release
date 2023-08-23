@@ -125,7 +125,6 @@ components:
       type: object
       properties:
         app_guid:
-
           $ref: "./shared_definitions.yaml#/schemas/GUID"
         instanceIndex:
           type: integer
@@ -142,7 +141,6 @@ components:
             The time at which the metrics were collected in the number of nanoseconds
           example: 1494989539138350000
         metric_type:
-
           $ref: "./shared_definitions.yaml#/schemas/metric_type"
         value:
           type: integer
