@@ -6,5 +6,6 @@ processes:
       - /var/vcap/jobs/metricsserver/config/metricsserver.yml
     env:
       DT_MONITOR: true
+      DT_APPLICATIONID: metricsserver
     hooks:
       pre_start: /var/vcap/jobs/metricsserver/bin/bpm-pre-start
