@@ -42,7 +42,7 @@ jobs:
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: make build
         env:
           POSTGRES_HOST: postgres
