@@ -23,7 +23,7 @@ ops_files=${OPS_FILES:-"${prometheus_ops}/monitor-bosh.yml\
                         ${prometheus_ops}/monitor-cf.yml\
                         ${prometheus_ops}/enable-cf-route-registrar.yml\
                         ${prometheus_ops}/enable-grafana-uaa.yml\
-                        ${prometheus_ops}/enable-cf-loggregator-v2.yml\
+                        ${prometheus_ops}/deprecated/enable-cf-loggregator-v2.yml\
                         ${prometheus_ops}/monitor-bosh-director.yml\
                         ${prometheus_ops}/alertmanager-slack-receiver.yml\
                         ${ci_dir}/operations/prometheus-customize-alerts.yml\
