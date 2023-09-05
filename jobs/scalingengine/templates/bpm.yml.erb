@@ -6,5 +6,6 @@ processes:
       - /var/vcap/jobs/scalingengine/config/scalingengine.yml
     env:
       DT_MONITOR: true
+      DT_APPLICATIONID: scalingengine
     hooks:
       pre_start: /var/vcap/jobs/scalingengine/bin/bpm-pre-start

@@ -6,5 +6,6 @@ processes:
       - /var/vcap/jobs/operator/config/operator.yml
     env:
       DT_MONITOR: true
+      DT_APPLICATIONID: operator
     hooks:
       pre_start: /var/vcap/jobs/operator/bin/bpm-pre-start
