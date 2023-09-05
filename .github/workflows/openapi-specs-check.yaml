@@ -8,7 +8,7 @@ jobs:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
     - name: Get Repository content
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Validating OpenAPI Specifications
       shell: bash
       run: |

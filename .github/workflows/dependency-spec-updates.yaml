@@ -8,7 +8,7 @@ jobs:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     if: contains(fromJson('["dependabot[bot]", "renovate[bot]"]'), github.event.pull_request.user.login) && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: package-specs
         run: |
