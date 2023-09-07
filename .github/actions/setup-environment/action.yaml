@@ -8,7 +8,7 @@ runs:
   using: "composite"
   steps:
     - name: clone BBL repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: cloudfoundry/app-autoscaler-env-bbl-state
         ssh-key: ${{ inputs.ssh-key }}

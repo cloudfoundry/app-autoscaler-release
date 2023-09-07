@@ -37,6 +37,6 @@ func ResponseTimeTests(logger logr.Logger, r *gin.RouterGroup, timeWaster TimeWa
 	return r
 }
 
-func (_ Sleeper) Sleep(sleepTime time.Duration) {
+func (Sleeper) Sleep(sleepTime time.Duration) {
 	time.Sleep(sleepTime)
 }

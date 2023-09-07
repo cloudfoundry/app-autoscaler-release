@@ -6,5 +6,6 @@ processes:
       - /var/vcap/jobs/eventgenerator/config/eventgenerator.yml
     env:
       DT_MONITOR: true
+      DT_APPLICATIONID: eventgenerator
     hooks:
       pre_start: /var/vcap/jobs/eventgenerator/bin/bpm-pre-start

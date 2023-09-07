@@ -22,9 +22,12 @@ CI?=false
 VERSION?=0.0.testing
 DEST?=build
 
+GOLANGCI_LINT_VERSION=v$(shell cat .tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+
 export BUILDIN_MODE?=false
 export DEBUG?=false
 export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+export GOWORK=off
 
 $(shell mkdir -p target)
 $(shell mkdir -p build)
@@ -43,12 +46,6 @@ check-db_type:
 init-db: check-db_type start-db db target/init-db-${db_type}
 target/init-db-${db_type}:
 	@./scripts/initialise_db.sh ${db_type}
-	@touch $@
-
-.PHONY: init
-init: target/init
-target/init:
-	@make -C src/autoscaler buildtools
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
@@ -85,23 +82,23 @@ clean-acceptance:
 	@rm -rf src/acceptance/results &> /dev/null || true
 
 .PHONY: build build-test build-tests build-all $(all_modules)
-build: init  $(all_modules)
+build: $(all_modules)
 build-tests: build-test
-build-test: init $(addprefix test_,$(go_modules))
-build-all: build build-test
+build-test: $(addprefix test_,$(go_modules))
+build-all: build build-test build-test-app
 db: target/db
 target/db:
 	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
 	@touch $@
-scheduler: init
+scheduler:
 	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
-autoscaler: init
+autoscaler:
 	@make -C src/autoscaler build
-changeloglockcleaner: init
+changeloglockcleaner:
 	@make -C src/changeloglockcleaner build
-changelog: init
+changelog:
 	@make -C src/changelog build
 $(addprefix test_,$(go_modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
@@ -120,18 +117,18 @@ target/scheduler_test_certs:
 
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
-test-autoscaler: check-db_type init init-db test-certs
+test-autoscaler: check-db_type init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
 	@make -C src/autoscaler test DBURL="${DBURL}" OPTS="${OPTS}"
-test-autoscaler-suite: check-db_type init init-db test-certs
+test-autoscaler-suite: check-db_type init-db test-certs
 	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
 	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
-test-scheduler: check-db_type init init-db test-certs
+test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
-test-changelog: init
+test-changelog:
 	@make -C src/changelog test
-test-changeloglockcleaner: init init-db test-certs
+test-changeloglockcleaner: init-db test-certs
 	@make -C src/changeloglockcleaner test DBURL="${DBURL}"
 test-acceptance-unit:
 	@make -C src/acceptance test-unit
@@ -220,16 +217,7 @@ integration: build init-db test-certs
 
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
-lint: golangci-lint_check $(addprefix lint_,$(go_modules))  rubocop
-
-golangci-lint_check:
-	@current_version=$(shell golangci-lint version | cut -d " " -f 4);\
-	current_major_version=$(shell golangci-lint version | cut -d " " -f 4| sed -E 's/v*([0-9]+\.[0-9]+)\..*/\1/');\
-	expected_version=$(shell cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2 | sed -E 's/v([0-9]+\.[0-9]+)\..*/\1/');\
-	if [ "$${current_major_version}" != "$${expected_version}" ]; then \
-        echo "ERROR: Expected to have golangci-lint version '$${expected_version}.x' but we have $${current_version}";\
-        exit 1;\
-  fi
+lint: $(addprefix lint_,$(go_modules))  rubocop
 
 rubocop:
 	@echo " - ruby scripts"
@@ -248,7 +236,7 @@ lint-actions:
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS}
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --config ${lint_config} ${OPTS}
 
 .PHONY: spec-test
 spec-test:
@@ -388,8 +376,7 @@ target/docker-login:
 docker-image: docker-login
 	docker build -t ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest  ci/dockerfiles/autoscaler-tools
 	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
-
-.PHONY: build-tools
-build-tools:
-	make -C src/autoscaler buildtools
-
+validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
+	for file in $^ ; do \
+		swagger-cli validate "$${file}" ; \
+	done

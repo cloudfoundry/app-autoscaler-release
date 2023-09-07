@@ -25,6 +25,7 @@ func (bat *BasicAuthTransport) Client() *http.Client {
 }
 
 func NewBasicAuthTransport(credentials CustomMetricsCredentials) *BasicAuthTransport {
+	/* #nosec G402 -- test app that shall run on dev foundations without proper certs */
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}

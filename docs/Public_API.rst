@@ -30,7 +30,7 @@ Parameters
 +--------------------+-------------------------------------------------------------------------------+---------------------------------------------------------------------+-----------------------+----------------------------------+
 | end-time           | The end time                                                                  | int, the number of nanoseconds elapsed since January 1, 1970 UTC.   | false. default 'now'  | end-time=1494989549117047288     |
 +--------------------+-------------------------------------------------------------------------------+---------------------------------------------------------------------+-----------------------+----------------------------------+
-| order-direction    | The order type. The scaling history will be order by timestamp asc or desc.   | string,"asc" or "desc"                                              | false. default desc   | order-direction=desc             |
+| order-direction    | The order type. The scaling history will be order by timestamp asc or desc.   | string, "asc" or "desc"                                              | false. default desc   | order-direction=desc             |
 +--------------------+-------------------------------------------------------------------------------+---------------------------------------------------------------------+-----------------------+----------------------------------+
 | page               | The page number to query                                                      | int                                                                 | false.  default 1     | page=1                           |
 +--------------------+-------------------------------------------------------------------------------+---------------------------------------------------------------------+-----------------------+----------------------------------+
@@ -47,7 +47,7 @@ cURL
 ''''
     | curl "https://[the-api-server-url]:[port]/v1/apps/8d0cee08-23ad-4813-a779-ad8118ea0b91/scaling\_histories?start-time=1494989539138350432&end-time=1494989539138399999&order-direction=desc&page=1&results-per-page=10" \\
     | -X GET \\
-    | -H "Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5\_Iu\_o" 
+    | -H "Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTQwOCIsImVtYWlsIjoiZW1haWwtMzAzQHNvbWVkb21haW4uY29tIiwic2NvcGUiOlsiY2xvdWRfY29udHJvbGxlci5hZG1pbiJdLCJhdWQiOlsiY2xvdWRfY29udHJvbGxlciJdLCJleHAiOjE0NDU1NTc5NzF9.RMJZvSzCSxpj4jjZBmzbO7eoSfTAcIWVSHqFu5\_Iu\_o"
 
 Response
 ^^^^^^^^
@@ -145,7 +145,7 @@ Parameters
 +--------------------+-------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+-----------------------+----------------------------------+
 | guid               | The GUID of the application                                                   |                                                                                             | true                  |                                  |
 +--------------------+-------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+-----------------------+----------------------------------+
-| metric_type        | The metric type                                                               | String, memoryused,memoryutil,responsetime, throughput or custom metric's name              | true                  | metric_type=memoryused           |
+| metric_type        | The metric type                                                               | String, "memoryused", "memoryutil", "responsetime", "throughput", "cpu" or custom metric's name | true              | metric_type=memoryused           |
 +--------------------+-------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+-----------------------+----------------------------------+
 | start-time         | The start time                                                                | int, the number of nanoseconds elapsed since January 1, 1970 UTC.                           | false, default 0      | start-time=1494989539138350432   |
 +--------------------+-------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------+-----------------------+----------------------------------+

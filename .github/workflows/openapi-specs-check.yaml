@@ -1,0 +1,18 @@
+name: "Validate OpenAPI-Specifications"
+on:
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+    steps:
+    - name: Get Repository content
+      uses: actions/checkout@v4
+    - name: Validating OpenAPI Specifications
+      shell: bash
+      run: |
+        #! /usr/bin/env bash
+
+        set -eu -o pipefail
+        make validate-openapi-specs

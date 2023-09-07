@@ -27,7 +27,6 @@ type CustomMetricAPIClient struct{}
 var _ CustomMetricClient = &CustomMetricAPIClient{}
 
 func CustomMetricsTests(logger logr.Logger, r *gin.RouterGroup, customMetricTest CustomMetricClient) *gin.RouterGroup {
-
 	r.GET("/mtls/:name/:value", handleCustomMetricsEndpoint(customMetricTest, true))
 	r.GET("/:name/:value", handleCustomMetricsEndpoint(customMetricTest, false))
 
@@ -59,17 +58,16 @@ func handleCustomMetricsEndpoint(customMetricTest CustomMetricClient, useMtls bo
 	}
 }
 
-func (_ *CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
+func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
 	var err error
 	if appConfig == nil {
 		appConfig, err = cfenv.Current()
 		if err != nil {
 			return fmt.Errorf("cloud foundry environment not found %w", err)
-
 		}
 	}
 
-	appId := appConfig.AppID
+	appId := api.GUID(appConfig.AppID)
 	autoscalerCredentials, err := getAutoscalerCredentials(appConfig)
 	if err != nil {
 		return err
@@ -94,7 +92,7 @@ func (_ *CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig 
 		return err
 	}
 
-	apiClient, err := api.NewClient(autoscalerApiServerURL, api.WithClient(client))
+	apiClient, err := api.NewClient(autoscalerApiServerURL, autoscalerCredentials, api.WithClient(client))
 	if err != nil {
 		return err
 	}
@@ -166,6 +164,7 @@ func getCFInstanceIdentityCertificateClient() (*http.Client, error) {
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCertBytes)
 
+	/* #nosec G402 -- test app that shall run on dev foundations without proper certs */
 	tlsConfig := &tls.Config{
 		Certificates:       []tls.Certificate{cert},
 		InsecureSkipVerify: true,
