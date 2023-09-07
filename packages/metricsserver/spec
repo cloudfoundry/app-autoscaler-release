@@ -137,6 +137,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/internal/grpcrand/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/grpcsync/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/grpcutil/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/internal/idle/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/metadata/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/pretty/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/* # gosub
