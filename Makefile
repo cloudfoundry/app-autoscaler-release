@@ -260,6 +260,8 @@ mod-tidy:
 	do\
 	   cd $${folder}; echo " - go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
 	done
+	@echo " - go mod tidying src/acceptance/assets/app/go_app";\
+	make -C src/acceptance/assets/app/go_app mod-tidy
 
 .PHONY: mod-download
 mod-download:

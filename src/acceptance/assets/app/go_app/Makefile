@@ -47,6 +47,10 @@ test: generate
 	@echo "Running tests"
 	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} run ${GINKGO_OPTS} ./...
 
+.PHONY: mod-tidy
+mod-tidy: generate
+	@go mod tidy
+
 lint: generate
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
 
