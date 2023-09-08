@@ -1,33 +1,32 @@
 SHELL := /bin/bash
-.SHELLFLAGS = -euo pipefail -c
-MAKEFLAGS = -s
-go_modules:= $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
-all_modules:= $(go_modules) db scheduler
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
-MVN_OPTS="-Dmaven.test.skip=true"
-OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
-db_type:=postgres
-DB_HOST:=localhost
+MAKEFLAGS = -s
+go_modules := $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
+all_modules := $(go_modules) db scheduler
+MVN_OPTS = "-Dmaven.test.skip=true"
+OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} || uname)
+db_type := postgres
+DB_HOST := localhost
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@${DB_HOST}/autoscaler?sslmode=disable"; ;; \
  			 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)
 DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
-SUITES?=broker api app
-AUTOSCALER_DIR?=$(shell pwd)
-lint_config:=${AUTOSCALER_DIR}/.golangci.yaml
-CI_DIR?=${AUTOSCALER_DIR}/ci
-CI?=false
-VERSION?=0.0.testing
-DEST?=build
+SUITES ?= broker api app
+AUTOSCALER_DIR ?= $(shell pwd)
+lint_config := ${AUTOSCALER_DIR}/.golangci.yaml
+CI_DIR ?= ${AUTOSCALER_DIR}/ci
+CI ?= false
+VERSION ?= 0.0.testing
+DEST ?= build
 
-GOLANGCI_LINT_VERSION=v$(shell cat .tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  | cut -d " " -f 2 )
 
-export BUILDIN_MODE?=false
-export DEBUG?=false
-export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
-export GOWORK=off
+export BUILDIN_MODE ?= false
+export DEBUG ?= false
+export ACCEPTANCE_TESTS_FILE ?= ${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+export GOWORK = off
 
 $(shell mkdir -p target)
 $(shell mkdir -p build)
@@ -59,7 +58,7 @@ clean-java:
 	@cd src && mvn clean > /dev/null && cd ..
 clean-targets:
 	@echo " - cleaning build target files"
-	@rm target/* &> /dev/null || echo "  . Already clean"
+	@rm --recursive --force target/* &> /dev/null || echo " . Already clean"
 clean-vendor:
 	@echo " - cleaning vendored go"
 	@find . -depth -name "vendor" -type d -exec rm -rf {} \;
@@ -307,10 +306,28 @@ deploy-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 
-deploy-prometheus:
-	@export DEPLOYMENT_NAME=prometheus;\
-	export BBL_STATE_PATH=$${BBL_STATE_PATH:-$(shell realpath "../app-autoscaler-env-bbl-state/bbl-state/")};\
+
+bosh-release-path := ./target/bosh-releases
+prometheus-bosh-release-path := ${bosh-release-path}/prometheus
+$(shell mkdir -p ${prometheus-bosh-release-path})
+
+download-prometheus-release: ${prometheus-bosh-release-path}/manifests
+${prometheus-bosh-release-path}/manifests &:
+	pushd '${prometheus-bosh-release-path}' > /dev/null ;\
+		git clone --recurse-submodules 'https://github.com/bosh-prometheus/prometheus-boshrelease' . ;\
+	popd > /dev/null
+
+
+
+deploy-prometheus: ${prometheus-bosh-release-path}/manifests
+	export DEPLOYMENT_NAME='prometheus' ;\
+	export PROMETHEUS_DIR='${prometheus-bosh-release-path}' ;\
+	export BBL_GCP_REGION="$$(yq eval '.jobs.[] | select(.name == "deploy-prometheus") | .plan.[] | select(.task == "deploy-prometheus") | .params.BBL_GCP_REGION' './ci/infrastructure/pipeline.yml')" ;\
+	export BBL_GCP_ZONE="$$(yq eval '.jobs.[] | select(.name == "deploy-prometheus") | .plan.[] | select(.task == "deploy-prometheus") | .params.BBL_GCP_ZONE' './ci/infrastructure/pipeline.yml')" ;\
+	export SLACK_WEBHOOK="$$(credhub get --name='/bosh-autoscaler/prometheus/alertmanager_slack_api_url' --quiet)" ;\
 	${CI_DIR}/infrastructure/scripts/deploy-prometheus.sh;
+
+
 
 
 .PHONY: build-test-app
