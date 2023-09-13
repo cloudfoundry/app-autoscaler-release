@@ -1,7 +1,7 @@
 act 0.2.50
 actionlint 1.6.25
 bosh 7.4.0
-cf 8.7.2
+cf 8.7.3
 concourse 7.10.0
 direnv 2.32.3
 gcloud 445.0.0
