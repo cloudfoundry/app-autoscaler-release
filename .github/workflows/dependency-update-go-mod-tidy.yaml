@@ -1,15 +1,17 @@
 name: "renovate-/ospo-bot: go mod tidy"
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/dependency-update-go-mod-tidy.yaml"
+  # pull_request:
+  #   paths:
+  #     - ".github/workflows/dependency-update-go-mod-tidy.yaml"
   push:
     # Execute on all renovate-branches, iff go.mod/-sum of the helper app has been changed.
     branches:
       - "renovate/**"
+      - "dependabot/**"
     paths:
-      - "./src/acceptance/assets/app/go_app/go.mod"
-      - "./src/acceptance/assets/app/go_app/go.sum"
+      - ".github/workflows/dependency-update-go-mod-tidy.yaml"
+      - "./src/**/go.mod"
+      - "./src/**/go.sum"
 jobs:
   go-mod-tidy:
     runs-on: ubuntu-latest
