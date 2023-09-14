@@ -50,10 +50,20 @@ jobs:
           #! /usr/bin/env bash
           set -eu -o pipefail
 
+          # We need the subsequent standard-message to determine if the last commit
+          # has already cleaned up everything. In this case this workflow should not
+          # change anything and we exit early.
+          # An alternative would be to use a tag for this. But this does affect the whole
+          # PR instead of just the latest commit.
+          declare -r tidy_message='🤖🦾🛠️ go mod tidy'
+
           declare -r commit_author_name="${{github.event.head_commit.author.name}}"
-          if [[ ! "${commit_author_name}" =~ ('dependabot'|'renovate')'[bot]' ]]
+          declare -r commit_message="${{github.event.head_commit.message}}"
+
+          if [[ ! "${commit_author_name}" =~ ('dependabot'|'renovate')'[bot]' ]] \
+             || [[ "${commit_message}" == "${tidy_message}" ]]
           then
-            echo 'This commit was not by a known bot! Exiting …'
+            echo 'This commit was not by a known bot or already an automatic `go mod tidy`! Exiting …'
             echo "Debug: commit_author_name = ${commit_author_name}" # TODO: Remove this!
             exit 0
           fi
@@ -70,7 +80,7 @@ jobs:
           if ((changed_files >= 0))
           then
             git add .
-            git commit --message='go mod tidy'
+            git commit --message="${tidy_message}"
             git push
           fi
 
