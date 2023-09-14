@@ -9,7 +9,7 @@ db_type := postgres
 DB_HOST := localhost
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@${DB_HOST}/autoscaler?sslmode=disable"; ;; \
- 			 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)
+				 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)
 DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
@@ -162,7 +162,7 @@ target/start-db-postgres_CI_true:
 waitfor_postgres_CI_false:
 	@echo -n " - waiting for ${db_type} ."
 	@COUNTER=0; until $$(docker exec postgres pg_isready &>/dev/null) || [ $$COUNTER -gt 10 ]; do echo -n "."; sleep 1; let COUNTER+=1; done;\
- 	if [ $$COUNTER -gt 10 ]; then echo; echo "Error: timed out waiting for postgres. Try \"make clean\" first." >&2 ; exit 1; fi
+	if [ $$COUNTER -gt 10 ]; then echo; echo "Error: timed out waiting for postgres. Try \"make clean\" first." >&2 ; exit 1; fi
 waitfor_postgres_CI_true:
 	@echo " - no ci postgres checks"
 
@@ -193,14 +193,14 @@ waitfor_mysql_CI_false:
 waitfor_mysql_CI_true:
 	@echo -n " - Waiting for table creation"
 	@which mysql >/dev/null &&\
-	 {\
-	   T=0;\
-	   until [[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
-	     || [[ $${T} -gt 30 ]];\
-	   do echo -n "."; sleep 1; T=$$((T+1)); done;\
-	 }
+	{\
+		T=0;\
+		until [[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
+			|| [[ $${T} -gt 30 ]];\
+		do echo -n "."; sleep 1; T=$$((T+1)); done;\
+	}
 	@[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
-	  || { echo "ERROR: Mysql timed out creating database"; exit 1; }
+		|| { echo "ERROR: Mysql timed out creating database"; exit 1; }
 
 
 .PHONY: stop-db
@@ -256,23 +256,26 @@ acceptance-release: clean-acceptance mod-tidy vendor build-test-app
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
 .PHONY: mod-tidy
 mod-tidy:
-	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
-	do\
-	   cd $${folder}; echo " - go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
+	@for folder in $$(find . -maxdepth 6 -name 'go.mod' -exec dirname {} \;) ;\
+	do \
+		pushd "$${folder}" ;\
+			echo " - go mod tidying '$${folder}'" ;\
+			go mod tidy ;\
+		popd ;\
 	done
 
 .PHONY: mod-download
 mod-download:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
-	   cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
+		 cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
 	done
 
 .PHONY: vendor
 vendor:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
-	   cd $${folder}; echo " - go mod vendor '$${folder}'"; go mod vendor; cd - >/dev/null;\
+		 cd $${folder}; echo " - go mod vendor '$${folder}'"; go mod vendor; cd - >/dev/null;\
 	done
 
 .PHONY: fakes

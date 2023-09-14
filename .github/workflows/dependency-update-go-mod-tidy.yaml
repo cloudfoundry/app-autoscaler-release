@@ -72,9 +72,10 @@ jobs:
           git checkout 'HEAD~1'
           pushd './src/acceptance/assets/app/go_app'
             make generate
-            git checkout "${current_branch}"
-            go mod tidy
           popd
+          git checkout "${current_branch}"
+
+          make package-specs
 
           declare -i -r changed_files=$(git status --porcelain | wc --lines)
           if ((changed_files >= 0))
