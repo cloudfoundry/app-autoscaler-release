@@ -38,9 +38,12 @@ jobs:
           #! /usr/bin/env bash
           set -eu -o pipefail
 
+          declare -r commit_author_name="${{github.event.head_commit.author.name}}"
+          declare -r commit_author_email="${{github.event.head_commit.author.email}}"
+
           git config --global --add safe.directory "${GITHUB_WORKSPACE}"
-          git config user.name "GitHubActions"
-          git config user.email "<>"
+          git config user.name "${commit_author_name}"
+          git config user.email "${commit_author_email}"
       - name: go-mod-tidy
         shell: bash
         run: |
@@ -51,11 +54,11 @@ jobs:
           if [[ ! "${commit_author_name}" =~ ('dependabot'|'renovate')'[bot]' ]]
           then
             echo 'This commit was not by a known bot! Exiting …'
-            echo "Debug: commit_author_name = ${commit_author_name}"
+            echo "Debug: commit_author_name = ${commit_author_name}" # TODO: Remove this!
             exit 0
           fi
 
-          declare -r current_branch="$(git rev-parse --abbrev-ref 'HEAD')"
+          declare -r current_branch="$(git branch --show-current)"
           git checkout 'HEAD~1'
           pushd './src/acceptance/assets/app/go_app'
             make generate
@@ -67,8 +70,8 @@ jobs:
           if ((changed_files >= 0))
           then
             git add .
-            git commit --amend --no-edit
-            git push --force-with-lease
+            git commit --message='go mod tidy'
+            git push
           fi
 
       # - uses: fastify/github-action-merge-dependabot@v3
