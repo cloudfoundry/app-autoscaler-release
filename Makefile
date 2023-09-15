@@ -1,8 +1,10 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MAKEFLAGS = -s
+
 go_modules := $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules := $(go_modules) db scheduler
+
 MVN_OPTS = "-Dmaven.test.skip=true"
 OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} || uname)
 db_type := postgres
@@ -243,26 +245,44 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: release
-bosh-release: mod-tidy vendor scheduler db build/autoscaler-test.tgz
+bosh-release: go-mod-tidy vendor scheduler db build/autoscaler-test.tgz
 build/autoscaler-test.tgz:
 	@echo " - building bosh release into build/autoscaler-test.tgz"
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
 
 .PHONY: acceptance-release
-acceptance-release: clean-acceptance mod-tidy vendor build-test-app
+acceptance-release: clean-acceptance go-mod-tidy vendor build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
-.PHONY: mod-tidy
-mod-tidy:
-	@for folder in $$(find . -maxdepth 6 -name 'go.mod' -exec dirname {} \;) ;\
-	do \
-		pushd "$${folder}" ;\
-			echo " - go mod tidying '$${folder}'" ;\
-			go mod tidy ;\
-		popd ;\
-	done
+
+
+
+.PHONY: go-mod-tidy
+go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
+						 changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
+
+go-acceptance-dir := ./src/acceptance
+go-autoscaler-dir := ./src/autoscaler
+go-changelog-dir := ./src/changelog
+go-changeloglockcleander-dir := ./src/changeloglockcleaner
+go-test-app-dir := ./src/acceptance/assets/app/go_app
+
+.PHONY: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
+				changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
+acceptance.go-mod-tidy:
+	make --directory='${go-acceptance-dir}' go-mod-tidy
+autoscaler.go-mod-tidy:
+	make --directory='${go-autoscaler-dir}' go-mod-tidy
+changelog.go-mod-tidy:
+	make --directory='${go-changelog-dir}' go-mod-tidy
+changeloglockcleander.go-mod-tidy:
+	make --directory='${go-changeloglockcleander-dir}' go-mod-tidy
+test-app.go-mod-tidy:
+	make --directory='${go-test-app-dir}' go-mod-tidy
+
+
 
 .PHONY: mod-download
 mod-download:
@@ -298,7 +318,7 @@ markdownlint-cli:
 
 .PHONY: deploy deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
 deploy-autoscaler: deploy
-deploy: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
+deploy: go-mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
@@ -370,7 +390,7 @@ run-performance:
 run-act:
 	${AUTOSCALER_DIR}/scripts/run_act.sh;\
 
-package-specs: mod-tidy vendor
+package-specs: go-mod-tidy vendor
 	@echo " - Updating the package specs"
 	@./scripts/sync-package-specs
 

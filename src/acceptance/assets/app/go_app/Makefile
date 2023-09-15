@@ -7,7 +7,8 @@ MAKEFLAGS=
 
 GO_VERSION = $(shell go version | sed --expression='s/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
-PACKAGE_DIRS = $(shell go list ./... | grep --invert-match /vendor/ | grep --invert-match e2e)
+PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
+								 | grep --invert-match --regexp='e2e')
 CGO_ENABLED := 0
 export GOWORK := off
 
@@ -26,24 +27,25 @@ GOLANGCI_LINT_VERSION = v$(shell cat ../../../../../.tool-versions | grep --rege
 
 openapi-spec-path := ../../../../../api
 openapi-specs-list := $(wildcard ${openapi-spec-path}/*.openapi.yaml)
-appfakes-path := ./internal/app/appfakes
+app-fakes-dir := ./internal/app/appfakes
+app-fakes-files := $(wildcard ${app-fakes-dir}/*.go)
 
 .PHONY: generate-fakes
-generate-fakes: ${appfakes-path} $(wildcard ${appfakes-path}/*.go)
-${appfakes-path} $(wildcard ${appfakes-path}/*.go) &: ./go.mod ./internal/generate.go ${openapi-specs-list}
+generate-fakes: ${app-fakes-dir} ${app-fakes-files}
+${app-fakes-dir} ${app-fakes-files} &: ./go.mod ./internal/generate.go ${openapi-specs-list}
 	go generate ./...
 
 
 
 .PHONY: go-mod-tidy
-go-mod-tidy: ${appfakes-path} $(wildcard ${appfakes-path}/*.go)
+go-mod-tidy: ${app-fakes-dir} ${app-fakes-files}
 	go mod tidy
 
 
 
 .PHONY: build
 build: ./build/app ./build/manifest.yml
-./build/app ./build/manifest.yml: ./go.mod ${appfakes-path} $(wildcard ${appfakes-path}/*.go)
+./build/app ./build/manifest.yml: ./go.mod ${app-fakes-dir} ${app-fakes-files}
 	echo '# building  test-app'
 	mkdir -p build
 	CGO_ENABLED='${CGO_ENABLED}' GOOS='linux' GOARCH='amd64' go build -o './build/app'
@@ -54,10 +56,10 @@ build: ./build/app ./build/manifest.yml
 .PHONY: build_tests
 build_tests: $(addprefix build_test-,$(test_dirs))
 
-build_test-%: ${appfakes-path} $(wildcard ${appfakes-path}/*.go)
+build_test-%: ${app-fakes-dir} ${app-fakes-files}
 	@echo " - building '$*' tests"
 	@export build_folder='${PWD}/build/tests/$*'
-	@mkdir -p '$${build_folder}'
+	@mkdir -p "$${build_folder}"
 	cd $*
 	for package in $$(go list './...' | sed 's|.*/autoscaler/$*|.|' | awk '{ print length, $$0 }' | \
 										sort --numeric-sort --reverse | cut --delimiter=' ' --fields='2-')
