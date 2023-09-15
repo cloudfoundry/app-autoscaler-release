@@ -62,13 +62,18 @@ jobs:
             exit 0
           fi
 
+          # Generated files are needed for `go mod tidy` which is a dependency of the
+          # target `package-specs`. However the generation of them itself already
+          # requires go-modules to be tidied up. So we need to generate the files
+          # before changing `go.mod` and `go.sum`.
           declare -r current_branch="$(git branch --show-current)"
           git checkout 'HEAD~1'
-          pushd './src/acceptance/assets/app/go_app'
-            make generate
-          popd
+          make --directory='./src/acceptance/assets/app/go_app' generate-fakes
+          make --directory='./src/autoscaler' generate-fakes
           git checkout "${current_branch}"
 
+          # ⚠️ For this workflow to be successful, the subsequent line must not
+          # trigger again the creation of the generated files.
           make package-specs
 
           declare -i -r changed_files=$(git status --porcelain | wc --lines)
