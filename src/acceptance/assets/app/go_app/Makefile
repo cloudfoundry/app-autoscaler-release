@@ -1,9 +1,11 @@
 .ONESHELL:
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
+aes_terminal_font_yellow := \e[38;2;255;255;0m
+aes_terminal_reset := \e[0m
 
 # TODO: Do we need the next line?
-MAKEFLAGS=
+MAKEFLAGS =
 
 GO_VERSION = $(shell go version | sed --expression='s/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
@@ -32,7 +34,13 @@ app-fakes-files := $(wildcard ${app-fakes-dir}/*.go)
 
 .PHONY: generate-fakes
 generate-fakes: ${app-fakes-dir} ${app-fakes-files}
-${app-fakes-dir} ${app-fakes-files} &: ./go.mod ./internal/generate.go ${openapi-specs-list}
+${app-fakes-dir} ${app-fakes-files} &: ./internal/generate.go ${openapi-specs-list}
+	@echo -ne '${aes_terminal_font_yellow}'
+	@echo -e '⚠️ The client-fakes generated from the openapi-specification depend on\n' \
+					 'the files ./go.mod and ./go.sum. This has not been reflected in this\n' \
+					 'make-target to avoid cyclic dependencies because `go mod tidy`, which\n' \
+					 'modifies both files, depends itself on the client-fakes.'
+	@echo -ne '${aes_terminal_reset}'
 	go generate ./...
 
 
