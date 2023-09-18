@@ -19,7 +19,7 @@ jobs:
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
       - name: run go mod tidy on all .mod's
-        run: make mod-tidy
+        run: make go-mod-tidy
 
       - name: Check if there is any change
         id: get_changes

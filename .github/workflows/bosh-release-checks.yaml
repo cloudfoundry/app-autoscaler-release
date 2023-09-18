@@ -46,7 +46,7 @@ jobs:
         run: |
           set -e
           export PATH=$PATH:/usr/local/maven/bin
-          make mod-tidy vendor db scheduler
+          make go-mod-tidy vendor db scheduler
 
       - name: Build Dev Release
         id: build

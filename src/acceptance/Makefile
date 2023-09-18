@@ -1,20 +1,32 @@
 SHELL := /bin/bash
-.SHELLFLAGS = -euo pipefail -c
-MAKEFLAGS = -s
+.SHELLFLAGS := -eu -o pipefail -c
+MAKEFLAGS := -s
+
 GO := GO111MODULE=on GO15VENDOREXPERIMENT=1 go
 GO_NOMOD := GO111MODULE=off go
-GO_VERSION := $(shell $(GO) version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
-GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
-PACKAGE_DIRS := $(shell $(GO) list ./... | grep -v /vendor/ | grep -v e2e)
 
-CGO_ENABLED = 0
-export GOWORK=off
-BUILDTAGS :=
+GO_VERSION = $(shell go version | sed --expression='s/^[^0-9.]*\([0-9.]*\).*/\1/')
+GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
+PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
+								 | grep --invert-match --regexp='e2e')
 
-GINKGO_VERSION=v$(shell cat ../../.tool-versions | grep ginkgo  | cut -d " " -f 2 )
-GOLANGCI_LINT_VERSION=v$(shell cat ../../.tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+CGO_ENABLED := 0
+export GOWORK := off
 
-test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
+GINKGO_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='ginkgo' \
+										| cut --delimiter=' ' --fields='2')
+GOLANGCI_LINT_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='golangci-lint' \
+													 | cut --delimiter=' ' --fields='2' )
+
+
+.PHONY: go-mod-tidy
+go-mod-tidy:
+	go mod tidy
+
+
+
+test_dirs = $(shell find . -name "*_test.go" -exec dirname {} \; | cut --delimiter='/' --fields='2' \
+						| sort | uniq)
 build_tests: $(addprefix build_test-,$(test_dirs))
 build_test-%:
 	@echo " - building '$*' tests"
@@ -23,9 +35,9 @@ build_test-%:
 	 cd $* &&\
 	 for package in $$(  go list ./... | sed 's|.*/autoscaler/$*|.|' | awk '{ print length, $$0 }' | sort -n -r | cut -d" " -f2- );\
 	 do\
-	   export test_file=$${build_folder}/$${package}.test;\
-	   echo "   - compiling $${package} to $${test_file}";\
-	   go test -c -o $${test_file} $${package};\
+		 export test_file=$${build_folder}/$${package}.test;\
+		 echo "   - compiling $${package} to $${test_file}";\
+		 go test -c -o $${test_file} $${package};\
 	 done;
 
 check: lint build_tests

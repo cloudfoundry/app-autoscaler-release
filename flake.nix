@@ -63,7 +63,11 @@
             hardeningDisable = [ "fortify" ];
 
             shellHook = ''
-              echo -ne '\033[1;33m' '\033[5m'
+              aes_terminal_font_yellow='\e[38;2;255;255;0m'
+              aes_terminal_font_blink='\e[5m'
+              aes_terminal_reset='\e[0m'
+
+              echo -ne "$aes_terminal_font_yellow" "$aes_terminal_font_blink"
               cat << 'EOF'
                 ⚠️ If `whoami` does not work properly on your computer, `bosh ssh` commands may fail.
                 The solution is, to provide your nix dev-shell the path to the `libnss_sss.so.2` of
@@ -72,7 +76,7 @@
                 Adapt the following line to contain the correct path:
                 export LD_PRELOAD='/lib/x86_64-linux-gnu/libnss_sss.so.2'
               EOF
-              echo -ne '\033[0m'
+              echo -ne "$aes_terminal_reset"
             '';
           };
       });
