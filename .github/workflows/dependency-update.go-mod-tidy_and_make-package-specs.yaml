@@ -1,6 +1,6 @@
 name: "renovate-/ospo-bot: go mod tidy and make package-specs"
 on:
-  [pull_request, push]:
+  pull_request: &on-filter
     branches:
       - "renovate/**"
       - "dependabot/**"
@@ -8,6 +8,7 @@ on:
       - ".github/workflows/dependency-update-go-mod-tidy.yaml"
       - "src/**/go.mod"
       - "src/**/go.sum"
+  push: *on-filter
   workflow_dispatch: {}
 jobs:
   go-mod-tidy:
