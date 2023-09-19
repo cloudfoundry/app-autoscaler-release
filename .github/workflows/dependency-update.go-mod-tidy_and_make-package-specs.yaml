@@ -1,13 +1,14 @@
 name: "renovate-/ospo-bot: go mod tidy and make package-specs"
 on:
-  push:
+  [pull_request, push]:
     branches:
       - "renovate/**"
       - "dependabot/**"
     paths:
       - ".github/workflows/dependency-update-go-mod-tidy.yaml"
-      - "./src/**/go.mod"
-      - "./src/**/go.sum"
+      - "src/**/go.mod"
+      - "src/**/go.sum"
+  workflow_dispatch: {}
 jobs:
   go-mod-tidy:
     runs-on: ubuntu-latest
