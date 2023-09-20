@@ -1,6 +1,6 @@
 name: "renovate-/ospo-bot: go mod tidy and make package-specs"
 on:
-  pull_request: &on-filter
+  pull_request:
     branches:
       - "renovate/**"
       - "dependabot/**"
@@ -8,7 +8,18 @@ on:
       - ".github/workflows/dependency-update-go-mod-tidy.yaml"
       - "src/**/go.mod"
       - "src/**/go.sum"
-  push: *on-filter
+  push:
+    # TODO: As soon as Github solves issue <https://github.com/actions/runner/issues/1182>
+    # and this event-configuration remains identical to the one for `pull_request`,
+    # anchors and aliases may be used, see the official
+    # [yaml-documentation](<https://yaml.org/spec/1.2.2/#alias-nodes>).
+    branches:
+      - "renovate/**"
+      - "dependabot/**"
+    paths:
+      - ".github/workflows/dependency-update-go-mod-tidy.yaml"
+      - "src/**/go.mod"
+      - "src/**/go.sum"
   workflow_dispatch: {}
 jobs:
   go-mod-tidy:
