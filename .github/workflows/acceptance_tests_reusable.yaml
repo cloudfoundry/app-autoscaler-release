@@ -88,14 +88,7 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Deploy autoscaler
         shell: bash
-        run: |
-          #! /usr/bin/env bash
-          set -eu -o pipefail
-
-          make --directory="${AUTOSCALER_DIR}/src/acceptance/assets/app/go_app" generate-fakes
-          make --directory="${AUTOSCALER_DIR}/src/autoscaler" generate-fakes
-
-          make --directory="${AUTOSCALER_DIR}" deploy-autoscaler
+        run: make --directory="${AUTOSCALER_DIR}" deploy-autoscaler
 
   acceptance_tests:
     needs: [ deploy_autoscaler ]

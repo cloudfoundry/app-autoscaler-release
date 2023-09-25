@@ -23,7 +23,7 @@ CI ?= false
 VERSION ?= 0.0.testing
 DEST ?= build
 
-GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  | cut --delimiter=' ' --fields='2')
 
 export BUILDIN_MODE ?= false
 export DEBUG ?= false
@@ -214,7 +214,7 @@ stop-db: check-db_type
 .PHONY: integration
 integration: build init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
-	make -C src/autoscaler integration DBURL="${DBURL}" OPTS="${OPTS}"
+	make --directory='./src/autoscaler' integration DBURL="${DBURL}" OPTS="${OPTS}"
 
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
@@ -316,9 +316,8 @@ uaac:
 markdownlint-cli:
 	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
-.PHONY: deploy deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: deploy
-deploy: go-mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
+.PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
+deploy-autoscaler: vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
