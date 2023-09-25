@@ -9,19 +9,19 @@ bosh_deploy_opts="${BOSH_DEPLOY_OPTS:-""}"
 bosh_upload_release_opts="${BOSH_UPLOAD_RELEASE_OPTS:-""}"
 bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
 ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
- ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
- ${autoscaler_dir}/operations/add-postgres-variables.yml\
- ${autoscaler_dir}/operations/connect_to_postgres_with_certs.yml\
- ${autoscaler_dir}/operations/enable-nats-tls.yml\
- ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
- ${autoscaler_dir}/operations/add-extra-plan.yml\
- ${autoscaler_dir}/operations/set-release-version.yml\
- ${autoscaler_dir}/operations/enable-log-cache.yml\
- ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
- ${autoscaler_dir}/operations/remove-metricsserver.yml\
- ${autoscaler_dir}/operations/remove-metricsgateway.yml\
- ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml\
- ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
+  ${autoscaler_dir}/operations/instance-identity-cert-from-cf.yml\
+  ${autoscaler_dir}/operations/add-postgres-variables.yml\
+  ${autoscaler_dir}/operations/connect_to_postgres_with_certs.yml\
+  ${autoscaler_dir}/operations/enable-nats-tls.yml\
+  ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
+  ${autoscaler_dir}/operations/add-extra-plan.yml\
+  ${autoscaler_dir}/operations/set-release-version.yml\
+  ${autoscaler_dir}/operations/enable-log-cache.yml\
+  ${autoscaler_dir}/operations/log-cache-syslog-server.yml\
+  ${autoscaler_dir}/operations/remove-metricsserver.yml\
+  ${autoscaler_dir}/operations/remove-metricsgateway.yml\
+  ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml\
+  ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
 
 
 if [[ "${buildin_mode}" == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
@@ -38,7 +38,7 @@ function setup_autoscaler_uaac(){
   local autoscaler_secret="autoscaler_client_secret"
   local uaa_client_secret=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
   uaac target "https://uaa.${system_domain}" --skip-ssl-validation > /dev/null
-  uaac token client get admin -s "$uaa_client_secret" > /dev/null
+  uaac token client get admin -s "${uaa_client_secret}" > /dev/null
 
   if uaac client get autoscaler_client_id >/dev/null; then
     step "updating autoscaler uaac client"
@@ -127,7 +127,7 @@ function find_or_upload_stemcell() {
   if ! bosh stemcells | grep "${stemcell_name}" >/dev/null; then
     URL="https://bosh.io/d/stemcells/${stemcell_name}"
     if [ "${stemcell_version}" != "latest" ]; then
-	    URL="${URL}?v=${stemcell_version}"
+      URL="${URL}?v=${stemcell_version}"
     fi
     wget "${URL}" -O stemcell.tgz
     bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz

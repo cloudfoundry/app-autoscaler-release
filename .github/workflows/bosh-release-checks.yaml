@@ -55,7 +55,7 @@ jobs:
           make --directory='./src/autoscaler' generate-fakes
 
           export PATH="${PATH}:/usr/local/maven/bin"
-          make go-mod-tidy vendor db scheduler
+          make go-mod-tidy go-mod-vendor db scheduler
 
       - name: Build Dev Release
         id: build

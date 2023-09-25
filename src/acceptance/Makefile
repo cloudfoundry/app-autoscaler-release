@@ -19,9 +19,26 @@ GOLANGCI_LINT_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='gol
 													 | cut --delimiter=' ' --fields='2' )
 
 
+
+.PHONY: clean
+clean:
+	rm --recursive --force './vendor'
+
+
 .PHONY: go-mod-tidy
 go-mod-tidy:
 	go mod tidy
+
+
+
+go-vendoring-folder := ./vendor
+go-vendored-files = $(shell find '${go-vendoring-folder}' -type f -name '*.go' 2> '/dev/null')
+## This does not work: go-vendored-files = $(wildcard ${go-vendoring-folder}/**/*.go)
+
+.PHONY: go-mod-vendor
+go-mod-vendor: ${go-vendoring-folder} ${go-vendored-files}
+${go-vendoring-folder} ${go-vendored-files} &:
+	go mod vendor
 
 
 

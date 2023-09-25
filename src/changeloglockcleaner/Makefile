@@ -20,9 +20,11 @@ GOLANGCI_LINT_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='gol
 													 | cut --delimiter=' ' --fields='2' )
 
 
-.PHONY: go-mod-tidy
+.PHONY: go-mod-tidy go-mod-vendor
 go-mod-tidy:
 	go mod tidy
+go-mod-vendor:
+	go mod vendor
 
 
 
