@@ -33,7 +33,7 @@ paths:
         The end time in the number of nanoseconds elapsed since January 1, 1970 UTC.
       schema:
         type: integer
-        default: 0
+        default: -1
       example: end-time=1494989549117047288
     - name: order-direction
       in: query
@@ -44,6 +44,15 @@ paths:
         enum: ["asc", "desc"]
         default: desc
       example: order-direction=desc
+    - name: order
+      in: query
+      description: |
+        Deprecated: Use order-direction instead.
+      schema:
+        type: string
+        enum: ["asc", "desc"]
+        deprecated: true
+      example: order=desc
     - name: page
       in: query
       description: The page number to query
@@ -116,12 +125,13 @@ components:
         - $ref: "#/components/schemas/HistoryErrorEntry"
         - $ref: "#/components/schemas/HistoryIgnoreEntry"
         - $ref: "#/components/schemas/HistorySuccessEntry"
-      discriminator:
-        propertyName: status
-        mapping:
-          0: "#/components/schemas/HistorySuccessEntry"
-          1: "#/components/schemas/HistoryErrorEntry"
-          2: "#/components/schemas/HistoryIgnoreEntry"
+#      Unfortunately, we cannot use a discriminator here, as the property MUST be a string, see also https://github.com/OAI/OpenAPI-Specification/issues/2731
+#      discriminator:
+#        propertyName: status
+#        mapping:
+#          0: "#/components/schemas/HistorySuccessEntry"
+#          1: "#/components/schemas/HistoryErrorEntry"
+#          2: "#/components/schemas/HistoryIgnoreEntry"
       properties:
         status:
           type: integer
@@ -134,7 +144,7 @@ components:
              + 2: The scaling was ignored.
             This field is as well a selector of which of the other ones are used and which not.
           example: 0
-        app_guid:
+        app_id:
           $ref: "./shared_definitions.yaml#/schemas/GUID"
         timestamp:
           type: integer
@@ -168,6 +178,10 @@ components:
           type: string
           description: Textual information about what triggered the scaling event.
           example: -1 instance(s) because cpu < 20% for 60 seconds
+        message:
+          type: string
+          description: Textual information about the scaling event.
+          example: app
     HistoryErrorEntry:
       description: Description of a failed scaling even in history.
       type: object

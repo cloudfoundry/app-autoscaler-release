@@ -33,7 +33,12 @@ func NewServer(logger lager.Logger, conf *config.Config, scalingEngineDB db.Scal
 	r := routes.ScalingEngineRoutes()
 	r.Use(httpStatusCollectMiddleware.Collect)
 	r.Get(routes.ScaleRouteName).Handler(VarsFunc(handler.Scale))
-	r.Get(routes.GetScalingHistoriesRouteName).Handler(VarsFunc(handler.GetScalingHistories))
+
+	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, scalingEngineDB)
+	if err != nil {
+		return nil, err
+	}
+	r.Get(routes.GetScalingHistoriesRouteName).Handler(scalingHistoryHandler)
 
 	r.Get(routes.SetActiveScheduleRouteName).Handler(VarsFunc(handler.StartActiveSchedule))
 	r.Get(routes.DeleteActiveScheduleRouteName).Handler(VarsFunc(handler.RemoveActiveSchedule))

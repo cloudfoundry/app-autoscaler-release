@@ -6,6 +6,9 @@ import (
 	"os"
 	"time"
 
+	"go.opentelemetry.io/contrib/propagators/b3"
+	"go.opentelemetry.io/otel"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
@@ -87,6 +90,8 @@ func main() {
 		healthendpoint.NewDatabaseStatusCollector("autoscaler", "scalingengine", "schedulerDB", schedulerDB),
 		httpStatusCollector,
 	}, true, logger.Session("scalingengine-prometheus"))
+
+	otel.SetTextMapPropagator(b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader)))
 
 	scalingEngine := scalingengine.NewScalingEngine(logger, cfClient, policyDb, scalingEngineDB, eClock, conf.DefaultCoolDownSecs, conf.LockSize)
 	synchronizer := schedule.NewActiveScheduleSychronizer(logger, schedulerDB, scalingEngineDB, scalingEngine)

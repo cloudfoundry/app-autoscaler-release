@@ -12,6 +12,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
+	_ "code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/ratelimiter"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
@@ -32,6 +33,10 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policydb db.Po
 	checkBindingFunc api.CheckBindingFunc, cfclient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector,
 	rateLimiter ratelimiter.Limiter, bindingdb db.BindingDB) (ifrit.Runner, error) {
 	pah := NewPublicApiHandler(logger, conf, policydb, bindingdb, credentials)
+	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, conf)
+	if err != nil {
+		return nil, err
+	}
 	mw := NewMiddleware(logger, cfclient, checkBindingFunc, conf.APIClientId)
 	rateLimiterMiddleware := ratelimiter.NewRateLimiterMiddleware("appId", rateLimiter, logger.Session("api-ratelimiter-middleware"))
 	httpStatusCollectMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
@@ -45,7 +50,8 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policydb db.Po
 	rp.Use(mw.HasClientToken)
 	rp.Use(mw.Oauth)
 	rp.Use(httpStatusCollectMiddleware.Collect)
-	rp.Get(routes.PublicApiScalingHistoryRouteName).Handler(VarsFunc(pah.GetScalingHistories))
+
+	rp.Get(routes.PublicApiScalingHistoryRouteName).Handler(scalingHistoryHandler)
 	rp.Get(routes.PublicApiAggregatedMetricsHistoryRouteName).Handler(VarsFunc(pah.GetAggregatedMetricsHistories))
 
 	rpolicy := routes.ApiPolicyRoutes()
