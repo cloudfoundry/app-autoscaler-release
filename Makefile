@@ -23,7 +23,7 @@ CI ?= false
 VERSION ?= 0.0.testing
 DEST ?= build
 
-GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  | cut -d " " -f 2 )
+GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  | cut --delimiter=' ' --fields='2')
 
 export BUILDIN_MODE ?= false
 export DEBUG ?= false
@@ -65,7 +65,7 @@ clean-vendor:
 	@echo " - cleaning vendored go"
 	@find . -depth -name "vendor" -type d -exec rm -rf {} \;
 clean-autoscaler:
-	@make -C src/autoscaler clean
+	@make --directory='./src/autoscaler' clean
 clean-scheduler:
 	@echo " - cleaning scheduler test resources"
 	@rm -rf src/scheduler/src/test/resources/certs
@@ -96,14 +96,14 @@ scheduler:
 	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
 autoscaler:
-	@make -C src/autoscaler build
+	@make --directory='./src/autoscaler' build
 changeloglockcleaner:
-	@make -C src/changeloglockcleaner build
+	@make --directory='./src/changeloglockcleaner' build
 changelog:
-	@make -C src/changelog build
+	@make --directory='./src/changelog' build
 $(addprefix test_,$(go_modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
-	@make -C src/$(patsubst test_%,%,$@) build_tests
+	@make --directory='./src/$(patsubst test_%,%,$@)' build_tests
 
 
 .PHONY: test-certs
@@ -120,20 +120,20 @@ target/scheduler_test_certs:
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
 test-autoscaler: check-db_type init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
-	@make -C src/autoscaler test DBURL="${DBURL}" OPTS="${OPTS}"
+	@make --directory='./src/autoscaler' test DBURL="${DBURL}" OPTS="${OPTS}"
 test-autoscaler-suite: check-db_type init-db test-certs
 	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
-	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
+	@make --directory='./src/autoscaler' testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
 test-changelog:
-	@make -C src/changelog test
+	@make --directory='./src/changelog' test
 test-changeloglockcleaner: init-db test-certs
-	@make -C src/changeloglockcleaner test DBURL="${DBURL}"
+	@make --directory='./src/changeloglockcleaner' test DBURL="${DBURL}"
 test-acceptance-unit:
-	@make -C src/acceptance test-unit
-	@make -C src/acceptance/assets/app/go_app test
+	@make --directory='./src/acceptance' test-unit
+	@make --directory='./src/acceptance/assets/app/go_app' test
 
 
 .PHONY: start-db
@@ -214,7 +214,7 @@ stop-db: check-db_type
 .PHONY: integration
 integration: build init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
-	make -C src/autoscaler integration DBURL="${DBURL}" OPTS="${OPTS}"
+	make --directory='./src/autoscaler' integration DBURL="${DBURL}" OPTS="${OPTS}"
 
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
@@ -291,16 +291,20 @@ mod-download:
 		 cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
 	done
 
-.PHONY: vendor
-vendor:
-	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
-	do\
-		 cd $${folder}; echo " - go mod vendor '$${folder}'"; go mod vendor; cd - >/dev/null;\
-	done
+.PHONY: vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
+				changeloglockcleander.go-mod-vendor
+go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
+							 changeloglockcleander.go-mod-vendor
+acceptance.go-mod-vendor:
+	make --directory='${go-acceptance-dir}' go-mod-vendor
+autoscaler.go-mod-vendor:
+	make --directory='${go-autoscaler-dir}' go-mod-vendor
+changelog.go-mod-vendor:
+	make --directory='${go-changelog-dir}' go-mod-vendor
+changeloglockcleander.go-mod-vendor:
+	make --directory='${go-changeloglockcleander-dir}' go-mod-vendor
 
-.PHONY: fakes
-fakes:
-	@make -C src/autoscaler fakes
+
 
 # https://github.com/golang/tools/blob/master/gopls/doc/workspace.md
 .PHONY: workspace
@@ -316,9 +320,8 @@ uaac:
 markdownlint-cli:
 	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
-.PHONY: deploy deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: deploy
-deploy: go-mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
+.PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
+deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
@@ -355,7 +358,7 @@ deploy-prometheus: ${prometheus-bosh-release-path}/manifests
 
 .PHONY: build-test-app
 build-test-app:
-	@make -C src/acceptance/assets/app/go_app build
+	@make --directory='./src/acceptance/assets/app/go_app' build
 
 .PHONY: acceptance-tests
 acceptance-tests: build-test-app

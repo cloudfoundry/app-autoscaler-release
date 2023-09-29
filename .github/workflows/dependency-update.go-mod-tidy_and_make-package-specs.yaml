@@ -22,7 +22,8 @@ on:
       - "src/**/go.sum"
   workflow_dispatch: {}
 jobs:
-  go-mod-tidy:
+  pkgs-specs_and_go-mod-tidy:
+    name: "go mod tidy && make package-specs"
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write

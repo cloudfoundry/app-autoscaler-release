@@ -19,7 +19,14 @@ jobs:
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
       - name: run go mod tidy on all .mod's
-        run: make go-mod-tidy
+        shell: bash
+        run: |
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          make --directory='./src/acceptance/assets/app/go_app' generate-fakes
+          make --directory='./src/autoscaler' generate-fakes
+          make go-mod-tidy
 
       - name: Check if there is any change
         id: get_changes

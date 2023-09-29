@@ -19,7 +19,7 @@ binaries = $(shell find . -name "main.go" -exec dirname {} \; \
 test_dirs = $(shell find . -name "*_test.go" -exec dirname {} \; \
 										| cut --delimiter='/' --fields='2' | sort | uniq)
 
-GINKGO_OPTS :=-r --race --require-suite --randomize-all --cover ${OPTS}
+GINKGO_OPTS := -r --race --require-suite --randomize-all --cover ${OPTS}
 export CONFIG ?= ../../../../acceptance_config.json
 
 GINKGO_VERSION = v$(shell cat ../../../../../.tool-versions | grep --regexp='ginkgo' | cut --delimiter=' ' --fields='2')
@@ -28,12 +28,14 @@ GOLANGCI_LINT_VERSION = v$(shell cat ../../../../../.tool-versions | grep --rege
 
 
 openapi-spec-path := ../../../../../api
-openapi-specs-list := $(wildcard ${openapi-spec-path}/*.openapi.yaml)
+openapi-specs-list = $(wildcard ${openapi-spec-path}/*.openapi.yaml)
 
 # The presence of the subsequent directory indicates wheather the fakes still need to be generated
 # or not.
 app-fakes-dir := ./internal/app/appfakes
-app-fakes-files := $(wildcard ${app-fakes-dir}/*.go)
+app-fakes-files = $(wildcard ${app-fakes-dir}/*.go)
+go_deps_without_fakes = $(shell find . -type f -name '*.go' \
+																| grep --invert-match --regexp='${app-fakes-dir}')
 
 .PHONY: generate-fakes
 generate-fakes: ${app-fakes-dir} ${app-fakes-files}
@@ -42,21 +44,18 @@ ${app-fakes-dir} ${app-fakes-files} &: ./go.mod ./go.sum ./internal/generate.go 
 
 
 
-# The generated fakes are order-only dependencies for `go-mod-tidy`. The reason is, that for
-# `go-mod-tidy` the generated fakes need to be present but fortunately not necessarily
-# up-to-date. This is fortunate because the generation of the fake requires the files `go.mod` and
-# `go.sum` to be already tidied up, introducing a cyclic dependency otherwise. But that would make
-# any modification to `go.mod` or `go.sum` impossible. This definition now makes it possible to
-# update `go.mod` and `go.sum` as follows:
+# This target should depend additionally on `${app-fakes-dir}` and on `${app-fakes-files}`. However
+# this is not defined here. The reason is, that for `go-mod-tidy` the generated fakes need to be
+# present but fortunately not necessarily up-to-date. This is fortunate because the generation of
+# the fake requires the files `go.mod` and `go.sum` to be already tidied up, introducing a cyclic
+# dependency otherwise. But that would make any modification to `go.mod` or `go.sum`
+# impossible. This definition now makes it possible to update `go.mod` and `go.sum` as follows:
 #  1. `make generate-fakes`
 #  2. Update `go.mod` and/or `go.sum`
 #  3. `make go-mod-tidy`
 #  4. Optionally: `make generate-fakes` to update the fakes as well.
-#
-# For more information on order-only dependencies, see:
-# <https://www.gnu.org/software/make/manual/html_node/Prerequisite-Types.html>
 .PHONY: go-mod-tidy
-go-mod-tidy: ./go.mod ./go.sum ${GO_DEPENDENCIES} | ${app-fakes-dir} ${app-fakes-files}
+go-mod-tidy: ./go.mod ./go.sum ${go_deps_without_fakes}
 	@echo -ne '${aes_terminal_font_yellow}'
 	@echo -e '⚠️ Warning: The client-fakes generated from the openapi-specification may be\n' \
 					 'outdated. Please consider re-generating them, if this is relevant.'
