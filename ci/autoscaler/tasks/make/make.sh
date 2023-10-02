@@ -1,5 +1,5 @@
 #!/bin/bash
 # shellcheck disable=SC2086
-set -euo pipefail
+set -eu -o pipefail
 
-make -C $1 ${TARGETS}
+make --directory="${1}" ${TARGETS}

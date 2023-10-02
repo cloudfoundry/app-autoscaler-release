@@ -26,7 +26,6 @@ anchors:
       operations/remove-metricsgateway.yml
       operations/enable-scheduler-logging.yml
 
-
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
       operations/add-releases.yml
@@ -234,9 +233,10 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -280,9 +280,10 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -328,9 +329,10 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -365,9 +367,10 @@ jobs:
     - get: bbl-state
     - get: app-autoscaler-release
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -378,11 +381,11 @@ jobs:
     params:
       <<: *performance-env
   - task: setup-performance
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
      TARGETS: setup-performance
   - task: run-performance
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
      TARGETS: run-performance
 
@@ -422,9 +425,10 @@ jobs:
         pre_upgrade
       NODES: 1
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -451,9 +455,10 @@ jobs:
       passed: [upgrade-test]
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: release-autoscaler
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
