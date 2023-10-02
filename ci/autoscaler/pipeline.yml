@@ -235,7 +235,8 @@ jobs:
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -281,7 +282,8 @@ jobs:
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -329,7 +331,8 @@ jobs:
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -366,7 +369,8 @@ jobs:
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -423,7 +427,8 @@ jobs:
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
@@ -452,7 +457,8 @@ jobs:
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: go-mod-tidy vendor db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes go-mod-tidy go-mod-vendor db scheduler
   - task: release-autoscaler
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:

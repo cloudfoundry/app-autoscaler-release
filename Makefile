@@ -2,7 +2,13 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MAKEFLAGS = -s
 
-go_modules := $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
+go-acceptance-dir := ./src/acceptance
+go-autoscaler-dir := ./src/autoscaler
+go-changelog-dir := ./src/changelog
+go-changeloglockcleander-dir := ./src/changeloglockcleaner
+go-test-app-dir := ./src/acceptance/assets/app/go_app
+
+go_modules := $(shell find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules := $(go_modules) db scheduler
 
 MVN_OPTS = "-Dmaven.test.skip=true"
@@ -23,7 +29,8 @@ CI ?= false
 VERSION ?= 0.0.testing
 DEST ?= build
 
-GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  | cut --delimiter=' ' --fields='2')
+GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  \
+													| cut --delimiter=' ' --fields='2')
 
 export BUILDIN_MODE ?= false
 export DEBUG ?= false
@@ -257,17 +264,16 @@ acceptance-release: clean-acceptance go-mod-tidy vendor build-test-app
 	@mkdir -p ${DEST}
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
 
-
+.PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
+generate-fakes: autoscaler.generate-fakes test-app.generate-fakes
+autoscaler.generate-fakes:
+	make --directory='${go-autoscaler-dir}' generate-fakes
+test-app.generate-fakes:
+	make --directory='${go-test-app-dir}' generate-fakes
 
 .PHONY: go-mod-tidy
 go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
 						 changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
-
-go-acceptance-dir := ./src/acceptance
-go-autoscaler-dir := ./src/autoscaler
-go-changelog-dir := ./src/changelog
-go-changeloglockcleander-dir := ./src/changeloglockcleaner
-go-test-app-dir := ./src/acceptance/assets/app/go_app
 
 .PHONY: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
 				changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
