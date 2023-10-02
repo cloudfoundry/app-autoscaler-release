@@ -26,7 +26,6 @@ anchors:
       operations/remove-metricsgateway.yml
       operations/enable-scheduler-logging.yml
 
-
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
       operations/add-releases.yml
@@ -234,7 +233,7 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       TARGETS: go-mod-tidy vendor db scheduler
   - task: deploy-autoscaler
@@ -280,7 +279,7 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       TARGETS: go-mod-tidy vendor db scheduler
   - task: deploy-autoscaler
@@ -328,7 +327,7 @@ jobs:
       trigger: true
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       TARGETS: go-mod-tidy vendor db scheduler
   - task: deploy-autoscaler
@@ -365,7 +364,7 @@ jobs:
     - get: bbl-state
     - get: app-autoscaler-release
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       TARGETS: go-mod-tidy vendor db scheduler
   - task: deploy-autoscaler
@@ -378,11 +377,11 @@ jobs:
     params:
       <<: *performance-env
   - task: setup-performance
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
      TARGETS: setup-performance
   - task: run-performance
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
      TARGETS: run-performance
 
@@ -422,7 +421,7 @@ jobs:
         pre_upgrade
       NODES: 1
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       TARGETS: go-mod-tidy vendor db scheduler
   - task: deploy-autoscaler
@@ -451,7 +450,7 @@ jobs:
       passed: [upgrade-test]
     - get: ci
   - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yml
+    file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       TARGETS: go-mod-tidy vendor db scheduler
   - task: release-autoscaler
