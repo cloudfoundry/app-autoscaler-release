@@ -13,15 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
-
     steps:
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
-
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: sync-package-specs
-        run: make package-specs
+        shell: bash
+        run: |
+          #! /usr/bin/env bash
+          set -eu -o pipefail
 
+          make --directory='./src/acceptance/assets/app/go_app' generate-fakes
+          make --directory='./src/autoscaler' generate-fakes
+          make package-specs
       - name: Check if there is any change
         run: |
             [ $(git status --porcelain | wc -l) -eq 0 ] || \
@@ -30,7 +34,6 @@ jobs:
               echo "::error::Specs are out of date, run \"make package-specs\" to update";\
               exit 1;\
             }
-
   bosh-release:
     needs: generate-gosub
     name: Create Bosh Release
@@ -41,16 +44,22 @@ jobs:
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run Update
+        shell: bash
         run: |
-          set -e
-          export PATH=$PATH:/usr/local/maven/bin
-          make mod-tidy vendor db scheduler
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          make --directory='./src/acceptance/assets/app/go_app' generate-fakes
+          make --directory='./src/autoscaler' generate-fakes
+
+          export PATH="${PATH}:/usr/local/maven/bin"
+          make go-mod-tidy go-mod-vendor db scheduler
 
       - name: Build Dev Release
         id: build
-        uses: orange-cloudfoundry/bosh-release-action@v2.0.0
+        uses: orange-cloudfoundry/bosh-release-action@v2.1.0
 
       - name: Compile Dev Release
         uses: cloudfoundry/bosh-compile-action@main

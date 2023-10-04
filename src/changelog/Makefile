@@ -1,14 +1,32 @@
 SHELL := /bin/bash
-.SHELLFLAGS = -euo pipefail -c
-MAKEFLAGS = -s
+.SHELLFLAGS := -eu -o pipefail -c
+MAKEFLAGS := -s
+
 GO := GO111MODULE=on GO15VENDOREXPERIMENT=1 go
 GO_NOMOD := GO111MODULE=off go
-GO_VERSION := $(shell $(GO) version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
-GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
-PACKAGE_DIRS := $(shell $(GO) list ./... | grep -v /vendor/ | grep -v e2e)
 
-CGO_ENABLED = 0
+GO_VERSION := $(shell ${GO} version | sed --expression='s/^[^0-9.]*\([0-9.]*\).*/\1/')
+GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
+PACKAGE_DIRS = $(shell ${GO} list './...' | grep --invert-match --regexp='/vendor/' \
+								 | grep --invert-match --regexp='e2e')
+
+CGO_ENABLED := 0
+export GOWORK := off
 BUILDTAGS :=
+
+GINKGO_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='ginkgo' \
+										| cut --delimiter=' ' --fields='2')
+GOLANGCI_LINT_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='golangci-lint' \
+													 | cut --delimiter=' ' --fields='2' )
+
+
+.PHONY: go-mod-tidy go-mod-vendor
+go-mod-tidy:
+	go mod tidy
+go-mod-vendor:
+	go mod vendor
+
+
 
 build:
 	@echo "# building changelog"
@@ -23,14 +41,14 @@ build_test-%:
 	 cd $* &&\
 	 for package in $$(  go list ./... | sed 's|.*/autoscaler/$*|.|' | awk '{ print length, $$0 }' | sort -n -r | cut -d" " -f2- );\
 	 do\
-	   export test_file=$${build_folder}/$${package}.test;\
-	   echo "   - compiling $${package} to $${test_file}";\
-	   go test -c -o $${test_file} $${package};\
+		 export test_file=$${build_folder}/$${package}.test;\
+		 echo "   - compiling $${package} to $${test_file}";\
+		 go test -c -o $${test_file} $${package};\
 	 done;
 check: fmt lint build test
 
 test:
-	ginkgo -r --race --randomize-all --keep-going
+	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} -r --race --randomize-all --keep-going
 
 get-fmt-deps: ## Install goimports
 	$(GO_NOMOD) get golang.org/x/tools/cmd/goimports
@@ -44,7 +62,7 @@ fmt: importfmt
 	@([[ ! -z "$(FORMATTED)" ]] && printf "Fixed unformatted files:\n$(FORMATTED)") || true
 
 lint:
-	golangci-lint run
+	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
 
 lint-fix:
-	golangci-lint run --fix
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --fix

@@ -62,7 +62,7 @@ jobs:
       checks: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: app-autoscaler-release
       - name: Create pending check
@@ -79,7 +79,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: app-autoscaler-release
       - name: Setup environment for deployment
@@ -87,9 +87,8 @@ jobs:
         with:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Deploy autoscaler
-        run: |
-          cd "${AUTOSCALER_DIR}"
-          make deploy-autoscaler
+        shell: bash
+        run: make --directory="${AUTOSCALER_DIR}" deploy-autoscaler
 
   acceptance_tests:
     needs: [ deploy_autoscaler ]
@@ -103,7 +102,7 @@ jobs:
     name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: app-autoscaler-release
       - name: Setup environment for acceptance tests
@@ -113,10 +112,15 @@ jobs:
       - name: Run acceptance test - ${{ matrix.suite }}
         env:
           MATRIX_SUITE: ${{ matrix.suite }}
+        shell: bash
         run: |
-          cd "${AUTOSCALER_DIR}"
-          make acceptance-tests SUITES="${MATRIX_SUITE,,}"
+          #! /usr/bin/env bash
+          set -eu -o pipefail
 
+          make --directory="${AUTOSCALER_DIR}/src/acceptance/assets/app/go_app" generate-fakes
+          make --directory="${AUTOSCALER_DIR}/src/autoscaler" generate-fakes
+
+          make --directory="${AUTOSCALER_DIR}" acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
   acceptance_tests_verify:
     name: "${{ github.workflow }} Result"
@@ -130,7 +134,7 @@ jobs:
       checks: write
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: app-autoscaler-release
     - name: Verify jobs execution
@@ -148,7 +152,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: app-autoscaler-release
       - name: Setup environment for deployment cleanup

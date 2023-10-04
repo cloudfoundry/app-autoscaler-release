@@ -6,5 +6,6 @@ processes:
       - /var/vcap/jobs/golangapiserver/config/apiserver.yml
     env:
       DT_MONITOR: true
+      DT_APPLICATIONID: apiserver
     hooks:
       pre_start: /var/vcap/jobs/golangapiserver/bin/bpm-pre-start

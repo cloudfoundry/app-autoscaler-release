@@ -4,9 +4,6 @@ info:
   description: |
     app-autoscaler lets you automatically increase or decrease the number of your application instances based on the policies you have defined. Your applications can call the app-autoscaler custom metrics API to submit custom metrics defined and used in a dynamic scaling policy to enable automatic scaling based on application-specific metrics.
   version: 1.0.0
-security:
-- mtls: []
-- basicAuthentication: []
 tags:
 - name: Custom Metrics API V1
   description: Work with application-specific custom metrics to scale your application.
@@ -16,15 +13,22 @@ paths:
     parameters:
     - in: path
       name: appGuid
-      description: The GUID identifying the application the custom metrics are submitted for. Can be found in the `application_id` property of the JSON object stored in the `VCAP_APPLICATION` environment variable.
+      description: |
+        The GUID identifying the application for which the metrics are fetched.
+
+        It can be found in the `application_id` property of the JSON object stored in the
+        `VCAP_APPLICATION` environment variable.
       example: 58d162ad-87d5-4f52-8abf-e56a63a67292
       required: true
       schema:
-        type: string
+        $ref: "./shared_definitions.yaml#/schemas/GUID"
     post:
       summary: Submits application-specific custom metrics to app-autoscaler.
       description: |
-        Use to submit custom metrics to app-autoscaler which are defined and used in a dynamic scaling policy to enable automatic scaling based on application-specific metrics. We recommend submitting the custom metrics every 40 seconds from every application instance.
+        Use to submit custom metrics to app-autoscaler which are defined and used in a dynamic
+        scaling policy to enable automatic scaling based on application-specific metrics.
+
+        We recommend submitting the custom metrics every 40 seconds from every application instance.
       tags:
       - Custom Metrics API V1
       requestBody:
@@ -38,19 +42,12 @@ paths:
         '200':
           description: Metrics were successfully submitted.
         default:
-          $ref: '#/components/responses/Error'
+          $ref: "./shared_definitions.yaml#/responses/Error"
       security:
+      - basicAuthentication: []
       - mtls: []
       x-codegen-request-body-name: body
 components:
-  responses:
-    Error:
-      description: |
-        Error, the response body may contain further information.
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
   schemas:
     Metrics:
       required:
@@ -86,15 +83,6 @@ components:
           type: string
           description: An optional unit for the metric, for display purposes only.
           example: jobs
-    ErrorResponse:
-      type: object
-      properties:
-        code:
-          type: string
-          description: The textual error code.
-        message:
-          type: string
-          description: The message describing the cause of the error.
   securitySchemes:
     mtls:
       type: mutualTLS

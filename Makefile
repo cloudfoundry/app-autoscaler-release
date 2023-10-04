@@ -1,30 +1,41 @@
 SHELL := /bin/bash
-.SHELLFLAGS = -euo pipefail -c
-MAKEFLAGS = -s
-go_modules:= $(shell  find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
-all_modules:= $(go_modules) db scheduler
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
-MVN_OPTS="-Dmaven.test.skip=true"
-OS:=$(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} ||  uname  )
-db_type:=postgres
-DB_HOST:=localhost
+MAKEFLAGS = -s
+
+go-acceptance-dir := ./src/acceptance
+go-autoscaler-dir := ./src/autoscaler
+go-changelog-dir := ./src/changelog
+go-changeloglockcleander-dir := ./src/changeloglockcleaner
+go-test-app-dir := ./src/acceptance/assets/app/go_app
+
+go_modules := $(shell find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
+all_modules := $(go_modules) db scheduler
+
+MVN_OPTS = "-Dmaven.test.skip=true"
+OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} || uname)
+db_type := postgres
+DB_HOST := localhost
 DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@${DB_HOST}/autoscaler?sslmode=disable"; ;; \
- 			 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)
+				 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)
 DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 12
-SUITES?=broker api app
-AUTOSCALER_DIR?=$(shell pwd)
-lint_config:=${AUTOSCALER_DIR}/.golangci.yaml
-CI_DIR?=${AUTOSCALER_DIR}/ci
-CI?=false
-VERSION?=0.0.testing
-DEST?=build
+SUITES ?= broker api app
+AUTOSCALER_DIR ?= $(shell pwd)
+lint_config := ${AUTOSCALER_DIR}/.golangci.yaml
+CI_DIR ?= ${AUTOSCALER_DIR}/ci
+CI ?= false
+VERSION ?= 0.0.testing
+DEST ?= build
 
-export BUILDIN_MODE?=false
-export DEBUG?=false
-export ACCEPTANCE_TESTS_FILE?=${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  \
+													| cut --delimiter=' ' --fields='2')
+
+export BUILDIN_MODE ?= false
+export DEBUG ?= false
+export ACCEPTANCE_TESTS_FILE ?= ${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
+export GOWORK = off
 
 $(shell mkdir -p target)
 $(shell mkdir -p build)
@@ -45,12 +56,6 @@ target/init-db-${db_type}:
 	@./scripts/initialise_db.sh ${db_type}
 	@touch $@
 
-.PHONY: init
-init: target/init
-target/init:
-	@make -C src/autoscaler buildtools
-	@touch $@
-
 .PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
 clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance
 	@make stop-db db_type=mysql
@@ -62,12 +67,12 @@ clean-java:
 	@cd src && mvn clean > /dev/null && cd ..
 clean-targets:
 	@echo " - cleaning build target files"
-	@rm target/* &> /dev/null || echo "  . Already clean"
+	@rm --recursive --force target/* &> /dev/null || echo " . Already clean"
 clean-vendor:
 	@echo " - cleaning vendored go"
 	@find . -depth -name "vendor" -type d -exec rm -rf {} \;
 clean-autoscaler:
-	@make -C src/autoscaler clean
+	@make --directory='./src/autoscaler' clean
 clean-scheduler:
 	@echo " - cleaning scheduler test resources"
 	@rm -rf src/scheduler/src/test/resources/certs
@@ -85,27 +90,27 @@ clean-acceptance:
 	@rm -rf src/acceptance/results &> /dev/null || true
 
 .PHONY: build build-test build-tests build-all $(all_modules)
-build: init  $(all_modules)
+build: $(all_modules)
 build-tests: build-test
-build-test: init $(addprefix test_,$(go_modules))
-build-all: build build-test
+build-test: $(addprefix test_,$(go_modules))
+build-all: build build-test build-test-app
 db: target/db
 target/db:
 	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
 	@touch $@
-scheduler: init
+scheduler:
 	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
-autoscaler: init
-	@make -C src/autoscaler build
-changeloglockcleaner: init
-	@make -C src/changeloglockcleaner build
-changelog: init
-	@make -C src/changelog build
+autoscaler:
+	@make --directory='./src/autoscaler' build
+changeloglockcleaner:
+	@make --directory='./src/changeloglockcleaner' build
+changelog:
+	@make --directory='./src/changelog' build
 $(addprefix test_,$(go_modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
-	@make -C src/$(patsubst test_%,%,$@) build_tests
+	@make --directory='./src/$(patsubst test_%,%,$@)' build_tests
 
 
 .PHONY: test-certs
@@ -120,22 +125,22 @@ target/scheduler_test_certs:
 
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
-test-autoscaler: check-db_type init init-db test-certs
+test-autoscaler: check-db_type init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
-	@make -C src/autoscaler test DBURL="${DBURL}" OPTS="${OPTS}"
-test-autoscaler-suite: check-db_type init init-db test-certs
+	@make --directory='./src/autoscaler' test DBURL="${DBURL}" OPTS="${OPTS}"
+test-autoscaler-suite: check-db_type init-db test-certs
 	@echo " - using DBURL=${DBURL} TEST=${TEST} OPTS=${OPTS}"
-	@make -C src/autoscaler testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
-test-scheduler: check-db_type init init-db test-certs
+	@make --directory='./src/autoscaler' testsuite TEST=${TEST} DBURL="${DBURL}" OPTS="${OPTS}"
+test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
-test-changelog: init
-	@make -C src/changelog test
-test-changeloglockcleaner: init init-db test-certs
-	@make -C src/changeloglockcleaner test DBURL="${DBURL}"
+test-changelog:
+	@make --directory='./src/changelog' test
+test-changeloglockcleaner: init-db test-certs
+	@make --directory='./src/changeloglockcleaner' test DBURL="${DBURL}"
 test-acceptance-unit:
-	@make -C src/acceptance test-unit
-	@make -C src/acceptance/assets/app/go_app test
+	@make --directory='./src/acceptance' test-unit
+	@make --directory='./src/acceptance/assets/app/go_app' test
 
 
 .PHONY: start-db
@@ -166,7 +171,7 @@ target/start-db-postgres_CI_true:
 waitfor_postgres_CI_false:
 	@echo -n " - waiting for ${db_type} ."
 	@COUNTER=0; until $$(docker exec postgres pg_isready &>/dev/null) || [ $$COUNTER -gt 10 ]; do echo -n "."; sleep 1; let COUNTER+=1; done;\
- 	if [ $$COUNTER -gt 10 ]; then echo; echo "Error: timed out waiting for postgres. Try \"make clean\" first." >&2 ; exit 1; fi
+	if [ $$COUNTER -gt 10 ]; then echo; echo "Error: timed out waiting for postgres. Try \"make clean\" first." >&2 ; exit 1; fi
 waitfor_postgres_CI_true:
 	@echo " - no ci postgres checks"
 
@@ -197,14 +202,14 @@ waitfor_mysql_CI_false:
 waitfor_mysql_CI_true:
 	@echo -n " - Waiting for table creation"
 	@which mysql >/dev/null &&\
-	 {\
-	   T=0;\
-	   until [[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
-	     || [[ $${T} -gt 30 ]];\
-	   do echo -n "."; sleep 1; T=$$((T+1)); done;\
-	 }
+	{\
+		T=0;\
+		until [[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
+			|| [[ $${T} -gt 30 ]];\
+		do echo -n "."; sleep 1; T=$$((T+1)); done;\
+	}
 	@[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
-	  || { echo "ERROR: Mysql timed out creating database"; exit 1; }
+		|| { echo "ERROR: Mysql timed out creating database"; exit 1; }
 
 
 .PHONY: stop-db
@@ -216,20 +221,11 @@ stop-db: check-db_type
 .PHONY: integration
 integration: build init-db test-certs
 	@echo " - using DBURL=${DBURL} OPTS=${OPTS}"
-	make -C src/autoscaler integration DBURL="${DBURL}" OPTS="${OPTS}"
+	make --directory='./src/autoscaler' integration DBURL="${DBURL}" OPTS="${OPTS}"
 
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
-lint: golangci-lint_check $(addprefix lint_,$(go_modules))  rubocop
-
-golangci-lint_check:
-	@current_version=$(shell golangci-lint version | cut -d " " -f 4);\
-	current_major_version=$(shell golangci-lint version | cut -d " " -f 4| sed -E 's/v*([0-9]+\.[0-9]+)\..*/\1/');\
-	expected_version=$(shell cat src/autoscaler/go.mod | grep golangci-lint  | cut -d " " -f 2 | sed -E 's/v([0-9]+\.[0-9]+)\..*/\1/');\
-	if [ "$${current_major_version}" != "$${expected_version}" ]; then \
-        echo "ERROR: Expected to have golangci-lint version '$${expected_version}.x' but we have $${current_version}";\
-        exit 1;\
-  fi
+lint: $(addprefix lint_,$(go_modules))  rubocop
 
 rubocop:
 	@echo " - ruby scripts"
@@ -248,7 +244,7 @@ lint-actions:
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS}
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --config ${lint_config} ${OPTS}
 
 .PHONY: spec-test
 spec-test:
@@ -256,41 +252,65 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: release
-bosh-release: mod-tidy vendor scheduler db build/autoscaler-test.tgz
+bosh-release: go-mod-tidy vendor scheduler db build/autoscaler-test.tgz
 build/autoscaler-test.tgz:
 	@echo " - building bosh release into build/autoscaler-test.tgz"
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
 
 .PHONY: acceptance-release
-acceptance-release: clean-acceptance mod-tidy vendor build-test-app
+acceptance-release: clean-acceptance go-mod-tidy vendor build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
-.PHONY: mod-tidy
-mod-tidy:
-	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
-	do\
-	   cd $${folder}; echo " - go mod tidying '$${folder}'"; go mod tidy; cd - >/dev/null;\
-	done
+
+.PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
+generate-fakes: autoscaler.generate-fakes test-app.generate-fakes
+autoscaler.generate-fakes:
+	make --directory='${go-autoscaler-dir}' generate-fakes
+test-app.generate-fakes:
+	make --directory='${go-test-app-dir}' generate-fakes
+
+.PHONY: go-mod-tidy
+go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
+						 changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
+
+.PHONY: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
+				changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
+acceptance.go-mod-tidy:
+	make --directory='${go-acceptance-dir}' go-mod-tidy
+autoscaler.go-mod-tidy:
+	make --directory='${go-autoscaler-dir}' go-mod-tidy
+changelog.go-mod-tidy:
+	make --directory='${go-changelog-dir}' go-mod-tidy
+changeloglockcleander.go-mod-tidy:
+	make --directory='${go-changeloglockcleander-dir}' go-mod-tidy
+test-app.go-mod-tidy:
+	make --directory='${go-test-app-dir}' go-mod-tidy
+
+
 
 .PHONY: mod-download
 mod-download:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
 	do\
-	   cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
+		 cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
 	done
 
-.PHONY: vendor
-vendor:
-	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
-	do\
-	   cd $${folder}; echo " - go mod vendor '$${folder}'"; go mod vendor; cd - >/dev/null;\
-	done
+.PHONY: vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
+				changeloglockcleander.go-mod-vendor
+go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
+							 changeloglockcleander.go-mod-vendor
+acceptance.go-mod-vendor:
+	make --directory='${go-acceptance-dir}' go-mod-vendor
+autoscaler.go-mod-vendor:
+	make --directory='${go-autoscaler-dir}' go-mod-vendor
+changelog.go-mod-vendor:
+	make --directory='${go-changelog-dir}' go-mod-vendor
+changeloglockcleander.go-mod-vendor:
+	make --directory='${go-changeloglockcleander-dir}' go-mod-vendor
 
-.PHONY: fakes
-fakes:
-	@make -C src/autoscaler fakes
+
 
 # https://github.com/golang/tools/blob/master/gopls/doc/workspace.md
 .PHONY: workspace
@@ -306,9 +326,8 @@ uaac:
 markdownlint-cli:
 	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
-.PHONY: deploy deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: deploy
-deploy: mod-tidy vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
+.PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
+deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
 	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
@@ -319,15 +338,33 @@ deploy-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 
-deploy-prometheus:
-	@export DEPLOYMENT_NAME=prometheus;\
-	export BBL_STATE_PATH=$${BBL_STATE_PATH:-$(shell realpath "../app-autoscaler-env-bbl-state/bbl-state/")};\
+
+bosh-release-path := ./target/bosh-releases
+prometheus-bosh-release-path := ${bosh-release-path}/prometheus
+$(shell mkdir -p ${prometheus-bosh-release-path})
+
+download-prometheus-release: ${prometheus-bosh-release-path}/manifests
+${prometheus-bosh-release-path}/manifests &:
+	pushd '${prometheus-bosh-release-path}' > /dev/null ;\
+		git clone --recurse-submodules 'https://github.com/bosh-prometheus/prometheus-boshrelease' . ;\
+	popd > /dev/null
+
+
+
+deploy-prometheus: ${prometheus-bosh-release-path}/manifests
+	export DEPLOYMENT_NAME='prometheus' ;\
+	export PROMETHEUS_DIR='${prometheus-bosh-release-path}' ;\
+	export BBL_GCP_REGION="$$(yq eval '.jobs.[] | select(.name == "deploy-prometheus") | .plan.[] | select(.task == "deploy-prometheus") | .params.BBL_GCP_REGION' './ci/infrastructure/pipeline.yml')" ;\
+	export BBL_GCP_ZONE="$$(yq eval '.jobs.[] | select(.name == "deploy-prometheus") | .plan.[] | select(.task == "deploy-prometheus") | .params.BBL_GCP_ZONE' './ci/infrastructure/pipeline.yml')" ;\
+	export SLACK_WEBHOOK="$$(credhub get --name='/bosh-autoscaler/prometheus/alertmanager_slack_api_url' --quiet)" ;\
 	${CI_DIR}/infrastructure/scripts/deploy-prometheus.sh;
+
+
 
 
 .PHONY: build-test-app
 build-test-app:
-	@make -C src/acceptance/assets/app/go_app build
+	@make --directory='./src/acceptance/assets/app/go_app' build
 
 .PHONY: acceptance-tests
 acceptance-tests: build-test-app
@@ -362,7 +399,7 @@ run-performance:
 run-act:
 	${AUTOSCALER_DIR}/scripts/run_act.sh;\
 
-package-specs: mod-tidy vendor
+package-specs: go-mod-tidy vendor
 	@echo " - Updating the package specs"
 	@./scripts/sync-package-specs
 
@@ -388,8 +425,7 @@ target/docker-login:
 docker-image: docker-login
 	docker build -t ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest  ci/dockerfiles/autoscaler-tools
 	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
-
-.PHONY: build-tools
-build-tools:
-	make -C src/autoscaler buildtools
-
+validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
+	for file in $^ ; do \
+		swagger-cli validate "$${file}" ; \
+	done

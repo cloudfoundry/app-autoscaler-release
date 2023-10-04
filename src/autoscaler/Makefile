@@ -1,21 +1,75 @@
 SHELL := /bin/bash
-.SHELLFLAGS = -euo pipefail -c
-MAKEFLAGS = -s
-GO_VERSION := $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
-GO_DEPENDENCIES := $(shell find . -type f -name '*.go')
-PACKAGE_DIRS := $(shell go list ./... | grep -v /vendor/ | grep -v e2e)
-CGO_ENABLED = 1 # This is set to enforce dynamic linking which is a requirement of dynatrace.
+.SHELLFLAGS := -eu -o pipefail -c
+MAKEFLAGS := -s
+aes_terminal_font_yellow := \e[38;2;255;255;0m
+aes_terminal_reset := \e[0m
+
+GO_VERSION = $(shell go version | sed --expression='s/^[^0-9.]*\([0-9.]*\).*/\1/')
+GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
+PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
+								 | grep --invert-match --regexp='e2e')
+
+# `CGO_ENABLED := 1` is required to enforce dynamic linking which is a requirement of dynatrace.
+CGO_ENABLED := 1
 BUILDTAGS :=
+export GOWORK=off
 BUILDFLAGS := -ldflags '-linkmode=external'
 
-binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
-test_dirs=$(shell   find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
+binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq | grep -v vendor)
+test_dirs=$(shell find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 export GO111MODULE=on
 
 #TODO: https://github.com/cloudfoundry/app-autoscaler-release/issues/564 allow the tests to be run in parallel
 #GINKGO_OPTS=-r --race --require-suite -p --randomize-all --cover
 
-GINKGO_OPTS=-r --race --require-suite --randomize-all --cover ${OPTS}
+GINKGO_OPTS = -r --race --require-suite --randomize-all --cover ${OPTS}
+GINKGO_VERSION = v$(shell cat ../../.tool-versions | grep ginkgo  | cut --delimiter=' ' --fields='2')
+
+# The presence of the subsequent directory indicates wheather the fakes still need to be generated
+# or not.
+app-fakes-dir := ./fakes
+app-fakes-files = $(wildcard ${app-fakes-dir}/*.go)
+go_deps_without_fakes = $(shell find . -type f -name '*.go' \
+																| grep --invert-match --regexp='${app-fakes-dir}')
+.PHONY: generate-fakes
+generate-fakes: ${app-fakes-dir} ${app-fakes-files}
+${app-fakes-dir} ${app-fakes-files} &: ./go.mod ./go.sum ./generate-fakes.go
+	@echo "# Generating counterfeits"
+	mkdir -p '${app-fakes-dir}'
+	COUNTERFEITER_NO_GENERATE_WARNING='true' go generate './...'
+
+
+
+# This target should depend additionally on `${app-fakes-dir}` and on `${app-fakes-files}`. However
+# this is not defined here. The reason is, that for `go-mod-tidy` the generated fakes need to be
+# present but fortunately not necessarily up-to-date. This is fortunate because the generation of
+# the fake requires the files `go.mod` and `go.sum` to be already tidied up, introducing a cyclic
+# dependency otherwise. But that would make any modification to `go.mod` or `go.sum`
+# impossible. This definition now makes it possible to update `go.mod` and `go.sum` as follows:
+#  1. `make generate-fakes`
+#  2. Update `go.mod` and/or `go.sum`
+#  3. `make go-mod-tidy`
+#  4. Optionally: `make generate-fakes` to update the fakes as well.
+.PHONY: go-mod-tidy
+go-mod-tidy: ./go.mod ./go.sum ${go_deps_without_fakes}
+	@echo -ne '${aes_terminal_font_yellow}'
+	@echo -e '⚠️ Warning: The client-fakes generated from the openapi-specification may be\n' \
+					 'outdated. Please consider re-generating them, if this is relevant.'
+	@echo -ne '${aes_terminal_reset}'
+	go mod tidy
+
+
+
+go-vendoring-folder := ./vendor
+go-vendored-files = $(shell find '${go-vendoring-folder}' -type f -name '*.go' 2> '/dev/null')
+## This does not work: go-vendored-files = $(wildcard ${go-vendoring-folder}/**/*.go)
+
+.PHONY: go-mod-vendor
+go-mod-vendor: ${go-vendoring-folder} ${go-vendored-files}
+${go-vendoring-folder} ${go-vendored-files} &: ${app-fakes-dir} ${app-fakes-files}
+	go mod vendor
+
+
 
 build-%:
 	@echo "# building $*"
@@ -26,44 +80,31 @@ build: $(addprefix build-,$(binaries))
 
 build_tests: $(addprefix build_test-,$(test_dirs))
 
-build_test-%:
+build_test-%: generate-fakes
 	@echo " - building '$*' tests"
 	@export build_folder=${PWD}/build/tests/$* &&\
 	 mkdir -p $${build_folder} &&\
 	 cd $* &&\
-	 for package in $$(  go list ./... | sed 's|.*/autoscaler/$*|.|' | awk '{ print length, $$0 }' | sort -n -r | cut -d" " -f2- );\
+	 for package in $$(go list ./... | sed 's|.*/autoscaler/$*|.|' | awk '{ print length, $$0 }' | sort -n -r | cut -d" " -f2- );\
 	 do\
-	   export test_file=$${build_folder}/$${package}.test;\
-	   echo "   - compiling $${package} to $${test_file}";\
-	   go test -c -o $${test_file} $${package};\
+		 export test_file=$${build_folder}/$${package}.test;\
+		 echo "   - compiling $${package} to $${test_file}";\
+		 go test -c -o $${test_file} $${package};\
 	 done;
 
 check: fmt lint build test
 
-ginkgo_check:
-	@ current_version=$(shell ginkgo version | cut -d " " -f 3 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/');\
-	expected_version=$(shell grep "ginkgo"  "../../.tool-versions" | cut -d " " -f 2 | sed -E 's/([0-9]+\.[0-9]+)\..*/\1/');\
-	if [ "$${current_version}" != "$${expected_version}" ]; then \
-        echo "WARNING: Expected to have ginkgo version '$${expected_version}.x' but we have $(shell ginkgo version)";\
-    fi
-
-test: ginkgo_check
+test: generate-fakes
 	@echo "Running tests"
-	@APP_AUTOSCALER_TEST_RUN=true ginkgo -p ${GINKGO_OPTS} --skip-package=integration
+	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} --skip-package='integration'
 
-testsuite: ginkgo_check
-	APP_AUTOSCALER_TEST_RUN=true ginkgo -p ${GINKGO_OPTS} ${TEST}
+testsuite: generate-fakes
+	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} ${TEST}
 
 .PHONY: integration
-integration: ginkgo_check
+integration: generate-fakes
 	@echo "# Running integration tests"
-	APP_AUTOSCALER_TEST_RUN=true ginkgo ${GINKGO_OPTS} integration
-
-.PHONY: fakes generate
-fakes: generate
-generate:
-	@echo "# Generating counterfeits"
-	@COUNTERFEITER_NO_GENERATE_WARNING=true go generate ./...
+	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' ${GINKGO_OPTS} integration
 
 importfmt:
 	@echo "# Formatting the imports"
@@ -73,21 +114,6 @@ fmt: importfmt
 	@FORMATTED=`go fmt $(PACKAGE_DIRS)`
 	@([[ ! -z "$(FORMATTED)" ]] && printf "Fixed unformatted files:\n$(FORMATTED)") || true
 
-buildtools-force:
-	@echo "# Installing build tools"
-	go mod download
-	go install github.com/square/certstrap
-	go install github.com/onsi/ginkgo/v2/ginkgo
-	go install github.com/maxbrunsfeld/counterfeiter/v6
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint
-
-.PHONY: buildtools
-buildtools:
-	@echo "# Installing build tools"
-	@which certstrap >/dev/null || go install github.com/square/certstrap
-	@which ginkgo >/dev/null  && [ "v$(shell ginkgo version | awk '{ print $$3}')" = "$(shell cat go.mod | grep ginkgo | awk '{ print $$2}')" ] ||  go install github.com/onsi/ginkgo/v2/ginkgo
-	@which counterfeiter >/dev/null || go install github.com/maxbrunsfeld/counterfeiter/v6
-
 lint:
 	@cd ../../; make lint_autoscaler OPTS=${OPTS}
 
@@ -95,4 +121,6 @@ lint:
 clean:
 	@echo "# cleaning autoscaler"
 	@go clean -cache -testcache
-	@rm -rf build
+	@rm --force --recursive 'build'
+	@rm --force --recursive 'fakes'
+	@rm --force --recursive 'vendor'

@@ -8,10 +8,16 @@ jobs:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     if: contains(fromJson('["dependabot[bot]", "renovate[bot]"]'), github.event.pull_request.user.login) && contains(github.event.pull_request.labels.*.name, 'dependencies')
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: package-specs
+        shell: bash
         run: |
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          make --directory='./src/acceptance/assets/app/go_app' generate-fakes
+          make --directory='./src/autoscaler' generate-fakes
           make package-specs
       - name: Check if there are changes
         id: changes
@@ -23,5 +29,3 @@ jobs:
           add: './packages/**/spec'
           message: 'Updating spec files from `dependabot[bot]` changes'
           push: true
-
-

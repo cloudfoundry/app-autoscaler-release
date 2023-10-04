@@ -23,7 +23,7 @@ ops_files=${OPS_FILES:-"${prometheus_ops}/monitor-bosh.yml\
                         ${prometheus_ops}/monitor-cf.yml\
                         ${prometheus_ops}/enable-cf-route-registrar.yml\
                         ${prometheus_ops}/enable-grafana-uaa.yml\
-                        ${prometheus_ops}/enable-cf-loggregator-v2.yml\
+                        ${prometheus_ops}/deprecated/enable-cf-loggregator-v2.yml\
                         ${prometheus_ops}/monitor-bosh-director.yml\
                         ${prometheus_ops}/alertmanager-slack-receiver.yml\
                         ${ci_dir}/operations/prometheus-customize-alerts.yml\
@@ -57,12 +57,12 @@ PROMETHEUS_CLIENT_SECRET=$(yq e '.prometheus_client_password' "${director_store}
 BOSH_METRICS_SERVER_CLIENT_CA=$(yq e '.metrics_server_client_tls.ca' "${director_store}")
 BOSH_METRICS_SERVER_CLIENT_CERT=$(yq e '.metrics_server_client_tls.certificate' "${director_store}")
 BOSH_METRICS_SERVER_CLIENT_KEY=$(yq e '.metrics_server_client_tls.private_key' "${director_store}")
-credhub set -n /bosh-autoscaler/prometheus/bosh_metrics_server_client_ca -t certificate -c "$BOSH_METRICS_SERVER_CLIENT_CA" >/dev/null
-credhub set -n /bosh-autoscaler/prometheus/bosh_metrics_server_client -t certificate -c "$BOSH_METRICS_SERVER_CLIENT_CERT" -p "$BOSH_METRICS_SERVER_CLIENT_KEY" -m /bosh-autoscaler/prometheus/bosh_metrics_server_client_ca >/dev/null
+credhub set -n /bosh-autoscaler/prometheus/bosh_metrics_server_client_ca -t certificate -c "${BOSH_METRICS_SERVER_CLIENT_CA}" >/dev/null
+credhub set -n /bosh-autoscaler/prometheus/bosh_metrics_server_client -t certificate -c "${BOSH_METRICS_SERVER_CLIENT_CERT}" -p "${BOSH_METRICS_SERVER_CLIENT_KEY}" -m /bosh-autoscaler/prometheus/bosh_metrics_server_client_ca >/dev/null
 
-credhub get -n /bosh-autoscaler/cf/uaa_ssl -k ca          > $uaa_ssl_ca_file
-credhub get -n /bosh-autoscaler/cf/uaa_ssl -k certificate > $uaa_ssl_cert_file
-credhub get -n /bosh-autoscaler/cf/uaa_ssl -k private_key > $uaa_ssl_key_file
+credhub get -n /bosh-autoscaler/cf/uaa_ssl -k ca          > ${uaa_ssl_ca_file}
+credhub get -n /bosh-autoscaler/cf/uaa_ssl -k certificate > ${uaa_ssl_cert_file}
+credhub get -n /bosh-autoscaler/cf/uaa_ssl -k private_key > ${uaa_ssl_key_file}
 
 credhub set -n /bosh-autoscaler/prometheus/alertmanager_slack_channel -t value -v "${slack_channel}"
 credhub set -n /bosh-autoscaler/prometheus/alertmanager_slack_api_url -t value -v "${slack_webhook}"
@@ -70,8 +70,8 @@ credhub set -n /bosh-autoscaler/prometheus/alertmanager_slack_api_url -t value -
 
 function find_or_upload_stemcell(){
   # Determine if we need to upload a stemcell at this point.
-  stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' $deployment_manifest)
-  stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' $deployment_manifest)
+  stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' ${deployment_manifest})
+  stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' ${deployment_manifest})
   stemcell_name="bosh-google-kvm-${stemcell_os}-go_agent"
 
   if ! bosh stemcells | grep "${stemcell_name}" >/dev/null; then
@@ -99,6 +99,8 @@ function deploy () {
   step "creating Bosh deployment '${deployment_name}'"
   log "using Ops files: '${OPS_FILES_TO_USE}'"
   log "deploy args: '${bosh_deploy_opts}'"
+
+  # TODO: For Debugging: Do a `bosh interpolate` first?
 
   bosh -n -d "${deployment_name}" \
     deploy "${deployment_manifest}" \
