@@ -10,6 +10,7 @@
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
   "platformAutomerge": true,
   "automergeStrategy": "squash",
+  "prConcurrentLimit": 2,
   "packageRules": [
     {
       "description": "Opt-out minimum Go version updates: https://github.com/renovatebot/renovate/issues/16715",
