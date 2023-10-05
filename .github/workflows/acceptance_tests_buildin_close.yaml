@@ -25,10 +25,19 @@ jobs:
         with:
           path: app-autoscaler-release
           ref: main
+
       - uses: ./app-autoscaler-release/.github/actions/setup-environment
         with:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
 
-      - run: |
+      - name: "clean up"
+        shell: bash
+        run: |
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          ls -lah . # TODO: Debug
+          ls -lah '${{ github.workspace }}' # TODO: Debug
+
           cd ${{ env.AUTOSCALER_DIR }}
           make deploy-cleanup
