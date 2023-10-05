@@ -17,7 +17,7 @@ require (
 	github.com/ogen-go/ogen v0.73.0
 	github.com/onsi/ginkgo/v2 v2.12.1
 	github.com/onsi/gomega v1.27.10
-	github.com/prometheus/procfs v0.11.1
+	github.com/prometheus/procfs v0.12.0
 	github.com/steinfletcher/apitest v1.5.15
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.43.0
 	go.opentelemetry.io/contrib/propagators/b3 v1.18.0
