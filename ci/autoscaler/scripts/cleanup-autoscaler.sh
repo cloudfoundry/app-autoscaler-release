@@ -1,10 +1,11 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
-set -euo pipefail
-script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+set -eu -o pipefail
+
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 source "${script_dir}/common.sh"
 
-function main(){
+function main() {
   step "cleaning up deployment ${DEPLOYMENT_NAME}"
   bosh_login
   cf_login

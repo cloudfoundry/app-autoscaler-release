@@ -3,7 +3,10 @@ on:
   pull_request:
     types: [ closed ]
     paths:
-      - 'src/acceptance/**'
+      - "./.github/workflows/acceptance_tests_buildin.yaml"
+      - "./.github/workflows/acceptance_tests_buildin_close.yaml"
+      - "./Makefile"
+      - "./src/acceptance/**"
 
 env:
   BUILDIN_MODE: true
