@@ -9,7 +9,6 @@ on:
       - "src/acceptance/**"
 
 env:
-  GITHUB_WORKSPACE: "${{ github.workspace }}"
   BUILDIN_MODE: true
   SERVICE_OFFERING_ENABLED: false
   PR_NUMBER: "${{ github.event.pull_request.number }}"
@@ -39,6 +38,10 @@ jobs:
         run: |
           #! /usr/bin/env bash
           set -eu -o pipefail
+
+          # The subsequent assignment is needed by the checkout-action to behave properly!
+          # See: <https://github.com/actions/checkout/issues/785>
+          GITHUB_WORKSPACE='${{ github.workspace }}'
 
           echo "GITHUB_WORKSPACE = ${GITHUB_WORKSPACE}"
           echo "github.workspace = ${{ github.workspace }}"
