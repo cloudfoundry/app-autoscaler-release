@@ -1,10 +1,8 @@
 name: Acceptance Tests Cleanup (Buildin)
 on:
   pull_request:
-    types: [labeled, synchronize, closed] # [closed]
+    types: [closed]
     paths:
-      - ".github/workflows/acceptance_tests_buildin.yaml"
-      - ".github/workflows/acceptance_tests_buildin_close.yaml"
       - "Makefile"
       - "src/acceptance/**"
 
@@ -13,9 +11,6 @@ env:
   SERVICE_OFFERING_ENABLED: false
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "autoscaler-buildin-${{ github.event.pull_request.number }}"
-  # BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
-  # AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
-  # CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
 
 jobs:
   deployment_cleanup:
@@ -39,15 +34,10 @@ jobs:
           #! /usr/bin/env bash
           set -eu -o pipefail
 
-          # The subsequent assignment is needed by the checkout-action to behave properly!
-          # See: <https://github.com/actions/checkout/issues/785>
+          # The subsequent assignments are needed *HERE* because of:
+          # <https://github.com/actions/runner/issues/2058> or
+          # <https://github.com/actions/checkout/issues/785>
           export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
           declare -r AUTOSCALER_DIR="${GITHUB_WORKSPACE}/app-autoscaler-release"
-          #export CI_DIR="${GITHUB_WORKSPACE}/app-autoscaler-release/ci"
-
-          echo "GITHUB_WORKSPACE = ${GITHUB_WORKSPACE}"
-          echo "github.workspace = ${{ github.workspace }}"
-          echo "pwd := $(pwd)"
-          ls -lah . # TODO: Debug
 
           make --directory="${AUTOSCALER_DIR}" deploy-cleanup
