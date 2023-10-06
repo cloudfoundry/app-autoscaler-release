@@ -25,7 +25,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.19.0
 	go.opentelemetry.io/otel/trace v1.19.0
 	go.uber.org/zap v1.26.0
-	golang.org/x/exp 3e424a577f31
+	golang.org/x/exp v0.0.0-20231005195138-3e424a577f31
 )
 
 require (
