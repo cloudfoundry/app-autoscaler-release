@@ -13,9 +13,9 @@ env:
   SERVICE_OFFERING_ENABLED: false
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "autoscaler-buildin-${{ github.event.pull_request.number }}"
-  BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
-  AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
-  CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
+  # BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
+  # AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
+  # CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
 
 jobs:
   deployment_cleanup:
@@ -41,12 +41,13 @@ jobs:
 
           # The subsequent assignment is needed by the checkout-action to behave properly!
           # See: <https://github.com/actions/checkout/issues/785>
-          GITHUB_WORKSPACE='${{ github.workspace }}'
+          export BBL_STATE_PATH="${GITHUB_WORKSPACE}/bbl/bbl-state"
+          declare -r AUTOSCALER_DIR="${GITHUB_WORKSPACE}/app-autoscaler-release"
+          #export CI_DIR="${GITHUB_WORKSPACE}/app-autoscaler-release/ci"
 
           echo "GITHUB_WORKSPACE = ${GITHUB_WORKSPACE}"
           echo "github.workspace = ${{ github.workspace }}"
           echo "pwd := $(pwd)"
           ls -lah . # TODO: Debug
-          ls -lah '${{ github.workspace }}' # TODO: Debug
 
           make --directory="${AUTOSCALER_DIR}" deploy-cleanup
