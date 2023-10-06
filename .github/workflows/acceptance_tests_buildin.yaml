@@ -1,9 +1,10 @@
 name: Acceptance Tests - Buildin
 on:
   pull_request:
-    types: [ opened, labeled, synchronize ]
+    types: [opened, labeled, synchronize]
     paths:
-     - 'src/acceptance/**'
+      - "Makefile"
+      - "src/acceptance/**"
 
 concurrency:
   group: "${{ github.workflow }}/${{ github.ref }}"
