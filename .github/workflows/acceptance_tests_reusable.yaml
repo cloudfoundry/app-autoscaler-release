@@ -161,5 +161,4 @@ jobs:
           ssh-key: ${{ secrets.bbl_ssh_key}}
       - name: Perform deployment cleanup
         run: |
-          cd "${AUTOSCALER_DIR}"
-          make deploy-cleanup
+          make --directory="${AUTOSCALER_DIR}" deploy-cleanup

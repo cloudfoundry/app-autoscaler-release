@@ -39,8 +39,10 @@ jobs:
           #! /usr/bin/env bash
           set -eu -o pipefail
 
+          echo "GITHUB_WORKSPACE = ${GITHUB_WORKSPACE}"
+          echo "github.workspace = ${{ github.workspace }}"
+          echo "pwd := $(pwd)"
           ls -lah . # TODO: Debug
           ls -lah '${{ github.workspace }}' # TODO: Debug
 
-          cd ${{ env.AUTOSCALER_DIR }}
-          make deploy-cleanup
+          make --directory="${AUTOSCALER_DIR}" deploy-cleanup
