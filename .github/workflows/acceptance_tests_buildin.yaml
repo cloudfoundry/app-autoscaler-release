@@ -3,10 +3,10 @@ on:
   pull_request:
     types: [ opened, labeled, synchronize ]
     paths:
-      - "./.github/workflows/acceptance_tests_buildin.yaml"
-      - "./.github/workflows/acceptance_tests_buildin_close.yaml"
-      - "./Makefile"
-      - 'src/acceptance/**'
+      - ".github/workflows/acceptance_tests_buildin.yaml"
+      - ".github/workflows/acceptance_tests_buildin_close.yaml"
+      - "Makefile"
+      - "src/acceptance/**"
 
 concurrency:
   group: "${{ github.workflow }}/${{ github.ref }}"
