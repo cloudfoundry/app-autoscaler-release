@@ -1,7 +1,7 @@
 name: Acceptance Tests Cleanup (Buildin)
 on:
   pull_request:
-    types: [ closed ]
+    types: [labeled, synchronize, closed] # [closed]
     paths:
       - ".github/workflows/acceptance_tests_buildin.yaml"
       - ".github/workflows/acceptance_tests_buildin_close.yaml"

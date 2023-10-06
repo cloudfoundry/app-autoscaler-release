@@ -1,7 +1,7 @@
 name: Acceptance Tests - Buildin
 on:
   pull_request:
-    types: [ opened, labeled, synchronize ]
+    types: [opened] # [opened, labeled, synchronize]
     paths:
       - ".github/workflows/acceptance_tests_buildin.yaml"
       - ".github/workflows/acceptance_tests_buildin_close.yaml"
