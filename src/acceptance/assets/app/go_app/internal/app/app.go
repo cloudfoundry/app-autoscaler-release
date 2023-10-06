@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -20,7 +21,25 @@ func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler,
 	otel.SetTextMapPropagator(b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader)))
 	r.Use(otelgin.Middleware("acceptance-tests-go-app"))
 
-	r.Use(ginzap.GinzapWithConfig(logger, &ginzap.Config{TimeFormat: time.RFC3339, UTC: true, TraceID: true}))
+	r.Use(ginzap.GinzapWithConfig(logger, &ginzap.Config{
+		TimeFormat: time.RFC3339,
+		UTC:        true,
+		Context: ginzap.Fn(func(c *gin.Context) []zapcore.Field {
+			fields := []zapcore.Field{}
+			// log CF ID
+			if requestID := c.Request.Header.Get("X-Vcap-Request-Id"); requestID != "" {
+				fields = append(fields, zap.String("vcap_request_id", requestID))
+			}
+			if passport := c.Request.Header.Get("SAP-PASSPORT"); passport != "" {
+				fields = append(fields, zap.String("sap_passport", passport))
+			}
+			// support opentelemetry trace ID
+			fields = append(fields, zap.String("trace_id", trace.SpanFromContext(c.Request.Context()).SpanContext().TraceID().String()))
+
+			return fields
+		}),
+	}))
+
 	r.Use(ginzap.RecoveryWithZap(logger, true))
 
 	logr := zapr.NewLogger(logger)
