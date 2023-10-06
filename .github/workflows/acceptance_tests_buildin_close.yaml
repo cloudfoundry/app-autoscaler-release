@@ -9,6 +9,7 @@ on:
       - "src/acceptance/**"
 
 env:
+  GITHUB_WORKSPACE: "${{ github.workspace }}"
   BUILDIN_MODE: true
   SERVICE_OFFERING_ENABLED: false
   PR_NUMBER: "${{ github.event.pull_request.number }}"
