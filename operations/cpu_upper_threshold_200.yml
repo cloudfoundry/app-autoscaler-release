@@ -1,0 +1,6 @@
+# This can be used to enable an upper CPU threshold of 200 instead of 100 to be used in dynamic scaling rules
+
+---
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/apiserver/scaling_rules?/cpu/upper_threshold
+  value: 200

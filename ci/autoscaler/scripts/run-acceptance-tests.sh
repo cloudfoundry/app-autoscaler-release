@@ -19,6 +19,7 @@ performance_app_count="${PERFORMANCE_APP_COUNT:-}"
 performance_app_percentage_to_scale="${PERFORMANCE_APP_PERCENTAGE_TO_SCALE:-}"
 performance_setup_workers="${PERFORMANCE_SETUP_WORKERS:-}"
 performance_update_existing_org_quota=${PERFORMANCE_UPDATE_EXISTING_ORG_QUOTA:-true}
+cpu_upper_threshold=${CPU_UPPER_THRESHOLD:-100}
 
 if [[ ! -d ${bbl_state_path} ]]; then
   echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
@@ -52,6 +53,7 @@ cat > acceptance_config.json <<EOF
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 120,
 	"default_timeout": 60,
+	"cpu_upper_threshold": ${cpu_upper_threshold},
   "name_prefix": "${name_prefix}",
 
   "autoscaler_api": "${deployment_name}.${system_domain}",

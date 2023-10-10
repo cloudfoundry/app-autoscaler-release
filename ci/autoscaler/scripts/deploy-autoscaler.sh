@@ -26,6 +26,22 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
 
 if [[ "${buildin_mode}" == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
 
+case "${cpu_upper_threshold}" in
+  "100")
+  # default
+  ;;
+  "200")
+  ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_200.yml"
+  ;;
+  "400")
+  ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_400.yml"
+  ;;
+  *)
+  echo "No Ops file for cpu_upper_threshold of ${cpu_upper_threshold}"
+  exit 1
+  ;;
+esac
+
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
 
