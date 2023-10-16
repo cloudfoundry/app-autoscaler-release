@@ -111,6 +111,8 @@ builds:
     version: 3.7.4
   ebffef87-168c-467c-448a-39f4987aba46:
     version: 4.1.0
+  ec865380-a51b-4049-5389-4ee95825bd99:
+    version: 11.2.0
   f070dbfd-be8f-4584-6645-c9ffb3a7590e:
     version: 5.2.1
   f1fe6437-6543-4ed4-7a5b-60c0044acab1:
