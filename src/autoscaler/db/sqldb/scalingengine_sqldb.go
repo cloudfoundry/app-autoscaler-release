@@ -89,7 +89,6 @@ func (sdb *ScalingEngineSQLDB) CountScalingHistories(ctx context.Context, appId 
 			lager.Data{"query": query, "appid": appId, "start": start, "end": end})
 		return 0, err
 	}
-	sdb.logger.Info("count-scaling-histories", lager.Data{"query": query, "appid": appId, "start": start, "end": end, "count": count})
 
 	return count, nil
 }

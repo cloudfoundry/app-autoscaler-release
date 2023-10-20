@@ -9,9 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"github.com/ogen-go/ogen/ogenerrors"
-
-	"go.opentelemetry.io/otel/trace"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
@@ -106,8 +105,7 @@ func (h *ScalingHistoryHandler) V1AppsGUIDScalingHistoriesGet(ctx context.Contex
 	parameters.Add("order-direction", string(orderDirection))
 	parameters.Add("results-per-page", strconv.Itoa(resultsPerPage))
 
-	traceId := trace.SpanFromContext(ctx).SpanContext().TraceID().String()
-	logger := h.logger.Session("get-scaling-histories", lager.Data{"x_b3_traceid": traceId, "parameters": parameters})
+	logger := h.logger.Session("get-scaling-histories", helpers.AddTraceID(ctx, lager.Data{"parameters": parameters, "app-guid": appId}))
 	logger.Info("start")
 	defer logger.Info("end")
 
@@ -128,7 +126,7 @@ func (h *ScalingHistoryHandler) V1AppsGUIDScalingHistoriesGet(ctx context.Contex
 	resources := make([]scalinghistory.HistoryEntry, len(histories))
 
 	for i, item := range histories {
-		modifiedItem := scalinghistory.HistoryEntry{
+		entry := scalinghistory.HistoryEntry{
 			AppID:        scalinghistory.NewOptGUID(scalinghistory.GUID(item.AppId)),
 			Status:       scalinghistory.NewOptHistoryEntryStatus(scalinghistory.HistoryEntryStatus(item.Status)),
 			Timestamp:    scalinghistory.NewOptInt(int(item.Timestamp)),
@@ -141,14 +139,14 @@ func (h *ScalingHistoryHandler) V1AppsGUIDScalingHistoriesGet(ctx context.Contex
 
 		switch item.Status {
 		case models.ScalingStatusSucceeded:
-			modifiedItem.SetOneOf(scalinghistory.NewHistorySuccessEntryHistoryEntrySum(scalinghistory.HistorySuccessEntry{}))
+			entry.SetOneOf(scalinghistory.NewHistorySuccessEntryHistoryEntrySum(scalinghistory.HistorySuccessEntry{}))
 		case models.ScalingStatusIgnored:
-			modifiedItem.SetOneOf(scalinghistory.NewHistoryIgnoreEntryHistoryEntrySum(scalinghistory.HistoryIgnoreEntry{IgnoreReason: scalinghistory.NewOptString(item.Message)}))
+			entry.SetOneOf(scalinghistory.NewHistoryIgnoreEntryHistoryEntrySum(scalinghistory.HistoryIgnoreEntry{IgnoreReason: scalinghistory.NewOptString(item.Message)}))
 		case models.ScalingStatusFailed:
-			modifiedItem.SetOneOf(scalinghistory.NewHistoryErrorEntryHistoryEntrySum(scalinghistory.HistoryErrorEntry{Error: scalinghistory.NewOptString(item.Error)}))
+			entry.SetOneOf(scalinghistory.NewHistoryErrorEntryHistoryEntrySum(scalinghistory.HistoryErrorEntry{Error: scalinghistory.NewOptString(item.Error)}))
 		}
 
-		resources[i] = modifiedItem
+		resources[i] = entry
 	}
 
 	prevURL := scalinghistory.OptURI{}

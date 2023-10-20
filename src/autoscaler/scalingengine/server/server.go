@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/http_server"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 
 	"fmt"
 	"net/http"
@@ -31,6 +32,8 @@ func NewServer(logger lager.Logger, conf *config.Config, scalingEngineDB db.Scal
 	syncHandler := NewSyncHandler(logger, synchronizer)
 	httpStatusCollectMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
 	r := routes.ScalingEngineRoutes()
+	r.Use(otelmux.Middleware("scalingengine"))
+
 	r.Use(httpStatusCollectMiddleware.Collect)
 	r.Get(routes.ScaleRouteName).Handler(VarsFunc(handler.Scale))
 

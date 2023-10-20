@@ -33,6 +33,7 @@ files:
 - autoscaler/vendor/github.com/dlclark/regexp2/* # gosub
 - autoscaler/vendor/github.com/dlclark/regexp2/syntax/* # gosub
 - autoscaler/vendor/github.com/fatih/color/* # gosub
+- autoscaler/vendor/github.com/felixge/httpsnoop/* # gosub
 - autoscaler/vendor/github.com/ghodss/yaml/* # gosub
 - autoscaler/vendor/github.com/go-faster/errors/* # gosub
 - autoscaler/vendor/github.com/go-faster/jx/* # gosub
@@ -111,7 +112,8 @@ files:
 - autoscaler/vendor/github.com/tedsuo/ifrit/grouper/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/http_server/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/sigmon/* # gosub
-- autoscaler/vendor/go.opentelemetry.io/contrib/propagators/b3/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/internal/semconvutil/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/attribute/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/baggage/* # gosub
@@ -123,7 +125,15 @@ files:
 - autoscaler/vendor/go.opentelemetry.io/otel/metric/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/metric/embedded/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/propagation/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/instrumentation/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/internal/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/internal/env/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/resource/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/trace/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.17.0/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.19.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.21.0/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/trace/* # gosub
 - autoscaler/vendor/go.uber.org/multierr/* # gosub
 - autoscaler/vendor/go.uber.org/zap/* # gosub
@@ -148,6 +158,7 @@ files:
 - autoscaler/vendor/golang.org/x/sys/cpu/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/golang.org/x/sys/windows/* # gosub
+- autoscaler/vendor/golang.org/x/sys/windows/registry/* # gosub
 - autoscaler/vendor/golang.org/x/text/cases/* # gosub
 - autoscaler/vendor/golang.org/x/text/internal/* # gosub
 - autoscaler/vendor/golang.org/x/text/internal/language/* # gosub

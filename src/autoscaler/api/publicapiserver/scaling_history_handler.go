@@ -9,7 +9,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
 	"code.cloudfoundry.org/lager/v3"
-	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -70,8 +69,7 @@ func (h *ScalingHistoryHandler) HandleBearerAuth(ctx context.Context, operationN
 }
 
 func (h *ScalingHistoryHandler) V1AppsGUIDScalingHistoriesGet(ctx context.Context, params scalinghistory.V1AppsGUIDScalingHistoriesGetParams) (*scalinghistory.History, error) {
-	traceId := trace.SpanFromContext(ctx).SpanContext().TraceID().String()
-	logger := h.logger.Session("get-scaling-histories", lager.Data{"x_b3_traceid": traceId, "app_guid": params.GUID})
+	logger := h.logger.Session("get-scaling-histories", helpers.AddTraceID(ctx, lager.Data{"app_guid": params.GUID}))
 	logger.Info("start")
 	defer logger.Info("end")
 
