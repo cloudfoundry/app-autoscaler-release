@@ -1,8 +1,8 @@
 package publicapiserver
 
 import (
-	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,11 +10,10 @@ import (
 	"os"
 	"reflect"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
-
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/policyvalidator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/schedulerclient"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -36,6 +35,12 @@ type PublicApiHandler struct {
 	schedulerUtil        *schedulerclient.Client
 	credentials          cred_helper.Credentials
 }
+
+const (
+	ActionWriteBody             = "write-body"
+	ActionCheckAppId            = "check-for-id-appid"
+	ErrorMessageAppidIsRequired = "AppId is required"
+)
 
 func NewPublicApiHandler(logger lager.Logger, conf *config.Config, policydb db.PolicyDB, bindingdb db.BindingDB, credentials cred_helper.Credentials) *PublicApiHandler {
 	seClient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
@@ -72,8 +77,8 @@ func writeErrorResponse(w http.ResponseWriter, statusCode int, message string) {
 func (h *PublicApiHandler) GetScalingPolicy(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	appId := vars["appId"]
 	if appId == "" {
-		h.logger.Error("AppId is missing", nil, nil)
-		writeErrorResponse(w, http.StatusBadRequest, "AppId is required")
+		h.logger.Error(ActionCheckAppId, errors.New(ErrorMessageAppidIsRequired), nil)
+		writeErrorResponse(w, http.StatusBadRequest, ErrorMessageAppidIsRequired)
 		return
 	}
 	logger := h.logger.Session("GetScalingPolicy", lager.Data{"appId": appId})
@@ -92,27 +97,14 @@ func (h *PublicApiHandler) GetScalingPolicy(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	bf := bytes.NewBuffer([]byte{})
-	jsonEncoder := json.NewEncoder(bf)
-	jsonEncoder.SetEscapeHTML(false)
-	err = jsonEncoder.Encode(scalingPolicy)
-	if err != nil {
-		logger.Error("Failed to json encode scaling policy", err, lager.Data{"policy": fmt.Sprintf("%+v", scalingPolicy)})
-		writeErrorResponse(w, http.StatusInternalServerError, "Error encode scaling policy")
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	_, err = w.Write(bf.Bytes())
-	if err != nil {
-		logger.Error("failed-to-write-body", err)
-	}
+	handlers.WriteJSONResponse(w, http.StatusOK, scalingPolicy)
 }
 
 func (h *PublicApiHandler) AttachScalingPolicy(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	appId := vars["appId"]
 	if appId == "" {
-		h.logger.Error("AppId is missing", nil, nil)
-		writeErrorResponse(w, http.StatusBadRequest, "AppId is required")
+		h.logger.Error(ActionCheckAppId, errors.New(ErrorMessageAppidIsRequired), nil)
+		writeErrorResponse(w, http.StatusBadRequest, ErrorMessageAppidIsRequired)
 		return
 	}
 
@@ -169,8 +161,8 @@ func (h *PublicApiHandler) AttachScalingPolicy(w http.ResponseWriter, r *http.Re
 func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	appId := vars["appId"]
 	if appId == "" {
-		h.logger.Error("AppId is missing", nil, nil)
-		writeErrorResponse(w, http.StatusBadRequest, "AppId is required")
+		h.logger.Error(ActionCheckAppId, errors.New(ErrorMessageAppidIsRequired), nil)
+		writeErrorResponse(w, http.StatusBadRequest, ErrorMessageAppidIsRequired)
 		return
 	}
 	logger := h.logger.Session("DetachScalingPolicy", lager.Data{"appId": appId})
@@ -233,7 +225,7 @@ func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Re
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write([]byte("{}"))
 	if err != nil {
-		logger.Error("failed-to-write-body", err)
+		logger.Error(ActionWriteBody, err)
 	}
 }
 
@@ -341,22 +333,22 @@ func (h *PublicApiHandler) GetApiInfo(w http.ResponseWriter, _ *http.Request, _ 
 
 	_, err = w.Write(info)
 	if err != nil {
-		h.logger.Error("failed-to-write-body", err)
+		h.logger.Error(ActionWriteBody, err)
 	}
 }
 
 func (h *PublicApiHandler) GetHealth(w http.ResponseWriter, _ *http.Request, _ map[string]string) {
 	_, err := w.Write([]byte(`{"alive":"true"}`))
 	if err != nil {
-		h.logger.Error("failed-to-write-body", err)
+		h.logger.Error(ActionWriteBody, err)
 	}
 }
 
 func (h *PublicApiHandler) CreateCredential(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	appId := vars["appId"]
 	if appId == "" {
-		h.logger.Error("AppId is missing", nil, nil)
-		writeErrorResponse(w, http.StatusBadRequest, "AppId is required")
+		h.logger.Error(ActionCheckAppId, errors.New(ErrorMessageAppidIsRequired), nil)
+		writeErrorResponse(w, http.StatusBadRequest, ErrorMessageAppidIsRequired)
 		return
 	}
 	logger := h.logger.Session("CreateCredential", lager.Data{"appId": appId})
@@ -403,8 +395,8 @@ func (h *PublicApiHandler) CreateCredential(w http.ResponseWriter, r *http.Reque
 func (h *PublicApiHandler) DeleteCredential(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	appId := vars["appId"]
 	if appId == "" {
-		h.logger.Error("AppId is missing", nil, nil)
-		writeErrorResponse(w, http.StatusBadRequest, "AppId is required")
+		h.logger.Error(ActionCheckAppId, errors.New(ErrorMessageAppidIsRequired), nil)
+		writeErrorResponse(w, http.StatusBadRequest, ErrorMessageAppidIsRequired)
 		return
 	}
 	logger := h.logger.Session("DeleteCredential", lager.Data{"appId": appId})
