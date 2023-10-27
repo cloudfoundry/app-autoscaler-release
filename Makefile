@@ -40,6 +40,8 @@ export GOWORK = off
 $(shell mkdir -p target)
 $(shell mkdir -p build)
 
+.DEFAULT_GOAL := build-all
+
 list-modules:
 	@echo ${go_modules}
 

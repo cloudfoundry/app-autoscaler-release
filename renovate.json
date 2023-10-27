@@ -19,6 +19,12 @@
       "enabled": false
     },
     {
+      "description": "Disable asdf Go version updates, as they are taken care by our bosh-package-golang-release-based automation",
+      "matchManagers": ["asdf"],
+      "matchDepTypes": ["golang"],
+      "enabled": false
+    },
+    {
       "description": "Strip of v prefix from version number in certain github releases",
       "packageNames": ["bosh-cli"],
       "extractVersion": "^v(?<version>.*)$"
