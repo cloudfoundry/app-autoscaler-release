@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	_ = scalinghistory.Handler(&ScalingHistoryHandler{})
 	_ = scalinghistory.SecurityHandler(&ScalingHistoryHandler{})
 	_ = scalinghistory.SecuritySource(&ScalingHistoryHandler{})
 )
@@ -21,7 +20,6 @@ type ScalingHistoryHandler struct {
 	logger              lager.Logger
 	conf                *config.Config
 	scalingEngineClient *http.Client
-	server              *scalinghistory.Server
 	client              *scalinghistory.Client
 }
 
@@ -36,11 +34,7 @@ func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*Scalin
 		conf:                conf,
 		scalingEngineClient: seClient,
 	}
-	if server, err := scalinghistory.NewServer(newHandler, newHandler); err != nil {
-		return nil, fmt.Errorf("error creating ogen scaling history server: %w", err)
-	} else {
-		newHandler.server = server
-	}
+
 	if client, err := scalinghistory.NewClient(conf.ScalingEngine.ScalingEngineUrl, newHandler, scalinghistory.WithClient(seClient)); err != nil {
 		return nil, fmt.Errorf("error creating ogen scaling history client: %w", err)
 	} else {
@@ -50,9 +44,6 @@ func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*Scalin
 	return newHandler, nil
 }
 
-func (h *ScalingHistoryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.server.ServeHTTP(w, r)
-}
 func (h *ScalingHistoryHandler) NewError(_ context.Context, _ error) *scalinghistory.ErrorResponseStatusCode {
 	result := &scalinghistory.ErrorResponseStatusCode{}
 	result.SetStatusCode(500)

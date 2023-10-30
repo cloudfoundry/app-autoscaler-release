@@ -5,6 +5,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
@@ -37,7 +38,7 @@ func NewServer(logger lager.Logger, conf *config.Config, scalingEngineDB db.Scal
 	r.Use(httpStatusCollectMiddleware.Collect)
 	r.Get(routes.ScaleRouteName).Handler(VarsFunc(handler.Scale))
 
-	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, scalingEngineDB)
+	scalingHistoryHandler, err := newScalingHistoryHandler(logger, scalingEngineDB)
 	if err != nil {
 		return nil, err
 	}
@@ -68,4 +69,16 @@ func NewServer(logger lager.Logger, conf *config.Config, scalingEngineDB db.Scal
 	}
 
 	return http_server.New(addr, r), nil
+}
+
+func newScalingHistoryHandler(logger lager.Logger, scalingEngineDB db.ScalingEngineDB) (http.Handler, error) {
+	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, scalingEngineDB)
+	if err != nil {
+		return nil, fmt.Errorf("error creating scaling history handler: %w", err)
+	}
+	server, err := scalinghistory.NewServer(scalingHistoryHandler, scalingHistoryHandler)
+	if err != nil {
+		return nil, fmt.Errorf("error creating ogen scaling history server: %w", err)
+	}
+	return server, err
 }

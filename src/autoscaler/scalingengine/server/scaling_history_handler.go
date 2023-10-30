@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math"
 	"net/url"
 	"strconv"
@@ -22,14 +21,12 @@ import (
 )
 
 var (
-	_ = scalinghistory.Handler(&ScalingHistoryHandler{})
 	_ = scalinghistory.SecurityHandler(&ScalingHistoryHandler{})
 )
 
 type ScalingHistoryHandler struct {
 	logger          lager.Logger
 	scalingEngineDB db.ScalingEngineDB
-	server          *scalinghistory.Server
 }
 
 func NewScalingHistoryHandler(logger lager.Logger, scalingEngineDB db.ScalingEngineDB) (*ScalingHistoryHandler, error) {
@@ -37,16 +34,8 @@ func NewScalingHistoryHandler(logger lager.Logger, scalingEngineDB db.ScalingEng
 		logger:          logger.Session("scaling-history-handler"),
 		scalingEngineDB: scalingEngineDB,
 	}
-	if server, err := scalinghistory.NewServer(newHandler, newHandler); err != nil {
-		return nil, fmt.Errorf("error creating ogen scaling history server: %w", err)
-	} else {
-		newHandler.server = server
-	}
-	return newHandler, nil
-}
 
-func (h *ScalingHistoryHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	h.server.ServeHTTP(w, r)
+	return newHandler, nil
 }
 
 func (h *ScalingHistoryHandler) NewError(_ context.Context, err error) *scalinghistory.ErrorResponseStatusCode {

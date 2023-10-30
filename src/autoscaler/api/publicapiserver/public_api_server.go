@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api"
@@ -13,7 +14,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
-	_ "code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/ratelimiter"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
@@ -34,10 +34,12 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policydb db.Po
 	checkBindingFunc api.CheckBindingFunc, cfclient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector,
 	rateLimiter ratelimiter.Limiter, bindingdb db.BindingDB) (ifrit.Runner, error) {
 	pah := NewPublicApiHandler(logger, conf, policydb, bindingdb, credentials)
-	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, conf)
+
+	scalingHistoryHandler, err := newScalingHistoryHandler(logger, conf)
 	if err != nil {
 		return nil, err
 	}
+
 	mw := NewMiddleware(logger, cfclient, checkBindingFunc, conf.APIClientId)
 	rateLimiterMiddleware := ratelimiter.NewRateLimiterMiddleware("appId", rateLimiter, logger.Session("api-ratelimiter-middleware"))
 	httpStatusCollectMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
@@ -102,4 +104,16 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policydb db.Po
 
 	logger.Info("public-api-http-server-created", lager.Data{"serverConfig": conf.PublicApiServer})
 	return runner, nil
+}
+
+func newScalingHistoryHandler(logger lager.Logger, conf *config.Config) (http.Handler, error) {
+	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, conf)
+	if err != nil {
+		return nil, fmt.Errorf("error creating scaling history handler: %w", err)
+	}
+	scalingHistoryServer, err := scalinghistory.NewServer(scalingHistoryHandler, scalingHistoryHandler)
+	if err != nil {
+		return nil, fmt.Errorf("error creating ogen scaling history server: %w", err)
+	}
+	return scalingHistoryServer, nil
 }
