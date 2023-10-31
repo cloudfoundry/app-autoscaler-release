@@ -75,6 +75,7 @@ func (sdb *ScalingEngineSQLDB) SaveScalingHistory(history *models.AppScalingHist
 	}
 	return nil
 }
+
 func (sdb *ScalingEngineSQLDB) CountScalingHistories(ctx context.Context, appId string, start int64, end int64, includeAll bool) (int, error) {
 	query := sdb.sqldb.Rebind("SELECT COUNT(*) FROM scalinghistory WHERE appid = ? AND timestamp >= ? AND timestamp <= ?" + statusFilter(includeAll))
 
