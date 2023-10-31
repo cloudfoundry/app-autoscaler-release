@@ -73,6 +73,7 @@ func (h *ScalingHistoryHandler) V1AppsGUIDScalingHistoriesGet(ctx context.Contex
 }
 
 func (h *ScalingHistoryHandler) BearerAuth(_ context.Context, _ string) (scalinghistory.BearerAuth, error) {
-	// we are calling the scalingengine server authenticated via mTLS, so no bearer token is necessary
+	// We are calling the scalingengine server authenticated via mTLS, so no bearer token is necessary.
+	// Having this function is required by the interface `SecuritySource`in “oas_security_gen”.
 	return scalinghistory.BearerAuth{Token: "none"}, nil
 }
