@@ -51,7 +51,7 @@ paths:
       schema:
         type: string
         enum: ["asc", "desc"]
-        deprecated: true
+      deprecated: true
       example: order=desc
     - name: page
       in: query
