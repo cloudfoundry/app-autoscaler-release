@@ -27,7 +27,7 @@ GINKGO_VERSION = v$(shell cat ../../.tool-versions | grep ginkgo  | cut --delimi
 
 
 # ogen generated OpenAPI clients and servers
-ogen-dir = ./helpers/apis/scalinghistory
+ogen-dir := ./helpers/apis/scalinghistory
 openapi-spec-path := ../../api
 openapi-specs-list = $(wildcard ${openapi-spec-path}/*.yaml)
 
