@@ -93,6 +93,7 @@ func (sdb *ScalingEngineSQLDB) CountScalingHistories(ctx context.Context, appId 
 
 	return count, nil
 }
+
 func (sdb *ScalingEngineSQLDB) RetrieveScalingHistories(ctx context.Context, appId string, start int64, end int64, orderType db.OrderType, includeAll bool, page int, resultsPerPage int) ([]*models.AppScalingHistory, error) {
 	query := sdb.sqldb.Rebind("SELECT timestamp, scalingtype, status, oldinstances, newinstances, reason, message, error FROM scalinghistory WHERE" +
 		" appid = ? " +
