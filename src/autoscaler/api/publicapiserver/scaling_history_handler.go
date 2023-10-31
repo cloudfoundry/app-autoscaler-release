@@ -55,7 +55,8 @@ func (h *ScalingHistoryHandler) NewError(_ context.Context, _ error) *scalinghis
 }
 
 func (h *ScalingHistoryHandler) HandleBearerAuth(ctx context.Context, operationName string, t scalinghistory.BearerAuth) (context.Context, error) {
-	// This handler is a no-op, as this handler shall only be available used behind our own auth middleware
+	// This handler is a no-op, as this handler shall only be available used behind our own auth middleware.
+	// Having this handler is required by the interface `SecurityHandler` in “oas_security_gen”.
 	return ctx, nil
 }
 
