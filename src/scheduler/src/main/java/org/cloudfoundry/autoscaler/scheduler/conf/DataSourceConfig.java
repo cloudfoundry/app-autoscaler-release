@@ -1,8 +1,8 @@
 package org.cloudfoundry.autoscaler.scheduler.conf;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.util.Properties;
 import javax.sql.DataSource;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.cloudfoundry.autoscaler.scheduler.beanPostProcessor.DatasourceBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -24,7 +24,7 @@ public class DataSourceConfig {
   @Qualifier("primary")
   @ConfigurationProperties(prefix = "spring.datasource")
   public DataSource dataSource(@Qualifier("primary") DataSourceProperties properties) {
-    return properties.initializeDataSourceBuilder().type(BasicDataSource.class).build();
+    return properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
   }
 
   @Bean
@@ -45,7 +45,7 @@ public class DataSourceConfig {
   @Qualifier("policy")
   @ConfigurationProperties("spring.policy-db-datasource")
   public DataSource policyDbDataSource(@Qualifier("policy") DataSourceProperties properties) {
-    return properties.initializeDataSourceBuilder().type(BasicDataSource.class).build();
+    return properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
   }
 
   @Bean
