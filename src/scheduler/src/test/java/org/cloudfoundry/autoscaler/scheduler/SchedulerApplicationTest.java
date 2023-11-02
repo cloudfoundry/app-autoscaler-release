@@ -3,7 +3,7 @@ package org.cloudfoundry.autoscaler.scheduler;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 
-import org.apache.commons.dbcp2.BasicDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,13 +14,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class SchedulerApplicationTest {
-  @Autowired private BasicDataSource dataSource;
+  @Autowired private HikariDataSource dataSource;
 
   @Test
   public void testTomcatConnectionPoolNameCorrect() {
     assertThat(
-        dataSource.getClass().getName(),
-        equalToIgnoringCase("org.apache.commons.dbcp2.BasicDataSource"));
+        dataSource.getClass().getName(), equalToIgnoringCase("com.zaxxer.hikari.HikariDataSource"));
   }
 
   @Test
