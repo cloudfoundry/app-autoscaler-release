@@ -31,9 +31,11 @@ ogen-dir := ./helpers/apis/scalinghistory
 openapi-spec-path := ../../api
 openapi-specs-list = $(wildcard ${openapi-spec-path}/*.yaml)
 
+${ogen-files} := $(wildcard ${orgen-dir}/*.go)
+
 .PHONY: generate-ogen
-generate-ogen: ${ogen-dir}
-${ogen-dir}: $(wildcard ./helpers/apis/generate.go) ${openapi-specs-list} ./go.mod ./go.sum
+generate-ogen: ${ogen-dir} ${ogen-files}
+${ogen-dir} ${ogen-files} &: $(wildcard ./helpers/apis/generate.go) ${openapi-specs-list} ./go.mod ./go.sum
 	@echo "# Generating OpenAPI clients and servers"
 	go generate ./helpers/apis/generate.go
 
