@@ -27,15 +27,15 @@ GINKGO_VERSION = v$(shell cat ../../.tool-versions | grep ginkgo  | cut --delimi
 
 
 # ogen generated OpenAPI clients and servers
-ogen-dir := ./helpers/apis/scalinghistory
+openapi-generated-clients-and-servers-dir := ./helpers/apis/scalinghistory
 openapi-spec-path := ../../api
 openapi-specs-list = $(wildcard ${openapi-spec-path}/*.yaml)
 
-${ogen-files} := $(wildcard ${orgen-dir}/*.go)
+${openapi-generated-clients-and-servers-files} := $(wildcard ${openapi-generated-clients-and-servers-dir}/*.go)
 
-.PHONY: generate-ogen
-generate-ogen: ${ogen-dir} ${ogen-files}
-${ogen-dir} ${ogen-files} &: $(wildcard ./helpers/apis/generate.go) ${openapi-specs-list} ./go.mod ./go.sum
+.PHONY: generate-openapi-generated-clients-and-servers
+generate-openapi-generated-clients-and-servers: ${openapi-generated-clients-and-servers-dir} ${openapi-generated-clients-and-servers-files}
+${openapi-generated-clients-and-servers-dir} ${openapi-generated-clients-and-servers-files} &: $(wildcard ./helpers/apis/generate.go) ${openapi-specs-list} ./go.mod ./go.sum
 	@echo "# Generating OpenAPI clients and servers"
 	go generate ./helpers/apis/generate.go
 
@@ -44,7 +44,7 @@ ${ogen-dir} ${ogen-files} &: $(wildcard ./helpers/apis/generate.go) ${openapi-sp
 app-fakes-dir := ./fakes
 app-fakes-files = $(wildcard ${app-fakes-dir}/*.go)
 .PHONY: generate-fakes
-generate-fakes: ${app-fakes-dir} ${app-fakes-files} ${ogen-dir}
+generate-fakes: ${app-fakes-dir} ${app-fakes-files} ${openapi-generated-clients-and-servers-dir}
 ${app-fakes-dir} ${app-fakes-files} &: ./go.mod ./go.sum ./generate-fakes.go
 	@echo "# Generating counterfeits"
 	mkdir -p '${app-fakes-dir}'
@@ -52,7 +52,7 @@ ${app-fakes-dir} ${app-fakes-files} &: ./go.mod ./go.sum ./generate-fakes.go
 
 
 go_deps_without_generated_sources = $(shell find . -type f -name '*.go' \
-																| grep --invert-match --regexp='${app-fakes-dir}|${ogen-dir}')
+																| grep --invert-match --regexp='${app-fakes-dir}|${openapi-generated-clients-and-servers-dir}')
 
 # This target should depend additionally on `${app-fakes-dir}` and on `${app-fakes-files}`. However
 # this is not defined here. The reason is, that for `go-mod-tidy` the generated fakes need to be
@@ -85,7 +85,7 @@ ${go-vendoring-folder} ${go-vendored-files} &: ${app-fakes-dir} ${app-fakes-file
 
 
 
-build-%: ${ogen-dir} ${ogen-files}
+build-%: ${openapi-generated-clients-and-servers-dir} ${openapi-generated-clients-and-servers-files}
 	@echo "# building $*"
 	@CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(BUILDFLAGS) -o build/$* $*/cmd/$*/main.go
 
@@ -138,4 +138,4 @@ clean:
 	@rm --force --recursive 'build'
 	@rm --force --recursive 'fakes'
 	@rm --force --recursive 'vendor'
-	@rm --force --recursive "${ogen-dir}"
+	@rm --force --recursive "${openapi-generated-clients-and-servers-dir}"
