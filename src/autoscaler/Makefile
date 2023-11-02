@@ -85,7 +85,7 @@ ${go-vendoring-folder} ${go-vendored-files} &: ${app-fakes-dir} ${app-fakes-file
 
 
 
-build-%: ${ogen-dir}
+build-%: ${ogen-dir} ${ogen-files}
 	@echo "# building $*"
 	@CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(BUILDFLAGS) -o build/$* $*/cmd/$*/main.go
 
