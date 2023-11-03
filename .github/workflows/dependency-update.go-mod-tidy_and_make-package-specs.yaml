@@ -82,8 +82,8 @@ jobs:
           # before changing `go.mod` and `go.sum`.
           declare -r current_branch="$(git branch --show-current)"
           git checkout 'HEAD~1'
-          make --directory='./src/acceptance/assets/app/go_app' generate-fakes
-          make --directory='./src/autoscaler' generate-fakes
+          make generate-fakes
+          make generate-openapi-generated-clients-and-servers
           git checkout "${current_branch}"
 
           # ⚠️ For this workflow to be successful, the subsequent line must not

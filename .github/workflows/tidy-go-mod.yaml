@@ -24,8 +24,8 @@ jobs:
           #! /usr/bin/env bash
           set -eu -o pipefail
 
-          make --directory='./src/acceptance/assets/app/go_app' generate-fakes
-          make --directory='./src/autoscaler' generate-fakes
+          make generate-fakes
+          make generate-openapi-generated-clients-and-servers
           make go-mod-tidy
 
       - name: Check if there is any change

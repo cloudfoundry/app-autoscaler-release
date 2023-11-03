@@ -273,6 +273,10 @@ autoscaler.generate-fakes:
 test-app.generate-fakes:
 	make --directory='${go-test-app-dir}' generate-fakes
 
+.PHONY: generate-openapi-generated-clients-and-servers
+generate-openapi-generated-clients-and-servers:
+	make --directory='${go-autoscaler-dir}' generate-openapi-generated-clients-and-servers
+
 .PHONY: go-mod-tidy
 go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
 						 changeloglockcleander.go-mod-tidy test-app.go-mod-tidy

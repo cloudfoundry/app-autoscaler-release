@@ -70,6 +70,11 @@ files:
 - autoscaler/vendor/github.com/tedsuo/ifrit/grouper/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/http_server/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/sigmon/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/attribute/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/codes/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/internal/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/internal/attribute/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/trace/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/pbkdf2/* # gosub

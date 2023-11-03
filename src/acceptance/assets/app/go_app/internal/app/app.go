@@ -8,8 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/zapr"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-	"go.opentelemetry.io/contrib/propagators/b3"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -18,7 +19,8 @@ import (
 func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler, cpuTest CPUWaster, customMetricTest CustomMetricClient) *gin.Engine {
 	r := gin.New()
 
-	otel.SetTextMapPropagator(b3.New(b3.WithInjectEncoding(b3.B3MultipleHeader)))
+	otel.SetTracerProvider(sdktrace.NewTracerProvider())
+	otel.SetTextMapPropagator(propagation.TraceContext{})
 	r.Use(otelgin.Middleware("acceptance-tests-go-app"))
 
 	r.Use(ginzap.GinzapWithConfig(logger, &ginzap.Config{
@@ -34,7 +36,7 @@ func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler,
 				fields = append(fields, zap.String("sap_passport", passport))
 			}
 			// support opentelemetry trace ID
-			fields = append(fields, zap.String("trace_id", trace.SpanFromContext(c.Request.Context()).SpanContext().TraceID().String()))
+			fields = append(fields, zap.String("w3c_trace-id", trace.SpanFromContext(c.Request.Context()).SpanContext().TraceID().String()))
 
 			return fields
 		}),
