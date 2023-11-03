@@ -31,7 +31,7 @@ openapi-generated-clients-and-servers-dir := ./helpers/apis/scalinghistory
 openapi-spec-path := ../../api
 openapi-specs-list = $(wildcard ${openapi-spec-path}/*.yaml)
 
-${openapi-generated-clients-and-servers-files} := $(wildcard ${openapi-generated-clients-and-servers-dir}/*.go)
+openapi-generated-clients-and-servers-files := $(wildcard ${openapi-generated-clients-and-servers-dir}/*.go)
 
 .PHONY: generate-openapi-generated-clients-and-servers
 generate-openapi-generated-clients-and-servers: ${openapi-generated-clients-and-servers-dir} ${openapi-generated-clients-and-servers-files}
