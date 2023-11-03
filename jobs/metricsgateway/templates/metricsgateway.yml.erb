@@ -80,3 +80,9 @@ health:
   port: <%= p("autoscaler.metricsgateway.health.port") %>
   username: <%= p("autoscaler.metricsgateway.health.username") %>
   password: <%= p("autoscaler.metricsgateway.health.password") %>
+  <% if_p("autoscaler.metricsgateway.health.ca_cert", "autoscaler.metricsgateway.health.server_cert", "autoscaler.metricsgateway.health.server_key") do %>
+  tls:
+    ca_file: /var/vcap/jobs/metricsgateway/config/certs/healthendpoint/ca.crt
+    cert_file: /var/vcap/jobs/metricsgateway/config/certs/healthendpoint/server.crt
+    key_file: /var/vcap/jobs/metricsgateway/config/certs/healthendpoint/server.key
+  <% end %>

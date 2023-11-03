@@ -8,6 +8,9 @@ templates:
   eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
   eventgenerator_server.crt.erb: config/certs/eventgenerator/server.crt
   eventgenerator_server.key.erb: config/certs/eventgenerator/server.key
+  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
+  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
+  healthendpoint.key.erb: config/certs/healthendpoint/server.key
   metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
   metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
   metricscollector_client.key.erb: config/certs/metricscollector/client.key
@@ -227,6 +230,13 @@ properties:
   autoscaler.eventgenerator.health.port:
     description: "the listening port of health endpoint"
     default: 6204
+  autoscaler.eventgenerator.health.ca_cert:
+    description: "PEM-encoded CA certificate for the health endpoint"
+  autoscaler.eventgenerator.health.server_cert:
+    description: "PEM-encoded server certificate for the health endpoint"
+  autoscaler.eventgenerator.health.server_key:
+    description: "PEM-encoded server key for the health endpoint"
+
   autoscaler.eventgenerator.health.username:
     description: "the username for the health endpoint"
     default: ''

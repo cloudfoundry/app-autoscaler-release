@@ -213,7 +213,7 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
-		PublicApiServer: apiConfig.ServerConfig{
+		PublicApiServer: helpers.ServerConfig{
 			Port: publicApiPort,
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "api.key"),
@@ -221,7 +221,7 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
 			},
 		},
-		BrokerServer: apiConfig.ServerConfig{
+		BrokerServer: helpers.ServerConfig{
 			Port: brokerPort,
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "servicebroker.key"),
@@ -392,11 +392,13 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 			Level: LOGLEVEL,
 		},
 		Server: egConfig.ServerConfig{
-			Port: port,
-			TLS: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			ServerConfig: helpers.ServerConfig{
+				Port: port,
+				TLS: models.TLSCerts{
+					KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
+					CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
+					CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+				},
 			},
 			NodeAddrs: []string{"localhost"},
 			NodeIndex: 0,
@@ -453,7 +455,7 @@ func (components *Components) PrepareScalingEngineConfig(dbURI string, port int,
 			ClientID: "admin",
 			Secret:   "admin",
 		},
-		Server: seConfig.ServerConfig{
+		Server: helpers.ServerConfig{
 			Port: port,
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
@@ -632,7 +634,7 @@ func (components *Components) PrepareMetricsServerConfig(dbURI string, httpClien
 			EnvelopeChannelSize:    100,
 			MetricChannelSize:      100,
 		},
-		Server: msConfig.ServerConfig{
+		Server: helpers.ServerConfig{
 			Port: httpServerPort,
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "metricserver.key"),

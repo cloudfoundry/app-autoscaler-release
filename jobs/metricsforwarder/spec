@@ -4,6 +4,14 @@ templates:
   bpm.yml.erb: config/bpm.yml
   metricsforwarder.yml.erb: config/metricsforwarder.yml
 
+  metricsforwarder_ca.crt.erb: config/certs/metricsforwarder/ca.crt
+  metricsforwarder_server.crt.erb: config/certs/metricsforwarder/server.crt
+  metricsforwarder_server.key.erb: config/certs/metricsforwarder/server.key
+
+  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
+  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
+  healthendpoint.key.erb: config/certs/healthendpoint/server.key
+
   metron_client_ca.crt.erb: config/certs/metron_client/ca.crt
   metron_client.crt.erb: config/certs/metron_client/client.crt
   metron_client.key.erb: config/certs/metron_client/client.key
@@ -137,6 +145,12 @@ properties:
   autoscaler.metricsforwarder.health.port:
     description: "The listening port of health endpoint"
     default: 6403
+  autoscaler.metricsforwarder.health.ca_cert:
+    description: "PEM-encoded CA certificate for the health endpoint"
+  autoscaler.metricsforwarder.health.server_cert:
+    description: "PEM-encoded server certificate for the health endpoint"
+  autoscaler.metricsforwarder.health.server_key:
+    description: "PEM-encoded server key for the health endpoint"
   autoscaler.metricsforwarder.health.username:
     description: "the username of health endpoint"
     default: ''
