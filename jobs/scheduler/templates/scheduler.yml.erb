@@ -99,6 +99,31 @@ spring:
             instanceName: app-autoscaler
           threadPool:
             threadCount: 10
+    ############################################################
+    #    SSL Bundles
+    ############################################################
+    ssl:
+      bundle:
+        jks:
+          server:
+            key:
+              alias: "scheduler"
+            keystore:
+              location: "/var/vcap/jobs/scheduler/config/certs/server.p12"
+              password: "123456"
+            truststore:
+              location: "/var/vcap/jobs/scheduler/config/certs/cacerts"
+              password: "123456"
+        <% if_p("autoscaler.scheduler.health.ca_cert", "autoscaler.scheduler.health.server_cert", "autoscaler.scheduler.health.server_key") do %>
+        pem:
+          healthendpoint:
+            keystore:
+              certificate: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/server.crt"
+              private-key: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/server.key"
+            truststore:
+              certificate: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/ca.crt"
+        <% end %>
+
 ############################################################
 #    Client SSL keys
 ############################################################
@@ -108,7 +133,7 @@ client:
     key-store: /var/vcap/jobs/scheduler/config/certs/scalingengine/client.p12
     key-store-password: 123456
     key-store-type: PKCS12
-    protocol: TLSv1.2
+    protocol: TLSv1.3
     trust-store: /var/vcap/jobs/scheduler/config/certs/scalingengine/cacerts
     trust-store-password: 123456
 ############################################################
@@ -142,15 +167,10 @@ scheduler:
 server:
   port: <%=p('autoscaler.scheduler.port') %>
   ssl:
-    ciphers: TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_CBC_SHA256,TLS_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA256,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_RSA_WITH_RC4_128_SHA,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,SSL_RSA_WITH_RC4_128_SHA
-    enabled-protocols: TLSv1.2
-    key-alias: scheduler
-    key-store: /var/vcap/jobs/scheduler/config/certs/server.p12
-    key-store-password: 123456
-    key-store-type: PKCS12
-    trust-store: /var/vcap/jobs/scheduler/config/certs/cacerts
-    trust-store-password: 123456
-
+    ciphers: TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384,TLS_CHACHA20_POLY1305_SHA256
+    enabled-protocols: TLSv1.3
+    bundle: "server"
+    client-auth: NEED
 
 #User added properties
 <%=p('autoscaler.scheduler.application.props')%>

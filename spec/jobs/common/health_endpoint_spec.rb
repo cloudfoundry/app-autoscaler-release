@@ -21,13 +21,13 @@ describe "health endpoint sections relevant specs" do
           @properties = YAML.safe_load(fixture(properties_file).read)
           @template = release.job(release_job).template(config_file)
           @links = case service
-                  when "eventgenerator"
-                    [ Bosh::Template::Test::Link.new(name: "eventgenerator") ]
-                  when "metricsgateway", "metricsserver"
-                    [ Bosh::Template::Test::Link.new(name: "metricsserver") ]
-                  else
-                    []
-                  end
+          when "eventgenerator"
+            [Bosh::Template::Test::Link.new(name: "eventgenerator")]
+          when "metricsgateway", "metricsserver"
+            [Bosh::Template::Test::Link.new(name: "metricsserver")]
+          else
+            []
+          end
           @rendered_template = YAML.safe_load(@template.render(@properties, consumes: @links))
         end
         it "by default TLS is not configured" do
@@ -46,10 +46,10 @@ describe "health endpoint sections relevant specs" do
 
           expect(rendered_template["health"]["tls"]).not_to be_nil
           expect(rendered_template["health"]["tls"]).to include({
-                                                                  "key_file" => "/var/vcap/jobs/#{release_job}/config/certs/healthendpoint/server.key",
-                                                                  "ca_file" => "/var/vcap/jobs/#{release_job}/config/certs/healthendpoint/ca.crt",
-                                                                  "cert_file" => "/var/vcap/jobs/#{release_job}/config/certs/healthendpoint/server.crt"
-                                                                })
+            "key_file" => "/var/vcap/jobs/#{release_job}/config/certs/healthendpoint/server.key",
+            "ca_file" => "/var/vcap/jobs/#{release_job}/config/certs/healthendpoint/ca.crt",
+            "cert_file" => "/var/vcap/jobs/#{release_job}/config/certs/healthendpoint/server.crt"
+          })
         end
       end
     end

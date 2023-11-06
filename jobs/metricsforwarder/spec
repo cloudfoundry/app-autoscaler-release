@@ -36,6 +36,13 @@ properties:
   autoscaler.metricsforwarder.server.port:
     description: "Port on which the metricsforwarder server will listen"
     default: 6201
+  autoscaler.metricsforwarder.server.ca_cert:
+    description: "PEM-encoded CA certificate for the metricsforwarder server"
+  autoscaler.metricsforwarder.server.server_cert:
+    description: "PEM-encoded server certificate for the metricsforwarder server"
+  autoscaler.metricsforwarder.server.server_key:
+    description: "PEM-encoded server key for the metricsforwarder server"
+
   autoscaler.metricsforwarder.loggregator.metron_address:
     description: "IP address and port where the metron agent is running"
     default: "127.0.0.1:3458"

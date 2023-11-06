@@ -46,6 +46,13 @@ end
 
 server:
   port: <%= p("autoscaler.metricsforwarder.server.port") %>
+  <% if_p("autoscaler.metricsforwarder.server.ca_cert", "autoscaler.metricsforwarder.server.server_cert", "autoscaler.metricsforwarder.server.server_key") do %>
+  tls:
+    ca_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/ca.crt
+    cert_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/server.crt
+    key_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/server.key
+  <% end %>
+
 logging:
   level: <%= p("autoscaler.metricsforwarder.logging.level") %>
 loggregator:
