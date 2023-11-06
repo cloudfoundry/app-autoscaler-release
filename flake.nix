@@ -43,6 +43,8 @@
               # # <https://blog.thalheim.io/2022/12/31/nix-ld-a-clean-solution-for-issues-with-pre-compiled-executables-on-nixos>
               # patchelf
               ruby
+              rubocop
+              rubyPackages.solargraph
               # The following package for cf-uaac is needed by our makefile as well.
               # Until PR https://github.com/NixOS/nixpkgs/pull/189079 has been merged, this requires
               # as additional input: `jdwpkgs.url = github:joergdw/nixpkgs/rubyPackages.cf-uaac;`
