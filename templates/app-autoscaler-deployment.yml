@@ -1,4 +1,5 @@
 ---
+# This file contains the documentary template of the example-manifest.
 
 name: app-autoscaler
 
@@ -609,29 +610,40 @@ instance_groups:
 variables:
 - name: database_password
   type: password
+  update_mode: converge
 - name: autoscaler_service_broker_password
   type: password
+  update_mode: converge
 - name: autoscaler_scheduler_health_password
   type: password
+  update_mode: converge
 - name: autoscaler_eventgenerator_health_password
   type: password
+  update_mode: converge
 - name: autoscaler_metricsforwarder_health_password
   type: password
+  update_mode: converge
 - name: autoscaler_metricsgateway_health_password
   type: password
+  update_mode: converge
 - name: autoscaler_metricsserver_health_password
   type: password
+  update_mode: converge
 - name: autoscaler_operator_health_password
   type: password
+  update_mode: converge
 - name: autoscaler_scalingengine_health_password
   type: password
+  update_mode: converge
 - name: scalingengine_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: scalingengineCA
 - name: scalingengine_server
   type: certificate
+  update_mode: converge
   options:
     ca: scalingengine_ca
     common_name: scalingengine.service.cf.internal
@@ -642,6 +654,7 @@ variables:
     - server_auth
 - name: scalingengine_client
   type: certificate
+  update_mode: converge
   options:
     ca: scalingengine_ca
     common_name: scalingengine client
@@ -649,11 +662,13 @@ variables:
     - client_auth
 - name: eventgenerator_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: eventgeneratorCA
 - name: eventgenerator_server
   type: certificate
+  update_mode: converge
   options:
     ca: eventgenerator_ca
     common_name: eventgenerator.service.cf.internal
@@ -664,6 +679,7 @@ variables:
     - server_auth
 - name: eventgenerator_client
   type: certificate
+  update_mode: converge
   options:
     ca: eventgenerator_ca
     common_name: eventgenerator client
@@ -671,11 +687,13 @@ variables:
     - client_auth
 - name: apiserver_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: apiserverCA
 - name: apiserver_server
   type: certificate
+  update_mode: converge
   options:
     ca: apiserver_ca
     common_name: apiserver.service.cf.internal
@@ -686,11 +704,13 @@ variables:
     - server_auth
 - name: apiserver_public_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: apiserverpublicCA
 - name: apiserver_public_server
   type: certificate
+  update_mode: converge
   options:
     ca: apiserver_public_ca
     common_name: autoscaler.((system_domain))
@@ -701,6 +721,7 @@ variables:
     - server_auth
 - name: apiserver_client
   type: certificate
+  update_mode: converge
   options:
     ca: apiserver_ca
     common_name: apiserver client
@@ -708,11 +729,13 @@ variables:
     - client_auth
 - name: servicebroker_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: servicebrokerCA
 - name: servicebroker_server
   type: certificate
+  update_mode: converge
   options:
     ca: servicebroker_ca
     common_name: servicebroker.service.cf.internal
@@ -723,6 +746,7 @@ variables:
     - server_auth
 - name: servicebroker_client
   type: certificate
+  update_mode: converge
   options:
     ca: servicebroker_ca
     common_name: servicebroker client
@@ -730,11 +754,13 @@ variables:
     - client_auth
 - name: servicebroker_public_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: servicebrokerCA
 - name: servicebroker_public_server
   type: certificate
+  update_mode: converge
   options:
     ca: servicebroker_public_ca
     common_name: autoscalerservicebroker.((system_domain))
@@ -745,11 +771,13 @@ variables:
     - server_auth
 - name: scheduler_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: schedulerCA
 - name: scheduler_server
   type: certificate
+  update_mode: converge
   options:
     ca: scheduler_ca
     common_name: autoscalerscheduler.service.cf.internal
@@ -760,6 +788,7 @@ variables:
     - server_auth
 - name: scheduler_client
   type: certificate
+  update_mode: converge
   options:
     ca: scheduler_ca
     common_name: scheduler client
@@ -767,11 +796,13 @@ variables:
     - client_auth
 - name: metricsserver_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: metricsserverCA
 - name: metricsserver_server
   type: certificate
+  update_mode: converge
   options:
     ca: metricsserver_ca
     common_name: metricsserver.service.cf.internal
@@ -781,6 +812,7 @@ variables:
     - server_auth
 - name: metricsserver_client
   type: certificate
+  update_mode: converge
   options:
     ca: metricsserver_ca
     common_name: metricsserver client
@@ -788,11 +820,13 @@ variables:
     - client_auth
 - name: postgres_ca
   type: certificate
+  update_mode: converge
   options:
     is_ca: true
     common_name: postgresCA
 - name: postgres_server
   type: certificate
+  update_mode: converge
   options:
     ca: postgres_ca
     common_name: autoscalerpostgres.service.cf.internal
@@ -803,6 +837,7 @@ variables:
     - server_auth
 - name: metric_scraper_ca
   type: certificate
+  update_mode: converge
   options:
     common_name: metricScraperCA
     is_ca: true
