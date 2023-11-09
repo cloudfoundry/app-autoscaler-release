@@ -1,23 +1,25 @@
-#!/bin/bash
-set -euo pipefail
+#! /usr/bin/env bash
+set -eu -o pipefail
 
 function sync_package() {
-  bosh_pkg=${1}
-  golang_pkg=${2}
+  local -r bosh_pkg="${1}"
+  local -r golang_pkg="${2}"
 
   shift
   shift
 
   (
-    spec_dir=$PWD/packages/${bosh_pkg}
-    echo "Syncing ${bosh_pkg}..."
-    cd $PWD/src/autoscaler/${golang_pkg}
+    local -r spec_dir="${PWD}/packages/${bosh_pkg}"
+    echo "Syncing ${bosh_pkg}…"
+    cd "${PWD}/src/autoscaler/${golang_pkg}"
     {
-      cat "${spec_dir}/spec" | grep -v '# gosub'
-      go run github.com/loggregator/gosub@2819a49a12756cab02592b5ee9f17f02148b0617 list "$@" | grep autoscaler | \
-        sed -e 's|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- \1/* # gosub|g'
-      go run github.com/loggregator/gosub@2819a49a12756cab02592b5ee9f17f02148b0617 list "$@" | grep -v autoscaler | \
-        sed -e 's|\(.*\)|- autoscaler/vendor/\1/* # gosub|g'
+      cat "${spec_dir}/spec" | grep --invert-match '# gosub'
+      go run github.com/loggregator/gosub@2819a49a12756cab02592b5ee9f17f02148b0617 list "$@" \
+        | grep 'autoscaler' \
+        | sed --expression='s|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- \1/* # gosub|g'
+      go run github.com/loggregator/gosub@2819a49a12756cab02592b5ee9f17f02148b0617 list "$@" \
+        | grep --invert-match 'autoscaler' \
+        | sed --expression='s|\(.*\)|- autoscaler/vendor/\1/* # gosub|g'
     } > "${spec_dir}/spec.new"
 
     mv "${spec_dir}/spec.new" "${spec_dir}/spec"
@@ -31,4 +33,3 @@ sync_package metricsgateway metricsgateway -app ./...
 sync_package metricsserver metricsserver -app ./...
 sync_package operator operator -app ./...
 sync_package scalingengine scalingengine -app ./...
-
