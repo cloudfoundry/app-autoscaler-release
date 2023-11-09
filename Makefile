@@ -303,7 +303,7 @@ mod-download:
 		 cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
 	done
 
-.PHONY: vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
+.PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 				changeloglockcleander.go-mod-vendor
 go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 							 changeloglockcleander.go-mod-vendor
@@ -405,7 +405,8 @@ run-performance:
 run-act:
 	${AUTOSCALER_DIR}/scripts/run_act.sh;\
 
-package-specs: go-mod-tidy vendor
+
+package-specs: go-mod-tidy go-mod-vendor
 	@echo " - Updating the package specs"
 	@./scripts/sync-package-specs
 

@@ -5,7 +5,7 @@ on:
       - "renovate/**"
       - "dependabot/**"
     paths:
-      - ".github/workflows/dependency-update-go-mod-tidy.yaml"
+      - ".github/workflows/dependency-update.go-mod-tidy_and_make-package-specs.yaml"
       - "src/**/go.mod"
       - "src/**/go.sum"
   push:
@@ -17,7 +17,7 @@ on:
       - "renovate/**"
       - "dependabot/**"
     paths:
-      - ".github/workflows/dependency-update-go-mod-tidy.yaml"
+      - ".github/workflows/dependency-update.go-mod-tidy_and_make-package-specs.yaml"
       - "src/**/go.mod"
       - "src/**/go.sum"
   workflow_dispatch: {}
@@ -90,10 +90,14 @@ jobs:
           # trigger again the creation of the generated files.
           make package-specs
 
-          declare -i -r changed_files=$(git status --porcelain | wc --lines)
-          if ((changed_files >= 0))
+          declare -i -r num_changed_files="$(git status --porcelain | wc --lines)"
+          if ((num_changed_files > 0))
           then
+            echo 'Changes to some files were necessary!'
             git add .
             git commit --message="${tidy_message}"
             git push
+          else
+            echo 'No files changed!'
           fi
+          echo '🏁'
