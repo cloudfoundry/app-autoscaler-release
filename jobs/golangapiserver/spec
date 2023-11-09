@@ -12,6 +12,9 @@ templates:
   brokerserver_ca.crt.erb: config/certs/brokerserver/ca.crt
   brokerserver.crt.erb: config/certs/brokerserver/server.crt
   brokerserver.key.erb: config/certs/brokerserver/server.key
+  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
+  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
+  healthendpoint.key.erb: config/certs/healthendpoint/server.key
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
@@ -78,6 +81,12 @@ properties:
     description: "PEM-encoded server key"
   autoscaler.apiserver.health.port:
     default: 1080
+  autoscaler.apiserver.health.ca_cert:
+    description: "PEM-encoded CA certificate for the health endpoint"
+  autoscaler.apiserver.health.server_cert:
+    description: "PEM-encoded server certificate for the health endpoint"
+  autoscaler.apiserver.health.server_key:
+    description: "PEM-encoded server key for the health endpoint"
   autoscaler.apiserver.use_buildin_mode:
     default: true
     description: ""

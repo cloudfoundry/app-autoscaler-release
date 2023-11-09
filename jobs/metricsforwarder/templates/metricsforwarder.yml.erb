@@ -46,6 +46,13 @@ end
 
 server:
   port: <%= p("autoscaler.metricsforwarder.server.port") %>
+  <% if_p("autoscaler.metricsforwarder.server.ca_cert", "autoscaler.metricsforwarder.server.server_cert", "autoscaler.metricsforwarder.server.server_key") do %>
+  tls:
+    ca_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/ca.crt
+    cert_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/server.crt
+    key_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/server.key
+  <% end %>
+
 logging:
   level: <%= p("autoscaler.metricsforwarder.logging.level") %>
 loggregator:
@@ -74,6 +81,12 @@ health:
   port:  <%= p("autoscaler.metricsforwarder.health.port") %>
   username: <%= p("autoscaler.metricsforwarder.health.username") %>
   password: <%= p("autoscaler.metricsforwarder.health.password") %>
+  <% if_p("autoscaler.metricsforwarder.health.ca_cert", "autoscaler.metricsforwarder.health.server_cert", "autoscaler.metricsforwarder.health.server_key") do %>
+  tls:
+    ca_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/ca.crt
+    cert_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/server.crt
+    key_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/server.key
+  <% end %>
 
 rate_limit:
   valid_duration: <%= p("autoscaler.metricsforwarder.rate_limit.valid_duration") %>

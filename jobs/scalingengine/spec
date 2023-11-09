@@ -10,13 +10,17 @@ templates:
   policy_db.key.erb: config/certs/policy_db/key
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
 
-  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
+  scalingengine_db_ca.crt.erb: config/certs/scalingengine_db/ca.crt
   scalingengine_db.crt.erb: config/certs/scalingengine_db/crt
   scalingengine_db.key.erb: config/certs/scalingengine_db/key
 
-  scalingengine_db_ca.crt.erb: config/certs/scalingengine_db/ca.crt
+  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_server.crt.erb: config/certs/scalingengine/server.crt
   scalingengine_server.key.erb: config/certs/scalingengine/server.key
+
+  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
+  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
+  healthendpoint.key.erb: config/certs/healthendpoint/server.key
 
   scheduler_db.crt.erb: config/certs/scheduler_db/crt
   scheduler_db.key.erb: config/certs/scheduler_db/key
@@ -169,6 +173,12 @@ properties:
   autoscaler.scalingengine.health.port:
     description: "the listening port of health endpoint"
     default: 6204
+  autoscaler.scalingengine.health.ca_cert:
+    description: "PEM-encoded CA certificate for the health endpoint"
+  autoscaler.scalingengine.health.server_cert:
+    description: "PEM-encoded server certificate for the health endpoint"
+  autoscaler.scalingengine.health.server_key:
+    description: "PEM-encoded server key for the health endpoint"
   autoscaler.scalingengine.health.username:
     description: "the username of health endpoint"
     default: ''

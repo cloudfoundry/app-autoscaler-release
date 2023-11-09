@@ -10,6 +10,10 @@ templates:
   metricsserver_server.crt.erb: config/certs/metricsserver/server.crt
   metricsserver_server.key.erb: config/certs/metricsserver/server.key
 
+  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
+  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
+  healthendpoint.key.erb: config/certs/healthendpoint/server.key
+
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
@@ -150,6 +154,12 @@ properties:
   autoscaler.metricsserver.health.port:
     description: "The listening port of health endpoint"
     default: 6303
+  autoscaler.metricsserver.health.ca_cert:
+    description: "PEM-encoded CA certificate for the health endpoint"
+  autoscaler.metricsserver.health.server_cert:
+    description: "PEM-encoded server certificate for the health endpoint"
+  autoscaler.metricsserver.health.server_key:
+    description: "PEM-encoded server key for the health endpoint"
   autoscaler.metricsserver.health.username:
     description: "the username of health endpoint"
     default: ''

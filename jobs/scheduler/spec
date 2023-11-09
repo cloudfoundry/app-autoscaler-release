@@ -12,6 +12,10 @@ templates:
   scheduler_server.crt.erb: config/certs/server.crt
   scheduler_server.key.erb: config/certs/server.key
 
+  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
+  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
+  healthendpoint.key.erb: config/certs/healthendpoint/server.key
+
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
@@ -119,6 +123,12 @@ properties:
   autoscaler.scheduler.health.port:
     description: "the listening port of health endpoint"
     default: 6204
+  autoscaler.scheduler.health.ca_cert:
+    description: "PEM-encoded CA certificate for the health endpoint"
+  autoscaler.scheduler.health.server_cert:
+    description: "PEM-encoded server certificate for the health endpoint"
+  autoscaler.scheduler.health.server_key:
+    description: "PEM-encoded server key for the health endpoint"
   autoscaler.scheduler.health.basicAuthEnabled:
     description: "if true, basic auth is enabled on the endpoint"
     default: false

@@ -5,6 +5,10 @@ templates:
   bpm.yml.erb: config/bpm.yml
   metricsgateway.yml.erb: config/metricsgateway.yml
 
+  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
+  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
+  healthendpoint.key.erb: config/certs/healthendpoint/server.key
+
   metricsserver_client_ca.crt.erb: config/certs/metricsserver_client/ca.crt
   metricsserver_client.crt.erb: config/certs/metricsserver_client/server.crt
   metricsserver_client.key.erb: config/certs/metricsserver_client/server.key
@@ -111,6 +115,12 @@ properties:
   autoscaler.metricsgateway.health.port:
     description: "The listening port of health endpoint"
     default: 6503
+  autoscaler.metricsgateway.health.ca_cert:
+    description: "PEM-encoded CA certificate for the health endpoint"
+  autoscaler.metricsgateway.health.server_cert:
+    description: "PEM-encoded server certificate for the health endpoint"
+  autoscaler.metricsgateway.health.server_key:
+    description: "PEM-encoded server key for the health endpoint"
   autoscaler.metricsgateway.health.username:
     description: "the username of health endpoint"
     default: ''
