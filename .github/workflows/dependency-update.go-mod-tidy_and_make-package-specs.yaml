@@ -5,7 +5,7 @@ on:
       - "renovate/**"
       - "dependabot/**"
     paths:
-      - ".github/workflows/dependency-update-go-mod-tidy.yaml"
+      - ".github/workflows/dependency-update.go-mod-tidy_and_make-package-specs.yaml"
       - "src/**/go.mod"
       - "src/**/go.sum"
   push:
@@ -17,7 +17,7 @@ on:
       - "renovate/**"
       - "dependabot/**"
     paths:
-      - ".github/workflows/dependency-update-go-mod-tidy.yaml"
+      - ".github/workflows/dependency-update.go-mod-tidy_and_make-package-specs.yaml"
       - "src/**/go.mod"
       - "src/**/go.sum"
   workflow_dispatch: {}
@@ -69,12 +69,15 @@ jobs:
           declare -r commit_author_name="${{github.event.head_commit.author.name}}"
           declare -r commit_message="${{github.event.head_commit.message}}"
 
-          if [[ ! "${commit_author_name}" =~ ('dependabot'|'renovate')'[bot]' ]] \
-             || [[ "${commit_message}" == "${tidy_message}" ]]
-          then
-            echo 'This commit was not by a known bot or already an automatic `go mod tidy`! Exiting …'
-            exit 0
-          fi
+          ## 👷🏼🚧 To-do: Un-comment me again
+          # if [[ ! "${commit_author_name}" =~ ('dependabot'|'renovate')'[bot]' ]] \
+          #    || [[ "${commit_message}" == "${tidy_message}" ]]
+          # then
+          #   echo 'This commit was not by a known bot or already an automatic `go mod tidy`! Exiting …'
+          #   exit 0
+          # fi
+
+          echo '👷🏼🚧 Position 1' # To-do: remove
 
           # Generated files are needed for `go mod tidy` which is a dependency of the
           # target `package-specs`. However the generation of them itself already
@@ -86,14 +89,22 @@ jobs:
           make generate-openapi-generated-clients-and-servers
           git checkout "${current_branch}"
 
+          echo '👷🏼🚧 Position 2' # To-do: remove
+
           # ⚠️ For this workflow to be successful, the subsequent line must not
           # trigger again the creation of the generated files.
           make package-specs
 
-          declare -i -r changed_files=$(git status --porcelain | wc --lines)
-          if ((changed_files >= 0))
+          echo '👷🏼🚧 Position 3' # To-do: remove
+
+          declare -i -r num_changed_files=$(git status --porcelain | wc --lines)
+          if ((num_changed_files >= 0))
           then
+            echo 'Changes to some files were necessary!'
             git add .
             git commit --message="${tidy_message}"
             git push
+          else
+            echo 'No files changed!'
           fi
+          echo '🏁'
