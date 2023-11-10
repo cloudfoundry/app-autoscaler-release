@@ -11,7 +11,25 @@ import (
 var _ = Describe("AutoScaler Basic Auth Tests", func() {
 
 	urlfor := func(name string) func() string {
-		return func() string { return strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-"+name, 1) }
+		return func() string {
+			override := ""
+			switch name {
+			case "eventgenerator":
+				override = cfg.EventgeneratorHealthEndpoint
+			case "scalingengine":
+				override = cfg.ScalingengineHealthEndpoint
+			case "operator":
+				override = cfg.OperatorHealthEndpoint
+			case "metricsforwarder":
+				override = cfg.MetricsforwarderHealthEndpoint
+			case "scheduler":
+				override = cfg.SchedulerHealthEndpoint
+			}
+			if override != "" {
+				return override
+			}
+			return strings.Replace(healthURL, cfg.ServiceName, cfg.ServiceName+"-"+name, 1)
+		}
 	}
 	DescribeTable("basic auth tests",
 		func(url func() string, statusCode func() int) {
