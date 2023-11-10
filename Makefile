@@ -254,14 +254,14 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: release
-bosh-release: go-mod-tidy vendor scheduler db build/autoscaler-test.tgz
+bosh-release: go-mod-tidy go-mod-vendor scheduler db build/autoscaler-test.tgz
 build/autoscaler-test.tgz:
 	@echo " - building bosh release into build/autoscaler-test.tgz"
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
 
 .PHONY: acceptance-release
-acceptance-release: clean-acceptance go-mod-tidy vendor build-test-app
+acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
