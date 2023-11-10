@@ -35,5 +35,5 @@ jobs:
       - name: Process changes
         if: steps.get_changes.outputs.changed != 0
         run: |
-          echo "::error::go.mod is not tidy, run scripts/update to tidy"
+          echo "::error::go.mod is not tidy, run make go-mod-tidy to tidy"
           exit 1
