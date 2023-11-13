@@ -75,6 +75,7 @@ files:
 - autoscaler/vendor/go.opentelemetry.io/otel/internal/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/internal/attribute/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/trace/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/trace/embedded/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/blowfish/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/pbkdf2/* # gosub
