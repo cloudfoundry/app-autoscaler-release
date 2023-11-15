@@ -21,6 +21,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		maxHeapLimitMb int
 	)
 
+	const minimalMemoryUsage = 28 // observed minimal memory usage by the test app
+
 	JustBeforeEach(func() {
 		appName = CreateTestApp(cfg, "dynamic-policy", initialInstanceCount)
 
@@ -30,7 +32,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 	})
 	BeforeEach(func() {
-		maxHeapLimitMb = cfg.NodeMemoryLimit - 28
+		maxHeapLimitMb = cfg.NodeMemoryLimit - minimalMemoryUsage
 	})
 
 	AfterEach(AppAfterEach)
@@ -41,7 +43,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			var heapToUse int
 			BeforeEach(func() {
 				heapToUse = min(maxHeapLimitMb, 200)
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", 78, 80)
+				expectedAverageUsageAfterScaling := float64(heapToUse)/2 + minimalMemoryUsage
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", int64(0.9*expectedAverageUsageAfterScaling), int64(heapToUse))
 				initialInstanceCount = 1
 			})
 
