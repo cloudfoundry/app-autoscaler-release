@@ -691,136 +691,106 @@ update:
 variables:
 - name: database_password
   type: password
-  update_mode: converge
 - name: uaa_secret
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: uaa_client_id
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: autoscaler_eventgenerator_health_password
   type: password
-  update_mode: converge
 - name: service_broker_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: service_broker_password_blue
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: autoscaler_metricsforwarder_health_password
   type: password
-  update_mode: converge
 - name: autoscaler_metricsgateway_health_password
   type: password
-  update_mode: converge
 - name: autoscaler_metricsserver_health_password
   type: password
-  update_mode: converge
 - name: app_autoscaler_sbss_restricted_dbuser_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: autoscaler_operator_health_password
   type: password
-  update_mode: converge
 - name: app_autoscaler_sbss_restricted_dbuser_password_blue
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: dashboard_client_id
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: dashboard_client_secret
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: api_client_id
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: api_client_secret
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: auditlog_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: dashboard_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: autoscaler_scheduler_health_password
   type: password
-  update_mode: converge
 - name: ratelimiter_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: metriccollector_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: scalingengine_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: eventgenerator_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: scheduler_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: apiserver_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: metricsforwarder_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: autoscaler_scalingengine_health_password
   type: password
-  update_mode: converge
 - name: metricsgateway_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: metricsserver_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: operator_monitor_basic_auth_password
   type: password
-  update_mode: converge
   options:
     length: 128
 - name: app_autoscaler_ca_cert
