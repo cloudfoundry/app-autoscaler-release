@@ -75,7 +75,7 @@ resources:
   source:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-    tag_filter: v13.*
+    tag_filter: v15.*
 
 jobs:
 - name: set-pipeline
