@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
-	github.com/shurcooL/githubv4 v0.0.0-20230704064427-599ae7bbf278
+	github.com/shurcooL/githubv4 v0.0.0-20231126234147-1cffa1f02456
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/oauth2 v0.14.0
 )
