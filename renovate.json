@@ -21,7 +21,7 @@
     {
       "description": "Disable asdf Go version updates, as they are taken care by our bosh-package-golang-release-based automation",
       "matchManagers": ["asdf"],
-      "matchDepTypes": ["golang"],
+      "matchDepNames": ["golang"],
       "enabled": false
     },
     {
