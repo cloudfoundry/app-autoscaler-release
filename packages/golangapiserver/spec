@@ -83,13 +83,13 @@ files:
 - autoscaler/vendor/github.com/ogen-go/ogen/conv/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/http/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/internal/httpcookie/* # gosub
-- autoscaler/vendor/github.com/ogen-go/ogen/internal/jsonpointer/* # gosub
-- autoscaler/vendor/github.com/ogen-go/ogen/internal/location/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/internal/urlpath/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/internal/xmaps/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/internal/xslices/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/json/* # gosub
+- autoscaler/vendor/github.com/ogen-go/ogen/jsonpointer/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/jsonschema/* # gosub
+- autoscaler/vendor/github.com/ogen-go/ogen/location/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/middleware/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/ogenerrors/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/ogenregex/* # gosub
