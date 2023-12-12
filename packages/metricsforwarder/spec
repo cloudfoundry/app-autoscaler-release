@@ -152,6 +152,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/internal/pretty/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/dns/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/internal/resolver/dns/internal/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/passthrough/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/unix/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/serviceconfig/* # gosub
@@ -163,6 +164,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/metadata/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/peer/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/resolver/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/resolver/dns/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/serviceconfig/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/stats/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/status/* # gosub
