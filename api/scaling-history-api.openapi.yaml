@@ -165,14 +165,14 @@ components:
         old_instances:
           type: integer
           format: int64
-          minimum: 0
-          description: The number of instances before the scaling.
+          minimum: -1
+          description: The number of instances before the scaling. -1 means that the value is not applicable.
           example: 1
         new_instances:
           type: integer
           format: int64
-          minimum: 0
-          description: The number of instances after the scaling.
+          minimum: -1
+          description: The number of instances after the scaling. -1 means that the value is not applicable.
           example: 2
         reason:
           type: string
