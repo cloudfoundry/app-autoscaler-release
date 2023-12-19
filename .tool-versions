@@ -1,6 +1,6 @@
 act 0.2.56
 actionlint 1.6.26
-bosh 7.5.0
+bosh 7.5.1
 cf 8.7.5
 concourse 7.11.0
 direnv 2.33.0
