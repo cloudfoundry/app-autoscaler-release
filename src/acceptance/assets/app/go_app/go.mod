@@ -7,7 +7,7 @@ require (
 	github.com/fgrosse/zaptest v1.2.1
 	github.com/gin-contrib/zap v0.2.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/go-faster/errors v0.7.0
+	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/go-logr/logr v1.3.0
 	github.com/go-logr/zapr v1.3.0
