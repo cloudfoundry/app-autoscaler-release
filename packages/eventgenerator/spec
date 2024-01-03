@@ -73,7 +73,7 @@ files:
 - autoscaler/vendor/github.com/jackc/puddle/v2/internal/genstack/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
-- autoscaler/vendor/github.com/matttproud/golang_protobuf_extensions/pbutil/* # gosub
+- autoscaler/vendor/github.com/matttproud/golang_protobuf_extensions/v2/pbutil/* # gosub
 - autoscaler/vendor/github.com/nu7hatch/gouuid/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
