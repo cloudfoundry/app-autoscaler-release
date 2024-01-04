@@ -26,5 +26,5 @@ jobs:
       - uses: alexwilson/enable-github-automerge-action@1.0.0
         name: Enable Auto-merge
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          github-token: "${{ secrets.APP_AUTOSCALER_CI_TOKEN_V1 }}"
           merge-method: "SQUASH"
