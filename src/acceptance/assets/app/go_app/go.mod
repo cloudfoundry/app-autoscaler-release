@@ -25,7 +25,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.21.0
 	go.opentelemetry.io/otel/trace v1.21.0
 	go.uber.org/zap v1.26.0
-	golang.org/x/exp be819d1f06fc
+	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
 )
 
 require (
