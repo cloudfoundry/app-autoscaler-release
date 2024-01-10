@@ -6,22 +6,22 @@
   - name: app-autoscaler
     version: latest
   - name: "postgres"
-    version: "44"
-    url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=44"
-    sha1: "582b1de9522077102dfa44ff7164cd8f499dbfc8"
+    version: "48"
+    url: "https://bosh.io/d/github.com/cloudfoundry/postgres-release?v=48"
+    sha1: sha256:75ceb40c970c54a922768d499bee9102d7a2ae2f88e269cefecba2f1c195e70b
   - name: bosh-dns-aliases
     url: https://bosh.io/d/github.com/cloudfoundry/bosh-dns-aliases-release?v=0.0.4
     version: '0.0.4'
     sha1: 55b3dced813ff9ed92a05cda02156e4b5604b273
   - name: "routing"
-    url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.274.0"
-    sha1: "3cc22aaf3d7484ed59171091c7c315229275a831"
-    version: "0.274.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry/routing-release?v=0.285.0"
+    sha1: sha256:18df3f00881de9b82b6c3e9a6e96871a2330ed5c0ea595431cabe64782ba5035
+    version: "0.285.0"
   - name: loggregator-agent
-    url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=7.2.1
-    version: 7.2.1
-    sha1: 623e45f6c19a68d01c313a9a1a504dabc39ac1cf
+    url: https://bosh.io/d/github.com/cloudfoundry/loggregator-agent-release?v=7.7.3
+    version: 7.7.3
+    sha1: sha256:4b7d5dd3eb2c4ed5d0a9f7957d5044c3da294a083ffdf395b5ddee2ff2360780
   - name: bpm
-    url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.3
-    version: 1.2.3
-    sha1: ad12bb4e1d2c0b94ef679670a99adaff920850d0
+    url: https://bosh.io/d/github.com/cloudfoundry/bpm-release?v=1.2.13
+    version: 1.2.13
+    sha1: sha256:14a2b83254ba5a833baf7fc2d297edfa2ad01452e9b9281785e1eb6b906e5d9c

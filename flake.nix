@@ -25,6 +25,7 @@
               actionlint
               bosh-cli
               cloudfoundry-cli
+              credhub-cli
               delve # go-debugger
               fly
               ginkgo
