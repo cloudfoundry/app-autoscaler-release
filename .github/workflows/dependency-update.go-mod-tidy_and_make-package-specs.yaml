@@ -25,6 +25,8 @@ jobs:
   pkgs-specs_and_go-mod-tidy:
     name: "go mod tidy && make package-specs"
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     permissions:
       pull-requests: write
       contents: write
