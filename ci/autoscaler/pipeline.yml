@@ -60,6 +60,7 @@ groups:
   - acceptance-buildin
   - acceptance-log-cache
   - cleanup-autoscaler-deployments
+  - fetch-latest-stemcell
   - draft
   - integration-tests
   - performance
@@ -175,6 +176,11 @@ resources:
     uri: https://github.com/cloudfoundry/bosh-package-java-release.git
     branch: main
     version_depth: 20
+
+- name: gcp-jammy-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-google-kvm-ubuntu-jammy-go_agent
 
 jobs:
 - name: set-pipeline
@@ -493,6 +499,20 @@ jobs:
       trigger: true
   - task: cleanup-autoscaler-deployments
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
+
+- name: fetch-latest-stemcell
+  public: true
+  build_logs_to_retain: 100
+  plan:
+    - in_parallel:
+        - get: bbl-state
+        - get: ci
+        - get: every-night
+          passed: [ cleanup-autoscaler-deployments ]
+          trigger: true
+        - get: gcp-jammy-stemcell
+    - task: fetch-latest-stemcell
+      file: ci/ci/autoscaler/tasks/fetch-latest-stemcell.yml
 
 - name: draft
   public: true
