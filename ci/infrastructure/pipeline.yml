@@ -7,6 +7,7 @@ groups:
   - delete-cf
   - destroy-infrastructure
   - bosh-cleanup
+  - fetch-latest-stemcell
   - deploy-prometheus
 
 - name: others
@@ -30,6 +31,7 @@ resources:
     fetch_tags: true
     paths:
       - ci/infrastructure
+      - ci/autoscaler
       - ci/operations
 
 - name: every-day
@@ -76,6 +78,11 @@ resources:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
     tag_filter: v15.*
+
+- name: gcp-jammy-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-google-kvm-ubuntu-jammy-go_agent
 
 jobs:
 - name: set-pipeline
@@ -171,6 +178,20 @@ jobs:
       trigger: true
   - task: bosh-cleanup
     file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
+
+- name: fetch-latest-stemcell
+  public: true
+  build_logs_to_retain: 100
+  plan:
+    - in_parallel:
+        - get: bbl-state
+        - get: ci
+        - get: every-day
+          passed: [ bosh-cleanup ]
+          trigger: true
+        - get: gcp-jammy-stemcell
+    - task: fetch-latest-stemcell
+      file: ci/ci/autoscaler/tasks/fetch-latest-stemcell.yml
 
 - name: deploy-prometheus
   public: true
