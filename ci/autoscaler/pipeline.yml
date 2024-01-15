@@ -88,6 +88,7 @@ groups:
 - name: maintenance
   jobs:
     - cleanup-autoscaler-deployments
+    - fetch-latest-stemcell
 
 resource_types:
 - name: gcs-resource
