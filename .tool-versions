@@ -2,7 +2,7 @@ act 0.2.57
 actionlint 1.6.26
 bosh 7.5.2
 cf 8.7.7
-concourse 7.10.0
+concourse 7.11.0
 direnv 2.33.0
 gcloud 459.0.0
 ginkgo 2.13.2
