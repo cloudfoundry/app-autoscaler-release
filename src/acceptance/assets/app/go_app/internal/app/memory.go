@@ -63,6 +63,7 @@ func MemoryTests(logger logr.Logger, r *gin.RouterGroup, memoryTest MemoryGobble
 			memoryTest.UseMemory(memoryMiB * Mebi)
 			logMemoryUsage(logger, "after allocating memory")
 			memoryTest.Sleep(duration)
+			memoryTest.StopTest()
 		}()
 		c.JSON(http.StatusOK, gin.H{"memoryMiB": memoryMiB, "minutes": minutes})
 	})
