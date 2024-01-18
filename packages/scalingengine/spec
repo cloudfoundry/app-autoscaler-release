@@ -111,6 +111,8 @@ files:
 - autoscaler/vendor/github.com/tedsuo/ifrit/grouper/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/http_server/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/sigmon/* # gosub
+- autoscaler/vendor/github.com/uptrace/opentelemetry-go-extra/otelsql/* # gosub
+- autoscaler/vendor/github.com/uptrace/opentelemetry-go-extra/otelsqlx/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/internal/semconvutil/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/* # gosub
@@ -130,6 +132,8 @@ files:
 - autoscaler/vendor/go.opentelemetry.io/otel/sdk/internal/env/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/sdk/resource/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/sdk/trace/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/internal/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.10.0/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.17.0/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.19.0/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.21.0/* # gosub
