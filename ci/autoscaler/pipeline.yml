@@ -209,6 +209,7 @@ jobs:
   - task: run-unit-tests
     file: ci/ci/autoscaler/tasks/run-unit-tests.yml
     attempts: 3
+    timeout: 45m
 
 - name: integration-tests
   public: true
@@ -222,6 +223,7 @@ jobs:
     - get: ci
   - task: run-integration-tests
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
+    timeout: 45m
 
 - name: acceptance
   public: true
@@ -244,31 +246,37 @@ jobs:
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
       TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+    timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *acceptance-params
       <<: *app-autoscaler-ops-files
+    timeout: 30m
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *acceptance-params
+    timeout: 5m
   - in_parallel:
     - task: autoscaler-acceptance-api
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-params
         SUITES: api
+      timeout: 15m
     - task: autoscaler-acceptance-app
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-params
         SUITES: app
+      timeout: 45m
     - task: autoscaler-acceptance-broker
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-params
         SUITES: broker
+      timeout: 15m
 
 - name: acceptance-log-cache
   public: true
@@ -291,31 +299,37 @@ jobs:
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
       TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+    timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *acceptance-log-cache-params
       <<: *app-autoscaler-ops-files-log-cache
+    timeout: 30m
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *acceptance-log-cache-params
+    timeout: 5m
   - in_parallel:
     - task: autoscaler-acceptance-api
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-params
         SUITES: api
+      timeout: 15m
     - task: autoscaler-acceptance-app
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-params
         SUITES: app
+      timeout: 45m
     - task: autoscaler-acceptance-broker
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-params
         SUITES: broker
+      timeout: 15m
 
 - name: acceptance-buildin
   public: true
@@ -340,22 +354,26 @@ jobs:
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
       TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+    timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *acceptance-buildin-params
       <<: *app-autoscaler-ops-files-buildin
+    timeout: 30m
   - in_parallel:
     - task: autoscaler-acceptance-api
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-buildin-params
         SUITES: api
+      timeout: 15m
     - task: autoscaler-acceptance-app
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-buildin-params
         SUITES: app
+      timeout: 45m
 
 - name: performance
   public: true
@@ -373,28 +391,35 @@ jobs:
     - get: ci
     - get: bbl-state
     - get: app-autoscaler-release
+      passed: [unit-tests, integration-tests]
+      trigger: true
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
       TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+    timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *performance-env
       <<: *app-autoscaler-ops-files
+    timeout: 30m
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *performance-env
+    timeout: 5m
   - task: setup-performance
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
      TARGETS: setup-performance
+    timeout: 15m
   - task: run-performance
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
      TARGETS: run-performance
+    timeout: 15m
 
 - name: upgrade-test
   public: true
@@ -420,10 +445,12 @@ jobs:
     params:
       <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
+    timeout: 30m
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *upgrade-test-params
+    timeout: 5m
   - task: autoscaler-pre-upgrade
     file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -431,16 +458,19 @@ jobs:
       SUITES: |
         pre_upgrade
       NODES: 1
+    timeout: 30m
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
       TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+    timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
+    timeout: 30m
   - task: autoscaler-post-upgrade
     file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
@@ -448,6 +478,7 @@ jobs:
       SUITES: |
         post_upgrade
       NODES: 1
+    timeout: 30m
 
 - name: release
   public: true
