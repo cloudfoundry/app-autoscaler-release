@@ -8,7 +8,7 @@ go-changelog-dir := ./src/changelog
 go-changeloglockcleander-dir := ./src/changeloglockcleaner
 go-test-app-dir := ./src/acceptance/assets/app/go_app
 
-go_modules := $(shell find . -maxdepth 3 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
+go_modules := $(shell find . -maxdepth 6 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules := $(go_modules) db scheduler
 
 MVN_OPTS = "-Dmaven.test.skip=true"
@@ -436,3 +436,12 @@ validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
 	for file in $^ ; do \
 		swagger-cli validate "$${file}" ; \
 	done
+
+.PHONY: go-get-u
+go-get-u: $(addsuffix .go-get-u,$(go_modules))
+
+.PHONY: %.go-get-u
+%.go-get-u: % generate-fakes
+	@echo " - go get -u" $<
+	cd src/$< && \
+	go get -u ./...
