@@ -9,8 +9,17 @@
   ],
   "anyOf": [
     {
-      "required": [
-        "scaling_rules"
+      "oneOf": [
+        {
+          "required": [
+            "scaling_rules"
+          ]
+        },
+        {
+          "required": [
+            "metric_targets"
+          ]
+        }
       ]
     },
     {
@@ -30,6 +39,28 @@
       "$id": "#/properties/instance_max_count",
       "type": "integer",
       "title": "Maximum how many instances of application can be provisioned as part of application scaling"
+    },
+    "metric_targets": {
+      "type": "array",**
+      "items": {
+        "type": "object",
+        "required": [
+          "metric_type",
+          "target_value"
+        ],
+        "properties": {
+          "metric_type": {
+            "type": "string",
+            "title": "The Metric_type Schema",
+            "pattern": "^[a-zA-Z0-9_]+$",
+            "maxLength": 100
+          },
+          "target_value": {
+            "type": "integer",
+            "title": "The Target_value Schema"
+          }
+        }
+      }
     },
     "scaling_rules": {
       "$id": "#/properties/scaling_rules",

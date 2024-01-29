@@ -39,10 +39,11 @@ func (p *PolicyJson) GetAppPolicy() (*AppPolicy, error) {
 }
 
 type ScalingPolicy struct {
-	InstanceMin  int               `json:"instance_min_count"`
-	InstanceMax  int               `json:"instance_max_count"`
-	ScalingRules []*ScalingRule    `json:"scaling_rules,omitempty"`
-	Schedules    *ScalingSchedules `json:"schedules,omitempty"`
+	InstanceMin   int               `json:"instance_min_count"`
+	InstanceMax   int               `json:"instance_max_count"`
+	ScalingRules  []*ScalingRule    `json:"scaling_rules,omitempty"`
+	Schedules     *ScalingSchedules `json:"schedules,omitempty"`
+	MetricTargets []*MetricTarget   `json:"metric_targets,omitempty"`
 }
 
 func (s ScalingPolicy) String() string {
@@ -59,6 +60,11 @@ type ScalingRule struct {
 	Operator              string `json:"operator"`
 	CoolDownSeconds       int    `json:"cool_down_secs,omitempty"`
 	Adjustment            string `json:"adjustment"`
+}
+
+type MetricTarget struct {
+	MetricType  string `json:"metric_type"`
+	TargetValue int64  `json:"target_value"`
 }
 
 type ScalingSchedules struct {
