@@ -1,0 +1,47 @@
+# This is a stop-gap solution until https://github.com/renovatebot/renovate/issues/9578 is implemented.
+name: "update all golang dependencies"
+on:
+  schedule:  # Monday morning: https://crontab.guru/#0_6_*_*_1
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}
+jobs:
+  make-go-get-u:
+    name: "go get -u"
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+          token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }} # With push token that can trigger new PR jobs
+      - name: make go-get-u and make package-specs
+        shell: bash
+        run: |
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+          git config user.name "app-autoscaler-ci-bot"
+          git config user.email "ApplicationAutoscaler@sap.com"
+
+          git switch --create scheduled-dependency-update-with-go-get-u
+
+          make go-get-u package-specs
+
+          declare -i -r num_changed_files="$(git status --porcelain | wc --lines)"
+          if ((num_changed_files > 0))
+          then
+            echo 'Changes to some files were necessary!'
+            git add .
+            git commit --message="chore(deps): automated dependency update with go get -u" --message="Please check that no unwanted changes have been introduced." --no-verify
+            git push --set-upstream origin scheduled-dependency-update-with-go-get-u
+            gh pr create --base main --fill --label dependencies
+          else
+            echo 'No files changed!'
+          fi
+          echo '🏁'
