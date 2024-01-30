@@ -68,7 +68,6 @@ files:
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
 - autoscaler/vendor/github.com/mattn/go-colorable/* # gosub
 - autoscaler/vendor/github.com/mattn/go-isatty/* # gosub
-- autoscaler/vendor/github.com/matttproud/golang_protobuf_extensions/v2/pbutil/* # gosub
 - autoscaler/vendor/github.com/nu7hatch/gouuid/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/conv/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/http/* # gosub
@@ -179,6 +178,7 @@ files:
 - autoscaler/vendor/golang.org/x/text/unicode/norm/* # gosub
 - autoscaler/vendor/golang.org/x/text/unicode/rangetable/* # gosub
 - autoscaler/vendor/golang.org/x/text/width/* # gosub
+- autoscaler/vendor/google.golang.org/protobuf/encoding/protodelim/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/encoding/prototext/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/encoding/protowire/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/descfmt/* # gosub
