@@ -21,6 +21,8 @@ jobs:
           token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }} # With push token that can trigger new PR jobs
       - name: make go-get-u and make package-specs
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
         run: |
           #! /usr/bin/env bash
           set -eu -o pipefail
