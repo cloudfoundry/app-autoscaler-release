@@ -19,10 +19,25 @@
         let
           pkgs = nixpkgsFor.${system};
         in {
+          # build bosh-bootloader CLI (bbl) locally because it is not available in the Nix package registry.
+          # this custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.
+          bosh-bootloader = pkgs.buildGoModule rec {
+            name = "bosh-bootloader";
+            src = pkgs.fetchgit {
+              url = "https://github.com/cloudfoundry/bosh-bootloader";
+              rev = "139141d8addd95ef381a29ef98b6ce2e9a78c437"; # commit hash of v9.0.17, see also https://github.com/cloudfoundry/bosh-bootloader/commit/139141d8addd95ef381a29ef98b6ce2e9a78c437
+              fetchSubmodules = true; # the repo contians submodules which are required during the build
+              hash = "sha256-P4rS7Nv/09+9dD198z4NOXnldSE5fx3phEK24Acatps=";
+            };
+            doCheck = false; # skip tests because they require special configuration to pass. let's rely that the released bosh-bootloader versions did pass the tests.
+            vendorHash = null;
+          };
+
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               act
               actionlint
+              self.devShells.${system}.bosh-bootloader
               bosh-cli
               cloudfoundry-cli
               credhub-cli
