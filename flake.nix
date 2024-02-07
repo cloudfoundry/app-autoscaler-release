@@ -25,7 +25,7 @@
             name = "bosh-bootloader";
             src = pkgs.fetchgit {
               url = "https://github.com/cloudfoundry/bosh-bootloader";
-              rev = "139141d8addd95ef381a29ef98b6ce2e9a78c437"; # commit hash of v9.0.17, see also https://github.com/cloudfoundry/bosh-bootloader/commit/139141d8addd95ef381a29ef98b6ce2e9a78c437
+              rev = "refs/tags/v9.0.17";
               fetchSubmodules = true; # the repo contains submodules which are required during the build phase
               hash = "sha256-P4rS7Nv/09+9dD198z4NOXnldSE5fx3phEK24Acatps=";
             };
