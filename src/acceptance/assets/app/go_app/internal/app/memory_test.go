@@ -64,13 +64,13 @@ var _ = Describe("Memory tests", func() {
 		It("should gobble memory and release when stopped", func() {
 			var allocInMebi uint64 = 50 * app.Mebi
 
-			oldMem := getTotalMemoryUsage("before memTest info test") // Alloc = HeapAlloc =  2138440 -> oldmem: 2138440
+			oldMem := getTotalMemoryUsage("before memTest info test")
 
-			slack := getMemorySlack() //1935416
+			slack := getMemorySlack()
 
 			By("allocating memory")
 			memInfo := &app.ListBasedMemoryGobbler{}
-			memInfo.UseMemory(allocInMebi) //52428800
+			memInfo.UseMemory(allocInMebi)
 			Expect(memInfo.IsRunning()).To(Equal(true))
 
 			newMem := getTotalMemoryUsage("during memTest info test") //55448288
@@ -81,7 +81,6 @@ var _ = Describe("Memory tests", func() {
 			having issues due to the go-runtime.
 			`
 			GinkgoWriter.Printf(msg)
-			// 55448288 - 2138440 > 2138440 - 1935416
 			Expect(newMem - oldMem).To(BeNumerically(">=", allocInMebi-slack))
 
 			By("and releasing it after the test ends")
