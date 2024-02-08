@@ -19,10 +19,23 @@
         let
           pkgs = nixpkgsFor.${system};
         in {
+          app-autoscaler-cli-plugin = pkgs.buildGoModule rec {
+            name = "app-autoscaler-cli-plugin";
+            src = pkgs.fetchgit {
+              url = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
+              rev = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
+              hash = "sha256-j8IAUhjYjEFvtRbA6o2vA7P2uUmKVYsd9uJmN0WtVCM=";
+              fetchSubmodules = true;
+            };
+            doCheck = false;
+            vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
+          };
+
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               act
               actionlint
+              self.devShells.${system}.app-autoscaler-cli-plugin
               bosh-cli
               cloudfoundry-cli
               credhub-cli
@@ -67,8 +80,8 @@
             hardeningDisable = [ "fortify" ];
 
             shellHook = ''
-              # this CF CLI plugin is required by several make-targets
-              cf install-plugin -r CF-Community app-autoscaler-plugin -f
+              # install required CF CLI plugins
+              cf install-plugin "$(whereis -q app-autoscaler-cli-plugin)" -f
 
               aes_terminal_font_yellow='\e[38;2;255;255;0m'
               aes_terminal_font_blink='\e[5m'
