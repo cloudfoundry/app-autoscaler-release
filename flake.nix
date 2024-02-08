@@ -67,6 +67,9 @@
             hardeningDisable = [ "fortify" ];
 
             shellHook = ''
+              # this CF CLI plugin is required by several make-targets
+              cf install-plugin -r CF-Community app-autoscaler-plugin -f
+
               aes_terminal_font_yellow='\e[38;2;255;255;0m'
               aes_terminal_font_blink='\e[5m'
               aes_terminal_reset='\e[0m'
