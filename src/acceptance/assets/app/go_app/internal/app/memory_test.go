@@ -73,7 +73,7 @@ var _ = Describe("Memory tests", func() {
 			memInfo.UseMemory(allocInMebi)
 			Expect(memInfo.IsRunning()).To(Equal(true))
 
-			newMem := getTotalMemoryUsage("during memTest info test") //55448288
+			newMem := getTotalMemoryUsage("during memTest info test")
 			msg :=
 				`
 			If this test fails, please consider to rewrite internal/app/memory.go.UseMemory()
