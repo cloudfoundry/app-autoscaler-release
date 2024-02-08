@@ -8,6 +8,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/shirou/gopsutil/cpu"
 )
 
 var _ = Describe("CPU tests", func() {
@@ -72,12 +73,10 @@ var _ = Describe("CPU tests", func() {
 func getTotalCPUUsage(action string) time.Duration {
 	GinkgoHelper()
 
-	proc := getProcessInfo()
-
-	stat, err := proc.Stat()
+	cpuInfo, err := cpu.Times(false)
 	Expect(err).ToNot(HaveOccurred())
 
-	result := time.Duration(stat.CPUTime() * float64(time.Second))
+	result := time.Duration(cpuInfo[0].Total() * float64(time.Second))
 	GinkgoWriter.Printf("total cpu time %s: %s\n", action, result.String())
 
 	return result
