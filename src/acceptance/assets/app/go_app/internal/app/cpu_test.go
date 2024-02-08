@@ -72,13 +72,10 @@ var _ = Describe("CPU tests", func() {
 func getTotalCPUUsage(action string) time.Duration {
 	GinkgoHelper()
 
-	proc := getProcessInfo()
+	cpuTotalUsage := app.CpuTotalUsageTime()
+	cpuTotalDuration := time.Duration(cpuTotalUsage * float64(time.Second))
 
-	stat, err := proc.Stat()
-	Expect(err).ToNot(HaveOccurred())
+	GinkgoWriter.Printf("total cpu time %s: %s\n", action, cpuTotalDuration.String())
 
-	result := time.Duration(stat.CPUTime() * float64(time.Second))
-	GinkgoWriter.Printf("total cpu time %s: %s\n", action, result.String())
-
-	return result
+	return cpuTotalDuration
 }
