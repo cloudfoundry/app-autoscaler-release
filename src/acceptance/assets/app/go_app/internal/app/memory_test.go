@@ -2,7 +2,6 @@ package app_test
 
 import (
 	"net/http"
-	"os"
 	"runtime"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/prometheus/procfs"
 )
 
 var _ = Describe("Memory tests", func() {
@@ -67,6 +65,7 @@ var _ = Describe("Memory tests", func() {
 			var allocInMebi uint64 = 50 * app.Mebi
 
 			oldMem := getTotalMemoryUsage("before memTest info test")
+
 			slack := getMemorySlack()
 
 			By("allocating memory")
@@ -99,13 +98,11 @@ func getTotalMemoryUsage(action string) uint64 {
 	GinkgoHelper()
 
 	runtime.GC()
-	proc := getProcessInfo()
 
-	stat, err := proc.NewStatus()
-	Expect(err).ToNot(HaveOccurred())
-
-	result := stat.VmRSS + stat.VmSwap
-
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	// Alloc = HeapAlloc have the same value
+	result := m.Alloc
 	GinkgoWriter.Printf("total memory usage %s: %d MiB\n", action, result/app.Mebi)
 
 	return result
@@ -126,15 +123,4 @@ func getMemorySlack() uint64 {
 	GinkgoWriter.Printf("slack: %d MiB\n", slack/app.Mebi)
 
 	return slack
-}
-
-func getProcessInfo() procfs.Proc {
-	GinkgoHelper()
-	fs, err := procfs.NewFS("/proc")
-	Expect(err).ToNot(HaveOccurred())
-
-	proc, err := fs.Proc(os.Getpid())
-	Expect(err).ToNot(HaveOccurred())
-
-	return proc
 }
