@@ -15,29 +15,30 @@
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
     in {
+      packages = forAllSystems (system:{
+        # this custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.
+        bosh-bootloader = nixpkgsFor.${system}.buildGoModule rec {
+          name = "bosh-bootloader";
+          src = nixpkgsFor.${system}.fetchgit {
+            url = "https://github.com/cloudfoundry/bosh-bootloader";
+            rev = "refs/tags/v9.0.17";
+            fetchSubmodules = true; # the repo contains submodules which are required during the build phase
+            hash = "sha256-P4rS7Nv/09+9dD198z4NOXnldSE5fx3phEK24Acatps=";
+          };
+          doCheck = false; # skip tests because they require special configuration to pass. let's rely on the fact that the released bosh-bootloader version passed the tests already.
+          vendorHash = null;
+        };
+      });
+
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
         in {
-          # build bosh-bootloader CLI (bbl) locally because it is not available in the Nix package registry.
-          # this custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.
-          bosh-bootloader = pkgs.buildGoModule rec {
-            name = "bosh-bootloader";
-            src = pkgs.fetchgit {
-              url = "https://github.com/cloudfoundry/bosh-bootloader";
-              rev = "refs/tags/v9.0.17";
-              fetchSubmodules = true; # the repo contains submodules which are required during the build phase
-              hash = "sha256-P4rS7Nv/09+9dD198z4NOXnldSE5fx3phEK24Acatps=";
-            };
-            doCheck = false; # skip tests because they require special configuration to pass. let's rely on the fact that the released bosh-bootloader version passed the tests already.
-            vendorHash = null;
-          };
-
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               act
               actionlint
-              self.devShells.${system}.bosh-bootloader
+              self.packages.${system}.bosh-bootloader
               bosh-cli
               cloudfoundry-cli
               credhub-cli
