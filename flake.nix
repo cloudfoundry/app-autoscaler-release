@@ -27,7 +27,6 @@
           doCheck = false;
           vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
         };
-        default = self.packages.${system}.app-autoscaler-cli-plugin;
       });
 
       devShells = forAllSystems (system:
