@@ -3,9 +3,10 @@
 
   inputs = {
     nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
+    nixpkgs-bosh-cli-v7-3-1.url = github:NixOS/nixpkgs/1179c6c3705509ba25bd35196fca507d2a227bd0;
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, nixpkgs-bosh-cli-v7-3-1 }:
     let
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
@@ -14,28 +15,25 @@
 
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+      nixpkgsFor-bosh-cli-v7-3-1 = forAllSystems (system: import nixpkgs-bosh-cli-v7-3-1 { inherit system; });
     in {
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
+          pkgs-bosh-cli-v7-3-1 = nixpkgsFor-bosh-cli-v7-3-1.${system};
         in {
-          # to make `bosh create-release` work in a Nix shell on macOS, use an older bosh-cli version that reuses
-          # a bosh-utils version under the hood that doesn't use the tar option `--no-mac-metadata`.
-          # unfortunately, Nix provides gnutar by default, which doesn't have the `--no-mac-metadata` option.
-          # bosh-utils assumes blindly bsdtar when building on macOS which comes with the `--no-mac-metadata` option,
-          # see bosh-utils change https://github.com/cloudfoundry/bosh-utils/commit/f79167bd43f3afc154065edc95799a464a80605f.
-          # this blind bsdtar assumption by bosh-utils breaks creating bosh releases in a Nix shell on macOS.
-          # a GitHub issue related to this problem can be found here: https://github.com/cloudfoundry/bosh-utils/issues/86.
-          pkgs-with-bosh-cli-v7-3-1 = import (builtins.fetchTarball { # dedicated version snippet generated with https://lazamar.co.uk/nix-versions/?package=bosh-cli&version=7.3.1&fullName=bosh-cli-7.3.1&keyName=bosh-cli&revision=976fa3369d722e76f37c77493d99829540d43845&channel=nixpkgs-unstable
-            url = "https://github.com/NixOS/nixpkgs/archive/976fa3369d722e76f37c77493d99829540d43845.tar.gz";
-            sha256 = "1r6c7ggdk0546wzf2hvd5a7jwzsf3gn1flr8vjd685rm74syxv6d";
-          }) { inherit system; };
-
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               act
               actionlint
-              self.devShells.${system}.pkgs-with-bosh-cli-v7-3-1.bosh-cli
+              # to make `bosh create-release` work in a Nix shell on macOS, use an older bosh-cli version that reuses
+              # a bosh-utils version under the hood that doesn't use the tar option `--no-mac-metadata`.
+              # unfortunately, Nix provides gnutar by default, which doesn't have the `--no-mac-metadata` option.
+              # bosh-utils assumes blindly bsdtar when building on macOS which comes with the `--no-mac-metadata` option,
+              # see bosh-utils change https://github.com/cloudfoundry/bosh-utils/commit/f79167bd43f3afc154065edc95799a464a80605f.
+              # this blind bsdtar assumption by bosh-utils breaks creating bosh releases in a Nix shell on macOS.
+              # a GitHub issue related to this problem can be found here: https://github.com/cloudfoundry/bosh-utils/issues/86.
+              pkgs-bosh-cli-v7-3-1.bosh-cli
               cloudfoundry-cli
               credhub-cli
               delve # go-debugger
