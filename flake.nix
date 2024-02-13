@@ -15,27 +15,30 @@
       # Nixpkgs instantiated for supported system types.
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
     in {
+      packages = forAllSystems (system:{
+        app-autoscaler-cli-plugin = nixpkgsFor.${system}.buildGoModule rec {
+          name = "app-autoscaler-cli-plugin";
+          src = nixpkgsFor.${system}.fetchgit {
+            url = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
+            rev = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
+            hash = "sha256-j8IAUhjYjEFvtRbA6o2vA7P2uUmKVYsd9uJmN0WtVCM=";
+            fetchSubmodules = true;
+          };
+          doCheck = false;
+          vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
+        };
+        default = self.packages.${system}.app-autoscaler-cli-plugin;
+      });
+
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
         in {
-          app-autoscaler-cli-plugin = pkgs.buildGoModule rec {
-            name = "app-autoscaler-cli-plugin";
-            src = pkgs.fetchgit {
-              url = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
-              rev = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
-              hash = "sha256-j8IAUhjYjEFvtRbA6o2vA7P2uUmKVYsd9uJmN0WtVCM=";
-              fetchSubmodules = true;
-            };
-            doCheck = false;
-            vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
-          };
-
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               act
               actionlint
-              self.devShells.${system}.app-autoscaler-cli-plugin
+              self.packages.${system}.app-autoscaler-cli-plugin
               bosh-cli
               cloudfoundry-cli
               credhub-cli
