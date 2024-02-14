@@ -32,17 +32,17 @@
           vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
         };
 
-        # this custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.
+        # this bosh-bootloader custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.
         bosh-bootloader = nixpkgsFor.${system}.buildGoModule rec {
           pname = "bosh-bootloader";
           version = "9.0.17";
           src = nixpkgsFor.${system}.fetchgit {
             url = "https://github.com/cloudfoundry/bosh-bootloader";
             rev = "v${version}";
-            fetchSubmodules = true; # the repo contains submodules which are required during the build phase
+            fetchSubmodules = true;
             hash = "sha256-P4rS7Nv/09+9dD198z4NOXnldSE5fx3phEK24Acatps=";
           };
-          doCheck = false; # skip tests because they require special configuration to pass. let's rely on the fact that the released bosh-bootloader version passed the tests already.
+          doCheck = false;
           vendorHash = null;
         };
       });
