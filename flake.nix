@@ -17,6 +17,22 @@
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
       nixpkgsFor-bosh-cli-v7-3-1 = forAllSystems (system: import nixpkgs-bosh-cli-v7-3-1 { inherit system; });
     in {
+      packages = forAllSystems (system:{
+        app-autoscaler-cli-plugin = nixpkgsFor.${system}.buildGoModule rec {
+          pname = "app-autoscaler-cli-plugin";
+          gitCommit = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
+          version = "${gitCommit}";
+          src = nixpkgsFor.${system}.fetchgit {
+            url = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
+            rev = "${gitCommit}";
+            hash = "sha256-j8IAUhjYjEFvtRbA6o2vA7P2uUmKVYsd9uJmN0WtVCM=";
+            fetchSubmodules = true;
+          };
+          doCheck = false;
+          vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
+        };
+      });
+
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
@@ -26,6 +42,7 @@
             buildInputs = with pkgs; [
               act
               actionlint
+              self.packages.${system}.app-autoscaler-cli-plugin
               # to make `bosh create-release` work in a Nix shell on macOS, use an older bosh-cli version that reuses
               # a bosh-utils version under the hood that doesn't use the tar option `--no-mac-metadata`.
               # unfortunately, Nix provides gnutar by default, which doesn't have the `--no-mac-metadata` option.
@@ -77,6 +94,9 @@
             hardeningDisable = [ "fortify" ];
 
             shellHook = ''
+              # install required CF CLI plugins
+              cf install-plugin "$(whereis -q app-autoscaler-cli-plugin)" -f
+
               aes_terminal_font_yellow='\e[38;2;255;255;0m'
               aes_terminal_font_blink='\e[5m'
               aes_terminal_reset='\e[0m'
