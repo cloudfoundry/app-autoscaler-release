@@ -20,10 +20,11 @@
       packages = forAllSystems (system:{
         # this custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.
         bosh-bootloader = nixpkgsFor.${system}.buildGoModule rec {
-          name = "bosh-bootloader";
+          pname = "bosh-bootloader";
+          version = "9.0.17";
           src = nixpkgsFor.${system}.fetchgit {
             url = "https://github.com/cloudfoundry/bosh-bootloader";
-            rev = "refs/tags/v9.0.17";
+            rev = "v${version}";
             fetchSubmodules = true; # the repo contains submodules which are required during the build phase
             hash = "sha256-P4rS7Nv/09+9dD198z4NOXnldSE5fx3phEK24Acatps=";
           };
