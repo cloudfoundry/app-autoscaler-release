@@ -45,7 +45,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 
 # install golang
 # renovate: datasource=golang-version depName=golang
-ARG GO_VERSION=1.21.6
+ARG GO_VERSION=1.22.0
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
@@ -98,7 +98,7 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-li
 
 # install yq
 # renovate: datasource=github-releases depName=yq lookupName=mikefarah/yq
-ARG YQ_VERSION=v4.40.5
+ARG YQ_VERSION=v4.40.7
 RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 && \
     chmod a+x /usr/local/bin/yq && \
     yq --version
