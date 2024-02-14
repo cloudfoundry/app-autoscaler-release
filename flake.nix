@@ -50,7 +50,6 @@
               # this blind bsdtar assumption by bosh-utils breaks creating bosh releases in a Nix shell on macOS.
               # a GitHub issue related to this problem can be found here: https://github.com/cloudfoundry/bosh-utils/issues/86.
               pkgs-bosh-cli-v7-3-1.bosh-cli
-              bosh-cli
               cloudfoundry-cli
               credhub-cli
               delve # go-debugger
