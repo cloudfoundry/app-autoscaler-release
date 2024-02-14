@@ -20,10 +20,11 @@
       packages = forAllSystems (system:{
         app-autoscaler-cli-plugin = nixpkgsFor.${system}.buildGoModule rec {
           pname = "app-autoscaler-cli-plugin";
-          version = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
+          gitCommit = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
+          version = "${gitCommit}";
           src = nixpkgsFor.${system}.fetchgit {
             url = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
-            rev = "${version}";
+            rev = "${gitCommit}";
             hash = "sha256-j8IAUhjYjEFvtRbA6o2vA7P2uUmKVYsd9uJmN0WtVCM=";
             fetchSubmodules = true;
           };
