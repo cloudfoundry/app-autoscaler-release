@@ -31,6 +31,20 @@
           doCheck = false;
           vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
         };
+
+        # this bosh-bootloader custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.
+        bosh-bootloader = nixpkgsFor.${system}.buildGoModule rec {
+          pname = "bosh-bootloader";
+          version = "9.0.17";
+          src = nixpkgsFor.${system}.fetchgit {
+            url = "https://github.com/cloudfoundry/bosh-bootloader";
+            rev = "v${version}";
+            fetchSubmodules = true;
+            hash = "sha256-P4rS7Nv/09+9dD198z4NOXnldSE5fx3phEK24Acatps=";
+          };
+          doCheck = false;
+          vendorHash = null;
+        };
       });
 
       devShells = forAllSystems (system:
@@ -43,6 +57,7 @@
               act
               actionlint
               self.packages.${system}.app-autoscaler-cli-plugin
+              self.packages.${system}.bosh-bootloader
               # to make `bosh create-release` work in a Nix shell on macOS, use an older bosh-cli version that reuses
               # a bosh-utils version under the hood that doesn't use the tar option `--no-mac-metadata`.
               # unfortunately, Nix provides gnutar by default, which doesn't have the `--no-mac-metadata` option.
