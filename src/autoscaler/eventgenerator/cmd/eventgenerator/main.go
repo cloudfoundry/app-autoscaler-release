@@ -64,14 +64,15 @@ func main() {
 	appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, len(conf.Server.NodeAddrs), conf.Server.NodeIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
 
 	triggersChan := make(chan []*models.Trigger, conf.Evaluator.TriggerArrayChannelSize)
+	metricsTargetChan := make(chan models.AppMetricTargets, conf.Evaluator.TriggerArrayChannelSize) // TODO: own channel size?
 
-	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, appManager.GetPolicies, conf.CircuitBreaker)
+	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, metricsTargetChan, appManager.GetPolicies, conf.CircuitBreaker)
 	if err != nil {
 		logger.Error("failed to create Evaluation Manager", err)
 		os.Exit(1)
 	}
 
-	evaluators, err := createEvaluators(logger, conf, triggersChan, appManager.QueryAppMetrics, evaluationManager.GetBreaker, evaluationManager.SetCoolDownExpired)
+	evaluators, err := createEvaluators(logger, conf, triggersChan, metricsTargetChan, appManager.QueryAppMetrics, evaluationManager.GetBreaker, evaluationManager.SetCoolDownExpired)
 	if err != nil {
 		logger.Error("failed to create Evaluators", err)
 		os.Exit(1)
@@ -169,7 +170,7 @@ func loadConfig(path string) (*config.Config, error) {
 	return conf, nil
 }
 
-func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan chan []*models.Trigger, queryMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) ([]*generator.Evaluator, error) {
+func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan chan []*models.Trigger, metricsTargetChan chan models.AppMetricTargets, queryMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) ([]*generator.Evaluator, error) {
 	count := conf.Evaluator.EvaluatorCount
 
 	aClient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
@@ -180,7 +181,7 @@ func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan cha
 
 	evaluators := make([]*generator.Evaluator, count)
 	for i := 0; i < count; i++ {
-		evaluators[i] = generator.NewEvaluator(logger, aClient, conf.ScalingEngine.ScalingEngineURL, triggersChan,
+		evaluators[i] = generator.NewEvaluator(logger, aClient, conf.ScalingEngine.ScalingEngineURL, triggersChan, metricsTargetChan,
 			conf.DefaultBreachDurationSecs, queryMetrics, getBreaker, setCoolDownExpired)
 	}
 

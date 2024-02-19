@@ -13,9 +13,16 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"github.com/jthomperoo/k8shorizmetrics/v2"
+	"github.com/jthomperoo/k8shorizmetrics/v2/metrics"
+	"github.com/jthomperoo/k8shorizmetrics/v2/metrics/podmetrics"
+	"github.com/jthomperoo/k8shorizmetrics/v2/metrics/pods"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"code.cloudfoundry.org/lager/v3"
 	circuit "github.com/rubyist/circuitbreaker"
+
+	v2 "k8s.io/api/autoscaling/v2"
 )
 
 var validOperators = []string{">", ">=", "<", "<="}
@@ -25,6 +32,7 @@ type Evaluator struct {
 	httpClient                *http.Client
 	scalingEngineUrl          string
 	triggerChan               chan []*models.Trigger
+	metricsTargetChan         chan models.AppMetricTargets
 	doneChan                  chan bool
 	defaultBreachDurationSecs int
 	queryAppMetrics           aggregator.QueryAppMetricsFunc
@@ -32,13 +40,14 @@ type Evaluator struct {
 	setCoolDownExpired        func(string, int64)
 }
 
-func NewEvaluator(logger lager.Logger, httpClient *http.Client, scalingEngineUrl string, triggerChan chan []*models.Trigger,
+func NewEvaluator(logger lager.Logger, httpClient *http.Client, scalingEngineUrl string, triggerChan chan []*models.Trigger, metricsTargetChan chan models.AppMetricTargets,
 	defaultBreachDurationSecs int, queryAppMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) *Evaluator {
 	return &Evaluator{
 		logger:                    logger.Session("Evaluator"),
 		httpClient:                httpClient,
 		scalingEngineUrl:          scalingEngineUrl,
 		triggerChan:               triggerChan,
+		metricsTargetChan:         metricsTargetChan,
 		doneChan:                  make(chan bool),
 		defaultBreachDurationSecs: defaultBreachDurationSecs,
 		queryAppMetrics:           queryAppMetrics,
@@ -58,7 +67,9 @@ func (e *Evaluator) start() {
 		case <-e.doneChan:
 			return
 		case triggerArray := <-e.triggerChan:
-			e.doEvaluate(triggerArray)
+			e.evaluateTriggers(triggerArray)
+		case metricsTargets := <-e.metricsTargetChan:
+			e.evaluateMetricsTargets(metricsTargets)
 		}
 	}
 }
@@ -69,7 +80,7 @@ func (e *Evaluator) Stop() {
 	e.logger.Info("stopped")
 }
 
-func (e *Evaluator) doEvaluate(triggerArray []*models.Trigger) {
+func (e *Evaluator) evaluateTriggers(triggerArray []*models.Trigger) {
 	for _, trigger := range triggerArray {
 		if trigger.BreachDurationSeconds <= 0 {
 			trigger.BreachDurationSeconds = e.defaultBreachDurationSecs
@@ -231,4 +242,77 @@ func (e *Evaluator) isValidOperator(operator string) bool {
 		}
 	}
 	return false
+}
+
+func (e *Evaluator) evaluateMetricsTargets(targets models.AppMetricTargets) {
+	metrics, err := e.retrieveTargetAppMetrics(targets)
+	if err != nil {
+		e.logger.Error("retrieve-target-app-metrics", err, lager.Data{"targets": targets})
+		return
+	}
+
+	evaluator := k8shorizmetrics.NewEvaluator(0.1)
+
+	newScale, _ := evaluator.Evaluate(metrics, 0)
+
+	e.logger.Info("newScale", lager.Data{"newScale": newScale})
+}
+
+func (e *Evaluator) retrieveTargetAppMetrics(targets models.AppMetricTargets) ([]*metrics.Metric, error) {
+	queryEndTime := time.Now()
+	queryStartTime := queryEndTime.Add(0 - time.Second*80)
+	result := []*metrics.Metric{}
+
+	for _, target := range targets.MetricTargets {
+		appMetrics, err := e.queryAppMetrics(targets.AppId, target.MetricType, queryStartTime.UnixNano(), queryEndTime.UnixNano(), db.ASC)
+		if err != nil {
+			e.logger.Error("retrieve-appMetrics", err, lager.Data{"target": target})
+			continue
+		}
+		e.logger.Debug("retrieve-appMetrics", lager.Data{"appMetrics": appMetrics})
+		if len(appMetrics) == 0 {
+			e.logger.Debug("missing metric", lager.Data{"target": target})
+			continue
+		}
+
+		ok, podMetric := appMetricToPodMetric(appMetrics[0])
+
+		if !ok {
+			e.logger.Debug("should not send trigger alarm to scaling engine because there is empty value metric", lager.Data{"target": target})
+			continue
+		}
+
+		metric := metrics.Metric{
+			Spec: metricTargetToSpec(target),
+			Pods: podMetric,
+		}
+		result = append(result, &metric)
+	}
+	return result, nil
+}
+func metricTargetToSpec(target *models.MetricTarget) v2.MetricSpec {
+	return v2.MetricSpec{
+		Type: v2.PodsMetricSourceType,
+		Pods: &v2.PodsMetricSource{
+			Target: v2.MetricTarget{
+				AverageValue: resource.NewQuantity(target.TargetValue, resource.DecimalSI),
+				Type:         v2.AverageValueMetricType},
+		},
+	}
+}
+
+func appMetricToPodMetric(appMetric *models.AppMetric) (bool, *pods.Metric) {
+	value, err := strconv.ParseInt(appMetric.Value, 10, 64)
+	if err != nil {
+		//e.logger.Debug("should not send trigger alarm to scaling engine because parse metric value fails", lager.Data{"trigger": trigger, "appMetric": appMetric})
+		return false, nil
+	}
+
+	return true, &pods.Metric{
+		PodMetricsInfo: podmetrics.MetricsInfo{
+			"1": podmetrics.Metric{
+				Value: value * 1000,
+			},
+		},
+	}
 }

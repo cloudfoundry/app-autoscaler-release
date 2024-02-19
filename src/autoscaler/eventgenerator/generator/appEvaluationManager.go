@@ -7,6 +7,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"github.com/samber/lo"
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager/v3"
@@ -17,33 +18,35 @@ import (
 type ConsumeAppMonitorMap func(map[string][]*models.Trigger, chan []*models.Trigger)
 
 type AppEvaluationManager struct {
-	evaluateInterval time.Duration
-	logger           lager.Logger
-	emClock          clock.Clock
-	doneChan         chan bool
-	triggerChan      chan []*models.Trigger
-	getPolicies      aggregator.GetPoliciesFunc
-	breakerConfig    config.CircuitBreakerConfig
-	breakers         map[string]*circuit.Breaker
-	cooldownExpired  map[string]int64
-	breakerLock      *sync.RWMutex
-	cooldownLock     *sync.RWMutex
+	evaluateInterval  time.Duration
+	logger            lager.Logger
+	emClock           clock.Clock
+	doneChan          chan bool
+	triggerChan       chan []*models.Trigger
+	metricsTargetChan chan models.AppMetricTargets
+	getPolicies       aggregator.GetPoliciesFunc
+	breakerConfig     config.CircuitBreakerConfig
+	breakers          map[string]*circuit.Breaker
+	cooldownExpired   map[string]int64
+	breakerLock       *sync.RWMutex
+	cooldownLock      *sync.RWMutex
 }
 
 func NewAppEvaluationManager(logger lager.Logger, evaluateInterval time.Duration, emClock clock.Clock,
-	triggerChan chan []*models.Trigger, getPolicies aggregator.GetPoliciesFunc,
+	triggerChan chan []*models.Trigger, metricsTargetChan chan models.AppMetricTargets, getPolicies aggregator.GetPoliciesFunc,
 	breakerConfig config.CircuitBreakerConfig) (*AppEvaluationManager, error) {
 	return &AppEvaluationManager{
-		evaluateInterval: evaluateInterval,
-		logger:           logger.Session("AppEvaluationManager"),
-		emClock:          emClock,
-		doneChan:         make(chan bool),
-		triggerChan:      triggerChan,
-		getPolicies:      getPolicies,
-		breakerConfig:    breakerConfig,
-		cooldownExpired:  map[string]int64{},
-		breakerLock:      &sync.RWMutex{},
-		cooldownLock:     &sync.RWMutex{},
+		evaluateInterval:  evaluateInterval,
+		logger:            logger.Session("AppEvaluationManager"),
+		emClock:           emClock,
+		doneChan:          make(chan bool),
+		triggerChan:       triggerChan,
+		metricsTargetChan: metricsTargetChan,
+		getPolicies:       getPolicies,
+		breakerConfig:     breakerConfig,
+		cooldownExpired:   map[string]int64{},
+		breakerLock:       &sync.RWMutex{},
+		cooldownLock:      &sync.RWMutex{},
 	}, nil
 }
 
@@ -77,6 +80,18 @@ func (a *AppEvaluationManager) getTriggers(policyMap map[string]*models.AppPolic
 		triggersByApp[appID] = triggers
 	}
 	return triggersByApp
+}
+
+func (a *AppEvaluationManager) getMetricTargets(policyMap map[string]*models.AppPolicy) []models.AppMetricTargets {
+	if policyMap == nil {
+		return nil
+	}
+	return lo.MapToSlice(policyMap, func(appId string, policy *models.AppPolicy) models.AppMetricTargets {
+		return models.AppMetricTargets{
+			AppId:         appId,
+			MetricTargets: policy.ScalingPolicy.MetricTargets,
+		}
+	})
 }
 
 func (a *AppEvaluationManager) Start() {
@@ -125,6 +140,10 @@ func (a *AppEvaluationManager) doEvaluate() {
 			triggers := a.getTriggers(policies)
 			for _, triggerArray := range triggers {
 				a.triggerChan <- triggerArray
+			}
+			metricTargets := a.getMetricTargets(policies)
+			for _, metricTargets := range metricTargets {
+				a.metricsTargetChan <- metricTargets
 			}
 		}
 	}

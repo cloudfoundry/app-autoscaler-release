@@ -26,6 +26,7 @@ var _ = Describe("AppEvaluationManager", func() {
 		manager              *AppEvaluationManager
 		testEvaluateInterval time.Duration
 		triggerArrayChan     chan []*models.Trigger
+		metricsTargetChan    chan models.AppMetricTargets
 		testAppId1           = "testAppId1"
 		testAppId2           = "testAppId2"
 		testMetricName       = "Test-Metric-Name"
@@ -79,7 +80,7 @@ var _ = Describe("AppEvaluationManager", func() {
 	Describe("Start", func() {
 		JustBeforeEach(func() {
 			var err error
-			manager, err = NewAppEvaluationManager(logger, testEvaluateInterval, fclock, triggerArrayChan, getPolicies, testBreakerConfig)
+			manager, err = NewAppEvaluationManager(logger, testEvaluateInterval, fclock, triggerArrayChan, metricsTargetChan, getPolicies, testBreakerConfig)
 			Expect(err).NotTo(HaveOccurred())
 			manager.Start()
 			Eventually(fclock.WatcherCount).Should(Equal(1))
@@ -195,7 +196,7 @@ var _ = Describe("AppEvaluationManager", func() {
 			}
 
 			var err error
-			manager, err = NewAppEvaluationManager(logger, testEvaluateInterval, fclock, triggerArrayChan, getPolicies, testBreakerConfig)
+			manager, err = NewAppEvaluationManager(logger, testEvaluateInterval, fclock, triggerArrayChan, metricsTargetChan, getPolicies, testBreakerConfig)
 			Expect(err).NotTo(HaveOccurred())
 			manager.Start()
 			Eventually(fclock.WatcherCount).Should(Equal(1))
@@ -225,7 +226,7 @@ var _ = Describe("AppEvaluationManager", func() {
 				return map[string]*models.AppPolicy{testAppId1: appPolicy1}
 			}
 			var err error
-			manager, err = NewAppEvaluationManager(logger, testEvaluateInterval, fclock, triggerArrayChan, getPolicies, testBreakerConfig)
+			manager, err = NewAppEvaluationManager(logger, testEvaluateInterval, fclock, triggerArrayChan, metricsTargetChan, getPolicies, testBreakerConfig)
 			Expect(err).NotTo(HaveOccurred())
 			manager.Start()
 			Eventually(fclock.WatcherCount).Should(Equal(1))
@@ -262,7 +263,7 @@ var _ = Describe("AppEvaluationManager", func() {
 			}
 
 			var err error
-			manager, err = NewAppEvaluationManager(logger, testEvaluateInterval, fclock, triggerArrayChan, getPolicies, testBreakerConfig)
+			manager, err = NewAppEvaluationManager(logger, testEvaluateInterval, fclock, triggerArrayChan, metricsTargetChan, getPolicies, testBreakerConfig)
 			Expect(err).NotTo(HaveOccurred())
 			manager.Start()
 			Eventually(fclock.WatcherCount).Should(Equal(1))

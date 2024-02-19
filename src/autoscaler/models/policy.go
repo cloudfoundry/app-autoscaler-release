@@ -61,10 +61,14 @@ type ScalingRule struct {
 	CoolDownSeconds       int    `json:"cool_down_secs,omitempty"`
 	Adjustment            string `json:"adjustment"`
 }
-
 type MetricTarget struct {
 	MetricType  string `json:"metric_type"`
 	TargetValue int64  `json:"target_value"`
+}
+
+type AppMetricTargets struct {
+	AppId         string
+	MetricTargets []*MetricTarget
 }
 
 type ScalingSchedules struct {

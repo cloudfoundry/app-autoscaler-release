@@ -26,6 +26,7 @@ var _ = Describe("Evaluator", func() {
 		logger             *lagertest.TestLogger
 		httpClient         *http.Client
 		triggerChan        chan []*models.Trigger
+		metricsTargetChan  chan models.AppMetricTargets
 		scalingEngine      *ghttp.Server
 		evaluator          *Evaluator
 		testAppId          = "testAppId"
@@ -136,7 +137,7 @@ var _ = Describe("Evaluator", func() {
 
 	Context("Start", func() {
 		JustBeforeEach(func() {
-			evaluator = NewEvaluator(logger, httpClient, scalingEngine.URL(), triggerChan, breachDurationSecs, queryAppMetrics, getBreaker, setCoolDownExpired)
+			evaluator = NewEvaluator(logger, httpClient, scalingEngine.URL(), triggerChan, metricsTargetChan, breachDurationSecs, queryAppMetrics, getBreaker, setCoolDownExpired)
 			evaluator.Start()
 		})
 
@@ -753,7 +754,7 @@ var _ = Describe("Evaluator", func() {
 			queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
 				return nil, nil
 			}
-			evaluator = NewEvaluator(logger, httpClient, scalingEngine.URL(), triggerChan, breachDurationSecs, queryAppMetrics, getBreaker, setCoolDownExpired)
+			evaluator = NewEvaluator(logger, httpClient, scalingEngine.URL(), triggerChan, metricsTargetChan, breachDurationSecs, queryAppMetrics, getBreaker, setCoolDownExpired)
 			evaluator.Start()
 			Expect(triggerChan).To(BeSent(triggerArrayGT))
 
@@ -772,7 +773,7 @@ var _ = Describe("Evaluator", func() {
 			queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
 				return appMetrics, nil
 			}
-			evaluator = NewEvaluator(logger, httpClient, scalingEngine.URL(), triggerChan, breachDurationSecs, queryAppMetrics, getBreaker, setCoolDownExpired)
+			evaluator = NewEvaluator(logger, httpClient, scalingEngine.URL(), triggerChan, metricsTargetChan, breachDurationSecs, queryAppMetrics, getBreaker, setCoolDownExpired)
 			evaluator.Start()
 			Expect(triggerChan).To(BeSent(triggerArrayGT))
 		})
