@@ -23,7 +23,7 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           target: minor
           approve-only: true
-      - uses: alexwilson/enable-github-automerge-action@1.0.0
+      - uses: alexwilson/enable-github-automerge-action@2.0.0
         name: Enable Auto-merge
         with:
           github-token: "${{ secrets.APP_AUTOSCALER_CI_TOKEN }}"
