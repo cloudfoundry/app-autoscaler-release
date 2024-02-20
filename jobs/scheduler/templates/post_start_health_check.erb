@@ -1,0 +1,13 @@
+<%
+  require 'erb'
+
+  user = ERB::Util.url_encode(p('autoscaler.scheduler.health.username'))
+  password = ERB::Util.url_encode(p('autoscaler.scheduler.health.password'))
+  port = p('autoscaler.scheduler.health.port')
+
+  health_url = "http://#{user}:#{password}@localhost:#{port}"
+%>check host scheduler with address localhost
+  if failed url <%=health_url%>
+    >&2 echo "Scheduler is not reachable"
+    exit 1
+    
