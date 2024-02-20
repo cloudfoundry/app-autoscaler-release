@@ -29,7 +29,7 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     container:
-      image: fooo1234/autoscaler-tools:test
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
 
     permissions:
       actions: read
