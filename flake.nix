@@ -110,7 +110,8 @@
 
             shellHook = ''
               # install required CF CLI plugins
-              cf install-plugin "$(whereis -q app-autoscaler-cli-plugin)" -f
+              cf install-plugin -f \
+                '${self.packages.${system}.app-autoscaler-cli-plugin}/bin/app-autoscaler-cli-plugin'
 
               aes_terminal_font_yellow='\e[38;2;255;255;0m'
               aes_terminal_font_blink='\e[5m'
