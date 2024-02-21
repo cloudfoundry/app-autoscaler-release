@@ -17,7 +17,7 @@
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
       nixpkgsFor-bosh-cli-v7-3-1 = forAllSystems (system: import nixpkgs-bosh-cli-v7-3-1 { inherit system; });
     in {
-      packages = forAllSystems (system:{
+      packages = forAllSystems (system: {
         app-autoscaler-cli-plugin = nixpkgsFor.${system}.buildGoModule rec {
           pname = "app-autoscaler-cli-plugin";
           gitCommit = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
