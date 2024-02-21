@@ -14,6 +14,7 @@ RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.k
 
 RUN apt-get update && \
     apt-get -qqy install --fix-missing \
+            file \
             lsb-release \
             build-essential \
             inetutils-ping \
@@ -98,7 +99,7 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-li
 
 # install yq
 # renovate: datasource=github-releases depName=yq lookupName=mikefarah/yq
-ARG YQ_VERSION=v4.40.7
+ARG YQ_VERSION=v4.41.1
 RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 && \
     chmod a+x /usr/local/bin/yq && \
     yq --version
