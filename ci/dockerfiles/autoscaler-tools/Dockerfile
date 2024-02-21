@@ -14,6 +14,7 @@ RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.k
 
 RUN apt-get update && \
     apt-get -qqy install --fix-missing \
+            file \
             lsb-release \
             build-essential \
             inetutils-ping \
