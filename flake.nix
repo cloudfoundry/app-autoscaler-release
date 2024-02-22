@@ -17,7 +17,7 @@
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
       nixpkgsFor-bosh-cli-v7-3-1 = forAllSystems (system: import nixpkgs-bosh-cli-v7-3-1 { inherit system; });
     in {
-      packages = forAllSystems (system:{
+      packages = forAllSystems (system: {
         app-autoscaler-cli-plugin = nixpkgsFor.${system}.buildGoModule rec {
           pname = "app-autoscaler-cli-plugin";
           gitCommit = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
@@ -110,7 +110,8 @@
 
             shellHook = ''
               # install required CF CLI plugins
-              cf install-plugin "$(whereis -q app-autoscaler-cli-plugin)" -f
+              cf install-plugin -f \
+                '${self.packages.${system}.app-autoscaler-cli-plugin}/bin/app-autoscaler-cli-plugin'
 
               aes_terminal_font_yellow='\e[38;2;255;255;0m'
               aes_terminal_font_blink='\e[5m'
