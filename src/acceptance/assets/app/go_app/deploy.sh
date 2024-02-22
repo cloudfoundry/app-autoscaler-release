@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-config="$(cat "${CONFIG:-}")"
+config="$(cat "${CONFIG:-}" 2> /dev/null || echo "")"
 
 function getConfItem(){
   val=$(jq -r ".$1" <<< "${config}")
