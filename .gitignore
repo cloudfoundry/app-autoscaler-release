@@ -34,6 +34,7 @@ privkey.pem
 app-autoscaler-release
 docs/*.bkp
 build/*
+acceptance_config.json
 
 # Generated, intermediate openapi-specs:
 src/acceptance/assets/app/go_app/internal/openapi-specs.bundled
