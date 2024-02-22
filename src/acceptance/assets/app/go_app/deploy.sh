@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
+# read content of config right at the beginning to avoid errors after switching directories
 config="$(cat "${CONFIG:-}" 2> /dev/null || echo "")"
 
 function getConfItem(){
