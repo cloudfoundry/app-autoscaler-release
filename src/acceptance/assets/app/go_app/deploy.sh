@@ -48,7 +48,7 @@ function deploy(){
     cf create-app "${app_name}"
 
     if ${service_offering_enabled}; then
-      cf enable-service-access "${service_name}" -b "${service_broker}" -p  "${service_plan}" -o test
+      cf enable-service-access "${service_name}" -b "${service_broker}" -p  "${service_plan}" -o "${org}"
       cf create-service "${service_name}" "${service_plan}" "${service_name}" -b "${service_broker}" --wait
       cf bind-service "${app_name}" "${service_name}"
     else
