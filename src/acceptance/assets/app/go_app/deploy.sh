@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # read content of config right at the beginning to avoid errors when switching directories
-readonly CONFIG_CONTENT="$(cat "${CONFIG:-}" 2> /dev/null || echo "")"
+CONFIG_CONTENT="$(cat "${CONFIG:-}" 2> /dev/null || echo "")"
+readonly CONFIG_CONTENT
 
 function getConfItem(){
   local key="$1"
@@ -46,7 +47,7 @@ function main(){
   cf create-service "${service_name}" "${service_plan}" "${service_name}" -b "${service_broker}" -t "app-autoscaler" --wait
 
   # make sure that the current directory is the one which contains the build artifacts like binary and manifest.yml
-  local script_dir, app_dir
+  local script_dir app_dir
   script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
   app_dir="$(realpath -e "${script_dir}/build")"
   pushd "${app_dir}" >/dev/null
