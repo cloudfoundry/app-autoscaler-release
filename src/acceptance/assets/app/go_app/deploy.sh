@@ -26,6 +26,8 @@ function check_requirements(){
 }
 
 function main(){
+  check_requirements
+
   local org space
   org="test"
   space="test_$(whoami)"
@@ -68,5 +70,4 @@ function main(){
   cf restage "${app_name}"
 }
 
-check_requirements
 main
