@@ -1,37 +1,80 @@
 #!/bin/bash
-
 set -euo pipefail
-config=${CONFIG:-}
+
+# read content of config right at the beginning to avoid errors when switching directories
+CONFIG_CONTENT="$(cat "${CONFIG:-}" 2> /dev/null || echo "")"
+readonly CONFIG_CONTENT
+
 function getConfItem(){
-  val=$(jq -r ".$1" "${config}")
-  if [ "$val" = "null" ]; then return 1; fi
-  echo "$val"
+  local key="$1"
+  local val
+
+  val=$(jq -r ".${key}" <<< "${CONFIG_CONTENT}")
+
+  if [ "${val}" = "null" ]; then
+    return 1;
+  fi
+
+  echo "${val}"
 }
-if [ -z "${config}" ]; then
-  echo "ERROR: Please supply the config using CONFIG env variable"
-  exit 1
-fi
 
-script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-app_dir="$( realpath -e "${script_dir}/build")"
-service_name=$(getConfItem service_name)
+function check_requirements(){
+    if [ -z "${CONFIG_CONTENT}" ]; then
+      echo "ERROR: Couldn't read content of config, please supply the path to config using CONFIG env variable."
+      exit 1
+    fi
+}
 
-cf create-org test
-cf target -o test
-cf create-space test_app
-cf target -s test_app
+function deploy(){
+  local org space
+    org="test"
+    space="test_$(whoami)"
 
-cf enable-service-access "${service_name}" -b "$(getConfItem service_broker)" -p  "$(getConfItem service_plan)" -o test
-cf create-service "${service_name}" "$(getConfItem service_plan)" "${service_name}" -b "$(getConfItem service_broker)" --wait
+    cf create-org "${org}"
+    cf target -o "${org}"
+    cf create-space "${space}"
+    cf target -s "${space}"
 
-pushd "${app_dir}" >/dev/null
-cf push\
-  --var app_name=test_app\
-  --var app_domain="$(getConfItem apps_domain)"\
-  --var service_name="${service_name}"\
-  --var instances=1\
-  --var memory_mb="$(getConfItem node_memory_limit||echo 128)"\
-  --var buildpack="binary_buildpack"\
-  -f "manifest.yml"\
-  -c ./app
-popd > /dev/null
+    local app_name app_domain service_name memory_mb service_broker service_plan service_offering_enabled
+    app_name="test_app"
+    app_domain="$(getConfItem apps_domain)"
+    service_name="$(getConfItem service_name)"
+    memory_mb="$(getConfItem node_memory_limit || echo 128)"
+    service_broker="$(getConfItem service_broker)"
+    service_plan="$(getConfItem service_plan)"
+    service_offering_enabled="$(getConfItem service_offering_enabled || echo false)"
+
+    # create app upfront to avoid restaging after binding to service happened
+    cf create-app "${app_name}"
+
+    if ${service_offering_enabled}; then
+      cf enable-service-access "${service_name}" -b "${service_broker}" -p  "${service_plan}" -o "${org}"
+      cf create-service "${service_name}" "${service_plan}" "${service_name}" -b "${service_broker}" --wait
+      cf bind-service "${app_name}" "${service_name}"
+    else
+      echo "INFO: Skipping service instance setup because service_offering_enabled is '${service_offering_enabled}'"
+    fi
+
+    # make sure that the current directory is the one which contains the build artifacts like binary and manifest.yml
+    local script_dir app_dir
+    script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+    app_dir="$(realpath -e "${script_dir}/build")"
+    pushd "${app_dir}" >/dev/null
+    cf push \
+      --var app_name="${app_name}" \
+      --var app_domain="${app_domain}" \
+      --var service_name="${service_name}" \
+      --var instances=1 \
+      --var memory_mb="${memory_mb}" \
+      -b "binary_buildpack" \
+      -f "manifest.yml" \
+      -c "./app"
+    popd > /dev/null
+}
+
+function main(){
+  check_requirements
+  deploy
+}
+
+main
