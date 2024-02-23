@@ -43,10 +43,11 @@ function deploy(){
     service_broker="$(getConfItem service_broker)"
     service_plan="$(getConfItem service_plan)"
 
-    cf enable-service-access "${service_name}" -b "${service_broker}" -p  "${service_plan}" -o test
-    cf create-service "${service_name}" "${service_plan}" "${service_name}" -b "${service_broker}" -t "app-autoscaler" --wait
-
+    # create app upfront to avoid restaging after binding to service happened
     cf create-app "${app_name}"
+
+    cf enable-service-access "${service_name}" -b "${service_broker}" -p  "${service_plan}" -o test
+    cf create-service "${service_name}" "${service_plan}" "${service_name}" -b "${service_broker}" --wait
     cf bind-service "${app_name}" "${service_name}"
 
     # make sure that the current directory is the one which contains the build artifacts like binary and manifest.yml
