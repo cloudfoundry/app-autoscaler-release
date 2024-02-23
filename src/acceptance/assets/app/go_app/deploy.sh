@@ -1,9 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-# read content of config right at the beginning to avoid errors after switching directories
-readonly CONFIG_CONTENT
-CONFIG_CONTENT="$(cat "${CONFIG:-}" 2> /dev/null || echo "")"
+# read content of config right at the beginning to avoid errors when switching directories
+readonly CONFIG_CONTENT="$(cat "${CONFIG:-}" 2> /dev/null || echo "")"
 
 function getConfItem(){
   local key="$1"
@@ -18,13 +17,15 @@ function getConfItem(){
   echo "${val}"
 }
 
-function main(){
-  if [ -z "${CONFIG_CONTENT}" ]; then
-    echo "ERROR: Please supply the config using CONFIG env variable"
-    exit 1
-  fi
+function check_requirements(){
+    if [ -z "${CONFIG_CONTENT}" ]; then
+      echo "ERROR: Couldn't read content of config, please supply the path to config using CONFIG env variable."
+      exit 1
+    fi
+}
 
-  local org, space
+function main(){
+  local org space
   org="test"
   space="test_$(whoami)"
 
@@ -33,7 +34,7 @@ function main(){
   cf create-space "${space}"
   cf target -s "${space}"
 
-  local app_name, app_domain, service_name, memory_mb, service_broker, service_plan
+  local app_name app_domain service_name memory_mb service_broker service_plan
   app_name="test_app"
   app_domain="$(getConfItem apps_domain)"
   service_name="$(getConfItem service_name)"
@@ -66,4 +67,5 @@ function main(){
   cf restage "${app_name}"
 }
 
+check_requirements
 main
