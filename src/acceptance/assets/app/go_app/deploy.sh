@@ -46,6 +46,9 @@ function deploy(){
     cf enable-service-access "${service_name}" -b "${service_broker}" -p  "${service_plan}" -o test
     cf create-service "${service_name}" "${service_plan}" "${service_name}" -b "${service_broker}" -t "app-autoscaler" --wait
 
+    cf create-app "${app_name}"
+    cf bind-service "${app_name}" "${service_name}"
+
     # make sure that the current directory is the one which contains the build artifacts like binary and manifest.yml
     local script_dir app_dir
     script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
@@ -61,11 +64,6 @@ function deploy(){
       -f "manifest.yml" \
       -c "./app"
     popd > /dev/null
-
-    cf bind-service "${app_name}" "${service_name}"
-
-    # restaging app so that it is able to access the VCAP environment
-    cf restage "${app_name}"
 }
 
 function main(){
