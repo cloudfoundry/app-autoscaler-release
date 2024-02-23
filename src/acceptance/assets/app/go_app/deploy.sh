@@ -35,20 +35,25 @@ function deploy(){
     cf create-space "${space}"
     cf target -s "${space}"
 
-    local app_name app_domain service_name memory_mb service_broker service_plan
+    local app_name app_domain service_name memory_mb service_broker service_plan service_offering_enabled
     app_name="test_app"
     app_domain="$(getConfItem apps_domain)"
     service_name="$(getConfItem service_name)"
-    memory_mb="$(getConfItem node_memory_limit||echo 128)"
+    memory_mb="$(getConfItem node_memory_limit || echo 128)"
     service_broker="$(getConfItem service_broker)"
     service_plan="$(getConfItem service_plan)"
+    service_offering_enabled="$(getConfItem service_offering_enabled || echo false)"
 
     # create app upfront to avoid restaging after binding to service happened
     cf create-app "${app_name}"
 
-    cf enable-service-access "${service_name}" -b "${service_broker}" -p  "${service_plan}" -o test
-    cf create-service "${service_name}" "${service_plan}" "${service_name}" -b "${service_broker}" --wait
-    cf bind-service "${app_name}" "${service_name}"
+    if ${service_offering_enabled}; then
+      cf enable-service-access "${service_name}" -b "${service_broker}" -p  "${service_plan}" -o test
+      cf create-service "${service_name}" "${service_plan}" "${service_name}" -b "${service_broker}" --wait
+      cf bind-service "${app_name}" "${service_name}"
+    else
+      echo "INFO: Skipping service instance setup because service_offering_enabled is '${service_offering_enabled}'"
+    fi
 
     # make sure that the current directory is the one which contains the build artifacts like binary and manifest.yml
     local script_dir app_dir
