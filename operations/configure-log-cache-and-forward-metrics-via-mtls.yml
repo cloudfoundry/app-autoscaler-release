@@ -1,0 +1,110 @@
+# safeguard: make sure there is no loggregator agent configured
+- type: remove
+  path: /instance_groups/name=metricsforwarder/jobs/name=loggregator_agent?
+
+
+# configure metricscollector
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/use_log_cache?
+  value: true
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/host
+  value: logcache
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/port
+  value: 8080
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/ca_cert
+  value: ((/bosh-autoscaler/cf/log_cache.ca))
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/client_cert
+  value: ((/bosh-autoscaler/cf/log_cache.certificate))
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/client_key
+  value: ((/bosh-autoscaler/cf/log_cache.private_key))
+
+
+# configure metricsforwarder
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/loggregator
+  value:
+    tls: # connection to syslog-agent
+      ca_cert: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.ca))
+      cert: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.certificate))
+      key:  ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.private_key))
+
+
+# configure syslog-agent
+
+# safeguard: make sure there is no syslog-agent configured
+- type: remove
+  path: /instance_groups/name=metricsforwarder/jobs/name=loggr-syslog-agent?
+
+# add configuration
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/-
+  value:
+    name: loggr-syslog-agent
+    release: loggregator-agent
+    properties:
+      tls: # connection to syslog-agent
+        ca_cert: ((!loggr_syslog_agent_tls.ca))
+        cert: ((!loggr_syslog_agent_tls.certificate))
+        key:  ((!loggr_syslog_agent_tls.private_key))
+      cache: # connection to syslog-binding-cache
+        tls:
+          ca_cert: ((!loggr_syslog_agent_cache_tls.ca))
+          cert: ((!loggr_syslog_agent_cache_tls.certificate))
+          key: ((!loggr_syslog_agent_cache_tls.private_key))
+          cn: loggr_syslog_binding_cache
+          # url: the value is automatically being generated if syslog-binding-cache is deployed https://github.com/cloudfoundry/loggregator-agent-release/blob/a5366d6d7c490417d12f990c1af0437a1feb067f/jobs/loggr-syslog-agent/templates/bpm.yml.erb#L60
+      metrics: # connection for metric scrapers, here are dummy values configured since the /metrics endpoint can't be disabled via configuration
+        ca_cert: ((!loggr_syslog_agent_metrics.ca))
+        cert: ((!loggr_syslog_agent_metrics.certificate))
+        key: ((!loggr_syslog_agent_metrics.private_key))
+        server_name: metrics.config.is.required.by.job.specification.but.not.needed.in.our.case
+
+
+# configure syslog-binding-cache
+
+# safeguard: make sure there is no syslog-binding-cache configured
+- type: remove
+  path: /instance_groups/name=metricsforwarder/jobs/name=loggr-syslog-binding-cache?
+
+# add configuration
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/-
+  value:
+    name: loggr-syslog-binding-cache
+    release: loggregator-agent
+    consumes:
+      cloud_controller: { from: cloud_controller, deployment: cf  } # required by job to resolve API URL https://github.com/cloudfoundry/loggregator-agent-release/blob/0e3340f17f94d06cb3d4c11d1553a9a2a5bfb891/jobs/loggr-syslog-binding-cache/templates/bpm.yml.erb#L4
+    properties:
+      tls: # connection to syslog-binding-cache api, e.g. /v2/aggregate & /v2/bindings
+        ca_cert: ((!loggr_syslog_binding_cache_tls.ca))
+        cert: ((!loggr_syslog_binding_cache_tls.certificate))
+        key: ((!loggr_syslog_binding_cache_tls.private_key))
+        cn: loggr_syslog_agent_tls
+      external_port: 9000
+      aggregate_drains: # connection to log-cache
+        - url: "syslog-tls://log-cache.service.cf.internal:6067?include-metrics-deprecated=true&ssl-strict-internal=true"
+          # reusing these certificates here is a workaround so that we don't need to generate own ones.
+          # the problem is that when we generate own certificates (see variables section of app-autoscaler.yml),
+          # we have no possibility to reuse the CA from CF to issue new certificates.
+          ca: ((/bosh-autoscaler/cf/log_cache_syslog_tls.ca))
+          cert: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.certificate))
+          key:  ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.private_key))
+      metrics: # connection for metric scrapers, here are dummy values configured since the /metrics endpoint can't be disabled via configuration
+        ca_cert: ((!loggr_syslog_binding_cache_metrics.ca))
+        cert: ((!loggr_syslog_binding_cache_metrics.certificate))
+        key: ((!loggr_syslog_binding_cache_metrics.private_key))
+        server_name: metrics.config.is.required.by.job.specification.but.not.needed.in.our.case
+      api: # connection to CF cloud controller
+        # here are dummy values configured since there is no need to query the CC API for all bindings.
+        # if a customer wants to ever receive their own custom metrics in their own syslog-drain, we would need to configure this properly.
+        tls:
+          cn: api.tls.config.is.required.by.job.specification.but.not.needed.in.our.case
+          ca_cert: ((!loggr_syslog_binding_cache_api_tls.ca))
+          cert: ((!loggr_syslog_binding_cache_api_tls.certificate))
+          key: ((!loggr_syslog_binding_cache_api_tls.private_key))
+        polling_interval: 876000h # 100 years, workaround to basically never poll the cloud controller API
