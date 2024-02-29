@@ -26,9 +26,14 @@ function check_requirements(){
 }
 
 function deploy(){
-  local org space
+  local org space use_existing_organization
   org="test"
   space="test_$(whoami)"
+
+  use_existing_organization="$(getConfItem use_existing_organization)"
+  if ${use_existing_organization}; then
+    org="$(getConfItem existing_organization)"
+  fi
 
   cf create-org "${org}"
   cf target -o "${org}"
