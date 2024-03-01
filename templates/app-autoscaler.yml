@@ -954,6 +954,8 @@ variables:
     extended_key_usage:
       - server_auth
       - client_auth
+    key_length: 4096
+    duration: 180
 
   # loggr-syslog-agent certificates
 - name: loggr_syslog_agent_tls
@@ -968,6 +970,8 @@ variables:
     extended_key_usage:
       - server_auth
       - client_auth
+    key_length: 4096
+    duration: 180
 - name: loggr_syslog_agent_metrics
   type: certificate
   update_mode: converge
@@ -979,6 +983,8 @@ variables:
     extended_key_usage:
       - server_auth
       - client_auth
+    key_length: 4096
+    duration: 180
 - name: loggr_syslog_agent_cache_tls
   type: certificate
   update_mode: converge
@@ -990,6 +996,8 @@ variables:
     extended_key_usage:
       - server_auth
       - client_auth
+    key_length: 4096
+    duration: 180
 
   # loggr-syslog-agent-binding-cache certificates
 - name: loggr_syslog_binding_cache_tls
@@ -1003,6 +1011,8 @@ variables:
     extended_key_usage:
       - server_auth
       - client_auth
+    key_length: 4096
+    duration: 180
 - name: loggr_syslog_binding_cache_metrics
   type: certificate
   update_mode: converge
@@ -1014,6 +1024,8 @@ variables:
     extended_key_usage:
       - server_auth
       - client_auth
+    key_length: 4096
+    duration: 180
 - name: loggr_syslog_binding_cache_api_tls
   type: certificate
   update_mode: converge
@@ -1025,3 +1037,5 @@ variables:
     extended_key_usage:
       - server_auth
       - client_auth
+    key_length: 4096
+    duration: 180
