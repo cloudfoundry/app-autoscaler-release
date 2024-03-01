@@ -942,3 +942,100 @@ variables:
     key_length: 4096
     duration: 180
 
+  # metricsforwarder loggregator certificates
+- name: metricsforwarder_autoscaler_metricsforwarder_loggregator_tls
+  type: certificate
+  update_mode: converge
+  options:
+    ca: app_autoscaler_ca_cert
+    common_name: metricsforwarder_autoscaler_metricsforwarder_loggregator_tls
+    alternative_names:
+      - metricsforwarder_autoscaler_metricsforwarder_loggregator_tls
+    extended_key_usage:
+      - server_auth
+      - client_auth
+    key_length: 4096
+    duration: 180
+
+  # loggr-syslog-agent certificates
+- name: loggr_syslog_agent_tls
+  type: certificate
+  update_mode: converge
+  options:
+    ca: app_autoscaler_ca_cert
+    common_name: loggr_syslog_agent_tls
+    alternative_names:
+      - loggr_syslog_agent_tls
+      - metron # the client in metricsforwarder which connects to syslog-agent requires this https://github.com/cloudfoundry/go-loggregator/blob/a52b61896b6f971d5c47f1008a1eaa279223c7c5/tls.go#L12
+    extended_key_usage:
+      - server_auth
+      - client_auth
+    key_length: 4096
+    duration: 180
+- name: loggr_syslog_agent_metrics
+  type: certificate
+  update_mode: converge
+  options:
+    ca: app_autoscaler_ca_cert
+    common_name: loggr_syslog_agent_metrics
+    alternative_names:
+      - loggr_syslog_agent_metrics
+    extended_key_usage:
+      - server_auth
+      - client_auth
+    key_length: 4096
+    duration: 180
+- name: loggr_syslog_agent_cache_tls
+  type: certificate
+  update_mode: converge
+  options:
+    ca: app_autoscaler_ca_cert
+    common_name: loggr_syslog_agent_cache_tls
+    alternative_names:
+      - loggr_syslog_agent_cache_tls
+    extended_key_usage:
+      - server_auth
+      - client_auth
+    key_length: 4096
+    duration: 180
+
+  # loggr-syslog-agent-binding-cache certificates
+- name: loggr_syslog_binding_cache_tls
+  type: certificate
+  update_mode: converge
+  options:
+    ca: app_autoscaler_ca_cert
+    common_name: loggr_syslog_binding_cache
+    alternative_names:
+      - loggr_syslog_binding_cache
+    extended_key_usage:
+      - server_auth
+      - client_auth
+    key_length: 4096
+    duration: 180
+- name: loggr_syslog_binding_cache_metrics
+  type: certificate
+  update_mode: converge
+  options:
+    ca: app_autoscaler_ca_cert
+    common_name: loggr_syslog_binding_cache_metrics
+    alternative_names:
+      - loggr_syslog_binding_cache_metrics
+    extended_key_usage:
+      - server_auth
+      - client_auth
+    key_length: 4096
+    duration: 180
+- name: loggr_syslog_binding_cache_api_tls
+  type: certificate
+  update_mode: converge
+  options:
+    ca: app_autoscaler_ca_cert
+    common_name: loggr_syslog_binding_cache_api_tls
+    alternative_names:
+      - loggr_syslog_binding_cache_api_tls
+    extended_key_usage:
+      - server_auth
+      - client_auth
+    key_length: 4096
+    duration: 180
