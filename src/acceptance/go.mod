@@ -6,7 +6,7 @@ require (
 	github.com/cloudfoundry/cf-test-helpers/v2 v2.9.0
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.31.1
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
