@@ -40,6 +40,7 @@ function deploy(){
     space="$(getConfItem existing_space)"
   fi
 
+  # `create-org/space` is idempotent and will simply keep the potentially already existing org/space as is
   cf create-org "${org}"
   cf target -o "${org}"
   cf create-space "${space}"
