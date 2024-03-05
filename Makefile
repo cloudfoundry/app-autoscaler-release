@@ -372,6 +372,10 @@ deploy-prometheus: ${prometheus-bosh-release-path}/manifests
 build-test-app:
 	@make --directory='./src/acceptance/assets/app/go_app' build
 
+.PHONY: deploy-test-app
+deploy-test-app:
+	@make --directory='./src/acceptance/assets/app/go_app' deploy
+
 .PHONY: acceptance-tests
 acceptance-tests: build-test-app
 	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
