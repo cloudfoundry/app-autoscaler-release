@@ -7,7 +7,7 @@ client:
         key-store: {{ .TestCertDir }}/scheduler.p12
         key-store-password: 123456
         key-store-type: PKCS12
-        protocol: TLSv1.3
+        protocol: TLSv1.2
         trust-store: {{ .TestCertDir }}/autoscaler.truststore
         trust-store-password: 123456
 endpoints:

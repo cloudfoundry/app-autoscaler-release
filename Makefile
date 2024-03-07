@@ -11,6 +11,9 @@ go-test-app-dir := ./src/acceptance/assets/app/go_app
 go_modules := $(shell find . -maxdepth 6 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules := $(go_modules) db scheduler
 
+# Enable the boringcrypto experiment to use the Go BoringCrypto library, which implements FIPS 140-2 validated cryptographic algorithms.
+export GOEXPERIMENT = boringcrypto
+
 MVN_OPTS = "-Dmaven.test.skip=true"
 OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} || uname)
 db_type := postgres

@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
+.ONESHELL:
 MAKEFLAGS := -s
 aes_terminal_font_yellow := \e[38;2;255;255;0m
 aes_terminal_reset := \e[0m
@@ -12,7 +13,9 @@ PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/'
 # `CGO_ENABLED := 1` is required to enforce dynamic linking which is a requirement of dynatrace.
 CGO_ENABLED := 1
 
-GOEXPERIMENT := boringcrypto
+# Enable the boringcrypto experiment to use the Go BoringCrypto library, which implements FIPS 140-2 validated cryptographic algorithms.
+export GOEXPERIMENT = boringcrypto
+
 BUILDTAGS :=
 export GOWORK=off
 BUILDFLAGS := -ldflags '-linkmode=external'
@@ -95,7 +98,7 @@ build-%: ${openapi-generated-clients-and-servers-dir} ${openapi-generated-client
 	@CGO_ENABLED=$(CGO_ENABLED) go build $(BUILDTAGS) $(BUILDFLAGS) -o build/$* $*/cmd/$*/main.go
 
 
-build: $(addprefix build-,$(binaries))
+build: $(addprefix build-,$(binaries)) validate-fips-only-mode
 
 build_tests: $(addprefix build_test-,$(test_dirs))
 
@@ -110,6 +113,16 @@ build_test-%: generate-fakes
 		 echo "   - compiling $${package} to $${test_file}";\
 		 go test -c -o $${test_file} $${package};\
 	 done;
+
+validate-fips-only-mode: $(binaries)
+	@echo "# Validating that the binaries are built with boringcrypto in FIPS-only mode"
+	@for binary in $(binaries); do
+		# See https://pkg.go.dev/crypto/internal/boring/sig for details on the signature checked here.
+		if [[ $$(go tool nm build/$$binary | grep -c 'crypto/internal/boring/sig.FIPSOnly') -eq 0 ]]; then
+			echo "Binary $$binary is not built with boringcrypto in FIPS-only mode";
+			exit 1;
+		fi;
+	done
 
 check: fmt lint build test
 

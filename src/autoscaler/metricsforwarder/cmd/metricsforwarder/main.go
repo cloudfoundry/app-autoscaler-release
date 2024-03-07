@@ -25,6 +25,8 @@ import (
 	"github.com/tedsuo/ifrit/sigmon"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/manager"
+
+	_ "crypto/tls/fipsonly"
 )
 
 func main() {

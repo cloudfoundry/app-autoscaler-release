@@ -21,6 +21,8 @@ import (
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
+
+	_ "crypto/tls/fipsonly"
 )
 
 func main() {
