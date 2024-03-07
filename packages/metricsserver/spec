@@ -183,6 +183,7 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/internal/descfmt/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/descopts/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/detrand/* # gosub
+- autoscaler/vendor/google.golang.org/protobuf/internal/editiondefaults/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/defval/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/json/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/messageset/* # gosub
@@ -207,6 +208,7 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoiface/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoimpl/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/* # gosub
+- autoscaler/vendor/google.golang.org/protobuf/types/gofeaturespb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/anypb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/durationpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/timestamppb/* # gosub

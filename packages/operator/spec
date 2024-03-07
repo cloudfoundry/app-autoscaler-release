@@ -114,6 +114,7 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/internal/descfmt/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/descopts/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/detrand/* # gosub
+- autoscaler/vendor/google.golang.org/protobuf/internal/editiondefaults/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/defval/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/messageset/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/tag/* # gosub
