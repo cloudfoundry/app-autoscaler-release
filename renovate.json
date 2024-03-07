@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:js-app",
+    "config:best-practices",
     "regexManagers:dockerfileVersions",
     ":label(dependencies)",
     ":automergeAll"
@@ -26,13 +26,14 @@
     },
     {
       "description": "Strip of v prefix from version number in certain github releases",
-      "packageNames": ["bosh-cli"],
+      "matchPackageNames": ["bosh-cli"],
       "extractVersion": "^v(?<version>.*)$"
     }
   ],
-  "nix": { "enabled": true },
-  "regexManagers": [
+  "nix": {"enabled": true},
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)act (?<currentValue>.+?)\\n"],
       "depNameTemplate": "nektos/act",
@@ -40,6 +41,7 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)actionlint (?<currentValue>.+?)\\n"],
       "depNameTemplate": "rhysd/actionlint",
@@ -47,6 +49,7 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)bosh (?<currentValue>.+?)\\n"],
       "depNameTemplate": "cloudfoundry/bosh-cli",
@@ -54,6 +57,7 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)cf (?<currentValue>.+?)\\n"],
       "depNameTemplate": "cloudfoundry/cli",
@@ -61,6 +65,7 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)concourse (?<currentValue>.+?)\\n"],
       "depNameTemplate": "concourse/concourse",
@@ -68,12 +73,14 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)gcloud (?<currentValue>.+?)\\n"],
       "depNameTemplate": "google/cloud-sdk",
       "datasourceTemplate": "docker"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)ginkgo (?<currentValue>.+?)\\n"],
       "depNameTemplate": "onsi/ginkgo",
@@ -81,6 +88,7 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)golangci-lint (?<currentValue>.+?)\\n"],
       "depNameTemplate": "golangci/golangci-lint",
@@ -88,12 +96,14 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)maven (?<currentValue>.+?)\\n"],
       "depNameTemplate": "apache/maven",
       "datasourceTemplate": "github-releases"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)terraform-lsp (?<currentValue>.+?)\\n"],
       "depNameTemplate": "juliosueiras/terraform-lsp",
@@ -101,6 +111,7 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)terragrunt (?<currentValue>.+?)\\n"],
       "depNameTemplate": "gruntwork-io/terragrunt",
@@ -108,6 +119,7 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
+      "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)yq (?<currentValue>.+?)\\n"],
       "depNameTemplate": "mikefarah/yq",
@@ -115,7 +127,7 @@
       "extractVersionTemplate": "^v(?<version>\\S+)"
     }
   ],
-  "lockFileMaintenance": { "enabled": true },
+  "lockFileMaintenance": {"enabled": true},
   "schedule": ["after 1am and before 7am every weekday"],
   "timezone": "Europe/Berlin"
 }
