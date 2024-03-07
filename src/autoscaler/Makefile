@@ -11,6 +11,8 @@ PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/'
 
 # `CGO_ENABLED := 1` is required to enforce dynamic linking which is a requirement of dynatrace.
 CGO_ENABLED := 1
+
+GOEXPERIMENT := boringcrypto
 BUILDTAGS :=
 export GOWORK=off
 BUILDFLAGS := -ldflags '-linkmode=external'
