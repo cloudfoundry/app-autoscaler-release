@@ -30,12 +30,12 @@ function deploy(){
   org="test"
   space="test_$(whoami)"
 
-  use_existing_organization="$(getConfItem use_existing_organization)"
+  use_existing_organization="$(getConfItem use_existing_organization || echo false)"
   if ${use_existing_organization}; then
     org="$(getConfItem existing_organization)"
   fi
 
-  use_existing_space="$(getConfItem use_existing_space)"
+  use_existing_space="$(getConfItem use_existing_space || echo false)"
   if ${use_existing_space}; then
     space="$(getConfItem existing_space)"
   fi
