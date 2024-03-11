@@ -27,6 +27,8 @@ files:
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/internal/truncate/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/tlsconfig/* # gosub
+- autoscaler/vendor/filippo.io/edwards25519/* # gosub
+- autoscaler/vendor/filippo.io/edwards25519/field/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
 - autoscaler/vendor/github.com/go-logr/logr/* # gosub
