@@ -11,7 +11,6 @@ golang_dir="$(realpath -e "${golang_dir}")"
 export golang_dir
 
 golang_version=$(cat "${golang_dir}/packages/golang-1-linux/version")
-golang_version="1.21.3"
 
 step "updating go.work file with golang version ${golang_version}"
 go work edit -go "${golang_version}" "${autoscaler_dir}/go.work"
