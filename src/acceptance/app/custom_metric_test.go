@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"acceptance"
+	"acceptance/config"
 	. "acceptance/helpers"
 	"time"
 
@@ -28,46 +29,49 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 			By("Scale out to 2 instances")
-			scaleOut := func() (int, error) {
-				SendMetric(cfg, appName, 550)
-				return RunningInstances(appGUID, 5*time.Second)
-			}
-			Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
+			scaleOut := sendMetricToAutoscaler(cfg, appGUID, appName, 550, false)
+			Eventually(scaleOut).
+				WithTimeout(5 * time.Minute).
+				WithPolling(15 * time.Second).
+				Should(Equal(2))
 
 			By("Scale in to 1 instances")
-			scaleIn := func() (int, error) {
-				SendMetric(cfg, appName, 100)
-				return RunningInstances(appGUID, 5*time.Second)
-			}
-			Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
-		})
-	})
+			scaleIn := sendMetricToAutoscaler(cfg, appGUID, appName, 100, false)
+			Eventually(scaleIn).
+				WithTimeout(5 * time.Minute).
+				WithPolling(15 * time.Second).
+				Should(Equal(1))
 
-	Context("when adding custom-metrics via mtls", func() {
-		It("should successfully add a metric using the app", func() {
-			By("adding policy so test_metric is allowed")
-			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
-			By("sending metric via mtls endpoint")
-			SendMetricMTLS(cfg, appName, 10)
-			GinkgoWriter.Println("")
 		})
 	})
 
 	Context("when scaling by custom metrics via mtls", func() {
 		It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 			By("Scale out to 2 instances")
-			scaleOut := func() (int, error) {
-				SendMetricMTLS(cfg, appName, 550)
-				return RunningInstances(appGUID, 5*time.Second)
-			}
-			Eventually(scaleOut, 5*time.Minute, 15*time.Second).Should(Equal(2))
+			scaleOut := sendMetricToAutoscaler(cfg, appGUID, appName, 550, true)
+			Eventually(scaleOut).
+				WithTimeout(5 * time.Minute).
+				WithPolling(15 * time.Second).
+				Should(Equal(2))
 
 			By("Scale in to 1 instance")
-			scaleIn := func() (int, error) {
-				SendMetricMTLS(cfg, appName, 100)
-				return RunningInstances(appGUID, 5*time.Second)
-			}
-			Eventually(scaleIn, 5*time.Minute, 15*time.Second).Should(Equal(1))
+			scaleIn := sendMetricToAutoscaler(cfg, appGUID, appName, 100, true)
+			Eventually(scaleIn).
+				WithTimeout(5 * time.Minute).
+				WithPolling(15 * time.Second).
+				Should(Equal(1))
+
 		})
 	})
 })
+
+func sendMetricToAutoscaler(config *config.Config, appGUID string, appName string, metricThreshold int, mtls bool) func() (int, error) {
+	return func() (int, error) {
+		if mtls {
+			SendMetricMTLS(config, appName, metricThreshold)
+		} else {
+			SendMetric(config, appName, metricThreshold)
+		}
+		return RunningInstances(appGUID, 5*time.Second)
+	}
+}
