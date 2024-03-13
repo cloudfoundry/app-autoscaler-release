@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: ghcr.io/cloudfoundryapp-autoscaler-release-tools
+    repository: ghcr.io/cloudfoundry/app-autoscaler-release-tools
     tag: main
 
 inputs:
