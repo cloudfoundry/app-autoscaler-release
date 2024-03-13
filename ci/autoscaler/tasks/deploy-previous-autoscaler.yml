@@ -4,14 +4,14 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: ghcr.io/cloudfoundry/app-autoscaler-release-deploy
+    repository: ghcr.io/cloudfoundry/app-autoscaler-release-tools
     tag: main
 
 params:
   # Optional: override the user to access bosh
   BOSH_USERNAME: admin
 
-  # Optional: relative to the root of the release input. The files will be 
+  # Optional: relative to the root of the release input. The files will be
   # checked to see if they exist, if not they will be excluded from the list
   OPS_FILES: |
     example/operation/loggregator-certs-from-cf.yml

@@ -28,8 +28,8 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        image_suffix: ["deploy", "test", "tools"]
-    name: Build and Push app-autoscaler-ci-${{ matrix.image_suffix }}
+        image_suffix: ["tools"]
+    name: Build and Push app-autoscaler-release-${{ matrix.image_suffix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -52,14 +52,14 @@ jobs:
         run: |
           version=$(grep "ginkgo " .tool-versions|  cut -f 2 -d " ")
           echo "GINKGO version from .tool-versions: \'${version}\'"
-          echo "::set-output name=version::${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - id: get-golang-version
         shell: bash
         run: |
           version=$(grep "golang " .tool-versions|  cut -f 2 -d " ")
           echo "Go version from .tool-versions: \'${version}\'"
-          echo "::set-output name=version::${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         id: build-and-push
