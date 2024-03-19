@@ -58,6 +58,7 @@ var _ = Describe("Memory tests", func() {
 			Expect(fakeMemoryTest.UseMemoryArgsForCall(0)).To(Equal(uint64(5 * app.Mebi)))
 			Eventually(func() int { return fakeMemoryTest.SleepCallCount() }).Should(Equal(1))
 			Expect(fakeMemoryTest.SleepArgsForCall(0)).To(Equal(4 * time.Minute))
+			Eventually(func() int { return fakeMemoryTest.StopTestCallCount() }).Should(Equal(1))
 		})
 	})
 	Context("memTest info tests", func() {
