@@ -647,7 +647,7 @@ func (b *Broker) Unbind(ctx context.Context, instanceID string, bindingID string
 	result := domain.UnbindSpec{}
 	err := b.deleteBinding(ctx, bindingID, instanceID)
 	if err != nil {
-		logger.Error("unbind failed:", err)
+		logger.Error("unbind failed", err)
 		if errors.Is(err, ErrBindingDoesNotExist) {
 			return result, apiresponses.ErrBindingDoesNotExist
 		}

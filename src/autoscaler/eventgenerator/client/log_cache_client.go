@@ -94,7 +94,7 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 	var err error
 
 	filters := logCacheFiltersFor(endTime, metricType)
-	c.logger.Debug("GetMetric", lager.Data{"filters": valuesFrom(filters)})
+	c.logger.Debug("GetMetrics", lager.Data{"filters": valuesFrom(filters)})
 	envelopes, err := c.Client.Read(context.Background(), appId, startTime, filters...)
 
 	if err != nil {
@@ -105,7 +105,7 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 	if getEnvelopeType(metricType) == rpc.EnvelopeType_TIMER {
 		metrics = c.envelopeProcessor.GetTimerMetrics(envelopes, appId, collectedAt)
 	} else {
-		c.logger.Debug("envelopes received from log-cache: ", lager.Data{"envelopes": envelopes})
+		c.logger.Debug("envelopes received from log-cache", lager.Data{"envelopes": envelopes})
 		metrics, err = c.envelopeProcessor.GetGaugeMetrics(envelopes, collectedAt)
 	}
 	return filter(metrics, metricType), err
