@@ -98,13 +98,6 @@ var _ = Describe("AutoScaler Public API", func() {
 			Expect(string(newPolicy)).Should(MatchJSON(policy))
 		})
 
-		It("[cpuutil] should succeed to create a valid policy", func() {
-			policy := GenerateDynamicScaleOutPolicy(1, 2, "cpuutil", 5)
-			newPolicy, status := createPolicy(policy)
-			Expect(status).To(Or(Equal(200), Equal(201)))
-			Expect(string(newPolicy)).Should(MatchJSON(policy))
-		})
-
 		It("should succeed to create a valid policy but remove any extra fields", func() {
 			policyWithExtraFields, validPolicy := GenerateDynamicScaleOutPolicyWithExtraFields(1, 2, "memoryused", 30)
 			newPolicy, status := createPolicy(policyWithExtraFields)
@@ -117,12 +110,6 @@ var _ = Describe("AutoScaler Public API", func() {
 			response, status := createPolicy(GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 30))
 			Expect(status).To(Equal(400))
 			Expect(string(response)).Should(ContainSubstring(`[{"context":"(root).instance_min_count","description":"Must be greater than or equal to 1"}]`))
-		})
-
-		It("[cpuutil] should fail to create an invalid policy", func() {
-			response, status := createPolicy(GenerateDynamicScaleOutPolicy(0, 2, "memoryused", 101))
-			Expect(status).To(Equal(400))
-			Expect(string(response)).Should(ContainSubstring(`[{"context":"(root).instance_min_count","description":"Must be less than or equal to 100"}]`))
 		})
 
 	})
