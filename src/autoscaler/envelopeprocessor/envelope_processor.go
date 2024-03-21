@@ -247,6 +247,15 @@ func processContainerMetrics(e *loggregator_v2.Envelope, currentTimeStamp int64)
 		metrics = append(metrics, appInstanceMetric)
 	}
 
+	if cpuEntitlement, exist := g.GetMetrics()["cpu_entitlement"]; exist {
+		appInstanceMetric := getCPUEntitlementInstanceMetric(cpuEntitlement.GetValue())
+		err := mergo.Merge(&appInstanceMetric, baseAppInstanceMetric)
+		if err != nil {
+			return []models.AppInstanceMetric{}, err
+		}
+		metrics = append(metrics, appInstanceMetric)
+	}
+
 	return metrics, nil
 }
 
@@ -268,9 +277,17 @@ func getMemoryQuotaInstanceMetric(memoryValue float64, memoryQuotaValue float64)
 
 func getCPUInstanceMetric(cpuValue float64) models.AppInstanceMetric {
 	return models.AppInstanceMetric{
-		Name:  models.MetricNameCPUUtil,
+		Name:  models.MetricNameCPU,
 		Unit:  models.UnitPercentage,
 		Value: fmt.Sprintf("%d", int64(math.Ceil(cpuValue))),
+	}
+}
+
+func getCPUEntitlementInstanceMetric(cpuEntitlementValue float64) models.AppInstanceMetric {
+	return models.AppInstanceMetric{
+		Name:  models.MetricNameCPUUtil,
+		Unit:  models.UnitPercentage,
+		Value: fmt.Sprintf("%d", int64(math.Ceil(cpuEntitlementValue))),
 	}
 }
 

@@ -19,7 +19,8 @@ const (
 
 type (
 	ScalingRulesConfig struct {
-		CPU CPUConfig
+		CPU     CPUConfig
+		CPUUtil CPUConfig
 	}
 
 	CPUConfig struct {
@@ -84,13 +85,17 @@ func newPolicyValidationError(context *gojsonschema.JsonContext, formatString st
 	return &err
 }
 
-func NewPolicyValidator(policySchemaPath string, lowerThreshold int, upperThreshold int) *PolicyValidator {
+func NewPolicyValidator(policySchemaPath string, lowerCPUThreshold int, upperCPUThreshold int, lowerCPUUtilThreshold int, upperCPUUtilThreshold int) *PolicyValidator {
 	policyValidator := &PolicyValidator{
 		policySchemaPath: policySchemaPath,
 		scalingRules: ScalingRulesConfig{
 			CPU: CPUConfig{
-				LowerThreshold: lowerThreshold,
-				UpperThreshold: upperThreshold,
+				LowerThreshold: lowerCPUThreshold,
+				UpperThreshold: upperCPUThreshold,
+			},
+			CPUUtil: CPUConfig{
+				LowerThreshold: lowerCPUUtilThreshold,
+				UpperThreshold: upperCPUUtilThreshold,
 			},
 		},
 	}
@@ -193,6 +198,12 @@ func (pv *PolicyValidator) validateScalingRuleThreshold(policy *models.ScalingPo
 		case "cpu":
 			if scalingRule.Threshold < int64(pv.scalingRules.CPU.LowerThreshold) || scalingRule.Threshold >= int64(pv.scalingRules.CPU.UpperThreshold) {
 				formatString := fmt.Sprintf("scaling_rules[{{.scalingRuleIndex}}].threshold for metric_type cpu should be greater than %d and less than or equal to %d", pv.scalingRules.CPU.LowerThreshold, pv.scalingRules.CPU.UpperThreshold)
+				err := newPolicyValidationError(currentContext, formatString, errDetails)
+				result.AddError(err, errDetails)
+			}
+		case "cpuutil":
+			if scalingRule.Threshold < int64(pv.scalingRules.CPUUtil.LowerThreshold) || scalingRule.Threshold >= int64(pv.scalingRules.CPUUtil.UpperThreshold) {
+				formatString := fmt.Sprintf("scaling_rules[{{.scalingRuleIndex}}].threshold for metric_type cpuutil should be greater than %d and less than or equal to %d", pv.scalingRules.CPUUtil.LowerThreshold, pv.scalingRules.CPUUtil.UpperThreshold)
 				err := newPolicyValidationError(currentContext, formatString, errDetails)
 				result.AddError(err, errDetails)
 			}

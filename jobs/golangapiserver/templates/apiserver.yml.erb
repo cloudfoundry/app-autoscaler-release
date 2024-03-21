@@ -155,6 +155,9 @@ scaling_rules:
   cpu:
     lower_threshold: <%= p("autoscaler.apiserver.scaling_rules.cpu.lower_threshold") %>
     upper_threshold: <%= p("autoscaler.apiserver.scaling_rules.cpu.upper_threshold") %>
+  cpuutil:
+    lower_threshold: <%= p("autoscaler.apiserver.scaling_rules.cpuutil.lower_threshold") %>
+    upper_threshold: <%= p("autoscaler.apiserver.scaling_rules.cpuutil.upper_threshold") %>
 
 rate_limit:
   valid_duration: <%= p("autoscaler.apiserver.rate_limit.valid_duration") %>

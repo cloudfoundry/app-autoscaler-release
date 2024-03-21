@@ -68,8 +68,8 @@ var _ = Describe("Envelopeprocessor", func() {
 
 		Context("processing container metrics", func() {
 			BeforeEach(func() {
-				envelopes = append(envelopes, generateContainerMetrics("test-app-id", "0", 10.2, 10*1024*1024, 20*1024*1024, 1111))
-				envelopes = append(envelopes, generateContainerMetrics("test-app-id", "1", 10.6, 10.2*1024*1024, 20*1024*1024, 1111))
+				envelopes = append(envelopes, generateContainerMetrics("test-app-id", "0", 10.2, 50, 10*1024*1024, 20*1024*1024, 1111))
+				envelopes = append(envelopes, generateContainerMetrics("test-app-id", "1", 10.6, 51, 10.2*1024*1024, 20*1024*1024, 1111))
 				envelopes = append(envelopes, generateMemoryContainerMetrics("test-app-id", "2", 10.2*1024*1024, 1111))
 				envelopes = append(envelopes, generateMemoryQuotaContainerMetrics("test-app-id", "2", 20*1024*1024, 1111))
 			})
@@ -78,7 +78,7 @@ var _ = Describe("Envelopeprocessor", func() {
 				timestamp := time.Now().UnixNano()
 				metrics, err := processor.GetGaugeMetrics(envelopes, timestamp)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(metrics)).To(Equal(8))
+				Expect(len(metrics)).To(Equal(10))
 				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
 					AppId:         "test-app-id",
 					InstanceIndex: 0,
@@ -103,9 +103,18 @@ var _ = Describe("Envelopeprocessor", func() {
 					AppId:         "test-app-id",
 					InstanceIndex: 0,
 					CollectedAt:   timestamp,
-					Name:          models.MetricNameCPUUtil,
+					Name:          models.MetricNameCPU,
 					Unit:          models.UnitPercentage,
 					Value:         "11",
+					Timestamp:     1111,
+				}))
+				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
+					AppId:         "test-app-id",
+					InstanceIndex: 0,
+					CollectedAt:   timestamp,
+					Name:          models.MetricNameCPUUtil,
+					Unit:          models.UnitPercentage,
+					Value:         "50",
 					Timestamp:     1111,
 				}))
 				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
@@ -132,9 +141,19 @@ var _ = Describe("Envelopeprocessor", func() {
 					AppId:         "test-app-id",
 					InstanceIndex: 1,
 					CollectedAt:   timestamp,
-					Name:          models.MetricNameCPUUtil,
+					Name:          models.MetricNameCPU,
 					Unit:          models.UnitPercentage,
 					Value:         "11",
+					Timestamp:     1111,
+				}))
+
+				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
+					AppId:         "test-app-id",
+					InstanceIndex: 1,
+					CollectedAt:   timestamp,
+					Name:          models.MetricNameCPUUtil,
+					Unit:          models.UnitPercentage,
+					Value:         "51",
 					Timestamp:     1111,
 				}))
 
@@ -284,7 +303,7 @@ func generateHttpStartStopEnvelope(sourceID, instance string, start, stop, times
 	return e
 }
 
-func generateContainerMetrics(sourceID, instance string, cpu, memory, memoryQuota float64, timestamp int64) *loggregator_v2.Envelope {
+func generateContainerMetrics(sourceID, instance string, cpu, cpuEntitlement, memory, memoryQuota float64, timestamp int64) *loggregator_v2.Envelope {
 	e := &loggregator_v2.Envelope{
 		SourceId:   sourceID,
 		InstanceId: instance,
@@ -294,6 +313,10 @@ func generateContainerMetrics(sourceID, instance string, cpu, memory, memoryQuot
 					"cpu": {
 						Unit:  "percentage",
 						Value: cpu,
+					},
+					"cpu_entitlement": {
+						Unit:  "percentage",
+						Value: cpuEntitlement,
 					},
 					"memory": {
 						Unit:  "bytes",

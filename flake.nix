@@ -78,6 +78,7 @@
               golangci-lint
               gopls # See: <https://github.com/golang/vscode-go/blob/master/docs/tools.md>
               google-cloud-sdk
+              jq
               maven
               nodejs
               nodePackages.yaml-language-server
