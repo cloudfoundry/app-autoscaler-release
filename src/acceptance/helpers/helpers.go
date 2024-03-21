@@ -248,15 +248,6 @@ func GenerateDynamicScaleInPolicy(instanceMin, instanceMax int, metricName strin
 }
 
 func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName string, minThreshold int64, maxThreshold int64) string {
-	scalingInRule := ScalingRule{
-		MetricType:            metricName,
-		BreachDurationSeconds: TestBreachDurationSeconds,
-		Threshold:             minThreshold,
-		Operator:              "<",
-		CoolDownSeconds:       TestCoolDownSeconds,
-		Adjustment:            "-1",
-	}
-
 	scalingOutRule := ScalingRule{
 		MetricType:            metricName,
 		BreachDurationSeconds: TestBreachDurationSeconds,
@@ -265,7 +256,14 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "+1",
 	}
-
+	scalingInRule := ScalingRule{
+		MetricType:            metricName,
+		BreachDurationSeconds: TestBreachDurationSeconds,
+		Threshold:             minThreshold,
+		Operator:              "<",
+		CoolDownSeconds:       TestCoolDownSeconds,
+		Adjustment:            "-1",
+	}
 	policy := ScalingPolicy{
 		InstanceMin:  instanceMin,
 		InstanceMax:  instanceMax,
