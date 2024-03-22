@@ -256,7 +256,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	})
 
 	Context("when there is a scaling policy for cpuutil", func() {
-
 		BeforeEach(func() {
 			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "cpuutil", 40, 80)
 			initialInstanceCount = 1
