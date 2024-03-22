@@ -229,3 +229,8 @@ func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int
 func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
 	Expect(CurlAppInstance(cfg, appName, instance, "/cpu/close")).Should(ContainSubstring(`close cpu test`))
 }
+
+func SetAppMemory(cfg *config.Config, appName string, memory string) {
+	Expect(cf.Cf("scale", appName, "-m", memory, "-f").Wait(cfg.DefaultTimeoutDuration())).
+		To(Exit(0), fmt.Sprintf("scaling app %s to %s memory failed", appName))
+}
