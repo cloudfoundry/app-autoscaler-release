@@ -232,5 +232,5 @@ func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
 
 func SetAppMemory(cfg *config.Config, appName string, memory string) {
 	Expect(cf.Cf("scale", appName, "-m", memory, "-f").Wait(cfg.DefaultTimeoutDuration())).
-		To(Exit(0), fmt.Sprintf("scaling app %s to %s memory failed", appName))
+		To(Exit(0), fmt.Sprintf("scaling app %s to %s memory failed", appName, memory))
 }
