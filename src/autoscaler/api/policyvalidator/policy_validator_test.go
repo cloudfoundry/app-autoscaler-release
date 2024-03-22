@@ -32,6 +32,9 @@ var _ = Describe("PolicyValidator", func() {
 		lowerCPUThreshold = 0
 		upperCPUThreshold = 100
 
+		lowerCPUUtilThreshold = 0
+		upperCPUUtilThreshold = 100
+
 		policyValidator = NewPolicyValidator("./policy_json.schema.json", lowerCPUThreshold, upperCPUThreshold, lowerCPUUtilThreshold, upperCPUUtilThreshold)
 	})
 	JustBeforeEach(func() {
@@ -427,7 +430,7 @@ var _ = Describe("PolicyValidator", func() {
 					Expect(errResult).To(Equal([]PolicyValidationErrors{
 						{
 							Context:     "(root).scaling_rules.0",
-							Description: "scaling_rules[0].threshold for metric_type memoryutil should be greater than 0 and less than equal to 100",
+							Description: "scaling_rules[0].threshold for metric_type memoryutil should be greater than 0 and less than or equal to 100",
 						},
 					}))
 				})
@@ -453,7 +456,7 @@ var _ = Describe("PolicyValidator", func() {
 					Expect(errResult).To(Equal([]PolicyValidationErrors{
 						{
 							Context:     "(root).scaling_rules.0",
-							Description: "scaling_rules[0].threshold for metric_type memoryutil should be greater than 0 and less than equal to 100",
+							Description: "scaling_rules[0].threshold for metric_type memoryutil should be greater than 0 and less than or equal to 100",
 						},
 					}))
 				})
