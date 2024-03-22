@@ -1,6 +1,6 @@
 module acceptance
 
-go 1.21.3
+go 1.21.4
 
 require (
 	github.com/cloudfoundry/cf-test-helpers/v2 v2.9.0
