@@ -155,7 +155,7 @@ properties:
     default: 1
   autoscaler.apiserver.scaling_rules.cpuutil.upper_threshold:
     description: "Allowable upper threshold of the cpuutil scaling range"
-    default: 10000
+    default: 100
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"

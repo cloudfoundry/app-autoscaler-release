@@ -148,7 +148,7 @@ var _ = Describe("Config", func() {
 				Expect(conf.ScalingRules.CPU.LowerThreshold).To(Equal(0))
 				Expect(conf.ScalingRules.CPU.UpperThreshold).To(Equal(100))
 				Expect(conf.ScalingRules.CPUUtil.LowerThreshold).To(Equal(0))
-				Expect(conf.ScalingRules.CPUUtil.UpperThreshold).To(Equal(10000))
+				Expect(conf.ScalingRules.CPUUtil.UpperThreshold).To(Equal(100))
 			})
 		})
 

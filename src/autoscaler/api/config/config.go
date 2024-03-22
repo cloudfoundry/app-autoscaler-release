@@ -25,7 +25,7 @@ const (
 	DefaultCPULowerThreshold     = 0
 	DefaultCPUUpperThreshold     = 100
 	DefaultCPUUtilLowerThreshold = 0
-	DefaultCPUUtilUpperThreshold = 10000
+	DefaultCPUUtilUpperThreshold = 100
 )
 
 var defaultBrokerServerConfig = helpers.ServerConfig{
