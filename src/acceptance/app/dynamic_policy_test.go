@@ -266,7 +266,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			// this means that cpuutil will be 100% if app cpu is at 25%.
 			SetAppMemory(cfg, appName, "1GB")
 
-			AppSetCpuUsage(cfg, appName, 25, 5)
+			maximumOfCPUEntitlement := 25
+			AppSetCpuUsage(cfg, appName, maximumOfCPUEntitlement, 5)
 			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
 			//only hit the one instance that was asked to run hot.
