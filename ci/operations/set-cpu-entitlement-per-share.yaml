@@ -1,7 +1,9 @@
-# This operations file is used to set the CPU entitlement per share in for the garden process in the diego-cell job as follows:
-# diego cell = 8 CPU 32GB RAM
-#  total shares = 1024 * 32[gb host ram] / 8[upper limit of app memory] = 4096
-#  CPU entitlement per share = 8[number host CPUs] * 100/ 4096[total shares] = 0,1953
+# the value is being calculated as follows:
+#   - Diego cell size = 8 CPU 32GB RAM
+#   - total shares = 1024 * 32[GB host ram] / 8[upper limit of app memory in GB] = 4096
+#   - CPU entitlement per share = 8[number host CPUs] * 100/ 4096[total shares] = 0,1953%
+
+# if this value changes, the acceptance test configuration related to metric type cpuutil needs to be adjusted as well
 - type: replace
   path: /instance_groups/name=diego-cell/jobs/name=garden/properties/garden/experimental_cpu_entitlement_per_share_in_percent?
   value: 0.195

@@ -49,7 +49,7 @@ func TestAcceptance(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	cfg = config.LoadConfig()
+	cfg = config.LoadConfig(config.DefaultTerminateSuite)
 	componentName := "Public API Suite"
 
 	if cfg.GetArtifactsDirectory() != "" {
