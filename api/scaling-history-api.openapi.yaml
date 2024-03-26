@@ -3,6 +3,10 @@ info:
   title: Scaling History API
   description: List scaling history of an application
   version: 1.0.0
+  license:
+    name: "Apache License Version 2.0"
+    # identifier: "Apache-2.0" # Requires at least OpenAPI 3.1.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 tags:
 - name: Scaling History API V1
   description: List the scaling history of an Application
