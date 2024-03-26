@@ -17,13 +17,13 @@ func TestConfigSuite(t *testing.T) {
 }
 
 var _ = Describe("LoadConfig", func() {
-	Context("CONFIG env var not set", func() {
+	When("CONFIG env var not set", func() {
 		It("terminates suite", func() {
 			loadConfigExpectSuiteTerminationWith("Must set $CONFIG to point to a json file")
 		})
 	})
 
-	Context("CONFIG env var set to non-existing file ", func() {
+	When("CONFIG env var set to non-existing file ", func() {
 		BeforeEach(func() {
 			err := os.Setenv("CONFIG", "this/path/does/not/exist/config.json")
 			Expect(err).ToNot(HaveOccurred())
@@ -34,9 +34,8 @@ var _ = Describe("LoadConfig", func() {
 		})
 	})
 
-	Context("CONFIG env var set to existing file", func() {
+	When("CONFIG env var set to existing file", func() {
 		var configFile *os.File
-
 		BeforeEach(func() {
 			tmpDir := GinkgoT().TempDir()
 			tmpFile, err := os.Create(fmt.Sprintf("%s/config.json", tmpDir))
@@ -87,68 +86,109 @@ var _ = Describe("LoadConfig", func() {
 			}`, "missing configuration 'autoscaler_api'"),
 		)
 
-		Context("timeout_scale not set correctly", func() {
-			It("falls back to a correct value", func() {
-				write(configWith(`"timeout_scale": 0`), configFile)
-				cfg := LoadConfig(DefaultTerminateSuite)
-				Expect(cfg.TimeoutScale).To(Equal(1.0))
-			})
-		})
+		When("all required fields set", func() {
+			When("timeout_scale not set correctly", func() {
+				BeforeEach(func() {
+					write(configWith(`"timeout_scale": 0`), configFile)
+				})
 
-		Context("aggregate_interval not set correctly", func() {
-			It("falls back to a correct value", func() {
-				write(configWith(`"aggregate_interval": 59`), configFile)
-				cfg := LoadConfig(DefaultTerminateSuite)
-				Expect(cfg.AggregateInterval).To(Equal(60))
+				It("falls back to a correct value", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.TimeoutScale).To(Equal(1.0))
+				})
 			})
-		})
 
-		Context("eventgenerator_health_endpoint not set correctly", func() {
-			It("falls back to a correct value", func() {
-				write(configWith(`"eventgenerator_health_endpoint": "foo.bar/"`), configFile)
-				cfg := LoadConfig(DefaultTerminateSuite)
-				Expect(cfg.EventgeneratorHealthEndpoint).To(Equal("https://foo.bar"))
+			When("aggregate_interval not set correctly", func() {
+				BeforeEach(func() {
+					write(configWith(`"aggregate_interval": 59`), configFile)
+				})
+
+				It("falls back to a correct value", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.AggregateInterval).To(Equal(60))
+				})
 			})
-		})
 
-		Context("scalingengine_health_endpoint not set correctly", func() {
-			It("falls back to a correct value", func() {
-				write(configWith(`"scalingengine_health_endpoint": "foo.bar/"`), configFile)
-				cfg := LoadConfig(DefaultTerminateSuite)
-				Expect(cfg.ScalingengineHealthEndpoint).To(Equal("https://foo.bar"))
+			When("eventgenerator_health_endpoint not set correctly", func() {
+				BeforeEach(func() {
+					write(configWith(`"eventgenerator_health_endpoint": "foo.bar/"`), configFile)
+				})
+
+				It("falls back to a correct value", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.EventgeneratorHealthEndpoint).To(Equal("https://foo.bar"))
+				})
 			})
-		})
 
-		Context("operator_health_endpoint not set correctly", func() {
-			It("falls back to a correct value", func() {
-				write(configWith(`"operator_health_endpoint": "foo.bar/"`), configFile)
-				cfg := LoadConfig(DefaultTerminateSuite)
-				Expect(cfg.OperatorHealthEndpoint).To(Equal("https://foo.bar"))
+			When("scalingengine_health_endpoint not set correctly", func() {
+				BeforeEach(func() {
+					write(configWith(`"scalingengine_health_endpoint": "foo.bar/"`), configFile)
+				})
+
+				It("falls back to a correct value", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.ScalingengineHealthEndpoint).To(Equal("https://foo.bar"))
+				})
 			})
-		})
 
-		Context("metricsforwarder_health_endpoint not set correctly", func() {
-			It("falls back to a correct value", func() {
-				write(configWith(`"metricsforwarder_health_endpoint": "foo.bar/"`), configFile)
-				cfg := LoadConfig(DefaultTerminateSuite)
-				Expect(cfg.MetricsforwarderHealthEndpoint).To(Equal("https://foo.bar"))
+			When("operator_health_endpoint not set correctly", func() {
+				BeforeEach(func() {
+					write(configWith(`"operator_health_endpoint": "foo.bar/"`), configFile)
+				})
+
+				It("falls back to a correct value", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.OperatorHealthEndpoint).To(Equal("https://foo.bar"))
+				})
 			})
-		})
 
-		Context("scheduler_health_endpoint not set correctly", func() {
-			It("falls back to a correct value", func() {
-				write(configWith(`"scheduler_health_endpoint": "foo.bar/"`), configFile)
-				cfg := LoadConfig(DefaultTerminateSuite)
-				Expect(cfg.SchedulerHealthEndpoint).To(Equal("https://foo.bar"))
+			When("metricsforwarder_health_endpoint not set correctly", func() {
+				BeforeEach(func() {
+					write(configWith(`"metricsforwarder_health_endpoint": "foo.bar/"`), configFile)
+				})
+
+				It("falls back to a correct value", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.MetricsforwarderHealthEndpoint).To(Equal("https://foo.bar"))
+				})
 			})
-		})
 
-		Context("cpuutil_scaling_policy_test not set", func() {
-			It("results in a default value", func() {
-				write(config(), configFile)
-				cfg := LoadConfig(DefaultTerminateSuite)
-				Expect(cfg.CPUUtilScalingPolicyTest.AppMemory).To(Equal("1GB"))
-				Expect(cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement).To(Equal(25))
+			When("scheduler_health_endpoint not set correctly", func() {
+				BeforeEach(func() {
+					write(configWith(`"scheduler_health_endpoint": "foo.bar/"`), configFile)
+				})
+
+				It("falls back to a correct value", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.SchedulerHealthEndpoint).To(Equal("https://foo.bar"))
+				})
+			})
+
+			When("cpuutil_scaling_policy_test not set", func() {
+				BeforeEach(func() {
+					write(config(), configFile)
+				})
+
+				It("results in a default value", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.CPUUtilScalingPolicyTest.AppMemory).To(Equal("1GB"))
+					Expect(cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement).To(Equal(25))
+				})
+			})
+
+			When("cpuutil_scaling_policy_test set", func() {
+				BeforeEach(func() {
+					write(configWith(`"cpuutil_scaling_policy_test": {
+					"app_memory": "2GB",
+					"app_cpu_entitlement": 50
+				}`), configFile)
+				})
+
+				It("unmarshalls correct", func() {
+					cfg := LoadConfig(DefaultTerminateSuite)
+					Expect(cfg.CPUUtilScalingPolicyTest.AppMemory).To(Equal("2GB"))
+					Expect(cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement).To(Equal(50))
+				})
 			})
 		})
 	})
