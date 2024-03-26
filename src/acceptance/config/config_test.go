@@ -3,10 +3,11 @@ package config_test
 import (
 	. "acceptance/config"
 	"fmt"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	"os"
 	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 func TestConfigSuite(t *testing.T) {
