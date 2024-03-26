@@ -28,6 +28,11 @@
       "description": "Strip of v prefix from version number in certain github releases",
       "matchPackageNames": ["bosh-cli"],
       "extractVersion": "^v(?<version>.*)$"
+    },
+    {
+      "description": "Group Ginkgo CLI and library updates together",
+      "groupName": "ginkgo updates",
+      "matchPackagePatterns": ["onsi/ginkgo"]
     }
   ],
   "nix": {"enabled": true},
