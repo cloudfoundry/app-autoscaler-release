@@ -2,11 +2,12 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/onsi/ginkgo/v2"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/onsi/ginkgo/v2"
 )
 
 const NODE_APP = "../assets/app/nodeApp"
