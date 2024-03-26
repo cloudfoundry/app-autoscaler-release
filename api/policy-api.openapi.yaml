@@ -3,6 +3,10 @@ info:
   title: Policy API
   description: This API is used to create, delete, retrieve the policy
   version: 1.0.0
+  license:
+    name: "Apache License Version 2.0"
+    # identifier: "Apache-2.0" # Requires at least OpenAPI 3.1.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 security:
 - bearerAuth: []
 tags:
@@ -213,7 +217,7 @@ components:
         - end_date_time
         - instance_min_count
         - instance_max_count
-      properties: 
+      properties:
         start_date_time:
           description: the start time of the schedule. Must be a future time
           type: string

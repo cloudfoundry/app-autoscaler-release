@@ -7,6 +7,10 @@ info:
 
     This API is used to return the aggregated metric result of an application.
   version: 1.0.0
+  license:
+    name: "Apache License Version 2.0"
+    # identifier: "Apache-2.0" # Requires at least OpenAPI 3.1.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 tags:
 - name: Application Metric API V1
   description: List aggregated metrics of an application.
@@ -118,7 +122,7 @@ components:
           format: uri
         resources:
           type: array
-          items: 
+          items:
             $ref: '#/components/schemas/ApplicationMetric'
     ApplicationMetric:
       description: Object containing metric history

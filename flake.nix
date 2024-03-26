@@ -47,6 +47,15 @@
         };
       });
 
+      openapi-specifications = {
+        app-autoscaler-api =
+          let
+            apiPath = ./api;
+          in builtins.filterSource
+            (path: type: builtins.match ".*\.ya?ml" (baseNameOf path) != null && type == "regular")
+            apiPath;
+      };
+
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
