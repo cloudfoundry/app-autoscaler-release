@@ -14,7 +14,7 @@ require (
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20240227163752-401108e1b7e7 // indirect
+	github.com/google/pprof v0.0.0-20240320155624-b11c3daa6f07 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
