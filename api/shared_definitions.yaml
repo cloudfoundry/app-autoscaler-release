@@ -28,6 +28,6 @@ schemas:
   metric_type:
     description: |
       One user-defined custom metric type or one of the system-default metric types, which are:
-      "memoryused", "memoryutil", "responsetime", "throughput" and "cpu"
+      "memoryused", "memoryutil", "responsetime", "throughput", "cpu" and "cpuutil"
     type: string
     example: memoryused

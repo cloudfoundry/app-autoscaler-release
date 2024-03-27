@@ -30,7 +30,7 @@ func TestSetup(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	cfg = config.LoadConfig()
+	cfg = config.LoadConfig(config.DefaultTerminateSuite)
 	if cfg.GetArtifactsDirectory() != "" {
 		cth.EnableCFTrace(cfg, componentName)
 	}

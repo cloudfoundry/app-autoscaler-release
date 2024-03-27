@@ -254,6 +254,39 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			WaitForNInstancesRunning(appGUID, 1, 10*time.Minute)
 		})
 	})
+
+	Context("when there is a scaling policy for cpuutil", func() {
+		BeforeEach(func() {
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "cpuutil", 40, 80)
+			initialInstanceCount = 1
+		})
+
+		It("should scale out and in", func() {
+			// this test depends on
+			//   - Diego cell size (CPU and RAM)
+			//   - CPU entitlements per share configured in ci/operations/set-cpu-entitlement-per-share.yaml
+			//   - app memory configured via cfg.CPUUtilScalingPolicyTest.AppMemory
+			//   - app CPU entitlement configured via cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement
+			//
+			// the following gives an example how to calculate an app CPU entitlement:
+			//   - Diego cell size = 8 CPU 32GB RAM
+			//   - total shares = 1024 * 32[GB host ram] / 8[upper limit of app memory in GB] = 4096
+			//   - CPU entitlement per share = 8[number host CPUs] * 100/ 4096[total shares] = 0,1953%
+			//   - app memory = 1GB
+			//   - app CPU entitlement = 4096[total shares] / (32[GB host ram] * 1024) * (1[app memory in GB] * 1024) * 0,1953 ~= 25%
+
+			SetAppMemory(cfg, appName, cfg.CPUUtilScalingPolicyTest.AppMemory)
+
+			// cpuutil will be 100% if cpu usage is reaching the value of cpu entitlement
+			maxCPUUsage := cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement
+			AppSetCpuUsage(cfg, appName, maxCPUUsage, 5)
+			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+
+			//only hit the one instance that was asked to run hot
+			AppEndCpuTest(cfg, appName, 0)
+			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+		})
+	})
 })
 
 func min(a int, b int) int {

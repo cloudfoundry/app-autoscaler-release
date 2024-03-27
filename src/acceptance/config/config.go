@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/onsi/ginkgo/v2"
+	"github.com/onsi/ginkgo/v2"
 )
 
 const NODE_APP = "../assets/app/nodeApp"
@@ -85,7 +85,14 @@ type Config struct {
 
 	CPUUpperThreshold int64 `json:"cpu_upper_threshold"`
 
+	CPUUtilScalingPolicyTest CPUUtilScalingPolicyTest `json:"cpuutil_scaling_policy_test"`
+
 	Performance PerformanceConfig `json:"performance"`
+}
+
+type CPUUtilScalingPolicyTest struct {
+	AppMemory         string `json:"app_memory"`
+	AppCPUEntitlement int    `json:"app_cpu_entitlement"`
 }
 
 var defaults = Config{
@@ -125,6 +132,11 @@ var defaults = Config{
 	MetricsforwarderHealthEndpoint: "",
 	SchedulerHealthEndpoint:        "",
 
+	CPUUtilScalingPolicyTest: CPUUtilScalingPolicyTest{
+		AppMemory:         "1GB",
+		AppCPUEntitlement: 25,
+	},
+
 	Performance: PerformanceConfig{
 		AppCount:                      100,
 		PercentageToScale:             30,
@@ -135,52 +147,54 @@ var defaults = Config{
 	},
 }
 
-func LoadConfig() *Config {
+// TerminateSuite allows to pass different suite termination behaviours,
+// matches the function signature of ginkgo.AbortSuite.
+type TerminateSuite func(message string, callerSkip ...int)
+
+var DefaultTerminateSuite TerminateSuite = ginkgo.AbortSuite
+
+func LoadConfig(terminateSuite TerminateSuite) *Config {
 	path := os.Getenv("CONFIG")
 	if path == "" {
-		AbortSuite("Must set $CONFIG to point to a json file.")
+		terminateSuite("Must set $CONFIG to point to a json file")
 	}
 
 	config := defaults
 	err := loadConfigFromPath(path, &config)
 	if err != nil {
-		AbortSuite(err.Error())
+		terminateSuite(err.Error())
 	}
-	validate(&config)
+	validate(&config, terminateSuite)
 	return &config
 }
 
-func validate(c *Config) {
+func validate(c *Config, terminateSuite TerminateSuite) {
 	if c.ApiEndpoint == "" {
-		AbortSuite("missing configuration 'api'")
+		terminateSuite("missing configuration 'api'")
 	}
 
 	if c.AdminUser == "" {
-		AbortSuite("missing configuration 'admin_user'")
+		terminateSuite("missing configuration 'admin_user'")
 	}
 
 	if c.AdminPassword == "" {
-		AbortSuite("missing configuration 'admin_password'")
+		terminateSuite("missing configuration 'admin_password'")
 	}
 
 	if c.TimeoutScale <= 0 {
 		c.TimeoutScale = 1.0
 	}
 
-	if c.ServiceBroker == "" {
-		AbortSuite("missing configuration 'service_broker'")
-	}
-
 	if c.ServiceName == "" {
-		AbortSuite("missing configuration 'service_name'")
+		terminateSuite("missing configuration 'service_name'")
 	}
 
 	if c.ServicePlan == "" {
-		AbortSuite("missing configuration 'service_plan'")
+		terminateSuite("missing configuration 'service_plan'")
 	}
 
 	if c.AggregateInterval == 0 {
-		AbortSuite("missing configuration 'aggregate_interval'")
+		terminateSuite("missing configuration 'aggregate_interval'")
 	} else {
 		if c.AggregateInterval < 60 {
 			c.AggregateInterval = 60
@@ -188,7 +202,7 @@ func validate(c *Config) {
 	}
 
 	if c.ASApiEndpoint == "" {
-		AbortSuite("missing configuration 'autoscaler_api'")
+		terminateSuite("missing configuration 'autoscaler_api'")
 	} else {
 		c.ASApiEndpoint = normalizeURL(c.ASApiEndpoint, c.UseHttp)
 	}

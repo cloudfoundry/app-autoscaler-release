@@ -150,6 +150,12 @@ properties:
   autoscaler.apiserver.scaling_rules.cpu.upper_threshold:
     description: "Allowable upper threshold of the cpu scaling range"
     default: 100
+  autoscaler.apiserver.scaling_rules.cpuutil.lower_threshold:
+    description: "Allowable lower threshold of the cpuutil scaling range"
+    default: 1
+  autoscaler.apiserver.scaling_rules.cpuutil.upper_threshold:
+    description: "Allowable upper threshold of the cpuutil scaling range"
+    default: 100
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
