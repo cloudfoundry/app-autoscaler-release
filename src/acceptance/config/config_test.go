@@ -39,15 +39,15 @@ var _ = Describe("LoadConfig", func() {
 		BeforeEach(func() {
 			tmpDir := GinkgoT().TempDir()
 			tmpFile, err := os.Create(fmt.Sprintf("%s/config.json", tmpDir))
-			Expect(err).ShouldNot(HaveOccurred())
+			Expect(err).ToNot(HaveOccurred())
 			configFile = tmpFile
 
 			err = os.Setenv("CONFIG", configFile.Name())
 			Expect(err).ToNot(HaveOccurred())
 		})
 
-		DescribeTable("missing required fields", func(json string, message string) {
-			write(json, configFile)
+		DescribeTable("missing required fields", func(content string, message string) {
+			write(content, configFile)
 			loadConfigExpectSuiteTerminationWith(message)
 		},
 			Entry("terminates suite because api is missing", `{}`, "missing configuration 'api'"),
@@ -87,112 +87,100 @@ var _ = Describe("LoadConfig", func() {
 		)
 
 		When("all required fields set", func() {
-			When("timeout_scale not set correctly", func() {
-				BeforeEach(func() {
-					write(configWith(`"timeout_scale": 0`), configFile)
-				})
+			var cfg = &Config{}
 
+			When("timeout_scale not set correctly", func() {
 				It("falls back to a correct value", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.TimeoutScale).To(Equal(1.0))
+					writeAndTestValueSetTo[float64](configWith(`"timeout_scale": 0`), configFile, cfg, &cfg.TimeoutScale, 1.0)
 				})
 			})
 
 			When("aggregate_interval not set correctly", func() {
-				BeforeEach(func() {
-					write(configWith(`"aggregate_interval": 59`), configFile)
-				})
-
 				It("falls back to a correct value", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.AggregateInterval).To(Equal(60))
+					writeAndTestValueSetTo[int](configWith(`"aggregate_interval": 59`), configFile, cfg, &cfg.AggregateInterval, 60)
 				})
 			})
 
 			When("eventgenerator_health_endpoint not set correctly", func() {
-				BeforeEach(func() {
-					write(configWith(`"eventgenerator_health_endpoint": "foo.bar/"`), configFile)
-				})
-
 				It("falls back to a correct value", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.EventgeneratorHealthEndpoint).To(Equal("https://foo.bar"))
+					writeAndTestValueSetTo[string](configWith(`"eventgenerator_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.EventgeneratorHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("scalingengine_health_endpoint not set correctly", func() {
-				BeforeEach(func() {
-					write(configWith(`"scalingengine_health_endpoint": "foo.bar/"`), configFile)
-				})
-
 				It("falls back to a correct value", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.ScalingengineHealthEndpoint).To(Equal("https://foo.bar"))
+					writeAndTestValueSetTo[string](configWith(`"scalingengine_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.ScalingengineHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("operator_health_endpoint not set correctly", func() {
-				BeforeEach(func() {
-					write(configWith(`"operator_health_endpoint": "foo.bar/"`), configFile)
-				})
-
 				It("falls back to a correct value", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.OperatorHealthEndpoint).To(Equal("https://foo.bar"))
+					writeAndTestValueSetTo[string](configWith(`"operator_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.OperatorHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("metricsforwarder_health_endpoint not set correctly", func() {
-				BeforeEach(func() {
-					write(configWith(`"metricsforwarder_health_endpoint": "foo.bar/"`), configFile)
-				})
-
 				It("falls back to a correct value", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.MetricsforwarderHealthEndpoint).To(Equal("https://foo.bar"))
+					writeAndTestValueSetTo[string](configWith(`"metricsforwarder_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.MetricsforwarderHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("scheduler_health_endpoint not set correctly", func() {
-				BeforeEach(func() {
-					write(configWith(`"scheduler_health_endpoint": "foo.bar/"`), configFile)
-				})
-
 				It("falls back to a correct value", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.SchedulerHealthEndpoint).To(Equal("https://foo.bar"))
+					writeAndTestValueSetTo[string](configWith(`"scheduler_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.SchedulerHealthEndpoint, "https://foo.bar")
 				})
 			})
 
-			When("cpuutil_scaling_policy_test not set", func() {
-				BeforeEach(func() {
-					write(config(), configFile)
-				})
-
-				It("results in a default value", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.CPUUtilScalingPolicyTest.AppMemory).To(Equal("1GB"))
-					Expect(cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement).To(Equal(25))
+			When("cpuutil_scaling_policy_test.app_memory not set", func() {
+				It("results in default value", func() {
+					writeAndTestValueSetTo[string](config(), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppMemory, "1GB")
 				})
 			})
 
-			When("cpuutil_scaling_policy_test set", func() {
-				BeforeEach(func() {
-					write(configWith(`"cpuutil_scaling_policy_test": {
-					"app_memory": "2GB",
-					"app_cpu_entitlement": 50
-				}`), configFile)
+			When("cpuutil_scaling_policy_test.app_memory not set", func() {
+				It("results in default value", func() {
+					writeAndTestValueSetTo[int](config(), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement, 25)
 				})
+			})
 
+			When("cpuutil_scaling_policy_test.app_memory set", func() {
 				It("unmarshalls correct", func() {
-					cfg := LoadConfig(DefaultTerminateSuite)
-					Expect(cfg.CPUUtilScalingPolicyTest.AppMemory).To(Equal("2GB"))
-					Expect(cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement).To(Equal(50))
+					writeAndTestValueSetTo[string](configWith(`"cpuutil_scaling_policy_test": {
+						"app_memory": "2GB"
+					}`), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppMemory, "2GB")
+				})
+			})
+
+			When("cpuutil_scaling_policy_test.app_cpu_entitlement set", func() {
+				It("unmarshalls correct", func() {
+					writeAndTestValueSetTo[int](configWith(`"cpuutil_scaling_policy_test": {
+						"app_cpu_entitlement": 33
+					}`), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement, 33)
 				})
 			})
 		})
 	})
 })
+
+func loadConfigExpectSuiteTerminationWith(expectedMessage string) {
+	terminated := false
+	actualMessage := ""
+	var mockTerminateSuite TerminateSuite = func(message string, _ ...int) {
+		terminated = true
+		actualMessage = message
+		panic(nil)
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			Fail("expected a panic to recover from")
+		}
+		Expect(terminated).To(BeTrue())
+		Expect(actualMessage).To(Equal(expectedMessage))
+	}()
+
+	LoadConfig(mockTerminateSuite)
+}
 
 func configWith(keyValue string) string {
 	// template contains all required fields
@@ -220,22 +208,10 @@ func write(content string, file *os.File) {
 	Expect(err).ToNot(HaveOccurred())
 }
 
-func loadConfigExpectSuiteTerminationWith(expectedMessage string) {
-	terminated := false
-	actualMessage := ""
-	var mockTerminateSuite TerminateSuite = func(message string, _ ...int) {
-		terminated = true
-		actualMessage = message
-		panic(nil)
-	}
-
-	defer func() {
-		if r := recover(); r == nil {
-			Fail("expected a panic to recover from")
-		}
-		Expect(terminated).To(BeTrue())
-		Expect(actualMessage).To(Equal(expectedMessage))
-	}()
-
-	LoadConfig(mockTerminateSuite)
+func writeAndTestValueSetTo[T any](content string, file *os.File, cfg *Config, actual *T, expected T) {
+	write(content, file)
+	// copy values from one config to another
+	// it's a workaround to successfully pass pointers to values of cfg
+	*cfg = *LoadConfig(AbortSuite)
+	Expect(*actual).To(Equal(expected))
 }
