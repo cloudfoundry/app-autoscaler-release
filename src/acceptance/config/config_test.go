@@ -91,61 +91,61 @@ var _ = Describe("LoadConfig", func() {
 
 			When("timeout_scale not set correctly", func() {
 				It("falls back to a correct value", func() {
-					writeAndTestValueSetTo[float64](configWith(`"timeout_scale": 0`), configFile, cfg, &cfg.TimeoutScale, 1.0)
+					writeAndExpectValueSetTo[float64](configWith(`"timeout_scale": 0`), configFile, cfg, &cfg.TimeoutScale, 1.0)
 				})
 			})
 
 			When("aggregate_interval not set correctly", func() {
 				It("falls back to a correct value", func() {
-					writeAndTestValueSetTo[int](configWith(`"aggregate_interval": 59`), configFile, cfg, &cfg.AggregateInterval, 60)
+					writeAndExpectValueSetTo[int](configWith(`"aggregate_interval": 59`), configFile, cfg, &cfg.AggregateInterval, 60)
 				})
 			})
 
 			When("eventgenerator_health_endpoint not set correctly", func() {
 				It("falls back to a correct value", func() {
-					writeAndTestValueSetTo[string](configWith(`"eventgenerator_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.EventgeneratorHealthEndpoint, "https://foo.bar")
+					writeAndExpectValueSetTo[string](configWith(`"eventgenerator_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.EventgeneratorHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("scalingengine_health_endpoint not set correctly", func() {
 				It("falls back to a correct value", func() {
-					writeAndTestValueSetTo[string](configWith(`"scalingengine_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.ScalingengineHealthEndpoint, "https://foo.bar")
+					writeAndExpectValueSetTo[string](configWith(`"scalingengine_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.ScalingengineHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("operator_health_endpoint not set correctly", func() {
 				It("falls back to a correct value", func() {
-					writeAndTestValueSetTo[string](configWith(`"operator_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.OperatorHealthEndpoint, "https://foo.bar")
+					writeAndExpectValueSetTo[string](configWith(`"operator_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.OperatorHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("metricsforwarder_health_endpoint not set correctly", func() {
 				It("falls back to a correct value", func() {
-					writeAndTestValueSetTo[string](configWith(`"metricsforwarder_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.MetricsforwarderHealthEndpoint, "https://foo.bar")
+					writeAndExpectValueSetTo[string](configWith(`"metricsforwarder_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.MetricsforwarderHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("scheduler_health_endpoint not set correctly", func() {
 				It("falls back to a correct value", func() {
-					writeAndTestValueSetTo[string](configWith(`"scheduler_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.SchedulerHealthEndpoint, "https://foo.bar")
+					writeAndExpectValueSetTo[string](configWith(`"scheduler_health_endpoint": "foo.bar/"`), configFile, cfg, &cfg.SchedulerHealthEndpoint, "https://foo.bar")
 				})
 			})
 
 			When("cpuutil_scaling_policy_test.app_memory not set", func() {
 				It("results in default value", func() {
-					writeAndTestValueSetTo[string](config(), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppMemory, "1GB")
+					writeAndExpectValueSetTo[string](config(), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppMemory, "1GB")
 				})
 			})
 
 			When("cpuutil_scaling_policy_test.app_memory not set", func() {
 				It("results in default value", func() {
-					writeAndTestValueSetTo[int](config(), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement, 25)
+					writeAndExpectValueSetTo[int](config(), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement, 25)
 				})
 			})
 
 			When("cpuutil_scaling_policy_test.app_memory set", func() {
 				It("unmarshalls correct", func() {
-					writeAndTestValueSetTo[string](configWith(`"cpuutil_scaling_policy_test": {
+					writeAndExpectValueSetTo[string](configWith(`"cpuutil_scaling_policy_test": {
 						"app_memory": "2GB"
 					}`), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppMemory, "2GB")
 				})
@@ -153,7 +153,7 @@ var _ = Describe("LoadConfig", func() {
 
 			When("cpuutil_scaling_policy_test.app_cpu_entitlement set", func() {
 				It("unmarshalls correct", func() {
-					writeAndTestValueSetTo[int](configWith(`"cpuutil_scaling_policy_test": {
+					writeAndExpectValueSetTo[int](configWith(`"cpuutil_scaling_policy_test": {
 						"app_cpu_entitlement": 33
 					}`), configFile, cfg, &cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement, 33)
 				})
@@ -208,7 +208,7 @@ func write(content string, file *os.File) {
 	Expect(err).ToNot(HaveOccurred())
 }
 
-func writeAndTestValueSetTo[T any](content string, file *os.File, cfg *Config, actual *T, expected T) {
+func writeAndExpectValueSetTo[T any](content string, file *os.File, cfg *Config, actual *T, expected T) {
 	write(content, file)
 	// copy values from one config to another
 	// it's a workaround to successfully pass pointers to values of cfg
