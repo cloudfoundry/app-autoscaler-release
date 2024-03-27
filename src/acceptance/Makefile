@@ -60,7 +60,7 @@ build_test-%:
 check: lint build_tests
 
 test-unit:
-	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} --race run helpers
+	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} --race run helpers config
 
 test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
