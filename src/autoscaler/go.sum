@@ -604,8 +604,8 @@ code.cloudfoundry.org/go-loggregator/v9 v9.2.0 h1:YNVD654RhMWzG195DZm0gNnrWAJJhE
 code.cloudfoundry.org/go-loggregator/v9 v9.2.0/go.mod h1:AP7PmrWSpyC9ltOQHcwF16BVkAVXS96i8+8gwI4lXRY=
 code.cloudfoundry.org/lager/v3 v3.0.3 h1:/UTmadZfIaKuT/whEinSxK1mzRfNu1uPfvjFfGqiwzM=
 code.cloudfoundry.org/lager/v3 v3.0.3/go.mod h1:Zn5q1SrIuuHjEUE7xerMKt3ztunrJQCZETAo7rV0CH8=
-code.cloudfoundry.org/tlsconfig v0.0.0-20240322144156-e73504174425 h1:xibopbk/Jlo+P5tiSoaCFOYaYRvi/8t+b8Mc6Sgcbi4=
-code.cloudfoundry.org/tlsconfig v0.0.0-20240322144156-e73504174425/go.mod h1:6JQJKj6axoHQPfWaCLd01zQN1BWzjwaKkNTkwnFSmrM=
+code.cloudfoundry.org/tlsconfig v0.0.0-20240327135916-6e62718de212 h1:E2kNimTp9k005hBfPCkCEd59zWdNKsNMRb2fVO+Yj1g=
+code.cloudfoundry.org/tlsconfig v0.0.0-20240327135916-6e62718de212/go.mod h1:6JQJKj6axoHQPfWaCLd01zQN1BWzjwaKkNTkwnFSmrM=
 dario.cat/mergo v1.0.0 h1:AGCNq9Evsj31mOgNPcLyXc+4PNABt905YmuqPYYpBWk=
 dario.cat/mergo v1.0.0/go.mod h1:uNxQE+84aUszobStD9th8a29P2fMDhsBdgRYvZOxGmk=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
