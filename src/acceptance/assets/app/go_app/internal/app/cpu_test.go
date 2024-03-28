@@ -53,29 +53,44 @@ var _ = Describe("CPU tests", func() {
 			Expect(utilization).Should(Equal(uint64(5)))
 		})
 	})
-	Context("UseCPU", func() {
-		It("should use cpu and release when stopped", func() {
 
-			oldCpu := getTotalCPUUsage("before cpuTest info test")
+	// This test is timing sensitive and may fail on GitHub workers, which is why it is marked as flaky
+	Context("UseCPU", FlakeAttempts(3), func() {
+		DescribeTable("should use cpu",
+			func(utilisation uint64, duration time.Duration) {
+				oldCpu := getTotalCPUUsage("before cpuTest info test")
 
-			By("allocating cpu")
-			cpuInfo := &app.ConcurrentBusyLoopCPUWaster{}
-			cpuInfo.UseCPU(100, time.Second)
-			Expect(cpuInfo.IsRunning()).To(Equal(true))
-			Eventually(cpuInfo.IsRunning, "2s").Should(Equal(false))
-			newCpu := getTotalCPUUsage("after cpuTest info test")
-			Expect(newCpu - oldCpu).To(BeNumerically(">=", 500*time.Millisecond))
-		})
+				By("allocating cpu")
+				cpuInfo := &app.ConcurrentBusyLoopCPUWaster{}
+				cpuInfo.UseCPU(utilisation, duration)
+				Expect(cpuInfo.IsRunning()).To(Equal(true))
+				Eventually(cpuInfo.IsRunning).WithTimeout(duration + time.Second).WithPolling(time.Second).Should(Equal(false))
+				newCpu := getTotalCPUUsage("after cpuTest info test")
+				expectedCPUUsage := multiplyDurationByPercentage(duration, utilisation)
+				// Give 10% tolerance - but at least 1 second, as this is the internal resolution of the CPU waster
+				tolerance := max(multiplyDurationByPercentage(expectedCPUUsage, 10), time.Second)
+				Expect(newCpu - oldCpu).To(BeNumerically("~", expectedCPUUsage, tolerance))
+			},
+			Entry("25% for 10 seconds", uint64(25), time.Second*10),
+			Entry("50% for 10 seconds", uint64(50), time.Second*10),
+			Entry("100% for 10 seconds", uint64(100), time.Second*10),
+			Entry("200% for 10 seconds", uint64(200), time.Second*10),
+			Entry("400% for 10 seconds", uint64(400), time.Second*10),
+		)
 	})
 })
 
 func getTotalCPUUsage(action string) time.Duration {
 	GinkgoHelper()
 
-	cpuTotalUsage := app.CpuTotalUsageTime()
-	cpuTotalDuration := time.Duration(cpuTotalUsage * float64(time.Second))
+	cpuTotalUsage := app.GetClock()
+	cpuTotalDuration := time.Duration(float64(time.Second) * cpuTotalUsage / app.ClocksPerSec)
 
 	GinkgoWriter.Printf("total cpu time %s: %s\n", action, cpuTotalDuration.String())
 
 	return cpuTotalDuration
+}
+
+func multiplyDurationByPercentage(duration time.Duration, percentage uint64) time.Duration {
+	return time.Duration(float64(duration) * float64(percentage) / 100)
 }
