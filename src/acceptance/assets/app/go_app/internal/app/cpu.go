@@ -64,17 +64,15 @@ func CPUTests(logger logr.Logger, r *gin.RouterGroup, cpuTest CPUWaster) *gin.Ro
 }
 
 func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.Duration) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.isRunning = true
+	m.StartTest()
 
 	for utilisation > 0 {
 		perGoRoutineUtilisation := min(utilisation, 100)
 		utilisation = utilisation - perGoRoutineUtilisation
 
 		go func(util uint64) {
-			run := time.Duration(util) * time.Microsecond / 10
-			sleep := time.Duration(100-util) * time.Microsecond / 10
+			run := time.Duration(util) * time.Second / 100
+			sleep := time.Duration(100-util) * time.Second / 100
 			runtime.LockOSThread()
 			for m.IsRunning() {
 				begin := time.Now()
@@ -83,8 +81,10 @@ func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.D
 				}
 				time.Sleep(sleep)
 			}
+			runtime.UnlockOSThread()
 		}(perGoRoutineUtilisation)
 	}
+
 	// how long
 	go func() {
 		time.Sleep(duration)
@@ -102,6 +102,12 @@ func (m *ConcurrentBusyLoopCPUWaster) StopTest() {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.isRunning = false
+}
+
+func (m *ConcurrentBusyLoopCPUWaster) StartTest() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.isRunning = true
 }
 
 func min[T constraints.Ordered](a, b T) T {
