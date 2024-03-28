@@ -29,6 +29,7 @@ func DebugInfo(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteS
 		commands = append(commands, command("cf", "autoscaling-metrics", anApp, "responsetime"))
 		commands = append(commands, command("cf", "autoscaling-metrics", anApp, "throughput"))
 		commands = append(commands, command("cf", "autoscaling-metrics", anApp, "cpu"))
+		commands = append(commands, command("cf", "autoscaling-metrics", anApp, "cpuutil"))
 		commands = append(commands, command("cf", "autoscaling-metrics", anApp, "test_metric"))
 		output := new(strings.Builder)
 		_, _ = fmt.Fprintf(output, "\n=============== DEBUG ===============\n")
