@@ -38,12 +38,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			Expect(expectedPolicy).To(BeEquivalentTo(policy))
 
 			By("should scale out to 2 instances")
-			helpers.AppSetCpuUsage(cfg, appName, 50, 5)
+			helpers.StartCPUUsage(cfg, appName, 50, 5)
 			helpers.WaitForNInstancesRunning(appGUID, 2, 10*time.Minute)
 
 			By("should scale in to 1 instance after cpu usage is reduced")
 			//only hit the one instance that was asked to run hot.
-			helpers.AppEndCpuTest(cfg, appName, 0)
+			helpers.StopCPUUsage(cfg, appName, 0)
 
 			helpers.WaitForNInstancesRunning(appGUID, 1, 10*time.Minute)
 		})

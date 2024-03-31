@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler, cpuTest CPUWaster, customMetricTest CustomMetricClient) *gin.Engine {
+func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler, cpuTest CPUWaster, diskOccupier DiskOccupier, customMetricTest CustomMetricClient) *gin.Engine {
 	r := gin.New()
 
 	otel.SetTracerProvider(sdktrace.NewTracerProvider())
@@ -51,6 +51,7 @@ func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler,
 	MemoryTests(logr, r.Group("/memory"), memoryTest)
 	ResponseTimeTests(logr, r.Group("/responsetime"), timewaster)
 	CPUTests(logr, r.Group("/cpu"), cpuTest)
+	DiskTest(r.Group("/disk"), diskOccupier)
 	CustomMetricsTests(logr, r.Group("/custom-metrics"), customMetricTest)
 	return r
 }
@@ -58,8 +59,15 @@ func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler,
 func New(logger *zap.Logger, address string) *http.Server {
 	errorLog, _ := zap.NewStdLogAt(logger, zapcore.ErrorLevel)
 	return &http.Server{
-		Addr:         address,
-		Handler:      Router(logger, &Sleeper{}, &ListBasedMemoryGobbler{}, &ConcurrentBusyLoopCPUWaster{}, &CustomMetricAPIClient{}),
+		Addr: address,
+		Handler: Router(
+			logger,
+			&Sleeper{},
+			&ListBasedMemoryGobbler{},
+			&ConcurrentBusyLoopCPUWaster{},
+			NewDefaultDiskOccupier("this-file-is-being-used-during-disk-occupation"),
+			&CustomMetricAPIClient{},
+		),
 		ReadTimeout:  5 * time.Second,
 		IdleTimeout:  2 * time.Second,
 		WriteTimeout: 30 * time.Second,
