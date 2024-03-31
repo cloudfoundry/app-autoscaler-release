@@ -22,13 +22,13 @@ const (
 	DefaultLoggingLevel           = "info"
 	DefaultMaxAmount              = 10
 	DefaultValidDuration          = 1 * time.Second
-	DefaultCPULowerThreshold      = 0
+	DefaultCPULowerThreshold      = 1
 	DefaultCPUUpperThreshold      = 100
-	DefaultCPUUtilLowerThreshold  = 0
+	DefaultCPUUtilLowerThreshold  = 1
 	DefaultCPUUtilUpperThreshold  = 100
-	DefaultDiskUtilLowerThreshold = 0
+	DefaultDiskUtilLowerThreshold = 1
 	DefaultDiskUtilUpperThreshold = 100
-	DefaultDiskLowerThreshold     = 0
+	DefaultDiskLowerThreshold     = 1
 	DefaultDiskUpperThreshold     = 8000
 )
 
