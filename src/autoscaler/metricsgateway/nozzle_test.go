@@ -46,7 +46,7 @@ var _ = Describe("Nozzle", func() {
 			},
 		}
 
-		containerMetricEnvelope1 = loggregator_v2.Envelope{
+		containerMetricEnvelope = loggregator_v2.Envelope{
 			SourceId: testAppId,
 			Message: &loggregator_v2.Envelope_Gauge{
 				Gauge: &loggregator_v2.Gauge{
@@ -66,21 +66,6 @@ var _ = Describe("Nozzle", func() {
 						"memory_quota": {
 							Unit:  "bytes",
 							Value: 2000000000,
-						},
-					},
-				},
-			},
-		}
-
-		// cpu_entitlement is emitted in a separate envelope https://docs.cloudfoundry.org/loggregator/container-metrics.html
-		containerMetricEnvelope2 = loggregator_v2.Envelope{
-			SourceId: testAppId,
-			Message: &loggregator_v2.Envelope_Gauge{
-				Gauge: &loggregator_v2.Gauge{
-					Metrics: map[string]*loggregator_v2.GaugeValue{
-						"cpu_entitlement": {
-							Unit:  "percentage",
-							Value: 20.5,
 						},
 					},
 				},
@@ -179,7 +164,8 @@ var _ = Describe("Nozzle", func() {
 			return appIDs
 		}
 		envelopes = []*loggregator_v2.Envelope{
-			&containerMetricEnvelope1,
+			&containerMetricEnvelope,
+			&httpStartStopEnvelope,
 		}
 		LogServerName = "reverselogproxy"
 
@@ -240,22 +226,10 @@ var _ = Describe("Nozzle", func() {
 				Consistently(envelopChan).ShouldNot(Receive())
 			})
 		})
-		Context("there is container metric envelope 1", func() {
+		Context("there is container metric envelope", func() {
 			BeforeEach(func() {
 				envelopes = []*loggregator_v2.Envelope{
-					&containerMetricEnvelope1,
-				}
-			})
-			It("should accept the envelope", func() {
-				Eventually(envelopChan).Should(Receive())
-
-			})
-		})
-
-		Context("there is container metric envelope 2", func() {
-			BeforeEach(func() {
-				envelopes = []*loggregator_v2.Envelope{
-					&containerMetricEnvelope2,
+					&containerMetricEnvelope,
 				}
 			})
 			It("should accept the envelope", func() {

@@ -46,7 +46,7 @@ cat > acceptance_config.json <<EOF
   "use_http": false,
   "service_name": "${deployment_name}",
   "service_broker": "${deployment_name}",
-  "use_existing_organization": ${use_existing_organization},
+	"use_existing_organization": ${use_existing_organization},
   "existing_organization": "${existing_organization}",
   "use_existing_space": ${use_existing_space},
   "existing_space": "${existing_space}",
