@@ -82,6 +82,14 @@ var _ = Describe("DefaultDiskOccupier", func() {
 				Expect(isGone(filePath))
 			})
 		})
+
+		When("it is not occupying already", func() {
+			FIt("does nothing", func() {
+				do.Stop()
+
+				Expect(true)
+			})
+		})
 	})
 })
 
