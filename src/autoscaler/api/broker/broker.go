@@ -74,6 +74,8 @@ func New(logger lager.Logger, conf *config.Config, bindingDb db.BindingDB, polic
 			conf.ScalingRules.CPU.UpperThreshold,
 			conf.ScalingRules.CPUUtil.LowerThreshold,
 			conf.ScalingRules.CPUUtil.UpperThreshold,
+			conf.ScalingRules.DiskUtil.LowerThreshold,
+			conf.ScalingRules.DiskUtil.UpperThreshold,
 		),
 		schedulerUtil: schedulerclient.New(conf, logger),
 		PlanChecker:   plancheck.NewPlanChecker(conf.PlanCheck, logger),

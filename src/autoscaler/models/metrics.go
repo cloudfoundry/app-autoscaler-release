@@ -17,6 +17,7 @@ const (
 	MetricNameCPUUtil      = "cpuutil"
 	MetricNameThroughput   = "throughput"
 	MetricNameResponseTime = "responsetime"
+	MetricNameDiskUtil     = "diskutil"
 
 	MetricLabelAppID         = "app_id"
 	MetricLabelInstanceIndex = "instance_index"

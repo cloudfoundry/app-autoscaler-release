@@ -15,15 +15,17 @@ import (
 
 var _ = Describe("PolicyValidator", func() {
 	var (
-		policyValidator       *PolicyValidator
-		errResult             []PolicyValidationErrors
-		policyString          string
-		policy                *models.ScalingPolicy
-		policyJson            string
-		lowerCPUThreshold     int
-		upperCPUThreshold     int
-		lowerCPUUtilThreshold int
-		upperCPUUtilThreshold int
+		policyValidator        *PolicyValidator
+		errResult              []PolicyValidationErrors
+		policyString           string
+		policy                 *models.ScalingPolicy
+		policyJson             string
+		lowerCPUThreshold      int
+		upperCPUThreshold      int
+		lowerCPUUtilThreshold  int
+		upperCPUUtilThreshold  int
+		lowerDiskUtilThreshold int
+		upperDiskUtilThreshold int
 	)
 	BeforeEach(func() {
 		lowerCPUThreshold = 0
@@ -35,7 +37,18 @@ var _ = Describe("PolicyValidator", func() {
 		lowerCPUUtilThreshold = 0
 		upperCPUUtilThreshold = 100
 
-		policyValidator = NewPolicyValidator("./policy_json.schema.json", lowerCPUThreshold, upperCPUThreshold, lowerCPUUtilThreshold, upperCPUUtilThreshold)
+		lowerDiskUtilThreshold = 0
+		upperDiskUtilThreshold = 100
+
+		policyValidator = NewPolicyValidator(
+			"./policy_json.schema.json",
+			lowerCPUThreshold,
+			upperCPUThreshold,
+			lowerCPUUtilThreshold,
+			upperCPUUtilThreshold,
+			lowerDiskUtilThreshold,
+			upperDiskUtilThreshold,
+		)
 	})
 	JustBeforeEach(func() {
 		policy, errResult = policyValidator.ValidatePolicy(json.RawMessage(policyString))
@@ -656,6 +669,58 @@ var _ = Describe("PolicyValidator", func() {
 						{
 							Context:     "(root).scaling_rules.0",
 							Description: fmt.Sprintf("scaling_rules[0].threshold for metric_type cpuutil should be greater than %d and less than or equal to %d", lowerCPUUtilThreshold, upperCPUUtilThreshold),
+						},
+					}))
+				})
+			})
+
+			Context(fmt.Sprintf("when threshold for diskutil is less than %d", lowerDiskUtilThreshold), func() {
+				BeforeEach(func() {
+					policyString = `{
+					"instance_max_count":4,
+					"instance_min_count":1,
+					"scaling_rules":[
+					{
+						"metric_type":"diskutil",
+						"breach_duration_secs":600,
+						"threshold": -1,
+						"operator":">=",
+						"cool_down_secs":300,
+						"adjustment":"+1"
+					}]
+				}`
+				})
+				It("should fail", func() {
+					Expect(errResult).To(Equal([]PolicyValidationErrors{
+						{
+							Context:     "(root).scaling_rules.0",
+							Description: fmt.Sprintf("scaling_rules[0].threshold for metric_type diskutil should be greater than %d and less than or equal to %d", lowerDiskUtilThreshold, upperCPUUtilThreshold),
+						},
+					}))
+				})
+			})
+
+			Context(fmt.Sprintf("when threshold for diskutil is greater than %d", upperCPUUtilThreshold), func() {
+				BeforeEach(func() {
+					policyString = `{
+					"instance_max_count":4,
+					"instance_min_count":1,
+					"scaling_rules":[
+					{
+						"metric_type":"diskutil",
+						"breach_duration_secs":600,
+						"threshold": 101,
+						"operator":">=",
+						"cool_down_secs":300,
+						"adjustment":"+1"
+					}]
+				}`
+				})
+				It("should fail", func() {
+					Expect(errResult).To(Equal([]PolicyValidationErrors{
+						{
+							Context:     "(root).scaling_rules.0",
+							Description: fmt.Sprintf("scaling_rules[0].threshold for metric_type diskutil should be greater than %d and less than or equal to %d", lowerCPUUtilThreshold, upperCPUUtilThreshold),
 						},
 					}))
 				})

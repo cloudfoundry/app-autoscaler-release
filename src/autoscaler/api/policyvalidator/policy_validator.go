@@ -19,11 +19,12 @@ const (
 
 type (
 	ScalingRulesConfig struct {
-		CPU     CPUConfig
-		CPUUtil CPUConfig
+		CPU      LowerUpperThresholdConfig
+		CPUUtil  LowerUpperThresholdConfig
+		DiskUtil LowerUpperThresholdConfig
 	}
 
-	CPUConfig struct {
+	LowerUpperThresholdConfig struct {
 		LowerThreshold int
 		UpperThreshold int
 	}
@@ -85,17 +86,21 @@ func newPolicyValidationError(context *gojsonschema.JsonContext, formatString st
 	return &err
 }
 
-func NewPolicyValidator(policySchemaPath string, lowerCPUThreshold int, upperCPUThreshold int, lowerCPUUtilThreshold int, upperCPUUtilThreshold int) *PolicyValidator {
+func NewPolicyValidator(policySchemaPath string, lowerCPUThreshold int, upperCPUThreshold int, lowerCPUUtilThreshold int, upperCPUUtilThreshold int, lowerDiskUtilThreshold int, upperDiskUtilThreshold int) *PolicyValidator {
 	policyValidator := &PolicyValidator{
 		policySchemaPath: policySchemaPath,
 		scalingRules: ScalingRulesConfig{
-			CPU: CPUConfig{
+			CPU: LowerUpperThresholdConfig{
 				LowerThreshold: lowerCPUThreshold,
 				UpperThreshold: upperCPUThreshold,
 			},
-			CPUUtil: CPUConfig{
+			CPUUtil: LowerUpperThresholdConfig{
 				LowerThreshold: lowerCPUUtilThreshold,
 				UpperThreshold: upperCPUUtilThreshold,
+			},
+			DiskUtil: LowerUpperThresholdConfig{
+				LowerThreshold: lowerDiskUtilThreshold,
+				UpperThreshold: upperDiskUtilThreshold,
 			},
 		},
 	}
@@ -215,6 +220,14 @@ func (pv *PolicyValidator) validateScalingRuleThreshold(policy *models.ScalingPo
 			upper := int64(pv.scalingRules.CPUUtil.UpperThreshold)
 			if scalingRule.Threshold < lower || scalingRule.Threshold >= upper {
 				formatString := shouldBeBetween("cpuutil", 0, 100)
+				err := newPolicyValidationError(currentContext, formatString, errDetails)
+				result.AddError(err, errDetails)
+			}
+		case "diskutil":
+			lower := int64(pv.scalingRules.DiskUtil.LowerThreshold)
+			upper := int64(pv.scalingRules.DiskUtil.UpperThreshold)
+			if scalingRule.Threshold < lower || scalingRule.Threshold > upper {
+				formatString := shouldBeBetween("diskutil", 0, 100)
 				err := newPolicyValidationError(currentContext, formatString, errDetails)
 				result.AddError(err, errDetails)
 			}

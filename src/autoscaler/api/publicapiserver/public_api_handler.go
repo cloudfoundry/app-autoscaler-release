@@ -68,6 +68,8 @@ func NewPublicApiHandler(logger lager.Logger, conf *config.Config, policydb db.P
 			conf.ScalingRules.CPU.UpperThreshold,
 			conf.ScalingRules.CPUUtil.LowerThreshold,
 			conf.ScalingRules.CPUUtil.UpperThreshold,
+			conf.ScalingRules.DiskUtil.LowerThreshold,
+			conf.ScalingRules.DiskUtil.UpperThreshold,
 		),
 		schedulerUtil: schedulerclient.New(conf, logger),
 		credentials:   credentials,

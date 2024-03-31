@@ -19,13 +19,15 @@ import (
 )
 
 const (
-	DefaultLoggingLevel          = "info"
-	DefaultMaxAmount             = 10
-	DefaultValidDuration         = 1 * time.Second
-	DefaultCPULowerThreshold     = 0
-	DefaultCPUUpperThreshold     = 100
-	DefaultCPUUtilLowerThreshold = 0
-	DefaultCPUUtilUpperThreshold = 100
+	DefaultLoggingLevel           = "info"
+	DefaultMaxAmount              = 10
+	DefaultValidDuration          = 1 * time.Second
+	DefaultCPULowerThreshold      = 1
+	DefaultCPUUpperThreshold      = 100
+	DefaultCPUUtilLowerThreshold  = 1
+	DefaultCPUUtilUpperThreshold  = 100
+	DefaultDiskUtilLowerThreshold = 1
+	DefaultDiskUtilUpperThreshold = 100
 )
 
 var defaultBrokerServerConfig = helpers.ServerConfig{
@@ -73,11 +75,12 @@ type BrokerCredentialsConfig struct {
 }
 
 type ScalingRulesConfig struct {
-	CPU     CPUConfig `yaml:"cpu"`
-	CPUUtil CPUConfig `yaml:"cpuutil"`
+	CPU      LowerUpperThresholdConfig `yaml:"cpu"`
+	CPUUtil  LowerUpperThresholdConfig `yaml:"cpuutil"`
+	DiskUtil LowerUpperThresholdConfig `yaml:"diskutil"`
 }
 
-type CPUConfig struct {
+type LowerUpperThresholdConfig struct {
 	LowerThreshold int `yaml:"lower_threshold"`
 	UpperThreshold int `yaml:"upper_threshold"`
 }
@@ -126,13 +129,17 @@ func LoadConfig(reader io.Reader) (*Config, error) {
 			ValidDuration: DefaultValidDuration,
 		},
 		ScalingRules: ScalingRulesConfig{
-			CPU: CPUConfig{
+			CPU: LowerUpperThresholdConfig{
 				LowerThreshold: DefaultCPULowerThreshold,
 				UpperThreshold: DefaultCPUUpperThreshold,
 			},
-			CPUUtil: CPUConfig{
+			CPUUtil: LowerUpperThresholdConfig{
 				LowerThreshold: DefaultCPUUtilLowerThreshold,
 				UpperThreshold: DefaultCPUUtilUpperThreshold,
+			},
+			DiskUtil: LowerUpperThresholdConfig{
+				LowerThreshold: DefaultDiskUtilLowerThreshold,
+				UpperThreshold: DefaultDiskUtilUpperThreshold,
 			},
 		},
 	}
