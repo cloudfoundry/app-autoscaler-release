@@ -305,6 +305,24 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 		})
 	})
+
+	Context("when there is a scaling policy for disk", func() {
+		BeforeEach(func() {
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "disk", 300, 600)
+			initialInstanceCount = 1
+		})
+
+		It("should scale out and in", func() {
+			ScaleDisk(cfg, appName, "1GB")
+
+			StartDiskUsage(cfg, appName, 800, 5)
+			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+
+			//only hit the one instance that was asked to occupy disk space
+			StopDiskUsage(cfg, appName, 0)
+			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+		})
+	})
 })
 
 func min(a int, b int) int {

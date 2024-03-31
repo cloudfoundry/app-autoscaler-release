@@ -22,12 +22,14 @@ const (
 	DefaultLoggingLevel           = "info"
 	DefaultMaxAmount              = 10
 	DefaultValidDuration          = 1 * time.Second
-	DefaultCPULowerThreshold      = 1
+	DefaultCPULowerThreshold      = 0
 	DefaultCPUUpperThreshold      = 100
-	DefaultCPUUtilLowerThreshold  = 1
+	DefaultCPUUtilLowerThreshold  = 0
 	DefaultCPUUtilUpperThreshold  = 100
-	DefaultDiskUtilLowerThreshold = 1
+	DefaultDiskUtilLowerThreshold = 0
 	DefaultDiskUtilUpperThreshold = 100
+	DefaultDiskLowerThreshold     = 0
+	DefaultDiskUpperThreshold     = 8000
 )
 
 var defaultBrokerServerConfig = helpers.ServerConfig{
@@ -78,6 +80,7 @@ type ScalingRulesConfig struct {
 	CPU      LowerUpperThresholdConfig `yaml:"cpu"`
 	CPUUtil  LowerUpperThresholdConfig `yaml:"cpuutil"`
 	DiskUtil LowerUpperThresholdConfig `yaml:"diskutil"`
+	Disk     LowerUpperThresholdConfig `yaml:"disk"`
 }
 
 type LowerUpperThresholdConfig struct {
@@ -140,6 +143,10 @@ func LoadConfig(reader io.Reader) (*Config, error) {
 			DiskUtil: LowerUpperThresholdConfig{
 				LowerThreshold: DefaultDiskUtilLowerThreshold,
 				UpperThreshold: DefaultDiskUtilUpperThreshold,
+			},
+			Disk: LowerUpperThresholdConfig{
+				LowerThreshold: DefaultDiskLowerThreshold,
+				UpperThreshold: DefaultDiskUpperThreshold,
 			},
 		},
 	}

@@ -119,6 +119,8 @@ var _ = Describe("Config", func() {
 				Expect(conf.ScalingRules.CPUUtil.UpperThreshold).To(Equal(33))
 				Expect(conf.ScalingRules.DiskUtil.LowerThreshold).To(Equal(22))
 				Expect(conf.ScalingRules.DiskUtil.UpperThreshold).To(Equal(33))
+				Expect(conf.ScalingRules.Disk.LowerThreshold).To(Equal(22))
+				Expect(conf.ScalingRules.Disk.UpperThreshold).To(Equal(33))
 			})
 		})
 
@@ -147,12 +149,14 @@ var _ = Describe("Config", func() {
 						ConnectionMaxLifetime: 0 * time.Second,
 					}))
 				Expect(conf.UseBuildInMode).To(BeFalse())
-				Expect(conf.ScalingRules.CPU.LowerThreshold).To(Equal(1))
+				Expect(conf.ScalingRules.CPU.LowerThreshold).To(Equal(0))
 				Expect(conf.ScalingRules.CPU.UpperThreshold).To(Equal(100))
-				Expect(conf.ScalingRules.CPUUtil.LowerThreshold).To(Equal(1))
+				Expect(conf.ScalingRules.CPUUtil.LowerThreshold).To(Equal(0))
 				Expect(conf.ScalingRules.CPUUtil.UpperThreshold).To(Equal(100))
-				Expect(conf.ScalingRules.DiskUtil.LowerThreshold).To(Equal(1))
+				Expect(conf.ScalingRules.DiskUtil.LowerThreshold).To(Equal(0))
 				Expect(conf.ScalingRules.DiskUtil.UpperThreshold).To(Equal(100))
+				Expect(conf.ScalingRules.Disk.LowerThreshold).To(Equal(0))
+				Expect(conf.ScalingRules.Disk.UpperThreshold).To(Equal(8000))
 			})
 		})
 

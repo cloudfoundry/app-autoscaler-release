@@ -263,6 +263,15 @@ func processContainerMetrics(e *loggregator_v2.Envelope, currentTimeStamp int64)
 		metrics = append(metrics, appInstanceMetric)
 	}
 
+	if memory, exist := g.GetMetrics()["disk"]; exist {
+		appInstanceMetric := getDiskInstanceMetric(memory.GetValue())
+		err := mergo.Merge(&appInstanceMetric, baseAppInstanceMetric)
+		if err != nil {
+			return []models.AppInstanceMetric{}, err
+		}
+		metrics = append(metrics, appInstanceMetric)
+	}
+
 	return metrics, nil
 }
 
@@ -279,6 +288,14 @@ func getMemoryQuotaInstanceMetric(memoryValue float64, memoryQuotaValue float64)
 		Name:  models.MetricNameMemoryUtil,
 		Unit:  models.UnitPercentage,
 		Value: fmt.Sprintf("%d", int(math.Ceil(memoryValue/memoryQuotaValue*100))),
+	}
+}
+
+func getDiskInstanceMetric(diskValue float64) models.AppInstanceMetric {
+	return models.AppInstanceMetric{
+		Name:  models.MetricNameDisk,
+		Unit:  models.UnitMegaBytes,
+		Value: fmt.Sprintf("%d", int(math.Ceil(diskValue/(1024*1024)))),
 	}
 }
 

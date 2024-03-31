@@ -72,4 +72,6 @@ scaling_rules:
   diskutil:
     lower_threshold: 22
     upper_threshold: 33
-
+  disk:
+    lower_threshold: 22
+    upper_threshold: 33

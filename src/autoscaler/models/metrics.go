@@ -18,6 +18,7 @@ const (
 	MetricNameThroughput   = "throughput"
 	MetricNameResponseTime = "responsetime"
 	MetricNameDiskUtil     = "diskutil"
+	MetricNameDisk         = "disk"
 
 	MetricLabelAppID         = "app_id"
 	MetricLabelInstanceIndex = "instance_index"

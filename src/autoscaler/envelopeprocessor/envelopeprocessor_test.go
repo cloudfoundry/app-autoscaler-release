@@ -89,7 +89,7 @@ var _ = Describe("Envelopeprocessor", func() {
 				timestamp := time.Now().UnixNano()
 				metrics, err := processor.GetGaugeMetrics(envelopes, timestamp)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(len(metrics)).To(Equal(15))
+				Expect(len(metrics)).To(Equal(18))
 				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
 					AppId:         "test-app-id",
 					InstanceIndex: 0,
@@ -139,6 +139,15 @@ var _ = Describe("Envelopeprocessor", func() {
 				}))
 				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
 					AppId:         "test-app-id",
+					InstanceIndex: 0,
+					CollectedAt:   timestamp,
+					Name:          models.MetricNameDisk,
+					Unit:          models.UnitMegaBytes,
+					Value:         "5",
+					Timestamp:     1111,
+				}))
+				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
+					AppId:         "test-app-id",
 					InstanceIndex: 1,
 					CollectedAt:   timestamp,
 					Name:          models.MetricNameMemoryUsed,
@@ -183,6 +192,15 @@ var _ = Describe("Envelopeprocessor", func() {
 					Name:          models.MetricNameDiskUtil,
 					Unit:          models.UnitPercentage,
 					Value:         "10",
+					Timestamp:     1111,
+				}))
+				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
+					AppId:         "test-app-id",
+					InstanceIndex: 1,
+					CollectedAt:   timestamp,
+					Name:          models.MetricNameDisk,
+					Unit:          models.UnitMegaBytes,
+					Value:         "3",
 					Timestamp:     1111,
 				}))
 				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
@@ -222,6 +240,15 @@ var _ = Describe("Envelopeprocessor", func() {
 					Name:          models.MetricNameDiskUtil,
 					Unit:          models.UnitPercentage,
 					Value:         "40",
+					Timestamp:     1111,
+				}))
+				Expect(metrics).To(ContainElement(models.AppInstanceMetric{
+					AppId:         "test-app-id",
+					InstanceIndex: 5,
+					CollectedAt:   timestamp,
+					Name:          models.MetricNameDisk,
+					Unit:          models.UnitMegaBytes,
+					Value:         "4",
 					Timestamp:     1111,
 				}))
 			})
