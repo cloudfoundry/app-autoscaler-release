@@ -255,7 +255,7 @@ func processContainerMetrics(e *loggregator_v2.Envelope, currentTimeStamp int64)
 	}
 
 	if diskQuota, exist := g.GetMetrics()["disk_quota"]; exist && diskQuota.GetValue() != 0 {
-		appInstanceMetric := getMemoryDiskQuotaInstanceMetric(g.GetMetrics()["disk"].GetValue(), diskQuota.GetValue())
+		appInstanceMetric := getDiskQuotaInstanceMetric(g.GetMetrics()["disk"].GetValue(), diskQuota.GetValue())
 		err := mergo.Merge(&appInstanceMetric, baseAppInstanceMetric)
 		if err != nil {
 			return []models.AppInstanceMetric{}, err
@@ -282,7 +282,7 @@ func getMemoryQuotaInstanceMetric(memoryValue float64, memoryQuotaValue float64)
 	}
 }
 
-func getMemoryDiskQuotaInstanceMetric(diskValue float64, diskQuotaValue float64) models.AppInstanceMetric {
+func getDiskQuotaInstanceMetric(diskValue float64, diskQuotaValue float64) models.AppInstanceMetric {
 	return models.AppInstanceMetric{
 		Name:  models.MetricNameDiskUtil,
 		Unit:  models.UnitPercentage,
