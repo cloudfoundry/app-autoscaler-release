@@ -63,36 +63,36 @@ func NewDefaultDiskOccupier(filePath string) *defaultDiskOccupier {
 	}
 }
 
-func (du *defaultDiskOccupier) Occupy(space int64, duration time.Duration) error {
-	if err := du.checkAlreadyRunning(); err != nil {
+func (d *defaultDiskOccupier) Occupy(space int64, duration time.Duration) error {
+	if err := d.checkAlreadyRunning(); err != nil {
 		return err
 	}
 
-	if err := du.occupy(space); err != nil {
+	if err := d.occupy(space); err != nil {
 		return err
 	}
 
-	du.stopAfter(duration)
+	d.stopAfter(duration)
 
 	return nil
 }
 
-func (du *defaultDiskOccupier) checkAlreadyRunning() error {
-	du.mu.RLock()
-	defer du.mu.RUnlock()
+func (d *defaultDiskOccupier) checkAlreadyRunning() error {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
 
-	if du.isRunning {
+	if d.isRunning {
 		return errors.New("disk space is already being occupied")
 	}
 
 	return nil
 }
 
-func (du *defaultDiskOccupier) occupy(space int64) error {
-	du.mu.Lock()
-	defer du.mu.Unlock()
+func (d *defaultDiskOccupier) occupy(space int64) error {
+	d.mu.Lock()
+	defer d.mu.Unlock()
 
-	file, err := os.Create(du.filePath)
+	file, err := os.Create(d.filePath)
 	if err != nil {
 		return err
 	}
@@ -102,23 +102,23 @@ func (du *defaultDiskOccupier) occupy(space int64) error {
 	if err := file.Close(); err != nil {
 		return err
 	}
-	du.isRunning = true
+	d.isRunning = true
 
 	return nil
 }
 
-func (du *defaultDiskOccupier) stopAfter(duration time.Duration) {
+func (d *defaultDiskOccupier) stopAfter(duration time.Duration) {
 	go func() {
 		time.Sleep(duration)
-		du.Stop()
+		d.Stop()
 	}()
 }
 
-func (du *defaultDiskOccupier) Stop() {
-	du.mu.Lock()
-	defer du.mu.Unlock()
+func (d *defaultDiskOccupier) Stop() {
+	d.mu.Lock()
+	defer d.mu.Unlock()
 
-	if err := os.Remove(du.filePath); err == nil {
-		du.isRunning = false
+	if err := os.Remove(d.filePath); err == nil {
+		d.isRunning = false
 	}
 }
