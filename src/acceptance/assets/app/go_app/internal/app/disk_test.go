@@ -59,7 +59,7 @@ var _ = Describe("Disk handler", func() {
 			Get("/disk/100/2").
 			Expect(GinkgoT()).
 			Status(http.StatusOK).
-			Body(`{"XXutilization":100, "minutes":2 }`).
+			Body(`{"utilization":100, "minutes":2 }`).
 			End()
 	})
 	It("should err if already running", func() {
