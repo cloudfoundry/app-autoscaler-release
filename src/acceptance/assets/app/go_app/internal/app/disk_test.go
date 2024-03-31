@@ -16,7 +16,8 @@ import (
 )
 
 var _ = Describe("Disk handler", func() {
-	mockDiskOccupier := &appfakes.FakeDiskOccupier{}
+
+	var mockDiskOccupier *appfakes.FakeDiskOccupier
 
 	apiTest := func(diskOccupier app.DiskOccupier) *apitest.APITest {
 		GinkgoHelper()
@@ -24,6 +25,10 @@ var _ = Describe("Disk handler", func() {
 
 		return apitest.New().Handler(app.Router(logger, nil, nil, nil, diskOccupier, nil))
 	}
+
+	BeforeEach(func() {
+		mockDiskOccupier = &appfakes.FakeDiskOccupier{}
+	})
 
 	It("should err if utilization not an int64", func() {
 		apiTest(mockDiskOccupier).
@@ -54,7 +59,7 @@ var _ = Describe("Disk handler", func() {
 			Get("/disk/100/2").
 			Expect(GinkgoT()).
 			Status(http.StatusOK).
-			Body(`{"utilization":100, "minutes":2 }`).
+			Body(`{"XXutilization":100, "minutes":2 }`).
 			End()
 	})
 	It("should err if already running", func() {
