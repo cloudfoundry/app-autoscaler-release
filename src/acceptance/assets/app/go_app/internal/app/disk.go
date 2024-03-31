@@ -14,14 +14,14 @@ import (
 )
 
 func DiskTest(r *gin.RouterGroup, diskOccupier DiskOccupier) *gin.RouterGroup {
-	r.GET("/:utilisation/:minutes", func(c *gin.Context) {
+	r.GET("/:utilization/:minutes", func(c *gin.Context) {
 		var utilisation int64
 		var minutes int64
 		var err error
 
-		utilisation, err = strconv.ParseInt(c.Param("utilisation"), 10, 64)
+		utilisation, err = strconv.ParseInt(c.Param("utilization"), 10, 64)
 		if err != nil {
-			Error(c, http.StatusBadRequest, "invalid utilisation: %s", err.Error())
+			Error(c, http.StatusBadRequest, "invalid utilization: %s", err.Error())
 			return
 		}
 		if minutes, err = strconv.ParseInt(c.Param("minutes"), 10, 64); err != nil {
@@ -34,7 +34,7 @@ func DiskTest(r *gin.RouterGroup, diskOccupier DiskOccupier) *gin.RouterGroup {
 			Error(c, http.StatusInternalServerError, "error invoking occupation: %s", err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"utilisation": utilisation, "minutes": minutes})
+		c.JSON(http.StatusOK, gin.H{"utilization": utilisation, "minutes": minutes})
 	})
 
 	r.GET("/close", func(c *gin.Context) {

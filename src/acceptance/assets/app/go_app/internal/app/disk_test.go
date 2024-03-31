@@ -25,23 +25,23 @@ var _ = Describe("Disk handler", func() {
 		return apitest.New().Handler(app.Router(logger, nil, nil, nil, diskOccupier, nil))
 	}
 
-	FIt("should err if utilisation not an int64", func() {
+	It("should err if utilization not an int64", func() {
 		apiTest(mockDiskOccupier).
 			Get("/disk/invalid/4").
 			Expect(GinkgoT()).
 			Status(http.StatusBadRequest).
-			Body(`{"error":{"description":"invalid utilisation: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
+			Body(`{"error":{"description":"invalid utilization: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
 			End()
 	})
-	FIt("should err if disk out of bounds", func() {
+	It("should err if disk out of bounds", func() {
 		apiTest(mockDiskOccupier).
 			Get("/disk/100001010101010249032897287298719874687936483275648273632429479827398798271/4").
 			Expect(GinkgoT()).
 			Status(http.StatusBadRequest).
-			Body(`{"error":{"description":"invalid utilisation: strconv.ParseInt: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
+			Body(`{"error":{"description":"invalid utilization: strconv.ParseInt: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
 			End()
 	})
-	FIt("should err if disk not an int", func() {
+	It("should err if disk not an int", func() {
 		apiTest(mockDiskOccupier).
 			Get("/disk/5/invalid").
 			Expect(GinkgoT()).
@@ -49,16 +49,15 @@ var _ = Describe("Disk handler", func() {
 			Body(`{"error":{"description":"invalid minutes: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
 			End()
 	})
-	FIt("should return ok", func() {
+	It("should return ok", func() {
 		apiTest(mockDiskOccupier).
 			Get("/disk/100/2").
 			Expect(GinkgoT()).
 			Status(http.StatusOK).
-			Body(`{"utilisation":100, "minutes":2 }`).
+			Body(`{"utilization":100, "minutes":2 }`).
 			End()
 	})
-
-	FIt("should err if already running", func() {
+	It("should err if already running", func() {
 		mockDiskOccupier.OccupyReturns(errors.New("already occupying"))
 		apiTest(mockDiskOccupier).
 			Get("/disk/100/2").
