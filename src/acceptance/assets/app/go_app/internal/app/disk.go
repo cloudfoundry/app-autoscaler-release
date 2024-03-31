@@ -14,15 +14,14 @@ import (
 )
 
 func DiskTest(r *gin.RouterGroup, diskOccupier DiskOccupier) *gin.RouterGroup {
-	r.GET(":spaceInMB/:minutes", func(c *gin.Context) {
-		var space int64
+	r.GET("/:utilisation/:minutes", func(c *gin.Context) {
+		var utilisation int64
 		var minutes int64
 		var err error
 
-		space, err = strconv.ParseInt(c.Param("spaceInMB"), 10, 64)
-		space = space * 1000 * 1000 // to MB
+		utilisation, err = strconv.ParseInt(c.Param("utilisation"), 10, 64)
 		if err != nil {
-			Error(c, http.StatusBadRequest, "invalid spaceInMB: %s", err.Error())
+			Error(c, http.StatusBadRequest, "invalid utilisation: %s", err.Error())
 			return
 		}
 		if minutes, err = strconv.ParseInt(c.Param("minutes"), 10, 64); err != nil {
@@ -30,16 +29,17 @@ func DiskTest(r *gin.RouterGroup, diskOccupier DiskOccupier) *gin.RouterGroup {
 			return
 		}
 		duration := time.Duration(minutes) * time.Minute
-		if err = diskOccupier.Occupy(space, duration); err != nil {
+		spaceInMB := utilisation * 1000 * 1000
+		if err = diskOccupier.Occupy(spaceInMB, duration); err != nil {
 			Error(c, http.StatusInternalServerError, "error invoking occupation: %s", err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"spaceInMB": space, "minutes": minutes})
+		c.JSON(http.StatusOK, gin.H{"utilisation": utilisation, "minutes": minutes})
 	})
 
-	r.GET("/stop", func(c *gin.Context) {
+	r.GET("/close", func(c *gin.Context) {
 		diskOccupier.Stop()
-		c.String(http.StatusOK, "disk occupation stopped")
+		c.String(http.StatusOK, "close disk test")
 	})
 
 	return r
@@ -79,16 +79,19 @@ func (du *defaultDiskOccupier) Occupy(space int64, duration time.Duration) error
 
 func (du *defaultDiskOccupier) checkAlreadyRunning() error {
 	du.mu.RLock()
+	defer du.mu.RUnlock()
+
 	if du.isRunning {
 		return errors.New("disk space is already being occupied")
 	}
-	du.mu.RUnlock()
 
 	return nil
 }
 
 func (du *defaultDiskOccupier) occupy(space int64) error {
 	du.mu.Lock()
+	defer du.mu.Unlock()
+
 	file, err := os.Create(du.filePath)
 	if err != nil {
 		return err
@@ -100,7 +103,6 @@ func (du *defaultDiskOccupier) occupy(space int64) error {
 		return err
 	}
 	du.isRunning = true
-	du.mu.Unlock()
 
 	return nil
 }
@@ -114,8 +116,9 @@ func (du *defaultDiskOccupier) stopAfter(duration time.Duration) {
 
 func (du *defaultDiskOccupier) Stop() {
 	du.mu.Lock()
+	defer du.mu.Unlock()
+
 	if err := os.Remove(du.filePath); err == nil {
 		du.isRunning = false
 	}
-	du.mu.Unlock()
 }

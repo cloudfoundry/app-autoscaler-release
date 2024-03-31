@@ -226,6 +226,15 @@ func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int
 	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/cpu/%d/%d", percent, minutes), 10*time.Second)).Should(MatchJSON(fmt.Sprintf("{\"minutes\":%d,\"utilization\":%d}", minutes, percent)))
 }
 
+func AppSetDiskUsage(cfg *config.Config, appName string, spaceInMB int, minutes int) {
+	GinkgoHelper()
+	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/disk/%d/%d", spaceInMB, minutes), 10*time.Second)).Should(MatchJSON(fmt.Sprintf("{\"minutes\":%d,\"spaceInMB\":%d,\"status\":\"started\"}", minutes, spaceInMB)))
+}
+
+func AppEndDiskTest(cfg *config.Config, appName string, instance int) {
+	Expect(CurlAppInstance(cfg, appName, instance, "/disk/close")).Should(ContainSubstring("close disk test"))
+}
+
 func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
 	Expect(CurlAppInstance(cfg, appName, instance, "/cpu/close")).Should(ContainSubstring(`close cpu test`))
 }

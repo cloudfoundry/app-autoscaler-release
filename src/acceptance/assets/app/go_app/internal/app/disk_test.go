@@ -2,14 +2,72 @@ package app_test
 
 import (
 	"errors"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
+	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
+	"github.com/fgrosse/zaptest"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/steinfletcher/apitest"
 )
+
+var _ = Describe("Disk handler", func() {
+	mockDiskOccupier := &appfakes.FakeDiskOccupier{}
+
+	apiTest := func(diskOccupier app.DiskOccupier) *apitest.APITest {
+		GinkgoHelper()
+		logger := zaptest.LoggerWriter(GinkgoWriter)
+
+		return apitest.New().Handler(app.Router(logger, nil, nil, nil, diskOccupier, nil))
+	}
+
+	FIt("should err if utilisation not an int64", func() {
+		apiTest(mockDiskOccupier).
+			Get("/disk/invalid/4").
+			Expect(GinkgoT()).
+			Status(http.StatusBadRequest).
+			Body(`{"error":{"description":"invalid utilisation: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
+			End()
+	})
+	FIt("should err if disk out of bounds", func() {
+		apiTest(mockDiskOccupier).
+			Get("/disk/100001010101010249032897287298719874687936483275648273632429479827398798271/4").
+			Expect(GinkgoT()).
+			Status(http.StatusBadRequest).
+			Body(`{"error":{"description":"invalid utilisation: strconv.ParseInt: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
+			End()
+	})
+	FIt("should err if disk not an int", func() {
+		apiTest(mockDiskOccupier).
+			Get("/disk/5/invalid").
+			Expect(GinkgoT()).
+			Status(http.StatusBadRequest).
+			Body(`{"error":{"description":"invalid minutes: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
+			End()
+	})
+	FIt("should return ok", func() {
+		apiTest(mockDiskOccupier).
+			Get("/disk/100/2").
+			Expect(GinkgoT()).
+			Status(http.StatusOK).
+			Body(`{"utilisation":100, "minutes":2 }`).
+			End()
+	})
+
+	FIt("should err if already running", func() {
+		mockDiskOccupier.OccupyReturns(errors.New("already occupying"))
+		apiTest(mockDiskOccupier).
+			Get("/disk/100/2").
+			Expect(GinkgoT()).
+			Status(http.StatusInternalServerError).
+			Body(`{"error":{"description":"error invoking occupation: already occupying"}}`).
+			End()
+	})
+})
 
 var _ = Describe("DefaultDiskOccupier", func() {
 
@@ -26,8 +84,8 @@ var _ = Describe("DefaultDiskOccupier", func() {
 	})
 
 	Describe("Occupy", func() {
-		When("it is not occupying already", func() {
-			FIt("occupies oneHundredKB for a certain amount of time", func() {
+		When("not occupying already", func() {
+			It("occupies oneHundredKB for a certain amount of time", func() {
 				err := do.Occupy(oneHundredKB, duration)
 				Expect(err).ToNot(HaveOccurred())
 
@@ -41,8 +99,8 @@ var _ = Describe("DefaultDiskOccupier", func() {
 			})
 		})
 
-		When("it is occupying already", func() {
-			FIt("fails with an error", func() {
+		When("occupying already started", func() {
+			It("fails with an error", func() {
 				// initial occupation
 				err := do.Occupy(oneHundredKB, duration)
 				Expect(err).ToNot(HaveOccurred())
@@ -53,8 +111,8 @@ var _ = Describe("DefaultDiskOccupier", func() {
 			})
 		})
 
-		When("an occupation just ended", func() {
-			FIt("is possible to start occupy again", func() {
+		When("occupation just ended", func() {
+			It("is possible to start occupy again", func() {
 				// initial occupation
 				veryShortTime := 10 * time.Millisecond
 				err := do.Occupy(oneHundredKB, veryShortTime)
@@ -72,7 +130,7 @@ var _ = Describe("DefaultDiskOccupier", func() {
 
 	Describe("Stop", func() {
 		When("it is occupying already", func() {
-			FIt("stops occupying oneHundredKB", func() {
+			It("stops occupying oneHundredKB", func() {
 				tremendousAmountOfTime := 999999999 * duration
 				err := do.Occupy(oneHundredKB, tremendousAmountOfTime)
 				Expect(err).ToNot(HaveOccurred())
@@ -84,7 +142,22 @@ var _ = Describe("DefaultDiskOccupier", func() {
 		})
 
 		When("it is not occupying already", func() {
-			FIt("does nothing", func() {
+			It("does nothing", func() {
+				do.Stop()
+
+				Expect(true)
+			})
+		})
+
+		When("occupation just ended", func() {
+			It("does nothing", func() {
+				veryShortTime := 10 * time.Millisecond
+				err := do.Occupy(oneHundredKB, veryShortTime)
+				Expect(err).ToNot(HaveOccurred())
+
+				// wait till occupation is over
+				time.Sleep(2 * veryShortTime)
+
 				do.Stop()
 
 				Expect(true)
