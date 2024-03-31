@@ -300,7 +300,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			AppSetDiskUsage(cfg, appName, 800, 5)
 			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
-			//only hit the one instance that was asked to occupy up some disk space
+			//only hit the one instance that was asked to occupy some disk space
 			AppEndDiskTest(cfg, appName, 0)
 			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 		})
