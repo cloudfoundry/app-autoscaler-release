@@ -79,6 +79,7 @@ var _ = Describe("DefaultDiskOccupier", func() {
 	var oneHundredKB int64
 	var duration time.Duration
 	var do app.DiskOccupier
+	const veryShortTime = 10 * time.Millisecond
 
 	BeforeEach(func() {
 		filePath = filepath.Join(GinkgoT().TempDir(), "this-file-is-being-used-to-eat-up-the-disk")
@@ -104,29 +105,42 @@ var _ = Describe("DefaultDiskOccupier", func() {
 		})
 
 		When("occupying already started", func() {
-			It("fails with an error", func() {
-				// initial occupation
+			BeforeEach(func() {
 				err := do.Occupy(oneHundredKB, duration)
 				Expect(err).ToNot(HaveOccurred())
+			})
 
-				// try to occupy again
-				err = do.Occupy(oneHundredKB, duration)
+			It("fails with an error", func() {
+				err := do.Occupy(oneHundredKB, duration)
 				Expect(err).To(MatchError(errors.New("disk space is already being occupied")))
 			})
 		})
 
 		When("occupation just ended", func() {
-			It("is possible to start occupy again", func() {
-				// initial occupation
-				veryShortTime := 10 * time.Millisecond
+			BeforeEach(func() {
 				err := do.Occupy(oneHundredKB, veryShortTime)
 				Expect(err).ToNot(HaveOccurred())
 
 				// wait till occupation is over
 				time.Sleep(2 * veryShortTime)
+			})
 
-				// occupy again
-				err = do.Occupy(oneHundredKB, veryShortTime)
+			It("is possible to start occupy again", func() {
+				err := do.Occupy(oneHundredKB, veryShortTime)
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
+
+		When("occupation was stopped", func() {
+			BeforeEach(func() {
+				err := do.Occupy(oneHundredKB, duration)
+				Expect(err).ToNot(HaveOccurred())
+
+				do.Stop()
+			})
+
+			It("is possible to start occupy again", func() {
+				err := do.Occupy(oneHundredKB, duration)
 				Expect(err).ToNot(HaveOccurred())
 			})
 		})
@@ -134,11 +148,13 @@ var _ = Describe("DefaultDiskOccupier", func() {
 
 	Describe("Stop", func() {
 		When("it is occupying already", func() {
-			It("stops occupying oneHundredKB", func() {
+			BeforeEach(func() {
 				tremendousAmountOfTime := 999999999 * duration
 				err := do.Occupy(oneHundredKB, tremendousAmountOfTime)
 				Expect(err).ToNot(HaveOccurred())
+			})
 
+			It("stops occupying oneHundredKB", func() {
 				do.Stop()
 
 				Expect(isGone(filePath))
@@ -154,14 +170,16 @@ var _ = Describe("DefaultDiskOccupier", func() {
 		})
 
 		When("occupation just ended", func() {
-			It("does nothing", func() {
-				veryShortTime := 10 * time.Millisecond
+			BeforeEach(func() {
+
 				err := do.Occupy(oneHundredKB, veryShortTime)
 				Expect(err).ToNot(HaveOccurred())
 
 				// wait till occupation is over
 				time.Sleep(2 * veryShortTime)
+			})
 
+			It("does nothing", func() {
 				do.Stop()
 
 				Expect(true)
