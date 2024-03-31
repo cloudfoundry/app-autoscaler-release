@@ -246,5 +246,5 @@ func ScaleMemory(cfg *config.Config, appName string, memory string) {
 
 func ScaleDisk(cfg *config.Config, appName string, space string) {
 	Expect(cf.Cf("scale", appName, "-k", space, "-f").Wait(cfg.DefaultTimeoutDuration())).
-		To(Exit(0), fmt.Sprintf("scaling app %s to %s disk failed", appName, memory))
+		To(Exit(0), fmt.Sprintf("scaling app %s to %s disk failed", appName, space))
 }
