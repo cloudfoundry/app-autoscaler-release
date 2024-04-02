@@ -9,7 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
-	"golang.org/x/exp/constraints"
 )
 
 //counterfeiter:generate . CPUWaster
@@ -20,7 +19,7 @@ type CPUWaster interface {
 }
 
 type ConcurrentBusyLoopCPUWaster struct {
-	mu        sync.Mutex
+	mu        sync.RWMutex
 	isRunning bool
 }
 
@@ -64,17 +63,20 @@ func CPUTests(logger logr.Logger, r *gin.RouterGroup, cpuTest CPUWaster) *gin.Ro
 }
 
 func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.Duration) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.isRunning = true
+	m.startTest()
 
 	for utilisation > 0 {
+		// to allow to use more than one CPU, we distribute the utilisation to multiple goroutines
 		perGoRoutineUtilisation := min(utilisation, 100)
 		utilisation = utilisation - perGoRoutineUtilisation
 
+		// the core cpu wasting goroutine
 		go func(util uint64) {
-			run := time.Duration(util) * time.Microsecond / 10
-			sleep := time.Duration(100-util) * time.Microsecond / 10
+			// to achieve a desired utilisation, we run a busy loop for a certain percentage of time and then wait for the remainder
+			// concretely, we split a second into two parts: one busy loop and one sleep
+			// we repeat this "second" until the test is stopped
+			run := time.Duration(util) * time.Second / 100
+			sleep := time.Duration(100-util) * time.Second / 100
 			runtime.LockOSThread()
 			for m.IsRunning() {
 				begin := time.Now()
@@ -83,8 +85,10 @@ func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.D
 				}
 				time.Sleep(sleep)
 			}
+			runtime.UnlockOSThread()
 		}(perGoRoutineUtilisation)
 	}
+
 	// how long
 	go func() {
 		time.Sleep(duration)
@@ -93,8 +97,8 @@ func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.D
 }
 
 func (m *ConcurrentBusyLoopCPUWaster) IsRunning() bool {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	m.mu.RLock()
+	defer m.mu.RUnlock()
 	return m.isRunning
 }
 
@@ -104,9 +108,8 @@ func (m *ConcurrentBusyLoopCPUWaster) StopTest() {
 	m.isRunning = false
 }
 
-func min[T constraints.Ordered](a, b T) T {
-	if a < b {
-		return a
-	}
-	return b
+func (m *ConcurrentBusyLoopCPUWaster) startTest() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.isRunning = true
 }
