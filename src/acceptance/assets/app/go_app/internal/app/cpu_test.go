@@ -55,28 +55,30 @@ var _ = Describe("CPU tests", func() {
 	})
 
 	// This test is timing sensitive and may fail on GitHub workers, which is why it is marked as flaky
-	Context("UseCPU", FlakeAttempts(3), func() {
-		DescribeTable("should use cpu",
-			func(utilisation uint64, duration time.Duration) {
-				oldCpu := getTotalCPUUsage("before cpuTest info test")
+	Context("ConcurrentBusyLoopCPUWaster", func() {
+		Context("UseCPU", FlakeAttempts(3), func() {
+			DescribeTable("should use cpu",
+				func(utilisation uint64, duration time.Duration) {
+					oldCpu := getTotalCPUUsage("before cpuTest info test")
 
-				By("allocating cpu")
-				cpuInfo := &app.ConcurrentBusyLoopCPUWaster{}
-				cpuInfo.UseCPU(utilisation, duration)
-				Expect(cpuInfo.IsRunning()).To(Equal(true))
-				Eventually(cpuInfo.IsRunning).WithTimeout(duration + time.Second).WithPolling(time.Second).Should(Equal(false))
-				newCpu := getTotalCPUUsage("after cpuTest info test")
-				expectedCPUUsage := multiplyDurationByPercentage(duration, utilisation)
-				// Give 10% tolerance - but at least 1 second, as this is the internal resolution of the CPU waster
-				tolerance := max(multiplyDurationByPercentage(expectedCPUUsage, 10), time.Second)
-				Expect(newCpu - oldCpu).To(BeNumerically("~", expectedCPUUsage, tolerance))
-			},
-			Entry("25% for 10 seconds", uint64(25), time.Second*10),
-			Entry("50% for 10 seconds", uint64(50), time.Second*10),
-			Entry("100% for 10 seconds", uint64(100), time.Second*10),
-			Entry("200% for 10 seconds", uint64(200), time.Second*10),
-			Entry("400% for 10 seconds", uint64(400), time.Second*10),
-		)
+					By("allocating cpu")
+					cpuWaster := &app.ConcurrentBusyLoopCPUWaster{}
+					cpuWaster.UseCPU(utilisation, duration)
+					Expect(cpuWaster.IsRunning()).To(Equal(true))
+					Eventually(cpuWaster.IsRunning).WithTimeout(duration + time.Second).WithPolling(time.Second).Should(Equal(false))
+					newCpu := getTotalCPUUsage("after cpuTest info test")
+					expectedCPUUsage := multiplyDurationByPercentage(duration, utilisation)
+					// Give 10% tolerance - but at least 1 second, as this is the internal resolution of the CPU waster
+					tolerance := max(multiplyDurationByPercentage(expectedCPUUsage, 10), time.Second)
+					Expect(newCpu - oldCpu).To(BeNumerically("~", expectedCPUUsage, tolerance))
+				},
+				Entry("25% for 10 seconds", uint64(25), time.Second*10),
+				Entry("50% for 10 seconds", uint64(50), time.Second*10),
+				Entry("100% for 10 seconds", uint64(100), time.Second*10),
+				Entry("200% for 10 seconds", uint64(200), time.Second*10),
+				Entry("400% for 10 seconds", uint64(400), time.Second*10),
+			)
+		})
 	})
 })
 
