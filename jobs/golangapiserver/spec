@@ -167,7 +167,7 @@ properties:
     default: 1
   autoscaler.apiserver.scaling_rules.disk.upper_threshold:
     description: "Allowable upper threshold of the disk scaling range"
-    default: 100
+    default: 8000
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"
