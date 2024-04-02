@@ -196,10 +196,12 @@ var _ = Describe("DefaultDiskOccupier", func() {
 			const Occupy = 1
 			const Stop = 2
 			OccupyOrStop := func() int {
-				return rand.Intn(2-1) + 1
+				return rand.Intn(2-1) + 1 // #nosec G404 - this is just a test
 			}
 
 			It("never result in a deadlock", func(ctx context.Context) {
+				// Ginkgo will abort this test due to a timeout whenever a deadlock occurs
+
 				for i := 0; i < headbangs; i++ {
 					rndDuration := randomBetween(1*time.Millisecond, maxOccupyDuration)
 					rndWait := randomBetween(1*time.Millisecond, maxWait)
@@ -229,5 +231,5 @@ func isGone(filePath string) bool {
 }
 
 func randomBetween(min time.Duration, max time.Duration) time.Duration {
-	return time.Duration(rand.Int63n(int64(max-min)) + int64(min))
+	return time.Duration(rand.Int63n(int64(max-min)) + int64(min)) // #nosec G404 - this is just a test
 }
