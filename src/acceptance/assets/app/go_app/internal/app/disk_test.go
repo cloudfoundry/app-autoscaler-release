@@ -199,7 +199,7 @@ var _ = Describe("DefaultDiskOccupier", func() {
 				return rand.Intn(2-1) + 1 // #nosec G404 - this is just a test
 			}
 
-			It("never result in a deadlock or run into an unexpected error situation", func(ctx context.Context) {
+			It("never runs into a deadlock or an unexpected error situation", func(ctx context.Context) {
 				// when a deadlock occurs, Ginkgo will abort this test due to a timeout
 
 				for i := 0; i < headbangs; i++ {
