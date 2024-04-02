@@ -59,14 +59,14 @@ var _ = Describe("CPU tests", func() {
 		Context("UseCPU", FlakeAttempts(3), func() {
 			DescribeTable("should use cpu",
 				func(utilisation uint64, duration time.Duration) {
-					oldCpu := getTotalCPUUsage("before cpuTest info test")
+					oldCpu := getTotalCPUUsage("before test")
 
-					By("allocating cpu")
+					By("wasting cpu time")
 					cpuWaster := &app.ConcurrentBusyLoopCPUWaster{}
 					cpuWaster.UseCPU(utilisation, duration)
 					Expect(cpuWaster.IsRunning()).To(Equal(true))
 					Eventually(cpuWaster.IsRunning).WithTimeout(duration + time.Second).WithPolling(time.Second).Should(Equal(false))
-					newCpu := getTotalCPUUsage("after cpuTest info test")
+					newCpu := getTotalCPUUsage("after test")
 					expectedCPUUsage := multiplyDurationByPercentage(duration, utilisation)
 					// Give 10% tolerance - but at least 1 second, as this is the internal resolution of the CPU waster
 					tolerance := max(multiplyDurationByPercentage(expectedCPUUsage, 10), time.Second)
