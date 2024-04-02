@@ -290,7 +290,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 	Context("when there is a scaling policy for diskutil", func() {
 		BeforeEach(func() {
-			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "diskutil", 30, 80)
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "diskutil", 30, 60)
 			initialInstanceCount = 1
 		})
 
@@ -308,7 +308,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 	Context("when there is a scaling policy for disk", func() {
 		BeforeEach(func() {
-			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "disk", 300, 800)
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "disk", 300, 600)
 			initialInstanceCount = 1
 		})
 
