@@ -188,7 +188,7 @@ var _ = Describe("DefaultDiskOccupier", func() {
 			})
 		})
 
-		When("someone is headbanging with the API", func() {
+		When("someone bangs the head against the API", func() {
 			headbangs := 1000
 			maxOccupyDuration := 5 * time.Millisecond
 			maxWait := 5 * time.Millisecond
@@ -199,8 +199,8 @@ var _ = Describe("DefaultDiskOccupier", func() {
 				return rand.Intn(2-1) + 1 // #nosec G404 - this is just a test
 			}
 
-			It("never result in a deadlock", func(ctx context.Context) {
-				// Ginkgo will abort this test due to a timeout whenever a deadlock occurs
+			It("never result in a deadlock or run into an unexpected error situation", func(ctx context.Context) {
+				// when a deadlock occurs, Ginkgo will abort this test due to a timeout
 
 				for i := 0; i < headbangs; i++ {
 					rndDuration := randomBetween(1*time.Millisecond, maxOccupyDuration)
@@ -209,6 +209,7 @@ var _ = Describe("DefaultDiskOccupier", func() {
 					switch OccupyOrStop() {
 					case Occupy:
 						if err := diskOccupier.Occupy(oneHundredKB, rndDuration); err != nil {
+							// these are the errors that are allowed to occur
 							Expect(err).To(MatchError(errors.New("disk space is already being occupied")))
 						}
 					case Stop:
