@@ -282,7 +282,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			StartCPUUsage(cfg, appName, maxCPUUsage, 5)
 			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
-			//only hit the one instance that was asked to run hot
+			// only hit the one instance that was asked to run hot
 			StopCPUUsage(cfg, appName, 0)
 			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 		})
@@ -300,7 +300,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			StartDiskUsage(cfg, appName, 800, 5)
 			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
-			//only hit the one instance that was asked to occupy disk space
+			// only hit the one instance that was asked to occupy disk space
 			StopDiskUsage(cfg, appName, 0)
 			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 		})
@@ -318,7 +318,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			StartDiskUsage(cfg, appName, 800, 5)
 			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
-			//only hit the one instance that was asked to occupy disk space
+			// only hit the one instance that was asked to occupy disk space
 			StopDiskUsage(cfg, appName, 0)
 			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 		})
