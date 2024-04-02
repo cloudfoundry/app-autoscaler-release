@@ -45,10 +45,12 @@ cf asp test_app
 
 ```bash
 # scale out 
-curl https://test_app.cf.stagingazure.hanavlab.ondemand.com/custom-metrics/mtls/review_count/201
+APP_ROUTE=$(cf app test_app | grep routes | awk '{print $2}')
+curl https://$APP_ROUTE/custom-metrics/mtls/review_count/201
 
 # scale In 
-curl https://test_app.cf.stagingazure.hanavlab.ondemand.com/custom-metrics/mtls/review_count/78
+APP_ROUTE=$(cf app test_app | grep routes | awk '{print $2}')
+curl https://$APP_ROUTE/custom-metrics/mtls/review_count/78
 ```
 
 
