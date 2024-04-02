@@ -1,7 +1,9 @@
 package app_test
 
 import (
+	"context"
 	"errors"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -75,16 +77,16 @@ var _ = Describe("Disk handler", func() {
 
 var _ = Describe("DefaultDiskOccupier", func() {
 
-	var filePath string
-	var oneHundredKB int64
-	var duration time.Duration
 	var diskOccupier app.DiskOccupier
+
+	var filePath string
+
+	const duration = 2 * time.Second
 	const veryShortTime = 10 * time.Millisecond
+	const oneHundredKB = 100 * 1000 // 100 KB
 
 	BeforeEach(func() {
 		filePath = filepath.Join(GinkgoT().TempDir(), "this-file-is-being-used-to-eat-up-the-disk")
-		oneHundredKB = 100 * 1000 // 100 KB
-		duration = 2 * time.Second
 		diskOccupier = app.NewDefaultDiskOccupier(filePath)
 	})
 
@@ -96,7 +98,7 @@ var _ = Describe("DefaultDiskOccupier", func() {
 
 				fStat, err := os.Stat(filePath)
 				Expect(err).ToNot(HaveOccurred())
-				Expect(fStat.Size()).To(Equal(oneHundredKB))
+				Expect(fStat.Size()).To(Equal(int64(oneHundredKB)))
 
 				Eventually(func() bool {
 					return isGone(filePath)
@@ -185,6 +187,36 @@ var _ = Describe("DefaultDiskOccupier", func() {
 				Expect(true)
 			})
 		})
+
+		When("someone headbanging with the API", func() {
+			headbangs := 1000
+			maxOccupyDuration := 5 * time.Millisecond
+			maxWait := 5 * time.Millisecond
+
+			const Occupy = 1
+			const Stop = 2
+			OccupyOrStop := func() int {
+				return rand.Intn(2-1) + 1
+			}
+
+			FIt("never result in a deadlock", func(ctx context.Context) {
+				for i := 0; i < headbangs; i++ {
+					rndDuration := randomBetween(1*time.Millisecond, maxOccupyDuration)
+					rndWait := randomBetween(1*time.Millisecond, maxWait)
+
+					switch OccupyOrStop() {
+					case Occupy:
+						if err := diskOccupier.Occupy(oneHundredKB, rndDuration); err != nil {
+							Expect(err).To(MatchError(errors.New("disk space is already being occupied")))
+						}
+					case Stop:
+						diskOccupier.Stop()
+					}
+
+					time.Sleep(rndWait)
+				}
+			})
+		})
 	})
 })
 
@@ -194,4 +226,8 @@ func isGone(filePath string) bool {
 		gone = true
 	}
 	return gone
+}
+
+func randomBetween(min time.Duration, max time.Duration) time.Duration {
+	return time.Duration(rand.Int63n(int64(max-min)) + int64(min))
 }
