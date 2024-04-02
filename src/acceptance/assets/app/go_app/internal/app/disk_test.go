@@ -188,7 +188,7 @@ var _ = Describe("DefaultDiskOccupier", func() {
 			})
 		})
 
-		When("someone headbanging with the API", func() {
+		When("someone is headbanging with the API", func() {
 			headbangs := 1000
 			maxOccupyDuration := 5 * time.Millisecond
 			maxWait := 5 * time.Millisecond
@@ -199,7 +199,7 @@ var _ = Describe("DefaultDiskOccupier", func() {
 				return rand.Intn(2-1) + 1
 			}
 
-			FIt("never result in a deadlock", func(ctx context.Context) {
+			It("never result in a deadlock", func(ctx context.Context) {
 				for i := 0; i < headbangs; i++ {
 					rndDuration := randomBetween(1*time.Millisecond, maxOccupyDuration)
 					rndWait := randomBetween(1*time.Millisecond, maxWait)
