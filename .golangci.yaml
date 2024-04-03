@@ -57,7 +57,7 @@ linters-settings:
           - condition
           - return
   govet:
-    check-shadowing: true
+    enable-all: true
   lll:
     line-length: 140
   maligned:
