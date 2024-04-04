@@ -264,6 +264,7 @@ build/autoscaler-test.tgz:
 acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
+	${AUTOSCALER_DIR}/scripts/compile-acceptance-tests.sh
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
 
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
