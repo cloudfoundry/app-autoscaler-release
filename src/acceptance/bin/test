@@ -21,7 +21,7 @@ pushd "${bin_dir}/.." > /dev/null
     exit 1;\
   }
 
-  # build ginkgo binary if binary path wasn't provided
+  # compile ginkgo cli if binary path wasn't provided
   if [[ -z "$GINKGO_BINARY" ]]; then
     echo "env var GINKGO_BINARY not specified, building ginkgo"
     go build -o ginkgo_v2 github.com/onsi/ginkgo/v2/ginkgo
