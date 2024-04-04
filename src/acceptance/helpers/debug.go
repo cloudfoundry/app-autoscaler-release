@@ -20,6 +20,7 @@ func DebugInfo(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteS
 		}
 		var commands []*Session
 		commands = append(commands, command("cf", "app", anApp))
+		commands = append(commands, command("cf", "events", anApp))
 		commands = append(commands, command("cf", "logs", "--recent", anApp))
 		commands = append(commands, command("cf", "autoscaling-api", cfg.ASApiEndpoint))
 		commands = append(commands, command("cf", "autoscaling-policy", anApp))

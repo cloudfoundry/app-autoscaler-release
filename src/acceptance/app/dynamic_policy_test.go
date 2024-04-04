@@ -377,10 +377,3 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		})
 	})
 })
-
-func min(a int, b int) int {
-	if a <= b {
-		return a
-	}
-	return b
-}

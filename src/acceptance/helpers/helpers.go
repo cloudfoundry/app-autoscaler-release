@@ -637,3 +637,9 @@ func FailOnCommandFailuref(command *Session, format string, args ...any) *Sessio
 	}
 	return command
 }
+
+func SetLabel(cfg *config.Config, appGUID string, labelKey string, labelValue string) {
+	GinkgoHelper()
+	cmd := cf.Cf("curl", "--fail", fmt.Sprintf("/v3/apps/%s", appGUID), "-X", "PATCH", "-d", fmt.Sprintf(`{"metadata": {"labels": {"%s": "%s"}}}`, labelKey, labelValue)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(cmd).To(Exit(0))
+}
