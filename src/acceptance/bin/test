@@ -11,8 +11,7 @@ pushd "${bin_dir}/.." > /dev/null
     exit 1;\
   }
 
-  # retrieve current go version not in the context of the acceptance module
-  # this ensures that no additional go toolchain downloads happen because the module requires another version
+  # retrieve go version outside of the context of any module to ensure that no toolchain download happens
   pushd "$(mktemp -d)" > /dev/null
     minor_version="$(go version | cut -d ' ' -f 3 | sed -E 's/go[0-9]+\.([0-9]+).*/\1/')"
   popd
