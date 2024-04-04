@@ -21,16 +21,16 @@ pushd "${bin_dir}/.." > /dev/null
     echo "ERROR: golang version 1.${MIN_GO_VERSION} or above needs to be installed to use the acceptance tests" 1>&2;\
     exit 1;\
   }
-  echo "# Acceptance tests"
+
   # build ginkgo binary if no one specified path to it
   if [[ -z "$GINKGO_BINARY" ]]; then
-    echo " - building ginkgo"
+    echo "env var GINKGO_BINARY not specified, building ginkgo"
     go build -o ginkgo_v2 github.com/onsi/ginkgo/v2/ginkgo
     GINKGO_BINARY="./ginkgo_v2"
   fi
 
   # shellcheck disable=SC2068
-  echo " - running ginkgo v2 with: '${*}'"
+  echo "running ${GINKGO_BINARY} with: '${*}'"
 
   "${GINKGO_BINARY}" "$@"
 popd > /dev/null
