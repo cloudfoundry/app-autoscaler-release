@@ -167,7 +167,7 @@ properties:
     default: 1
   autoscaler.apiserver.scaling_rules.disk.upper_threshold:
     description: "Allowable upper threshold of the disk scaling range"
-    default: 8000
+    default: 10240 # =1024MB*10, 10GB this is the maximum disk quota of CF: https://help.sap.com/docs/btp/sap-business-technology-platform/cloud-foundry-environment
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"

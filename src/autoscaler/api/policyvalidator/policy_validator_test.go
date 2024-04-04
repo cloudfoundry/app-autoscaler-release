@@ -43,7 +43,7 @@ var _ = Describe("PolicyValidator", func() {
 		upperDiskUtilThreshold = 100
 
 		lowerDiskThreshold = 1
-		upperDiskThreshold = 8000
+		upperDiskThreshold = 10*1024
 
 		policyValidator = NewPolicyValidator(
 			"./policy_json.schema.json",
@@ -768,7 +768,7 @@ var _ = Describe("PolicyValidator", func() {
 					{
 						"metric_type":"disk",
 						"breach_duration_secs":600,
-						"threshold": 8001,
+						"threshold": 10241,
 						"operator":">=",
 						"cool_down_secs":300,
 						"adjustment":"+1"
