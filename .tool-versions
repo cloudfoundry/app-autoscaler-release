@@ -1,4 +1,4 @@
-act 0.2.60
+act 0.2.61
 actionlint 1.6.27
 bosh 7.5.5
 cf 8.7.9
@@ -7,7 +7,7 @@ direnv 2.34.0
 gcloud 467.0.0
 ginkgo 2.17.1
 golang 1.21.4
-golangci-lint 1.56.1
+golangci-lint 1.57.2
 java temurin-17.0.10+7
 make 4.4
 maven 3.8.6
