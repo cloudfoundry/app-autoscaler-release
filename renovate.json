@@ -4,7 +4,8 @@
     "config:best-practices",
     "regexManagers:dockerfileVersions",
     ":label(dependencies)",
-    ":automergeAll"
+    ":automergeAll",
+    "schedule:nonOfficeHours"
   ],
   "transitiveRemediation": true,
   "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
@@ -133,6 +134,5 @@
     }
   ],
   "lockFileMaintenance": {"enabled": true},
-  "schedule": ["after 1am and before 7am every weekday"],
   "timezone": "Europe/Berlin"
 }
