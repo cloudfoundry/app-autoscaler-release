@@ -29,7 +29,7 @@ const (
 	DefaultDiskUtilLowerThreshold = 1
 	DefaultDiskUtilUpperThreshold = 100
 	DefaultDiskLowerThreshold     = 1
-	DefaultDiskUpperThreshold     = 10 * 1024
+	DefaultDiskUpperThreshold     = 2 * 1024
 )
 
 var defaultBrokerServerConfig = helpers.ServerConfig{

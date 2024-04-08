@@ -156,7 +156,7 @@ var _ = Describe("Config", func() {
 				Expect(conf.ScalingRules.DiskUtil.LowerThreshold).To(Equal(1))
 				Expect(conf.ScalingRules.DiskUtil.UpperThreshold).To(Equal(100))
 				Expect(conf.ScalingRules.Disk.LowerThreshold).To(Equal(1))
-				Expect(conf.ScalingRules.Disk.UpperThreshold).To(Equal(10 * 1024))
+				Expect(conf.ScalingRules.Disk.UpperThreshold).To(Equal(2 * 1024))
 			})
 		})
 
