@@ -244,12 +244,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		It("when cpu is greater than scaling out threshold", func() {
 			By("should scale out to 2 instances")
-			AppSetCpuUsage(cfg, appName, int(float64(cfg.CPUUpperThreshold)*0.9), 5)
+			StartCPUUsage(cfg, appName, int(float64(cfg.CPUUpperThreshold)*0.9), 5)
 			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
 			By("should scale in to 1 instance after cpu usage is reduced")
 			//only hit the one instance that was asked to run hot.
-			AppEndCpuTest(cfg, appName, 0)
+			StopCPUUsage(cfg, appName, 0)
 
 			WaitForNInstancesRunning(appGUID, 1, 10*time.Minute)
 		})
@@ -275,15 +275,51 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			//   - app memory = 1GB
 			//   - app CPU entitlement = 4096[total shares] / (32[GB host ram] * 1024) * (1[app memory in GB] * 1024) * 0,1953 ~= 25%
 
-			SetAppMemory(cfg, appName, cfg.CPUUtilScalingPolicyTest.AppMemory)
+			ScaleMemory(cfg, appName, cfg.CPUUtilScalingPolicyTest.AppMemory)
 
 			// cpuutil will be 100% if cpu usage is reaching the value of cpu entitlement
 			maxCPUUsage := cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement
-			AppSetCpuUsage(cfg, appName, maxCPUUsage, 5)
+			StartCPUUsage(cfg, appName, maxCPUUsage, 5)
 			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 
-			//only hit the one instance that was asked to run hot
-			AppEndCpuTest(cfg, appName, 0)
+			// only hit the one instance that was asked to run hot
+			StopCPUUsage(cfg, appName, 0)
+			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+		})
+	})
+
+	Context("when there is a scaling policy for diskutil", func() {
+		BeforeEach(func() {
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "diskutil", 30, 60)
+			initialInstanceCount = 1
+		})
+
+		It("should scale out and in", func() {
+			ScaleDisk(cfg, appName, "1GB")
+
+			StartDiskUsage(cfg, appName, 800, 5)
+			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+
+			// only hit the one instance that was asked to occupy disk space
+			StopDiskUsage(cfg, appName, 0)
+			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+		})
+	})
+
+	Context("when there is a scaling policy for disk", func() {
+		BeforeEach(func() {
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "disk", 300, 600)
+			initialInstanceCount = 1
+		})
+
+		It("should scale out and in", func() {
+			ScaleDisk(cfg, appName, "1GB")
+
+			StartDiskUsage(cfg, appName, 800, 5)
+			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+
+			// only hit the one instance that was asked to occupy disk space
+			StopDiskUsage(cfg, appName, 0)
 			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 		})
 	})

@@ -221,16 +221,30 @@ func CurlAppInstance(cfg *config.Config, appName string, appInstance int, url st
 	return output
 }
 
-func AppSetCpuUsage(cfg *config.Config, appName string, percent int, minutes int) {
+func StartCPUUsage(cfg *config.Config, appName string, percent int, minutes int) {
 	GinkgoHelper()
 	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/cpu/%d/%d", percent, minutes), 10*time.Second)).Should(MatchJSON(fmt.Sprintf("{\"minutes\":%d,\"utilization\":%d}", minutes, percent)))
 }
 
-func AppEndCpuTest(cfg *config.Config, appName string, instance int) {
+func StopCPUUsage(cfg *config.Config, appName string, instance int) {
 	Expect(CurlAppInstance(cfg, appName, instance, "/cpu/close")).Should(ContainSubstring(`close cpu test`))
 }
 
-func SetAppMemory(cfg *config.Config, appName string, memory string) {
+func StartDiskUsage(cfg *config.Config, appName string, spaceInMB int, minutes int) {
+	GinkgoHelper()
+	Expect(cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/disk/%d/%d", spaceInMB, minutes), 10*time.Second)).Should(MatchJSON(fmt.Sprintf("{\"minutes\":%d,\"utilization\":%d}", minutes, spaceInMB)))
+}
+
+func StopDiskUsage(cfg *config.Config, appName string, instance int) {
+	Expect(CurlAppInstance(cfg, appName, instance, "/disk/close")).Should(ContainSubstring("close disk test"))
+}
+
+func ScaleMemory(cfg *config.Config, appName string, memory string) {
 	Expect(cf.Cf("scale", appName, "-m", memory, "-f").Wait(cfg.DefaultTimeoutDuration())).
 		To(Exit(0), fmt.Sprintf("scaling app %s to %s memory failed", appName, memory))
+}
+
+func ScaleDisk(cfg *config.Config, appName string, space string) {
+	Expect(cf.Cf("scale", appName, "-k", space, "-f").Wait(cfg.DefaultTimeoutDuration())).
+		To(Exit(0), fmt.Sprintf("scaling app %s to %s disk failed", appName, space))
 }

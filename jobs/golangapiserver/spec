@@ -156,6 +156,18 @@ properties:
   autoscaler.apiserver.scaling_rules.cpuutil.upper_threshold:
     description: "Allowable upper threshold of the cpuutil scaling range"
     default: 100
+  autoscaler.apiserver.scaling_rules.diskutil.lower_threshold:
+    description: "Allowable lower threshold of the diskutil scaling range"
+    default: 1
+  autoscaler.apiserver.scaling_rules.diskutil.upper_threshold:
+    description: "Allowable upper threshold of the diskutil scaling range"
+    default: 100
+  autoscaler.apiserver.scaling_rules.disk.lower_threshold:
+    description: "Allowable lower threshold of the disk scaling range"
+    default: 1
+  autoscaler.apiserver.scaling_rules.disk.upper_threshold:
+    description: "Allowable upper threshold of the disk scaling range"
+    default: 2048 # same default as the maximum app disk size maintained in the cloud controller API release https://github.com/cloudfoundry/capi-release/blob/dd94bda54387eb68a73a01dcb1c1f0102ebcf7b3/jobs/cc_deployment_updater/spec#L200-L201
   autoscaler.policy_db.address:
     description: "IP address on which the policydb server will listen"
     default: "autoscalerpostgres.service.cf.internal"

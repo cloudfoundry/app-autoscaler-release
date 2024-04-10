@@ -80,5 +80,5 @@ func apiTest(timeWaster app.TimeWaster, memoryGobbler app.MemoryGobbler, cpuWast
 	logger := zaptest.LoggerWriter(GinkgoWriter)
 
 	return apitest.New().
-		Handler(app.Router(logger, timeWaster, memoryGobbler, cpuWaster, customMetricClient))
+		Handler(app.Router(logger, timeWaster, memoryGobbler, cpuWaster, nil, customMetricClient))
 }

@@ -158,6 +158,12 @@ scaling_rules:
   cpuutil:
     lower_threshold: <%= p("autoscaler.apiserver.scaling_rules.cpuutil.lower_threshold") %>
     upper_threshold: <%= p("autoscaler.apiserver.scaling_rules.cpuutil.upper_threshold") %>
+  diskutil:
+    lower_threshold: <%= p("autoscaler.apiserver.scaling_rules.diskutil.lower_threshold") %>
+    upper_threshold: <%= p("autoscaler.apiserver.scaling_rules.diskutil.upper_threshold") %>
+  disk:
+    lower_threshold: <%= p("autoscaler.apiserver.scaling_rules.disk.lower_threshold") %>
+    upper_threshold: <%= p("autoscaler.apiserver.scaling_rules.disk.upper_threshold") %>
 
 rate_limit:
   valid_duration: <%= p("autoscaler.apiserver.rate_limit.valid_duration") %>
