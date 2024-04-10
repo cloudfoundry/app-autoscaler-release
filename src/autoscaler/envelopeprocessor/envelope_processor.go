@@ -20,7 +20,7 @@ type EnvelopeProcessorCreator interface {
 
 type EnvelopeProcessor interface {
 	GetGaugeMetrics(envelopes []*loggregator_v2.Envelope, currentTimeStamp int64) ([]models.AppInstanceMetric, error)
-	GetTimerMetrics(envelopes []*loggregator_v2.Envelope, appID string, currentTimestamp int64) []models.AppInstanceMetric
+	GetCollectionInterval() time.Duration
 }
 
 var _ EnvelopeProcessor = &Processor{}
@@ -43,10 +43,9 @@ func (p Processor) GetGaugeMetrics(envelopes []*loggregator_v2.Envelope, current
 	p.logger.Debug("Compacted envelopes", lager.Data{"compactedEnvelopes": compactedEnvelopes})
 	return GetGaugeInstanceMetrics(compactedEnvelopes, currentTimeStamp)
 }
-func (p Processor) GetTimerMetrics(envelopes []*loggregator_v2.Envelope, appID string, currentTimestamp int64) []models.AppInstanceMetric {
-	p.logger.Debug("GetTimerMetrics")
-	p.logger.Debug("Compacted envelopes", lager.Data{"Envelopes": envelopes})
-	return GetHttpStartStopInstanceMetrics(envelopes, appID, currentTimestamp, p.collectionInterval)
+
+func (p Processor) GetCollectionInterval() time.Duration {
+	return p.collectionInterval
 }
 
 // Log cache returns instance metrics such as cpu and memory in serparate envelopes, this was not the case with
@@ -91,10 +90,10 @@ func GetHttpStartStopInstanceMetrics(envelopes []*loggregator_v2.Envelope, appID
 	var metrics []models.AppInstanceMetric
 
 	numRequestsPerAppIdx := calcNumReqs(envelopes)
-	sumReponseTimesPerAppIdx := calcSumResponseTimes(envelopes)
+	sumResponseTimesPerAppIdx := calcSumResponseTimes(envelopes)
 
 	throughputMetrics := getThroughputInstanceMetrics(envelopes, appID, numRequestsPerAppIdx, collectionInterval, currentTimestamp)
-	responseTimeMetric := getResponsetimeInstanceMetrics(envelopes, appID, numRequestsPerAppIdx, sumReponseTimesPerAppIdx, currentTimestamp)
+	responseTimeMetric := getResponsetimeInstanceMetrics(envelopes, appID, numRequestsPerAppIdx, sumResponseTimesPerAppIdx, currentTimestamp)
 
 	metrics = append(metrics, throughputMetrics...)
 	metrics = append(metrics, responseTimeMetric...)
