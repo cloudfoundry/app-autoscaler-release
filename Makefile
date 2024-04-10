@@ -246,7 +246,7 @@ lint-actions:
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --config ${lint_config} ${OPTS}
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --config ${lint_config} ${OPTS} --timeout 5m
 
 .PHONY: spec-test
 spec-test:
@@ -264,6 +264,7 @@ build/autoscaler-test.tgz:
 acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
+	${AUTOSCALER_DIR}/scripts/compile-acceptance-tests.sh
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
 
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
