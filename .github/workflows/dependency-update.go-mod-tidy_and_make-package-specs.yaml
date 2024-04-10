@@ -56,6 +56,7 @@ jobs:
           git config user.name "${commit_author_name}"
           git config user.email "${commit_author_email}"
       - name: go-mod-tidy and make package-specs
+        id: go-mod-tidy
         shell: bash
         run: |
           #! /usr/bin/env bash
@@ -99,7 +100,14 @@ jobs:
             git add .
             git commit --message="${tidy_message}"
             git push
+            echo "changed=true" >> $GITHUB_ENV
           else
             echo 'No files changed!'
+            echo "changed=false" >> $GITHUB_ENV
           fi
           echo '🏁'
+      - uses: hmarr/auto-approve-action@v4
+        name: Auto-approve
+        if: steps.go-mod-tidy.outputs.changed == 'true' && github.event.pull_request.user.login == 'dependabot[bot]'
+        with:
+          github-token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }} # bot's token
