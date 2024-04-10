@@ -177,12 +177,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 1)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 80)
 				initialInstanceCount = 1
 			})
 
 			JustBeforeEach(func() {
-				ticker = time.NewTicker(25 * time.Millisecond)
+				ticker = time.NewTicker(10 * time.Millisecond)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -198,7 +198,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				}(doneChan)
 			})
 
-			It("should scale out", func() {
+			FIt("should scale out", func() {
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
 
