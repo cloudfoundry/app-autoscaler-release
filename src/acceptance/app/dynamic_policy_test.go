@@ -177,7 +177,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 80)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 79)
 				initialInstanceCount = 1
 			})
 
