@@ -1,23 +1,8 @@
 name: "Dependency Updates Post-Processing"
 on:
   pull_request:
-    branches:
-      - "renovate/**"
-      - "dependabot/**"
     paths:
-      - ".github/workflows/dependency-update.go-mod-tidy_and_make-package-specs.yaml"
-      - "src/**/go.mod"
-      - "src/**/go.sum"
-  push:
-    # TODO: As soon as Github solves issue <https://github.com/actions/runner/issues/1182>
-    # and this event-configuration remains identical to the one for `pull_request`,
-    # anchors and aliases may be used, see the official
-    # [yaml-documentation](<https://yaml.org/spec/1.2.2/#alias-nodes>).
-    branches:
-      - "renovate/**"
-      - "dependabot/**"
-    paths:
-      - ".github/workflows/dependency-update.go-mod-tidy_and_make-package-specs.yaml"
+      - ".github/workflows/dependency-updates-post-processing.yaml"
       - "src/**/go.mod"
       - "src/**/go.sum"
   workflow_dispatch: {}
@@ -45,17 +30,22 @@ jobs:
           submodules: true
           token: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }} # With push token that can trigger new PR jobs
       - name: Configure git
+        id: configure_git
         shell: bash
         run: |
           #! /usr/bin/env bash
           set -eu -o pipefail
 
-          declare -r commit_author_name="${{github.event.head_commit.author.name}}"
-          declare -r commit_author_email="${{github.event.head_commit.author.email}}"
+          declare -r commit_author_name="$(git log -1 --pretty=format:'%an')"
+          declare -r commit_author_email="$(git log -1 --pretty=format:'%ae')"
+          declare -r commit_subject="$(git log -1 --pretty=format:'%s')"
 
           git config --global --add safe.directory "${GITHUB_WORKSPACE}"
           git config user.name "${commit_author_name}"
           git config user.email "${commit_author_email}"
+
+          echo "commit_author_name=${commit_author_name}" >> $GITHUB_OUTPUT
+          echo "commit_subject=${commit_subject}" >> $GITHUB_OUTPUT
       - name: go-mod-tidy and make package-specs
         shell: bash
         run: |
@@ -69,10 +59,10 @@ jobs:
           # PR instead of just the latest commit.
           declare -r tidy_message='🤖🦾🛠️ go mod tidy & make package-specs'
 
-          declare -r commit_author_name="${{github.event.head_commit.author.name}}"
-          declare -r commit_message="${{github.event.head_commit.message}}"
+          declare -r commit_author_name="${{steps.configure_git.outputs.commit_author_name}}"
+          declare -r commit_message="${{steps.configure_git.outputs.commit_subject}}"
 
-          if [[ ! "${commit_author_name}" =~ ('dependabot'|'renovate')'[bot]' ]] \
+          if [[ ! "${commit_author_name}" == 'renovate[bot]' ]] \
              || [[ "${commit_message}" == "${tidy_message}" ]]
           then
             echo 'This commit was not by a known bot or already an automatic `go mod tidy`! Exiting …'
