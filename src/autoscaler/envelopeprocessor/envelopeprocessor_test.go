@@ -370,6 +370,14 @@ var _ = Describe("Envelopeprocessor", func() {
 
 		})
 	})
+
+	Describe("GetCollectionInterval", func() {
+		When("interval is set", func() {
+			It("returns interval", func() {
+				Expect(processor.GetCollectionInterval()).To(Equal(TestCollectInterval))
+			})
+		})
+	})
 })
 
 func generateHttpStartStopEnvelope(sourceID, instance string, start, stop, timestamp int64) *loggregator_v2.Envelope {

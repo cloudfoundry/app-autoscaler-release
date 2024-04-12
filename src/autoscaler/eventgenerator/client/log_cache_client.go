@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/envelopeprocessor"
@@ -15,6 +17,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	logcache "code.cloudfoundry.org/go-log-cache/v2"
+	"code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
 	rpc "code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
 	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
 	"code.cloudfoundry.org/lager/v3"
@@ -36,6 +39,7 @@ type LogCacheClient struct {
 
 type LogCacheClientReader interface {
 	Read(ctx context.Context, sourceID string, start time.Time, opts ...logcache.ReadOption) ([]*loggregator_v2.Envelope, error)
+	PromQL(ctx context.Context, query string, opts ...logcache.PromQLOption) (*logcache_v1.PromQL_InstantQueryResult, error)
 }
 
 type GRPCOptions interface {
@@ -90,8 +94,73 @@ func NewLogCacheClient(logger lager.Logger, getTime func() time.Time, envelopePr
 
 func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
 	var metrics []models.AppInstanceMetric
-
 	var err error
+
+	if metricType == models.MetricNameThroughput {
+		collectionInterval := fmt.Sprintf("%.0f", c.envelopeProcessor.GetCollectionInterval().Seconds())
+		now := time.Now()
+
+		query := fmt.Sprintf("sum by (instance_id) (count_over_time(http{source_id='%s'}[%ss])) / %s)", appId, collectionInterval, collectionInterval)
+		result, err :=c.Client.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
+		if err != nil {
+			return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL throughput result (appId: %s, collectionInterval: %s, query: %s, time: %s): %w", appId, collectionInterval, query, now.String(), err)
+		}
+
+		// safeguard: the query ensures that we get a vector but let's double-check
+		vector := result.GetVector()
+		if vector == nil {
+			return []models.AppInstanceMetric{}, fmt.Errorf("throughput result is not a vector")
+		}
+
+		// return empty metric if there are no samples
+		if len(vector.GetSamples()) <= 0 {
+			return []models.AppInstanceMetric{
+				{
+					AppId:         appId,
+					InstanceIndex: 0,
+					Name:          models.MetricNameThroughput,
+					Unit:          models.UnitRPS,
+					Value:         "0",
+					CollectedAt:   now.UnixNano(),
+					Timestamp:     now.UnixNano(),
+				},
+			}, nil
+		}
+
+		// convert promQL result into the autoscaler metric struct
+		var metrics []models.AppInstanceMetric
+		for _, s := range vector.GetSamples() {
+			// safeguard: metric label instance_id should be always there but let's double-check
+			instanceIdStr, ok := s.GetMetric()["instance_id"]
+			if !ok {
+				return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain instance_id: %w", err)
+			}
+
+			instanceIdUInt, err := strconv.ParseUint(instanceIdStr, 10, 32)
+			if err != nil {
+				return []models.AppInstanceMetric{}, fmt.Errorf("could not convert instance_id to uint32: %w", err)
+			}
+
+			p := s.GetPoint()
+			if p == nil {
+				return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
+			}
+
+			instanceId := uint32(instanceIdUInt)
+			valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(p.GetValue()))
+
+			metrics = append(metrics, models.AppInstanceMetric{
+				AppId:         appId,
+				InstanceIndex: instanceId,
+				Name:          models.MetricNameThroughput,
+				Unit:          models.UnitRPS,
+				Value:         valueWithoutDecimalsRoundedToCeiling,
+				CollectedAt:   now.UnixNano(),
+				Timestamp:     now.UnixNano(),
+			})
+		}
+		return metrics, nil
+	}
 
 	filters := logCacheFiltersFor(endTime, metricType)
 	c.logger.Debug("GetMetrics", lager.Data{"filters": valuesFrom(filters)})
@@ -149,8 +218,6 @@ func (c *LogCacheClient) Configure() {
 		oauth2HTTPClient := c.goLogCache.NewOauth2HTTPClient(c.uaaCreds.URL, c.uaaCreds.ClientID, c.uaaCreds.ClientSecret, oauth2HTTPOpts)
 		opts = append(opts, c.goLogCache.WithHTTPClient(oauth2HTTPClient))
 	}
-
-	c.Client = c.goLogCache.NewClient(c.url, opts...)
 }
 
 func (c *LogCacheClient) GetUaaTlsConfig() *tls.Config {
