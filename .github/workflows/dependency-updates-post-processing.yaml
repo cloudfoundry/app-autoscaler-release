@@ -1,4 +1,4 @@
-name: "renovate-/ospo-bot: go mod tidy and make package-specs"
+name: "Dependency Updates Post-Processing"
 on:
   pull_request:
     branches:
@@ -22,8 +22,9 @@ on:
       - "src/**/go.sum"
   workflow_dispatch: {}
 jobs:
-  pkgs-specs_and_go-mod-tidy:
-    name: "go mod tidy && make package-specs"
+  dependency-updates-post-processing:
+    if: github.actor == 'renovate[bot]'
+    name: "Dependency Updates Post-Processing"
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
@@ -103,3 +104,5 @@ jobs:
             echo 'No files changed!'
           fi
           echo '🏁'
+      - name: Auto-approve
+        uses: hmarr/auto-approve-action@v4
