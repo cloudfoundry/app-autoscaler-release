@@ -101,7 +101,7 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 		now := time.Now()
 
 		query := fmt.Sprintf("sum by (instance_id) (count_over_time(http{source_id='%s'}[%ss])) / %s)", appId, collectionInterval, collectionInterval)
-		result, err :=c.Client.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
+		result, err := c.Client.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
 		if err != nil {
 			return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL throughput result (appId: %s, collectionInterval: %s, query: %s, time: %s): %w", appId, collectionInterval, query, now.String(), err)
 		}
@@ -127,7 +127,7 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 			}, nil
 		}
 
-		// convert promQL result into the autoscaler metric struct
+		// convert promQL result into the autoscaler metric model
 		var metrics []models.AppInstanceMetric
 		for _, s := range vector.GetSamples() {
 			// safeguard: metric label instance_id should be always there but let's double-check

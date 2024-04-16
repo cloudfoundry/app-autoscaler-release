@@ -338,8 +338,8 @@ var _ = Describe("LogCacheClient", func() {
 				})
 			})
 
-			It("should retrieve requested metrics only", func() {
-				actualMetrics, err := logCacheClient.GetMetrics(appId, models.MetricNameMemoryUsed, startTime, endTime)
+			FIt("should retrieve requested metrics only", func() {
+				actualMetrics, err := logCacheClient.GetMetrics(appId, models.MetricNameThroughput, startTime, endTime)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(len(actualMetrics)).To(Equal(1))
 				Expect(actualMetrics[0]).To(Equal(metrics[0]))
