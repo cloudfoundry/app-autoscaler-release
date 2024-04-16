@@ -75,7 +75,9 @@ var _ = Describe("CPU tests", func() {
 					expectedCPUUsage := multiplyDurationByPercentage(duration, utilisation)
 
 					// If the environment variable CI is not set to true: Give 10% tolerance - but at least 1 second, as this is the internal resolution of the CPU waster.
-					// If the environment variable CI is set to true, as is by default in GitHub Actions, give 50% tolerance. This is due to the fact that on CI workers the available CPU time is not guaranteed.
+					// If the environment variable CI is set to true, as is by default in GitHub Actions
+					// (see https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables)
+					// give 50% tolerance. This is due to the fact that on CI workers the available CPU time is not guaranteed.
 					var tolerance time.Duration
 					if ci := os.Getenv("CI"); ci == "true" {
 						tolerance = max(multiplyDurationByPercentage(expectedCPUUsage, 50), time.Second)
