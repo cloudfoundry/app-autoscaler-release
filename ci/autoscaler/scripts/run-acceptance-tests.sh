@@ -15,6 +15,7 @@ existing_space="${EXISTING_SPACE:-}"
 suites=${SUITES:-"api app broker"}
 ginkgo_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
+node_memory_limit="${APP_MEMORY:-128}"
 performance_app_count="${PERFORMANCE_APP_COUNT:-}"
 performance_app_percentage_to_scale="${PERFORMANCE_APP_PERCENTAGE_TO_SCALE:-}"
 performance_setup_workers="${PERFORMANCE_SETUP_WORKERS:-}"
@@ -55,6 +56,7 @@ cat > acceptance_config.json <<EOF
 	"default_timeout": 60,
 	"cpu_upper_threshold": ${cpu_upper_threshold},
   "name_prefix": "${name_prefix}",
+  "node_memory_limit": ${node_memory_limit},
   "autoscaler_api": "${deployment_name}.${system_domain}",
   "service_offering_enabled": ${service_offering_enabled},
 
