@@ -15,7 +15,7 @@ existing_space="${EXISTING_SPACE:-}"
 suites=${SUITES:-"api app broker"}
 ginkgo_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
-node_memory_limit="${APP_MEMORY:-128}"
+node_memory_limit="${APP_MEMORY:-64}" # debug: change this to 128
 performance_app_count="${PERFORMANCE_APP_COUNT:-}"
 performance_app_percentage_to_scale="${PERFORMANCE_APP_PERCENTAGE_TO_SCALE:-}"
 performance_setup_workers="${PERFORMANCE_SETUP_WORKERS:-}"
@@ -83,6 +83,7 @@ step "running $suites_to_run"
 #run suites
 if [ "${suites_to_run}" != "" ]; then
   # shellcheck disable=SC2086
+  echo "using CONFIG: $PWD/acceptance_config.json"
   SKIP_TEARDOWN=$skip_teardown CONFIG=$PWD/acceptance_config.json DEBUG=true ./bin/test -race -nodes="${nodes}" -trace $ginkgo_opts ${suites_to_run}
 else
   log "Nothing to run!"
