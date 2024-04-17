@@ -106,8 +106,14 @@ resources:
   type: git
   icon: github
   source:
-    uri: git@github.com:cloudfoundry/app-autoscaler-release
-    private_key: ((autoscaler_git_key))
+    uri: https://github.com/cloudfoundry/app-autoscaler-release.git
+    username: ((app-autoscaler-ci-bot-username))
+    password: ((app-autoscaler-ci-bot-password))
+    git_config:
+      - name: user.name
+        value: ((app-autoscaler-ci-bot-username))
+      - name: user.email
+        value: ((app-autoscaler-ci-bot-email))
     branch: ((branch_name))
     fetch_tags: true
     paths:
@@ -117,8 +123,14 @@ resources:
   type: git
   icon: github
   source:
-    uri: git@github.com:cloudfoundry/app-autoscaler-release
-    private_key: ((autoscaler_git_key))
+    uri: https://github.com/cloudfoundry/app-autoscaler-release.git
+    username: ((app-autoscaler-ci-bot-username))
+    password: ((app-autoscaler-ci-bot-password))
+    git_config:
+      - name: user.name
+        value: ((app-autoscaler-ci-bot-username))
+      - name: user.email
+        value: ((app-autoscaler-ci-bot-email))
     branch: ((branch_name))
     fetch_tags: true
 
