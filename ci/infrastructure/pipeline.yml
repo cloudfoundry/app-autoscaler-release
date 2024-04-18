@@ -26,7 +26,7 @@ resources:
   icon: github
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
-    private_key: ((autoscaler_git_key))
+    private_key: ((autoscaler-ci-bot-authentication-key-private))
     branch: main
     fetch_tags: true
     paths:
