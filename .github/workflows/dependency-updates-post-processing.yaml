@@ -40,7 +40,7 @@ jobs:
 
           declare -r commit_author_name="$(git log -1 --pretty=format:'%an')"
           declare -r commit_author_email="$(git log -1 --pretty=format:'%ae')"
-          declare -r commit_subject="$(git log -1 --pretty=format:'%s')"
+          declare -r commit_subject="$(git log -1 ${{ github.head_ref }} --pretty=format:'%s')"
 
           git config user.name "${commit_author_name}"
           git config user.email "${commit_author_email}"
@@ -74,7 +74,7 @@ jobs:
           # target `package-specs`. However the generation of them itself already
           # requires go-modules to be tidied up. So we need to generate the files
           # before changing `go.mod` and `go.sum`.
-          declare -r current_branch="$(git branch --show-current)"
+          declare -r current_branch="${{ github.head_ref }}"
           git checkout 'HEAD~1'
           make generate-fakes
           make generate-openapi-generated-clients-and-servers
