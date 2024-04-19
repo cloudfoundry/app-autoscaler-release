@@ -17,7 +17,7 @@ params:
   GIT_USER_EMAIL: ApplicationAutoscaler@sap.com
   UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
   GITHUB_ACCESS_TOKEN: ((autoscaler_access_token))
-  GITHUB_PRIVATE_KEY: ((autoscaler-ci-bot-authentication-key-private))
+  GITHUB_PRIVATE_KEY: ((autoscaler-deploy-key-private))
   type:
   JAVA_DIR: java-release
   GOLANG_DIR: golang-release
