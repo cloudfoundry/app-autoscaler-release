@@ -14,10 +14,10 @@ inputs:
 
 params:
   GIT_USER_NAME: app-autoscaler-ci-bot
-  GIT_USER_EMAIL: InstanceManagerCloudNotifications@sap.com
+  GIT_USER_EMAIL: ApplicationAutoscaler@sap.com
   UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
   GITHUB_ACCESS_TOKEN: ((autoscaler_access_token))
-  GITHUB_PRIVATE_KEY: ((autoscaler_git_key))
+  GITHUB_PRIVATE_KEY: ((autoscaler-ci-bot-authentication-key-private))
   type:
   JAVA_DIR: java-release
   GOLANG_DIR: golang-release

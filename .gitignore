@@ -52,6 +52,9 @@ go.work.sum
 src/acceptance/**/*.test
 src/acceptance/**/ginkgo_v2_*
 
+# ignore ssh keys that are being used during release creation to sign the commits
+keys/
+
 # Plugins that the editor needs to work well with the code within this
 # repository. Recommended, to put it under version-control for
 # easy sharing, see:

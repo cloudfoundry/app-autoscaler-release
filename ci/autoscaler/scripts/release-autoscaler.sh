@@ -1,8 +1,22 @@
 #! /usr/bin/env bash
 
 # NOTE: you can run this locally for testing !!!
-# you need a github token (GITHUB_TOKEN) and beware that it adds a commit you need to drop each time also you need to remove dev_releases from root.
-# GITHUB_TOKEN=ghp_[your token]   DEST=${PWD}/../../../build VERSION="8.0.0" BUILD_OPTS="--force" PREV_VERSION=6.0.0  ./release-autoscaler.sh
+# beware that it adds a commit you need to drop each time also you need to remove dev_releases from root.
+#
+# DEPLOYMENT=foo \
+# GITHUB_TOKEN="ghp_..." \
+# PREV_VERSION=12.2.1 \
+# DEST="${PWD}/../../../build" \
+# VERSION="12.3.0" \
+# BUILD_OPTS="--force" \
+# AUTOSCALER_CI_BOT_NAME="foo" \
+# AUTOSCALER_CI_BOT_EMAIL="foo@bar.baz" \
+# AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC="ssh-ed25519 AAAA... foo@bar.baz" \
+# AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE="-----BEGIN OPENSSH PRIVATE KEY-----
+# b3Bl...
+# -----END OPENSSH PRIVATE KEY-----" \
+# ./ci/autoscaler/scripts/release-autoscaler.sh
+
 
 [ -n "${DEBUG}" ] && set -x
 
@@ -11,9 +25,11 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
 previous_version=${PREV_VERSION:-$(cat gh-release/tag)}
-mkdir -p 'build'
+mkdir -p "build"
 build_path=$(realpath build)
 build_opts=${BUILD_OPTS:-"--final"}
+mkdir -p "keys"
+keys_path="$(realpath keys)"
 PERFORM_BOSH_RELEASE=${PERFORM_BOSH_RELEASE:-"true"}
 REPO_OUT=${REPO_OUT:-}
 export UPLOADER_KEY=${UPLOADER_KEY:-"NOT_SET"}
@@ -31,7 +47,7 @@ function create_release() {
 
    yq eval -i ".properties.\"autoscaler.apiserver.info.build\".default = \"${version}\"" jobs/golangapiserver/spec
    git add jobs/golangapiserver/spec
-   [ "${CI}" = "true" ] && git commit -m "Updated release version to ${version} in golangapiserver"
+   [ "${CI}" = "true" ] && git commit -S -m "Updated release version to ${version} in golangapiserver"
 
    # shellcheck disable=SC2086
    bosh create-release \
@@ -55,7 +71,7 @@ function commit_release(){
   pushd "${autoscaler_dir}"
   git add -A
   git status
-  git commit -m "created release v${VERSION}"
+  git commit -S -m "created release v${VERSION}"
 }
 
 function create_bosh_config(){
@@ -86,15 +102,23 @@ function generate_changelog(){
   popd
 }
 function setup_git(){
-  # FIXME these should be configurable variables
   if [[ -z $(git config --global user.email) ]]; then
-    git config --global user.email "ci@cloudfoundry.org"
+    git config --global user.email "${AUTOSCALER_CI_BOT_EMAIL}"
   fi
 
-  # FIXME these should be configurable variables
   if [[ -z $(git config --global user.name) ]]; then
-    git config --global user.name "CI Bot"
+    git config --global user.name "${AUTOSCALER_CI_BOT_NAME}"
   fi
+
+  public_key_path="${keys_path}/autoscaler-ci-bot-signing-key.pub"
+  private_key_path="${keys_path}/autoscaler-ci-bot-signing-key"
+  echo "$AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC" > "${public_key_path}"
+  echo "$AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE" > "${private_key_path}"
+  chmod 600 "${public_key_path}"
+  chmod 600 "${private_key_path}"
+
+  git config --global gpg.format ssh
+  git config --global user.signingkey "${private_key_path}"
 }
 
 

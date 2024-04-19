@@ -107,7 +107,7 @@ resources:
   icon: github
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
-    private_key: ((autoscaler_git_key))
+    private_key: ((autoscaler-ci-bot-authentication-key-private))
     branch: ((branch_name))
     fetch_tags: true
     paths:
@@ -118,7 +118,7 @@ resources:
   icon: github
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
-    private_key: ((autoscaler_git_key))
+    private_key: ((autoscaler-ci-bot-authentication-key-private))
     branch: ((branch_name))
     fetch_tags: true
 
@@ -500,6 +500,10 @@ jobs:
     params:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
       GITHUB_TOKEN: ((autoscaler_access_token))
+      AUTOSCALER_CI_BOT_NAME: app-autoscaler-ci-bot
+      AUTOSCALER_CI_BOT_EMAIL: ApplicationAutoscaler@sap.com
+      AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE: ((autoscaler-ci-bot-signing-key-private))
+      AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC: ((autoscaler-ci-bot-signing-key-public))
   - put: release-bucket
     params:
       file: "build/artifacts/app-autoscaler-v*.tgz"
