@@ -2,6 +2,7 @@ package app_test
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
@@ -63,13 +64,26 @@ var _ = Describe("CPU tests", func() {
 
 					By("wasting cpu time")
 					cpuWaster := &app.ConcurrentBusyLoopCPUWaster{}
+
 					cpuWaster.UseCPU(utilisation, duration)
+
 					Expect(cpuWaster.IsRunning()).To(Equal(true))
 					Eventually(cpuWaster.IsRunning).WithTimeout(duration + time.Second).WithPolling(time.Second).Should(Equal(false))
+
 					newCpu := getTotalCPUUsage("after test")
+
 					expectedCPUUsage := multiplyDurationByPercentage(duration, utilisation)
-					// Give 10% tolerance - but at least 1 second, as this is the internal resolution of the CPU waster
-					tolerance := max(multiplyDurationByPercentage(expectedCPUUsage, 10), time.Second)
+
+					// If the environment variable CI is not set to true: Give 10% tolerance - but at least 1 second, as this is the internal resolution of the CPU waster.
+					// If the environment variable CI is set to true, as is by default in GitHub Actions
+					// (see https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables)
+					// give 50% tolerance. This is due to the fact that on CI workers the available CPU time is not guaranteed.
+					var tolerance time.Duration
+					if ci := os.Getenv("CI"); ci == "true" {
+						tolerance = max(multiplyDurationByPercentage(expectedCPUUsage, 50), time.Second)
+					} else {
+						tolerance = max(multiplyDurationByPercentage(expectedCPUUsage, 10), time.Second)
+					}
 					Expect(newCpu - oldCpu).To(BeNumerically("~", expectedCPUUsage, tolerance))
 				},
 				Entry("25% for 10 seconds", uint64(25), time.Second*10),
