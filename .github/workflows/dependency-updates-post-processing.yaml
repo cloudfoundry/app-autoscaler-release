@@ -91,9 +91,8 @@ jobs:
             git add .
             git commit --message="${tidy_message}"
             git push
+            gh pr review --approve
           else
             echo 'No files changed!'
           fi
           echo '🏁'
-      - name: Auto-approve
-        uses: hmarr/auto-approve-action@v4
