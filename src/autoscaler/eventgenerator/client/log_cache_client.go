@@ -218,6 +218,8 @@ func (c *LogCacheClient) Configure() {
 		oauth2HTTPClient := c.goLogCache.NewOauth2HTTPClient(c.uaaCreds.URL, c.uaaCreds.ClientID, c.uaaCreds.ClientSecret, oauth2HTTPOpts)
 		opts = append(opts, c.goLogCache.WithHTTPClient(oauth2HTTPClient))
 	}
+
+	c.Client = c.goLogCache.NewClient(c.url, opts...)
 }
 
 func (c *LogCacheClient) GetUaaTlsConfig() *tls.Config {
