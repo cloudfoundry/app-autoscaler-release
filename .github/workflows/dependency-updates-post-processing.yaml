@@ -49,6 +49,8 @@ jobs:
           echo "commit_subject=${commit_subject}" >> $GITHUB_OUTPUT
       - name: go-mod-tidy and make package-specs
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
         run: |
           #! /usr/bin/env bash
           set -eu -o pipefail
