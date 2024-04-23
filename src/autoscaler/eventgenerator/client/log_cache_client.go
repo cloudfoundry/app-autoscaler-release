@@ -92,74 +92,96 @@ func NewLogCacheClient(logger lager.Logger, getTime func() time.Time, envelopePr
 	return c
 }
 
+func (c *LogCacheClient) emptyAppInstanceMetrics(appId string, name string, unit string, now time.Time) ([]models.AppInstanceMetric, error) {
+	return []models.AppInstanceMetric{
+		{
+			AppId:         appId,
+			InstanceIndex: 0,
+			Name:          name,
+			Unit:          unit,
+			Value:         "0",
+			CollectedAt:   now.UnixNano(),
+			Timestamp:     now.UnixNano(),
+		},
+	}, nil
+}
+
 func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
 	var metrics []models.AppInstanceMetric
 	var err error
 
-	if metricType == models.MetricNameThroughput {
+	if metricType == models.MetricNameThroughput || metricType == models.MetricNameResponseTime {
 		collectionInterval := fmt.Sprintf("%.0f", c.envelopeProcessor.GetCollectionInterval().Seconds())
 		now := time.Now()
 
-		query := fmt.Sprintf("sum by (instance_id) (count_over_time(http{source_id='%s'}[%ss])) / %s)", appId, collectionInterval, collectionInterval)
+		query := ""
+		metricTypeUnit := ""
+		if metricType == models.MetricNameThroughput {
+			query = fmt.Sprintf("sum by (instance_id) (count_over_time(http{source_id='%s'}[%ss])) / %s", appId, collectionInterval, collectionInterval)
+			metricTypeUnit = models.UnitRPS
+		}
+
+		if metricType == models.MetricNameResponseTime {
+			query = fmt.Sprintf("avg by (instance_id) (max_over_time(http{source_id='%s'}[%ss])) / (1000 * 1000)", appId, collectionInterval)
+			metricTypeUnit = models.UnitMilliseconds
+		}
+
+		c.logger.Info("get-metrics-prom-ql", lager.Data{"query": query})
 		result, err := c.Client.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
 		if err != nil {
-			return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL throughput result (appId: %s, collectionInterval: %s, query: %s, time: %s): %w", appId, collectionInterval, query, now.String(), err)
+			return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL result (metricType: %s, appId: %s, collectionInterval: %s, query: %s, time: %s): %w", metricType, appId, collectionInterval, query, now.String(), err)
 		}
 
 		// safeguard: the query ensures that we get a vector but let's double-check
 		vector := result.GetVector()
 		if vector == nil {
-			return []models.AppInstanceMetric{}, fmt.Errorf("throughput result is not a vector")
+			return []models.AppInstanceMetric{}, fmt.Errorf("result does not contain a vector")
 		}
 
-		// return empty metric if there are no samples
+		// safeguard: the query ensures that we get a sample but let's double-check
+		if len(vector.GetSamples()) > 1 {
+			return []models.AppInstanceMetric{}, fmt.Errorf("vector contains more than one sample")
+		}
+
+		// return empty metrics if there are no samples
 		if len(vector.GetSamples()) <= 0 {
-			return []models.AppInstanceMetric{
-				{
-					AppId:         appId,
-					InstanceIndex: 0,
-					Name:          models.MetricNameThroughput,
-					Unit:          models.UnitRPS,
-					Value:         "0",
-					CollectedAt:   now.UnixNano(),
-					Timestamp:     now.UnixNano(),
-				},
-			}, nil
+			return c.emptyAppInstanceMetrics(appId, models.MetricNameThroughput, models.UnitRPS, now)
 		}
 
-		// convert promQL result into the autoscaler metric model
-		var metrics []models.AppInstanceMetric
-		for _, s := range vector.GetSamples() {
-			// safeguard: metric label instance_id should be always there but let's double-check
-			instanceIdStr, ok := s.GetMetric()["instance_id"]
-			if !ok {
-				return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain instance_id: %w", err)
-			}
+		sample := vector.GetSamples()[0]
 
-			instanceIdUInt, err := strconv.ParseUint(instanceIdStr, 10, 32)
-			if err != nil {
-				return []models.AppInstanceMetric{}, fmt.Errorf("could not convert instance_id to uint32: %w", err)
-			}
+		// safeguard: metric label instance_id should be always there but let's double-check
+		instanceIdStr, ok := sample.GetMetric()["instance_id"]
+		if !ok {
+			return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain instance_id: %w", err)
+		}
 
-			p := s.GetPoint()
-			if p == nil {
-				return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
-			}
+		// convert result into autoscaler metric model
+		instanceIdUInt, err := strconv.ParseUint(instanceIdStr, 10, 32)
+		if err != nil {
+			return []models.AppInstanceMetric{}, fmt.Errorf("could not convert instance_id to uint32: %w", err)
+		}
 
-			instanceId := uint32(instanceIdUInt)
-			valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(p.GetValue()))
+		// safeguard: the query ensures that we get a point
+		p := sample.GetPoint()
+		if p == nil {
+			return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
+		}
 
-			metrics = append(metrics, models.AppInstanceMetric{
+		instanceId := uint32(instanceIdUInt)
+		valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(p.GetValue()))
+
+		return []models.AppInstanceMetric{
+			{
 				AppId:         appId,
 				InstanceIndex: instanceId,
-				Name:          models.MetricNameThroughput,
-				Unit:          models.UnitRPS,
+				Name:          metricType,
+				Unit:          metricTypeUnit,
 				Value:         valueWithoutDecimalsRoundedToCeiling,
 				CollectedAt:   now.UnixNano(),
 				Timestamp:     now.UnixNano(),
-			})
-		}
-		return metrics, nil
+			},
+		}, nil
 	}
 
 	filters := logCacheFiltersFor(endTime, metricType)
@@ -245,6 +267,7 @@ func filter(metrics []models.AppInstanceMetric, metricType string) []models.AppI
 
 	return result
 }
+
 func logCacheFiltersFor(endTime time.Time, metricType string) (readOptions []logcache.ReadOption) {
 	logMetricType := getEnvelopeType(metricType)
 	readOptions = append(readOptions, logcache.WithEndTime(endTime))
