@@ -138,43 +138,35 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 			return []models.AppInstanceMetric{}, fmt.Errorf("result does not contain a vector")
 		}
 
-		// safeguard: the query ensures that we get a sample but let's double-check
-		if len(vector.GetSamples()) > 1 {
-			return []models.AppInstanceMetric{}, fmt.Errorf("vector contains more than one sample")
-		}
-
 		// return empty metrics if there are no samples
 		if len(vector.GetSamples()) <= 0 {
 			return c.emptyAppInstanceMetrics(appId, models.MetricNameThroughput, models.UnitRPS, now)
 		}
 
-		sample := vector.GetSamples()[0]
-
-		// safeguard: metric label instance_id should be always there but let's double-check
-		instanceIdStr, ok := sample.GetMetric()["instance_id"]
-		if !ok {
-			return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain instance_id: %w", err)
-		}
-
 		// convert result into autoscaler metric model
-		instanceIdUInt, err := strconv.ParseUint(instanceIdStr, 10, 32)
-		if err != nil {
-			return []models.AppInstanceMetric{}, fmt.Errorf("could not convert instance_id to uint32: %w", err)
-		}
+		var metrics []models.AppInstanceMetric
+		for _, sample := range vector.GetSamples() {
+			// safeguard: metric label instance_id should be always there but let's double-check
+			instanceIdStr, ok := sample.GetMetric()["instance_id"]
+			if !ok {
+				return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain instance_id: %w", err)
+			}
 
-		// safeguard: the query ensures that we get a point
-		point := sample.GetPoint()
-		if point == nil {
-			return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
-		}
+			instanceIdUInt, err := strconv.ParseUint(instanceIdStr, 10, 32)
+			if err != nil {
+				return []models.AppInstanceMetric{}, fmt.Errorf("could not convert instance_id to uint32: %w", err)
+			}
 
-		c.logger.Info("get-metrics-promql-result", lager.Data{"value": fmt.Sprintf("%f", point.GetValue())})
+			// safeguard: the query ensures that we get a point but let's double-check
+			point := sample.GetPoint()
+			if point == nil {
+				return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
+			}
 
-		instanceId := uint32(instanceIdUInt)
-		valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(point.GetValue()))
+			instanceId := uint32(instanceIdUInt)
+			valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(point.GetValue()))
 
-		return []models.AppInstanceMetric{
-			{
+			metrics = append(metrics, models.AppInstanceMetric{
 				AppId:         appId,
 				InstanceIndex: instanceId,
 				Name:          metricType,
@@ -182,8 +174,9 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 				Value:         valueWithoutDecimalsRoundedToCeiling,
 				CollectedAt:   now.UnixNano(),
 				Timestamp:     now.UnixNano(),
-			},
-		}, nil
+			})
+		}
+		return metrics, nil
 	}
 
 	filters := logCacheFiltersFor(endTime, metricType)

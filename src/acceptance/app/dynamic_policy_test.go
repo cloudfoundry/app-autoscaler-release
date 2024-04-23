@@ -109,6 +109,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 1
 			})
 
+			// todo: break this test so that it fails when reading only 100 envelopes form log-cache via rest-api
 			JustBeforeEach(func() {
 				ticker = time.NewTicker(10 * time.Second)
 				go func(chan bool) {

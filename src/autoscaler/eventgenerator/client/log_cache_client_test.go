@@ -71,7 +71,6 @@ var _ = Describe("LogCacheClient", func() {
 
 	JustBeforeEach(func() {
 		fakeGoLogCacheReader.ReadReturns(envelopes, logCacheClientReadError)
-		fakeEnvelopeProcessor.GetTimerMetricsReturns(metrics)
 		fakeEnvelopeProcessor.GetGaugeMetricsReturnsOnCall(0, metrics, nil)
 		fakeEnvelopeProcessor.GetGaugeMetricsReturnsOnCall(1, nil, errors.New("some error"))
 
@@ -248,6 +247,14 @@ var _ = Describe("LogCacheClient", func() {
 										Value: 123,
 									},
 								},
+								{
+									Metric: map[string]string{
+										"instance_id": "1",
+									},
+									Point: &logcache_v1.PromQL_Point{
+										Value: 321,
+									},
+								},
 							},
 						},
 					},
@@ -256,14 +263,19 @@ var _ = Describe("LogCacheClient", func() {
 				metrics, err := logCacheClient.GetMetrics("app-id", "throughput", startTime, endTime)
 
 				Expect(err).To(Not(HaveOccurred()))
-				Expect(metrics).To(HaveLen(1))
+				Expect(metrics).To(HaveLen(2))
 
-				metric := metrics[0]
-				Expect(metric.AppId).To(Equal("app-id"))
-				Expect(metric.InstanceIndex).To(Equal(uint32(0)))
-				Expect(metric.Name).To(Equal("throughput"))
-				Expect(metric.Unit).To(Equal("rps"))
-				Expect(metric.Value).To(Equal("123"))
+				Expect(metrics[0].AppId).To(Equal("app-id"))
+				Expect(metrics[0].InstanceIndex).To(Equal(uint32(0)))
+				Expect(metrics[0].Name).To(Equal("throughput"))
+				Expect(metrics[0].Unit).To(Equal("rps"))
+				Expect(metrics[0].Value).To(Equal("123"))
+
+				Expect(metrics[1].AppId).To(Equal("app-id"))
+				Expect(metrics[1].InstanceIndex).To(Equal(uint32(1)))
+				Expect(metrics[1].Name).To(Equal("throughput"))
+				Expect(metrics[1].Unit).To(Equal("rps"))
+				Expect(metrics[1].Value).To(Equal("321"))
 			})
 		})
 
@@ -293,8 +305,6 @@ var _ = Describe("LogCacheClient", func() {
 
 				// after starTime and envelopeType we filter the metric names
 				Expect(valuesFrom(readOptions[2])["name_filter"][0]).To(Equal(requiredFilters[2]))
-
-				Expect(fakeEnvelopeProcessor.GetTimerMetricsCallCount()).To(Equal(0))
 
 				By("Sends the right arguments to the gauge processor")
 				actualEnvelopes, actualCurrentTimestamp := fakeEnvelopeProcessor.GetGaugeMetricsArgsForCall(0)
