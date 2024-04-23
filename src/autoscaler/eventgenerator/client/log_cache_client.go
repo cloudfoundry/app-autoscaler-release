@@ -126,7 +126,7 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 			metricTypeUnit = models.UnitMilliseconds
 		}
 
-		c.logger.Info("get-metrics-prom-ql", lager.Data{"query": query})
+		c.logger.Info("get-metrics-promql-query", lager.Data{"query": query, "appId": appId, "metricType": metricType})
 		result, err := c.Client.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
 		if err != nil {
 			return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL result (metricType: %s, appId: %s, collectionInterval: %s, query: %s, time: %s): %w", metricType, appId, collectionInterval, query, now.String(), err)
@@ -163,13 +163,15 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 		}
 
 		// safeguard: the query ensures that we get a point
-		p := sample.GetPoint()
-		if p == nil {
+		point := sample.GetPoint()
+		if point == nil {
 			return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
 		}
 
+		c.logger.Info("get-metrics-promql-result", lager.Data{"value": fmt.Sprintf("%f", point.GetValue())})
+
 		instanceId := uint32(instanceIdUInt)
-		valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(p.GetValue()))
+		valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(point.GetValue()))
 
 		return []models.AppInstanceMetric{
 			{
