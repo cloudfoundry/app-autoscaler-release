@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
 	gogrpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -233,6 +234,39 @@ var _ = Describe("LogCacheClient", func() {
 			})
 		})
 
+		When("reading throughput metrics", func() {
+			FIt("should work", func() {
+				fakeGoLogCacheReader.PromQLReturns(&logcache_v1.PromQL_InstantQueryResult{
+					Result: &logcache_v1.PromQL_InstantQueryResult_Vector{
+						Vector: &logcache_v1.PromQL_Vector{
+							Samples: []*logcache_v1.PromQL_Sample{
+								{
+									Metric: map[string]string{
+										"instance_id": "0",
+									},
+									Point: &logcache_v1.PromQL_Point{
+										Value: 123,
+									},
+								},
+							},
+						},
+					},
+				}, nil)
+
+				metrics, err := logCacheClient.GetMetrics("app-id", "throughput", startTime, endTime)
+
+				Expect(err).To(Not(HaveOccurred()))
+				Expect(metrics).To(HaveLen(1))
+
+				metric := metrics[0]
+				Expect(metric.AppId).To(Equal("app-id"))
+				Expect(metric.InstanceIndex).To(Equal(uint32(0)))
+				Expect(metric.Name).To(Equal("throughput"))
+				Expect(metric.Unit).To(Equal("rps"))
+				Expect(metric.Value).To(Equal("123"))
+			})
+		})
+
 		DescribeTable("GetMetrics for startStop Metrics",
 			func(metricType string, requiredFilters []string) {
 				metrics = []models.AppInstanceMetric{
@@ -338,7 +372,7 @@ var _ = Describe("LogCacheClient", func() {
 				})
 			})
 
-			FIt("should retrieve requested metrics only", func() {
+			It("should retrieve requested metrics only", func() {
 				actualMetrics, err := logCacheClient.GetMetrics(appId, models.MetricNameThroughput, startTime, endTime)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(len(actualMetrics)).To(Equal(1))
