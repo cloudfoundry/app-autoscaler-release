@@ -20,7 +20,6 @@ type EnvelopeProcessorCreator interface {
 
 type EnvelopeProcessor interface {
 	GetGaugeMetrics(envelopes []*loggregator_v2.Envelope, currentTimeStamp int64) ([]models.AppInstanceMetric, error)
-	GetTimerMetrics(envelopes []*loggregator_v2.Envelope, appID string, currentTimestamp int64) []models.AppInstanceMetric
 	GetCollectionInterval() time.Duration
 }
 
@@ -43,11 +42,6 @@ func (p Processor) GetGaugeMetrics(envelopes []*loggregator_v2.Envelope, current
 	compactedEnvelopes := p.CompactEnvelopes(envelopes)
 	p.logger.Debug("Compacted envelopes", lager.Data{"compactedEnvelopes": compactedEnvelopes})
 	return GetGaugeInstanceMetrics(compactedEnvelopes, currentTimeStamp)
-}
-func (p Processor) GetTimerMetrics(envelopes []*loggregator_v2.Envelope, appID string, currentTimestamp int64) []models.AppInstanceMetric {
-	p.logger.Debug("GetTimerMetrics")
-	p.logger.Debug("Compacted envelopes", lager.Data{"Envelopes": envelopes})
-	return GetHttpStartStopInstanceMetrics(envelopes, appID, currentTimestamp, p.collectionInterval)
 }
 
 func (p Processor) GetCollectionInterval() time.Duration {

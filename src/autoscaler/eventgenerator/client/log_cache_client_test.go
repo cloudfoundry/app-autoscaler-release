@@ -235,7 +235,7 @@ var _ = Describe("LogCacheClient", func() {
 		})
 
 		When("reading throughput metrics", func() {
-			FIt("should work", func() {
+			It("should work", func() {
 				fakeGoLogCacheReader.PromQLReturns(&logcache_v1.PromQL_InstantQueryResult{
 					Result: &logcache_v1.PromQL_InstantQueryResult_Vector{
 						Vector: &logcache_v1.PromQL_Vector{
@@ -266,46 +266,6 @@ var _ = Describe("LogCacheClient", func() {
 				Expect(metric.Value).To(Equal("123"))
 			})
 		})
-
-		DescribeTable("GetMetrics for startStop Metrics",
-			func(metricType string, requiredFilters []string) {
-				metrics = []models.AppInstanceMetric{
-					{
-						AppId: "some-id",
-						Name:  metricType,
-					},
-				}
-				fakeEnvelopeProcessor.GetTimerMetricsReturnsOnCall(0, metrics)
-				actualMetrics, err := logCacheClient.GetMetrics(appId, metricType, startTime, endTime)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(actualMetrics).To(Equal(metrics))
-
-				Expect(err).NotTo(HaveOccurred())
-				Expect(fakeGoLogCacheReader.ReadCallCount()).To(Equal(1))
-
-				By("Sends the right arguments to log-cache-client")
-				actualContext, actualAppId, actualStartTime, readOptions := fakeGoLogCacheReader.ReadArgsForCall(0)
-
-				Expect(actualContext).To(Equal(context.Background()))
-				Expect(actualAppId).To(Equal(appId))
-				Expect(actualStartTime).To(Equal(startTime))
-				values := url.Values{}
-				readOptions[0](nil, values)
-				Expect(valuesFrom(readOptions[0])["end_time"][0]).To(Equal(strconv.FormatInt(int64(endTime.UnixNano()), 10)))
-				Expect(valuesFrom(readOptions[1])["envelope_types"][0]).To(Equal("TIMER"))
-				Expect(len(readOptions)).To(Equal(3), "filters by envelope type and metric names based on the requested metric type sent to GetMetrics")
-				Expect(valuesFrom(readOptions[2])["name_filter"][0]).To(Equal(requiredFilters[2]))
-
-				By("Sends the right arguments to the timer processor")
-				Expect(fakeEnvelopeProcessor.GetTimerMetricsCallCount()).To(Equal(1), "Should call GetHttpStartStopInstanceMetricsCallCount once")
-				actualEnvelopes, actualAppId, actualCurrentTimestamp := fakeEnvelopeProcessor.GetTimerMetricsArgsForCall(0)
-				Expect(actualEnvelopes).To(Equal(envelopes))
-				Expect(actualAppId).To(Equal(appId))
-				Expect(actualCurrentTimestamp).To(Equal(collectedAt.UnixNano()))
-			},
-			Entry("When metric type is throughput", models.MetricNameThroughput, []string{"endtime", "envelope_type", "http"}),
-			Entry("When metric type is responsetime", models.MetricNameResponseTime, []string{"endtime", "envelope_type", "http"}),
-		)
 
 		DescribeTable("GetMetrics for Gauge Metrics",
 			func(autoscalerMetricType string, requiredFilters []string) {
@@ -373,7 +333,7 @@ var _ = Describe("LogCacheClient", func() {
 			})
 
 			It("should retrieve requested metrics only", func() {
-				actualMetrics, err := logCacheClient.GetMetrics(appId, models.MetricNameThroughput, startTime, endTime)
+				actualMetrics, err := logCacheClient.GetMetrics(appId, models.MetricNameMemoryUsed, startTime, endTime)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(len(actualMetrics)).To(Equal(1))
 				Expect(actualMetrics[0]).To(Equal(metrics[0]))

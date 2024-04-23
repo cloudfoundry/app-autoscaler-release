@@ -188,7 +188,7 @@ func (pv *PolicyValidator) validateScalingRuleThreshold(policy *models.ScalingPo
 		}
 
 		switch scalingRule.MetricType {
-		case "memoryused": // TODO: make use of models constants e.g. models.MetricNameMemoryUsed
+		case "memoryused":
 			if scalingRule.Threshold < 0 {
 				formatString := shouldBeGreaterThanOrEqual("memoryused", 1)
 				err := newPolicyValidationError(currentContext, formatString, errDetails)

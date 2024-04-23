@@ -191,16 +191,13 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 	envelopes, err := c.Client.Read(context.Background(), appId, startTime, filters...)
 
 	if err != nil {
-		return metrics, fmt.Errorf("fail to Read %s metric from %s GoLogCache client: %w", getEnvelopeType(metricType), appId, err)
+		return metrics, fmt.Errorf("fail to Read %s metric from %s GoLogCache client: %w", rpc.EnvelopeType_GAUGE, appId, err)
 	}
 
 	collectedAt := c.now().UnixNano()
-	if getEnvelopeType(metricType) == rpc.EnvelopeType_TIMER {
-		metrics = c.envelopeProcessor.GetTimerMetrics(envelopes, appId, collectedAt)
-	} else {
-		c.logger.Debug("envelopes received from log-cache", lager.Data{"envelopes": envelopes})
-		metrics, err = c.envelopeProcessor.GetGaugeMetrics(envelopes, collectedAt)
-	}
+	c.logger.Debug("envelopes received from log-cache", lager.Data{"envelopes": envelopes})
+	metrics, err = c.envelopeProcessor.GetGaugeMetrics(envelopes, collectedAt)
+
 	return filter(metrics, metricType), err
 }
 
@@ -271,9 +268,8 @@ func filter(metrics []models.AppInstanceMetric, metricType string) []models.AppI
 }
 
 func logCacheFiltersFor(endTime time.Time, metricType string) (readOptions []logcache.ReadOption) {
-	logMetricType := getEnvelopeType(metricType)
 	readOptions = append(readOptions, logcache.WithEndTime(endTime))
-	readOptions = append(readOptions, logcache.WithEnvelopeTypes(logMetricType))
+	readOptions = append(readOptions, logcache.WithEnvelopeTypes(rpc.EnvelopeType_GAUGE))
 
 	switch metricType {
 	case models.MetricNameMemoryUtil:
@@ -288,24 +284,11 @@ func logCacheFiltersFor(endTime time.Time, metricType string) (readOptions []log
 		readOptions = append(readOptions, logcache.WithNameFilter("disk"))
 	case models.MetricNameDiskUtil:
 		readOptions = append(readOptions, logcache.WithNameFilter("disk|disk_quota"))
-	case models.MetricNameResponseTime, models.MetricNameThroughput:
-		readOptions = append(readOptions, logcache.WithNameFilter("http"))
 	default:
 		readOptions = append(readOptions, logcache.WithNameFilter(metricType))
 	}
 
 	return readOptions
-}
-
-func getEnvelopeType(metricType string) rpc.EnvelopeType {
-	var metricName rpc.EnvelopeType
-	switch metricType {
-	case models.MetricNameThroughput, models.MetricNameResponseTime:
-		metricName = rpc.EnvelopeType_TIMER
-	default:
-		metricName = rpc.EnvelopeType_GAUGE
-	}
-	return metricName
 }
 
 func (c *LogCacheClient) getUaaHttpClient() logcache.HTTPClient {
