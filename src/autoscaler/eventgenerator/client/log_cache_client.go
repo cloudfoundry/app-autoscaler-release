@@ -140,7 +140,7 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 
 		// return empty metrics if there are no samples, this usually happens in case there were no recent http-requests towards the application
 		if len(vector.GetSamples()) <= 0 {
-			return c.emptyAppInstanceMetrics(appId, models.MetricNameThroughput, models.UnitRPS, now)
+			return c.emptyAppInstanceMetrics(appId, metricType, metricTypeUnit, now)
 		}
 
 		// convert result into autoscaler metric model

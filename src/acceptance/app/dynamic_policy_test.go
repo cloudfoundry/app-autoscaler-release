@@ -217,12 +217,13 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(1, 2, "throughput", 100)
+				policy = GenerateDynamicScaleInPolicy(1, 2, "throughput", 30)
 				initialInstanceCount = 2
 			})
 
 			JustBeforeEach(func() {
-				ticker = time.NewTicker(10 * time.Second)
+				// simulate ongoing ~1 requests per second
+				ticker = time.NewTicker(1 * time.Second)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -241,7 +242,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 			})
 		})
-
 	})
 
 	// To check existing aggregated cpu metrics do: cf asm APP_NAME cpu
