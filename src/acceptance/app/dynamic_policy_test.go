@@ -4,6 +4,7 @@ import (
 	"acceptance"
 	. "acceptance/helpers"
 	"fmt"
+	"sync"
 	"time"
 
 	cfh "github.com/cloudfoundry/cf-test-helpers/v2/helpers"
@@ -19,6 +20,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		doneAcceptChan chan bool
 		ticker         *time.Ticker
 		maxHeapLimitMb int
+		wg             sync.WaitGroup
 	)
 
 	const minimalMemoryUsage = 28 // observed minimal memory usage by the test app
@@ -30,6 +32,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Expect(err).NotTo(HaveOccurred())
 		StartApp(appName, cfg.CfPushTimeoutDuration())
 		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
+
+		wg = sync.WaitGroup{}
 	})
 	BeforeEach(func() {
 		maxHeapLimitMb = cfg.NodeMemoryLimit - minimalMemoryUsage
@@ -109,7 +113,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				initialInstanceCount = 1
 			})
 
-			// todo: break this test so that it fails when reading only 100 envelopes form log-cache via rest-api
 			JustBeforeEach(func() {
 				ticker = time.NewTicker(10 * time.Second)
 				go func(chan bool) {
@@ -164,7 +167,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	})
 
 	Context("when scaling by throughput", func() {
-
 		JustBeforeEach(func() {
 			doneChan = make(chan bool)
 			doneAcceptChan = make(chan bool)
@@ -185,6 +187,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			JustBeforeEach(func() {
 				// simulate ongoing ~100 requests per second
 				ticker = time.NewTicker(10 * time.Millisecond)
+				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -194,22 +197,24 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
+							wg.Add(1)
 							go func() {
-								cfh.CurlApp(cfg, appName, "/responsetime/fast", "-f")
+								defer wg.Done()
+								cfh.Curl(cfg, appUri)
 							}()
 						}
 					}
 				}(doneChan)
 			})
 
-			FIt("should scale out", func() {
+			It("should scale out", func() {
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
 
 			AfterEach(func() {
 				// ginkgo requires all go-routines to be finished before reporting the result.
-				// give the curl-command executing go-routines some time to return.
-				time.Sleep(10 * time.Second)
+				// let's wait for all curl executing go-routines to return.
+				wg.Wait()
 			})
 
 		})
@@ -222,8 +227,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				// simulate ongoing ~1 requests per second
-				ticker = time.NewTicker(1 * time.Second)
+				// simulate ongoing ~20 requests per second
+				ticker = time.NewTicker(50 * time.Millisecond)
+				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -233,13 +239,24 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							cfh.CurlApp(cfg, appName, "/responsetime/fast", "-f")
+							wg.Add(1)
+							go func() {
+								defer wg.Done()
+								cfh.Curl(cfg, appUri)
+							}()
 						}
 					}
 				}(doneChan)
 			})
-			It("should scale in", func() {
+
+			FIt("should scale in", func() {
 				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+			})
+
+			AfterEach(func() {
+				// ginkgo requires all go-routines to be finished before reporting the result.
+				// let's wait for all curl executing go-routines to return.
+				wg.Wait()
 			})
 		})
 	})
