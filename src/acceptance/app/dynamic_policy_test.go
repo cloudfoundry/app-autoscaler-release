@@ -194,7 +194,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							cfh.CurlApp(cfg, appName, "/responsetime/fast", "-f")
+							go func() {
+								cfh.CurlApp(cfg, appName, "/responsetime/fast", "-f")
+							}()
 						}
 					}
 				}(doneChan)
