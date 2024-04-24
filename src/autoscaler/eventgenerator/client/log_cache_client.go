@@ -192,14 +192,18 @@ func (c *LogCacheClient) getMetricsRestAPI(appId string, metricType string, star
 }
 
 func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
+	c.logger.Debug("GetMetrics")
+
 	// the log-cache REST API only return max. 1000 envelopes: https://github.com/cloudfoundry/log-cache-release/tree/main/src#get-apiv1readsource-id.
 	// receiving a limited set of envelopes breaks throughput and responsetime, because all envelopes are required to calculate these metric types properly.
 	// pagination via `start_time` and `end_time` could be done but is very error-prone.
 	// using the PromQL API also has an advantage over REST API because it shifts the metric aggregations to log-cache.
 	if metricType == models.MetricNameThroughput || metricType == models.MetricNameResponseTime {
+		c.logger.Debug("get-metrics-via-promql-api")
 		return c.getMetricsPromQLAPI(appId, metricType, startTime, endTime)
 	}
 
+	c.logger.Debug("get-metrics-via-rest-api")
 	return c.getMetricsRestAPI(appId, metricType, startTime, endTime)
 }
 
