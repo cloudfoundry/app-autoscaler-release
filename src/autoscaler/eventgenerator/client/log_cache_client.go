@@ -121,12 +121,12 @@ func (c *LogCacheClient) getMetricsPromQLAPI(appId string, metricType string, st
 		metricTypeUnit = models.UnitMilliseconds
 	}
 
-	c.logger.Info("query-promql", lager.Data{"query": query, "appId": appId, "metricType": metricType})
+	c.logger.Info("query-promql-api", lager.Data{"query": query, "appId": appId, "metricType": metricType})
 	result, err := c.Client.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
 	if err != nil {
 		return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL result (metricType: %s, appId: %s, collectionInterval: %s, query: %s, time: %s): %w", metricType, appId, collectionInterval, query, now.String(), err)
 	}
-	c.logger.Info("received-promql-result", lager.Data{"result": result})
+	c.logger.Info("received-promql-api-result", lager.Data{"result": result})
 
 	// safeguard: the query ensures that we get a vector but let's double-check
 	vector := result.GetVector()
@@ -199,11 +199,11 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 	// pagination via `start_time` and `end_time` could be done but is very error-prone.
 	// using the PromQL API also has an advantage over REST API because it shifts the metric aggregations to log-cache.
 	if metricType == models.MetricNameThroughput || metricType == models.MetricNameResponseTime {
-		c.logger.Debug("get-metrics-via-promql-api")
+		c.logger.Debug("get-metrics-via-promql-api", lager.Data{"metricType": metricType})
 		return c.getMetricsPromQLAPI(appId, metricType, startTime, endTime)
 	}
 
-	c.logger.Debug("get-metrics-via-rest-api")
+	c.logger.Debug("get-metrics-via-rest-api", lager.Data{"metricType": metricType})
 	return c.getMetricsRestAPI(appId, metricType, startTime, endTime)
 }
 
