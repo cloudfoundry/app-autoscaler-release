@@ -105,92 +105,102 @@ func (c *LogCacheClient) emptyAppInstanceMetrics(appId string, name string, unit
 	}, nil
 }
 
-func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
-	var metrics []models.AppInstanceMetric
-	var err error
+func (c *LogCacheClient) getMetricsPromQLAPI(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
+	collectionInterval := fmt.Sprintf("%.0f", c.envelopeProcessor.GetCollectionInterval().Seconds())
+	now := time.Now()
 
-	if metricType == models.MetricNameThroughput || metricType == models.MetricNameResponseTime {
-		collectionInterval := fmt.Sprintf("%.0f", c.envelopeProcessor.GetCollectionInterval().Seconds())
-		now := time.Now()
-
-		query := ""
-		metricTypeUnit := ""
-		if metricType == models.MetricNameThroughput {
-			query = fmt.Sprintf("sum by (instance_id) (count_over_time(http{source_id='%s'}[%ss])) / %s", appId, collectionInterval, collectionInterval)
-			metricTypeUnit = models.UnitRPS
-		}
-
-		if metricType == models.MetricNameResponseTime {
-			query = fmt.Sprintf("avg by (instance_id) (max_over_time(http{source_id='%s'}[%ss])) / (1000 * 1000)", appId, collectionInterval)
-			metricTypeUnit = models.UnitMilliseconds
-		}
-
-		c.logger.Info("get-metrics-promql-query", lager.Data{"query": query, "appId": appId, "metricType": metricType})
-		result, err := c.Client.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
-		if err != nil {
-			return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL result (metricType: %s, appId: %s, collectionInterval: %s, query: %s, time: %s): %w", metricType, appId, collectionInterval, query, now.String(), err)
-		}
-
-		// safeguard: the query ensures that we get a vector but let's double-check
-		vector := result.GetVector()
-		if vector == nil {
-			return []models.AppInstanceMetric{}, fmt.Errorf("result does not contain a vector")
-		}
-
-		// return empty metrics if there are no samples, this usually happens in case there were no recent http-requests towards the application
-		if len(vector.GetSamples()) <= 0 {
-			return c.emptyAppInstanceMetrics(appId, metricType, metricTypeUnit, now)
-		}
-
-		// convert result into autoscaler metric model
-		var metrics []models.AppInstanceMetric
-		for _, sample := range vector.GetSamples() {
-			// safeguard: metric label instance_id should be always there but let's double-check
-			instanceIdStr, ok := sample.GetMetric()["instance_id"]
-			if !ok {
-				return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain instance_id: %w", err)
-			}
-
-			instanceIdUInt, err := strconv.ParseUint(instanceIdStr, 10, 32)
-			if err != nil {
-				return []models.AppInstanceMetric{}, fmt.Errorf("could not convert instance_id to uint32: %w", err)
-			}
-
-			// safeguard: the query ensures that we get a point but let's double-check
-			point := sample.GetPoint()
-			if point == nil {
-				return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
-			}
-
-			instanceId := uint32(instanceIdUInt)
-			valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(point.GetValue()))
-
-			metrics = append(metrics, models.AppInstanceMetric{
-				AppId:         appId,
-				InstanceIndex: instanceId,
-				Name:          metricType,
-				Unit:          metricTypeUnit,
-				Value:         valueWithoutDecimalsRoundedToCeiling,
-				CollectedAt:   now.UnixNano(),
-				Timestamp:     now.UnixNano(),
-			})
-		}
-		return metrics, nil
+	query := ""
+	metricTypeUnit := ""
+	if metricType == models.MetricNameThroughput {
+		query = fmt.Sprintf("sum by (instance_id) (count_over_time(http{source_id='%s'}[%ss])) / %s", appId, collectionInterval, collectionInterval)
+		metricTypeUnit = models.UnitRPS
 	}
 
-	filters := logCacheFiltersFor(endTime, metricType)
-	c.logger.Debug("GetMetrics", lager.Data{"filters": valuesFrom(filters)})
-	envelopes, err := c.Client.Read(context.Background(), appId, startTime, filters...)
+	if metricType == models.MetricNameResponseTime {
+		query = fmt.Sprintf("avg by (instance_id) (max_over_time(http{source_id='%s'}[%ss])) / (1000 * 1000)", appId, collectionInterval)
+		metricTypeUnit = models.UnitMilliseconds
+	}
 
+	c.logger.Info("query-promql", lager.Data{"query": query, "appId": appId, "metricType": metricType})
+	result, err := c.Client.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
 	if err != nil {
-		return metrics, fmt.Errorf("fail to Read %s metric from %s GoLogCache client: %w", logcache_v1.EnvelopeType_GAUGE, appId, err)
+		return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL result (metricType: %s, appId: %s, collectionInterval: %s, query: %s, time: %s): %w", metricType, appId, collectionInterval, query, now.String(), err)
 	}
+	c.logger.Info("received-promql-result", lager.Data{"result": result})
+
+	// safeguard: the query ensures that we get a vector but let's double-check
+	vector := result.GetVector()
+	if vector == nil {
+		return []models.AppInstanceMetric{}, fmt.Errorf("result does not contain a vector")
+	}
+
+	// return empty metrics if there are no samples, this usually happens in case there were no recent http-requests towards the application
+	if len(vector.GetSamples()) <= 0 {
+		return c.emptyAppInstanceMetrics(appId, metricType, metricTypeUnit, now)
+	}
+
+	// convert result into autoscaler metric model
+	var metrics []models.AppInstanceMetric
+	for _, sample := range vector.GetSamples() {
+		// safeguard: metric label instance_id should be always there but let's double-check
+		instanceIdStr, ok := sample.GetMetric()["instance_id"]
+		if !ok {
+			return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain instance_id: %w", err)
+		}
+
+		instanceIdUInt, err := strconv.ParseUint(instanceIdStr, 10, 32)
+		if err != nil {
+			return []models.AppInstanceMetric{}, fmt.Errorf("could not convert instance_id to uint32: %w", err)
+		}
+
+		// safeguard: the query ensures that we get a point but let's double-check
+		point := sample.GetPoint()
+		if point == nil {
+			return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
+		}
+
+		instanceId := uint32(instanceIdUInt)
+		valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(point.GetValue()))
+
+		metrics = append(metrics, models.AppInstanceMetric{
+			AppId:         appId,
+			InstanceIndex: instanceId,
+			Name:          metricType,
+			Unit:          metricTypeUnit,
+			Value:         valueWithoutDecimalsRoundedToCeiling,
+			CollectedAt:   now.UnixNano(),
+			Timestamp:     now.UnixNano(),
+		})
+	}
+	return metrics, nil
+}
+
+func (c *LogCacheClient) getMetricsRestAPI(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
+	filters := logCacheFiltersFor(endTime, metricType)
+	c.logger.Info("query-rest-api-with-filters", lager.Data{"filters": valuesFrom(filters)})
+
+	envelopes, err := c.Client.Read(context.Background(), appId, startTime, filters...)
+	if err != nil {
+		return []models.AppInstanceMetric{}, fmt.Errorf("fail to Read %s metric from %s GoLogCache client: %w", logcache_v1.EnvelopeType_GAUGE, appId, err)
+	}
+	c.logger.Info("received-rest-api-result", lager.Data{"envelopes": envelopes})
 
 	collectedAt := c.now().UnixNano()
-	c.logger.Debug("envelopes received from log-cache", lager.Data{"envelopes": envelopes})
-	metrics, err = c.envelopeProcessor.GetGaugeMetrics(envelopes, collectedAt)
+	metrics, err := c.envelopeProcessor.GetGaugeMetrics(envelopes, collectedAt)
 
 	return filter(metrics, metricType), err
+}
+
+func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
+	// the log-cache REST API only return max. 1000 envelopes: https://github.com/cloudfoundry/log-cache-release/tree/main/src#get-apiv1readsource-id.
+	// receiving a limited set of envelopes breaks throughput and responsetime, because all envelopes are required to calculate these metric types properly.
+	// pagination via `start_time` and `end_time` could be done but is very error-prone.
+	// using the PromQL API also has an advantage over REST API because it shifts the metric aggregations to log-cache.
+	if metricType == models.MetricNameThroughput || metricType == models.MetricNameResponseTime {
+		return c.getMetricsPromQLAPI(appId, metricType, startTime, endTime)
+	}
+
+	return c.getMetricsRestAPI(appId, metricType, startTime, endTime)
 }
 
 func (c *LogCacheClient) SetTLSConfig(tlsConfig *tls.Config) {
