@@ -109,7 +109,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(1, 2, "responsetime", 500)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "responsetime", 800)
 				initialInstanceCount = 1
 			})
 
@@ -204,7 +204,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 10)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 15)
 				initialInstanceCount = 1
 			})
 
