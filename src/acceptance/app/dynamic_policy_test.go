@@ -249,7 +249,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 				}(doneChan)
 			})
 
-			FIt("should scale in", func() {
+			It("should scale in", func() {
 				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 			})
 
