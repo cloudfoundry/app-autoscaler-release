@@ -109,12 +109,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(1, 2, "responsetime", 2000)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "responsetime", 500)
 				initialInstanceCount = 1
 			})
 
 			JustBeforeEach(func() {
-				ticker = time.NewTicker(10 * time.Second)
+				// simulate ongoing ~20 slow requests per second
+				ticker = time.NewTicker(50 * time.Millisecond)
+				appUri := cfh.AppUri(appName, "/responsetime/slow/1000", cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -124,7 +126,11 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							cfh.CurlApp(cfg, appName, "/responsetime/slow/3000", "-f")
+							wg.Add(1)
+							go func() {
+								defer wg.Done()
+								cfh.Curl(cfg, appUri)
+							}()
 						}
 					}
 				}(doneChan)
@@ -133,17 +139,25 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			It("should scale out", Label(acceptance.LabelSmokeTests), func() {
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
+
+			AfterEach(func() {
+				// ginkgo requires all go-routines to be finished before reporting the result.
+				// let's wait for all curl executing go-routines to return.
+				wg.Wait()
+			})
 		})
 
 		Context("when responsetime is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(1, 2, "responsetime", 1000)
+				policy = GenerateDynamicScaleInPolicy(1, 2, "responsetime", 100)
 				initialInstanceCount = 2
 			})
 
 			JustBeforeEach(func() {
-				ticker = time.NewTicker(2 * time.Second)
+				// simulate ongoing ~20 fast requests per second
+				ticker = time.NewTicker(50 * time.Millisecond)
+				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -153,7 +167,11 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							cfh.CurlApp(cfg, appName, "/responsetime/fast", "-f")
+							wg.Add(1)
+							go func() {
+								defer wg.Done()
+								cfh.Curl(cfg, appUri)
+							}()
 						}
 					}
 				}(doneChan)
@@ -161,6 +179,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			It("should scale in", func() {
 				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+			})
+
+			AfterEach(func() {
+				// ginkgo requires all go-routines to be finished before reporting the result.
+				// let's wait for all curl executing go-routines to return.
+				wg.Wait()
 			})
 		})
 
@@ -180,13 +204,13 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 50)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "throughput", 10)
 				initialInstanceCount = 1
 			})
 
 			JustBeforeEach(func() {
-				// simulate ongoing ~100 requests per second
-				ticker = time.NewTicker(10 * time.Millisecond)
+				// simulate ongoing ~20 requests per second
+				ticker = time.NewTicker(50 * time.Millisecond)
 				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
