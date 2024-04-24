@@ -183,7 +183,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				// simulates ~100 requests per second
+				// simulate ongoing ~100 requests per second
 				ticker = time.NewTicker(10 * time.Millisecond)
 				go func(chan bool) {
 					defer GinkgoRecover()
@@ -204,6 +204,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			FIt("should scale out", func() {
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+			})
+
+			AfterEach(func() {
+				// ginkgo requires all go-routines to be finished before reporting the result.
+				// give the curl-command executing go-routines some time to return.
+				time.Sleep(10 * time.Second)
 			})
 
 		})
