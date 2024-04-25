@@ -105,7 +105,7 @@ func (c *LogCacheClient) emptyAppInstanceMetrics(appId string, name string, unit
 	}, nil
 }
 
-func (c *LogCacheClient) getMetricsPromQLAPI(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
+func (c *LogCacheClient) getMetricsPromQLAPI(appId string, metricType string) ([]models.AppInstanceMetric, error) {
 	collectionInterval := fmt.Sprintf("%.0f", c.envelopeProcessor.GetCollectionInterval().Seconds())
 	now := time.Now()
 
@@ -200,7 +200,7 @@ func (c *LogCacheClient) GetMetrics(appId string, metricType string, startTime t
 	// using the PromQL API also has an advantage over REST API because it shifts the metric aggregations to log-cache.
 	if metricType == models.MetricNameThroughput || metricType == models.MetricNameResponseTime {
 		c.logger.Debug("get-metrics-via-promql-api", lager.Data{"metricType": metricType})
-		return c.getMetricsPromQLAPI(appId, metricType, startTime, endTime)
+		return c.getMetricsPromQLAPI(appId, metricType)
 	}
 
 	c.logger.Debug("get-metrics-via-rest-api", lager.Data{"metricType": metricType})
