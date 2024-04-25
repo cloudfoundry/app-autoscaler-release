@@ -317,7 +317,6 @@ func GenerateDynamicScaleInPolicyBetween(metricName string, scaleInLowerThreshol
 	Expect(err).NotTo(HaveOccurred())
 
 	return string(marshaled)
-
 }
 
 func GenerateSpecificDateSchedulePolicy(startDateTime, endDateTime time.Time, scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
