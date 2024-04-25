@@ -150,14 +150,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(1, 2, "responsetime", 100)
+				policy = GenerateDynamicScaleInPolicyBetween("responsetime", 250, 350)
 				initialInstanceCount = 2
 			})
 
 			JustBeforeEach(func() {
 				// simulate ongoing ~20 fast requests per second
 				ticker = time.NewTicker(50 * time.Millisecond)
-				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
+				appUri := cfh.AppUri(appName, "/responsetime/300", cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -246,7 +246,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicy(1, 2, "throughput", 30)
+				policy = GenerateDynamicScaleInPolicyBetween("throughput", 15, 25)
 				initialInstanceCount = 2
 			})
 

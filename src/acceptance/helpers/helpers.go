@@ -276,6 +276,50 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 	return string(marshaled)
 }
 
+func GenerateDynamicScaleInPolicyBetween(metricName string, scaleInLowerThreshold int64, scaleInUpperThreshold int64) string {
+	// < 10 => +1 => don't do anything if below 10
+	// < 30 => -1 => scale down if less than 30
+	// > 30 => +1 => don't do anything if above 30
+	noDownscalingWhenBelowLower := ScalingRule{
+		MetricType:            metricName,
+		BreachDurationSeconds: TestBreachDurationSeconds,
+		Threshold:             scaleInLowerThreshold,
+		Operator:              "<",
+		CoolDownSeconds:       TestCoolDownSeconds,
+		Adjustment:            "+1",
+	}
+
+	downscalingWhenBelowUpper := ScalingRule{
+		MetricType:            metricName,
+		BreachDurationSeconds: TestBreachDurationSeconds,
+		Threshold:             scaleInUpperThreshold,
+		Operator:              "<",
+		CoolDownSeconds:       TestCoolDownSeconds,
+		Adjustment:            "-1",
+	}
+
+	noDownscalingWhenAboveUpper := ScalingRule{
+		MetricType:            metricName,
+		BreachDurationSeconds: TestBreachDurationSeconds,
+		Threshold:             scaleInUpperThreshold,
+		Operator:              ">=",
+		CoolDownSeconds:       TestCoolDownSeconds,
+		Adjustment:            "+1",
+	}
+
+	policy := ScalingPolicy{
+		InstanceMin:  1,
+		InstanceMax:  2,
+		ScalingRules: []*ScalingRule{&noDownscalingWhenBelowLower, &downscalingWhenBelowUpper, &noDownscalingWhenAboveUpper},
+	}
+
+	marshaled, err := MarshalWithoutHTMLEscape(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(marshaled)
+
+}
+
 func GenerateSpecificDateSchedulePolicy(startDateTime, endDateTime time.Time, scheduledInstanceMin, scheduledInstanceMax, scheduledInstanceInit int) string {
 	scalingInRule := ScalingRule{
 		MetricType:            "cpu",
