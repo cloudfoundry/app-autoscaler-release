@@ -26,12 +26,13 @@ type LogCacheClient struct {
 	logger lager.Logger
 	Client LogCacheClientReader
 
-	now               func() time.Time
-	envelopeProcessor envelopeprocessor.EnvelopeProcessor
-	goLogCache        GoLogCache
-	TLSConfig         *tls.Config
-	uaaCreds          models.UAACreds
-	url               string
+	now                func() time.Time
+	envelopeProcessor  envelopeprocessor.EnvelopeProcessor
+	goLogCache         GoLogCache
+	TLSConfig          *tls.Config
+	uaaCreds           models.UAACreds
+	url                string
+	collectionInterval time.Duration
 
 	grpc GRPC
 }
@@ -66,10 +67,10 @@ type GoLogCache struct {
 }
 
 type LogCacheClientCreator interface {
-	NewLogCacheClient(logger lager.Logger, getTime func() time.Time, envelopeProcessor envelopeprocessor.EnvelopeProcessor, addrs string) MetricClient
+	NewLogCacheClient(logger lager.Logger, getTime func() time.Time, collectionInterval time.Duration, envelopeProcessor envelopeprocessor.EnvelopeProcessor, url string) MetricClient
 }
 
-func NewLogCacheClient(logger lager.Logger, getTime func() time.Time, envelopeProcessor envelopeprocessor.EnvelopeProcessor, url string) *LogCacheClient {
+func NewLogCacheClient(logger lager.Logger, getTime func() time.Time, collectionInterval time.Duration, envelopeProcessor envelopeprocessor.EnvelopeProcessor, url string) *LogCacheClient {
 	var c = &LogCacheClient{
 		logger: logger.Session("LogCacheClient"),
 
@@ -83,6 +84,7 @@ func NewLogCacheClient(logger lager.Logger, getTime func() time.Time, envelopePr
 			NewOauth2HTTPClient:  logcache.NewOauth2HTTPClient,
 			WithOauth2HTTPClient: logcache.WithOauth2HTTPClient,
 		},
+		collectionInterval: collectionInterval,
 
 		grpc: GRPC{
 			WithTransportCredentials: gogrpc.WithTransportCredentials,
@@ -106,7 +108,7 @@ func (c *LogCacheClient) emptyAppInstanceMetrics(appId string, name string, unit
 }
 
 func (c *LogCacheClient) getMetricsPromQLAPI(appId string, metricType string) ([]models.AppInstanceMetric, error) {
-	collectionInterval := fmt.Sprintf("%.0f", c.envelopeProcessor.GetCollectionInterval().Seconds())
+	collectionInterval := fmt.Sprintf("%.0f", c.CollectionInterval().Seconds())
 	now := time.Now()
 
 	query := ""
@@ -252,6 +254,10 @@ func (c *LogCacheClient) Configure() {
 func (c *LogCacheClient) GetUaaTlsConfig() *tls.Config {
 	//nolint:gosec
 	return &tls.Config{InsecureSkipVerify: c.uaaCreds.SkipSSLValidation}
+}
+
+func (c *LogCacheClient) CollectionInterval() time.Duration {
+	return c.collectionInterval
 }
 
 func valuesFrom(filters []logcache.ReadOption) url.Values {

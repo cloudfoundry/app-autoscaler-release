@@ -64,9 +64,7 @@ var _ = Describe("LogCacheClient", func() {
 			{AppId: "some-id"},
 		}
 
-		logCacheClient = NewLogCacheClient(
-			logger, func() time.Time { return collectedAt },
-			fakeEnvelopeProcessor, "")
+		logCacheClient = NewLogCacheClient(logger, func() time.Time { return collectedAt }, 40*time.Second, fakeEnvelopeProcessor, "")
 	})
 
 	JustBeforeEach(func() {
@@ -94,9 +92,7 @@ var _ = Describe("LogCacheClient", func() {
 
 		BeforeEach(func() {
 			expectedAddrs = "logcache:8080"
-			logCacheClient = NewLogCacheClient(
-				logger, func() time.Time { return collectedAt },
-				fakeEnvelopeProcessor, expectedAddrs)
+			logCacheClient = NewLogCacheClient(logger, func() time.Time { return collectedAt }, 40*time.Second, fakeEnvelopeProcessor, expectedAddrs)
 		})
 
 		Context("when consuming log cache via grpc/mtls", func() {
@@ -214,6 +210,13 @@ var _ = Describe("LogCacheClient", func() {
 				Expect(actualHTTPClient).To(Equal(expectedOauth2HTTPClient))
 				Expect(&actualClientOptions).NotTo(Equal(expectedClientOption))
 			})
+		})
+	})
+
+	Describe("CollectionInterval", func() {
+		It("returns correct collection interval", func() {
+			logCacheClient = NewLogCacheClient(logger, func() time.Time { return time.Now() }, 40*time.Second, fakeEnvelopeProcessor, "url")
+			Expect(logCacheClient.CollectionInterval()).To(Equal(40 * time.Second))
 		})
 	})
 
@@ -335,7 +338,6 @@ var _ = Describe("LogCacheClient", func() {
 
 			When("promql api returns a vector with samples", func() {
 				It("returns metrics", func() {
-					fakeEnvelopeProcessor.GetCollectionIntervalReturns(40 * time.Second)
 					fakeGoLogCacheReader.PromQLReturns(&logcache_v1.PromQL_InstantQueryResult{
 						Result: &logcache_v1.PromQL_InstantQueryResult_Vector{
 							Vector: &logcache_v1.PromQL_Vector{
@@ -408,7 +410,6 @@ var _ = Describe("LogCacheClient", func() {
 
 			When("promql api returns a vector with samples", func() {
 				It("returns metrics", func() {
-					fakeEnvelopeProcessor.GetCollectionIntervalReturns(40 * time.Second)
 					fakeGoLogCacheReader.PromQLReturns(&logcache_v1.PromQL_InstantQueryResult{
 						Result: &logcache_v1.PromQL_InstantQueryResult_Vector{
 							Vector: &logcache_v1.PromQL_Vector{

@@ -29,7 +29,7 @@ var _ = Describe("Envelopeprocessor", func() {
 
 	JustBeforeEach(func() {
 		logger = lagertest.NewTestLogger("envelopeProcessor")
-		processor = envelopeprocessor.NewProcessor(logger, TestCollectInterval)
+		processor = envelopeprocessor.NewProcessor(logger)
 	})
 
 	Describe("#GetGaugeMetrics", func() {
@@ -282,14 +282,6 @@ var _ = Describe("Envelopeprocessor", func() {
 				}
 
 			}
-		})
-	})
-
-	Describe("GetCollectionInterval", func() {
-		When("interval is set", func() {
-			It("returns interval", func() {
-				Expect(processor.GetCollectionInterval()).To(Equal(TestCollectInterval))
-			})
 		})
 	})
 })
