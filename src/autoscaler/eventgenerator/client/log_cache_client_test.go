@@ -334,7 +334,7 @@ var _ = Describe("LogCacheClient", func() {
 			})
 
 			When("promql api returns a vector with samples", func() {
-				It("returns metrics ", func() {
+				It("returns metrics", func() {
 					fakeEnvelopeProcessor.GetCollectionIntervalReturns(40 * time.Second)
 					fakeGoLogCacheReader.PromQLReturns(&logcache_v1.PromQL_InstantQueryResult{
 						Result: &logcache_v1.PromQL_InstantQueryResult_Vector{
@@ -407,7 +407,7 @@ var _ = Describe("LogCacheClient", func() {
 			})
 
 			When("promql api returns a vector with samples", func() {
-				It("reads from PromQL API ", func() {
+				It("returns metrics", func() {
 					fakeEnvelopeProcessor.GetCollectionIntervalReturns(40 * time.Second)
 					fakeGoLogCacheReader.PromQLReturns(&logcache_v1.PromQL_InstantQueryResult{
 						Result: &logcache_v1.PromQL_InstantQueryResult_Vector{
