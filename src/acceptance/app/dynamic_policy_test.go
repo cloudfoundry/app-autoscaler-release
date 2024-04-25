@@ -150,14 +150,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicyBetween("responsetime", 250, 350)
+				policy = GenerateDynamicScaleInPolicyBetween("responsetime", 800, 1200)
 				initialInstanceCount = 2
 			})
 
 			JustBeforeEach(func() {
 				// simulate ongoing ~20 fast requests per second
 				ticker = time.NewTicker(50 * time.Millisecond)
-				appUri := cfh.AppUri(appName, "/responsetime/300", cfg)
+				appUri := cfh.AppUri(appName, "/responsetime/slow/1000", cfg)
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
