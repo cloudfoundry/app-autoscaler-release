@@ -21,7 +21,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         env:
           # Needed for self-hosted runner
-          ImageOS: "ubuntu22"
+          ImageOS: "ubuntu24"
         with:
           # runs 'bundle install' and caches installed gems automatically
           bundler-cache: true

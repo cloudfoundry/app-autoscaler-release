@@ -39,7 +39,7 @@ jobs:
           bundler-cache: true
         env:
           # Needed for self-hosted runner
-          ImageOS: ubuntu22
+          ImageOS: ubuntu24
 
       - name: shellcheck
         uses: reviewdog/action-shellcheck@v1
