@@ -141,6 +141,7 @@ jobs:
 
   deployment_cleanup:
     needs: [ acceptance_tests_verify ]
+    if: "!contains(github.event.pull_request.labels.*.name, 'skip-cleanup')"
     name: Deployment cleanup
     runs-on: ubuntu-latest
     container:
