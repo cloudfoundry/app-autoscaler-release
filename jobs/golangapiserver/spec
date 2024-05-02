@@ -87,9 +87,6 @@ properties:
     description: "PEM-encoded server certificate for the health endpoint"
   autoscaler.apiserver.health.server_key:
     description: "PEM-encoded server key for the health endpoint"
-  autoscaler.apiserver.use_buildin_mode:
-    default: true
-    description: ""
   autoscaler.apiserver.info.name:
     description: "Name of the autoscaler application to be shown in /info path"
     default: "Autoscaler"

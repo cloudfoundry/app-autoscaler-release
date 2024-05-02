@@ -12,12 +12,7 @@ describe "golangapiserver" do
     let(:properties) { YAML.safe_load(fixture("apiserver.yml").read) }
     let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
-    context "apiserver does not use buildin mode" do
-      before(:each) do
-        properties["autoscaler"]["apiserver"].merge!(
-          "use_buildin_mode" => false
-        )
-      end
+    context "handles broker credentials" do
 
       it "writes service_broker_usernames" do
         properties["autoscaler"]["apiserver"]["broker"]["broker_credentials"] = [
@@ -38,6 +33,7 @@ describe "golangapiserver" do
       end
 
       it "writes deprecated service_broker_usernames" do
+        properties["autoscaler"]["apiserver"]["broker"]["broker_credentials"] = nil
         properties["autoscaler"]["apiserver"]["broker"].merge!(
           "username" => "deprecated_username",
           "password" => "deprecated_password"

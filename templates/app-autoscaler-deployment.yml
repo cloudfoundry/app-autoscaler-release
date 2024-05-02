@@ -510,7 +510,6 @@ instance_groups:
           public_api:
             server:
               port: &publicApiServerPort 6101
-          use_buildin_mode: false
           scheduler:
             host: autoscalerscheduler.service.cf.internal
             ca_cert: ((scheduler_ca.ca))

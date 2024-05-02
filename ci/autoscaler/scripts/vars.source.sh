@@ -79,11 +79,6 @@ debug "CI_DIR: ${CI_DIR}"
 # shellcheck disable=SC2034
 ci_dir="${CI_DIR}"
 
-export BUILDIN_MODE=${BUILDIN_MODE:-"false"}
-debug "BUILDIN_MODE: ${BUILDIN_MODE}"
-# shellcheck disable=SC2034
-buildin_mode="${BUILDIN_MODE}"
-
 export SERVICE_NAME="${DEPLOYMENT_NAME}"
 debug "SERVICE_NAME: ${SERVICE_NAME}"
 # shellcheck disable=SC2034

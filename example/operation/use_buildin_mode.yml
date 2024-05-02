@@ -1,7 +1,0 @@
-# This can be used to set the release version of the autoscaler and is primarily used in our CI to modify the release version in our dev pipeline.
-# Parameters:
-# app_autoscaler_version: Version numbering of the release to deploy.
----
-- type: replace
-  path: /instance_groups/name=asapi/jobs/name=golangapiserver/properties/autoscaler/apiserver/use_buildin_mode?
-  value: true

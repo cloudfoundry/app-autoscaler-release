@@ -86,7 +86,6 @@ function unset_vars() {
   unset BBL_STATE_PATH
   unset AUTOSCALER_DIR
   unset CI_DIR
-  unset BUILDIN_MODE
   unset SERVICE_NAME
   unset SERVICE_BROKER_NAME
   unset NAME_PREFIX

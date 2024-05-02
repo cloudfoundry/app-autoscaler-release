@@ -58,3 +58,6 @@ autoscaler:
     broker:
       server:
         dashboard_redirect_uri: https://application-autoscaler-dashboard.cf.domain
+      broker_credentials:
+      - broker_username: fake_b_user_1
+        broker_password: fake_b_password_1

@@ -1,6 +1,0 @@
-# This can be used to enable the `build_in_mode`, which means disabling the service broker 
-# and exclusively using the API to interact with the App Autoscaler
----
-- type: replace
-  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/apiserver/use_buildin_mode?
-  value: true
