@@ -32,11 +32,9 @@ function set_pipeline(){
   if [[ -z $PR_NUMBER ]]; then
     add_var acceptance_deployment_name          "acceptance"
     add_var logcache_acceptance_deployment_name "acceptance-lc"
-    add_var builtin_acceptance_deployment_name  "acceptance-bld"
   else
     add_var acceptance_deployment_name          "${PR_NUMBER}-acceptance"
     add_var logcache_acceptance_deployment_name "${PR_NUMBER}-acceptance-lc"
-    add_var builtin_acceptance_deployment_name  "${PR_NUMBER}-acceptance-bld"
   fi
 
   # shellcheck disable=SC2086

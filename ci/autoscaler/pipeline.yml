@@ -36,26 +36,10 @@ anchors:
       operations/add-extra-plan.yml
       operations/set-release-version.yml
 
-  app-autoscaler-ops-files-buildin: &app-autoscaler-ops-files-buildin
-    OPS_FILES: |
-      operations/add-releases.yml
-      operations/instance-identity-cert-from-cf.yml
-      operations/add-postgres-variables.yml
-      operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
-      operations/add-extra-plan.yml
-      operations/set-release-version.yml
-      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
-      operations/use_buildin_mode.yml
-      operations/remove-metricsserver.yml
-      operations/remove-metricsgateway.yml
-      operations/enable-scheduler-logging.yml
-
 groups:
 - name: all
   jobs:
   - acceptance
-  - acceptance-buildin
   - acceptance-log-cache
   - cleanup-autoscaler-deployments
   - fetch-latest-stemcell
@@ -71,7 +55,6 @@ groups:
 - name: autoscaler-release
   jobs:
   - acceptance
-  - acceptance-buildin
   - acceptance-log-cache
   - draft
   - integration-tests
@@ -193,7 +176,6 @@ jobs:
       branch_name: ((branch_name))
       acceptance_deployment_name: ((acceptance_deployment_name))
       logcache_acceptance_deployment_name: ((logcache_acceptance_deployment_name))
-      builtin_acceptance_deployment_name: ((builtin_acceptance_deployment_name))
 
 - name: unit-tests
   public: true
@@ -329,50 +311,6 @@ jobs:
         SUITES: broker
       timeout: 15m
 
-- name: acceptance-buildin
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  on_success:
-    task: cleanup
-    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-buildin-params
-      DEPLOYMENT_NAME: ((builtin_acceptance_deployment_name))
-      BUILDIN_MODE: true
-      SERVICE_OFFERING_ENABLED: false
-  plan:
-  - in_parallel:
-    - get: bbl-state
-    - get: app-autoscaler-release
-      passed: [unit-tests, integration-tests]
-      trigger: true
-    - get: ci
-  - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yaml
-    params:
-      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
-    timeout: 15m
-  - task: deploy-autoscaler
-    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
-    params:
-      <<: *acceptance-buildin-params
-      <<: *app-autoscaler-ops-files-buildin
-    timeout: 30m
-  - in_parallel:
-    - task: autoscaler-acceptance-api
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-buildin-params
-        SUITES: api
-      timeout: 15m
-    - task: autoscaler-acceptance-app
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-buildin-params
-        SUITES: app
-      timeout: 45m
-
 - name: performance
   public: true
   build_logs_to_retain: 100
@@ -435,7 +373,6 @@ jobs:
       passed:
       - acceptance
       - acceptance-log-cache
-      - acceptance-buildin
       trigger: true
     - get: previous-stable-release
   - task: deploy-previous-stable-release

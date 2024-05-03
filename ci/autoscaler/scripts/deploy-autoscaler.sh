@@ -23,7 +23,6 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
   ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
 
 
-if [[ "${buildin_mode}" == "true" ]]; then ops_files+=" ${autoscaler_dir}/operations/use_buildin_mode.yml"; fi;
 
 case "${cpu_upper_threshold}" in
   "100")

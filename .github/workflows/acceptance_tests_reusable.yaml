@@ -5,10 +5,6 @@ on:
       self_hosted_image:
         type: string
         default: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
-      buildin_mode:
-        required: false
-        type: boolean
-        default: false
       service_offering_enabled:
         required: false
         type: boolean
@@ -29,7 +25,6 @@ defaults:
     shell: bash
 
 env:
-  BUILDIN_MODE: "${{ inputs.buildin_mode }}"
   SERVICE_OFFERING_ENABLED: "${{ inputs.service_offering_enabled }}"
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   DEPLOYMENT_NAME: "${{ inputs.deployment_name }}"

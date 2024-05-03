@@ -38,9 +38,7 @@ require 'yaml'
 #           Template Main                 #
 ###########################################
   job_name = 'golangapiserver'
-  if p("autoscaler.apiserver.use_buildin_mode") == false
-    binding_db_url = build_db_url('binding_db', job_name)
-  end
+  binding_db_url = build_db_url('binding_db', job_name)
   policy_db_url = build_db_url('policy_db', job_name)
   if p("autoscaler.storedprocedure_db.address") != ''
     storedprocedure_db_url = build_db_url('storedprocedure_db', job_name)
@@ -68,7 +66,6 @@ public_api_server:
     key_file: /var/vcap/jobs/golangapiserver/config/certs/apiserver/server.key
   <% end %>
 
-<% if p("autoscaler.apiserver.use_buildin_mode") == false %>
 broker_server:
   port:  <%= p("autoscaler.apiserver.broker.server.port") %>
   <% if_p("autoscaler.apiserver.broker.server.ca_cert", "autoscaler.apiserver.broker.server.server_cert", "autoscaler.apiserver.broker.server.server_key") do %>
@@ -88,11 +85,9 @@ broker_credentials:
 
 catalog_path: /var/vcap/jobs/golangapiserver/config/catalog.json
 catalog_schema_path: /var/vcap/packages/golangapiserver/catalog.schema.json
-<% end %>
 info_file_path: /var/vcap/jobs/golangapiserver/config/info.json
 policy_schema_path: /var/vcap/packages/golangapiserver/policy_json.schema.json
 dashboard_redirect_uri: <%= p("autoscaler.apiserver.broker.server.dashboard_redirect_uri") %>
-use_buildin_mode: <%= p("autoscaler.apiserver.use_buildin_mode") %>
 
 health:
   port: <%= p("autoscaler.apiserver.health.port") %>
@@ -109,13 +104,11 @@ db:
     max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
-<% if p("autoscaler.apiserver.use_buildin_mode") == false %>
   binding_db:
     url: <%= binding_db_url %>
     max_open_connections: <%= p("autoscaler.binding_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.binding_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.binding_db_connection_config.connection_max_lifetime") %>
-<% end %>
 <% if p("autoscaler.storedprocedure_db.address") != '' %>
   storedprocedure_db:
     url: <%= storedprocedure_db_url %>

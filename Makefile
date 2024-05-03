@@ -32,7 +32,6 @@ DEST ?= build
 GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  \
 													| cut --delimiter=' ' --fields='2')
 
-export BUILDIN_MODE ?= false
 export DEBUG ?= false
 export ACCEPTANCE_TESTS_FILE ?= ${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
 export GOWORK = off
@@ -337,7 +336,7 @@ markdownlint-cli:
 deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
-	[ "$${BUILDIN_MODE}" == "false" ] && { ${CI_DIR}/autoscaler/scripts/register-broker.sh; } || echo " - Not registering broker due to buildin mode enabled"
+	${CI_DIR}/autoscaler/scripts/register-broker.sh
 deploy-autoscaler-bosh:
 	echo " - deploying autoscaler"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
