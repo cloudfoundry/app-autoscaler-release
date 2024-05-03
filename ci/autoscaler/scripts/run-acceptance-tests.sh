@@ -55,7 +55,6 @@ cat > acceptance_config.json <<EOF
 	"default_timeout": 60,
 	"cpu_upper_threshold": ${cpu_upper_threshold},
   "name_prefix": "${name_prefix}",
-
   "autoscaler_api": "${deployment_name}.${system_domain}",
   "service_offering_enabled": ${service_offering_enabled},
 
