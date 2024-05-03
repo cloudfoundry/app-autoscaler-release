@@ -3,7 +3,7 @@ actionlint 1.6.27
 bosh 7.5.6
 credhub 2.9.30
 cf 8.7.10
-concourse 7.11.2
+concourse 7.10.0
 direnv 2.34.0
 gcloud 473.0.0
 ginkgo 2.17.2

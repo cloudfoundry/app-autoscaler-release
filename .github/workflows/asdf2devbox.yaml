@@ -71,8 +71,6 @@ jobs:
             exit 0
           fi
 
-          git checkout "${GITHUB_HEAD_REF}"
-
           devbox run scripts/asdf2devbox.py
 
           num_changed_files="$(git status --porcelain | wc --lines)"
@@ -82,8 +80,7 @@ jobs:
             echo 'Changes to some files were necessary!'
             git add .
             git commit --message="${tidy_message}"
-            git pull --rebase=true
-            git push
+            git push origin "HEAD:${GITHUB_HEAD_REF}"
           else
             echo 'No files changed!'
           fi

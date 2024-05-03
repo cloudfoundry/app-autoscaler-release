@@ -43,20 +43,6 @@
           doCheck = false;
           vendorHash = null;
         };
-
-        log-cache-cli-plugin = nixpkgsFor.${system}.buildGoModule rec {
-          pname = "log-cache-cli";
-          version = "6.0.1";
-          src = nixpkgsFor.${system}.fetchgit {
-            url = "https://github.com/cloudfoundry/log-cache-cli";
-            rev = "v${version}";
-            hash = "sha256-XMxZPmqjOo/yaMFHY+zTjamB2FmPn2eh0zEtwQevt+I=";
-            fetchSubmodules = true;
-          };
-          doCheck = false;
-          vendorHash = null;
-          ldflags = ["-s" "-w" "-X main.version=${version}"];
-        };
       });
   };
 }

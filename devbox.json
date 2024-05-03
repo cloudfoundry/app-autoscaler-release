@@ -2,7 +2,6 @@
   "packages": [
     "path:local-flake#bosh-bootloader",
     "path:local-flake#app-autoscaler-cli-plugin",
-    "path:local-flake#log-cache-cli-plugin",
     "credhub-cli@latest",
     "delve@latest",
     "gh@latest",
@@ -13,6 +12,7 @@
     "rubocop@latest",
     "rubyPackages.solargraph@latest",
     "swagger-cli@latest",
+    "go@1.21.4",
     "actionlint@1.6.27",
     "direnv@2.34.0",
     "gnumake@4.4",
@@ -25,20 +25,17 @@
     "jq@latest",
     "fly@7.10.0",
     "python@latest",
+    "act@latest",
     "cloudfoundry-cli@8.7.10",
-    "shellcheck@0.10.0",
-    "hey@latest",
-    "act@0.2.62",
-    "go@1.21.5",
-    "ruby@3.3.1",
-    "ginkgo@2.17.3",
     "google-cloud-sdk@latest",
-    "temurin-bin-17@latest"
+    "ginkgo@latest",
+    "temurin-bin-17@latest",
+    "ruby@latest",
+    "shellcheck@0.10.0"
   ],
   "shell": {
     "init_hook": [
-      "cf install-plugin -f $(which app-autoscaler-cli-plugin)",
-      "cf install-plugin -f $(which log-cache-cli)"
+      "cf install-plugin -f $(which app-autoscaler-cli-plugin)"
     ],
     "scripts": {
       "test": [
