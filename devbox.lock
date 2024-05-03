@@ -1,7 +1,7 @@
 {
   "lockfile_version": "1",
   "packages": {
-    "act@0.2.61": {
+    "act@latest": {
       "last_modified": "2024-04-19T17:36:04-04:00",
       "resolved": "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5#act",
       "source": "devbox-search",
@@ -117,23 +117,51 @@
         }
       }
     },
-    "cloudfoundry-cli@latest": {
-      "last_modified": "2024-03-08T13:51:52Z",
-      "resolved": "github:NixOS/nixpkgs/a343533bccc62400e8a9560423486a3b6c11a23b#cloudfoundry-cli",
+    "cloudfoundry-cli@8.7.10": {
+      "last_modified": "2024-04-19T17:36:04-04:00",
+      "resolved": "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5#cloudfoundry-cli",
       "source": "devbox-search",
-      "version": "8.7.8",
+      "version": "8.7.10",
       "systems": {
         "aarch64-darwin": {
-          "store_path": "/nix/store/3gfr3d0q0f51s9b4pq603jrgyn58q074-cloudfoundry-cli-8.7.8"
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/1aigw2nm7is18821nqxpx2ml090ir97j-cloudfoundry-cli-8.7.10",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/1aigw2nm7is18821nqxpx2ml090ir97j-cloudfoundry-cli-8.7.10"
         },
         "aarch64-linux": {
-          "store_path": "/nix/store/5zfrasa3kmb3nz1bb2ixi5qxrsn1jazx-cloudfoundry-cli-8.7.8"
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/dy0559nm61x9n1kanibppr1kzrwkbvxc-cloudfoundry-cli-8.7.10",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/dy0559nm61x9n1kanibppr1kzrwkbvxc-cloudfoundry-cli-8.7.10"
         },
         "x86_64-darwin": {
-          "store_path": "/nix/store/q3cywxb829fpxwp78jilzg3vy7w40dvg-cloudfoundry-cli-8.7.8"
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/y5wk93kiyank5np7cxfgndp4jhlgnk1d-cloudfoundry-cli-8.7.10",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/y5wk93kiyank5np7cxfgndp4jhlgnk1d-cloudfoundry-cli-8.7.10"
         },
         "x86_64-linux": {
-          "store_path": "/nix/store/pqhnim4br7nwj61lqd9qx5hwvkf6h5d3-cloudfoundry-cli-8.7.8"
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/y80g7qab72ym96bn766x6rpx58bsd9g7-cloudfoundry-cli-8.7.10",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/y80g7qab72ym96bn766x6rpx58bsd9g7-cloudfoundry-cli-8.7.10"
         }
       }
     },
@@ -265,7 +293,7 @@
         }
       }
     },
-    "ginkgo@2.17.1": {
+    "ginkgo@latest": {
       "last_modified": "2024-04-19T17:36:04-04:00",
       "resolved": "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5#ginkgo",
       "source": "devbox-search",
@@ -704,6 +732,7 @@
     },
     "python@latest": {
       "last_modified": "2024-04-19T17:36:04-04:00",
+      "plugin_version": "0.0.3",
       "resolved": "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5#python312",
       "source": "devbox-search",
       "version": "3.12.3",
@@ -863,23 +892,107 @@
         }
       }
     },
-    "shellcheck@latest": {
-      "last_modified": "2024-03-17T01:03:25Z",
-      "resolved": "github:NixOS/nixpkgs/299d4668ba61600311553920d9fd9c102145b2cb#shellcheck",
+    "shellcheck@0.10.0": {
+      "last_modified": "2024-04-19T17:36:04-04:00",
+      "resolved": "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5#shellcheck",
       "source": "devbox-search",
-      "version": "0.9.0",
+      "version": "0.10.0",
       "systems": {
         "aarch64-darwin": {
-          "store_path": "/nix/store/bngymhhfha92zqpmd01ms1f35kmpfidd-shellcheck-0.9.0-bin"
+          "outputs": [
+            {
+              "name": "bin",
+              "path": "/nix/store/49ncfws5qrd7rkgwz6dv2gvmqv0rsrrw-shellcheck-0.10.0-bin",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/s6j4yx6qbnln5nxmljx0qy8jf59adz5p-shellcheck-0.10.0-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/2dfy2v96fv9542s4m7z7yxinwil9ngyp-shellcheck-0.10.0-doc",
+              "default": true
+            },
+            {
+              "name": "out",
+              "path": "/nix/store/q2jz8khcx1a3kfmb77yspp85vlb973iz-shellcheck-0.10.0"
+            }
+          ],
+          "store_path": "/nix/store/49ncfws5qrd7rkgwz6dv2gvmqv0rsrrw-shellcheck-0.10.0-bin"
         },
         "aarch64-linux": {
-          "store_path": "/nix/store/4y4s0iwzhwmw3r5qz6paxg1f99px1lfx-shellcheck-0.9.0-bin"
+          "outputs": [
+            {
+              "name": "bin",
+              "path": "/nix/store/q1hs93pxrpr388r8b4bj7rpqvd2daq1c-shellcheck-0.10.0-bin",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/6hz9inqbkawax0lcdig54sx2fh9ygq1k-shellcheck-0.10.0-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/6iv0bbwzc4c4p364474j37acbcj85ncg-shellcheck-0.10.0-doc",
+              "default": true
+            },
+            {
+              "name": "out",
+              "path": "/nix/store/2xlv5aw7b8zj5sn20bn0r7j5xbpq3lqj-shellcheck-0.10.0"
+            }
+          ],
+          "store_path": "/nix/store/q1hs93pxrpr388r8b4bj7rpqvd2daq1c-shellcheck-0.10.0-bin"
         },
         "x86_64-darwin": {
-          "store_path": "/nix/store/rfxrjh6nvd3s9r7yla95438an3pngajh-shellcheck-0.9.0-bin"
+          "outputs": [
+            {
+              "name": "bin",
+              "path": "/nix/store/jnsl9dzp3smhbkzxjj42spmlbkixzh8k-shellcheck-0.10.0-bin",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/yv9i4zbnsbc3f9552718lsxifvz44xzp-shellcheck-0.10.0-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/vdggbwa31i0vv021ik69mczg21mf5160-shellcheck-0.10.0-doc",
+              "default": true
+            },
+            {
+              "name": "out",
+              "path": "/nix/store/qdfv3dw1rr5hxygz3h2h17zilkd7fd34-shellcheck-0.10.0"
+            }
+          ],
+          "store_path": "/nix/store/jnsl9dzp3smhbkzxjj42spmlbkixzh8k-shellcheck-0.10.0-bin"
         },
         "x86_64-linux": {
-          "store_path": "/nix/store/2hr19r4705ak33jp3znlfqg0wb6di8ii-shellcheck-0.9.0-bin"
+          "outputs": [
+            {
+              "name": "bin",
+              "path": "/nix/store/f321hrckks8jq89ipz48jmzdp7d0pj7r-shellcheck-0.10.0-bin",
+              "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/nc6ym17bdcnv8xm5qixywrlnvyj62qjf-shellcheck-0.10.0-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/0csxlgjfdjadv9i1cz5bjmq8mhqyxlkj-shellcheck-0.10.0-doc",
+              "default": true
+            },
+            {
+              "name": "out",
+              "path": "/nix/store/64zid87pr32msyp2i91zf7p08qj5v0bp-shellcheck-0.10.0"
+            }
+          ],
+          "store_path": "/nix/store/f321hrckks8jq89ipz48jmzdp7d0pj7r-shellcheck-0.10.0-bin"
         }
       }
     },
@@ -904,16 +1017,50 @@
       }
     },
     "temurin-bin-17@latest": {
-      "last_modified": "2024-03-08T13:51:52Z",
-      "resolved": "github:NixOS/nixpkgs/a343533bccc62400e8a9560423486a3b6c11a23b#temurin-bin-17",
+      "last_modified": "2024-04-19T17:36:04-04:00",
+      "resolved": "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5#temurin-bin-17",
       "source": "devbox-search",
       "version": "17.0.9",
       "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/150lqcf9xmjz3543z5my0n4b1kncyr5z-temurin-bin-17.0.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/150lqcf9xmjz3543z5my0n4b1kncyr5z-temurin-bin-17.0.9"
+        },
         "aarch64-linux": {
-          "store_path": "/nix/store/55kfv81bz5970n3jqjl5k9d1ncnq5vy6-temurin-bin-17.0.9"
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8k4kyhhvlxkzzfpgl0p0yn147585hf60-temurin-bin-17.0.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/8k4kyhhvlxkzzfpgl0p0yn147585hf60-temurin-bin-17.0.9"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/j58pbnd0rnfyn3akxb8zx3s1kc5p9dy8-temurin-bin-17.0.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/j58pbnd0rnfyn3akxb8zx3s1kc5p9dy8-temurin-bin-17.0.9"
         },
         "x86_64-linux": {
-          "store_path": "/nix/store/vf23zgqxyr8cjiys27kl0z33qv5wxxb8-temurin-bin-17.0.9"
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/z16qjcmxxiki2ah8wvg4qp0kp96a5s84-temurin-bin-17.0.9",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/z16qjcmxxiki2ah8wvg4qp0kp96a5s84-temurin-bin-17.0.9"
         }
       }
     },
