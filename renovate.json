@@ -73,14 +73,6 @@
     {
       "customType": "regex",
       "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)concourse (?<currentValue>.+?)\\n"],
-      "depNameTemplate": "concourse/concourse",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>\\S+)"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
       "matchStrings": ["(^|\\n)gcloud (?<currentValue>.+?)\\n"],
       "depNameTemplate": "google/cloud-sdk",
       "datasourceTemplate": "docker"

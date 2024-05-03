@@ -1,0 +1,46 @@
+{
+  "packages": [
+    "path:local-flake#bosh-bootloader",
+    "path:local-flake#app-autoscaler-cli-plugin",
+    "credhub-cli@latest",
+    "delve@latest",
+    "gh@latest",
+    "go-tools@latest",
+    "gopls@latest",
+    "nodejs@latest",
+    "nodePackages.yaml-language-server@latest",
+    "rubocop@latest",
+    "rubyPackages.solargraph@latest",
+    "swagger-cli@latest",
+    "go@1.21.4",
+    "actionlint@1.6.27",
+    "direnv@2.34.0",
+    "gnumake@4.4",
+    "maven@3.8.6",
+    "pre-commit@latest",
+    "bosh-cli@7.5.6",
+    "golangci-lint@1.57.2",
+    "yq-go@4.43.1",
+    "which@latest",
+    "jq@latest",
+    "fly@7.10.0",
+    "python@latest",
+    "act@latest",
+    "cloudfoundry-cli@8.7.10",
+    "google-cloud-sdk@latest",
+    "ginkgo@latest",
+    "temurin-bin-17@latest",
+    "ruby@latest",
+    "shellcheck@0.10.0"
+  ],
+  "shell": {
+    "init_hook": [
+      "cf install-plugin -f $(which app-autoscaler-cli-plugin)"
+    ],
+    "scripts": {
+      "test": [
+        "echo \"Error: no test specified\" && exit 1"
+      ]
+    }
+  }
+}
