@@ -1,2 +1,2 @@
 - type: remove
-  path: /instance_groups/name=postgres/jobs/name=postgres/properties/tls
+  path: /instance_groups/name=postgres/jobs/name=postgres/properties/databases/tls
