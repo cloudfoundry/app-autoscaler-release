@@ -79,7 +79,7 @@ clean-scheduler:
 	@rm -rf src/scheduler/src/test/resources/certs
 clean-certs:
 	@echo " - cleaning test certs"
-	@rm -f testcerts/*
+	@rm -f test-certs/*
 clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases

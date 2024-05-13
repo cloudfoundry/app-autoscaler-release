@@ -162,6 +162,7 @@ instance_groups:
         databases: &database
           # property is not in https://bosh.io/jobs/postgres?source=github.com/cloudfoundry/postgres-release&version=48
           # sslmode: verify-full
+          sslmode: disable
           tls: &db_tls
             ca: ((postgres_ca.ca))
             certificate: ((postgres_server.certificate))
@@ -170,10 +171,10 @@ instance_groups:
             - name: autoscaler
               tag: default
           # property is not in https://bosh.io/jobs/postgres?source=github.com/cloudfoundry/postgres-release&version=48
-          # db_scheme: postgres
-          # address: *postgres_domain
+          db_scheme: postgres
+          address: *postgres_domain
           # property default value is already 5432 https://bosh.io/jobs/postgres?source=github.com/cloudfoundry/postgres-release&version=48
-          # port: 5432
+          port: 5432
           roles:
             - name: postgres
               password: "((database_password))"
