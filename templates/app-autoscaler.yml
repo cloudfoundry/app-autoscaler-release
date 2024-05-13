@@ -253,6 +253,7 @@ instance_groups:
           public_api:
             server:
               port: &publicApiServerPort 6101
+          use_buildin_mode: false
           scheduler:
             ca_cert: ((!scheduler_client_cert.ca))
             client_cert: ((!scheduler_client_cert.certificate))
