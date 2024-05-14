@@ -162,6 +162,7 @@ files:
 - autoscaler/vendor/golang.org/x/net/idna/* # gosub
 - autoscaler/vendor/golang.org/x/sync/errgroup/* # gosub
 - autoscaler/vendor/golang.org/x/sync/semaphore/* # gosub
+- autoscaler/vendor/golang.org/x/sys/cpu/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/golang.org/x/sys/windows/* # gosub
 - autoscaler/vendor/golang.org/x/sys/windows/registry/* # gosub
