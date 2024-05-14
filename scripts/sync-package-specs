@@ -16,10 +16,10 @@ function sync_package() {
       cat "${spec_dir}/spec" | grep --invert-match '# gosub'
       go run github.com/loggregator/gosub@2819a49a12756cab02592b5ee9f17f02148b0617 list "$@" \
         | grep 'autoscaler' \
-        | sed --expression='s|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- \1/* # gosub|g'
+        | sed -e 's|code.cloudfoundry.org/app-autoscaler/src/\(.*\)|- \1/* # gosub|g'
       go run github.com/loggregator/gosub@2819a49a12756cab02592b5ee9f17f02148b0617 list "$@" \
         | grep --invert-match 'autoscaler' \
-        | sed --expression='s|\(.*\)|- autoscaler/vendor/\1/* # gosub|g'
+        | sed -e 's|\(.*\)|- autoscaler/vendor/\1/* # gosub|g'
     } > "${spec_dir}/spec.new"
 
     mv "${spec_dir}/spec.new" "${spec_dir}/spec"
