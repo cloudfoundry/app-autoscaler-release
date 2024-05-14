@@ -43,6 +43,9 @@ properties:
   autoscaler.metricsforwarder.server.server_key:
     description: "PEM-encoded server key for the metricsforwarder server"
 
+  autoscaler.metricsforwarder.syslog.server_address:
+    description: "IP address for log cache syslog server"
+
   autoscaler.metricsforwarder.loggregator.metron_address:
     description: "IP address and port where the metron agent is running"
     default: "127.0.0.1:3458"

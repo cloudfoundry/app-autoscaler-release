@@ -55,12 +55,24 @@ server:
 
 logging:
   level: <%= p("autoscaler.metricsforwarder.logging.level") %>
+
+<% if_p("autoscaler.metricsforwarder.syslog.server_address") %>
+syslog:
+  metron_address: <%= p("autoscaler.metricsforwarder.syslog.server_address") %>
+  port: 6067
+  tls:
+    key_file: /var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.key
+    cert_file: /var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.crt
+    ca_file: /home/vcap/app/assets/certs/loggr-syslog-agent/loggregator_ca.crt
+<% else %>
 loggregator:
   metron_address: <%= p("autoscaler.metricsforwarder.loggregator.metron_address") %>
   tls:
     key_file: /var/vcap/jobs/metricsforwarder/config/certs/metron_client/client.key
     cert_file: /var/vcap/jobs/metricsforwarder/config/certs/metron_client/client.crt
     ca_file: /var/vcap/jobs/metricsforwarder/config/certs/metron_client/ca.crt
+<% end %>
+
 db:
   policy_db:
     url: <%= policy_db_url %>
