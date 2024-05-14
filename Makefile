@@ -305,7 +305,7 @@ mod-download:
 
 .PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 				changeloglockcleander.go-mod-vendor
-go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
+go-mod-vendor: clean-vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 							 changeloglockcleander.go-mod-vendor
 acceptance.go-mod-vendor:
 	make --directory='${go-acceptance-dir}' go-mod-vendor

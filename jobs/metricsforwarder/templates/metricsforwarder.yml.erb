@@ -56,7 +56,7 @@ server:
 logging:
   level: <%= p("autoscaler.metricsforwarder.logging.level") %>
 
-<% if_p("autoscaler.metricsforwarder.syslog.server_address") %>
+<% if if_p("autoscaler.metricsforwarder.syslog.server_address") %>
 syslog:
   metron_address: <%= p("autoscaler.metricsforwarder.syslog.server_address") %>
   port: 6067
