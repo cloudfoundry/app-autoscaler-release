@@ -246,7 +246,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when throughput is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicyBetween("throughput", 15, 25)
+				policy = GenerateDynamicScaleInPolicyBetween("throughput", 5, 15)
 				initialInstanceCount = 2
 			})
 
@@ -274,6 +274,8 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			It("should scale in", func() {
+				// because we are generating 20rps but starting with 2 instances,
+				// there should be on average 10rps per instance, which should trigger the scale in
 				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 			})
 
