@@ -46,6 +46,10 @@ properties:
   autoscaler.metricsforwarder.syslog.server_address:
     description: "IP address for log cache syslog server"
 
+  autoscaler.metricsforwarder.syslog.port:
+    description: "port where the syslog server is running"
+    default: "6067"
+
   autoscaler.metricsforwarder.loggregator.metron_address:
     description: "IP address and port where the metron agent is running"
     default: "127.0.0.1:3458"

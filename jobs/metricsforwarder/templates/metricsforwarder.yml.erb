@@ -60,6 +60,7 @@ logging:
 <% if_p("autoscaler.metricsforwarder.syslog.server_address") do |prop| %>
 syslog:
   server_address: <%= p("autoscaler.metricsforwarder.syslog.server_address") %>
+  port: <%= p("autoscaler.metricsforwarder.syslog.port") %>
   tls:
     key_file: /var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.key
     cert_file: /var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.crt

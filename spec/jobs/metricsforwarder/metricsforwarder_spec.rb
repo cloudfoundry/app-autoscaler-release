@@ -23,6 +23,7 @@ describe "metricsforwarder" do
         {
           "syslog" => {
             "server_address" => "syslog-server",
+            "port" => 6067,
             "tls" =>  {
               "key_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.key",
               "cert_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.crt",
