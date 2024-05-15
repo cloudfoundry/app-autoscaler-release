@@ -12,6 +12,28 @@ describe "metricsforwarder" do
   let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
   context "config/metricsforwarder.yml" do
+    it "supports syslog forwarding" do
+      properties["autoscaler"]["metricsforwarder"] = {
+        "syslog" => {
+          "server_address" => "syslog-server",
+        }
+      }
+
+      expect(rendered_template).to include(
+        {
+          "syslog" => {
+            "server_address" => "syslog-server",
+            "tls" =>  {
+              "key_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.key",
+              "cert_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.crt",
+              "ca_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/loggregator_ca.crt",
+            }
+          }
+        }
+      )
+    end
+
+
     it "does not set username nor password if not configured" do
       properties["autoscaler"]["metricsforwarder"] = {
         "health" => {
@@ -41,6 +63,7 @@ describe "metricsforwarder" do
            "password" => "test-user-password"}
         )
     end
+
 
     it "has a cred helper impl by default" do
       expect(rendered_template).to include(

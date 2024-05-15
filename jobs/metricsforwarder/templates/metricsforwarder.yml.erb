@@ -56,15 +56,15 @@ server:
 logging:
   level: <%= p("autoscaler.metricsforwarder.logging.level") %>
 
-<% if if_p("autoscaler.metricsforwarder.syslog.server_address") %>
+
+<% if_p("autoscaler.metricsforwarder.syslog.server_address") do |prop| %>
 syslog:
-  metron_address: <%= p("autoscaler.metricsforwarder.syslog.server_address") %>
-  port: 6067
+  server_address: <%= p("autoscaler.metricsforwarder.syslog.server_address") %>
   tls:
     key_file: /var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.key
     cert_file: /var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.crt
-    ca_file: /home/vcap/app/assets/certs/loggr-syslog-agent/loggregator_ca.crt
-<% else %>
+    ca_file: /var/vcap/jobs/loggr-syslog-agent/config/certs/loggregator_ca.crt
+<% end.else do %>
 loggregator:
   metron_address: <%= p("autoscaler.metricsforwarder.loggregator.metron_address") %>
   tls:
