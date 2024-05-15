@@ -78,7 +78,7 @@ RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${
 
 # Install credhub
 # renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
-ARG CREDHUB_VERSION=2.9.29
+ARG CREDHUB_VERSION=2.9.30
 RUN wget -q https://github.com/cloudfoundry/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   mv credhub /usr/local/bin/credhub &&\
