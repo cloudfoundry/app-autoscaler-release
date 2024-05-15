@@ -7,6 +7,7 @@ anchors:
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
+      operations/append-deployment-name-to-loggregator-nozzle-shard-id.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
       operations/enable-scheduler-logging.yml
@@ -32,6 +33,7 @@ anchors:
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
+      operations/append-deployment-name-to-loggregator-nozzle-shard-id.yml
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml

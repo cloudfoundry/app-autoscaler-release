@@ -1,0 +1,5 @@
+# This can be used to make the Loggregator nozzle of the autoscaler unique and is primarily used in our CI where multiple deployments run at the same time in the same CF foundation.
+---
+- type: replace
+  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/nozzle/shard_id?
+  value: CF_AUTOSCALER_((deployment_name))

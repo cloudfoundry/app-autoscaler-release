@@ -2,6 +2,7 @@
   "packages": [
     "path:local-flake#bosh-bootloader",
     "path:local-flake#app-autoscaler-cli-plugin",
+    "path:local-flake#log-cache-cli-plugin",
     "credhub-cli@latest",
     "delve@latest",
     "gh@latest",
@@ -31,11 +32,13 @@
     "ginkgo@latest",
     "temurin-bin-17@latest",
     "ruby@latest",
-    "shellcheck@0.10.0"
+    "shellcheck@0.10.0",
+    "hey@latest"
   ],
   "shell": {
     "init_hook": [
-      "cf install-plugin -f $(which app-autoscaler-cli-plugin)"
+      "cf install-plugin -f $(which app-autoscaler-cli-plugin)",
+      "cf install-plugin -f $(which log-cache-cli)"
     ],
     "scripts": {
       "test": [
