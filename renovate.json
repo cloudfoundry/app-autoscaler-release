@@ -2,129 +2,192 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:best-practices",
-    "regexManagers:dockerfileVersions",
+    "customManagers:dockerfileVersions",
     ":label(dependencies)",
     ":automergeAll",
     "schedule:nonOfficeHours"
   ],
   "transitiveRemediation": true,
-  "postUpdateOptions": ["gomodTidy", "gomodUpdateImportPaths"],
+  "postUpdateOptions": [
+    "gomodTidy",
+    "gomodUpdateImportPaths"
+  ],
   "platformAutomerge": true,
   "automergeStrategy": "squash",
   "prConcurrentLimit": 2,
   "packageRules": [
     {
       "description": "Opt-out minimum Go version updates: https://github.com/renovatebot/renovate/issues/16715",
-      "matchManagers": ["gomod"],
-      "matchDepTypes": ["golang"],
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepTypes": [
+        "golang"
+      ],
       "enabled": false
     },
     {
       "description": "Disable asdf Go version updates, as they are taken care by our bosh-package-golang-release-based automation",
-      "matchManagers": ["asdf"],
-      "matchDepNames": ["golang"],
+      "matchManagers": [
+        "asdf"
+      ],
+      "matchDepNames": [
+        "golang"
+      ],
       "enabled": false
     },
     {
       "description": "Strip of v prefix from version number in certain github releases",
-      "matchPackageNames": ["bosh-cli"],
+      "matchPackageNames": [
+        "bosh-cli"
+      ],
       "extractVersion": "^v(?<version>.*)$"
     },
     {
       "description": "Group Ginkgo CLI and library updates together",
       "groupName": "ginkgo updates",
-      "matchPackagePatterns": ["onsi/ginkgo"]
+      "matchPackagePatterns": [
+        "onsi/ginkgo"
+      ]
     }
   ],
-  "nix": {"enabled": true},
+  "nix": {
+    "enabled": true
+  },
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)act (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)act (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "nektos/act",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)actionlint (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)actionlint (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "rhysd/actionlint",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)bosh (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)bosh (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "cloudfoundry/bosh-cli",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)cf (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)cf (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "cloudfoundry/cli",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)gcloud (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)gcloud (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "google/cloud-sdk",
       "datasourceTemplate": "docker"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)ginkgo (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)ginkgo (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "onsi/ginkgo",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)golangci-lint (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)golangci-lint (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "golangci/golangci-lint",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)maven (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)maven (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "apache/maven",
       "datasourceTemplate": "github-releases"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)terraform-lsp (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)terraform-lsp (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "juliosueiras/terraform-lsp",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)terragrunt (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)terragrunt (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "gruntwork-io/terragrunt",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     },
     {
       "customType": "regex",
-      "fileMatch": ["\\.tool-versions$"],
-      "matchStrings": ["(^|\\n)yq (?<currentValue>.+?)\\n"],
+      "fileMatch": [
+        "\\.tool-versions$"
+      ],
+      "matchStrings": [
+        "(^|\\n)yq (?<currentValue>.+?)\\n"
+      ],
       "depNameTemplate": "mikefarah/yq",
       "datasourceTemplate": "github-releases",
       "extractVersionTemplate": "^v(?<version>\\S+)"
     }
   ],
-  "lockFileMaintenance": {"enabled": true},
+  "lockFileMaintenance": {
+    "enabled": true
+  },
   "timezone": "Europe/Berlin"
 }
