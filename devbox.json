@@ -3,6 +3,7 @@
     "path:local-flake#bosh-bootloader",
     "path:local-flake#app-autoscaler-cli-plugin",
     "path:local-flake#log-cache-cli-plugin",
+    "path:local-flake#uaac",
     "credhub-cli@latest",
     "delve@latest",
     "gh@latest",
@@ -27,13 +28,14 @@
     "python@latest",
     "cloudfoundry-cli@8.7.10",
     "shellcheck@0.10.0",
-    "hey@latest",
     "act@0.2.62",
     "go@1.21.5",
     "ruby@3.3.1",
     "ginkgo@2.17.3",
     "google-cloud-sdk@latest",
-    "temurin-bin-17@latest"
+    "temurin-bin-17@latest",
+    "bundix@latest",
+    "oha@latest"
   ],
   "shell": {
     "init_hook": [
