@@ -89,6 +89,5 @@ function unset_vars() {
   unset SERVICE_NAME
   unset SERVICE_BROKER_NAME
   unset NAME_PREFIX
-  unset SERVICE_OFFERING_ENABLED
   unset GINKGO_OPTS
 }

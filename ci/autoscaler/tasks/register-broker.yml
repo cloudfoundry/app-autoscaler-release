@@ -9,7 +9,6 @@ image_resource:
 
 params:
   SYSTEM_DOMAIN:
-  SERVICE_OFFERING_ENABLED: false
   SKIP_SSL_VALIDATION: false
   AUTOSCALER_DIR: app-autoscaler-release
 
