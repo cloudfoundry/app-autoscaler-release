@@ -22,7 +22,6 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 		appGUID, err = GetAppGuid(cfg, appName)
 		Expect(err).NotTo(HaveOccurred())
 		_ = CreatePolicy(cfg, appName, appGUID, policy)
-		CreateCustomMetricCred(cfg, appName, appGUID)
 		StartApp(appName, cfg.CfPushTimeoutDuration())
 	})
 

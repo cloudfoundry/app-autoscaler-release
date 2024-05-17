@@ -102,7 +102,6 @@ func pushAppAndBindService(appName string, runningApps *int32, pendingApps *sync
 		errors.Store(appName, err)
 		return
 	}
-	helpers.CreateCustomMetricCred(cfg, appName, appGUID)
 	err = helpers.StartAppWithErr(appName, cfg.CfPushTimeoutDuration())
 	if err != nil {
 		errors.Store(appName, err)

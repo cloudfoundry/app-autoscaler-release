@@ -56,9 +56,7 @@ var _ = BeforeSuite(func() {
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	setup.Setup()
 
-	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-	}
+	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 })
 
 var _ = AfterSuite(func() {

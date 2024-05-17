@@ -4,10 +4,7 @@ import (
 	"acceptance/config"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cloudfoundry/cf-test-helpers/v2/cf"
@@ -70,8 +67,7 @@ type cfResource struct {
 }
 
 const (
-	CustomMetricPath    = "/v1/apps/{appId}/credential"
-	CustomMetricCredEnv = "AUTO_SCALER_CUSTOM_METRIC_ENV" // #nosec G101
+	CustomMetricPath = "/v1/apps/{appId}/credential"
 )
 
 func GetServices(cfg *config.Config, orgGuid, spaceGuid string) []string {
@@ -101,48 +97,12 @@ func getRawServicesByPage(spaceGuid string, orgGuid string, page int, timeout ti
 	Expect(err).ShouldNot(HaveOccurred())
 	return appsResponse
 }
-func CreateCustomMetricCred(cfg *config.Config, appName, appGUID string) {
-	GinkgoHelper()
-	if !cfg.IsServiceOfferingEnabled() {
-		oauthToken := OauthToken(cfg)
-		customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
-		req, err := http.NewRequest("PUT", customMetricURL, nil)
-		Expect(err).ShouldNot(HaveOccurred())
-		req.Header.Add("Authorization", oauthToken)
-
-		//TODO ... this wont scale to 1000 apps at once
-		resp, err := GetHTTPClient(cfg).Do(req)
-		Expect(err).ShouldNot(HaveOccurred())
-		defer func() { _ = resp.Body.Close() }()
-		Expect(resp.StatusCode).To(Equal(http.StatusOK))
-		bodyBytes, err := io.ReadAll(resp.Body)
-		Expect(err).NotTo(HaveOccurred())
-		setEnv := cf.Cf("set-env", appName, CustomMetricCredEnv, string(bodyBytes)).Wait(cfg.DefaultTimeoutDuration())
-		Expect(setEnv).To(Exit(0), "failed set custom metric credential env")
-	}
-}
-
-func DeleteCustomMetricCred(cfg *config.Config, appGUID string) {
-	if !cfg.IsServiceOfferingEnabled() {
-		oauthToken := OauthToken(cfg)
-		customMetricURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(CustomMetricPath, "{appId}", appGUID, -1))
-		req, err := http.NewRequest("DELETE", customMetricURL, nil)
-		Expect(err).ShouldNot(HaveOccurred())
-		req.Header.Add("Authorization", oauthToken)
-
-		resp, err := GetHTTPClient(cfg).Do(req)
-		Expect(err).ShouldNot(HaveOccurred())
-		defer func() { _ = resp.Body.Close() }()
-	}
-}
 
 func DeleteService(cfg *config.Config, instanceName, appName string) {
-	if cfg.IsServiceOfferingEnabled() {
-		if appName != "" && instanceName != "" {
-			UnbindService(cfg, instanceName, appName)
-		}
-		DeleteServiceInstance(cfg, instanceName)
+	if appName != "" && instanceName != "" {
+		UnbindService(cfg, instanceName, appName)
 	}
+	DeleteServiceInstance(cfg, instanceName)
 }
 
 func DeleteServiceInstance(cfg *config.Config, instanceName string) {

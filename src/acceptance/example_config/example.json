@@ -10,6 +10,5 @@
   "service_plan": "autoscaler-free-plan",
   "aggregate_interval": 40,
 
-  "autoscaler_api": "autoscaler.bosh-lite.com",
-  "service_offering_enabled": true
+  "autoscaler_api": "autoscaler.bosh-lite.com"
 }

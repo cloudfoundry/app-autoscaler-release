@@ -5,7 +5,6 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
 cf_admin_password="${CF_ADMIN_PASSWORD:-}"
-service_offering_enabled="${SERVICE_OFFERING_ENABLED:-true}"
 skip_ssl_validation="${SKIP_SSL_VALIDATION:-true}"
 skip_teardown="${SKIP_TEARDOWN:-false}"
 use_existing_organization="${USE_EXISTING_ORGANIZATION:-false}"
@@ -56,7 +55,6 @@ cat > acceptance_config.json <<EOF
 	"cpu_upper_threshold": ${cpu_upper_threshold},
   "name_prefix": "${name_prefix}",
   "autoscaler_api": "${deployment_name}.${system_domain}",
-  "service_offering_enabled": ${service_offering_enabled},
 
   "performance": {
     "app_count": ${performance_app_count},

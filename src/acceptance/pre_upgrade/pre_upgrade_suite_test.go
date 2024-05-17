@@ -39,7 +39,5 @@ var _ = BeforeSuite(func() {
 	setup.Setup()
 	EnableServiceAccess(setup, cfg, setup.GetOrganizationName())
 
-	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-	}
+	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 })
