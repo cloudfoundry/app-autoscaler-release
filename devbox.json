@@ -29,11 +29,11 @@
     "shellcheck@0.10.0",
     "hey@latest",
     "act@0.2.62",
-    "google-cloud-sdk@latest",
-    "ginkgo@2.17.2",
     "go@1.21.5",
-    "temurin-bin-17@latest",
-    "ruby@3.3.1"
+    "ruby@3.3.1",
+    "google-cloud-sdk@latest",
+    "ginkgo@2.17.3",
+    "temurin-bin-17@latest"
   ],
   "shell": {
     "init_hook": [
