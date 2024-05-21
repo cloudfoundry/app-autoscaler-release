@@ -31,8 +31,8 @@
     "act@0.2.62",
     "go@1.21.5",
     "ruby@3.3.1",
-    "google-cloud-sdk@latest",
     "ginkgo@2.17.3",
+    "google-cloud-sdk@latest",
     "temurin-bin-17@latest"
   ],
   "shell": {

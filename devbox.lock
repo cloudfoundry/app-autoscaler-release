@@ -483,6 +483,16 @@
       "source": "devbox-search",
       "version": "475.0.0",
       "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/in7z3zdbn8q6ldlnk71iizk7wph5d7wg-google-cloud-sdk-475.0.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/in7z3zdbn8q6ldlnk71iizk7wph5d7wg-google-cloud-sdk-475.0.0"
+        },
         "aarch64-linux": {
           "outputs": [
             {
@@ -492,6 +502,16 @@
             }
           ],
           "store_path": "/nix/store/54nfb97icp62kd1q8vd11wlgnm59nbx2-google-cloud-sdk-475.0.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/2liav3if8831hj5d76dm46g9pgg1cxgp-google-cloud-sdk-475.0.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/2liav3if8831hj5d76dm46g9pgg1cxgp-google-cloud-sdk-475.0.0"
         },
         "x86_64-linux": {
           "outputs": [
@@ -1082,11 +1102,11 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/b4r7prgcvyyw0w5kanrh5xs5khis0j2s-temurin-bin-17.0.9",
+              "path": "/nix/store/5wm01i1h0i2c4sknbh5mwkiv97k75f5n-temurin-bin-17.0.9",
               "default": true
             }
           ],
-          "store_path": "/nix/store/b4r7prgcvyyw0w5kanrh5xs5khis0j2s-temurin-bin-17.0.9"
+          "store_path": "/nix/store/5wm01i1h0i2c4sknbh5mwkiv97k75f5n-temurin-bin-17.0.9"
         },
         "aarch64-linux": {
           "outputs": [
