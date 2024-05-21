@@ -184,7 +184,6 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/internal/descopts/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/detrand/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/editiondefaults/* # gosub
-- autoscaler/vendor/google.golang.org/protobuf/internal/editionssupport/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/defval/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/json/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/encoding/messageset/* # gosub
