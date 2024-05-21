@@ -5,6 +5,7 @@
   path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/syslog?
   value:
     server_address: log-cache.service.cf.internal
-    ca: ((/bosh-autoscaler/cf/log_cache_syslog_tls.ca))
-    cert: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.certificate))
-    key: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.private_key))
+    tls:
+      ca: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.ca))
+      cert: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.certificate))
+      key: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.private_key))
