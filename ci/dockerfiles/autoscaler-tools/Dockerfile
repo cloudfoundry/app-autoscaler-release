@@ -46,7 +46,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 
 # install golang
 # renovate: datasource=golang-version depName=golang
-ARG GO_VERSION=1.22.3
+ARG GO_VERSION=1.22.2
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
@@ -78,7 +78,7 @@ RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${
 
 # Install credhub
 # renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
-ARG CREDHUB_VERSION=2.9.30
+ARG CREDHUB_VERSION=2.9.29
 RUN wget -q https://github.com/cloudfoundry/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   mv credhub /usr/local/bin/credhub &&\
@@ -130,7 +130,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
   gcloud version
 
 # renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
-ARG GINKGO_VERSION=v2.17.3
+ARG GINKGO_VERSION=v2.17.2
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} && \
     ginkgo version
 
