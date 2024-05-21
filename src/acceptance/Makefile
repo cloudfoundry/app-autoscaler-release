@@ -66,7 +66,4 @@ test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
 lint:
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
-
-lint-fix:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --fix
+	@cd ../../; make lint_acceptance OPTS=${OPTS}

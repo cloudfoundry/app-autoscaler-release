@@ -15,7 +15,7 @@ describe "metricsforwarder" do
     it "supports syslog forwarding" do
       properties["autoscaler"]["metricsforwarder"] = {
         "syslog" => {
-          "server_address" => "syslog-server",
+          "server_address" => "syslog-server"
         }
       }
 
@@ -24,16 +24,15 @@ describe "metricsforwarder" do
           "syslog" => {
             "server_address" => "syslog-server",
             "port" => 6067,
-            "tls" =>  {
+            "tls" => {
               "key_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.key",
               "cert_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.crt",
-              "ca_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/loggregator_ca.crt",
+              "ca_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/loggregator_ca.crt"
             }
           }
         }
       )
     end
-
 
     it "does not set username nor password if not configured" do
       properties["autoscaler"]["metricsforwarder"] = {
@@ -65,13 +64,10 @@ describe "metricsforwarder" do
         )
     end
 
-
     it "has a cred helper impl by default" do
-      expect(rendered_template).to include(
-        {
-          "cred_helper_impl" => "default"
-        }
-      )
+      expect(rendered_template).to include({
+        "cred_helper_impl" => "default"
+      })
     end
 
     it "has a cred helper impl configured for stored procedures" do
