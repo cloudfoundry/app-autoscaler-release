@@ -16,6 +16,10 @@ templates:
   metron_client.crt.erb: config/certs/metron_client/client.crt
   metron_client.key.erb: config/certs/metron_client/client.key
 
+  syslog_client_ca.crt.erb: config/certs/syslog_client/ca.crt
+  syslog_client.crt.erb: config/certs/syslog_client/client.crt
+  syslog_client.key.erb: config/certs/syslog_client/client.key
+
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
@@ -49,6 +53,13 @@ properties:
   autoscaler.metricsforwarder.syslog.port:
     description: "port where the syslog server is running"
     default: "6067"
+
+  autoscaler.metricsforwarder.syslog.tls.cert:
+    description: "PEM-encoded tls client certificate to connect to syslog ingress client"
+  autoscaler.metricsforwarder.syslog.tls.key:
+    description: "PEM-encoded tls client key to connect to syslog ingress client"
+  autoscaler.metricsforwarder.syslog.tls.ca_cert:
+    description: "PEM-encoded ca certificate of syslog ingress client"
 
   autoscaler.metricsforwarder.loggregator.metron_address:
     description: "IP address and port where the metron agent is running"
