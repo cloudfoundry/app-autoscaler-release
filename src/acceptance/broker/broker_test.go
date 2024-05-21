@@ -164,7 +164,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		})
 	})
 
-	It("should update service instance from autoscaler-free-plan to acceptance-standard", func() {
+	It("should update a service instance from the first plan to the second plan", func() {
 		plans := getPlans()
 		if plans.length() < 2 {
 			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
@@ -177,18 +177,14 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		service.delete()
 	})
 
-	It("should fail to update service instance from acceptance-standard to first", func() {
+	It("should fail to update a service instance from the second plan to the first plan", func() {
 		plans := getPlans()
 		if plans.length() < 2 {
 			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
 			return
 		}
-		if !plans.contains("acceptance-standard") {
-			Skip(fmt.Sprintf("Acceptance test standard plan required plans:%+v", plans))
-			return
-		}
 
-		service := createService("acceptance-standard")
+		service := createService(plans[1])
 		updateService := service.updatePlanRaw(plans[0])
 		Expect(updateService).To(Exit(1), "failed updating service")
 
@@ -210,14 +206,6 @@ func isCFVersion7() bool {
 type plans []string
 
 func (p plans) length() int { return len(p) }
-func (p plans) contains(planName string) bool {
-	for _, plan := range p {
-		if plan == planName {
-			return true
-		}
-	}
-	return false
-}
 
 func getPlans() plans {
 	values := url2.Values{
