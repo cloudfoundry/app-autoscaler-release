@@ -19,7 +19,6 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
   ${autoscaler_dir}/operations/configure-log-cache-and-forward-metrics-via-mtls.yml\
   ${autoscaler_dir}/operations/remove-metricsserver.yml\
   ${autoscaler_dir}/operations/remove-metricsgateway.yml\
-  ${autoscaler_dir}/operations/remove-postgres-tls.yml\
   ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml\
   ${autoscaler_dir}/operations/enable-metricsforwarder-syslog.yml\
   ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
