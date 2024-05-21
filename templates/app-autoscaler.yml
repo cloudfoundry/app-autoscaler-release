@@ -159,10 +159,8 @@ instance_groups:
     - name: postgres
       release: postgres
       properties:
-        databases: &database
-          # property is not in https://bosh.io/jobs/postgres?source=github.com/cloudfoundry/postgres-release&version=48
-          # sslmode: verify-full
-          sslmode: disable
+        databases: &database   
+          sslmode: verify-full
           tls: &db_tls
             ca: ((postgres_ca.ca))
             certificate: ((postgres_server.certificate))
