@@ -168,10 +168,8 @@ instance_groups:
           databases:
             - name: autoscaler
               tag: default
-          # property is not in https://bosh.io/jobs/postgres?source=github.com/cloudfoundry/postgres-release&version=48
           db_scheme: postgres
           address: *postgres_domain
-          # property default value is already 5432 https://bosh.io/jobs/postgres?source=github.com/cloudfoundry/postgres-release&version=48
           port: 5432
           roles:
             - name: postgres
