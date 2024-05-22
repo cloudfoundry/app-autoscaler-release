@@ -58,6 +58,54 @@
           ldflags = ["-s" "-w" "-X main.version=${version}"];
         };
 
+        mbt = nixpkgsFor.${system}.buildGoModule rec {
+          pname = "Cloud MTA Build Tool";
+          version = "1.2.26";
+
+          src = nixpkgsFor.${system}.fetchFromGitHub {
+            owner = "SAP";
+            repo = "cloud-mta-build-tool";
+            rev = "v${version}";
+            hash = "sha256-DKZ9Nj/sNC9dRjyiu4MKjLrIJWluYlZzUHWqEqtrNt4=";
+          };
+
+          vendorHash = "sha256-h8LPsuxvbr/aRhH1vR1fYgBot37yrfiemZTJMKj0zbk=";
+
+          ldflags = ["-s" "-w" "-X main.Version=${version}"];
+
+          doCheck = false;
+
+          postInstall = ''
+            pushd "$out/bin" &> /dev/null
+              ln -s 'cloud-mta-build-tool' 'mbt'
+            popd
+          '';
+        };
+
+        sap-piper = nixpkgsFor.${system}.buildGoModule rec {
+          pname = "Project Piper";
+          version = "1.360.0";
+
+          src = nixpkgsFor.${system}.fetchFromGitHub {
+            owner = "SAP";
+            repo = "jenkins-library";
+            rev = "v${version}";
+            hash = "sha256-eCg9fgP4pIhbW8zkg6izHb6V1VrkA+4hUCNvjMYOagI=";
+          };
+
+          vendorHash = "sha256-qCoz6jGoqGYsTYumrdy4RA3LdVwaMhS+vcCK2n970eg=";
+
+          ldflags = ["-s" "-w" "-X github.com/SAP/jenkins-library/cmd.GitTag=v${version}"];
+
+          doCheck = false;
+
+          postInstall = ''
+            pushd "$out/bin" &> /dev/null
+              ln -s 'jenkins-library' 'piper'
+            popd
+          '';
+        };
+
         uaac =  nixpkgsFor.${system}.bundlerApp rec {
           pname = "cf-uaac";
           gemdir = ./.;
