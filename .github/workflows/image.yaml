@@ -15,8 +15,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
   build-and-push-devbox-image:
     runs-on: ubuntu-latest
@@ -24,6 +22,8 @@ jobs:
       contents: read
       packages: write
     name: Build and Push app-autoscaler-release-devbox
+    env:
+      IMAGE_NAME: ${{ github.repository }}-devbox
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-devbox
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push
         id: build-and-push
@@ -50,7 +50,7 @@ jobs:
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-devbox:main
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
 
   build-and-push-image:
     runs-on: ubuntu-latest
@@ -64,6 +64,8 @@ jobs:
       matrix:
         image_suffix: ["tools"]
     name: Build and Push app-autoscaler-release-${{ matrix.image_suffix }}
+    env:
+      IMAGE_NAME: ${{ github.repository }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
