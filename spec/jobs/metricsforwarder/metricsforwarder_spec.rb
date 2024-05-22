@@ -25,9 +25,9 @@ describe "metricsforwarder" do
             "server_address" => "syslog-server",
             "port" => 6067,
             "tls" => {
-              "key_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.key",
-              "cert_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/syslog_agent.crt",
-              "ca_file" => "/var/vcap/jobs/loggr-syslog-agent/config/certs/loggregator_ca.crt"
+              "key_file" => "/var/vcap/jobs/metricsforwarder/config/certs/syslog_client/client.key",
+              "cert_file" => "/var/vcap/jobs/metricsforwarder/config/certs/syslog_client/client.crt",
+              "ca_file" => "/var/vcap/jobs/metricsforwarder/config/certs/syslog_client/ca.crt"
             }
           }
         }
