@@ -3,10 +3,7 @@
     "path:local-flake#bosh-bootloader":           "",
     "path:local-flake#app-autoscaler-cli-plugin": "",
     "path:local-flake#log-cache-cli-plugin":      "",
-    "path:local-flake#mbt":                       "",
-    "path:local-flake#sap-piper": {
-      "platforms": ["x86_64-linux"]
-    },
+    "path:local-flake#cloud-mta-build-tool":      "",
     "path:local-flake#uaac":                      "",
     "credhub-cli":                                "latest",
     "delve":                                      "latest",
