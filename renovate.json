@@ -85,18 +85,6 @@
         "\\.tool-versions$"
       ],
       "matchStrings": [
-        "(^|\\n)bosh (?<currentValue>.+?)\\n"
-      ],
-      "depNameTemplate": "cloudfoundry/bosh-cli",
-      "datasourceTemplate": "github-releases",
-      "extractVersionTemplate": "^v(?<version>\\S+)"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "\\.tool-versions$"
-      ],
-      "matchStrings": [
         "(^|\\n)cf (?<currentValue>.+?)\\n"
       ],
       "depNameTemplate": "cloudfoundry/cli",
