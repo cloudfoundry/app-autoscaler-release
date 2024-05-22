@@ -4,3 +4,15 @@
 - type: replace
   path: /instance_groups/name=postgres/jobs/name=postgres/properties/databases/sslmode
   value: disable
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/policy_db/sslmode
+  value: disable
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine_db/sslmode
+  value: disable
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scheduler_db/sslmode
+  value: disable
