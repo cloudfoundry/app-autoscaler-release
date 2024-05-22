@@ -39,11 +39,6 @@
     "init_hook": [
       "cf install-plugin -f $(which app-autoscaler-cli-plugin)",
       "cf install-plugin -f $(which log-cache-cli)"
-    ],
-    "scripts": {
-      "test": [
-        "echo \"Error: no test specified\" && exit 1"
-      ]
-    }
+    ]
   }
 }
