@@ -47,9 +47,7 @@ var _ = BeforeSuite(func() {
 		updateOrgQuotaForPerformanceTest(orgGuid)
 	})
 
-	if cfg.IsServiceOfferingEnabled() {
-		CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
-	}
+	CheckServiceExists(cfg, setup.TestSpace.SpaceName(), cfg.ServiceName)
 
 	fmt.Print("\ncreating droplet...")
 	nodeAppDropletPath = CreateDroplet(cfg)

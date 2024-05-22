@@ -96,7 +96,7 @@ func OauthToken(cfg *config.Config) string {
 }
 
 func EnableServiceAccess(setup *workflowhelpers.ReproducibleTestSuiteSetup, cfg *config.Config, orgName string) {
-	if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+	if cfg.ShouldEnableServiceAccess() {
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			if orgName == "" {
 				Fail(fmt.Sprintf("Org must not be an empty string. Using broker:%s, serviceName:%s", cfg.ServiceBroker, cfg.ServiceName))
@@ -108,7 +108,7 @@ func EnableServiceAccess(setup *workflowhelpers.ReproducibleTestSuiteSetup, cfg 
 }
 
 func DisableServiceAccess(cfg *config.Config, setup *workflowhelpers.ReproducibleTestSuiteSetup) {
-	if cfg.IsServiceOfferingEnabled() && cfg.ShouldEnableServiceAccess() {
+	if cfg.ShouldEnableServiceAccess() {
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			orgName := setup.GetOrganizationName()
 			enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
@@ -118,36 +118,34 @@ func DisableServiceAccess(cfg *config.Config, setup *workflowhelpers.Reproducibl
 }
 
 func CheckServiceExists(cfg *config.Config, spaceName, serviceName string) {
-	if cfg.IsServiceOfferingEnabled() {
-		spaceCmd := cf.Cf("space", spaceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
-		Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
-		spaceGuid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
+	spaceCmd := cf.Cf("space", spaceName, "--guid").Wait(cfg.DefaultTimeoutDuration())
+	Expect(spaceCmd).To(Exit(0), fmt.Sprintf("Space, %s, does not exist", spaceName))
+	spaceGuid := strings.TrimSpace(strings.Trim(string(spaceCmd.Out.Contents()), "\n"))
 
-		serviceCmd := cf.CfSilent("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
-		if serviceCmd.ExitCode() != 0 {
-			Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
-		}
-
-		var services = struct {
-			Included struct {
-				ServiceOfferings []struct{ Name string } `json:"service_offerings"`
-			}
-		}{}
-		contents := serviceCmd.Out.Contents()
-		err := json.Unmarshal(contents, &services)
-		if err != nil {
-			AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
-		}
-		GinkgoWriter.Printf("\nFound services: %s\n", services.Included.ServiceOfferings)
-		for _, service := range services.Included.ServiceOfferings {
-			if service.Name == serviceName {
-				return
-			}
-		}
-
-		cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
-		Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
+	serviceCmd := cf.CfSilent("curl", "-f", ServicePlansUrl(cfg, spaceGuid)).Wait(cfg.DefaultTimeoutDuration())
+	if serviceCmd.ExitCode() != 0 {
+		Fail(fmt.Sprintf("Failed get broker information for serviceName=%s spaceName=%s", cfg.ServiceName, spaceName))
 	}
+
+	var services = struct {
+		Included struct {
+			ServiceOfferings []struct{ Name string } `json:"service_offerings"`
+		}
+	}{}
+	contents := serviceCmd.Out.Contents()
+	err := json.Unmarshal(contents, &services)
+	if err != nil {
+		AbortSuite(fmt.Sprintf("Failed to parse service plan json: %s\n\n'%s'", err.Error(), string(contents)))
+	}
+	GinkgoWriter.Printf("\nFound services: %s\n", services.Included.ServiceOfferings)
+	for _, service := range services.Included.ServiceOfferings {
+		if service.Name == serviceName {
+			return
+		}
+	}
+
+	cf.Cf("marketplace", "-e", cfg.ServiceName).Wait(cfg.DefaultTimeoutDuration())
+	Fail(fmt.Sprintf("Could not find service %s in space %s", serviceName, spaceName))
 }
 
 func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
@@ -472,17 +470,13 @@ func CreatePolicyWithErr(cfg *config.Config, appName, appGUID, policy string) (s
 
 func createPolicy(cfg *config.Config, appName, appGUID, policy string) (string, error) {
 	GinkgoHelper()
-	if cfg.IsServiceOfferingEnabled() {
-		instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
-		err := Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
-		if err != nil {
-			return instanceName, err
-		}
-		err = Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
+	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
+	err := Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
+	if err != nil {
 		return instanceName, err
 	}
-	CreatePolicyWithAPI(cfg, appGUID, policy)
-	return "", nil
+	err = Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return BindServiceToAppWithPolicy(cfg, appName, instanceName, policy) })
+	return instanceName, err
 }
 
 func BindServiceToApp(cfg *config.Config, appName string, instanceName string) {
@@ -493,17 +487,15 @@ func BindServiceToApp(cfg *config.Config, appName string, instanceName string) {
 func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName string, policy string) error {
 	var err error
 
-	if cfg.IsServiceOfferingEnabled() {
-		args := []string{"bind-service", appName, instanceName}
-		if policy != "" {
-			args = append(args, "-c", policy)
-		}
-		bindService := cf.Cf(args...).Wait(cfg.DefaultTimeoutDuration())
+	args := []string{"bind-service", appName, instanceName}
+	if policy != "" {
+		args = append(args, "-c", policy)
+	}
+	bindService := cf.Cf(args...).Wait(cfg.DefaultTimeoutDuration())
 
-		if bindService.ExitCode() != 0 {
-			err = fmt.Errorf("failed binding service %s to app %s. \n Command Error: %s %s",
-				instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents())
-		}
+	if bindService.ExitCode() != 0 {
+		err = fmt.Errorf("failed binding service %s to app %s. \n Command Error: %s %s",
+			instanceName, appName, bindService.Buffer().Contents(), bindService.Err.Contents())
 	}
 
 	return err
@@ -520,18 +512,17 @@ func CreateServiceWithPlan(cfg *config.Config, servicePlan string, instanceName 
 }
 
 func CreateServiceWithPlanAndParameters(cfg *config.Config, servicePlan string, defaultPolicy string, instanceName string) (err error) {
-	if cfg.IsServiceOfferingEnabled() {
-		cfCommand := []string{"create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker}
-		if defaultPolicy != "" {
-			cfCommand = append(cfCommand, "-c", defaultPolicy)
-		}
-		createService := cf.Cf(cfCommand...).Wait(cfg.DefaultTimeoutDuration())
-
-		if createService.ExitCode() != 0 {
-			err = fmt.Errorf("Failed to create service instance %s on service %s \n Command Error: %s %s",
-				instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
-		}
+	cfCommand := []string{"create-service", cfg.ServiceName, servicePlan, instanceName, "-b", cfg.ServiceBroker}
+	if defaultPolicy != "" {
+		cfCommand = append(cfCommand, "-c", defaultPolicy)
 	}
+	createService := cf.Cf(cfCommand...).Wait(cfg.DefaultTimeoutDuration())
+
+	if createService.ExitCode() != 0 {
+		err = fmt.Errorf("Failed to create service instance %s on service %s \n Command Error: %s %s",
+			instanceName, cfg.ServiceName, createService.Buffer().Contents(), createService.Err.Contents())
+	}
+
 	return err
 }
 
@@ -636,4 +627,10 @@ func FailOnCommandFailuref(command *Session, format string, args ...any) *Sessio
 		Fail(fmt.Sprintf(format, args...))
 	}
 	return command
+}
+
+func SetLabel(cfg *config.Config, appGUID string, labelKey string, labelValue string) {
+	GinkgoHelper()
+	cmd := cf.Cf("curl", "--fail", fmt.Sprintf("/v3/apps/%s", appGUID), "-X", "PATCH", "-d", fmt.Sprintf(`{"metadata": {"labels": {"%s": "%s"}}}`, labelKey, labelValue)).Wait(cfg.DefaultTimeoutDuration())
+	Expect(cmd).To(Exit(0))
 }

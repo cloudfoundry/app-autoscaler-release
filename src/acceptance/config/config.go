@@ -71,9 +71,8 @@ type Config struct {
 	CfJavaTimeout   int `json:"cf_java_timeout"`
 	NodeMemoryLimit int `json:"node_memory_limit"`
 
-	ASApiEndpoint          string `json:"autoscaler_api"`
-	ServiceOfferingEnabled bool   `json:"service_offering_enabled"`
-	EnableServiceAccess    bool   `json:"enable_service_access"`
+	ASApiEndpoint       string `json:"autoscaler_api"`
+	EnableServiceAccess bool   `json:"enable_service_access"`
 
 	EventgeneratorHealthEndpoint   string `json:"eventgenerator_health_endpoint"`
 	ScalingengineHealthEndpoint    string `json:"scalingengine_health_endpoint"`
@@ -118,7 +117,6 @@ var defaults = Config{
 
 	CfJavaTimeout:                   10,  // minutes
 	NodeMemoryLimit:                 128, // MB
-	ServiceOfferingEnabled:          true,
 	EnableServiceAccess:             true,
 	HealthEndpointsBasicAuthEnabled: true,
 	CPUUpperThreshold:               100,
@@ -387,10 +385,6 @@ func (c *Config) GetAdminOrigin() string {
 
 func (c *Config) GetApiEndpoint() string {
 	return c.ApiEndpoint
-}
-
-func (c *Config) IsServiceOfferingEnabled() bool {
-	return c.ServiceOfferingEnabled
 }
 
 func (c *Config) ShouldEnableServiceAccess() bool {

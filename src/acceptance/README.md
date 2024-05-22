@@ -44,7 +44,6 @@ cat > integration_config.json <<EOF
   "health_endpoints_basic_auth_enabled": false,
 
   "autoscaler_api": "autoscaler.bosh-lite.com",
-  "service_offering_enabled": true
 }
 EOF
 export CONFIG=$PWD/integration_config.json
@@ -63,7 +62,6 @@ The full set of config parameters is explained below:
 | **admin_password**                                  |  required   |                    | Password of the admin user above.                                                                                                                                                                                                                                                                                            |
 | **apps_domain**                                     |  required   |                    | A shared domain that tests can use to create subdomains that will route to applications also craeted in the tests.                                                                                                                                                                                                           |
 | **health_endpoints_basic_auth_enabled**             |  optional   |        true        | Set to false if you did not enable basic auth on the health endpoints. Default is true.                                                                                                                                                                                                                                      |
-| **service_offering_enabled**                        |  optional   |        true        | Set to true if auto-scaler is offered as a cloudfoundry service. The value should be the consistent with the one in app-autoscaler deployment. Default is true.                                                                                                                                                              |
 | **enable_service_access**                           |  optional   |        true        | Set to false if autoscaler is offered as a cloudfoundry service which is globally enabled. Default is true.                                                                                                                                                                                                                  |
 | **skip_ssl_validation**                             |  optional   |       false        | Set to true if using an invalid (e.g. self-signed) cert for traffic routed to your CF instance; this is generally always true for BOSH-Lite deployments of CF.                                                                                                                                                               |
 | **use_existing_user**                               |  optional   |       false        | The admin user configured above will normally be used to create a temporary user (with lesser permissions) to perform actions (such as push applications) during tests, and then delete said user after the tests have run; set this to `true` if you want to use an existing user, configured via the following properties. |

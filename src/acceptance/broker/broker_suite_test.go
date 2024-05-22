@@ -31,9 +31,6 @@ var _ = BeforeSuite(func() {
 	if cfg.GetArtifactsDirectory() != "" {
 		helpers.EnableCFTrace(cfg, componentName)
 	}
-	if !cfg.IsServiceOfferingEnabled() {
-		Skip("Skipping due to tests needing a service offering enabled")
-	}
 
 	setup = workflowhelpers.NewTestSuiteSetup(cfg)
 	setup.Setup()

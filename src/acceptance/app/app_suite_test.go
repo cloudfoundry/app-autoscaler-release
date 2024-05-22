@@ -62,9 +62,7 @@ func AppAfterEach() {
 		DebugInfo(cfg, setup, appName)
 		if appName != "" {
 			DeleteService(cfg, instanceName, appName)
-			DeletePolicy(appGUID)
 			DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
-			DeleteCustomMetricCred(cfg, appGUID)
 		}
 	}
 }
@@ -102,10 +100,4 @@ func DeletePolicyWithAPI(appGUID string) {
 	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(resp.Body)
 	Expect(resp.StatusCode).To(Equal(http.StatusOK), "Failed to delete policy '%s'", string(body))
-}
-
-func DeletePolicy(appGUID string) {
-	if !cfg.IsServiceOfferingEnabled() {
-		DeletePolicyWithAPI(appGUID)
-	}
 }
