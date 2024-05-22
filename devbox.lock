@@ -69,51 +69,51 @@
         }
       }
     },
-    "bosh-cli@7.5.6": {
-      "last_modified": "2024-04-19T17:36:04-04:00",
-      "resolved": "github:NixOS/nixpkgs/92d295f588631b0db2da509f381b4fb1e74173c5#bosh-cli",
+    "bosh-cli@7.3.1": {
+      "last_modified": "2023-08-22T06:04:29Z",
+      "resolved": "github:NixOS/nixpkgs/9d757ec498666cc1dcc6f2be26db4fd3e1e9ab37#bosh-cli",
       "source": "devbox-search",
-      "version": "7.5.6",
+      "version": "7.3.1",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/p2sm9lj0jlikhh69xi55larmyqh61ryw-bosh-cli-7.5.6",
+              "path": "/nix/store/qknp5ly60n24vnschjsqj7xddnbw2law-bosh-cli-7.3.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/p2sm9lj0jlikhh69xi55larmyqh61ryw-bosh-cli-7.5.6"
+          "store_path": "/nix/store/qknp5ly60n24vnschjsqj7xddnbw2law-bosh-cli-7.3.1"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/w3sby9zipmphdgsjd2xbaqna9qsb3db1-bosh-cli-7.5.6",
+              "path": "/nix/store/64nwkd5lk1370a0n5jw6xz35gbc97zws-bosh-cli-7.3.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/w3sby9zipmphdgsjd2xbaqna9qsb3db1-bosh-cli-7.5.6"
+          "store_path": "/nix/store/64nwkd5lk1370a0n5jw6xz35gbc97zws-bosh-cli-7.3.1"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/i7csc1lqbrw76hhibxyi799blf1mi6fm-bosh-cli-7.5.6",
+              "path": "/nix/store/1zk21pgb266m9c6gd8sxxd8kj34idyfl-bosh-cli-7.3.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/i7csc1lqbrw76hhibxyi799blf1mi6fm-bosh-cli-7.5.6"
+          "store_path": "/nix/store/1zk21pgb266m9c6gd8sxxd8kj34idyfl-bosh-cli-7.3.1"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dila416vvd6zjr1rb54ygl39b84x4mc4-bosh-cli-7.5.6",
+              "path": "/nix/store/y8hglq4jc9hnr1aaisbrij2f9ldf25kq-bosh-cli-7.3.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dila416vvd6zjr1rb54ygl39b84x4mc4-bosh-cli-7.5.6"
+          "store_path": "/nix/store/y8hglq4jc9hnr1aaisbrij2f9ldf25kq-bosh-cli-7.3.1"
         }
       }
     },
