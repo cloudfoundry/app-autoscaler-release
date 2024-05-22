@@ -1,0 +1,6 @@
+- type: remove
+  path: /instance_groups/name=postgres/jobs/name=postgres/properties/databases/tls
+
+- type: replace
+  path: /instance_groups/name=postgres/jobs/name=postgres/properties/databases/sslmode
+  value: disable
