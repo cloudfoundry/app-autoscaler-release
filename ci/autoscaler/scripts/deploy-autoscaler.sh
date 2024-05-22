@@ -21,6 +21,7 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
   ${autoscaler_dir}/operations/remove-metricsgateway.yml\
   ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml\
   ${autoscaler_dir}/operations/enable-metricsforwarder-via-syslog-agent.yml\
+  ${autoscaler_dir}/operations/remove-postgres-tls.yml\
   ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
 
 
