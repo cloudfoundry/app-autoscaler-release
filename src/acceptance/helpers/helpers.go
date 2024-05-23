@@ -274,8 +274,8 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 	return string(marshaled)
 }
 
-// GenerateDynamicScaleInPolicyBetween creates a scaling policy, that scales down from 2 instances to 1, if the metric value lies within a given range.
-// Example how the scaling rules must be defined to achieve a "scale down if value is in range" behaviour:
+// GenerateDynamicScaleInPolicyBetween creates a scaling policy that scales down from 2 instances to 1, if the metric value is in a range of [upper, lower].
+// Example how the scaling rules must be defined to achieve a "scale down if value is in range"-behaviour:
 //
 //	val <  10  ➡  +1  ➡ don't do anything if below 10 because there are already 2 instances
 //	val >  30  ➡  +1  ➡ don't do anything if above 30 because there are already 2 instances
