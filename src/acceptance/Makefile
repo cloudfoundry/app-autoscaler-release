@@ -66,4 +66,4 @@ test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
 lint:
-	@cd ../../; make lint_acceptance OPTS=${OPTS}
+	make -C ../.. lint_acceptance OPTS=${OPTS}
