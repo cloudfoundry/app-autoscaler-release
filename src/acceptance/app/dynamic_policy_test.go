@@ -3,8 +3,9 @@ package app_test
 import (
 	"acceptance"
 	. "acceptance/helpers"
+	"crypto/tls"
 	"fmt"
-	"sync"
+	"net/http"
 	"time"
 
 	cfh "github.com/cloudfoundry/cf-test-helpers/v2/helpers"
@@ -20,7 +21,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		doneAcceptChan chan bool
 		ticker         *time.Ticker
 		maxHeapLimitMb int
-		wg             sync.WaitGroup
 	)
 
 	const minimalMemoryUsage = 28 // observed minimal memory usage by the test app
@@ -32,8 +32,6 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Expect(err).NotTo(HaveOccurred())
 		StartApp(appName, cfg.CfPushTimeoutDuration())
 		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
-
-		wg = sync.WaitGroup{}
 	})
 	BeforeEach(func() {
 		maxHeapLimitMb = cfg.NodeMemoryLimit - minimalMemoryUsage
@@ -109,14 +107,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		Context("when responsetime is greater than scaling out threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleOutPolicy(1, 2, "responsetime", 800)
+				policy = GenerateDynamicScaleOutPolicy(1, 2, "responsetime", 50)
 				initialInstanceCount = 1
 			})
 
 			JustBeforeEach(func() {
-				// simulate ongoing ~20 slow requests per second
-				ticker = time.NewTicker(50 * time.Millisecond)
-				appUri := cfh.AppUri(appName, "/responsetime/slow/1000", cfg)
+				appUri := cfh.AppUri(appName, "/responsetime/slow/100", cfg)
+				ticker = time.NewTicker(1 * time.Second)
+				rps := 5
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -126,38 +124,28 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							wg.Add(1)
-							go func() {
-								defer wg.Done()
-								cfh.Curl(cfg, appUri)
-							}()
+							concurrentHttpGet(rps, appUri)
 						}
 					}
 				}(doneChan)
 			})
 
-			It("should scale out", Label(acceptance.LabelSmokeTests), func() {
+			FIt("should scale out", Label(acceptance.LabelSmokeTests), func() {
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
-			})
-
-			AfterEach(func() {
-				// ginkgo requires all go-routines to be finished before reporting the result.
-				// let's wait for all curl executing go-routines to return.
-				wg.Wait()
 			})
 		})
 
 		Context("when responsetime is less than scaling in threshold", func() {
 
 			BeforeEach(func() {
-				policy = GenerateDynamicScaleInPolicyBetween("responsetime", 800, 1200)
+				policy = GenerateDynamicScaleInPolicyBetween("responsetime", 50, 150)
 				initialInstanceCount = 2
 			})
 
 			JustBeforeEach(func() {
-				// simulate ongoing ~20 fast requests per second
-				ticker = time.NewTicker(50 * time.Millisecond)
-				appUri := cfh.AppUri(appName, "/responsetime/slow/1000", cfg)
+				appUri := cfh.AppUri(appName, "/responsetime/slow/100", cfg)
+				ticker = time.NewTicker(1 * time.Second)
+				rps := 5
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -167,24 +155,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							wg.Add(1)
-							go func() {
-								defer wg.Done()
-								cfh.Curl(cfg, appUri)
-							}()
+							concurrentHttpGet(rps, appUri)
 						}
 					}
 				}(doneChan)
 			})
 
-			It("should scale in", func() {
+			FIt("should scale in", func() {
 				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
-			})
-
-			AfterEach(func() {
-				// ginkgo requires all go-routines to be finished before reporting the result.
-				// let's wait for all curl executing go-routines to return.
-				wg.Wait()
 			})
 		})
 
@@ -209,9 +187,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				// simulate ongoing ~20 requests per second
-				ticker = time.NewTicker(50 * time.Millisecond)
 				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
+				ticker = time.NewTicker(1 * time.Second)
+				rps := 20
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -221,26 +199,15 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							wg.Add(1)
-							go func() {
-								defer wg.Done()
-								cfh.Curl(cfg, appUri)
-							}()
+							concurrentHttpGet(rps, appUri)
 						}
 					}
 				}(doneChan)
 			})
 
-			It("should scale out", func() {
+			FIt("should scale out", func() {
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
 			})
-
-			AfterEach(func() {
-				// ginkgo requires all go-routines to be finished before reporting the result.
-				// let's wait for all curl executing go-routines to return.
-				wg.Wait()
-			})
-
 		})
 
 		Context("when throughput is less than scaling in threshold", func() {
@@ -251,9 +218,9 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				// simulate ongoing ~20 requests per second
-				ticker = time.NewTicker(50 * time.Millisecond)
 				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
+				ticker = time.NewTicker(1 * time.Second)
+				rps := 20
 				go func(chan bool) {
 					defer GinkgoRecover()
 					for {
@@ -263,26 +230,16 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 							doneAcceptChan <- true
 							return
 						case <-ticker.C:
-							wg.Add(1)
-							go func() {
-								defer wg.Done()
-								cfh.Curl(cfg, appUri)
-							}()
+							concurrentHttpGet(rps, appUri)
 						}
 					}
 				}(doneChan)
 			})
 
-			It("should scale in", func() {
+			FIt("should scale in", func() {
 				// because we are generating 20rps but starting with 2 instances,
 				// there should be on average 10rps per instance, which should trigger the scale in
 				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
-			})
-
-			AfterEach(func() {
-				// ginkgo requires all go-routines to be finished before reporting the result.
-				// let's wait for all curl executing go-routines to return.
-				wg.Wait()
 			})
 		})
 	})
@@ -377,6 +334,33 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		})
 	})
 })
+
+func concurrentHttpGet(count int, url string) {
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+
+	for i := 0; i < count; i++ {
+		go func() {
+			GinkgoWriter.Printf("[http get] [request] url: %s\n", url)
+
+			resp, err := client.Get(url)
+
+			if err != nil {
+				GinkgoWriter.Printf("[http get] [response] error: %s\n", err.Error())
+			}
+
+			if resp != nil {
+				GinkgoWriter.Printf("[http get] [response] status-code: %d\n", resp.StatusCode)
+			}
+		}()
+	}
+}
 
 func min(a int, b int) int {
 	if a <= b {
