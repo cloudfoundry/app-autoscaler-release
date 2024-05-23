@@ -3,6 +3,7 @@
     "path:local-flake#bosh-bootloader",
     "path:local-flake#app-autoscaler-cli-plugin",
     "path:local-flake#log-cache-cli-plugin",
+    "path:local-flake#uaac",
     "credhub-cli@latest",
     "delve@latest",
     "gh@latest",
@@ -18,7 +19,7 @@
     "gnumake@4.4",
     "maven@3.8.6",
     "pre-commit@latest",
-    "bosh-cli@7.5.6",
+    "bosh-cli@7.3.1",
     "golangci-lint@1.57.2",
     "yq-go@4.43.1",
     "which@latest",
@@ -27,23 +28,19 @@
     "python@latest",
     "cloudfoundry-cli@8.7.10",
     "shellcheck@0.10.0",
-    "hey@latest",
     "act@0.2.62",
-    "google-cloud-sdk@latest",
-    "ginkgo@2.17.2",
     "go@1.21.5",
+    "ruby@3.3.1",
+    "ginkgo@2.17.3",
+    "google-cloud-sdk@latest",
     "temurin-bin-17@latest",
-    "ruby@3.3.1"
+    "bundix@latest",
+    "oha@latest"
   ],
   "shell": {
     "init_hook": [
       "cf install-plugin -f $(which app-autoscaler-cli-plugin)",
       "cf install-plugin -f $(which log-cache-cli)"
-    ],
-    "scripts": {
-      "test": [
-        "echo \"Error: no test specified\" && exit 1"
-      ]
-    }
+    ]
   }
 }
