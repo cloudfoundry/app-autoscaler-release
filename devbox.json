@@ -36,7 +36,12 @@
     "bundix":                                     "latest",
     "oha":                                        "latest",
     "google-cloud-sdk":                           "latest",
-    "temurin-bin-17":                             "latest"
+    "temurin-bin-17":                             "latest",
+    "postgresql":                                 "latest",
+    "glibcLocales": {
+      "version":   "latest",
+      "platforms": ["x86_64-linux", "aarch64-linux"]
+    }
   },
   "shell": {
     "init_hook": [
