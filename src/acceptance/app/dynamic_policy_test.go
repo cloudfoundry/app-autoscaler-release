@@ -340,7 +340,7 @@ func concurrentHttpGet(count int, url string) {
 		Timeout: 10 * time.Second,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: true, //nolint:all
 			},
 		},
 	}
@@ -349,7 +349,7 @@ func concurrentHttpGet(count int, url string) {
 		go func() {
 			GinkgoWriter.Printf("[http get] [request] url: %s\n", url)
 
-			resp, err := client.Get(url)
+			resp, err := client.Get(url) //nolint:all
 
 			if err != nil {
 				GinkgoWriter.Printf("[http get] [response] error: %s\n", err.Error())
