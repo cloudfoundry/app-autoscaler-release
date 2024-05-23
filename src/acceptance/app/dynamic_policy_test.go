@@ -135,7 +135,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 		})
 
-		Context("when responsetime is less than scaling in threshold", func() {
+		Context("when responsetime is in range of scaling in threshold", func() {
 
 			BeforeEach(func() {
 				policy = GenerateDynamicScaleInPolicyBetween("responsetime", 50, 150)
@@ -210,7 +210,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 		})
 
-		Context("when throughput is less than scaling in threshold", func() {
+		Context("when throughput is in range of scaling in threshold", func() {
 
 			BeforeEach(func() {
 				policy = GenerateDynamicScaleInPolicyBetween("throughput", 5, 15)
