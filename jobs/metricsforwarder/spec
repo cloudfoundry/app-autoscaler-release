@@ -48,7 +48,7 @@ properties:
     description: "PEM-encoded server key for the metricsforwarder server"
 
   autoscaler.metricsforwarder.syslog.server_address:
-    description: "IP address for log cache syslog server"
+    description: "host where the syslog server is running"
 
   autoscaler.metricsforwarder.syslog.port:
     description: "port where the syslog server is running"
