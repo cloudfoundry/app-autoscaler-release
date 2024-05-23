@@ -279,7 +279,7 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 //
 //	val <  10  ➡  +1  ➡ don't do anything if below 10 because there are already 2 instances
 //	val >  30  ➡  +1  ➡ don't do anything if above 30 because there are already 2 instances
-//	val <= 30  ➡  -1  ➡ scale down if less than 30
+//	val <= 30  ➡  -1  ➡ scale down if less than or equal 30
 func GenerateDynamicScaleInPolicyBetween(metricName string, scaleInLowerThreshold int64, scaleInUpperThreshold int64) string {
 	noDownscalingWhenBelowLower := ScalingRule{
 		MetricType:            metricName,
@@ -299,11 +299,11 @@ func GenerateDynamicScaleInPolicyBetween(metricName string, scaleInLowerThreshol
 		Adjustment:            "+1",
 	}
 
-	downscalingWhenBelowUpper := ScalingRule{
+	downscalingWhenBelowOrEqualUpper := ScalingRule{
 		MetricType:            metricName,
 		BreachDurationSeconds: TestBreachDurationSeconds,
 		Threshold:             scaleInUpperThreshold,
-		Operator:              "<",
+		Operator:              "<=",
 		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "-1",
 	}
@@ -311,7 +311,7 @@ func GenerateDynamicScaleInPolicyBetween(metricName string, scaleInLowerThreshol
 	policy := ScalingPolicy{
 		InstanceMin:  1,
 		InstanceMax:  2,
-		ScalingRules: []*ScalingRule{&noDownscalingWhenBelowLower, &noDownscalingWhenAboveUpper, &downscalingWhenBelowUpper},
+		ScalingRules: []*ScalingRule{&noDownscalingWhenBelowLower, &noDownscalingWhenAboveUpper, &downscalingWhenBelowOrEqualUpper},
 	}
 
 	marshaled, err := MarshalWithoutHTMLEscape(policy)
