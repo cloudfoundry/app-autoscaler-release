@@ -55,11 +55,11 @@ properties:
     default: "6067"
 
   autoscaler.metricsforwarder.syslog.tls.cert:
-    description: "PEM-encoded tls client certificate to connect to syslog ingress client"
+    description: "PEM-encoded tls client certificate to connect to syslog server"
   autoscaler.metricsforwarder.syslog.tls.key:
-    description: "PEM-encoded tls client key to connect to syslog ingress client"
+    description: "PEM-encoded tls client key to connect to syslog server"
   autoscaler.metricsforwarder.syslog.tls.ca_cert:
-    description: "PEM-encoded ca certificate of syslog ingress client"
+    description: "PEM-encoded ca certificate of syslog server"
 
   autoscaler.metricsforwarder.loggregator.metron_address:
     description: "IP address and port where the metron agent is running"
