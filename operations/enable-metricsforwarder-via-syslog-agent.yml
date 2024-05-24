@@ -1,6 +1,4 @@
-- type: remove
-  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/loggregator
-
+#t  configure metricsforwarder
 - type: replace
   path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/syslog?
   value:

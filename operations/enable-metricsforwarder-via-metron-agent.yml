@@ -1,0 +1,8 @@
+# configure metricsforwarder
+- type: replace
+  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/loggregator
+  value:
+    tls: # connection to syslog-agent
+      ca_cert: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.ca))
+      cert: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.certificate))
+      key:  ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.private_key))

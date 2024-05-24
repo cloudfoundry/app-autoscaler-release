@@ -16,11 +16,11 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
   ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
   ${autoscaler_dir}/operations/add-extra-plan.yml\
   ${autoscaler_dir}/operations/set-release-version.yml\
-  ${autoscaler_dir}/operations/configure-log-cache-and-forward-metrics-via-mtls.yml\
+  ${autoscaler_dir}/operations/use-log-cache.yml\
   ${autoscaler_dir}/operations/remove-metricsserver.yml\
   ${autoscaler_dir}/operations/remove-metricsgateway.yml\
   ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml\
-  ${autoscaler_dir}/operations/enable-metricsforwarder-syslog.yml\
+  ${autoscaler_dir}/operations/enable-metricsforwarder-via-syslog-agent.yml\
   ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
 
 

@@ -1,7 +1,5 @@
-# safeguard: make sure there is no loggregator agent configured
 - type: remove
   path: /instance_groups/name=metricsforwarder/jobs/name=loggregator_agent?
-
 
 # configure metricscollector
 - type: replace
