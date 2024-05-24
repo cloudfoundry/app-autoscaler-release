@@ -4,7 +4,6 @@
     "path:local-flake#app-autoscaler-cli-plugin",
     "path:local-flake#log-cache-cli-plugin",
     "path:local-flake#uaac",
-    "credhub-cli@latest",
     "delve@latest",
     "gh@latest",
     "go-tools@latest",

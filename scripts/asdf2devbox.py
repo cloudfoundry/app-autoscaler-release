@@ -27,6 +27,8 @@ if __name__ == "__main__":
                 "bosh": "bosh-cli",
                 "cf": "cloudfoundry-cli",
                 "concourse": "fly",
+                "concourse": "fly",
+                "credhub": "credhub-cli",
                 "gcloud": "google-cloud-sdk",
                 "golang": "go",
                 "java": "temurin-bin-17",
