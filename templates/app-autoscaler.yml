@@ -159,7 +159,7 @@ instance_groups:
     - name: postgres
       release: postgres
       properties:
-        databases: &database   
+        databases: &database
           sslmode: verify-full
           tls: &db_tls
             ca: ((postgres_ca.ca))
