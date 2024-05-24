@@ -18,7 +18,7 @@
     "gnumake@4.4",
     "maven@3.8.6",
     "pre-commit@latest",
-    "bosh-cli@7.5.6",
+    "bosh-cli@7.3.1",
     "golangci-lint@1.57.2",
     "yq-go@4.43.1",
     "which@latest",
@@ -40,11 +40,6 @@
     "init_hook": [
       "cf install-plugin -f $(which app-autoscaler-cli-plugin)",
       "cf install-plugin -f $(which log-cache-cli)"
-    ],
-    "scripts": {
-      "test": [
-        "echo \"Error: no test specified\" && exit 1"
-      ]
-    }
+    ]
   }
 }
