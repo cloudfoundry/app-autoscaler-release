@@ -31,10 +31,11 @@
     "go@1.21.5",
     "ruby@3.3.1",
     "ginkgo@2.17.3",
-    "google-cloud-sdk@latest",
-    "temurin-bin-17@latest",
     "bundix@latest",
-    "oha@latest"
+    "oha@latest",
+    "credhub-cli@2.9.29",
+    "google-cloud-sdk@latest",
+    "temurin-bin-17@latest"
   ],
   "shell": {
     "init_hook": [
