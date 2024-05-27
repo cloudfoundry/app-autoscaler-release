@@ -11,7 +11,7 @@ if "$(which gh)" > /dev/null; then
   echo "gh cli found"
   gh --version
 else
-  echo "no gh cli found!"  
+  echo "no gh cli found!"
   exit 1
 fi
 
@@ -31,10 +31,12 @@ function set_pipeline(){
   add_var branch_name "${CURRENT_BRANCH}"
   if [[ -z $PR_NUMBER ]]; then
     add_var acceptance_deployment_name          "acceptance"
-    add_var logcache_acceptance_deployment_name "acceptance-lc"
+    add_var acceptance_deployment_name_logcache_metron "acceptance-lc"
+    add_var acceptance_deployment_name_logcache_syslog "acceptance-lc-syslog"
   else
     add_var acceptance_deployment_name          "${PR_NUMBER}-acceptance"
-    add_var logcache_acceptance_deployment_name "${PR_NUMBER}-acceptance-lc"
+    add_var acceptance_deployment_name_logcache_metron "${PR_NUMBER}-acceptance-lc"
+    add_var acceptance_deployment_name_logcache_syslog "${PR_NUMBER}-acceptance-lc-sl"
   fi
 
   # shellcheck disable=SC2086
