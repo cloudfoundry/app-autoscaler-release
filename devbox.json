@@ -35,7 +35,8 @@
     "oha@latest",
     "credhub-cli@2.9.29",
     "google-cloud-sdk@latest",
-    "temurin-bin-17@latest"
+    "temurin-bin-17@latest",
+    "gum@0.13.0"
   ],
   "shell": {
     "init_hook": [
