@@ -57,6 +57,7 @@ cf:
   idle_connection_timeout_ms: <%= p("autoscaler.cf.idle_connection_timeout_ms") %>
   max_idle_conns_per_host_ms: <%= p("autoscaler.cf.max_idle_conns_per_host_ms") %>
 
+api_client_id: <%= p("autoscaler.apiserver.public_api.autoscaler_api_client_id") %>
 public_api_server:
   port:  <%= p("autoscaler.apiserver.public_api.server.port") %>
   <% if_p("autoscaler.apiserver.public_api.server.ca_cert", "autoscaler.apiserver.public_api.server.server_cert", "autoscaler.apiserver.public_api.server.server_key") do %>
