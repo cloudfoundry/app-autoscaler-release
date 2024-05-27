@@ -91,7 +91,6 @@ public class DataSourceConfig {
     Properties properties = new Properties();
     properties.setProperty("hibernate.hbm2ddl.auto", "none");
     properties.setProperty("hibernate.show_sql", "false");
-    properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
     return properties;
   }
 
