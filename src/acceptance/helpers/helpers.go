@@ -274,12 +274,12 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 	return string(marshaled)
 }
 
-// GenerateDynamicScaleInPolicyBetween creates a scaling policy, that scales down from 2 instances to 1, if the metric value lies within a given range.
-// Example how the scaling rules must be defined to achieve a "scale down if value is in range" behaviour:
+// GenerateDynamicScaleInPolicyBetween creates a scaling policy that scales down from 2 instances to 1, if the metric value is in a range of [upper, lower].
+// Example how the scaling rules must be defined to achieve a "scale down if value is in range"-behaviour:
 //
 //	val <  10  ➡  +1  ➡ don't do anything if below 10 because there are already 2 instances
 //	val >  30  ➡  +1  ➡ don't do anything if above 30 because there are already 2 instances
-//	val <= 30  ➡  -1  ➡ scale down if less than 30
+//	val <= 30  ➡  -1  ➡ scale down if less than or equal 30
 func GenerateDynamicScaleInPolicyBetween(metricName string, scaleInLowerThreshold int64, scaleInUpperThreshold int64) string {
 	noDownscalingWhenBelowLower := ScalingRule{
 		MetricType:            metricName,
@@ -299,11 +299,11 @@ func GenerateDynamicScaleInPolicyBetween(metricName string, scaleInLowerThreshol
 		Adjustment:            "+1",
 	}
 
-	downscalingWhenBelowUpper := ScalingRule{
+	downscalingWhenBelowOrEqualUpper := ScalingRule{
 		MetricType:            metricName,
 		BreachDurationSeconds: TestBreachDurationSeconds,
 		Threshold:             scaleInUpperThreshold,
-		Operator:              "<",
+		Operator:              "<=",
 		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "-1",
 	}
@@ -311,7 +311,7 @@ func GenerateDynamicScaleInPolicyBetween(metricName string, scaleInLowerThreshol
 	policy := ScalingPolicy{
 		InstanceMin:  1,
 		InstanceMax:  2,
-		ScalingRules: []*ScalingRule{&noDownscalingWhenBelowLower, &noDownscalingWhenAboveUpper, &downscalingWhenBelowUpper},
+		ScalingRules: []*ScalingRule{&noDownscalingWhenBelowLower, &noDownscalingWhenAboveUpper, &downscalingWhenBelowOrEqualUpper},
 	}
 
 	marshaled, err := MarshalWithoutHTMLEscape(policy)
