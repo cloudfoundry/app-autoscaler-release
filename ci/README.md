@@ -1,8 +1,7 @@
 # app-autoscaler-ci
 
 This repository provides all public scripts and pipeline deployments used
-
-By the app autoscaler team.  The public pipeline is hosted at: <https://concourse.app-runtime-interfaces.ci.cloudfoundry.org>.
+by the app autoscaler team.  The public pipeline is hosted at: <https://concourse.app-runtime-interfaces.ci.cloudfoundry.org>.
 
 To reproduce this pipeline, you can use your own private configuration files for the `pipeline.yml` files as described below.
 
@@ -10,7 +9,6 @@ To reproduce this pipeline, you can use your own private configuration files for
 
 This directory contains the concourse `pipeline.yml` for the autoscaler [pipeline](https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/teams/app-autoscaler/pipelines/app-autoscaler-release)
 and all of the associated scripts. To use this manifest, you need to provide a private configuration file
-
 for all of the template parameters.
 
 NOTE: If you are recreating this pipeline, for personal use and do not have authority to update
@@ -34,9 +32,7 @@ fly --target app-autoscaler-release login --team-name app-autoscaler --concourse
 make set-autoscaler-pipeline
 ```
 
-## Unpause all/some jobs for any set pipeline
-
-__Unpause__
+## Unpause pipeline and jobs
 
 ```
 # You will be prompted to select the specific jobs you want to unpause.
