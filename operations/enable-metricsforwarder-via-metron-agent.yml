@@ -1,4 +1,3 @@
-# configure metricsforwarder
 - type: replace
   path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/loggregator
   value:

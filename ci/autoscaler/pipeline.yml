@@ -21,7 +21,7 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/use-log-cache.yml
+      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
       operations/enable-metricsforwarder-via-metron-agent.yml
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
@@ -36,7 +36,7 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/use-log-cache.yml
+      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
