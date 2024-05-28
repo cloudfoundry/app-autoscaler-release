@@ -2,6 +2,7 @@
 
 # Tests that are skipped by default and why:
 # mtls - this requires changes to gorouter/haproxy to allow mtls operations
+# updating service plans - this requires a deployment with two service plans, at least one of which is updatable
 
 $(dirname $0)/test \
   -v \
@@ -9,5 +10,6 @@ $(dirname $0)/test \
   --keep-going \
   --race \
   --skip "mtls" \
+  --skip "updating service plans" \
   "$@" \
   . broker app api
