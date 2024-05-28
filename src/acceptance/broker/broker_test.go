@@ -1,14 +1,17 @@
 package broker_test
 
 import (
+	"acceptance/config"
 	"acceptance/helpers"
 	"encoding/json"
 	"fmt"
-	url2 "net/url"
+	"net/url"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/cloudfoundry/cf-test-helpers/v2/generator"
+	"github.com/cloudfoundry/cf-test-helpers/v2/workflowhelpers"
 
 	"github.com/onsi/gomega/gbytes"
 
@@ -164,80 +167,82 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		})
 	})
 
-	It("should update service instance from autoscaler-free-plan to acceptance-standard", func() {
-		plans := getPlans()
-		if plans.length() < 2 {
-			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
-			return
-		}
-		service := createService(plans[0])
-		service.updatePlan(plans[1])
+	Describe("allows updating service plans", func() {
+		var instance serviceInstance
+		It("should update a service instance from one plan to another plan", func() {
+			servicePlans := GetServicePlans(cfg)
+			source, target, err := servicePlans.getSourceAndTargetForPlanUpdate()
+			Expect(err).NotTo(HaveOccurred(), "failed getting source and target service plans")
+			instance = createService(source.Name)
+			instance.updatePlan(target.Name)
+		})
 
-		By("delete service")
-		service.delete()
-	})
-
-	It("should fail to update service instance from acceptance-standard to first", func() {
-		plans := getPlans()
-		if plans.length() < 2 {
-			Skip(fmt.Sprintf("2 plans needed, only one plan available plans:%+v", plans))
-			return
-		}
-		if !plans.contains("acceptance-standard") {
-			Skip(fmt.Sprintf("Acceptance test standard plan required plans:%+v", plans))
-			return
-		}
-
-		service := createService("acceptance-standard")
-		updateService := service.updatePlanRaw(plans[0])
-		Expect(updateService).To(Exit(1), "failed updating service")
-
-		errStream := updateService.Err
-		if isCFVersion7() {
-			errStream = updateService.Out
-		}
-		Expect(string(errStream.Contents())).To(ContainSubstring("service does not support changing plans"))
-		service.delete()
+		AfterEach(func() {
+			instance.delete()
+		})
 	})
 })
 
-func isCFVersion7() bool {
-	version := cf.Cf("--version").Wait(cfg.DefaultTimeoutDuration())
-	Expect(version).To(Exit(0))
-	return strings.Contains(string(version.Out.Contents()), "cf version 7")
-}
+type ServicePlans []ServicePlan
 
-type plans []string
-
-func (p plans) length() int { return len(p) }
-func (p plans) contains(planName string) bool {
-	for _, plan := range p {
-		if plan == planName {
-			return true
-		}
+type (
+	ServicePlan struct {
+		Guid          string        `json:"guid"`
+		Name          string        `json:"name"`
+		BrokerCatalog BrokerCatalog `json:"broker_catalog"`
 	}
-	return false
-}
+	BrokerCatalog struct {
+		Id       string   `json:"id"`
+		Features Features `json:"features"`
+	}
+	Features struct {
+		PlanUpdateable bool `json:"plan_updateable"`
+	}
+)
 
-func getPlans() plans {
-	values := url2.Values{
-		"fields[service_offering.service_broker]": []string{"name"},
-		"include":                []string{"service_offering"},
+func (p ServicePlans) length() int { return len(p) }
+
+func GetServicePlans(cfg *config.Config) ServicePlans {
+	values := url.Values{
 		"per_page":               []string{"5000"},
 		"service_broker_names":   []string{cfg.ServiceBroker},
 		"service_offering_names": []string{cfg.ServiceName},
 	}
-	url := &url2.URL{Path: "/v3/service_plans", RawQuery: values.Encode()}
-	getPlans := cf.CfSilent("curl", url.String(), "-f").Wait(cfg.DefaultTimeoutDuration())
-	Expect(getPlans).To(Exit(0), "failed getting plans")
+	servicePlansURL := &url.URL{Path: "/v3/service_plans", RawQuery: values.Encode()}
 
-	plansResult := &struct{ Resources []struct{ Name string } }{}
-	err := json.Unmarshal(getPlans.Out.Contents(), plansResult)
-	Expect(err).NotTo(HaveOccurred())
+	var result ServicePlans
 
-	var p plans
-	for _, item := range plansResult.Resources {
-		p = append(p, item.Name)
+	// This should also work as normal user - for some reason, if we use the normal user
+	// plan_updateable is returned as integer instead of boolean
+	workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+		serviceCmd := cf.CfSilent("curl", "-f", servicePlansURL.String()).Wait(cfg.DefaultTimeoutDuration())
+		Expect(serviceCmd).To(Exit(0), "failed getting service plans")
+
+		plansResult := &struct{ Resources []ServicePlan }{}
+		err := json.Unmarshal(serviceCmd.Out.Contents(), plansResult)
+		Expect(err).NotTo(HaveOccurred())
+
+		result = plansResult.Resources
+	})
+
+	return result
+}
+
+func (p ServicePlan) isUpdatable() bool {
+	return p.BrokerCatalog.Features.PlanUpdateable
+}
+
+func (p ServicePlans) getSourceAndTargetForPlanUpdate() (source, target ServicePlan, err error) {
+	if p.length() < 2 {
+		return ServicePlan{}, ServicePlan{}, fmt.Errorf("two service plans needed, only one plan available")
 	}
-	return p
+	updatablePlanIndex := slices.IndexFunc(p, func(n ServicePlan) bool {
+		return n.isUpdatable()
+	})
+	if updatablePlanIndex == -1 {
+		return ServicePlan{}, ServicePlan{}, fmt.Errorf("no updatable plan found")
+	}
+	source = p[updatablePlanIndex]
+	target = p[(updatablePlanIndex+1)%p.length()] // simply update to any other plan
+	return source, target, nil
 }
