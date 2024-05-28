@@ -28,7 +28,6 @@
     "cloudfoundry-cli@8.7.10",
     "shellcheck@0.10.0",
     "act@0.2.62",
-    "go@1.21.5",
     "ruby@3.3.1",
     "ginkgo@2.17.3",
     "bundix@latest",
@@ -36,6 +35,7 @@
     "credhub-cli@2.9.29",
     "gum@0.13.0",
     "google-cloud-sdk@latest",
+    "go@1.22.3",
     "temurin-bin-17@latest"
   ],
   "shell": {
