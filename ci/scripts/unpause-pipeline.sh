@@ -7,6 +7,12 @@ target="app-autoscaler-release"
 function unpause-job(){
   pipeline="$1"
   jobs=$(fly -t "$target" jobs -p "$pipeline" --json | jq ".[] | select(.paused==true) | .name" -r)
+
+  if [[ -z "$jobs" ]]; then
+    echo "No paused job in pipeline $pipeline"
+    return
+  fi
+
   selected_job=$(gum choose --no-limit $jobs --header "Select jobs to unpause from pipeline $pipeline")
 
 
