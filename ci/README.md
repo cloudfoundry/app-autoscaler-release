@@ -36,7 +36,7 @@ make set-autoscaler-pipeline
 
 ## Unpause all/some jobs for any set pipeline
 
-_Unpause_
+__Unpause__
 
 ```
 # You will be prompted to select the specific jobs you want to unpause.
