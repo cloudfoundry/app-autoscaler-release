@@ -31,9 +31,16 @@ __Setup__
 
 ```
 fly --target app-autoscaler-release login --team-name app-autoscaler --concourse-url https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
-push autoscaler
-./set-pipeline.sh
-popd
+make set-autoscaler-pipeline
+```
+
+## Unpause all/some jobs for any set pipeline
+
+_Unpause_
+
+```
+# You will be prompted to select the specific jobs you want to unpause.
+make unpause-pipeline
 ```
 
 ## Prometheus
