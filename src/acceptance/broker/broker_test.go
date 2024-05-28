@@ -243,6 +243,6 @@ func (p ServicePlans) getSourceAndTargetForPlanUpdate() (source, target ServiceP
 		return ServicePlan{}, ServicePlan{}, fmt.Errorf("no updatable plan found")
 	}
 	source = p[updatablePlanIndex]
-	target = p[(updatablePlanIndex+1)%p.length()]
+	target = p[(updatablePlanIndex+1)%p.length()] // simply update to any other plan
 	return source, target, nil
 }
