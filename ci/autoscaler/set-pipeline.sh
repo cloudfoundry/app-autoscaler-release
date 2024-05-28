@@ -32,7 +32,7 @@ function set_pipeline(){
   if [[ -z $PR_NUMBER ]]; then
     add_var acceptance_deployment_name          "acceptance"
     add_var acceptance_deployment_name_logcache_metron "acceptance-lc"
-    add_var acceptance_deployment_name_logcache_syslog "acceptance-lc-syslog"
+    add_var acceptance_deployment_name_logcache_syslog "acceptance-lc-sl"
   else
     add_var acceptance_deployment_name          "${PR_NUMBER}-acceptance"
     add_var acceptance_deployment_name_logcache_metron "${PR_NUMBER}-acceptance-lc"
