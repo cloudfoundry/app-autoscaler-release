@@ -111,8 +111,8 @@ func DisableServiceAccess(cfg *config.Config, setup *workflowhelpers.Reproducibl
 	if cfg.ShouldEnableServiceAccess() {
 		workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 			orgName := setup.GetOrganizationName()
-			enableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
-			Expect(enableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
+			disableServiceAccess := cf.Cf("disable-service-access", cfg.ServiceName, "-b", cfg.ServiceBroker, "-o", orgName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(disableServiceAccess).To(Exit(0), fmt.Sprintf("Failed to disable service %s for org %s", cfg.ServiceName, orgName))
 		})
 	}
 }
