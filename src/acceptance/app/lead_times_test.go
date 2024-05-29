@@ -24,7 +24,7 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 	AfterEach(AppAfterEach)
 
 	When("lead times are defined", func() {
-		FIt("should do first scaling after breach_duration_secs has passed and second scaling after cool_down_secs has passed", func() {
+		It("should do first scaling after breach_duration_secs has passed and second scaling after cool_down_secs has passed", func() {
 			internalMetricPollingIntervalOfAutoscaler := 40 * time.Second
 			headroom := 60 * time.Second // be patient and allow more time for "internal autoscaler processes" to happen before actual scaling happens
 
