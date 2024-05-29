@@ -7,7 +7,7 @@ aes_terminal_reset := \e[0m
 # TODO: Do we need the next line?
 MAKEFLAGS =
 
-GO_VERSION = $(shell go version | sed --expression='s/^[^0-9.]*\([0-9.]*\).*/\1/')
+GO_VERSION = $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
 PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
 								 | grep --invert-match --regexp='e2e')

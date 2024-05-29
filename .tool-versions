@@ -1,6 +1,7 @@
 act 0.2.62
 actionlint 1.6.27
 bosh 7.3.1
+credhub 2.9.29
 cf 8.7.10
 concourse 7.10.0
 direnv 2.34.0
@@ -14,3 +15,4 @@ maven 3.8.6
 ruby 3.3.1
 shellcheck 0.10.0
 yq 4.43.1
+gum 0.13.0

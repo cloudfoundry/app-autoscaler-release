@@ -5,7 +5,7 @@ MAKEFLAGS := -s
 GO := GO111MODULE=on GO15VENDOREXPERIMENT=1 go
 GO_NOMOD := GO111MODULE=off go
 
-GO_VERSION = $(shell go version | sed --expression='s/^[^0-9.]*\([0-9.]*\).*/\1/')
+GO_VERSION = $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
 PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
 								 | grep --invert-match --regexp='e2e')
@@ -66,7 +66,4 @@ test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
 lint:
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
-
-lint-fix:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --fix
+	make -C ../.. lint_acceptance OPTS=${OPTS}

@@ -4,7 +4,6 @@
     "path:local-flake#app-autoscaler-cli-plugin",
     "path:local-flake#log-cache-cli-plugin",
     "path:local-flake#uaac",
-    "credhub-cli@latest",
     "delve@latest",
     "gh@latest",
     "go-tools@latest",
@@ -33,6 +32,8 @@
     "ruby@3.3.1",
     "bundix@latest",
     "oha@latest",
+    "credhub-cli@2.9.29",
+    "gum@0.13.0",
     "google-cloud-sdk@latest",
     "ginkgo@latest",
     "temurin-bin-17@latest"

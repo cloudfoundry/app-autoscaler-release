@@ -1,13 +1,13 @@
 # app-autoscaler-ci
 
 This repository provides all public scripts and pipeline deployments used
-by the app autoscaler team.  The public pipeline is hosted at: <https://bosh.ci.cloudfoundry.org/>.
+by the app autoscaler team.  The public pipeline is hosted at: <https://concourse.app-runtime-interfaces.ci.cloudfoundry.org>.
 
 To reproduce this pipeline, you can use your own private configuration files for the `pipeline.yml` files as described below.
 
 ## Autoscaler
 
-This directory contains the concourse `pipeline.yml` for the autoscaler [pipeline](https://bosh.ci.cloudfoundry.org/pipelines/app-autoscaler)
+This directory contains the concourse `pipeline.yml` for the autoscaler [pipeline](https://concourse.app-runtime-interfaces.ci.cloudfoundry.org/teams/app-autoscaler/pipelines/app-autoscaler-release)
 and all of the associated scripts. To use this manifest, you need to provide a private configuration file
 for all of the template parameters.
 
@@ -28,10 +28,15 @@ This directory contains the terragrunt managed stacks of resouces in account app
 __Setup__
 
 ```
-fly --target autoscaler login --team-name app-autoscaler --concourse-url https://bosh.ci.cloudfoundry.org/
-push autoscaler
-./set-pipeline.sh
-popd
+fly --target app-autoscaler-release login --team-name app-autoscaler --concourse-url https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
+make set-autoscaler-pipeline
+```
+
+## Unpause pipeline and jobs
+
+```
+# You will be prompted to select the specific jobs you want to unpause.
+make unpause-pipeline
 ```
 
 ## Prometheus

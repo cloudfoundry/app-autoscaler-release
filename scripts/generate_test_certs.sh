@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # Place keys and certificates here
@@ -20,11 +21,17 @@ ${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name log
 mv -f "${depot_path}"/loggregatorCA.crt "${depot_path}"/loggregator-ca.crt
 mv -f "${depot_path}"/loggregatorCA.key "${depot_path}"/loggregator-ca.key
 
+# CA to distribute to dummy syslog emitter certs
+${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name LogCacheSyslogServerCA --years "20"
+mv -f "${depot_path}"/LogCacheSyslogServerCA.crt "${depot_path}"/log-cache-syslog-server-ca.crt
+mv -f "${depot_path}"/LogCacheSyslogServerCA.key "${depot_path}"/log-cache-syslog-server-ca.key
+
 # CA for local testing mTLS certs
 ${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name validMTLSLocalCA --years "20"
 mv -f "${depot_path}"/validMTLSLocalCA.crt "${depot_path}"/valid-mtls-local-ca-1.crt
 mv -f "${depot_path}"/validMTLSLocalCA.key "${depot_path}"/valid-mtls-local-ca-1.key
 rm -f "${depot_path}"/validMTLSLocalCA.crl
+
 ${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name validMTLSLocalCA --years "20"
 mv -f "${depot_path}"/validMTLSLocalCA.crt "${depot_path}"/valid-mtls-local-ca-2.crt
 mv -f "${depot_path}"/validMTLSLocalCA.key "${depot_path}"/valid-mtls-local-ca-2.key
@@ -87,6 +94,11 @@ ${CERTSTRAP} --depot-path "${depot_path}" sign metricserver_client --CA autoscal
 # metricsforwarder certificate for loggregator_agent
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain metron
 ${CERTSTRAP} --depot-path "${depot_path}" sign metron --CA loggregator-ca --years "20"
+
+
+# metricsforwarder certificate for log-cache-syslog-server
+${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain cf-app
+${CERTSTRAP} --depot-path "${depot_path}" sign cf-app --CA log-cache-syslog-server-ca --years "20"
 
 # mTLS client certificate for local testing
 ## certstrap with multiple OU not working at the moment. Pull request is created in the upstream. Therefore, using openssl at the moment

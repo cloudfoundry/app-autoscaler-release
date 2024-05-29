@@ -79,7 +79,7 @@ clean-scheduler:
 	@rm -rf src/scheduler/src/test/resources/certs
 clean-certs:
 	@echo " - cleaning test certs"
-	@rm -f testcerts/*
+	@rm -f test-certs/*
 clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
@@ -231,7 +231,7 @@ lint: $(addprefix lint_,$(go_modules))  rubocop
 rubocop:
 	@echo " - ruby scripts"
 	@bundle install
-	@bundle exec rubocop ./spec ./packages
+	@bundle exec rubocop ${RUBOCOP_OPTS} ./spec ./packages
 
 .PHONY: markdownlint
 markdownlint: markdownlint-cli
@@ -305,7 +305,7 @@ mod-download:
 
 .PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 				changeloglockcleander.go-mod-vendor
-go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
+go-mod-vendor: clean-vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 							 changeloglockcleander.go-mod-vendor
 acceptance.go-mod-vendor:
 	make --directory='${go-acceptance-dir}' go-mod-vendor

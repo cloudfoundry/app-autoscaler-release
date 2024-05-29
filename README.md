@@ -302,6 +302,21 @@ database.password | The password of the user specified above in "database.userna
 database.sslmode | There are 6 values allowed for "postgres": disable, allow, prefer, require, verify-ca and verify-full. Please refer to [Postgres SSL definition](https://www.postgresql.org/docs/current/libpq-ssl.html) when define `database_sslmode`.  For "mysql", there are 7 values allowed: false, true, skip-verify, preferred, verify-ca, verify_identity.Please refer to [Mysql SSL definition(Golang)](https://github.com/go-sql-driver/mysql#tls) and [Mysql Connector SSL](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-using-ssl.html)
 database.tls.ca | PEM-encoded certification authority for secure TLS communication. Only required when sslmode is verify-ca or verify-full(postgres) or verify_identity(mysql) and can be omitted for other sslmode.
 
+## Run linting
+
+Linting can be run through make:
+
+```
+make lint
+```
+
+Autofix can be trigger by providing the following options:
+
+
+```
+OPTS=--fix RUBOCOP_OPTS=-A make lint
+```
+
 ## Register service
 
 Log in to Cloud Foundry with admin user, and use the following commands to register `app-autoscaler` service
