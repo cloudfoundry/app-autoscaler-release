@@ -30,7 +30,7 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 
 			breachDuration := TestBreachDurationSeconds * time.Second
 			expectedFirstScalingTimeWindow := internalMetricPollingIntervalOfAutoscaler + breachDuration + headroom
-			scaleOut := sendMetricToAutoscaler(cfg, appGUID, appName, 501, false)
+			scaleOut := sendMetricToAutoscaler(cfg, appGUID, appName, 510, false)
 			Eventually(scaleOut).
 				WithTimeout(expectedFirstScalingTimeWindow).
 				WithPolling(time.Second).
@@ -38,7 +38,7 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 
 			coolDown := TestCoolDownSeconds * time.Second
 			expectedSecondScalingTimeWindow := internalMetricPollingIntervalOfAutoscaler + breachDuration + coolDown + headroom
-			scaleIn := sendMetricToAutoscaler(cfg, appGUID, appName, 499, false)
+			scaleIn := sendMetricToAutoscaler(cfg, appGUID, appName, 490, false)
 			Eventually(scaleIn).
 				WithTimeout(expectedSecondScalingTimeWindow).
 				WithPolling(time.Second).
