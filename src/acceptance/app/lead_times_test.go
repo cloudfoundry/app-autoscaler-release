@@ -2,7 +2,6 @@ package app_test
 
 import (
 	. "acceptance/helpers"
-	"fmt"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -37,15 +36,13 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 				WithPolling(time.Second).
 				Should(Equal(2))
 
-			fmt.Println(time.Now())
 			coolDown := TestCoolDownSeconds * time.Second
 			expectedSecondScalingTimeWindow := internalMetricPollingIntervalOfAutoscaler + breachDuration + coolDown + headroom
-			scaleIn := sendMetricToAutoscaler(cfg, appGUID, appName, 0, false)
+			scaleIn := sendMetricToAutoscaler(cfg, appGUID, appName, 499, false)
 			Eventually(scaleIn).
 				WithTimeout(expectedSecondScalingTimeWindow).
 				WithPolling(time.Second).
 				Should(Equal(1))
-			fmt.Println(time.Now())
 		})
 	})
 })
