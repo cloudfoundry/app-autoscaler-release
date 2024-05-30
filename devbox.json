@@ -18,6 +18,7 @@
     "gnumake@4.4",
     "maven@3.8.6",
     "pre-commit@latest",
+    "bosh-cli@7.3.1",
     "golangci-lint@1.57.2",
     "yq-go@4.43.1",
     "which@latest",
@@ -33,9 +34,8 @@
     "oha@latest",
     "credhub-cli@2.9.29",
     "gum@0.13.0",
-    "bosh-cli@7.3.1",
     "google-cloud-sdk@latest",
-    "ginkgo@2.17.3",
+    "ginkgo@latest",
     "temurin-bin-17@latest"
   ],
   "shell": {
