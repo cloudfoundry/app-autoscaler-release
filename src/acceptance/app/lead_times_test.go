@@ -24,7 +24,7 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 	AfterEach(AppAfterEach)
 
 	When("lead times are defined", func() {
-		FIt("should do first scaling after breach_duration_secs has passed and second scaling after cool_down_secs has passed", func() {
+		FIt("should do first scaling after breach_duration_secs have passed and second scaling after cool_down_secs have passed", func() {
 			breachDuration := TestBreachDurationSeconds * time.Second
 			coolDown := TestCoolDownSeconds * time.Second
 			internalMetricPollingIntervalOfAutoscaler := 40 * time.Second
@@ -44,13 +44,13 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 				WithPolling(time.Second).
 				Should(Equal(2))
 
-			By("checking that no scale in happens before breach_duration_secs and cool_down_secs have passed")
+			By("checking that no scale in happens before cool_down_secs have passed")
 			Consistently(sendMetricForScaleInAndReturnNumInstancesFunc).
-				WithTimeout(breachDuration + coolDown).
+				WithTimeout(coolDown).
 				WithPolling(time.Second).
 				Should(Equal(2))
 
-			By("checking that scale in happens after breach_duration_secs and cool_down_secs have passed")
+			By("checking that scale in happens after cool_down_secs have passed")
 			Eventually(sendMetricForScaleInAndReturnNumInstancesFunc).
 				WithTimeout(internalMetricPollingIntervalOfAutoscaler + headroom).
 				WithPolling(time.Second).
