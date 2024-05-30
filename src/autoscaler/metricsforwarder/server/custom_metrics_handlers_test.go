@@ -1,17 +1,21 @@
 package server_test
 
 import (
-	"bytes"
 	"encoding/json"
+	"fmt"
+	"path/filepath"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/server"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
 	"code.cloudfoundry.org/lager/v3"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/tedsuo/ifrit/ginkgomon_v2"
 
 	"net/http"
 	"net/http/httptest"
@@ -20,15 +24,16 @@ import (
 )
 
 var _ = Describe("MetricHandler", func() {
-
 	var (
-		handler *CustomMetricsHandler
+		fakeCredentials *fakes.FakeCredentials
+
+		policyDB *fakes.FakePolicyDB
+		handler  *CustomMetricsHandler
 
 		allowedMetricCache cache.Cache
 
 		allowedMetricTypeSet map[string]struct{}
 
-		policyDB         *fakes.FakePolicyDB
 		metricsforwarder *fakes.FakeMetricForwarder
 
 		resp *httptest.ResponseRecorder
@@ -41,10 +46,47 @@ var _ = Describe("MetricHandler", func() {
 		found bool
 
 		scalingPolicy *models.ScalingPolicy
+		serverUrl     string
 	)
 
 	BeforeEach(func() {
+		testCertDir := "../../../../test-certs"
+		loggregatorConfig := config.LoggregatorConfig{
+			TLS: models.TLSCerts{
+				KeyFile:    filepath.Join(testCertDir, "metron.key"),
+				CertFile:   filepath.Join(testCertDir, "metron.crt"),
+				CACertFile: filepath.Join(testCertDir, "loggregator-ca.crt"),
+			},
+			MetronAddress: "invalid-host-name-blah:12345",
+		}
+		serverConfig := helpers.ServerConfig{
+			Port: 2223 + GinkgoParallelProcess(),
+		}
+
+		loggerConfig := helpers.LoggingConfig{
+			Level: "debug",
+		}
+
+		conf := &config.Config{
+			Server:            serverConfig,
+			Logging:           loggerConfig,
+			LoggregatorConfig: loggregatorConfig,
+		}
+		policyDB = &fakes.FakePolicyDB{}
+		allowedMetricCache = *cache.New(10*time.Minute, -1)
+		httpStatusCollector := &fakes.FakeHTTPStatusCollector{}
+		rateLimiter = &fakes.FakeLimiter{}
+		fakeCredentials = &fakes.FakeCredentials{}
+
 		logger := lager.NewLogger("metrichandler-test")
+		logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
+
+		httpServer, err = NewServer(logger, conf, policyDB,
+			fakeCredentials, allowedMetricCache, httpStatusCollector, rateLimiter)
+		Expect(err).NotTo(HaveOccurred())
+		serverUrl = fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port)
+		serverProcess = ginkgomon_v2.Invoke(httpServer)
+
 		policyDB = &fakes.FakePolicyDB{}
 		metricsforwarder = &fakes.FakeMetricForwarder{}
 		allowedMetricCache = *cache.New(10*time.Minute, -1)
@@ -55,13 +97,27 @@ var _ = Describe("MetricHandler", func() {
 		allowedMetricCache.Flush()
 	})
 
+	JustBeforeEach(func() {
+
+	})
+	AfterEach(func() {
+		ginkgomon_v2.Interrupt(serverProcess)
+		// wait for the server to shutdown
+		// this is necessary because the server is running in a separate goroutine
+		// and the test can exit before the server has a chance to shutdown
+
+		Eventually(serverProcess.Wait(), 5).Should(Receive())
+
+	})
+
+	JustBeforeEach(func() {
+		req = CreateRequest(body, serverUrl+"/v1/apps/an-app-id/metrics")
+		req.SetBasicAuth("username", "password")
+		vars["appid"] = "an-app-id"
+		handler.VerifyCredentialsAndPublishMetrics(resp, req, vars)
+	})
+
 	Describe("PublishMetrics", func() {
-		JustBeforeEach(func() {
-			req = CreateRequest(body)
-			Expect(err).ToNot(HaveOccurred())
-			vars["appid"] = "an-app-id"
-			handler.VerifyCredentialsAndPublishMetrics(resp, req, vars)
-		})
 
 		Context("when a request to publish custom metrics comes with malformed request body", func() {
 			BeforeEach(func() {
@@ -71,7 +127,7 @@ var _ = Describe("MetricHandler", func() {
 				}, nil)
 				body = []byte(`{
 					   "instance_index":0,
-					   "test" : 
+					   "test" :
 					   "metrics":[
 					      {
 					         "name":"custom_metric1",
@@ -268,10 +324,3 @@ var _ = Describe("MetricHandler", func() {
 	})
 
 })
-
-func CreateRequest(body []byte) *http.Request {
-	req, err := http.NewRequest(http.MethodPost, serverUrl+"/v1/apps/an-app-id/metrics", bytes.NewReader(body))
-	Expect(err).ToNot(HaveOccurred())
-	req.Header.Add("Content-Type", "application/json")
-	return req
-}

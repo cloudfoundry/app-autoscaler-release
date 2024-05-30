@@ -21,13 +21,17 @@ import (
 	"github.com/tedsuo/ifrit"
 )
 
-func NewServer(logger lager.Logger, conf *config.Config, policyDB db.PolicyDB, credentials cred_helper.Credentials, allowedMetricCache cache.Cache, httpStatusCollector healthendpoint.HTTPStatusCollector, rateLimiter ratelimiter.Limiter) (ifrit.Runner, error) {
+func NewServer(logger lager.Logger, conf *config.Config, policyDB db.PolicyDB,
+	credentials cred_helper.Credentials, allowedMetricCache cache.Cache,
+	httpStatusCollector healthendpoint.HTTPStatusCollector,
+	rateLimiter ratelimiter.Limiter) (ifrit.Runner, error) {
 	metricForwarder, err := forwarder.NewMetricForwarder(logger, conf)
 	if err != nil {
 		logger.Error("failed-to-create-metricforwarder-server", err)
 		os.Exit(1)
 	}
 
+	logger.Info(fmt.Sprintf("credentials received: %p", &credentials))
 	mh := NewCustomMetricsHandler(logger, metricForwarder, policyDB, allowedMetricCache)
 	authenticator, err := auth.New(logger, credentials)
 	if err != nil {
