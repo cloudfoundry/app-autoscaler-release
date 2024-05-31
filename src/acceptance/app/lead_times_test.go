@@ -28,7 +28,8 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 			breachDuration := TestBreachDurationSeconds * time.Second
 			coolDown := TestCoolDownSeconds * time.Second
 			//internalMetricPollingIntervalOfAutoscaler := 40 * time.Second
-			headroom := 60 * time.Second // be friendly and allow more time for "internal autoscaler processes" to happen before actual scaling is being done
+			headroom := 2 * time.Minute // be friendly and allow more time for "internal autoscaler processes" to happen before actual scaling is being done
+
 			sendMetricForScaleOutAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appGUID, appName, 510, false)
 			sendMetricForScaleInAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appGUID, appName, 490, false)
 
