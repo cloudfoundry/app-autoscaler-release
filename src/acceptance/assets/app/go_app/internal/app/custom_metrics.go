@@ -23,7 +23,6 @@ type CustomMetricClient interface {
 }
 
 type CustomMetricAPIClient struct {
-	logger logr.Logger
 }
 
 var _ CustomMetricClient = &CustomMetricAPIClient{}
