@@ -22,8 +22,7 @@ type CustomMetricClient interface {
 	PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error
 }
 
-type CustomMetricAPIClient struct {
-}
+type CustomMetricAPIClient struct{}
 
 var _ CustomMetricClient = &CustomMetricAPIClient{}
 
