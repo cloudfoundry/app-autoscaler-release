@@ -11,7 +11,7 @@ function delete-pipeline(){
   # ignore shellcheck warning
   pipeline=$(gum choose $pipelines )
 
-  if [ ! -z "$pipeline" ]; then
+  if [ -n "$pipeline" ]; then
     fly -t "$target" destroy-pipeline -p "$pipeline"
   fi
 }
