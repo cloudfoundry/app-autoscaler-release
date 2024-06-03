@@ -55,12 +55,18 @@ log "set up vars: DEPLOYMENT_NAME=${DEPLOYMENT_NAME}"
 # shellcheck disable=SC2034
 deployment_name="${DEPLOYMENT_NAME}"
 
-export AUTOSCALER_ORG="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
-[ "${AUTOSCALER_ORG}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
-debug "AUTOSCALER_ORG: ${DEPLOYMENT_NAME}"
-log "set up vars: AUTOSCALER_ORG=${DEPLOYMENT_NAME}"
+export AUTOSCALER_ORG="${AUTOSCALER_ORG:-"autoscaler-${PR_NUMBER}"}"
+[ "${AUTOSCALER_ORG}" = "autoscaler-" ] && AUTOSCALER_ORG="${user}"
+debug "AUTOSCALER_ORG: ${AUTOSCALER_ORG}"
+log "set up vars: AUTOSCALER_ORG=${AUTOSCALER_ORG}"
 # shellcheck disable=SC2034
 autoscaler_org="${AUTOSCALER_ORG}"
+
+export AUTOSCALER_SPACE="${AUTOSCALER_SPACE:-"develop"}"
+debug "AUTOSCALER_SPACE: ${AUTOSCALER_SPACE}"
+log "set up vars: AUTOSCALER_SPACE=${AUTOSCALER_SPACE}"
+# shellcheck disable=SC2034
+autoscaler_space="${AUTOSCALER_SPACE}"
 
 export SYSTEM_DOMAIN="${SYSTEM_DOMAIN:-"autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"}"
 debug "SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
