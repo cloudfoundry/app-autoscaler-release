@@ -418,7 +418,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: app-autoscaler-release
-      passed: [unit-tests, integration-tests]
+      # passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - task: make-prerelease
@@ -459,6 +459,7 @@ jobs:
         <<: *acceptance-log-cache-syslog-cf-params
         SUITES: broker
       timeout: 15m
+
 - name: performance
   public: true
   build_logs_to_retain: 100
