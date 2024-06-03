@@ -1,0 +1,7 @@
+
+
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_forwarder
+  value:
+    host: ((metricsforwarder_host))
+    mtls_host: ((metricsforwarder_host))

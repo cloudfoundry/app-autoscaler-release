@@ -60,6 +60,11 @@ debug "SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 # shellcheck disable=SC2034
 system_domain="${SYSTEM_DOMAIN}"
 
+export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"metricsforwarder.$SYSTEM_DOMAIN"}"
+debug "METRICSFORWARDER_HOST: ${METRICSFORWARDER_HOST}"
+# shellcheck disable=SC2034
+metricsforwarder_host="${METRICSFORWARDER_HOST}"
+
 BBL_STATE_PATH="${BBL_STATE_PATH:-$( realpath -e "${root_dir}/../app-autoscaler-env-bbl-state/bbl-state" 2> /dev/null || echo "${root_dir}/../bbl-state/bbl-state" )}"
 BBL_STATE_PATH="$(realpath -e "${BBL_STATE_PATH}" || echo "ERR_invalid_state_path" )"
 export BBL_STATE_PATH
