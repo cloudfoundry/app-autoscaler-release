@@ -18,10 +18,10 @@ set-target:
 
 .phony: lint
 lint:
-	shellcheck -x -s bash autoscaler/**/**/*.sh
+	shellcheck --external-sources -x -s bash autoscaler/**/**/*.sh
 
 .phony: fix-lint
 fix-lint:
-	shellcheck -x -s bash -f diff autoscaler/**/**/*.sh
+	shellcheck --external-sources -x -s bash -f diff autoscaler/**/**/*.sh
 
 
