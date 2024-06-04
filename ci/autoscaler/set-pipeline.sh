@@ -75,7 +75,10 @@ function main(){
       export PIPELINE_NAME="app-autoscaler-release"
       set_pipeline $PIPELINE_NAME
     else
-      export PIPELINE_NAME="app-autoscaler-release-${CURRENT_BRANCH}"
+      local current_branch_without_slashes
+      current_branch_without_slashes="$(echo "${CURRENT_BRANCH}" | sed 's/\//-/g')" # Concourse can't handle slashes in pipeline names
+
+      export PIPELINE_NAME="app-autoscaler-release-${current_branch_without_slashes}"
       set_pipeline "$PIPELINE_NAME"
       pause_jobs "$PIPELINE_NAME"
       unpause_job "$PIPELINE_NAME/set-pipeline"
