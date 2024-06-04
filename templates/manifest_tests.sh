@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-manifest_path="${MANIFEST_PATH:-../templates/app-autoscaler-deployment.yml}"
+manifest_path="${MANIFEST_PATH:-../templates/app-autoscaler.yml}"
 operation_dir_path="${OPERATION_DIR_PATH:-../example/operation}"
 scalingengine_instance_group="${SCALINGENGINE_INSTANCE_GROUP:-scalingengine}"
 scheduler_instance_group="${SCHEDULER_INSTANCE_GROUP:-scheduler}"
