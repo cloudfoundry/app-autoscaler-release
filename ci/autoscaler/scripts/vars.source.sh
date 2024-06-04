@@ -76,8 +76,10 @@ system_domain="${SYSTEM_DOMAIN}"
 # Metricsfowrder follows the same pattern that deployment name but instead of autoscaler is metricsforwarder.
 export METRICSFORWARDER_HOST="${DEPLOYMENT_NAME/autoscaler/metricsforwarder}.$SYSTEM_DOMAIN"
 debug "METRICSFORWARDER_HOST: ${METRICSFORWARDER_HOST}"
+log "set up vars: METRICSFORWRDER_HOST=${METRICSFORWRDER_HOST}"
 # shellcheck disable=SC2034
 metricsforwarder_host="${METRICSFORWARDER_HOST}"
+
 
 BBL_STATE_PATH="${BBL_STATE_PATH:-$( realpath -e "${root_dir}/../app-autoscaler-env-bbl-state/bbl-state" 2> /dev/null || echo "${root_dir}/../bbl-state/bbl-state" )}"
 BBL_STATE_PATH="$(realpath -e "${BBL_STATE_PATH}" || echo "ERR_invalid_state_path" )"
