@@ -38,7 +38,8 @@ RUN apt-get update && \
             gnupg2 \
             gh  \
             make \
-            mysql-client && \
+            mysql-client \
+            netcat && \
     apt-get clean
 
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add -
