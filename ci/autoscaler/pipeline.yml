@@ -434,6 +434,8 @@ jobs:
       <<: *app-autoscaler-ops-files-log-cache-syslog-cf
   - task: deploy-apps
     file: ci/ci/autoscaler/tasks/deploy-apps.yml
+    params:
+      <<: *acceptance-log-cache-syslog-cf-params
     timeout: 30m
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
