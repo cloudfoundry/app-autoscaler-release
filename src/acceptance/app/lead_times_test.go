@@ -9,12 +9,15 @@ import (
 )
 
 var _ = Describe("Autoscaler lead times for scaling", func() {
+	var (
+		policy string
+		err    error
+	)
 	BeforeEach(func() {
+		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 		appName = CreateTestApp(cfg, "labeled-go_app", 1)
-		appGUID, err := GetAppGuid(cfg, appName)
+		appGUID, err = GetAppGuid(cfg, appName)
 		Expect(err).NotTo(HaveOccurred())
-
-		policy := GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
 		StartApp(appName, cfg.CfPushTimeoutDuration())
 	})
@@ -28,9 +31,6 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 
 			sendMetricForScaleOutAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appGUID, appName, 510, false)
 			sendMetricForScaleInAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appGUID, appName, 490, false)
-
-			By("waiting till the app runs with 1 instance")
-			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 
 			By("checking that no scaling out happens before breach_duration_secs have passed")
 			Consistently(sendMetricForScaleOutAndReturnNumInstancesFunc).
