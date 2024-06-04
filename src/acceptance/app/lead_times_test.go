@@ -24,10 +24,13 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 		It("should do first scaling after breach_duration_secs have passed and second scaling after cool_down_secs have passed", func() {
 			breachDuration := TestBreachDurationSeconds * time.Second
 			coolDown := TestCoolDownSeconds * time.Second
-			scalingTimewindow := 150 * time.Second // be friendly and allow some time for "internal autoscaler processes" (metric polling interval etc.) to take place before actual scaling happens
+			scalingTimewindow := 130 * time.Second // be friendly and allow some time for "internal autoscaler processes" (metric polling interval etc.) to take place before actual scaling happens
 
 			sendMetricForScaleOutAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appGUID, appName, 510, false)
 			sendMetricForScaleInAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appGUID, appName, 490, false)
+
+			By("waiting till the app runs with 1 instance")
+			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
 
 			By("checking that no scaling out happens before breach_duration_secs have passed")
 			Consistently(sendMetricForScaleOutAndReturnNumInstancesFunc).
