@@ -73,10 +73,16 @@ debug "SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 # shellcheck disable=SC2034
 system_domain="${SYSTEM_DOMAIN}"
 
+# Configure Metrics forwarder variables
+
+export METRICSFORWARDER_APPNAME="${METRICSFORWARDER_APPNAME:-"metricsforwarder-${DEPLOYMENT_NAME}"}"
+debug "METRICSFORWARDER_APPNAME: ${METRICSFORWARDER_APPNAME}"
+log "set up vars: METRICSFORWRDER_APPNAME=${METRICSFORWARDER_APPNAME}"
+
 # Metricsfowrder follows the same pattern that deployment name but instead of autoscaler is metricsforwarder.
-export METRICSFORWARDER_HOST="${DEPLOYMENT_NAME/autoscaler/metricsforwarder}.$SYSTEM_DOMAIN"
+export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${METRICSFORWARDER_APPNAME}.${SYSTEM_DOMAIN}"}"
 debug "METRICSFORWARDER_HOST: ${METRICSFORWARDER_HOST}"
-log "set up vars: METRICSFORWRDER_HOST=${METRICSFORWRDER_HOST}"
+log "set up vars: METRICSFORWRDER_HOST=${METRICSFORWARDER_HOST}"
 # shellcheck disable=SC2034
 metricsforwarder_host="${METRICSFORWARDER_HOST}"
 
