@@ -19,7 +19,7 @@
     roles:
     - name: ((database.username))
       password: ((database.password))
-      tag: default 
+      tag: default
 
 - type: replace
   path: /instance_groups/name=asactors/jobs/name=scalingengine/properties/autoscaler/scalingengine_db_connection_config
@@ -87,21 +87,6 @@
   path: /instance_groups/name=asactors/jobs/name=operator/properties/autoscaler/lock_db_connection_config
   value: *databaseConnectionConfig
 
-# asmetrics/metricsserver
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db
-  value: *external_database
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db_connection_config
-  value: *databaseConnectionConfig
-
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db
-  value: *external_database
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db_connection_config
-  value: *databaseConnectionConfig
-
 # asmetrics/eventgenerator
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db
@@ -115,14 +100,6 @@
   value: *external_database
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db_connection_config
-  value: *databaseConnectionConfig
-
-# asnozzle/metricsgateway
-- type: replace
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db
-  value: *external_database
-- type: replace
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db_connection_config
   value: *databaseConnectionConfig
 
 # asapi/golangapiserver

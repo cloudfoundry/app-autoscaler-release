@@ -22,8 +22,6 @@ domains:
   servicebroker: &servicebroker_domain ((deployment_name)).servicebroker.service.cf.internal
   eventgenerator: &eventgenerator_domain ((deployment_name)).eventgenerator.service.cf.internal
   scalingengine: &scalingengine_domain ((deployment_name)).scalingengine.service.cf.internal
-  metricsgateway: &metricsgateway_domain ((deployment_name)).metricsgateway.service.cf.internal
-  metricsserver: &metricsserver_domain ((deployment_name)).metricsserver.service.cf.internal
 
 public_domains:
   metricsforwarder: &metricsforwarder_public_domain ((deployment_name))metrics.((system_domain))
@@ -246,11 +244,6 @@ instance_groups:
             client_cert: ((!scalingengine_client_cert.certificate))
             client_key: ((!scalingengine_client_cert.private_key))
             host: *scalingengine_domain
-          metrics_collector:
-            ca_cert: ((!metricsserver_client_cert.ca))
-            client_cert: ((!metricsserver_client_cert.certificate))
-            client_key: ((!metricsserver_client_cert.private_key))
-            host: logcache
           event_generator:
             ca_cert: ((!eventgenerator_client_cert.ca))
             client_cert: ((!eventgenerator_client_cert.certificate))
@@ -416,122 +409,6 @@ instance_groups:
               component: autoscaler_operator_health
             uris:
               - ((deployment_name))-operator.((system_domain))
-
-# Metricsserver
-- name: metricsserver
-  azs:
-    - z1
-  instances: 1
-  vm_type: minimal
-  stemcell: default
-  networks:
-  - name: default
-  jobs:
-  - name: metricsserver
-    release: app-autoscaler
-    properties:
-      autoscaler:
-        instancemetrics_db: *database
-        instancemetrics_db_connection_config: *databaseConnectionConfig
-        policy_db: *database
-        policy_db_connection_config: *databaseConnectionConfig
-        metricsserver:
-          logging:
-            level: info
-          server:
-            port: &metricsserverPort 6103
-          http_client_timeout: 60s
-          ca_cert: ((!metricsserver_server_cert.ca))
-          server_cert: ((!metricsserver_server_cert.certificate))
-          server_key: ((!metricsserver_server_cert.private_key))
-          collector:
-            keep_alive_time: 60s
-            refresh_interval: 60s
-            collect_interval: 60s
-            save_interval: 5s
-            persist_metrics: true
-            envelope_processor_count: 4
-            metric_cache_size_per_app: 1000
-            envelope_channel_size: 1000
-            metric_channel_size: 1000
-          health:
-            port: &metricsserverHealthPort 6303
-            username: metricsserver
-            password: ((autoscaler_metricsserver_health_password))
-  - name: route_registrar
-    release: routing
-    consumes:
-      nats: {from: nats, deployment: cf}
-    properties:
-      route_registrar:
-        routes:
-          - name: autoscaler_metricsserver_health
-            registration_interval: 20s
-            port: *metricsserverHealthPort
-            tags:
-              component: autoscaler_metricsserver_health
-            uris:
-              - ((deployment_name))-metricsserver.((system_domain))
-
-# Metricsgateway
-- name: metricsgateway
-  azs:
-  - z1
-  instances: 1
-  vm_type: minimal
-  stemcell: default
-  networks:
-  - name: default
-  jobs:
-  - name: metricsgateway
-    release: app-autoscaler
-    properties:
-      autoscaler:
-        policy_db: *database
-        policy_db_connection_config.max_open_connections: *databaseConnectionConfig
-        metricsgateway:
-          logging:
-            level: info
-          envelop_chan_size: 1000
-          nozzle_count: 4
-          app_manager:
-            app_refresh_interval: 5s
-          emitter:
-            buffer_size: 500
-            keep_alive_interval: 5s
-            handshake_timeout: 1s
-            max_setup_retry_count: 3
-            max_close_retry_count: 3
-            retry_delay: 1s
-            metricsserver_client:
-              ca_cert: ((!metricsserver_client_cert.ca))
-              cert: ((!metricsserver_client_cert.certificate))
-              key: ((!metricsserver_client_cert.private_key))
-          nozzle:
-            rlp_addr: "reverse-log-proxy.service.cf.internal:8082"
-            shard_id: "CF_AUTOSCALER"
-            loggregator_rlp_tls:
-              cert: ((loggregator_tls_rlp.certificate))
-              key: ((loggregator_tls_rlp.private_key))
-              ca_cert: ((loggregator_ca.certificate))
-          health:
-            port: &metricsgatewayHealthPort 6503
-            username: metricsgateway
-            password: ((autoscaler_metricsgateway_health_password))
-  - name: route_registrar
-    release: routing
-    consumes:
-      nats: {from: nats, deployment: cf}
-    properties:
-      route_registrar:
-        routes:
-        - name: autoscaler_metricsgateway_health
-          registration_interval: 20s
-          port: *metricsgatewayHealthPort
-          tags:
-            component: autoscaler_metricsgateway_health
-          uris:
-            - ((deployment_name))-metricsgateway.((system_domain))
 
 # Eventgenerator Instance Group
 - name: eventgenerator
@@ -732,10 +609,6 @@ variables:
     length: 128
 - name: autoscaler_metricsforwarder_health_password
   type: password
-- name: autoscaler_metricsgateway_health_password
-  type: password
-- name: autoscaler_metricsserver_health_password
-  type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password
   type: password
   options:
@@ -802,14 +675,6 @@ variables:
     length: 128
 - name: autoscaler_scalingengine_health_password
   type: password
-- name: metricsgateway_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: metricsserver_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
 - name: operator_monitor_basic_auth_password
   type: password
   options:
@@ -890,31 +755,6 @@ variables:
   options:
     ca: app_autoscaler_ca_cert
     common_name: eventgenerator_client
-    extended_key_usage:
-    - client_auth
-    key_length: 4096
-    duration: 180
-- name: metricsserver_server_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: *metricsserver_domain
-    alternative_names:
-    - *metricsserver_domain
-    - "*.metricsserver.default.((deployment_name)).bosh"
-
-    extended_key_usage:
-    - client_auth
-    - server_auth
-    key_length: 4096
-    duration: 180
-- name: metricsserver_client_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: metricsserver_client
     extended_key_usage:
     - client_auth
     key_length: 4096

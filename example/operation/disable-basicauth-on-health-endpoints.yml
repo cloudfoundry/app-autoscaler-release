@@ -1,5 +1,5 @@
 ---
-- type: remove 
+- type: remove
   path: /variables/name=autoscaler_scheduler_health_password
 
 - type: remove
@@ -7,12 +7,6 @@
 
 - type: remove
   path: /variables/name=autoscaler_metricsforwarder_health_password
-
-- type: remove
-  path: /variables/name=autoscaler_metricsgateway_health_password
-
-- type: remove
-  path: /variables/name=autoscaler_metricsserver_health_password
 
 - type: remove
   path: /variables/name=autoscaler_operator_health_password
@@ -44,23 +38,10 @@
 
 #asmetrics
 - type: remove
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/metricsserver/health/username
-
-- type: remove
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/metricsserver/health/password
-
-- type: remove
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/health/username
 
 - type: remove
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/health/password
-
-# asnozzle
-- type: remove
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/health/username
-
-- type: remove
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/health/password
 
 # asapi
 - type: remove

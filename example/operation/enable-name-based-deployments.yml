@@ -16,8 +16,6 @@
       servicebroker: &servicebroker_domain ((deployment_name)).servicebroker.service.cf.internal
       eventgenerator: &eventgenerator_domain ((deployment_name)).eventgenerator.service.cf.internal
       scalingengine: &scalingengine_domain ((deployment_name)).scalingengine.service.cf.internal
-      metricsgateway: &metricsgateway_domain ((deployment_name)).metricsgateway.service.cf.internal
-      metricsserver: &metricsserver_domain ((deployment_name)).metricsserver.service.cf.internal
     public_domains:
       metricsforwarder: &metricsforwarder_public_domain ((deployment_name))metrics.((system_domain))
       metricsforwarder_mtls: &metricsforwarder_mtls_public_domain ((deployment_name))-metricsforwarder-mtls.((system_domain))
@@ -67,20 +65,6 @@
          targets:
            - query: '*'
              instance_group: asactors
-             deployment: ((deployment_name))
-             network: default
-             domain: bosh
-       - domain: *metricsgateway_domain
-         targets:
-           - query: '*'
-             instance_group: asnozzle
-             deployment: ((deployment_name))
-             network: default
-             domain: bosh
-       - domain: *metricsserver_domain
-         targets:
-           - query: '*'
-             instance_group: asmetrics
              deployment: ((deployment_name))
              network: default
              domain: bosh
@@ -186,17 +170,6 @@
   value: *postgres_domain
 
 
-
-###########
-# asmetrics - metricsserver
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db/address?
-  value: *postgres_domain
-
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=metricsserver/properties/autoscaler/policy_db/address?
-  value: *postgres_domain
-
 ###########
 # asmetrics - eventgenerator
 - type: replace
@@ -204,21 +177,11 @@
   value:  *scalingengine_domain
 
 - type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/metricscollector/host
-  value:  *metricsserver_domain
-
-- type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/appmetrics_db/address?
   value: *postgres_domain
 
 - type: replace
   path: /instance_groups/name=asmetrics/jobs/name=eventgenerator/properties/autoscaler/policy_db/address?
-  value: *postgres_domain
-
-###########
-# asnozzle - metricsgateway
-- type: replace
-  path: /instance_groups/name=asnozzle/jobs/name=metricsgateway/properties/autoscaler/policy_db/address?
   value: *postgres_domain
 
 ###########
@@ -290,16 +253,6 @@
   path: /instance_groups/name=asmetrics/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_eventgenerator_health/uris
   value: [ ((deployment_name))-eventgenerator.((system_domain)) ]
 
-- type: replace
-  path: /instance_groups/name=asmetrics/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsserver_health/uris
-  value: [ ((deployment_name))-metricsserver.((system_domain)) ]
-
-## asnozzle
-
-- type: replace
-  path: /instance_groups/name=asnozzle/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsgateway_health/uris
-  value: [ ((deployment_name))-metricsgateway.((system_domain)) ]
-
 ## asactors
 
 - type: replace
@@ -363,16 +316,6 @@
 - type: replace
   path: /variables/name=scheduler_server/options/alternative_names
   value: [*scheduler_domain]
-
-# - metricsserver_server
-- type: replace
-  path: /variables/name=metricsserver_server/options/common_name
-  value: *metricsserver_domain
-- type: replace
-  path: /variables/name=metricsserver_server/options/alternative_names
-  value:
-    - *metricsserver_domain
-    - "*.asmetrics.default.((deployment_name)).bosh"
 
 # - postgres_server
 - type: replace
