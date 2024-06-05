@@ -255,3 +255,17 @@ jobs:
       ERRAND_NAME: smoke-tests
 
 
+- name: deploy-postgres-service
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - task: deploy-postgres-service
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source: {repository: alpine}
+      run:
+        path: echo
+        args: ["Hello, world!"]
