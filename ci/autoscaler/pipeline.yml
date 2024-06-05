@@ -9,7 +9,6 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
       operations/enable-metricsforwarder-via-metron-agent.yml
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
@@ -24,7 +23,6 @@ anchors:
       operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
@@ -37,7 +35,6 @@ anchors:
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
       operations/loggregator-certs-from-cf.yml
-      operations/append-deployment-name-to-loggregator-nozzle-shard-id.yml
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
