@@ -42,7 +42,6 @@ function deploy() {
   pushd "${autoscaler_dir}/src/autoscaler/metricsforwarder" > /dev/null
     log "Deploying metricsforwarder"
     make cf-push
-    make stop-metricsforwarder-vm
   popd > /dev/null
 }
 
