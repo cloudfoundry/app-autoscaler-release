@@ -40,7 +40,7 @@ function cf_target(){
 
 function deploy() {
   pushd "${autoscaler_dir}/src/autoscaler/metricsforwarder" > /dev/null
-    log "Deploying metricsforwarder"
+    log "Deploying autoscaler apps"
     make cf-push
   popd > /dev/null
 }
