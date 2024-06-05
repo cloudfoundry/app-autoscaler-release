@@ -16,11 +16,6 @@ ${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name aut
 mv -f "${depot_path}"/autoscalerCA.crt "${depot_path}"/autoscaler-ca.crt
 mv -f "${depot_path}"/autoscalerCA.key "${depot_path}"/autoscaler-ca.key
 
-# CA to distribute to dummy loggregator_agent certs
-${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name loggregatorCA --years "20"
-mv -f "${depot_path}"/loggregatorCA.crt "${depot_path}"/loggregator-ca.crt
-mv -f "${depot_path}"/loggregatorCA.key "${depot_path}"/loggregator-ca.key
-
 # CA to distribute to dummy syslog emitter certs
 ${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name LogCacheSyslogServerCA --years "20"
 mv -f "${depot_path}"/LogCacheSyslogServerCA.crt "${depot_path}"/log-cache-syslog-server-ca.crt
@@ -90,11 +85,6 @@ ${CERTSTRAP} --depot-path "${depot_path}" sign metricserver --CA autoscaler-ca -
 # metricserver test client certificate
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain metricserver_client
 ${CERTSTRAP} --depot-path "${depot_path}" sign metricserver_client --CA autoscaler-ca --years "20"
-
-# metricsforwarder certificate for loggregator_agent
-${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain metron
-${CERTSTRAP} --depot-path "${depot_path}" sign metron --CA loggregator-ca --years "20"
-
 
 # metricsforwarder certificate for log-cache-syslog-server
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain cf-app

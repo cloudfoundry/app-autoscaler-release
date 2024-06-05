@@ -6,7 +6,6 @@ anchors:
       operations/instance-identity-cert-from-cf.yml
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
       operations/enable-metricsforwarder-via-metron-agent.yml
@@ -18,7 +17,6 @@ anchors:
       operations/instance-identity-cert-from-cf.yml
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
@@ -30,7 +28,6 @@ anchors:
       operations/instance-identity-cert-from-cf.yml
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml

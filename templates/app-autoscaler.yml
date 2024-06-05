@@ -790,18 +790,6 @@ variables:
     is_ca: true
     key_length: 4096
     duration: 180
-- name: loggregator_agent_metrics_tls
-  type: certificate
-  update_mode: converge
-  options:
-    ca: metric_scraper_ca
-    common_name: loggregator_agent_server
-    alternative_names:
-      - loggregator_agent_server
-    extended_key_usage:
-      - server_auth
-    key_length: 4096
-    duration: 180
 
   # metricsforwarder loggregator certificates
 - name: metricsforwarder_autoscaler_metricsforwarder_loggregator_tls
