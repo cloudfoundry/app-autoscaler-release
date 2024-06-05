@@ -2,6 +2,6 @@
 set-autoscaler-pipeline:
 	@./autoscaler/set-pipeline.sh
 
-.PHONY: unpause-pipeline
-unpause-pipeline:
+.PHONY: unpause-autoscaler-pipeline
+unpause-autoscaler-pipeline:
 	@./scripts/unpause-pipeline.sh
