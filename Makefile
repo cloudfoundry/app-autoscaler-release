@@ -252,7 +252,7 @@ spec-test:
 	bundle install
 	bundle exec rspec
 
-.PHONY: release
+.PHONY: bosh-release
 bosh-release: go-mod-tidy go-mod-vendor scheduler db build/autoscaler-test.tgz
 build/autoscaler-test.tgz:
 	@echo " - building bosh release into build/autoscaler-test.tgz"
