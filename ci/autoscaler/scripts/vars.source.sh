@@ -79,7 +79,7 @@ metricsforwarder_appname="${METRICSFORWARDER_APPNAME}"
 
 export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${METRICSFORWARDER_APPNAME}.${SYSTEM_DOMAIN}"}"
 debug "METRICSFORWARDER_HOST: ${METRICSFORWARDER_HOST}"
-log "set up vars: METRICSFORWRDER_HOST=${METRICSFORWARDER_HOST}"
+log "set up vars: METRICSFORWARDER_HOST=${METRICSFORWARDER_HOST}"
 metricsforwarder_host="${METRICSFORWARDER_HOST}"
 
 BBL_STATE_PATH="${BBL_STATE_PATH:-$( realpath -e "${root_dir}/../app-autoscaler-env-bbl-state/bbl-state" 2> /dev/null || echo "${root_dir}/../bbl-state/bbl-state" )}"
