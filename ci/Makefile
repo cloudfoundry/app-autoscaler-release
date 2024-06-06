@@ -16,12 +16,14 @@ delete-pipeline:
 set-target:
 	@fly --target app-autoscaler-release login --team-name app-autoscaler --concourse-url https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
 
-.phony: lint
+.PHONY: lint
 lint:
 	shellcheck --external-sources -x -s bash autoscaler/**/**/*.sh
 
-.phony: fix-lint
+.PHONY: fix-lint
 fix-lint:
 	shellcheck --external-sources -x -s bash -f diff autoscaler/**/**/*.sh
 
-
+.PHONY: browse
+browse:
+	@open https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
