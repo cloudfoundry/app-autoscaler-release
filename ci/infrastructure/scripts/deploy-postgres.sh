@@ -16,7 +16,7 @@ release_dir="${POSTGRES_DIR:-$(realpath -e ${root_dir}/../postgres-release)}"
 repo_dir="${REPO_DIR:-$(realpath -e ${root_dir}/../postgres-repo)}"
 deployment_manifest=${DEPLOYMENT_MANIFEST:-"${repo_dir}/templates/postgres.yml"}
 
-release_ops="${repo_dir}/templates/operators"
+release_ops="${repo_dir}/templates/operations"
 ops_files=${OPS_FILES:-"${release_ops}/use-ssl.yml\
                         "}
 
