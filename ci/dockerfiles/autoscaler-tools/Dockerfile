@@ -7,9 +7,9 @@ RUN apt-get update && \
     apt-get -qqy install --fix-missing gnupg apt-transport-https wget && \
     apt-get clean
 
-RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add - && \
+RUN wget --secure-protocol=TLSv1_2 --max-redirect=0 -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add - && \
       echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list && \
-      wget -q -O - https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+      wget --secure-protocol=TLSv1_2 --max-redirect=0  -q -O - https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
       echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
 
 RUN apt-get update && \
@@ -41,7 +41,7 @@ RUN apt-get update && \
             mysql-client && \
     apt-get clean
 
-RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add -
+RUN wget --secure-protocol=TLSv1_2 --max-redirect=0 -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list
 
 # install golang
@@ -49,7 +49,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 ARG GO_VERSION=1.22.3
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
-RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
+RUN wget --secure-protocol=TLSv1_2 --max-redirect=0 -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
     tar xzvf /tmp/go${GO_VERSION}.linux-amd64.tar.gz -C /usr/local &&\
     mkdir $GOPATH &&\
     rm -rf /tmp/* &&\
@@ -64,14 +64,14 @@ RUN apt-get update && \
 # Install bosh_cli
 # renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
 ARG BOSH_VERSION=7.5.7
-RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
+RUN curl --proto "=https" -sL -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
 ARG BBL_VERSION=v9.0.21
-RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_amd64 && \
+RUN curl --proto "=https" -sL -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_amd64 && \
   mv bbl-* /usr/local/bin/bbl &&\
   chmod +x /usr/local/bin/bbl &&\
   bbl --version
@@ -79,7 +79,7 @@ RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${
 # Install credhub
 # renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
 ARG CREDHUB_VERSION=2.9.31
-RUN wget -q https://github.com/cloudfoundry/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
+RUN curl --proto "=https" -sL -q https://github.com/cloudfoundry/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   mv credhub /usr/local/bin/credhub &&\
   rm credhub-linux-amd64-${CREDHUB_VERSION}.tgz &&\
@@ -92,7 +92,7 @@ RUN gem install cf-uaac &&\
 # Install jq as a nice to have on container debugging
 # renovate: datasource=github-releases depName=jq lookupName=stedolan/jq
 ARG JQ_VERSION=jq-1.6
-RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-linux64 && \
+RUN curl --proto "=https" -sL -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-linux64 && \
     mv jq-linux64 /usr/local/bin/jq && \
     chmod +x /usr/local/bin/jq &&\
     jq --version
@@ -100,7 +100,7 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-li
 # install yq
 # renovate: datasource=github-releases depName=yq lookupName=mikefarah/yq
 ARG YQ_VERSION=v4.43.1
-RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 && \
+RUN wget --secure-protocol=TLSv1_2 --max-redirect=0 -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 && \
     chmod a+x /usr/local/bin/yq && \
     yq --version
 
@@ -108,7 +108,7 @@ RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download
 # renovate: datasource=maven depName=org.apache.maven:maven-core
 ARG MAVEN_VERSION=3.9.7
 ENV MAVEN_HOME /opt/maven
-RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
+RUN wget --secure-protocol=TLSv1_2 --max-redirect=0 --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
 	tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \
 	ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
 	ln -s /opt/maven/bin/mvn /usr/local/bin && \
@@ -123,7 +123,7 @@ RUN sed -i 's/peer/trust/' ${PGCONFIG}/pg_hba.conf \
 
 # Install gcloud
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-  curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+  curl --proto "=https" https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
   apt-get update -y && \
   apt-get install google-cloud-cli -y && \
   apt-get clean && \
@@ -135,7 +135,7 @@ RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} && \
     ginkgo version
 
 ARG NODE_VERSION=18
-RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
+RUN curl --proto "=https" -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && apt-get update -y \
     && apt install nodejs -y \
     && apt-get clean \
