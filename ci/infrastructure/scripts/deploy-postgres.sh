@@ -33,10 +33,10 @@ function deploy () {
   bosh -n -d "${deployment_name}" \
     deploy "${deployment_manifest}" \
     ${ops_files_to_use} \
-    ${bosh_deploy_opts} \
+    ${bosh_deploy_opts}
 }
 
+load_bbl_vars
 find_or_upload_stemcell_from "${deployment_manifest}"
 upload_release "${release_dir}"
-load_bbl_vars
 deploy

@@ -287,6 +287,7 @@ jobs:
   - task: deploy-postgres
     file: ci/ci/infrastructure/tasks/deploy-postgres.yml
     params:
+      DEBUG: true
       BBL_GCP_REGION: europe-west3
       BBL_GCP_ZONE: europe-west3-a
       SLACK_WEBHOOK: ((slack_webhook))

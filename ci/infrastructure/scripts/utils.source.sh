@@ -13,7 +13,8 @@ function find_or_upload_stemcell_from(){
 	    URL="${URL}?v=${stemcell_version}"
     fi
     wget "$URL" -O stemcell.tgz
-    bosh -n upload-stemcell "$bosh_upload_stemcell_opts" stemcell.tgz
+    # shellcheck disable=SC2086
+    bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
   fi
 }
 
@@ -27,7 +28,7 @@ function load_bbl_vars() {
   log "director_store = '${director_store}'"
 
   pushd "${bbl_state_path}" > /dev/null || exit
-    eval "$(bbl print-en  v)"
+    eval "$(bbl print-env)"
   popd > /dev/null || exit
 }
 
