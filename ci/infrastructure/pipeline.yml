@@ -20,9 +20,8 @@ resource_types:
 - name: maven-resource
   type: registry-image
   source:
-    repository: nulldriver/maven-resource
+    repository: ghcr.io/garethjevans/maven-resource
     tag: latest
-
 
 - name: gcs-resource
   type: registry-image
@@ -108,11 +107,22 @@ resources:
   source:
     name: bosh-google-kvm-ubuntu-jammy-go_agent
 
+- name: multiapps-controller-repo
+  type: git
+  icon: github
+  source:
+    branch: main
+    uri: https://github.com/cloudfoundry/multiapps-controller.git
+
+
 - name: multiapps-controller-artifact
   type: maven-resource
   source:
-    url: https://central.sonatype.com/artifact
-    artifact: org.cloudfoundry.multiapps:multiapps-controller-web:jar
+    # groupId:artifactId:type[:classifier]
+    repository: https://repo.maven.apache.org/maven2
+    artifactId: multiapps-controller-web
+    groupId: org.cloudfoundry.multiapps
+    type: war
 
 jobs:
 - name: set-pipeline
@@ -315,7 +325,8 @@ jobs:
       trigger: true
       passed: [setup-infrastructure]
     - get: ci
-    - name: multiapps-controller-artifact
+    - get: multiapps-controller-artifact
+    - get: multiapps-controller-repo
   - task: deploy-multiapps-controller
     file: ci/ci/infrastructure/tasks/deploy-multiapps-controller.yml
     params:
