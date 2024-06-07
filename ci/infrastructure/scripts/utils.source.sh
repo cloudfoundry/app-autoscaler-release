@@ -47,7 +47,9 @@ function load_bbl_vars() {
 
 function validate_ops_files() {
   for ops_file in ${ops_files}; do
+    if [ ! -f "${ops_file}" ]; then
       echo "ERROR: could not find ops file ${ops_file} in ${PWD}"
       exit 1
+    fi
   done
 }

@@ -31,3 +31,7 @@ fix-lint:
 .PHONY: browse
 browse:
 	@open https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
+
+.PHONY: intercept
+intercept:
+	./scripts/intercept.sh
