@@ -50,8 +50,6 @@ are listed in the table below, but the passwords are available in credhub.
 |------------------|--------------------------------------------------------------|------------------|----------------------------------------------|
 | eventgenerator   | https://autoscaler-eventgenerator.((system_domain))/health   | eventgenerator   | /autoscaler_eventgenerator_health_password   |
 | metricsforwarder | https://autoscaler-metricsforwarder.((system_domain))/health | metricsforwarder | /autoscaler_metricsforwarder_health_password |
-| metricsgateway   | https://autoscaler-metricsgateway.((system_domain))/health   | metricsgateway   | /autoscaler_metricsgateway_health_password   |
-| metricsserver    | https://autoscaler-metricsserver.((system_domain))/health    | metricsserver    | /autoscaler_metricsserver_health_password    |
 | scalingengine    | https://autoscaler-scalingengine.((system_domain))/health    | scalingengine    | /autoscaler_scalingengine_health_password    |
 | operator         | https://autoscaler-operator.((system_domain))/health         | operator         | /autoscaler_operator_health_password         |
 | scheduler        | https://autoscaler-scheduler.((system_domain))/health        | scheduler        | /autoscaler_scheduler_health_password        |
