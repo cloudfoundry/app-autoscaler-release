@@ -17,7 +17,7 @@ repo_dir="${REPO_DIR:-$(realpath -e ${root_dir}/../postgres-repo)}"
 deployment_manifest=${DEPLOYMENT_MANIFEST:-"${repo_dir}/templates/postgres.yml"}
 
 release_ops="${repo_dir}/templates/operations"
-ops_files=${OPS_FILES:-"${release_ops}/use-ssl.yml\
+ops_files=${OPS_FILES:-"${release_ops}/use_ssl.yml\
                         "}
 
 function deploy () {
