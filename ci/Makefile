@@ -35,3 +35,7 @@ browse:
 .PHONY: intercept
 intercept:
 	./scripts/intercept.sh
+
+.PHONY: trigger-job
+trigger-job:
+	./scripts/trigger-job.sh

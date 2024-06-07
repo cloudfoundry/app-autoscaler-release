@@ -3,8 +3,6 @@
 #
 
 set -euo pipefail
-set -x
-#uses gum to select pipeline
 
 target="app-autoscaler-release"
 # connect to a concourse container throgh intercept
