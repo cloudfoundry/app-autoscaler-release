@@ -1,11 +1,13 @@
 
-
+.PHONY: set-pipeline
 set-pipeline:
 	./set-pipeline.sh
 
+.PHONY: lint
 lint:
 	shellcheck -x -s bash scripts/*.sh
+	shellcheck --external-sources -x -s bash **/*.sh
 
+.PHONY: lint-fix
 lint-fix:
-	# uses shellcheck to fix any issues it can
-	shellcheck -x -s bash scripts/*.sh --fix
+	shellcheck --external-sources -x -s bash -f diff **/*.sh
