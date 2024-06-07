@@ -3,6 +3,7 @@
 set -euo pipefail
 
 set -x
+
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 source "${script_dir}/utils.source.sh"
@@ -33,7 +34,7 @@ function deploy () {
     ops_files_to_use="${ops_files_to_use} -o ${OPS_FILE}"
   done
 
-  add_var_to_bosh_deploy_opts "postgres_host_or_ip" "10.0.2.2"
+  add_var_to_bosh_deploy_opts "postgres_host_or_ip" "10.0.255.2"
 
   step "Deploying release with name '${deployment_name}' "
   log "using Ops files: '${ops_files_to_use}'"
