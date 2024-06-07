@@ -10,12 +10,20 @@ groups:
   - fetch-latest-stemcell
   - deploy-prometheus
   - deploy-postgres
+  - deploy-multiapps-controller
 
 - name: others
   jobs:
   - set-pipeline
 
 resource_types:
+- name: maven-resource
+  type: registry-image
+  source:
+    repository: nulldriver/maven-resource
+    tag: latest
+
+
 - name: gcs-resource
   type: registry-image
   source:
@@ -99,6 +107,12 @@ resources:
   type: bosh-io-stemcell
   source:
     name: bosh-google-kvm-ubuntu-jammy-go_agent
+
+- name: multiapps-controller-artifact
+  type: maven-resource
+  source:
+    url: https://central.sonatype.com/artifact
+    artifact: org.cloudfoundry.multiapps:multiapps-controller-web:jar
 
 jobs:
 - name: set-pipeline
@@ -291,3 +305,18 @@ jobs:
       BBL_GCP_REGION: europe-west3
       BBL_GCP_ZONE: europe-west3-a
       SLACK_WEBHOOK: ((slack_webhook))
+- name: deploy-multiapps-controller
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: bbl-state
+      trigger: true
+      passed: [setup-infrastructure]
+    - get: ci
+    - name: multiapps-controller-artifact
+  - task: deploy-multiapps-controller
+    file: ci/ci/infrastructure/tasks/deploy-multiapps-controller.yml
+    params:
+
