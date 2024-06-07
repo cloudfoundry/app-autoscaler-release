@@ -9,6 +9,7 @@ groups:
   - bosh-cleanup
   - fetch-latest-stemcell
   - deploy-prometheus
+  - deploy-postgres
 
 - name: others
   jobs:
@@ -27,7 +28,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler-deploy-key-private))
-    branch: main
+    branch: feature/739-setup-mtar-controller
     fetch_tags: true
     paths:
       - ci/infrastructure
@@ -43,6 +44,21 @@ resources:
   source:
     uri: https://github.com/bosh-prometheus/prometheus-boshrelease.git
     branch: master
+
+- name: postgres-repo
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/cloudfoundry/postgres-release.git
+    branch: v52
+
+
+- name: postgres-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/postgres-release
+    version: v52
+
 
 - name: bbl-state
   type: git
@@ -255,17 +271,22 @@ jobs:
       ERRAND_NAME: smoke-tests
 
 
-- name: deploy-postgres-service
+- name: deploy-postgres
   serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
   plan:
-  - task: deploy-postgres-service
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source: {repository: alpine}
-      run:
-        path: echo
-        args: ["Hello, world!"]
+  - in_parallel:
+    - get: bbl-state
+      trigger: true
+      passed: [setup-infrastructure]
+    - get: ci
+    - get: postgres-repo
+    - get: postgres-release
+      trigger: true
+  - task: deploy-postgres
+    file: ci/ci/infrastructure/tasks/deploy-postgres.yml
+    params:
+      BBL_GCP_REGION: europe-west3
+      BBL_GCP_ZONE: europe-west3-a
+      SLACK_WEBHOOK: ((slack_webhook))
