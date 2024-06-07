@@ -3,8 +3,8 @@ bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
 function find_or_upload_stemcell_from(){
   deployment_manifest=$1
   # Determine if we need to upload a stemcell at this point.
-  stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' ${deployment_manifest})
-  stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' ${deployment_manifest})
+  stemcell_os=$(yq eval '.stemcells[] | select(.alias == "default").os' "${deployment_manifest}")
+  stemcell_version=$(yq eval '.stemcells[] | select(.alias == "default").version' "${deployment_manifest}")
   stemcell_name="bosh-google-kvm-${stemcell_os}-go_agent"
 
   if ! bosh stemcells | grep "${stemcell_name}" >/dev/null; then
@@ -13,7 +13,7 @@ function find_or_upload_stemcell_from(){
 	    URL="${URL}?v=${stemcell_version}"
     fi
     wget "$URL" -O stemcell.tgz
-    bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
+    bosh -n upload-stemcell "$bosh_upload_stemcell_opts" stemcell.tgz
   fi
 }
 
@@ -26,9 +26,9 @@ function load_bbl_vars() {
   director_store="${bbl_state_path}/vars/director-vars-store.yml"
   log "director_store = '${director_store}'"
 
-  pushd "${bbl_state_path}" > /dev/null
+  pushd "${bbl_state_path}" > /dev/null || exit
     eval "$(bbl print-en  v)"
-  popd > /dev/null
+  popd > /dev/null || exit
 }
 
 function validate_ops_files() {
