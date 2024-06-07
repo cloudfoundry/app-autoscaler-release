@@ -19,14 +19,10 @@ deployment_manifest=${DEPLOYMENT_MANIFEST:-"${repo_dir}/templates/postgres.yml"}
 release_ops="${repo_dir}/templates/operations"
 ops_files=${OPS_FILES:-"${release_ops}/use_ssl.yml\
                        ${release_ops}/add_static_ips.yml\
+                       ${ci_dir}/operations/postgres/set_disk.yml\
                        "}
 
 
-function add_var_to_bosh_deploy_opts() {
-  local var_name=$1
-  local var_value=$2
-  bosh_deploy_opts="${bosh_deploy_opts} -v ${var_name}=${var_value}"
-}
 
 function deploy () {
   local ops_files_to_use=""
