@@ -53,3 +53,9 @@ function validate_ops_files() {
     fi
   done
 }
+
+function add_var_to_bosh_deploy_opts() {
+  local var_name=$1
+  local var_value=$2
+  bosh_deploy_opts="${bosh_deploy_opts} -v ${var_name}=${var_value}"
+}

@@ -18,7 +18,15 @@ deployment_manifest=${DEPLOYMENT_MANIFEST:-"${repo_dir}/templates/postgres.yml"}
 
 release_ops="${repo_dir}/templates/operations"
 ops_files=${OPS_FILES:-"${release_ops}/use_ssl.yml\
-                        "}
+                       ${release_ops}/add_static_ips.yml\
+                       "}
+
+
+function add_var_to_bosh_deploy_opts() {
+  local var_name=$1
+  local var_value=$2
+  bosh_deploy_opts="${bosh_deploy_opts} -v ${var_name}=${var_value}"
+}
 
 function deploy () {
   local ops_files_to_use=""
@@ -27,6 +35,8 @@ function deploy () {
   for OPS_FILE in ${ops_files}; do
     ops_files_to_use="${ops_files_to_use} -o ${OPS_FILE}"
   done
+
+  add_var_to_bosh_deploy_opts "postgres_host_or_ip" "10.0.2.2"
 
   step "Deploying release with name '${deployment_name}' "
   log "using Ops files: '${ops_files_to_use}'"
@@ -38,5 +48,7 @@ function deploy () {
 
 load_bbl_vars
 find_or_upload_stemcell_from "${deployment_manifest}"
+
 upload_release "${release_dir}"
 deploy
+
