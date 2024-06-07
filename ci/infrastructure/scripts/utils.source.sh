@@ -1,5 +1,6 @@
 
 bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
+
 function find_or_upload_stemcell_from(){
   deployment_manifest=$1
   # Determine if we need to upload a stemcell at this point.
@@ -18,6 +19,18 @@ function find_or_upload_stemcell_from(){
   fi
 }
 
+# upload release from a bosh.io resource
+function upload_release(){
+  release_dir=$1
+
+  pushd "${release_dir}" > /dev/null || exit
+    echo "Uploading release from ${release_dir}"
+    echo "Listing files in ${release_dir}:"
+    log $(ls -1 *.tgz)
+    bosh -n upload-release release.tgz
+  popd > /dev/null || exit
+}
+
 function load_bbl_vars() {
   if [ -z "${bbl_state_path}" ]; then
     echo "ERROR: bbl_state_path is not set"
@@ -34,7 +47,7 @@ function load_bbl_vars() {
 
 function validate_ops_files() {
   for ops_file in ${ops_files}; do
-      echo "ERROR: could not find ops file ${OPS_FILE} in ${PWD}"
+      echo "ERROR: could not find ops file ${ops_file} in ${PWD}"
       exit 1
   done
 }
