@@ -10,4 +10,4 @@ lint:
 
 .PHONY: lint-fix
 lint-fix:
-	shellcheck --external-sources -x -s bash -f diff **/*.sh
+	shellcheck --external-sources -x -s bash -f diff **/*.sh | git apply --cached --ignore-whitespace --unidiff-zero
