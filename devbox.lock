@@ -554,50 +554,50 @@
       }
     },
     "google-cloud-sdk@latest": {
-      "last_modified": "2024-05-22T06:18:38Z",
-      "resolved": "github:NixOS/nixpkgs/3f316d2a50699a78afe5e77ca486ad553169061e#google-cloud-sdk",
+      "last_modified": "2024-06-06T04:00:50Z",
+      "resolved": "github:NixOS/nixpkgs/818dbe2f96df233d2041739d6079bb616d3e5597#google-cloud-sdk",
       "source": "devbox-search",
-      "version": "475.0.0",
+      "version": "478.0.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/s3hak6b0mmb2hx86h3nw0ycw8yb00d8y-google-cloud-sdk-475.0.0",
+              "path": "/nix/store/6vw818ni5lym496xy4d18pn2j272c5iv-google-cloud-sdk-478.0.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/s3hak6b0mmb2hx86h3nw0ycw8yb00d8y-google-cloud-sdk-475.0.0"
+          "store_path": "/nix/store/6vw818ni5lym496xy4d18pn2j272c5iv-google-cloud-sdk-478.0.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/5p94d16aqg8a04bin4pcz19zmsmadp99-google-cloud-sdk-475.0.0",
+              "path": "/nix/store/y133y7aaq6knvxgq6w5y0ml9y16d7811-google-cloud-sdk-478.0.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/5p94d16aqg8a04bin4pcz19zmsmadp99-google-cloud-sdk-475.0.0"
+          "store_path": "/nix/store/y133y7aaq6knvxgq6w5y0ml9y16d7811-google-cloud-sdk-478.0.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/a55rqgn3b6ycvkl8i9radrfkp7p1yisn-google-cloud-sdk-475.0.0",
+              "path": "/nix/store/cazzvzlwf34nnmnh2ilb2bc8b5g6jg5q-google-cloud-sdk-478.0.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/a55rqgn3b6ycvkl8i9radrfkp7p1yisn-google-cloud-sdk-475.0.0"
+          "store_path": "/nix/store/cazzvzlwf34nnmnh2ilb2bc8b5g6jg5q-google-cloud-sdk-478.0.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/yfkm1jl2frrvgzyxqc53f3szvnk0xgmj-google-cloud-sdk-475.0.0",
+              "path": "/nix/store/l04ghn5n5crhz7bzmkqi4ycs9770vw7j-google-cloud-sdk-478.0.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/yfkm1jl2frrvgzyxqc53f3szvnk0xgmj-google-cloud-sdk-475.0.0"
+          "store_path": "/nix/store/l04ghn5n5crhz7bzmkqi4ycs9770vw7j-google-cloud-sdk-478.0.0"
         }
       }
     },
@@ -1007,10 +1007,9 @@
         }
       }
     },
-    "ruby@3.3.1": {
-      "last_modified": "2024-05-13T18:06:16Z",
-      "plugin_version": "0.0.2",
-      "resolved": "github:NixOS/nixpkgs/1daef0114a6074be56586f2cf81898ed142e1e44#ruby_3_3",
+    "ruby@latest": {
+      "last_modified": "2024-05-22T06:18:38Z",
+      "resolved": "github:NixOS/nixpkgs/3f316d2a50699a78afe5e77ca486ad553169061e#ruby_3_3",
       "source": "devbox-search",
       "version": "3.3.1",
       "systems": {
@@ -1018,57 +1017,57 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/g84fk6i3alpkd8m7gq31fcwykihmfdm9-ruby-3.3.1",
+              "path": "/nix/store/pkp3jxxrv5k2q30d7dlrhi3iavf7yx30-ruby-3.3.1",
               "default": true
             },
             {
               "name": "devdoc",
-              "path": "/nix/store/h8qihxdi9jh6x6zn7wx6880z5xh856s6-ruby-3.3.1-devdoc"
+              "path": "/nix/store/kd1jzkciy029zvr9z93flqvj5jv3p4fg-ruby-3.3.1-devdoc"
             }
           ],
-          "store_path": "/nix/store/g84fk6i3alpkd8m7gq31fcwykihmfdm9-ruby-3.3.1"
+          "store_path": "/nix/store/pkp3jxxrv5k2q30d7dlrhi3iavf7yx30-ruby-3.3.1"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/c7g40p7m9qblj7g79bmbgs2fdwzpxvbf-ruby-3.3.1",
+              "path": "/nix/store/nz9ad6vkijjqb4a472d9wdsnr2v8zpzk-ruby-3.3.1",
               "default": true
             },
             {
               "name": "devdoc",
-              "path": "/nix/store/fsg4x9g1sc8vnfp9nnd681gbgw00vi95-ruby-3.3.1-devdoc"
+              "path": "/nix/store/fdg456ic2642jzhrc2xx77930xw2zml0-ruby-3.3.1-devdoc"
             }
           ],
-          "store_path": "/nix/store/c7g40p7m9qblj7g79bmbgs2fdwzpxvbf-ruby-3.3.1"
+          "store_path": "/nix/store/nz9ad6vkijjqb4a472d9wdsnr2v8zpzk-ruby-3.3.1"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/k3np8iw8rgvnvzahw90k692kvvk7arzc-ruby-3.3.1",
+              "path": "/nix/store/52f08h8gxjd0i0kf321ka6iyyfv17cyw-ruby-3.3.1",
               "default": true
             },
             {
               "name": "devdoc",
-              "path": "/nix/store/v9m76yxmckdsvy4yk77fbsah38yvf678-ruby-3.3.1-devdoc"
+              "path": "/nix/store/bj3s7wngp91256scm3x6x7jivncgynrx-ruby-3.3.1-devdoc"
             }
           ],
-          "store_path": "/nix/store/k3np8iw8rgvnvzahw90k692kvvk7arzc-ruby-3.3.1"
+          "store_path": "/nix/store/52f08h8gxjd0i0kf321ka6iyyfv17cyw-ruby-3.3.1"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/l7i7nszmnx5dxn0bvdf838r2nzviydwn-ruby-3.3.1",
+              "path": "/nix/store/nwbbnrwrzhk552p11lcxkxjfxi7z69sx-ruby-3.3.1",
               "default": true
             },
             {
               "name": "devdoc",
-              "path": "/nix/store/57c2xsirc0nz182gcl62ab14igpxsndj-ruby-3.3.1-devdoc"
+              "path": "/nix/store/iqrnl5h2rfczsrkiqpskg9m86r5l51gl-ruby-3.3.1-devdoc"
             }
           ],
-          "store_path": "/nix/store/l7i7nszmnx5dxn0bvdf838r2nzviydwn-ruby-3.3.1"
+          "store_path": "/nix/store/nwbbnrwrzhk552p11lcxkxjfxi7z69sx-ruby-3.3.1"
         }
       }
     },
