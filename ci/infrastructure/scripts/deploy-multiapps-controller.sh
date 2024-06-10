@@ -26,6 +26,15 @@ function deploy_multiapps_controller() {
   cf push -f manifest.yml
 }
 
+function add_postrgres_security_group() {
+  pushd ${CI_DIR}/infrastructure/assets
+    cf create-security-group multiapps-postgres-security-group multiapps-postgres-security-group.json
+    cf update-security-group multiapps-postgres-security-group multiapps-postgres-security-group.json
+    cf unbind-security-group multiapps-postgres-security-group ${cf_org} ${cf_space}
+    cf bind-security-group multiapps-postgres-security-group ${cf_org} --space ${cf_space}
+  popd
+}
+
 function cleanup_multiapps_controller() {
   cf delete -f multiapps-controller
   cf delete-service -f deploy-service-database
@@ -35,4 +44,5 @@ load_bbl_vars
 cf_login
 cleanup_multiapps_controller
 create_postgres_service
+add_postrgres_security_group
 deploy_multiapps_controller
