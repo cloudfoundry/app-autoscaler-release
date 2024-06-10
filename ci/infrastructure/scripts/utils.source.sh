@@ -39,6 +39,11 @@ function load_bbl_vars() {
 
   director_store="${bbl_state_path}/vars/director-vars-store.yml"
   log "director_store = '${director_store}'"
+  if [[ ! -d ${bbl_state_path} ]]; then
+    echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
+    echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
+    exit 1;
+  fi
 
   pushd "${bbl_state_path}" > /dev/null || exit
     eval "$(bbl print-env)"
@@ -59,3 +64,20 @@ function add_var_to_bosh_deploy_opts() {
   local var_value=$2
   bosh_deploy_opts="${bosh_deploy_opts} -v ${var_name}=${var_value}"
 }
+
+function cf_login(){
+  cf api "https://api.${system_domain}" --skip-ssl-validation
+  CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
+  cf auth admin "$CF_ADMIN_PASSWORD"
+
+  if [ -n "${CF_ORG}" ]; then
+    cf create-org "${CF_ORG}"
+    cf target -o "${CF_ORG}"
+  fi
+
+  if [ -n "${CF_SPACE}" ]; then
+    cf create-space "${CF_SPACE}"
+    cf target -s "${CF_SPACE}"
+  fi
+}
+

@@ -33,7 +33,7 @@ function deploy () {
     ops_files_to_use="${ops_files_to_use} -o ${OPS_FILE}"
   done
 
-  add_var_to_bosh_deploy_opts "postgres_host_or_ip" "10.0.255.2"
+  credhub set -n /bosh-autoscaler/postgres/postgres_host_or_ip -t value -v "10.0.255.2"
 
   step "Deploying release with name '${deployment_name}' "
   log "using Ops files: '${ops_files_to_use}'"
