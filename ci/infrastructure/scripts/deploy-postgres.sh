@@ -20,6 +20,7 @@ release_ops="${repo_dir}/templates/operations"
 ops_files=${OPS_FILES:-"${release_ops}/use_ssl.yml\
                        ${release_ops}/add_static_ips.yml\
                        ${ci_dir}/operations/postgres/set_disk.yml\
+                       ${ci_dir}/operations/postgres/add_databases.yml\
                        "}
 
 
