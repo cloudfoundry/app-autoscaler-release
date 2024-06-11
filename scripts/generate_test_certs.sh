@@ -82,14 +82,6 @@ ${CERTSTRAP} --depot-path "${depot_path}" sign reverselogproxy --CA autoscaler-c
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain reverselogproxy_client
 ${CERTSTRAP} --depot-path "${depot_path}" sign reverselogproxy_client --CA autoscaler-ca --years "20"
 
-# metricserver test client certificate
-${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain metricserver --ip 127.0.0.1
-${CERTSTRAP} --depot-path "${depot_path}" sign metricserver --CA autoscaler-ca --years "20"
-
-# metricserver test client certificate
-${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain metricserver_client
-${CERTSTRAP} --depot-path "${depot_path}" sign metricserver_client --CA autoscaler-ca --years "20"
-
 # metricsforwarder certificate for loggregator_agent
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain metron
 ${CERTSTRAP} --depot-path "${depot_path}" sign metron --CA loggregator-ca --years "20"

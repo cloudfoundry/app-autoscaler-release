@@ -446,7 +446,6 @@ instance_groups:
             client_key: ((!scalingengine_client_cert.private_key))
             host: *scalingengine_domain
           metricscollector:
-            use_log_cache: true
             ca_cert: ((/bosh-autoscaler/cf/log_cache.ca))
             client_cert: ((/bosh-autoscaler/cf/log_cache.certificate))
             client_key: ((/bosh-autoscaler/cf/log_cache.private_key))
