@@ -15,7 +15,6 @@
     "rubocop":                                    "latest",
     "rubyPackages.solargraph":                    "latest",
     "swagger-cli":                                "latest",
-    "actionlint":                                 "1.6.27",
     "direnv":                                     "2.34.0",
     "gnumake":                                    "4.4",
     "maven":                                      "3.8.6",
@@ -29,15 +28,16 @@
     "python":                                     "latest",
     "cloudfoundry-cli":                           "8.7.10",
     "shellcheck":                                 "0.10.0",
-    "ruby":                                       "3.3.1",
     "ginkgo":                                     "2.19.0",
     "bundix":                                     "latest",
     "oha":                                        "latest",
     "gum":                                        "0.13.0",
     "act":                                        "0.2.63",
-    "google-cloud-sdk":                           "latest",
     "go":                                         "1.21.6",
-    "temurin-bin-17":                             "latest"
+    "actionlint":                                 "1.7.1",
+    "google-cloud-sdk":                           "latest",
+    "temurin-bin-17":                             "latest",
+    "ruby":                                       "latest"
   },
   "shell": {
     "init_hook": [
