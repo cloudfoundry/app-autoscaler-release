@@ -8,7 +8,7 @@ source "${script_dir}/vars.source.sh"
 source "${script_dir}/vendor_package.sh"
 
 java_dir=${JAVA_DIR:-"${autoscaler_dir}/../java-release"}
-java_dir=$(realpath -e "${java_dir}")
+java_dir=$(realpath --canonicalize-existing "${java_dir}")
 export java_dir
 
 # shellcheck disable=SC2154
