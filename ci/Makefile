@@ -18,7 +18,7 @@ set-target:
 
 .PHONY: lint
 lint:
-	shellcheck --external-sources -x -s bash autoscaler/**/**/*.sh
+	shellcheck --external-sources --shell='bash' autoscaler/**/**/*.sh
 
 .PHONY: fix-lint
 fix-lint:
