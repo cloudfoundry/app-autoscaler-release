@@ -11,10 +11,7 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 def get_installed_version(package):
     with open(os.path.join(script_dir, '..', 'devbox.json'), 'r') as f:
         data = json.load(f)
-        for pkg in data['packages']:
-            if pkg.startswith(f"{package}@"):
-                return pkg.split('@')[1]
-    return None
+        return data['packages'][package]
 
 # Read the .tool-versions file and process each line
 if __name__ == "__main__":
@@ -26,7 +23,6 @@ if __name__ == "__main__":
             program_mapping = {
                 "bosh": "bosh-cli",
                 "cf": "cloudfoundry-cli",
-                "concourse": "fly",
                 "concourse": "fly",
                 "credhub": "credhub-cli",
                 "gcloud": "google-cloud-sdk",
