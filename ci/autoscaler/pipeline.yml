@@ -56,7 +56,7 @@ anchors:
       operations/remove-metricsserver.yml
       operations/remove-metricsgateway.yml
       operations/enable-scheduler-logging.yml
-      operations/remove-postgres-tls.yml
+      operations/disable-postgres-tls-config.yml
       operations/use-cf-services.yml
 
 
