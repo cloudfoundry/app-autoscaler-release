@@ -20,10 +20,13 @@ function create_postgres_service() {
 function deploy_multiapps_controller() {
   version=$(cat multiapps-controller-artifact/version)
   war_file=multiapps-controller-artifact/multiapps-controller-web-${version}.war
+  app_name=deploy-service
   cp multiapps-controller-repo/multiapps-controller-web/manifests/manifest.yml manifest.yml
   yq -i ".applications[0].path = \"${war_file}\"" manifest.yml
   yq -i ".applications[0].env.VERSION = \"${version}\"" manifest.yml
-  cf push -f manifest.yml
+  cf push -f manifest.yml "${app_name}" --no-start
+  cf set-env "${app_name}" SKIP_SSL_VALIDATION true
+  cf restart "${app_name}"
 }
 
 function add_postrgres_security_group() {
