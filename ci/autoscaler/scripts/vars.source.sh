@@ -1,7 +1,4 @@
 #!/bin/bash
-# Source this file please.
-# Moved to ci/  *DO NOT MODIFY MANUALLY*
-
 # NOTE: to turn on debug use DEBUG=true
 # shellcheck disable=SC2155,SC2034
 #
