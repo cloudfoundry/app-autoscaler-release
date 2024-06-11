@@ -14,7 +14,7 @@ function create_postgres_service() {
   postgres_password=$(credhub get -n /bosh-autoscaler/postgres/pgadmin_database_password -q)
 
   # delete existing service
-  cf cups deploy-service-database -p "{ \"uri\": \"postgres://${postgres_username}:${postgres_password}@${postgres_hostname}:5524/${postgres_database_name}\", \"username\": \"${postgres_username}\", \"password\": \"${postgres_password}\" }" -t postgres
+  cf cups deploy-service-database -p "{ \"uri\": \"postgres://${postgres_username}:${postgres_password}@${postgres_hostname}:5524/${postgres_database_name}?ssl=false\", \"username\": \"${postgres_username}\", \"password\": \"${postgres_password}\" }" -t postgres
 }
 
 function deploy_multiapps_controller() {
