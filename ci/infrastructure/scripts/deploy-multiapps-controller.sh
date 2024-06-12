@@ -26,6 +26,7 @@ function deploy_multiapps_controller() {
   yq -i ".applications[0].env.VERSION = \"${version}\"" manifest.yml
   cf push -f manifest.yml "${app_name}" --no-start
   cf set-env "${app_name}" SKIP_SSL_VALIDATION true
+  cf set-env "${app_name}" CF_API https://api.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
   cf restart "${app_name}"
 }
 
