@@ -14,10 +14,10 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/envelopeprocessor/* # gosub
 - autoscaler/eventgenerator/aggregator/* # gosub
-- autoscaler/eventgenerator/client/* # gosub
 - autoscaler/eventgenerator/cmd/eventgenerator/* # gosub
 - autoscaler/eventgenerator/config/* # gosub
 - autoscaler/eventgenerator/generator/* # gosub
+- autoscaler/eventgenerator/metric/* # gosub
 - autoscaler/eventgenerator/server/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
