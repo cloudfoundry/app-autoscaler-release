@@ -1,11 +1,10 @@
 #! /usr/bin/env bash
 # shellcheck disable=SC2086,SC2034,SC2155
 set -euo pipefail
+
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/common.sh"
 source "${script_dir}/vars.source.sh"
-
-
 
 function deploy() {
   log "Deploying autoscaler apps for bosh deployment '${deployment_name}' "

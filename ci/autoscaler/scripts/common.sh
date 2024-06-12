@@ -15,6 +15,7 @@ function retry(){
   [ "${retries}" -lt "${max_retries}" ] || { echo "ERROR: Command '$*' failed after ${max_retries} attempts"; return 1; }
 }
 
+
 function bosh_login(){
   step "bosh login"
   if [[ ! -d ${bbl_state_path} ]]; then

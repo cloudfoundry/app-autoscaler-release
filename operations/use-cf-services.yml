@@ -4,11 +4,7 @@
     host: ((metricsforwarder_host))
     mtls_host: ((metricsforwarder_host))
 
-# Run healthendpoint on the same port of metricsforwarder
-- type: remove
-  path: /instance_groups/name=metricsforwarder/jobs/name=metricsforwarder/properties/autoscaler/metricsforwarder/port
-
 # Set the same port for metricsforwarder and healthenpoint routes
 - type: replace
-  path: /instance_groups/name=metricsforwarder/jobs/name=route_registrar/properties/route_registrar/routes=autoscaler_metricsforwarder_health/port
+  path: /instance_groups/name=metricsforwarder/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/port
   value: 6201
