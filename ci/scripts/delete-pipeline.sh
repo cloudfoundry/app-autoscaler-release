@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2086
 #
+#
+set -eu -o pipefail
 
 target="app-autoscaler-release"
 
