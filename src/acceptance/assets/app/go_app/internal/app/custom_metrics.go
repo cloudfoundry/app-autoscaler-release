@@ -42,7 +42,8 @@ func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetr
 		var err error
 
 		if metricName = c.Param("name"); metricName == "" {
-			logger.Error(nil, "empty metric name")
+			err = fmt.Errorf("empty metric name")
+			logger.Error(err, err.Error())
 			Error(c, http.StatusBadRequest, "empty metric name")
 			return
 		}
