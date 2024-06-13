@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 # shellcheck disable=SC2086,SC2034,SC2155
 set -euo pipefail
+
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
@@ -98,6 +99,7 @@ function create_manifest(){
       -v eventgenerator_uaa_client_id=firehose_exporter \
       -v eventgenerator_uaa_client_secret="$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)"\
       -v eventgenerator_uaa_skip_ssl_validation=true \
+      -v metricsforwarder_host="${metricsforwarder_host}" \
     -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 

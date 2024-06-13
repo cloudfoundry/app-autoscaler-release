@@ -28,7 +28,7 @@ This directory contains the terragrunt managed stacks of resouces in account app
 __Setup__
 
 ```
-fly --target app-autoscaler-release login --team-name app-autoscaler --concourse-url https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
+make set-target
 make set-autoscaler-pipeline
 ```
 
