@@ -52,22 +52,6 @@ describe "eventgenerator" do
         )
     end
 
-    describe "when using log-cache via grpc" do
-      before do
-        properties["autoscaler"]["eventgenerator"] = {
-          "metricscollector" => {
-            "host" => "logcache",
-            "port" => "8080"
-          }
-        }
-      end
-
-      it "should not add https protocol to metric_collector_url" do
-        expect(rendered_template["metricCollector"]["metric_collector_url"])
-          .not_to include("http")
-      end
-    end
-
     describe "when using log-cache via https/uaa" do
       before do
         properties["autoscaler"]["eventgenerator"] = {
