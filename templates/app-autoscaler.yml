@@ -446,9 +446,9 @@ instance_groups:
             client_key: ((!scalingengine_client_cert.private_key))
             host: *scalingengine_domain
           metricscollector:
-            ca_cert: ((/bosh-autoscaler/cf/log_cache.ca))
-            client_cert: ((/bosh-autoscaler/cf/log_cache.certificate))
-            client_key: ((/bosh-autoscaler/cf/log_cache.private_key))
+            ca_cert: ((metricscollector_ca_cert))
+            client_cert: ((metricscollector_client_cert))
+            client_key: ((metricscollector_client_key))
             port: 8080
             host: logcache
   - name: route_registrar
@@ -532,9 +532,9 @@ instance_groups:
           # reusing these certificates here is a workaround so that we don't need to generate own ones.
           # the problem is that when we generate own certificates (see variables section of app-autoscaler.yml),
           # we have no possibility to reuse the CA from CF to issue new certificates.
-          ca: ((/bosh-autoscaler/cf/log_cache_syslog_tls.ca))
-          cert: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.certificate))
-          key: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.private_key))
+          ca: ((log_cache_syslog_tls_ca))
+          cert: ((syslog_agent_log_cache_tls_certificate))
+          key: ((syslog_agent_log_cache_tls_key))
       metrics: # connection for metric scrapers, here are dummy values configured since the /metrics endpoint can't be disabled via configuration
         ca_cert: ((!loggr_syslog_binding_cache_metrics.ca))
         cert: ((!loggr_syslog_binding_cache_metrics.certificate))

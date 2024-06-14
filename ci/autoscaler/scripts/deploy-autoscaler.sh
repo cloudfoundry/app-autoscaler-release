@@ -91,10 +91,13 @@ function create_manifest(){
       -v admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)" \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
-      -v eventgenerator_uaa_client_id=firehose_exporter \
-      -v eventgenerator_uaa_client_secret="$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)"\
-      -v eventgenerator_uaa_skip_ssl_validation=true \
-    -v skip_ssl_validation=true \
+      -v log_cache_syslog_tls_ca="$(credhub get -n /bosh-autoscaler/cf/log_cache_syslog_tls --key ca --quiet)"\
+      -v syslog_agent_log_cache_tls_certificate="$(credhub get -n /bosh-autoscaler/cf/syslog_agent_log_cache_tls --key certificate --quiet)"\
+      -v syslog_agent_log_cache_tls_key="$(credhub get -n /bosh-autoscaler/cf/syslog_agent_log_cache_tls --key private_key --quiet)"\
+      -v metricscollector_ca_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key ca --quiet)"\
+      -v metricscollector_client_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key certificate --quiet)"\
+      -v metricscollector_client_key="$(credhub get -n /bosh-autoscaler/cf/log_cache --key private_key --quiet)"\
+      -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
     # shellcheck disable=SC2064
