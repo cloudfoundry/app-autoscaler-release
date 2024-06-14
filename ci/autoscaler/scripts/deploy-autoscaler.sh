@@ -15,7 +15,6 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
   ${autoscaler_dir}/operations/enable-nats-tls.yml\
   ${autoscaler_dir}/operations/add-extra-plan.yml\
   ${autoscaler_dir}/operations/set-release-version.yml\
-  ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml\
   ${autoscaler_dir}/operations/enable-metricsforwarder-via-syslog-agent.yml\
   ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
 
