@@ -27,30 +27,35 @@ type CustomMetricAPIClient struct{}
 var _ CustomMetricClient = &CustomMetricAPIClient{}
 
 func CustomMetricsTests(logger logr.Logger, r *gin.RouterGroup, customMetricTest CustomMetricClient) *gin.RouterGroup {
-	r.GET("/mtls/:name/:value", handleCustomMetricsEndpoint(customMetricTest, true))
-	r.GET("/:name/:value", handleCustomMetricsEndpoint(customMetricTest, false))
+	r.GET("/mtls/:name/:value", handleCustomMetricsEndpoint(logger, customMetricTest, true))
+	r.GET("/:name/:value", handleCustomMetricsEndpoint(logger, customMetricTest, false))
 
 	return r
 }
 
-func handleCustomMetricsEndpoint(customMetricTest CustomMetricClient, useMtls bool) func(c *gin.Context) {
+func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetricClient, useMtls bool) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		var (
 			metricName  string
 			metricValue uint64
 		)
 		var err error
+
 		if metricName = c.Param("name"); metricName == "" {
+			err = fmt.Errorf("empty metric name")
+			logger.Error(err, err.Error())
 			Error(c, http.StatusBadRequest, "empty metric name")
 			return
 		}
 		if metricValue, err = strconv.ParseUint(c.Param("value"), 10, 64); err != nil {
+			logger.Error(err, "invalid metric value")
 			Error(c, http.StatusBadRequest, "invalid metric value: %s", err.Error())
 			return
 		}
 
 		err = customMetricTest.PostCustomMetric(c, nil, float64(metricValue), metricName, useMtls)
 		if err != nil {
+			logger.Error(err, "failed to submit custom metric")
 			Error(c, http.StatusInternalServerError, "failed to submit custom metric: %s", err.Error())
 			return
 		}

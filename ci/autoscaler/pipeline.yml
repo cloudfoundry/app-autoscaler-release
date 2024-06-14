@@ -22,6 +22,24 @@ anchors:
       operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
 
+  app-autoscaler-ops-files-log-cache-syslog-cf: &app-autoscaler-ops-files-log-cache-syslog-cf
+    OPS_FILES: |
+      operations/add-releases.yml
+      operations/instance-identity-cert-from-cf.yml
+      operations/add-postgres-variables.yml
+      operations/enable-nats-tls.yml
+      operations/loggregator-certs-from-cf.yml
+      operations/add-extra-plan.yml
+      operations/set-release-version.yml
+      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
+      operations/enable-metricsforwarder-via-syslog-agent.yml
+      operations/remove-metricsserver.yml
+      operations/remove-metricsgateway.yml
+      operations/enable-scheduler-logging.yml
+      operations/disable-postgres-tls-config.yml
+      operations/use-cf-services.yml
+
+
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
       operations/add-releases.yml
@@ -37,6 +55,7 @@ groups:
   jobs:
   - acceptance-log-cache-metron
   - acceptance-log-cache-syslog
+  - acceptance-log-cache-syslog-cf
   - cleanup-autoscaler-deployments
   - fetch-latest-stemcell
   - draft
@@ -173,6 +192,7 @@ jobs:
       acceptance_deployment_name: ((acceptance_deployment_name))
       acceptance_deployment_name_logcache_metron: ((acceptance_deployment_name_logcache_metron))
       acceptance_deployment_name_logcache_syslog: ((acceptance_deployment_name_logcache_syslog))
+      acceptance_deployment_name_logcache_syslog_cf: ((acceptance_deployment_name_logcache_syslog_cf))
 
 - name: unit-tests
   public: true
@@ -209,7 +229,7 @@ jobs:
   on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-log-cache-params
+    params: &acceptance-log-cache-metron-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_metron))
   plan:
   - in_parallel:
@@ -227,31 +247,31 @@ jobs:
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *acceptance-log-cache-params
+      <<: *acceptance-log-cache-metron-params
       <<: *app-autoscaler-ops-files-log-cache-metron
     timeout: 30m
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
-      <<: *acceptance-log-cache-params
+      <<: *acceptance-log-cache-metron-params
     timeout: 5m
   - in_parallel:
     - task: autoscaler-acceptance-api
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-log-cache-params
+        <<: *acceptance-log-cache-metron-params
         SUITES: api
       timeout: 15m
     - task: autoscaler-acceptance-app
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-log-cache-params
+        <<: *acceptance-log-cache-metron-params
         SUITES: app
       timeout: 45m
     - task: autoscaler-acceptance-broker
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-log-cache-params
+        <<: *acceptance-log-cache-metron-params
         SUITES: broker
       timeout: 15m
 
@@ -262,7 +282,7 @@ jobs:
   on_success:
     task: cleanup
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-log-cache-params
+    params: &acceptance-log-cache-syslog-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_syslog))
   plan:
   - in_parallel:
@@ -280,31 +300,88 @@ jobs:
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
-      <<: *acceptance-log-cache-params
+      <<: *acceptance-log-cache-syslog-params
       <<: *app-autoscaler-ops-files-log-cache-syslog
     timeout: 30m
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
-      <<: *acceptance-log-cache-params
+      <<: *acceptance-log-cache-syslog-params
     timeout: 5m
   - in_parallel:
     - task: autoscaler-acceptance-api
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-log-cache-params
+        <<: *acceptance-log-cache-syslog-params
         SUITES: api
       timeout: 15m
     - task: autoscaler-acceptance-app
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-log-cache-params
+        <<: *acceptance-log-cache-syslog-params
         SUITES: app
       timeout: 45m
     - task: autoscaler-acceptance-broker
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
-        <<: *acceptance-log-cache-params
+        <<: *acceptance-log-cache-syslog-params
+        SUITES: broker
+      timeout: 15m
+
+- name: acceptance-log-cache-syslog-cf
+  public: true
+  build_logs_to_retain: 100
+  serial: true
+  on_success:
+    task: cleanup
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params: &acceptance-log-cache-syslog-cf-params
+      DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_syslog_cf))
+  plan:
+  - in_parallel:
+    - get: bbl-state
+    - get: app-autoscaler-release
+      passed: [unit-tests, integration-tests]
+      trigger: true
+    - get: ci
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make/make.yaml
+    params:
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+    timeout: 15m
+  - task: deploy-autoscaler
+    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+    params:
+      <<: *acceptance-log-cache-syslog-cf-params
+      <<: *app-autoscaler-ops-files-log-cache-syslog-cf
+  - task: deploy-apps
+    file: ci/ci/autoscaler/tasks/deploy-apps.yml
+    params:
+      <<: *acceptance-log-cache-syslog-cf-params
+    timeout: 30m
+  - task: register-broker
+    file: ci/ci/autoscaler/tasks/register-broker.yml
+    params:
+      <<: *acceptance-log-cache-syslog-cf-params
+    timeout: 5m
+  - in_parallel:
+    - task: autoscaler-acceptance-api
+      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-log-cache-syslog-cf-params
+        SUITES: api
+      timeout: 15m
+    - task: autoscaler-acceptance-app
+      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-log-cache-syslog-cf-params
+        SUITES: app
+      timeout: 45m
+    - task: autoscaler-acceptance-broker
+      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
+      params:
+        <<: *acceptance-log-cache-syslog-cf-params
         SUITES: broker
       timeout: 15m
 

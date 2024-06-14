@@ -571,7 +571,7 @@ instance_groups:
               - *metricsforwarder_mtls_public_domain
           - name: autoscaler_metricsforwarder_health
             registration_interval: 20s
-            port: *metricsforwarderHealthPort
+            port: *metricsforwarderServerPort
             tags:
               component: autoscaler_metricsforwarder_health
             uris:
