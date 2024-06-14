@@ -28,13 +28,9 @@ anchors:
       operations/instance-identity-cert-from-cf.yml
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
-      operations/remove-metricsserver.yml
-      operations/remove-metricsgateway.yml
       operations/enable-scheduler-logging.yml
       operations/disable-postgres-tls-config.yml
       operations/use-cf-services.yml
