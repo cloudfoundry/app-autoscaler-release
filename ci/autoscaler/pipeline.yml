@@ -215,7 +215,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: app-autoscaler-release
-      # passed: [unit-tests, integration-tests] disabled this here just for testing
+      passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - task: make-prerelease
@@ -268,7 +268,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: app-autoscaler-release
-      # passed: [unit-tests, integration-tests] disabled this here just for testing
+      passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - task: make-prerelease
