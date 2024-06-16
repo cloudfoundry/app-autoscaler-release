@@ -2,7 +2,6 @@ package main
 
 import (
 	"io"
-	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
@@ -21,7 +20,6 @@ import (
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager/v3"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
@@ -57,12 +55,6 @@ func main() {
 	defer func() { _ = policyDb.Close() }()
 
 	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "eventgenerator")
-	promRegistry := prometheus.NewRegistry()
-	healthendpoint.RegisterCollectors(promRegistry, []prometheus.Collector{
-		healthendpoint.NewDatabaseStatusCollector("autoscaler", "eventgenerator", "appMetricDB", appMetricDB),
-		healthendpoint.NewDatabaseStatusCollector("autoscaler", "eventgenerator", "policyDB", policyDb),
-		httpStatusCollector,
-	}, true, logger.Session("eventgenerator-prometheus"))
 
 	appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, len(conf.Server.NodeAddrs), conf.Server.NodeIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
 
@@ -103,20 +95,16 @@ func main() {
 
 	eventGenerator := ifrit.RunFunc(runFunc(appManager, evaluators, evaluationManager, metricPollers, anAggregator))
 
-	httpServer, err := server.NewServer(logger.Session("http_server"), conf, appManager.QueryAppMetrics, httpStatusCollector)
+	httpServer, err := server.NewServer(logger.Session("http_server"), conf, appMetricDB, policyDb, appManager.QueryAppMetrics, httpStatusCollector)
+
 	if err != nil {
 		logger.Error("failed to create http server", err)
 		os.Exit(1)
 	}
-	healthServer, err := healthendpoint.NewServerWithBasicAuth(conf.Health, []healthendpoint.Checker{}, logger.Session("health-server"), promRegistry, time.Now)
-	if err != nil {
-		logger.Error("failed to create health server", err)
-		os.Exit(1)
-	}
+
 	members := grouper.Members{
 		{"eventGenerator", eventGenerator},
 		{"http_server", httpServer},
-		{"health_server", healthServer},
 	}
 	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))
 
@@ -162,7 +150,8 @@ func loadConfig(path string) (*config.Config, error) {
 	}
 
 	configFileBytes, err := io.ReadAll(configFile)
-	_ = configFile.Close()
+	defer func() { _ = configFile.Close() }()
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to read data from config file %q: %w", path, err)
 	}
