@@ -73,7 +73,10 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 })
 
 var _ = SynchronizedAfterSuite(func() {
-	_ = os.Remove(configFile.Name())
+	if configFile != nil {
+		err := os.Remove(configFile.Name())
+		Expect(err).NotTo(HaveOccurred())
+	}
 }, func() {
 	gexec.CleanupBuildArtifacts()
 })
@@ -238,7 +241,7 @@ func initConfig() {
 	testCertDir := testhelpers.TestCertFolder()
 
 	egPort = 7000 + GinkgoParallelProcess()
-	healthport = 8000 + GinkgoParallelProcess()
+	healthport = egPort
 	dbUrl := testhelpers.GetDbUrl()
 	conf = config.Config{
 		Logging: helpers.LoggingConfig{
@@ -317,6 +320,7 @@ func initConfig() {
 		},
 	}
 	configFile = writeConfig(&conf)
+
 }
 
 func writeConfig(c *config.Config) *os.File {
