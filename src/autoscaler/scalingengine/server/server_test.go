@@ -21,11 +21,10 @@ import (
 )
 
 var (
-	server              ifrit.Process
-	serverUrl           string
-	scalingEngineDB     *fakes.FakeScalingEngineDB
-	sychronizer         *fakes.FakeActiveScheduleSychronizer
-	httpStatusCollector *fakes.FakeHTTPStatusCollector
+	server          ifrit.Process
+	serverUrl       string
+	scalingEngineDB *fakes.FakeScalingEngineDB
+	sychronizer     *fakes.FakeActiveScheduleSychronizer
 )
 
 var _ = SynchronizedBeforeSuite(func() []byte {
@@ -39,10 +38,11 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	}
 	scalingEngineDB = &fakes.FakeScalingEngineDB{}
 	scalingEngine := &fakes.FakeScalingEngine{}
+	policyDb := &fakes.FakePolicyDB{}
+	schedulerDB := &fakes.FakeSchedulerDB{}
 	sychronizer = &fakes.FakeActiveScheduleSychronizer{}
-	httpStatusCollector = &fakes.FakeHTTPStatusCollector{}
 
-	httpServer, err := NewServer(lager.NewLogger("test"), conf, scalingEngineDB, scalingEngine, sychronizer, httpStatusCollector)
+	httpServer, err := NewServer(lager.NewLogger("test"), conf, policyDb, scalingEngineDB, schedulerDB, scalingEngine, sychronizer)
 	Expect(err).NotTo(HaveOccurred())
 	server = ginkgomon_v2.Invoke(httpServer)
 	serverUrl = fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port)

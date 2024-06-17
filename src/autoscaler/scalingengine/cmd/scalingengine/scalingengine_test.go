@@ -23,11 +23,13 @@ import (
 var _ = Describe("Main", func() {
 
 	var (
-		runner *ScalingEngineRunner
+		runner    *ScalingEngineRunner
+		serverURL string
 	)
 
 	BeforeEach(func() {
 		runner = NewScalingEngineRunner()
+		serverURL = fmt.Sprintf("https://127.0.0.1:%d", conf.Server.Port)
 	})
 
 	JustBeforeEach(func() {
@@ -48,10 +50,6 @@ var _ = Describe("Main", func() {
 
 			It("http server starts directly", func() {
 				Eventually(runner.Session.Buffer, 2*time.Second).Should(gbytes.Say("scalingengine.http-server.new-http-server"))
-			})
-
-			It("health server starts directly", func() {
-				Eventually(runner.Session.Buffer, 2*time.Second).Should(gbytes.Say("scalingengine.health-server.new-http-server"))
 			})
 		})
 
@@ -160,7 +158,7 @@ var _ = Describe("Main", func() {
 				body, err := json.Marshal(models.Trigger{Adjustment: "+1"})
 				Expect(err).NotTo(HaveOccurred())
 
-				rsp, err := httpClient.Post(fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/scale", port, appId),
+				rsp, err := httpClient.Post(fmt.Sprintf("%s/v1/apps/%s/scale", serverURL, appId),
 					"application/json", bytes.NewReader(body))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
@@ -170,7 +168,7 @@ var _ = Describe("Main", func() {
 
 		Context("when a request to retrieve scaling history comes", func() {
 			It("returns with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/scaling_histories", port, appId), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/apps/%s/scaling_histories", serverURL, appId), nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.Header.Set("Authorization", "Bearer none")
 				rsp, err := httpClient.Do(req)
@@ -182,7 +180,7 @@ var _ = Describe("Main", func() {
 
 		It("handles the start and end of a schedule", func() {
 			By("start of a schedule")
-			url := fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/active_schedules/111111", port, appId)
+			url := fmt.Sprintf("%s/v1/apps/%s/active_schedules/111111", serverURL, appId)
 			bodyReader := bytes.NewReader([]byte(`{"instance_min_count":1, "instance_max_count":5, "initial_min_instance_count":3}`))
 
 			req, err := http.NewRequest(http.MethodPut, url, bodyReader)
@@ -205,7 +203,6 @@ var _ = Describe("Main", func() {
 	})
 
 	Describe("when Health server is ready to serve RESTful API", func() {
-
 		BeforeEach(func() {
 			basicAuthConfig := conf
 			basicAuthConfig.Health.HealthCheckUsername = ""
@@ -219,7 +216,7 @@ var _ = Describe("Main", func() {
 
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", healthport))
+				rsp, err := httpClient.Get(fmt.Sprintf("%s", serverURL))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
@@ -243,13 +240,12 @@ var _ = Describe("Main", func() {
 
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := httpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 			})
@@ -258,12 +254,12 @@ var _ = Describe("Main", func() {
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := httpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 			})
@@ -278,12 +274,12 @@ var _ = Describe("Main", func() {
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := httpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 			})
@@ -292,12 +288,12 @@ var _ = Describe("Main", func() {
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := httpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 			})

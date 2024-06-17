@@ -138,8 +138,7 @@ var _ = SynchronizedBeforeSuite(
 		_, err = testDB.Exec(testDB.Rebind("INSERT INTO policy_json(app_id, policy_json, guid) values(?, ?, ?)"), appId, policy, "1234")
 		FailOnError("insert failed", err)
 
-		httpClient = NewEventGeneratorClient()
-		healthHttpClient = &http.Client{}
+		httpClient = NewScalingEngineClient()
 	})
 
 func verifyCertExistence(testCertDir string) {
