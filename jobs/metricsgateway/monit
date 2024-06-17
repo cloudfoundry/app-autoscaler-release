@@ -1,5 +1,0 @@
-check process metricsgateway
-  with pidfile /var/vcap/sys/run/bpm/metricsgateway/metricsgateway.pid
-  start program "/var/vcap/jobs/bpm/bin/bpm start metricsgateway"
-  stop program "/var/vcap/jobs/bpm/bin/bpm stop metricsgateway"
-  group vcap

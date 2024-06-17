@@ -38,7 +38,6 @@ end
 ###########################################
   job_name = 'operator'
   policy_db_url = build_db_url('policy_db', job_name)
-  instance_metrics_db_url = build_db_url('instancemetrics_db', job_name)
   app_metrics_db_url = build_db_url('appmetrics_db', job_name)
   scaling_engine_db_url = build_db_url('scalingengine_db', job_name)
   lock_db_url = build_db_url('lock_db', job_name)
@@ -70,14 +69,6 @@ health:
   <% end %>
 
 http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
-instance_metrics_db:
-  db:
-    url: <%= instance_metrics_db_url %>
-    max_open_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_open_connections") %>
-    max_idle_connections: <%= p("autoscaler.instancemetrics_db_connection_config.max_idle_connections") %>
-    connection_max_lifetime: <%= p("autoscaler.instancemetrics_db_connection_config.connection_max_lifetime") %>
-  refresh_interval: <%= p("autoscaler.operator.instance_metrics_db.refresh_interval") %>
-  cutoff_duration: <%= p("autoscaler.operator.instance_metrics_db.cutoff_duration") %>
 
 app_metrics_db:
   db:

@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 # shellcheck disable=SC2086,SC2034,SC2155
 set -euo pipefail
-
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
@@ -14,13 +13,8 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
   ${autoscaler_dir}/operations/add-postgres-variables.yml\
   ${autoscaler_dir}/operations/connect_to_postgres_with_certs.yml\
   ${autoscaler_dir}/operations/enable-nats-tls.yml\
-  ${autoscaler_dir}/operations/loggregator-certs-from-cf.yml\
   ${autoscaler_dir}/operations/add-extra-plan.yml\
   ${autoscaler_dir}/operations/set-release-version.yml\
-  ${autoscaler_dir}/operations/configure-log-cache-and-forward-metrics-via-mtls.yml\
-  ${autoscaler_dir}/operations/remove-metricsserver.yml\
-  ${autoscaler_dir}/operations/remove-metricsgateway.yml\
-  ${autoscaler_dir}/operations/enable-log-cache-via-uaa.yml\
   ${autoscaler_dir}/operations/enable-metricsforwarder-via-syslog-agent.yml\
   ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
 
@@ -96,11 +90,13 @@ function create_manifest(){
       -v admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)" \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
-      -v eventgenerator_uaa_client_id=firehose_exporter \
-      -v eventgenerator_uaa_client_secret="$(credhub get -n /bosh-autoscaler/cf/uaa_clients_firehose_exporter_secret --quiet)"\
-      -v eventgenerator_uaa_skip_ssl_validation=true \
-      -v metricsforwarder_host="${metricsforwarder_host}" \
-    -v skip_ssl_validation=true \
+      -v log_cache_syslog_tls_ca="$(credhub get -n /bosh-autoscaler/cf/log_cache_syslog_tls --key ca --quiet)"\
+      -v syslog_agent_log_cache_tls_certificate="$(credhub get -n /bosh-autoscaler/cf/syslog_agent_log_cache_tls --key certificate --quiet)"\
+      -v syslog_agent_log_cache_tls_key="$(credhub get -n /bosh-autoscaler/cf/syslog_agent_log_cache_tls --key private_key --quiet)"\
+      -v metricscollector_ca_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key ca --quiet)"\
+      -v metricscollector_client_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key certificate --quiet)"\
+      -v metricscollector_client_key="$(credhub get -n /bosh-autoscaler/cf/log_cache --key private_key --quiet)"\
+      -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
     # shellcheck disable=SC2064

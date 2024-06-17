@@ -73,26 +73,6 @@
 - type: replace
   path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/policy_db/tls/private_key
   value: ((postgres_client.private_key))
-- type: replace
-  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db/tls/certificate
-  value: ((postgres_client.certificate))
-- type: replace
-  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/instancemetrics_db/tls/private_key
-  value: ((postgres_client.private_key))
-
-- type: replace
-  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/policy_db/tls/certificate
-  value: ((postgres_client.certificate))
-- type: replace
-  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/policy_db/tls/private_key
-  value: ((postgres_client.private_key))
-
-- type: replace
-  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/policy_db/tls/certificate
-  value: ((postgres_client.certificate))
-- type: replace
-  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/policy_db/tls/private_key
-  value: ((postgres_client.private_key))
 
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/policy_db/tls/certificate

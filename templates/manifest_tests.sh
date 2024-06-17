@@ -2,15 +2,13 @@
 
 set -euo pipefail
 
-manifest_path="${MANIFEST_PATH:-../templates/app-autoscaler-deployment.yml}"
+manifest_path="${MANIFEST_PATH:-../templates/app-autoscaler.yml}"
 operation_dir_path="${OPERATION_DIR_PATH:-../example/operation}"
 scalingengine_instance_group="${SCALINGENGINE_INSTANCE_GROUP:-scalingengine}"
 scheduler_instance_group="${SCHEDULER_INSTANCE_GROUP:-scheduler}"
 metricsforwarder_instance_group="${METICSFORWARDER_INSTANCE_GROUP:-metricsforwarder}"
 operator_instance_group="${OPERATOR_INSTANCE_GROUP:-operator}"
 eventgenerator_instance_group="${EVENTGENERATOR_INSTANCE_GROUP:-eventgenerator}"
-metricsserver_instance_group="${METIRCSSERVER_INSTANCE_GROUP:-metricsserver}"
-metricsgateway_instance_group="${METRICSGATEWAY_INSTANCE_GROUP:-metricsgateway}"
 
 # this is a really basic check to validate that the peristent disk value is set.
 # FIXME we need a much better way of doing this.
@@ -28,7 +26,7 @@ if [ "${ACTUAL}" != "10GB" ]; then
 fi
 
 
-COMPONENTS="scheduler eventgenerator metricsforwarder metricsgateway metricsserver operator scalingengine"
+COMPONENTS="scheduler eventgenerator metricsforwarder operator scalingengine"
 for COMPONENT in $COMPONENTS; do
   ACTUAL=$(bosh int "$manifest_path" | yq e ".variables[] | select(.name == \"autoscaler_${COMPONENT}_health_password\").type" -)
   if [ "${ACTUAL}" != "password" ]; then
@@ -66,21 +64,9 @@ if [ "${ACTUAL}" != "((autoscaler_operator_health_password))" ]; then
 	exit 1
 fi
 
-ACTUAL=$(bosh int "$manifest_path" | yq e ".instance_groups[] | select(.name == \"$metricsserver_instance_group\") | .jobs[] | select(.name == \"metricsserver\").properties.autoscaler.metricsserver.health.password" -)
-if [ "${ACTUAL}" != "((autoscaler_metricsserver_health_password))" ]; then
-	echo "FAILED: $metricsserver_instance_group/metricsserver health password should be set"
-	exit 1
-fi
-
 ACTUAL=$(bosh int "$manifest_path" | yq e ".instance_groups[] | select(.name == \"$eventgenerator_instance_group\") | .jobs[] | select(.name == \"eventgenerator\").properties.autoscaler.eventgenerator.health.password" -)
 if [ "${ACTUAL}" != "((autoscaler_eventgenerator_health_password))" ]; then
 	echo "FAILED: asmetrics/eventgenerator health password should be set"
-	exit 1
-fi
-
-ACTUAL=$(bosh int "$manifest_path" | yq e ".instance_groups[] | select(.name == \"$metricsgateway_instance_group\") | .jobs[] | select(.name == \"metricsgateway\").properties.autoscaler.metricsgateway.health.password" -)
-if [ "${ACTUAL}" != "((autoscaler_metricsgateway_health_password))" ]; then
-	echo "FAILED: $metricsgateway_instance_group/metricsgateway health password should be set"
 	exit 1
 fi
 
@@ -114,21 +100,9 @@ if [ "${ACTUAL}" != "null" ]; then
 	exit 1
 fi
 
-ACTUAL=$(bosh int -o "$operation_dir_path/disable-basicauth-on-health-endpoints.yml" "$manifest_path" | yq e ".instance_groups[] | select(.name == \"$metricsserver_instance_group\") | .jobs[] | select(.name == \"metricsserver\").properties.autoscaler.metricsserver.health.password" -)
-if [ "${ACTUAL}" != "null" ]; then
-	echo "FAILED: $metricsserver_instance_group/metricsserver health password should not be set"
-	exit 1
-fi
-
 ACTUAL=$(bosh int -o "$operation_dir_path/disable-basicauth-on-health-endpoints.yml" "$manifest_path" | yq e ".instance_groups[] | select(.name == \"$eventgenerator_instance_group\") | .jobs[] | select(.name == \"eventgenerator\").properties.autoscaler.eventgenerator.health.password" -)
 if [ "${ACTUAL}" != "null" ]; then
 	echo "FAILED: $eventgenerator_instance_group/eventgenerator health password should not be set"
-	exit 1
-fi
-
-ACTUAL=$(bosh int -o "$operation_dir_path/disable-basicauth-on-health-endpoints.yml" "$manifest_path" | yq e ".instance_groups[] | select(.name == \"$metricsgateway_instance_group\") | .jobs[] | select(.name == \"metricsgateway\").properties.autoscaler.metricsgateway.health.password" -)
-if [ "${ACTUAL}" != "null" ]; then
-	echo "FAILED: $metricsgateway_instance_group/metricsgatway health password should not be set"
 	exit 1
 fi
 

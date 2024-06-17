@@ -1,30 +1,14 @@
 ---
 anchors:
-  app-autoscaler-ops-files: &app-autoscaler-ops-files
-    OPS_FILES: |
-      operations/add-releases.yml
-      operations/instance-identity-cert-from-cf.yml
-      operations/add-postgres-variables.yml
-      operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
-      operations/append-deployment-name-to-loggregator-nozzle-shard-id.yml
-      operations/add-extra-plan.yml
-      operations/set-release-version.yml
-      operations/enable-scheduler-logging.yml
-
   app-autoscaler-ops-files-log-cache-metron: &app-autoscaler-ops-files-log-cache-metron
     OPS_FILES: |
       operations/add-releases.yml
       operations/instance-identity-cert-from-cf.yml
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
       operations/enable-metricsforwarder-via-metron-agent.yml
-      operations/remove-metricsserver.yml
-      operations/remove-metricsgateway.yml
       operations/enable-scheduler-logging.yml
 
   app-autoscaler-ops-files-log-cache-syslog: &app-autoscaler-ops-files-log-cache-syslog
@@ -33,13 +17,9 @@ anchors:
       operations/instance-identity-cert-from-cf.yml
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
-      operations/remove-metricsserver.yml
-      operations/remove-metricsgateway.yml
       operations/enable-scheduler-logging.yml
 
   app-autoscaler-ops-files-log-cache-syslog-cf: &app-autoscaler-ops-files-log-cache-syslog-cf
@@ -48,13 +28,9 @@ anchors:
       operations/instance-identity-cert-from-cf.yml
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/configure-log-cache-and-forward-metrics-via-mtls.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
-      operations/remove-metricsserver.yml
-      operations/remove-metricsgateway.yml
       operations/enable-scheduler-logging.yml
       operations/disable-postgres-tls-config.yml
       operations/use-cf-services.yml
@@ -66,8 +42,6 @@ anchors:
       operations/instance-identity-cert-from-cf.yml
       operations/add-postgres-variables.yml
       operations/enable-nats-tls.yml
-      operations/loggregator-certs-from-cf.yml
-      operations/append-deployment-name-to-loggregator-nozzle-shard-id.yml
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
@@ -75,7 +49,6 @@ anchors:
 groups:
 - name: all
   jobs:
-  - acceptance
   - acceptance-log-cache-metron
   - acceptance-log-cache-syslog
   - acceptance-log-cache-syslog-cf
@@ -92,7 +65,6 @@ groups:
   - update-java
 - name: autoscaler-release
   jobs:
-  - acceptance
   - acceptance-log-cache-metron
   - acceptance-log-cache-syslog
   - draft
@@ -245,59 +217,6 @@ jobs:
   - task: run-integration-tests
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
     timeout: 45m
-
-- name: acceptance
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  on_success:
-    task: cleanup
-    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-params
-      DEPLOYMENT_NAME: ((acceptance_deployment_name))
-  plan:
-  - in_parallel:
-    - get: bbl-state
-    - get: app-autoscaler-release
-      passed: [unit-tests, integration-tests]
-      trigger: true
-    - get: ci
-  - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yaml
-    params:
-      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
-    timeout: 15m
-  - task: deploy-autoscaler
-    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
-    params:
-      <<: *acceptance-params
-      <<: *app-autoscaler-ops-files
-    timeout: 30m
-  - task: register-broker
-    file: ci/ci/autoscaler/tasks/register-broker.yml
-    params:
-      <<: *acceptance-params
-    timeout: 5m
-  - in_parallel:
-    - task: autoscaler-acceptance-api
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-params
-        SUITES: api
-      timeout: 15m
-    - task: autoscaler-acceptance-app
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-params
-        SUITES: app
-      timeout: 45m
-    - task: autoscaler-acceptance-broker
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-params
-        SUITES: broker
-      timeout: 15m
 
 - name: acceptance-log-cache-metron
   public: true
@@ -490,7 +409,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
     params:
       <<: *performance-env
-      <<: *app-autoscaler-ops-files
+      <<: *app-autoscaler-ops-files-log-cache-syslog
     timeout: 30m
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
@@ -522,7 +441,6 @@ jobs:
     - get: ci
     - get: app-autoscaler-release
       passed:
-      - acceptance
       - acceptance-log-cache-metron
       - acceptance-log-cache-syslog
       trigger: true
