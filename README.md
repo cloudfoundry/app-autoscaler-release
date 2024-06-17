@@ -11,9 +11,9 @@ through
 ### Prerequisites
 
 * [Docker](https://www.docker.com/products/docker-desktop/) to spin up the required databases
-* [devbox](https://github.com/jetify-com/devbox) to start a shell with all required tools
-* clone of https://github.com/cloudfoundry/app-autoscaler-env-bbl-state next to the clone of this repo to access systems
-* [direnv](https://direnv.net/) to spin up the shell properly before running the make-targets
+* [devbox](https://github.com/jetify-com/devbox) to start a shell with all required tools (see [devbox.json](/devbox.json))
+* A clone of [cloudfoundry/app-autoscaler-env-bbl-state](https://github.com/cloudfoundry/app-autoscaler-env-bbl-state) next to the clone of this repo in order to access dev-systems
+* [direnv](https://direnv.net/) to automatically spin up the devbox shell before running the make targets (see [.envrc](/.envrc))
 
 ### Make Targets
 
