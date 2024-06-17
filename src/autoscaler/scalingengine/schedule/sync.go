@@ -10,6 +10,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine"
 )
 
+// TODO: fix the typo in the interface name, it should be ActiveScheduleSynchronizer
 type ActiveScheduleSychronizer interface {
 	Sync()
 }
