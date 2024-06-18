@@ -23,11 +23,13 @@ var _ = Describe("Api", func() {
 		runner           *ApiRunner
 		rsp              *http.Response
 		brokerHttpClient *http.Client
+		serverURL        string
 	)
 
 	BeforeEach(func() {
 		brokerHttpClient = NewServiceBrokerClient()
 		runner = NewApiRunner()
+		serverURL = fmt.Sprintf("https://127.0.0.1:%d", cfg.PublicApiServer.Port)
 	})
 
 	Describe("Api configuration check", func() {
@@ -180,8 +182,12 @@ var _ = Describe("Api", func() {
 		})
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", healthport))
+				req, err := http.NewRequest(http.MethodGet, serverURL, nil)
 				Expect(err).NotTo(HaveOccurred())
+
+				rsp, err := apiHttpClient.Do(req)
+				Expect(err).ToNot(HaveOccurred())
+
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
 				healthData := string(raw)
@@ -207,12 +213,12 @@ var _ = Describe("Api", func() {
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := apiHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 			})
@@ -221,12 +227,12 @@ var _ = Describe("Api", func() {
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := apiHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 			})
