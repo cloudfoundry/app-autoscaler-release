@@ -39,7 +39,6 @@ var (
 	configFile         *os.File
 	conf               config.Config
 	egPort             int
-	healthport         int
 	httpClient         *http.Client
 	healthHttpClient   *http.Client
 	mockLogCache       *testhelpers.MockLogCache
@@ -241,7 +240,6 @@ func initConfig() {
 	testCertDir := testhelpers.TestCertFolder()
 
 	egPort = 7000 + GinkgoParallelProcess()
-	healthport = egPort
 	dbUrl := testhelpers.GetDbUrl()
 	conf = config.Config{
 		Logging: helpers.LoggingConfig{
@@ -312,9 +310,6 @@ func initConfig() {
 		DefaultStatWindowSecs:     300,
 		HttpClientTimeout:         10 * time.Second,
 		Health: helpers.HealthConfig{
-			ServerConfig: helpers.ServerConfig{
-				Port: healthport,
-			},
 			HealthCheckUsername: "healthcheckuser",
 			HealthCheckPassword: "healthcheckpassword",
 		},
