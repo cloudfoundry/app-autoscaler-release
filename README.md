@@ -18,23 +18,23 @@ through
 
 ### Make Targets
 
-| Category          | Description                                                                            | Target                                                                   |
-|-------------------|----------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| mock              | generate mocks                                                                         | `make generate-fakes`                                                    |
-| unit-tests        | run against PostgreSQL                                                                 | `make test`                                                              |
-| unit-tests        | run against specific PostgreSQL version                                                | `make clean && make test POSTGRES_TAG=x.y`                   |
-| unit-tests        | run against MySQL                                                                      | `make test db_type=mysql`                                                |
-| unit-tests        | run against specific MySQL version                                                     | `make clean && make test db_type=mysql MYSQL_TAG=x.y`        |
-| integration-tests | run against PostgreSQL                                                                 | `make integration`                                                       |
-| integration-tests | run against specific PostgreSQL version                                                | `make clean && make integration POSTGRES_TAG=x.y`            |
-| integration-tests | run against MySQL                                                                      | `make integration db_type=mysql`                                         |
-| integration-tests | run against specific MySQL version                                                     | `make clean && make integration db_type=mysql MYSQL_TAG=x.y` |
-| acceptance-tests  | run acceptance-tests, see [AutoScaler UAT guide](src/acceptance/README.md) for details | `make acceptance-tests`                                                  |
-| lint              | check code style                                                                       | `make lint`                                                              |
-| lint              | check code style and apply auto-fixes                                                  | `OPTS=--fix RUBOCOP_OPTS=-A make lint`                                   |
-| build             | compile project                                                                        | `make build`                                                             |
-| deploy            | deploy Application Autoscaler and register the service broker in CF                    | `make deploy-autoscaler`                                                 |
-| cleanup           | remove build artifacts                                                                 | `make clean`                                                             |
+| Target                                                                   | Description                                                                            |
+|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| `make generate-fakes`                                                    | generate mocks                                                                         |
+| `make test`                                                              | run unit-tests against PostgreSQL                                                      |
+| `make clean && make test POSTGRES_TAG=x.y`                   | run unit-tests against specific PostgreSQL version                                     |
+| `make test db_type=mysql`                                                | run unit-tests against MySQL                                                           |
+| `make clean && make test db_type=mysql MYSQL_TAG=x.y`        | run unit-tests against specific MySQL version                                          |
+| `make integration`                                                       | run integration-tests against PostgreSQL                                               |
+| `make clean && make integration POSTGRES_TAG=x.y`            | run integration-tests against specific PostgreSQL version                              |
+| `make integration db_type=mysql`                                         | run integration-tests against MySQL                                                    |
+| `make clean && make integration db_type=mysql MYSQL_TAG=x.y` | run integration-tests against specific MySQL version                                   |
+| `make acceptance-tests`                                                  | run acceptance-tests, see [AutoScaler UAT guide](src/acceptance/README.md) for details |
+| `make lint`                                                              | check code style                                                                       |
+| `OPTS=--fix RUBOCOP_OPTS=-A make lint`                                   | check code style and apply auto-fixes                                                  |
+| `make build`                                                             | compile project                                                                        |
+| `make deploy-autoscaler`                                                 | deploy Application Autoscaler and register the service broker in CF                    |
+| `make clean`                                                             | remove build artifacts                                                                 |
 
 ## Use Application Autoscaler Service
 
