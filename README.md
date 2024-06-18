@@ -17,23 +17,23 @@ through
 
 ### Make Targets
 
-| Category          | Description                                                                            | Target                                                                                                                                                    |
-|-------------------|----------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| mock              | generate mocks                                                                         | `make generate-fakes`                                                                                                                                     |
-| unit-tests        | run against PostgreSQL                                                                 | `make test`                                                                                                                                               |
-| unit-tests        | run against specific PostgreSQL version                                                | <pre><code>make clean #Only if you're changing versions to refresh the running docker image<br/>make test POSTGRES_TAG=x.y</code></pre>                   |
-| unit-tests        | run against MySQL                                                                      | `make test db_type=mysql`                                                                                                                                 |
-| unit-tests        | run against specific MySQL version                                                     | <pre><code>make clean #Only if you're changing versions to refresh the running docker image<br/>make test db_type=mysql MYSQL_TAG=x.y</code></pre>        |
-| integration-tests | run against PostgreSQL                                                                 | `make integration`                                                                                                                                        |
-| integration-tests | run against specific PostgreSQL version                                                | <pre><code>make clean #Only if you're changing versions to refresh the running docker image<br/>make integration POSTGRES_TAG=x.y</code></pre>            |
-| integration-tests | run against MySQL                                                                      | `make integration db_type=mysql`                                                                                                                          |
-| integration-tests | run against specific MySQL version                                                     | <pre><code>make clean #Only if you're changing versions to refresh the running docker image<br/>make integration db_type=mysql MYSQL_TAG=x.y</code></pre> |
-| acceptance-tests  | run acceptance-tests, see [AutoScaler UAT guide](src/acceptance/README.md) for details | `make acceptance-tests`                                                                                                                                   |
-| lint              | check code style                                                                       | `make lint`                                                                                                                                               |
-| lint              | check code style and apply auto-fixes                                                  | `OPTS=--fix RUBOCOP_OPTS=-A make lint`                                                                                                                    |
-| build             | compile project                                                                        | `make build`                                                                                                                                              |
-| deploy            | deploy Application Autoscaler and register the service broker in CF                    | `make deploy-autoscaler`                                                                                                                                  |
-| cleanup           | remove build artifacts                                                                 | `make clean`                                                                                                                                              |
+| Category          | Description                                                                            | Target                                                                   |
+|-------------------|----------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| mock              | generate mocks                                                                         | `make generate-fakes`                                                    |
+| unit-tests        | run against PostgreSQL                                                                 | `make test`                                                              |
+| unit-tests        | run against specific PostgreSQL version                                                | `make clean && make test POSTGRES_TAG=x.y`                   |
+| unit-tests        | run against MySQL                                                                      | `make test db_type=mysql`                                                |
+| unit-tests        | run against specific MySQL version                                                     | `make clean && make test db_type=mysql MYSQL_TAG=x.y`        |
+| integration-tests | run against PostgreSQL                                                                 | `make integration`                                                       |
+| integration-tests | run against specific PostgreSQL version                                                | `make clean && make integration POSTGRES_TAG=x.y`            |
+| integration-tests | run against MySQL                                                                      | `make integration db_type=mysql`                                         |
+| integration-tests | run against specific MySQL version                                                     | `make clean && make integration db_type=mysql MYSQL_TAG=x.y` |
+| acceptance-tests  | run acceptance-tests, see [AutoScaler UAT guide](src/acceptance/README.md) for details | `make acceptance-tests`                                                  |
+| lint              | check code style                                                                       | `make lint`                                                              |
+| lint              | check code style and apply auto-fixes                                                  | `OPTS=--fix RUBOCOP_OPTS=-A make lint`                                   |
+| build             | compile project                                                                        | `make build`                                                             |
+| deploy            | deploy Application Autoscaler and register the service broker in CF                    | `make deploy-autoscaler`                                                 |
+| cleanup           | remove build artifacts                                                                 | `make clean`                                                             |
 
 ## Use Application Autoscaler Service
 
