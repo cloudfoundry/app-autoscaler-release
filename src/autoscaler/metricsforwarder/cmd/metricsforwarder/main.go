@@ -114,5 +114,4 @@ func loadConfig(path string) (*config.Config, error) {
 	}
 
 	return conf, nil
-
 }
