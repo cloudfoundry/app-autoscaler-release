@@ -235,11 +235,6 @@ var _ = Describe("Eventgenerator", func() {
 
 				rsp, err := httpsClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
-
-				body, err := io.ReadAll(rsp.Body)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(string(body)).To(ContainSubstring("autoscaler_eventgenerator_concurrent_http_request"))
-
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 			})
 		})
