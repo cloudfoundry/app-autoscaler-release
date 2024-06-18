@@ -7,7 +7,7 @@ set -eu -o pipefail
 target="app-autoscaler-release"
 
 function delete-pipeline(){
-  payload=$(fly --target= "$target" pipelines --json)
+  payload=$(fly --target="$target" pipelines --json)
 
   pipelines=$(echo "$payload" | jq ".[] |.name" -r | sort)
   # ignore shellcheck warning
