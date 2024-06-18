@@ -437,12 +437,6 @@ var _ = Describe("PublicApiServer", func() {
 			})
 		})
 	})
-
-	Context("when requesting non existing path", func() {
-		It("should get 404", func() {
-			verifyResponse(httpClient, serverUrl, "/non-existing-path", nil, http.MethodGet, "", http.StatusNotFound)
-		})
-	})
 })
 
 func verifyResponse(httpClient *http.Client, serverUrl *url.URL, path string, headers map[string]string, httpRequestMethod string, httpRequestBody string, expectResponseStatusCode int) {

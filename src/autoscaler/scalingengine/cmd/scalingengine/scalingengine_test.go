@@ -23,13 +23,11 @@ import (
 var _ = Describe("Main", func() {
 
 	var (
-		runner    *ScalingEngineRunner
-		serverURL string
+		runner *ScalingEngineRunner
 	)
 
 	BeforeEach(func() {
 		runner = NewScalingEngineRunner()
-		serverURL = fmt.Sprintf("https://127.0.0.1:%d", conf.Server.Port)
 	})
 
 	JustBeforeEach(func() {
