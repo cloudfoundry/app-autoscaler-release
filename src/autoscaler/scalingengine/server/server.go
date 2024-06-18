@@ -1,4 +1,4 @@
-package serveDBr
+package server
 
 import (
 	"time"

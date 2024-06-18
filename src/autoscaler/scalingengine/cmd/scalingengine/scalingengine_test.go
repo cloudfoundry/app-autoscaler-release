@@ -23,11 +23,13 @@ import (
 var _ = Describe("Main", func() {
 
 	var (
-		runner *ScalingEngineRunner
+		runner    *ScalingEngineRunner
+		serverURL string
 	)
 
 	BeforeEach(func() {
 		runner = NewScalingEngineRunner()
+		serverURL = fmt.Sprintf("https://127.0.0.1:%d", conf.Server.Port)
 	})
 
 	JustBeforeEach(func() {
@@ -214,7 +216,7 @@ var _ = Describe("Main", func() {
 
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := httpClient.Get(fmt.Sprintf("%s", serverURL))
+				rsp, err := httpClient.Get(serverURL)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
