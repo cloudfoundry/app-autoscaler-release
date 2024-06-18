@@ -320,7 +320,6 @@ func initConfig() {
 		},
 	}
 	configFile = writeConfig(&conf)
-
 }
 
 func writeConfig(c *config.Config) *os.File {
