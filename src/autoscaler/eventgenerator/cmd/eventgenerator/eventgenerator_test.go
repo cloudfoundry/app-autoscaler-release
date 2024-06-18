@@ -1,13 +1,10 @@
 package main_test
 
 import (
-	"crypto/tls"
-	"crypto/x509"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
@@ -21,52 +18,16 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
-func newHttpsclient(certDir string) *http.Client {
-	clientKey := filepath.Join(certDir, "eventgenerator.key")
-	clientCrt := filepath.Join(certDir, "eventgenerator.crt")
-	autoscalerCa := filepath.Join(certDir, "autoscaler-ca.crt")
-
-	cert, err := tls.LoadX509KeyPair(clientCrt, clientKey)
-	if err != nil {
-		panic(err)
-	}
-
-	// Load the CA certificate
-	caCert, err := os.ReadFile(autoscalerCa)
-	if err != nil {
-		panic(err)
-	}
-	caCertPool := x509.NewCertPool()
-	caCertPool.AppendCertsFromPEM(caCert)
-
-	// Create a TLS configuration using the client key, client certificate, and CA certificate
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		RootCAs:      caCertPool,
-		MinVersion:   tls.VersionTLS12,
-	}
-
-	// Create an HTTP client with the custom TLS configuration
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: tlsConfig,
-		},
-	}
-	return client
-}
-
 var _ = Describe("Eventgenerator", func() {
 	var (
 		runner      *EventGeneratorRunner
-		testCertDir string
 		httpsClient *http.Client
 		serverURL   string
 	)
 
 	BeforeEach(func() {
 		runner = NewEventGeneratorRunner()
-		testCertDir = testhelpers.TestCertFolder()
-		httpsClient = newHttpsclient(testCertDir)
+		httpsClient = testhelpers.NewEventGeneratorClient()
 		serverURL = fmt.Sprintf("https://127.0.0.1:%d", conf.Server.Port)
 	})
 
