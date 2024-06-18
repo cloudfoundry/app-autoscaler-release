@@ -4,6 +4,7 @@ The Application Autoscaler provides the capability to adjust the computation res
 through
 
 * dynamic scaling based on application performance metrics
+* dynamic scaling based on custom metrics
 * scheduled scaling based on time
 
 ## Local Development
