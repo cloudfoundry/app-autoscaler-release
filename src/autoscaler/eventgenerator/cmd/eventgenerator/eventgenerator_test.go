@@ -44,6 +44,7 @@ func newHttpsclient(certDir string) *http.Client {
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
 		RootCAs:      caCertPool,
+		MinVersion:   tls.VersionTLS12,
 	}
 
 	// Create an HTTP client with the custom TLS configuration
