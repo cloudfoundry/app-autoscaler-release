@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -33,7 +32,7 @@ func newHttpsclient(certDir string) *http.Client {
 	}
 
 	// Load the CA certificate
-	caCert, err := ioutil.ReadFile(autoscalerCa)
+	caCert, err := os.ReadFile(autoscalerCa)
 	if err != nil {
 		panic(err)
 	}
