@@ -228,10 +228,6 @@ var _ = Describe("Eventgenerator", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-				// Load the client key and certificate
-				//
-				// Load your custom certificate file
-
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
