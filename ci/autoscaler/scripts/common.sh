@@ -15,6 +15,7 @@ function retry(){
   [ "${retries}" -lt "${max_retries}" ] || { echo "ERROR: Command '$*' failed after ${max_retries} attempts"; return 1; }
 }
 
+
 function bosh_login(){
   step "bosh login"
   if [[ ! -d ${bbl_state_path} ]]; then
@@ -31,8 +32,8 @@ function bosh_login(){
 function cf_login(){
   step "login to cf"
   cf api "https://api.${system_domain}" --skip-ssl-validation
-  CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
-  cf auth admin "$CF_ADMIN_PASSWORD"
+  cf_admin_password="$(credhub get --quiet --name='/bosh-autoscaler/cf/cf_admin_password')"
+  cf auth admin "$cf_admin_password"
 }
 
 function cleanup_acceptance_run(){
@@ -90,4 +91,28 @@ function unset_vars() {
   unset SERVICE_BROKER_NAME
   unset NAME_PREFIX
   unset GINKGO_OPTS
+}
+
+function find_or_create_org(){
+  local org_name="$1"
+  if ! cf orgs | grep --quiet --regexp="${org_name}"; then
+    cf create-org "${org_name}"
+  fi
+  cf target -o "${org_name}"
+}
+
+function find_or_create_space(){
+  local space_name="$1"
+  if ! cf spaces | grep --quiet --regexp="${space_name}"; then
+    cf create-space "${space_name}"
+  fi
+  cf target -s "${space_name}"
+}
+
+function cf_target(){
+  local org_name="$1"
+  local space_name="$2"
+
+  find_or_create_org "${org_name}"
+  find_or_create_space "${space_name}"
 }

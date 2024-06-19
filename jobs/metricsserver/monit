@@ -1,5 +1,0 @@
-check process metricsserver
-  with pidfile /var/vcap/sys/run/bpm/metricsserver/metricsserver.pid
-  start program "/var/vcap/jobs/bpm/bin/bpm start metricsserver"
-  stop program "/var/vcap/jobs/bpm/bin/bpm stop metricsserver"
-  group vcap

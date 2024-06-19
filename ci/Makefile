@@ -6,11 +6,10 @@ set-autoscaler-pipeline:
 .PHONY: set-autoscaler-pipeline
 set-infrastructure-pipeline:
 	@./infrastructure/set-pipeline.sh
-
+ 
 .PHONY: unpause-pipeline
 unpause-pipeline:
 	@./scripts/unpause-pipeline.sh
-
 
 .PHONY: delete-pipeline
 delete-pipeline:
@@ -22,16 +21,16 @@ set-target:
 
 .PHONY: lint
 lint:
-	shellcheck --external-sources -x -s bash autoscaler/**/**/*.sh
+	@shellcheck --external-sources --shell='bash' **/scripts/*.sh
 
 .PHONY: fix-lint
 fix-lint:
-	shellcheck --external-sources -x -s bash -f diff autoscaler/**/**/*.sh
+	@shellcheck --external-sources --shell='bash' -f diff **/scripts/*.sh
 
 .PHONY: browse
 browse:
 	@open https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
-
+  
 .PHONY: intercept
 intercept:
 	./scripts/intercept.sh
@@ -39,3 +38,4 @@ intercept:
 .PHONY: trigger-job
 trigger-job:
 	./scripts/trigger-job.sh
+

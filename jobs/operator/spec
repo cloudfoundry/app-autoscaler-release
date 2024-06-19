@@ -26,10 +26,6 @@ templates:
   appmetrics_db.crt.erb: config/certs/appmetrics_db/crt
   appmetrics_db.key.erb: config/certs/appmetrics_db/key
 
-  appinstancemetrics_db_ca.crt.erb: config/certs/instancemetrics_db/ca.crt
-  appinstancemetrics_db.crt.erb: config/certs/instancemetrics_db/crt
-  appinstancemetrics_db.key.erb: config/certs/instancemetrics_db/key
-
   lock_db_ca.crt.erb: config/certs/lock_db/ca.crt
   lock_db.crt.erb: config/certs/lock_db/crt
   lock_db.key.erb: config/certs/lock_db/key
@@ -207,13 +203,6 @@ properties:
     default: 60s
   autoscaler.operator.app_sync_interval:
     description: "the time interval to sync applications"
-    default: 24h
-
-  autoscaler.operator.instance_metrics_db.refresh_interval:
-    description: "the time interval to prune the instancemetrics database"
-    default: 1h
-  autoscaler.operator.instance_metrics_db.cutoff_duration:
-    description: "the cutoff days when pruning instancemetrics database"
     default: 24h
 
   autoscaler.operator.app_metrics_db.refresh_interval:

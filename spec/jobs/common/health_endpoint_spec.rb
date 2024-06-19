@@ -10,8 +10,6 @@ describe "health endpoint sections relevant specs" do
     %w[apiserver golangapiserver config/apiserver.yml apiserver.yml],
     %w[eventgenerator eventgenerator config/eventgenerator.yml eventgenerator.yml],
     %w[metricsforwarder metricsforwarder config/metricsforwarder.yml metricsforwarder.yml],
-    %w[metricsgateway metricsgateway config/metricsgateway.yml metricsgateway.yml],
-    %w[metricsserver metricsserver config/metricsserver.yml metricsserver.yml],
     %w[operator operator config/operator.yml operator.yml],
     %w[scalingengine scalingengine config/scalingengine.yml scalingengine.yml]
   ].each do |service, release_job, config_file, properties_file|
@@ -23,8 +21,6 @@ describe "health endpoint sections relevant specs" do
           @links = case service
           when "eventgenerator"
             [Bosh::Template::Test::Link.new(name: "eventgenerator")]
-          when "metricsgateway", "metricsserver"
-            [Bosh::Template::Test::Link.new(name: "metricsserver")]
           else
             []
           end

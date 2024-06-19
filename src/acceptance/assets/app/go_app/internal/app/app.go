@@ -16,7 +16,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler, cpuTest CPUWaster, diskOccupier DiskOccupier, customMetricTest CustomMetricClient) *gin.Engine {
+func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler,
+	cpuTest CPUWaster, diskOccupier DiskOccupier, customMetricTest CustomMetricClient) *gin.Engine {
 	r := gin.New()
 
 	otel.SetTracerProvider(sdktrace.NewTracerProvider())

@@ -41,11 +41,7 @@ end
   app_metrics_db_url = build_db_url('appmetrics_db', job_name)
 
 
-  unless p("autoscaler.eventgenerator.metricscollector.use_log_cache")
-    metric_collector_url = "https://" + p("autoscaler.eventgenerator.metricscollector.host")
-  else
-    metric_collector_url = p("autoscaler.eventgenerator.metricscollector.host")
-  end
+  metric_collector_url = p("autoscaler.eventgenerator.metricscollector.host")
 
   metrics_collector_port = p("autoscaler.eventgenerator.metricscollector.port").to_s
   unless metrics_collector_port.empty?
@@ -118,7 +114,6 @@ scalingEngine:
 
 metricCollector:
   metric_collector_url: <%= metric_collector_url %>
-  use_log_cache: <%= p("autoscaler.eventgenerator.metricscollector.use_log_cache") %>
   tls:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.crt

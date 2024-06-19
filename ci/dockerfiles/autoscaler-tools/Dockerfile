@@ -36,6 +36,7 @@ RUN apt-get update && \
             cf8-cli \
             gnupg \
             gnupg2 \
+            netcat \
             gh  \
             make \
             mysql-client && \

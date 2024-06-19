@@ -22,8 +22,6 @@ domains:
   servicebroker: &servicebroker_domain ((deployment_name)).servicebroker.service.cf.internal
   eventgenerator: &eventgenerator_domain ((deployment_name)).eventgenerator.service.cf.internal
   scalingengine: &scalingengine_domain ((deployment_name)).scalingengine.service.cf.internal
-  metricsgateway: &metricsgateway_domain ((deployment_name)).metricsgateway.service.cf.internal
-  metricsserver: &metricsserver_domain ((deployment_name)).metricsserver.service.cf.internal
 
 public_domains:
   metricsforwarder: &metricsforwarder_public_domain ((deployment_name))metrics.((system_domain))
@@ -79,20 +77,6 @@ addons:
         targets:
           - query: '*'
             instance_group: scalingengine
-            deployment: ((deployment_name))
-            network: default
-            domain: bosh
-      - domain: *metricsgateway_domain
-        targets:
-          - query: '*'
-            instance_group: metricsgateway
-            deployment: ((deployment_name))
-            network: default
-            domain: bosh
-      - domain: *metricsserver_domain
-        targets:
-          - query: '*'
-            instance_group: metricsserver
             deployment: ((deployment_name))
             network: default
             domain: bosh
@@ -260,11 +244,6 @@ instance_groups:
             client_cert: ((!scalingengine_client_cert.certificate))
             client_key: ((!scalingengine_client_cert.private_key))
             host: *scalingengine_domain
-          metrics_collector:
-            ca_cert: ((!metricsserver_client_cert.ca))
-            client_cert: ((!metricsserver_client_cert.certificate))
-            client_key: ((!metricsserver_client_cert.private_key))
-            host: *metricsserver_domain
           event_generator:
             ca_cert: ((!eventgenerator_client_cert.ca))
             client_cert: ((!eventgenerator_client_cert.certificate))
@@ -388,7 +367,6 @@ instance_groups:
     properties:
       autoscaler:
         instancemetrics_db: *database
-        instancemetrics_db_connection_config: *databaseConnectionConfig
         appmetrics_db: *database
         appmetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db: *database
@@ -431,122 +409,6 @@ instance_groups:
             uris:
               - ((deployment_name))-operator.((system_domain))
 
-# Metricsserver
-- name: metricsserver
-  azs:
-    - z1
-  instances: 1
-  vm_type: minimal
-  stemcell: default
-  networks:
-  - name: default
-  jobs:
-  - name: metricsserver
-    release: app-autoscaler
-    properties:
-      autoscaler:
-        instancemetrics_db: *database
-        instancemetrics_db_connection_config: *databaseConnectionConfig
-        policy_db: *database
-        policy_db_connection_config: *databaseConnectionConfig
-        metricsserver:
-          logging:
-            level: info
-          server:
-            port: &metricsserverPort 6103
-          http_client_timeout: 60s
-          ca_cert: ((!metricsserver_server_cert.ca))
-          server_cert: ((!metricsserver_server_cert.certificate))
-          server_key: ((!metricsserver_server_cert.private_key))
-          collector:
-            keep_alive_time: 60s
-            refresh_interval: 60s
-            collect_interval: 60s
-            save_interval: 5s
-            persist_metrics: true
-            envelope_processor_count: 4
-            metric_cache_size_per_app: 1000
-            envelope_channel_size: 1000
-            metric_channel_size: 1000
-          health:
-            port: &metricsserverHealthPort 6303
-            username: metricsserver
-            password: ((autoscaler_metricsserver_health_password))
-  - name: route_registrar
-    release: routing
-    consumes:
-      nats: {from: nats, deployment: cf}
-    properties:
-      route_registrar:
-        routes:
-          - name: autoscaler_metricsserver_health
-            registration_interval: 20s
-            port: *metricsserverHealthPort
-            tags:
-              component: autoscaler_metricsserver_health
-            uris:
-              - ((deployment_name))-metricsserver.((system_domain))
-
-# Metricsgateway
-- name: metricsgateway
-  azs:
-  - z1
-  instances: 1
-  vm_type: minimal
-  stemcell: default
-  networks:
-  - name: default
-  jobs:
-  - name: metricsgateway
-    release: app-autoscaler
-    properties:
-      autoscaler:
-        policy_db: *database
-        policy_db_connection_config.max_open_connections: *databaseConnectionConfig
-        metricsgateway:
-          logging:
-            level: info
-          envelop_chan_size: 1000
-          nozzle_count: 4
-          app_manager:
-            app_refresh_interval: 5s
-          emitter:
-            buffer_size: 500
-            keep_alive_interval: 5s
-            handshake_timeout: 1s
-            max_setup_retry_count: 3
-            max_close_retry_count: 3
-            retry_delay: 1s
-            metricsserver_client:
-              ca_cert: ((!metricsserver_client_cert.ca))
-              cert: ((!metricsserver_client_cert.certificate))
-              key: ((!metricsserver_client_cert.private_key))
-          nozzle:
-            rlp_addr: "reverse-log-proxy.service.cf.internal:8082"
-            shard_id: "CF_AUTOSCALER"
-            loggregator_rlp_tls:
-              cert: ((loggregator_tls_rlp.certificate))
-              key: ((loggregator_tls_rlp.private_key))
-              ca_cert: ((loggregator_ca.certificate))
-          health:
-            port: &metricsgatewayHealthPort 6503
-            username: metricsgateway
-            password: ((autoscaler_metricsgateway_health_password))
-  - name: route_registrar
-    release: routing
-    consumes:
-      nats: {from: nats, deployment: cf}
-    properties:
-      route_registrar:
-        routes:
-        - name: autoscaler_metricsgateway_health
-          registration_interval: 20s
-          port: *metricsgatewayHealthPort
-          tags:
-            component: autoscaler_metricsgateway_health
-          uris:
-            - ((deployment_name))-metricsgateway.((system_domain))
-
 # Eventgenerator Instance Group
 - name: eventgenerator
   azs:
@@ -583,11 +445,11 @@ instance_groups:
             client_key: ((!scalingengine_client_cert.private_key))
             host: *scalingengine_domain
           metricscollector:
-            ca_cert: ((!metricsserver_client_cert.ca))
-            client_cert: ((!metricsserver_client_cert.certificate))
-            client_key: ((!metricsserver_client_cert.private_key))
-            port: *metricsserverPort
-            host: *metricsserver_domain
+            ca_cert: ((metricscollector_ca_cert))
+            client_cert: ((metricscollector_client_cert))
+            client_key: ((metricscollector_client_key))
+            port: 8080
+            host: logcache
   - name: route_registrar
     release: routing
     consumes:
@@ -630,28 +492,62 @@ instance_groups:
             port: &metricsforwarderServerPort 6201
           loggregator:
             tls:
-              ca_cert: ((loggregator_tls_agent.ca))
-              cert: ((loggregator_tls_agent.certificate))
-              key: ((loggregator_tls_agent.private_key))
+              ca_cert: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.ca))
+              cert: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.certificate))
+              key: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.private_key))
         storedprocedure_db: *database
-  - name: loggregator_agent
+  - name: loggr-syslog-agent
+    release: loggregator-agent
+    properties:
+      tls: # connection to syslog-agent
+        ca_cert: ((!loggr_syslog_agent_tls.ca))
+        cert: ((!loggr_syslog_agent_tls.certificate))
+        key: ((!loggr_syslog_agent_tls.private_key))
+      cache: # connection to syslog-binding-cache
+        tls:
+          ca_cert: ((!loggr_syslog_agent_cache_tls.ca))
+          cert: ((!loggr_syslog_agent_cache_tls.certificate))
+          key: ((!loggr_syslog_agent_cache_tls.private_key))
+          cn: loggr_syslog_binding_cache
+          # url: the value is automatically being generated if syslog-binding-cache is deployed https://github.com/cloudfoundry/loggregator-agent-release/blob/a5366d6d7c490417d12f990c1af0437a1feb067f/jobs/loggr-syslog-agent/templates/bpm.yml.erb#L60
+      metrics: # connection for metric scrapers, here are dummy values configured since the /metrics endpoint can't be disabled via configuration
+        ca_cert: ((!loggr_syslog_agent_metrics.ca))
+        cert: ((!loggr_syslog_agent_metrics.certificate))
+        key: ((!loggr_syslog_agent_metrics.private_key))
+        server_name: metrics.config.is.required.by.job.specification.but.not.needed.in.our.case
+  - name: loggr-syslog-binding-cache
     release: loggregator-agent
     consumes:
-      doppler:
-        from: doppler
-        deployment: cf
+      cloud_controller: { from: cloud_controller, deployment: cf } # required by job to resolve API URL https://github.com/cloudfoundry/loggregator-agent-release/blob/0e3340f17f94d06cb3d4c11d1553a9a2a5bfb891/jobs/loggr-syslog-binding-cache/templates/bpm.yml.erb#L4
     properties:
-      loggregator:
+      tls: # connection to syslog-binding-cache api, e.g. /v2/aggregate & /v2/bindings
+        ca_cert: ((!loggr_syslog_binding_cache_tls.ca))
+        cert: ((!loggr_syslog_binding_cache_tls.certificate))
+        key: ((!loggr_syslog_binding_cache_tls.private_key))
+        cn: loggr_syslog_agent_tls
+      external_port: 9000
+      aggregate_drains: # connection to log-cache
+        - url: "syslog-tls://log-cache.service.cf.internal:6067?include-metrics-deprecated=true&ssl-strict-internal=true"
+          # reusing these certificates here is a workaround so that we don't need to generate own ones.
+          # the problem is that when we generate own certificates (see variables section of app-autoscaler.yml),
+          # we have no possibility to reuse the CA from CF to issue new certificates.
+          ca: ((log_cache_syslog_tls_ca))
+          cert: ((syslog_agent_log_cache_tls_certificate))
+          key: ((syslog_agent_log_cache_tls_key))
+      metrics: # connection for metric scrapers, here are dummy values configured since the /metrics endpoint can't be disabled via configuration
+        ca_cert: ((!loggr_syslog_binding_cache_metrics.ca))
+        cert: ((!loggr_syslog_binding_cache_metrics.certificate))
+        key: ((!loggr_syslog_binding_cache_metrics.private_key))
+        server_name: metrics.config.is.required.by.job.specification.but.not.needed.in.our.case
+      api: # connection to CF cloud controller
+        # here are dummy values configured since there is no need to query the CC API for all bindings.
+        # if a customer wants to ever receive their own custom metrics in their own syslog-drain, we would need to configure this properly.
         tls:
-          ca_cert: ((loggregator_ca.certificate))
-          agent:
-            cert: ((loggregator_tls_agent.certificate))
-            key: ((loggregator_tls_agent.private_key))
-      metrics:
-        ca_cert: ((loggregator_agent_metrics_tls.ca))
-        cert: ((loggregator_agent_metrics_tls.certificate))
-        key: ((loggregator_agent_metrics_tls.private_key))
-        server_name: loggregator_agent_server
+          cn: api.tls.config.is.required.by.job.specification.but.not.needed.in.our.case
+          ca_cert: ((!loggr_syslog_binding_cache_api_tls.ca))
+          cert: ((!loggr_syslog_binding_cache_api_tls.certificate))
+          key: ((!loggr_syslog_binding_cache_api_tls.private_key))
+        polling_interval: 876000h # 100 years, workaround to basically never poll the cloud controller API
   - name: route_registrar
     release: routing
     consumes:
@@ -675,7 +571,7 @@ instance_groups:
               - *metricsforwarder_mtls_public_domain
           - name: autoscaler_metricsforwarder_health
             registration_interval: 20s
-            port: *metricsforwarderHealthPort
+            port: *metricsforwarderServerPort
             tags:
               component: autoscaler_metricsforwarder_health
             uris:
@@ -710,10 +606,6 @@ variables:
   options:
     length: 128
 - name: autoscaler_metricsforwarder_health_password
-  type: password
-- name: autoscaler_metricsgateway_health_password
-  type: password
-- name: autoscaler_metricsserver_health_password
   type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password
   type: password
@@ -781,14 +673,6 @@ variables:
     length: 128
 - name: autoscaler_scalingengine_health_password
   type: password
-- name: metricsgateway_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: metricsserver_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
 - name: operator_monitor_basic_auth_password
   type: password
   options:
@@ -873,31 +757,6 @@ variables:
     - client_auth
     key_length: 4096
     duration: 180
-- name: metricsserver_server_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: *metricsserver_domain
-    alternative_names:
-    - *metricsserver_domain
-    - "*.metricsserver.default.((deployment_name)).bosh"
-
-    extended_key_usage:
-    - client_auth
-    - server_auth
-    key_length: 4096
-    duration: 180
-- name: metricsserver_client_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: metricsserver_client
-    extended_key_usage:
-    - client_auth
-    key_length: 4096
-    duration: 180
 - name: scalingengine_server_cert
   type: certificate
   update_mode: converge
@@ -927,18 +786,6 @@ variables:
   options:
     common_name: metricScraperCA
     is_ca: true
-    key_length: 4096
-    duration: 180
-- name: loggregator_agent_metrics_tls
-  type: certificate
-  update_mode: converge
-  options:
-    ca: metric_scraper_ca
-    common_name: loggregator_agent_server
-    alternative_names:
-      - loggregator_agent_server
-    extended_key_usage:
-      - server_auth
     key_length: 4096
     duration: 180
 
