@@ -366,7 +366,6 @@ instance_groups:
     release: app-autoscaler
     properties:
       autoscaler:
-        instancemetrics_db: *database
         appmetrics_db: *database
         appmetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db: *database
