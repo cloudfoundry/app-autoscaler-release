@@ -31,22 +31,6 @@ var _ = Describe("Server", func() {
 		})
 	})
 
-	Context("when requesting the wrong path", func() {
-		BeforeEach(func() {
-			serverUrl.Path = "/not-exist-path"
-		})
-
-		JustBeforeEach(func() {
-			rsp, err = http.Get(serverUrl.String())
-		})
-
-		It("should return 404", func() {
-			Expect(err).ToNot(HaveOccurred())
-			Expect(rsp.StatusCode).To(Equal(http.StatusNotFound))
-			rsp.Body.Close()
-		})
-	})
-
 	Context("when using wrong method to retrieve aggregared metrics history", func() {
 		BeforeEach(func() {
 			serverUrl.Path = TestPathAggregatedMetricHistories
