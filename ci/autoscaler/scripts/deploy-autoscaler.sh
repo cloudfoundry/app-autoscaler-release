@@ -95,6 +95,7 @@ function create_manifest(){
       -v syslog_agent_log_cache_tls_key="$(credhub get -n /bosh-autoscaler/cf/syslog_agent_log_cache_tls --key private_key --quiet)"\
       -v metricscollector_ca_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key ca --quiet)"\
       -v metricscollector_client_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key certificate --quiet)"\
+      -v metricsforwarder_host="${metricsforwarder_host}"\
       -v metricscollector_client_key="$(credhub get -n /bosh-autoscaler/cf/log_cache --key private_key --quiet)"\
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
