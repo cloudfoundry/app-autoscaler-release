@@ -19,7 +19,6 @@ anchors:
       operations/enable-nats-tls.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
 
   app-autoscaler-ops-files-log-cache-syslog-cf: &app-autoscaler-ops-files-log-cache-syslog-cf
