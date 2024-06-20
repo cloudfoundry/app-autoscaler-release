@@ -1,5 +1,5 @@
 gcloud 473.0.0
-helm 3.14.4
+helm 3.15.2
 python 3.12.4
 terraform 1.8.5
 terraform-lsp
