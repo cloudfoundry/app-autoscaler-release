@@ -11,3 +11,4 @@ popd
 
 cp -a ${BOSH_COMPILE_TARGET}/autoscaler/build/eventgenerator ${BOSH_INSTALL_TARGET}
 cp -a ${BOSH_COMPILE_TARGET}/autoscaler/eventgenerator/db/dataaggregator.db.changelog.yml ${BOSH_INSTALL_TARGET}
+cp -a ${BOSH_COMPILE_TARGET}/autoscaler/eventgenerator/db/metricscollector.db.changelog.yml ${BOSH_INSTALL_TARGET}

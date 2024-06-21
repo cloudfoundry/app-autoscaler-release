@@ -1,5 +1,6 @@
 { buildGoModule
 , callPackage
+, fetchFromGitHub
 , fetchgit
 , lib
 }: {
@@ -29,6 +30,30 @@
     };
     doCheck = false;
     vendorHash = null;
+  };
+
+  cloud-mta-build-tool = buildGoModule rec {
+    pname = "Cloud MTA Build Tool";
+    version = "1.2.26";
+
+    src = fetchFromGitHub {
+      owner = "SAP";
+      repo = "cloud-mta-build-tool";
+      rev = "v${version}";
+      hash = "sha256-DKZ9Nj/sNC9dRjyiu4MKjLrIJWluYlZzUHWqEqtrNt4=";
+    };
+
+    vendorHash = "sha256-h8LPsuxvbr/aRhH1vR1fYgBot37yrfiemZTJMKj0zbk=";
+
+    ldflags = ["-s" "-w" "-X main.Version=${version}"];
+
+    doCheck = false;
+
+    postInstall = ''
+      pushd "$out/bin" &> /dev/null
+        ln -s 'cloud-mta-build-tool' 'mbt'
+      popd
+    '';
   };
 
   log-cache-cli-plugin = buildGoModule rec {

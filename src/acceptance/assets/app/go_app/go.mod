@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app
 
-go 1.21.5
+go 1.21.6
 
 require (
 	github.com/cloudfoundry-community/go-cfenv v1.18.0
@@ -9,7 +9,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
-	github.com/go-logr/logr v1.4.1
+	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/zapr v1.3.0
 	github.com/json-iterator/go v1.1.12
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
@@ -17,8 +17,8 @@ require (
 	github.com/ogen-go/ogen v1.1.1
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
-	github.com/prometheus/procfs v0.14.0
-	github.com/steinfletcher/apitest v1.5.15
+	github.com/prometheus/procfs v0.15.1
+	github.com/steinfletcher/apitest v1.5.16
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.51.0
 	go.opentelemetry.io/otel v1.26.0
 	go.opentelemetry.io/otel/metric v1.26.0

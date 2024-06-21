@@ -9,12 +9,6 @@
   path: /variables/name=autoscaler_metricsforwarder_health_password
 
 - type: remove
-  path: /variables/name=autoscaler_metricsgateway_health_password
-
-- type: remove
-  path: /variables/name=autoscaler_metricsserver_health_password
-
-- type: remove
   path: /variables/name=autoscaler_operator_health_password
 
 - type: remove
@@ -43,22 +37,10 @@
   path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/operator/health/password
 
 - type: remove
-  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/metricsserver/health/username
-
-- type: remove
-  path: /instance_groups/name=metricsserver/jobs/name=metricsserver/properties/autoscaler/metricsserver/health/password
-
-- type: remove
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/health/username
 
 - type: remove
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/health/password
-
-- type: remove
-  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/health/username
-
-- type: remove
-  path: /instance_groups/name=metricsgateway/jobs/name=metricsgateway/properties/autoscaler/metricsgateway/health/password
 
 # asapi
 - type: remove
@@ -77,12 +59,6 @@
 
 - type: remove
   path: /instance_groups/name=operator/jobs/name=route_registrar
-
-- type: remove
-  path: /instance_groups/name=metricsserver/jobs/name=route_registrar
-
-- type: remove
-  path: /instance_groups/name=metricsgateway/jobs/name=route_registrar
 
 - type: remove
   path: /instance_groups/name=eventgenerator/jobs/name=route_registrar

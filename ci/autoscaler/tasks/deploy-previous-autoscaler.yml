@@ -14,7 +14,6 @@ params:
   # Optional: relative to the root of the release input. The files will be
   # checked to see if they exist, if not they will be excluded from the list
   OPS_FILES: |
-    example/operation/loggregator-certs-from-cf.yml
     example/operation/postgres-persistent-disk.yml
 
 

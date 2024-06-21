@@ -33,10 +33,12 @@ function set_pipeline(){
     add_var acceptance_deployment_name          "acceptance"
     add_var acceptance_deployment_name_logcache_metron "acceptance-lc"
     add_var acceptance_deployment_name_logcache_syslog "acceptance-lc-sl"
+    add_var acceptance_deployment_name_logcache_syslog_cf "acceptance-lc-sl-cf"
   else
     add_var acceptance_deployment_name          "${PR_NUMBER}-acceptance"
     add_var acceptance_deployment_name_logcache_metron "${PR_NUMBER}-acceptance-lc"
     add_var acceptance_deployment_name_logcache_syslog "${PR_NUMBER}-acceptance-lc-sl"
+    add_var acceptance_deployment_name_logcache_syslog_cf "${PR_NUMBER}-acceptance-lc-sl-cf"
   fi
 
   # shellcheck disable=SC2086
@@ -75,7 +77,10 @@ function main(){
       export PIPELINE_NAME="app-autoscaler-release"
       set_pipeline $PIPELINE_NAME
     else
-      export PIPELINE_NAME="app-autoscaler-release-${CURRENT_BRANCH}"
+      local current_branch_without_slashes
+      current_branch_without_slashes="$(echo "${CURRENT_BRANCH}" | sed 's/\//-/g')" # Concourse can't handle slashes in pipeline names
+
+      export PIPELINE_NAME="app-autoscaler-release-${current_branch_without_slashes}"
       set_pipeline "$PIPELINE_NAME"
       pause_jobs "$PIPELINE_NAME"
       unpause_job "$PIPELINE_NAME/set-pipeline"
