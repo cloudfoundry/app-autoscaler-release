@@ -67,8 +67,6 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-health:
-  port: 9999
 cred_helper_impl: default
 `)
 			})
@@ -76,7 +74,6 @@ cred_helper_impl: default
 			It("returns the config", func() {
 				Expect(conf.Server.Port).To(Equal(8081))
 				Expect(conf.Logging.Level).To(Equal("debug"))
-				Expect(conf.Health.Port).To(Equal(9999))
 				Expect(conf.LoggregatorConfig.MetronAddress).To(Equal("127.0.0.1:3457"))
 				Expect(conf.Db[db.PolicyDb]).To(Equal(
 					db.DatabaseConfig{
@@ -103,8 +100,6 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-health:
-  port: 8081
 `)
 			})
 
@@ -115,7 +110,6 @@ health:
 				Expect(conf.LoggregatorConfig.MetronAddress).To(Equal(DefaultMetronAddress))
 				Expect(conf.CacheTTL).To(Equal(DefaultCacheTTL))
 				Expect(conf.CacheCleanupInterval).To(Equal(DefaultCacheCleanupInterval))
-				Expect(conf.Health.Port).To(Equal(8081))
 			})
 
 			When("PORT env variable is set", func() {
@@ -160,20 +154,6 @@ server:
 			})
 		})
 
-		When("it gives a non integer health server port", func() {
-			BeforeEach(func() {
-				configBytes = []byte(`
-health:
-  port: port
-`)
-			})
-
-			It("should error", func() {
-				Expect(err).To(BeAssignableToTypeOf(&yaml.TypeError{}))
-				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal.*into int")))
-			})
-		})
-
 		When("it gives a non integer max_open_connections of policydb", func() {
 			BeforeEach(func() {
 				configBytes = []byte(`
@@ -189,8 +169,6 @@ db:
     max_open_connections: NOT-INTEGER-VALUE
     max_idle_connections: 5
     connection_max_lifetime: 60s
-health:
-  port: 8081
 `)
 			})
 
@@ -215,8 +193,6 @@ db:
     max_open_connections: 10
     max_idle_connections: NOT-INTEGER-VALUE
     connection_max_lifetime: 60s
-health:
-  port: 8081
 `)
 			})
 
@@ -241,8 +217,6 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 6K
-health:
-  port: 8081
 `)
 			})
 
@@ -267,8 +241,6 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-health:
-  port: 8081
 rate_limit:
   max_amount: NOT-INTEGER
   valid_duration: 1s
@@ -296,8 +268,6 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-health:
-  port: 8081
 rate_limit:
   max_amount: 2
   valid_duration: NOT-TIME-DURATION
@@ -316,7 +286,6 @@ rate_limit:
 			conf = &Config{}
 			conf.Server.Port = 8081
 			conf.Logging.Level = "debug"
-			conf.Health.Port = 8081
 			conf.LoggregatorConfig.MetronAddress = "127.0.0.1:3458"
 			conf.LoggregatorConfig.TLS.CACertFile = "../testcerts/ca.crt"
 			conf.LoggregatorConfig.TLS.CertFile = "../testcerts/client.crt"

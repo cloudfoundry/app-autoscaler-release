@@ -135,7 +135,7 @@ var _ = Describe("Operator", Serial, func() {
 				secondRunner.startCheck = ""
 				cfg.Health.HealthCheckUsername = ""
 				cfg.Health.HealthCheckPassword = ""
-				cfg.Health.Port = 9000 + GinkgoParallelProcess()
+				cfg.Server.Port = 9000 + GinkgoParallelProcess()
 				secondRunner.configPath = writeConfig(&cfg).Name()
 				secondRunner.Start()
 
@@ -150,7 +150,7 @@ var _ = Describe("Operator", Serial, func() {
 				Consistently(secondRunner.Session.Buffer, 5*time.Second).ShouldNot(Say("operator.successfully-acquired-lock"))
 
 				By("checking the health endpoint of the standing-by instance")
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d/health", cfg.Health.Port))
+				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d/health", cfg.Server.Port))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 
@@ -168,7 +168,7 @@ var _ = Describe("Operator", Serial, func() {
 
 				cfg.Health.HealthCheckUsername = ""
 				cfg.Health.HealthCheckPassword = ""
-				cfg.Health.Port = 9000 + GinkgoParallelProcess()
+				cfg.Server.Port = 9000 + GinkgoParallelProcess()
 				secondRunner.configPath = writeConfig(&cfg).Name()
 				secondRunner.Start()
 			})
@@ -210,7 +210,7 @@ var _ = Describe("Operator", Serial, func() {
 				runner.Start()
 				Eventually(runner.Session.Buffer, 10*time.Second).Should(Say("operator.started"))
 				secondRunner = NewOperatorRunner()
-				cfg.Health.Port = 9000 + GinkgoParallelProcess()
+				cfg.Server.Port = 9000 + GinkgoParallelProcess()
 				secondRunner.configPath = writeConfig(&cfg).Name()
 				secondRunner.startCheck = ""
 				secondRunner.Start()
