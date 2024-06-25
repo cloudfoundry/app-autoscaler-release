@@ -45,12 +45,6 @@ var defaultServerConfig = helpers.ServerConfig{
 	Port: 6110,
 }
 
-var defaultHealthConfig = helpers.HealthConfig{
-	ServerConfig: helpers.ServerConfig{
-		Port: 8081,
-	},
-}
-
 var defaultLoggingConfig = helpers.LoggingConfig{
 	Level: "info",
 }
@@ -77,7 +71,6 @@ func LoadConfig(reader io.Reader) (*Config, error) {
 		LoggregatorConfig: LoggregatorConfig{
 			MetronAddress: DefaultMetronAddress,
 		},
-		Health:               defaultHealthConfig,
 		CacheTTL:             DefaultCacheTTL,
 		CacheCleanupInterval: DefaultCacheCleanupInterval,
 		PolicyPollerInterval: DefaultPolicyPollerInterval,

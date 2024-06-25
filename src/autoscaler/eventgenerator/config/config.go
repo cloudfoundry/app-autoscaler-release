@@ -16,7 +16,6 @@ import (
 const (
 	DefaultLoggingLevel                   string = "info"
 	DefaultServerPort                     int    = 8080
-	DefaultHealthServerPort               int    = 8081
 	DefaultPolicyPollerInterval                  = 40 * time.Second
 	DefaultAggregatorExecuteInterval             = 40 * time.Second
 	DefaultSaveInterval                          = 5 * time.Second
@@ -98,11 +97,6 @@ func LoadConfig(config []byte) (*Config, error) {
 		Server: ServerConfig{
 			ServerConfig: helpers.ServerConfig{
 				Port: DefaultServerPort,
-			},
-		},
-		Health: helpers.HealthConfig{
-			ServerConfig: helpers.ServerConfig{
-				Port: DefaultHealthServerPort,
 			},
 		},
 		Aggregator: AggregatorConfig{

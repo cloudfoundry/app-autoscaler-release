@@ -25,12 +25,6 @@ var defaultServerConfig = helpers.ServerConfig{
 	Port: 8080,
 }
 
-var defaultHealthConfig = helpers.HealthConfig{
-	ServerConfig: helpers.ServerConfig{
-		Port: 8081,
-	},
-}
-
 var defaultLoggingConfig = helpers.LoggingConfig{
 	Level: "info",
 }
@@ -61,7 +55,6 @@ func LoadConfig(reader io.Reader) (*Config, error) {
 		CF:                defaultCFConfig,
 		Logging:           defaultLoggingConfig,
 		Server:            defaultServerConfig,
-		Health:            defaultHealthConfig,
 		HttpClientTimeout: DefaultHttpClientTimeout,
 	}
 

@@ -7,7 +7,6 @@ import (
 )
 
 type HealthConfig struct {
-	ServerConfig            `yaml:",inline"`
 	HealthCheckUsername     string `yaml:"username"`
 	HealthCheckUsernameHash string `yaml:"username_hash"`
 	HealthCheckPassword     string `yaml:"password"`

@@ -63,7 +63,6 @@ var _ = Describe("Main", func() {
 				secondConf := conf
 
 				secondConf.Server.Port += 500
-				secondConf.Health.Port += 500
 				secondRunner.configPath = writeConfig(&secondConf).Name()
 				secondRunner.Start()
 			})
