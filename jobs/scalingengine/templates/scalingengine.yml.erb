@@ -63,16 +63,8 @@ logging:
   level: <%= p("autoscaler.scalingengine.logging.level") %>
 http_client_timeout: <%= p("autoscaler.scalingengine.http_client_timeout") %>
 health:
-  port: <%= p("autoscaler.scalingengine.health.port") %>
   username: <%= p("autoscaler.scalingengine.health.username") %>
   password: <%= p("autoscaler.scalingengine.health.password") %>
-  <% if_p("autoscaler.scalingengine.health.ca_cert", "autoscaler.scalingengine.health.server_cert", "autoscaler.scalingengine.health.server_key") do %>
-  tls:
-    ca_file: /var/vcap/jobs/scalingengine/config/certs/healthendpoint/ca.crt
-    cert_file: /var/vcap/jobs/scalingengine/config/certs/healthendpoint/server.crt
-    key_file: /var/vcap/jobs/scalingengine/config/certs/healthendpoint/server.key
-  <% end %>
-
 
 db:
   policy_db:

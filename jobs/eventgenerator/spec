@@ -223,22 +223,13 @@ properties:
     description: "Number of consecutive failure to trip the circuit down"
     default: 3
 
-  autoscaler.eventgenerator.health.port:
-    description: "the listening port of health endpoint"
-    default: 6204
-  autoscaler.eventgenerator.health.ca_cert:
-    description: "PEM-encoded CA certificate for the health endpoint"
-  autoscaler.eventgenerator.health.server_cert:
-    description: "PEM-encoded server certificate for the health endpoint"
-  autoscaler.eventgenerator.health.server_key:
-    description: "PEM-encoded server key for the health endpoint"
-
   autoscaler.eventgenerator.health.username:
     description: "the username for the health endpoint"
     default: ''
   autoscaler.eventgenerator.health.password:
     description: "the password for the health endpoint"
     default: ''
+
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"

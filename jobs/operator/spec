@@ -6,10 +6,6 @@ templates:
   operator.yml.erb: config/operator.yml
   liquibase.properties: bin/liquibase.properties
 
-  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
-  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
-  healthendpoint.key.erb: config/certs/healthendpoint/server.key
-
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
@@ -269,15 +265,9 @@ properties:
     description: "lock db retry interval"
     default: 5s
 
-  autoscaler.operator.health.port:
-    description: "the listening port of health endpoint"
+  autoscaler.operator.server.port:
+    description: "the listening port of server"
     default: 6208
-  autoscaler.operator.health.ca_cert:
-    description: "PEM-encoded CA certificate for the health endpoint"
-  autoscaler.operator.health.server_cert:
-    description: "PEM-encoded server certificate for the health endpoint"
-  autoscaler.operator.health.server_key:
-    description: "PEM-encoded server key for the health endpoint"
   autoscaler.operator.health.username:
     description: "the username of health endpoint"
     default: ''
