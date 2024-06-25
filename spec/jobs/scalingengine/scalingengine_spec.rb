@@ -22,7 +22,8 @@ describe "scalingengine" do
 
       it "does not include health port anymore" do
         expect(rendered_template["health"].keys).not_to include(
-          "port")
+          "port"
+)
       end
 
       it "check scalingengine basic auth username and password" do
