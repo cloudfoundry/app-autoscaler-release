@@ -16,7 +16,7 @@ describe "scalingengine" do
     context "scalingengine" do
       it "does not set username nor password if not configured" do
 
-      expect(rendered_template["health"]).to include(
+        expect(rendered_template["health"]).to include(
         {"username" => nil, "password" => nil})
       end
 
