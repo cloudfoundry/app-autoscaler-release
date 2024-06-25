@@ -26,19 +26,15 @@ describe "eventgenerator" do
     it "does not set username nor password if not configured" do
       properties["autoscaler"]["eventgenerator"] = {
         "health" => {
-          "port" => 1234
         }
       }
-      expect(rendered_template["health"])
-        .to include(
-          {"port" => 1234}
-        )
+      expect(rendered_template["health"]["password"]).to be_nil
+      expect(rendered_template["health"]["username"]).to be_nil
     end
 
     it "check eventgenerator username and password" do
       properties["autoscaler"]["eventgenerator"] = {
         "health" => {
-          "port" => 1234,
           "username" => "test-user",
           "password" => "test-user-password"
         }
@@ -46,8 +42,7 @@ describe "eventgenerator" do
 
       expect(rendered_template["health"])
         .to include(
-          {"port" => 1234,
-           "username" => "test-user",
+          {"username" => "test-user",
            "password" => "test-user-password"}
         )
     end

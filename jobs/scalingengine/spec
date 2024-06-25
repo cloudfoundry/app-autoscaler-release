@@ -18,10 +18,6 @@ templates:
   scalingengine_server.crt.erb: config/certs/scalingengine/server.crt
   scalingengine_server.key.erb: config/certs/scalingengine/server.key
 
-  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
-  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
-  healthendpoint.key.erb: config/certs/healthendpoint/server.key
-
   scheduler_db.crt.erb: config/certs/scheduler_db/crt
   scheduler_db.key.erb: config/certs/scheduler_db/key
   scheduler_db_ca.crt.erb: config/certs/scheduler_db/ca.crt
@@ -152,7 +148,6 @@ properties:
   autoscaler.cf.max_idle_conns_per_host_ms:
     description: "Controls the maximum idle (keep-alive) connections to keep pooled per-host. If zero, golang default (2) is used. A negative value will mean no idle connection pool reuse."
     default: 200
-
   autoscaler.scalingengine.logging.level:
     description: "the level of logging"
     default: "info"
@@ -168,17 +163,6 @@ properties:
     description: "PEM-encoded server certificate"
   autoscaler.scalingengine.server_key:
     description: "PEM-encoded server key"
-
-
-  autoscaler.scalingengine.health.port:
-    description: "the listening port of health endpoint"
-    default: 6204
-  autoscaler.scalingengine.health.ca_cert:
-    description: "PEM-encoded CA certificate for the health endpoint"
-  autoscaler.scalingengine.health.server_cert:
-    description: "PEM-encoded server certificate for the health endpoint"
-  autoscaler.scalingengine.health.server_key:
-    description: "PEM-encoded server key for the health endpoint"
   autoscaler.scalingengine.health.username:
     description: "the username of health endpoint"
     default: ''
