@@ -17,7 +17,8 @@ describe "scalingengine" do
       it "does not set username nor password if not configured" do
 
         expect(rendered_template["health"]).to include(
-        {"username" => nil, "password" => nil})
+        {"username" => nil, "password" => nil}
+)
       end
 
       it "does not include health port anymore" do
