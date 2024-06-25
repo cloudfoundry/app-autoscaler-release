@@ -30,7 +30,7 @@ describe "scalingengine" do
           }
         }
 
-        expect(rendered_template["health"]).to include( { "password" => "test-user-password" })
+        expect(rendered_template["health"]).to include({ "password" => "test-user-password" })
       end
     end
 
