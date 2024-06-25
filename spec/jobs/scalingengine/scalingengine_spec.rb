@@ -38,7 +38,7 @@ describe "scalingengine" do
         expect(rendered_template["health"])
           .to include(
             {
-             "username" => "test-user",
+            { 
              "password" => "test-user-password"
             }
           )
