@@ -159,6 +159,11 @@ properties:
   autoscaler.scalingengine_db_connection_config.connection_max_lifetime:
     default: 60s
 
+
+  autoscaler.operator.server.port:
+    description: "the listening port of health endpoint"
+    default: 6208
+
   autoscaler.operator.logging.level:
      description: "the leve of logging"
      default: "info"
