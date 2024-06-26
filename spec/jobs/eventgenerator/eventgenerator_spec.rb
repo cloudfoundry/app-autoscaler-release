@@ -25,8 +25,7 @@ describe "eventgenerator" do
 
     it "does not set username nor password if not configured" do
       properties["autoscaler"]["eventgenerator"] = {
-        "health" => {
-        }
+        "health" => {}
       }
       expect(rendered_template["health"]["password"]).to be_nil
       expect(rendered_template["health"]["username"]).to be_nil
