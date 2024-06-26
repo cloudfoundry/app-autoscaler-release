@@ -3,10 +3,13 @@
 set-autoscaler-pipeline:
 	@./autoscaler/set-pipeline.sh
 
+.PHONY: set-autoscaler-pipeline
+set-infrastructure-pipeline:
+	@./infrastructure/set-pipeline.sh
+ 
 .PHONY: unpause-pipeline
 unpause-pipeline:
 	@./scripts/unpause-pipeline.sh
-
 
 .PHONY: delete-pipeline
 delete-pipeline:
@@ -27,3 +30,12 @@ fix-lint:
 .PHONY: browse
 browse:
 	@open https://concourse.app-runtime-interfaces.ci.cloudfoundry.org
+  
+.PHONY: intercept
+intercept:
+	./scripts/intercept.sh
+
+.PHONY: trigger-job
+trigger-job:
+	./scripts/trigger-job.sh
+

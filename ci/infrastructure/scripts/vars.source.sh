@@ -87,6 +87,14 @@ export BBL_GCP_ZONE="europe-west3-a"
 export bbl_gcp_zone="${BBL_GCP_ZONE}"
 debug "BBL_GCP_ZONE: ${BBL_GCP_ZONE}"
 
+export CF_ORG="system"
+export cf_org="${CF_ORG}"
+debug "CF_ORG: ${CF_ORG}"
+
+export CF_SPACE="production"
+export cf_space="${CF_SPACE}"
+debug "CF_SPACE: ${CF_SPACE}"
+
 function unset_vars() {
   unset BOSH_USERNAME
   unset CI_DIR
