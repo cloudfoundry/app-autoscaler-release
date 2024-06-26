@@ -25,6 +25,8 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 	})
 	AfterEach(AppAfterEach)
 
+	// This test will fail if credential-type is set to X509 int autoscaler broker. Therefore, we will only support mtls
+	// connection with custom metrics apis.
 	Context("when scaling by custom metrics", func() {
 		It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 			By("Scale out to 2 instances")
