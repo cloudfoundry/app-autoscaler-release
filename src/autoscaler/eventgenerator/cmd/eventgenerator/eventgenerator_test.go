@@ -139,9 +139,7 @@ var _ = Describe("Eventgenerator", func() {
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
 			})
-
 		})
-
 	})
 
 	Describe("when Health server is ready to serve RESTful API", func() {
@@ -171,7 +169,6 @@ var _ = Describe("Eventgenerator", func() {
 				Expect(healthData).To(ContainSubstring("go_goroutines"))
 				Expect(healthData).To(ContainSubstring("go_memstats_alloc_bytes"))
 				rsp.Body.Close()
-
 			})
 		})
 	})
@@ -182,7 +179,6 @@ var _ = Describe("Eventgenerator", func() {
 		})
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
