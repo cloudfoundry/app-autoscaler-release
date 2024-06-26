@@ -19,7 +19,17 @@ function create_postgres_service() {
 
 function deploy_multiapps_controller() {
   app_name=deploy-service
+
+  mvn install:install-file \
+    -Dfile=multiapps-controller-repo/custom.cloudfoundry-client-facade-2.45.0-SNAPSHOT.jar \
+    -DgroupId=custom.com.sap.cloud.lm.sl \
+    -DartifactId=custom.cloudfoundry-client-facade \
+    -Dversion=2.45.0-SNAPSHOT \
+    -Dpackaging=jar
+
   mvn -Dmaven.test.skip=true -f multiapps-controller-repo/pom.xml clean install
+
+
   pushd multiapps-controller-repo/multiapps-controller-web/target/manifests
   cf push -f manifest.yml "${app_name}"
   popd
