@@ -1,10 +1,10 @@
 {
   "packages": {
-    "path:local-flake#bosh-bootloader":           "",
-    "path:local-flake#app-autoscaler-cli-plugin": "",
-    "path:local-flake#log-cache-cli-plugin":      "",
-    "path:local-flake#cloud-mta-build-tool":      "",
-    "path:local-flake#uaac":                      "",
+    "path:.#bosh-bootloader":           "",
+    "path:.#app-autoscaler-cli-plugin": "",
+    "path:.#log-cache-cli-plugin":      "",
+    "path:.#cloud-mta-build-tool":      "",
+    "path:.#uaac":                      "",
     "credhub-cli":                                "2.9.29",
     "delve":                                      "latest",
     "gh":                                         "latest",

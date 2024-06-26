@@ -46,10 +46,6 @@
   value: disable
 
 - type: replace
-  path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/instancemetrics_db/sslmode
-  value: disable
-
-- type: replace
   path: /instance_groups/name=operator/jobs/name=operator/properties/autoscaler/lock_db/sslmode
   value: disable
 
