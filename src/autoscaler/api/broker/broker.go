@@ -511,7 +511,8 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 		logger.Error("get-default-policy", err)
 		return result, err
 	}
-	credentialType, err := getOrDefaultCredentialType(policyJson, logger)
+	customMetricsCredentialType := b.conf.CustomMetricsCredentialType
+	credentialType, err := getOrDefaultCredentialType(policyJson, customMetricsCredentialType, logger)
 	if err != nil {
 		logger.Error("getOrDefaultCredentialType %w", err)
 		return result, err
@@ -618,10 +619,14 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 	return result, nil
 }
 
-func getOrDefaultCredentialType(policyJson json.RawMessage, logger lager.Logger) (*models.CredentialType, error) {
+func getOrDefaultCredentialType(policyJson json.RawMessage, credentialTypeConfig string, logger lager.Logger) (*models.CredentialType, error) {
 	credentialType := &models.CredentialType{}
+	if credentialTypeConfig == "" {
+		logger.Error("error: Credential Type in the configuration is empty", ErrInvalidCredentialType)
+		return credentialType, nil
+	}
 	if len(policyJson) == 0 {
-		credentialType.CredentialType = "binding-secret"
+		credentialType.CredentialType = credentialTypeConfig
 		return credentialType, nil
 	}
 	err := json.Unmarshal(policyJson, &credentialType)
@@ -631,8 +636,7 @@ func getOrDefaultCredentialType(policyJson json.RawMessage, logger lager.Logger)
 	}
 	// credential-type in policyJson is not set
 	if credentialType.CredentialType == "" {
-		//TODO - set default value from bosh specs
-		credentialType.CredentialType = "binding-secret"
+		credentialType.CredentialType = credentialTypeConfig
 	}
 	logger.Debug("getOrDefaultCredentialType", lager.Data{"credential-Type": credentialType})
 	return credentialType, err
