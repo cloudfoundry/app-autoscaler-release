@@ -15,14 +15,15 @@ describe "operator" do
   context "config/operator.yml" do
     it "does not set username nor password if not configured" do
       expect(rendered_template["health"]).to include(
-        {"username" => nil, "password" => nil}
-)
+        {
+          "username" => nil,
+          "password" => nil
+        }
+      )
     end
 
     it "does not include health port anymore" do
-      expect(rendered_template["health"].keys).not_to include(
-        "port"
-)
+      expect(rendered_template["health"].keys).not_to include("port")
     end
 
     it "check operator basic auth username and password" do
@@ -33,13 +34,12 @@ describe "operator" do
         }
       }
 
-      expect(rendered_template["health"])
-        .to include(
-          {
-           "username" => "test-user",
-           "password" => "test-user-password"
-          }
-        )
+      expect(rendered_template["health"]).to include(
+        {
+          "username" => "test-user",
+          "password" => "test-user-password"
+        }
+      )
     end
 
     context "uses tls" do
