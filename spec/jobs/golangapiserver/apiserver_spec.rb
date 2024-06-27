@@ -3,6 +3,7 @@ require "json"
 require "bosh/template/test"
 require "rspec/file_fixtures"
 require "yaml"
+require_relative "../utils"
 
 describe "golangapiserver" do
   context "apiserver.yml.erb" do
