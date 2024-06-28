@@ -37,7 +37,9 @@
     "google-cloud-sdk":                           "latest",
     "golangci-lint":                              "latest",
     "temurin-bin-17":                             "latest",
-    "ruby":                                       "latest"
+    "ruby":                                       "latest",
+    "uutils-coreutils-noprefix":                  "latest",
+    "gnutar":                                     "latest"
   },
   "shell": {
     "init_hook": [

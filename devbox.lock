@@ -465,6 +465,70 @@
         }
       }
     },
+    "gnutar@latest": {
+      "last_modified": "2024-06-12T20:55:33Z",
+      "resolved": "github:NixOS/nixpkgs/a9858885e197f984d92d7fe64e9fff6b2e488d40#gnutar",
+      "source": "devbox-search",
+      "version": "1.35",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/vd6i09s9gbb6d9dgvcwkhd7h680laayv-gnutar-1.35",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/ckzg4qng19pjkxmqwljlxyqakxjhdv0f-gnutar-1.35-info"
+            }
+          ],
+          "store_path": "/nix/store/vd6i09s9gbb6d9dgvcwkhd7h680laayv-gnutar-1.35"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/1cqyddnhggg6xcxni7k13pwlh3pygxyn-gnutar-1.35",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/rb7r09fp9bgcjq544yqxp8bp1qrwcp30-gnutar-1.35-info"
+            }
+          ],
+          "store_path": "/nix/store/1cqyddnhggg6xcxni7k13pwlh3pygxyn-gnutar-1.35"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mdrdg0c883305fbh7zmkdlqsk5pid21c-gnutar-1.35",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/rkr4fsxsfn0dbhvh1vb7m48056wpvmgv-gnutar-1.35-info"
+            }
+          ],
+          "store_path": "/nix/store/mdrdg0c883305fbh7zmkdlqsk5pid21c-gnutar-1.35"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/95ljdxg4drk1iq8jkjfq2c0z5vbwv8vm-gnutar-1.35",
+              "default": true
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/96sapma38sp22qn8j2x0q3k4ryii0c89-gnutar-1.35-info"
+            }
+          ],
+          "store_path": "/nix/store/95ljdxg4drk1iq8jkjfq2c0z5vbwv8vm-gnutar-1.35"
+        }
+      }
+    },
     "go-tools@latest": {
       "last_modified": "2024-02-24T23:06:34Z",
       "resolved": "github:NixOS/nixpkgs/9a9dae8f6319600fa9aebde37f340975cab4b8c0#go-tools",
@@ -1289,6 +1353,54 @@
             }
           ],
           "store_path": "/nix/store/aksnf2r8nlpplmgaxy3bbcw0cxfph6n7-temurin-bin-17.0.9"
+        }
+      }
+    },
+    "uutils-coreutils-noprefix@latest": {
+      "last_modified": "2024-06-12T20:55:33Z",
+      "resolved": "github:NixOS/nixpkgs/a9858885e197f984d92d7fe64e9fff6b2e488d40#uutils-coreutils-noprefix",
+      "source": "devbox-search",
+      "version": "0.0.25",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/m8hrxq8hwp1zxzj1yrswspfrn0q4f38h-uutils-coreutils-0.0.25",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/m8hrxq8hwp1zxzj1yrswspfrn0q4f38h-uutils-coreutils-0.0.25"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/a2bpaq86l697zfll4sv486pvcfbdw5mp-uutils-coreutils-0.0.25",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/a2bpaq86l697zfll4sv486pvcfbdw5mp-uutils-coreutils-0.0.25"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/k8v2k0dhfcc3ixs57xv72xwjbbywm6mk-uutils-coreutils-0.0.25",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/k8v2k0dhfcc3ixs57xv72xwjbbywm6mk-uutils-coreutils-0.0.25"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7r12wwxmxz9d77k1g7flmpm36wfkg5rc-uutils-coreutils-0.0.25",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7r12wwxmxz9d77k1g7flmpm36wfkg5rc-uutils-coreutils-0.0.25"
         }
       }
     },
