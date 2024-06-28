@@ -100,7 +100,6 @@ files:
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
 - autoscaler/vendor/github.com/patrickmn/go-cache/* # gosub
-- autoscaler/vendor/github.com/pborman/uuid/* # gosub
 - autoscaler/vendor/github.com/pivotal-cf/brokerapi/v11/* # gosub
 - autoscaler/vendor/github.com/pivotal-cf/brokerapi/v11/auth/* # gosub
 - autoscaler/vendor/github.com/pivotal-cf/brokerapi/v11/domain/* # gosub
@@ -109,7 +108,6 @@ files:
 - autoscaler/vendor/github.com/pivotal-cf/brokerapi/v11/internal/blog/* # gosub
 - autoscaler/vendor/github.com/pivotal-cf/brokerapi/v11/middlewares/* # gosub
 - autoscaler/vendor/github.com/pivotal-cf/brokerapi/v11/utils/* # gosub
-- autoscaler/vendor/github.com/pkg/errors/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/collectors/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/internal/* # gosub
