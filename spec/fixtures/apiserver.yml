@@ -61,3 +61,4 @@ autoscaler:
       broker_credentials:
       - broker_username: fake_b_user_1
         broker_password: fake_b_password_1
+credential_type: binding-secret

@@ -47,6 +47,7 @@ var (
 	ErrDeletePolicyForUnbinding    = errors.New("failed to delete policy for unbinding")
 	ErrDeleteServiceBinding        = errors.New("error deleting service binding")
 	ErrCredentialNotDeleted        = errors.New("failed to delete custom metrics credential for unbinding")
+	ErrInvalidCredentialType       = errors.New("error: invalid-credential-type is not supported. Allowed values are [binding-secret, X509]")
 )
 
 type Errors []error
@@ -504,10 +505,17 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 	if details.RawParameters != nil {
 		policyJson = details.RawParameters
 	}
-
+	// FIXME : Question: can we get rawParameters in the bind request? for example, the user does not provide any configuration to the service.
+	// Write a test for it
 	policy, err := b.getPolicyFromJsonRawMessage(policyJson, instanceID, details.PlanID)
 	if err != nil {
-		logger.Error("get-default-policy", err)
+		logger.Error("get-default-policy: no user defined policy was provided", err)
+		return result, err
+	}
+	customMetricsCredentialType := b.conf.CustomMetricsCredentialType
+	credentialType, err := getOrDefaultCredentialType(policyJson, customMetricsCredentialType, logger)
+	if err != nil {
+		logger.Error("getOrDefaultCredentialType %w", err)
 		return result, err
 	}
 	policyGuid, err := uuid.NewV4()
@@ -547,18 +555,41 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 		}
 		return result, apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, actionCreateServiceBinding)
 	}
+	/* Pseudo:
+	 Read credential-type from the RawParameters
+	1. if credential-type == "binding-secret" => create credentials
+	2. if credential-type != "binding-secret" => do not create credentials
+	3. if credential-type == "" or not set => "binding-secret" is the default value
+	*/
 
-	// create credentials
-	cred, err := b.credentials.Create(ctx, appGUID, nil)
-	if err != nil {
-		//revert binding creating
-		logger.Error("create-credentials", err)
+	customMetricsCredentials := &models.CustomMetricsCredentials{
+		URL:     b.conf.MetricsForwarder.MetricsForwarderUrl,
+		MtlsUrl: b.conf.MetricsForwarder.MetricsForwarderMtlsUrl,
+	}
 
-		err = b.bindingdb.DeleteServiceBindingByAppId(ctx, appGUID)
+	if !isValidCredentialType(credentialType.CredentialType) {
+		actionValidateCredentialType := "validate-credential-type" // #nosec G101
+		logger.Error("invalid credential_type provided", err, lager.Data{"credential_type": credentialType.CredentialType})
+		return result, apiresponses.NewFailureResponseBuilder(
+			ErrInvalidCredentialType, http.StatusBadRequest, actionValidateCredentialType).
+			WithErrorKey(actionValidateCredentialType).
+			Build()
+	}
+
+	if credentialType.CredentialType == "binding-secret" {
+		// create credentials
+		cred, err := b.credentials.Create(ctx, appGUID, nil)
 		if err != nil {
-			logger.Error("revert-binding-creation-due-to-credentials-creation-failure", err)
+			//revert binding creating
+			logger.Error("create-credentials", err)
+
+			err = b.bindingdb.DeleteServiceBindingByAppId(ctx, appGUID)
+			if err != nil {
+				logger.Error("revert-binding-creation-due-to-credentials-creation-failure", err)
+			}
+			return result, apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "revert-binding-creation-due-to-credentials-creation-failure")
 		}
-		return result, apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "revert-binding-creation-due-to-credentials-creation-failure")
+		customMetricsCredentials.Credential = cred
 	}
 
 	// attach policy to appGUID
@@ -567,14 +598,22 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 	}
 
 	result.Credentials = models.Credentials{
-		CustomMetrics: models.CustomMetricsCredentials{
-			Credential: cred,
-			URL:        b.conf.MetricsForwarder.MetricsForwarderUrl,
-			MtlsUrl:    b.conf.MetricsForwarder.MetricsForwarderMtlsUrl,
-		},
+		CustomMetrics: *customMetricsCredentials,
 	}
-
 	return result, nil
+}
+
+func getOrDefaultCredentialType(policyJson json.RawMessage, credentialTypeConfig string, logger lager.Logger) (*models.CredentialType, error) {
+	credentialType := &models.CredentialType{CredentialType: credentialTypeConfig}
+	if len(policyJson) != 0 {
+		err := json.Unmarshal(policyJson, &credentialType)
+		if err != nil {
+			logger.Error("error: unmarshal-credential-type", err)
+			return nil, apiresponses.NewFailureResponse(ErrCreatingServiceBinding, http.StatusInternalServerError, "error-unmarshal-credential-type")
+		}
+	}
+	logger.Debug("getOrDefaultCredentialType", lager.Data{"credential-Type": credentialType})
+	return credentialType, nil
 }
 
 func (b *Broker) attachPolicyToApp(ctx context.Context, appGUID string, policy *models.ScalingPolicy, policyGuidStr string, logger lager.Logger) error {
@@ -824,4 +863,15 @@ func (b *Broker) deleteBinding(ctx context.Context, bindingId string, serviceIns
 		return ErrCredentialNotDeleted
 	}
 	return nil
+}
+
+// TODO: Move this to better place
+// Valid credential types
+var validCredentialTypes = map[string]bool{
+	"binding-secret": true,
+	"X509":           true,
+}
+
+func isValidCredentialType(credentialType string) bool {
+	return validCredentialTypes[credentialType]
 }
