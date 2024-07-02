@@ -47,6 +47,13 @@ function setup_autoscaler_uaac(){
   local uaac_authorities="cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
   local autoscaler_secret="autoscaler_client_secret"
   local uaa_client_secret=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
+  # Check if uaac gem is installed
+  #
+  if ! gem list -i "cf-uaac" > /dev/null; then
+    echo "cf-uaac gem is not installed. Please install it by running 'gem install cf-uaac'"
+    exit 1
+  fi
+
   uaac target "https://uaa.${system_domain}" --skip-ssl-validation > /dev/null
   uaac token client get admin -s "${uaa_client_secret}" > /dev/null
 

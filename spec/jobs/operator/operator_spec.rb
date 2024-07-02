@@ -14,33 +14,32 @@ describe "operator" do
 
   context "config/operator.yml" do
     it "does not set username nor password if not configured" do
-      properties["autoscaler"]["operator"] = {
-        "health" => {
-          "port" => 1234
+      expect(rendered_template["health"]).to include(
+        {
+          "username" => nil,
+          "password" => nil
         }
-      }
+      )
+    end
 
-      expect(rendered_template["health"])
-        .to include(
-          {"port" => 1234}
-        )
+    it "does not include health port anymore" do
+      expect(rendered_template["health"].keys).not_to include("port")
     end
 
     it "check operator basic auth username and password" do
       properties["autoscaler"]["operator"] = {
         "health" => {
-          "port" => 1234,
           "username" => "test-user",
           "password" => "test-user-password"
         }
       }
 
-      expect(rendered_template["health"])
-        .to include(
-          {"port" => 1234,
-           "username" => "test-user",
-           "password" => "test-user-password"}
-        )
+      expect(rendered_template["health"]).to include(
+        {
+          "username" => "test-user",
+          "password" => "test-user-password"
+        }
+      )
     end
 
     context "uses tls" do

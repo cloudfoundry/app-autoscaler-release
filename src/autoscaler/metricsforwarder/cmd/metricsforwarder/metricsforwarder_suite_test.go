@@ -32,8 +32,6 @@ import (
 var (
 	mfPath                string
 	cfg                   config.Config
-	healthport            int
-	healthHttpClient      *http.Client
 	configFile            *os.File
 	httpClient            *http.Client
 	req                   *http.Request
@@ -141,8 +139,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	cfg.Health.ReadinessCheckEnabled = true
 
 	cfg.Server.Port = 10000 + GinkgoParallelProcess()
-	healthport = 8000 + GinkgoParallelProcess()
-	cfg.Health.Port = healthport
 	cfg.CacheCleanupInterval = 10 * time.Minute
 	cfg.PolicyPollerInterval = 40 * time.Second
 	cfg.Db = make(map[string]db.DatabaseConfig)
@@ -159,7 +155,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	configFile = writeConfig(&cfg)
 
 	httpClient = &http.Client{}
-	healthHttpClient = &http.Client{}
 })
 
 var _ = SynchronizedAfterSuite(func() {

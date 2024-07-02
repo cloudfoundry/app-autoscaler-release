@@ -41,8 +41,6 @@ server:
     ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
   node_addrs: [address1, address2]
   node_index: 1
-health:
-  port: 9999
 db:
   policy_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
@@ -103,11 +101,6 @@ circuitBreaker:
 						},
 						NodeAddrs: []string{"address1", "address2"},
 						NodeIndex: 1,
-					},
-					Health: helpers.HealthConfig{
-						ServerConfig: helpers.ServerConfig{
-							Port: 9999,
-						},
 					},
 					DB: DBConfig{
 						PolicyDB: db.DatabaseConfig{
@@ -231,11 +224,6 @@ defaultBreachDurationSecs: 600
 						ServerConfig: helpers.ServerConfig{
 							Port: 8080,
 							TLS:  models.TLSCerts{},
-						},
-					},
-					Health: helpers.HealthConfig{
-						ServerConfig: helpers.ServerConfig{
-							Port: 8081,
 						},
 					},
 					DB: DBConfig{
@@ -1027,49 +1015,6 @@ defaultBreachDurationSecs: NOT-INTEGER-VALUE
 				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal !!str `NOT-INT...` into int")))
 			})
 		})
-
-		Context("when it gives a non integer health port", func() {
-			BeforeEach(func() {
-				configBytes = []byte(`
-logging:
-  level: info
-db:
-  policy_db:
-    url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
-    max_open_connections: 10
-    max_idle_connections: 5
-    connection_max_lifetime: 60s
-  app_metrics_db:
-    url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
-    max_open_connections: 10
-    max_idle_connections: 5
-    connection_max_lifetime: 60s
-aggregator:
-  aggregator_execute_interval: 30s
-  policy_poller_interval: 30s
-  metric_poller_count: 10
-  app_monitor_channel_size: 100
-evaluator:
-  evaluation_manager_execute_interval: 30s
-  evaluator_count: 10
-  trigger_array_channel_size: 100
-scalingEngine:
-  scaling_engine_url: http://localhost:8082
-metricCollector:
-  metric_collector_url: log-cache:1234
-defaultStatWindowSecs: 300
-defaultBreachDurationSecs: 300
-health:
-  port: NOT-INTEGER-VALUE
-`)
-			})
-
-			It("should error", func() {
-				Expect(err).To(BeAssignableToTypeOf(&yaml.TypeError{}))
-				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal !!str `NOT-INT...` into int")))
-			})
-		})
-
 	})
 
 	Describe("Validate", func() {

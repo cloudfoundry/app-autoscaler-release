@@ -5,7 +5,5 @@
   secret: autoscaler_client_secret
 server:
   port: 8989
-health:
-  port: 9999
 defaultCoolDownSecs: 300
 lockSize: 32

@@ -4,7 +4,7 @@ cf:
   client_id: client-id
   secret: client-secret
   skip_ssl_validation: false
-health:
+server:
   port: 9999
 logging:
   level: "debug"

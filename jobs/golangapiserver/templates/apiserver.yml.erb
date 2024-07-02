@@ -90,7 +90,6 @@ policy_schema_path: /var/vcap/packages/golangapiserver/policy_json.schema.json
 dashboard_redirect_uri: <%= p("autoscaler.apiserver.broker.server.dashboard_redirect_uri") %>
 
 health:
-  port: <%= p("autoscaler.apiserver.health.port") %>
   <% if_p("autoscaler.apiserver.health.ca_cert", "autoscaler.apiserver.health.server_cert", "autoscaler.apiserver.health.server_key") do %>
   tls:
     ca_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/ca.crt

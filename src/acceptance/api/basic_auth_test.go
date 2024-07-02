@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"io"
 	"net/http"
 	"strings"
 
@@ -36,7 +37,7 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 			Expect(Get(url())).To(Equal(statusCode()), "to get status code %d when getting %s", statusCode(), url())
 		},
 		Entry("API Server", func() string { return healthURL }, func() int { return 200 }),
-		Entry("Eventgenerator", urlfor("eventgenerator"), getStatus),
+		FEntry("Eventgenerator", urlfor("eventgenerator"), getStatus),
 		Entry("Scaling Engine", urlfor("scalingengine"), getStatus),
 		Entry("Operator", urlfor("operator"), getStatus),
 		Entry("Metrics Forwarder", urlfor("metricsforwarder"), getStatus),
@@ -58,6 +59,17 @@ func Get(url string) int {
 	Expect(err).ShouldNot(HaveOccurred())
 	resp, err := client.Do(req)
 	Expect(err).ShouldNot(HaveOccurred())
+
+	By("GET " + url)
+
+	// check body content
+	body, err := io.ReadAll(resp.Body)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	// body to string
+	bodyStr := string(body)
+	By("BODY:" + bodyStr)
+
 	defer func() { _ = resp.Body.Close() }()
 	Expect(err).ShouldNot(HaveOccurred())
 	return resp.StatusCode

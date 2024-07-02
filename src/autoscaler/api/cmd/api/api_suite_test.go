@@ -45,8 +45,6 @@ var (
 	catalogBytes     string
 	schedulerServer  *ghttp.Server
 	brokerPort       int
-	publicApiPort    int
-	healthport       int
 	infoBytes        string
 	ccServer         *mocks.Server
 )
@@ -114,8 +112,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	catalogBytes = info.CatalogBytes
 	infoBytes = info.InfoBytes
 	brokerPort = 8000 + GinkgoParallelProcess()
-	publicApiPort = 9000 + GinkgoParallelProcess()
-	healthport = 7000 + GinkgoParallelProcess()
+	publicApiPort := 9000 + GinkgoParallelProcess()
 
 	cfg.BrokerServer = helpers.ServerConfig{
 		Port: brokerPort,
@@ -198,9 +195,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	cfg.CF.Secret = "client-secret"
 	cfg.CF.SkipSSLValidation = true
 	cfg.Health = helpers.HealthConfig{
-		ServerConfig: helpers.ServerConfig{
-			Port: healthport,
-		},
 		HealthCheckUsername: "healthcheckuser",
 		HealthCheckPassword: "healthcheckpassword",
 	}

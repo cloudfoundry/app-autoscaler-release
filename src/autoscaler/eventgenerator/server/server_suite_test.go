@@ -22,6 +22,9 @@ import (
 var (
 	serverProcess ifrit.Process
 	serverUrl     *url.URL
+	policyDB      *fakes.FakePolicyDB
+
+	appMetricDB *fakes.FakeAppMetricDB
 )
 
 func TestServer(t *testing.T) {
@@ -43,7 +46,9 @@ var _ = BeforeSuite(func() {
 	}
 
 	httpStatusCollector := &fakes.FakeHTTPStatusCollector{}
-	httpServer, err := server.NewServer(lager.NewLogger("test"), conf, queryAppMetrics, httpStatusCollector)
+	policyDB = &fakes.FakePolicyDB{}
+	appMetricDB = &fakes.FakeAppMetricDB{}
+	httpServer, err := server.NewServer(lager.NewLogger("test"), conf, appMetricDB, policyDB, queryAppMetrics, httpStatusCollector)
 	Expect(err).NotTo(HaveOccurred())
 
 	serverUrl, err = url.Parse("http://127.0.0.1:" + strconv.Itoa(port))

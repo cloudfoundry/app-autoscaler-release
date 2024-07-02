@@ -21,11 +21,10 @@ import (
 )
 
 var (
-	server              ifrit.Process
-	serverUrl           string
-	scalingEngineDB     *fakes.FakeScalingEngineDB
-	sychronizer         *fakes.FakeActiveScheduleSychronizer
-	httpStatusCollector *fakes.FakeHTTPStatusCollector
+	server          ifrit.Process
+	serverUrl       string
+	scalingEngineDB *fakes.FakeScalingEngineDB
+	sychronizer     *fakes.FakeActiveScheduleSychronizer
 )
 
 var _ = SynchronizedBeforeSuite(func() []byte {
@@ -39,10 +38,11 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	}
 	scalingEngineDB = &fakes.FakeScalingEngineDB{}
 	scalingEngine := &fakes.FakeScalingEngine{}
+	policyDb := &fakes.FakePolicyDB{}
+	schedulerDB := &fakes.FakeSchedulerDB{}
 	sychronizer = &fakes.FakeActiveScheduleSychronizer{}
-	httpStatusCollector = &fakes.FakeHTTPStatusCollector{}
 
-	httpServer, err := NewServer(lager.NewLogger("test"), conf, scalingEngineDB, scalingEngine, sychronizer, httpStatusCollector)
+	httpServer, err := NewServer(lager.NewLogger("test"), conf, policyDb, scalingEngineDB, schedulerDB, scalingEngine, sychronizer)
 	Expect(err).NotTo(HaveOccurred())
 	server = ginkgomon_v2.Invoke(httpServer)
 	serverUrl = fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port)
@@ -90,19 +90,6 @@ var _ = Describe("Server", func() {
 				rsp.Body.Close()
 			})
 		})
-
-		Context("when requesting the wrong path", func() {
-			JustBeforeEach(func() {
-				rsp, err = http.Post(serverUrl+"/not-exist-path", "application/json", bytes.NewReader(body))
-			})
-
-			It("should return 404", func() {
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusNotFound))
-				rsp.Body.Close()
-			})
-		})
-
 	})
 
 	Context("when getting scaling histories", func() {
@@ -123,18 +110,6 @@ var _ = Describe("Server", func() {
 			It("should return 200", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-				rsp.Body.Close()
-			})
-		})
-
-		Context("when requesting the wrong path", func() {
-			JustBeforeEach(func() {
-				rsp, err = http.Get(serverUrl + "/not-exist-path")
-			})
-
-			It("should return 404", func() {
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusNotFound))
 				rsp.Body.Close()
 			})
 		})
@@ -167,19 +142,6 @@ var _ = Describe("Server", func() {
 					rsp.Body.Close()
 				})
 			})
-
-			Context("when requesting the wrong path", func() {
-				BeforeEach(func() {
-					method = http.MethodPut
-					urlPath = "/not-exist"
-				})
-
-				It("should return 404", func() {
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusNotFound))
-					rsp.Body.Close()
-				})
-			})
 		})
 
 		Context("when deleting active schedule", func() {
@@ -194,18 +156,6 @@ var _ = Describe("Server", func() {
 				It("should return 200", func() {
 					Expect(err).ToNot(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-					rsp.Body.Close()
-				})
-			})
-
-			Context("when requesting the wrong path", func() {
-				BeforeEach(func() {
-					urlPath = "/not-exist"
-				})
-
-				It("should return 404", func() {
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusNotFound))
 					rsp.Body.Close()
 				})
 			})

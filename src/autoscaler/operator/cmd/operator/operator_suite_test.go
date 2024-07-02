@@ -74,7 +74,7 @@ func initConfig() {
 		Secret:   "secret",
 	}
 	healthport = 8000 + GinkgoParallelProcess()
-	cfg.Health.Port = healthport
+	cfg.Server.Port = healthport
 	cfg.Logging.Level = "debug"
 	dbUrl := testhelpers.GetDbUrl()
 

@@ -39,7 +39,6 @@ var (
 	configFile         *os.File
 	conf               config.Config
 	egPort             int
-	healthport         int
 	httpClient         *http.Client
 	healthHttpClient   *http.Client
 	mockLogCache       *testhelpers.MockLogCache
@@ -73,7 +72,10 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 })
 
 var _ = SynchronizedAfterSuite(func() {
-	_ = os.Remove(configFile.Name())
+	if configFile != nil {
+		err := os.Remove(configFile.Name())
+		Expect(err).NotTo(HaveOccurred())
+	}
 }, func() {
 	gexec.CleanupBuildArtifacts()
 })
@@ -238,7 +240,6 @@ func initConfig() {
 	testCertDir := testhelpers.TestCertFolder()
 
 	egPort = 7000 + GinkgoParallelProcess()
-	healthport = 8000 + GinkgoParallelProcess()
 	dbUrl := testhelpers.GetDbUrl()
 	conf = config.Config{
 		Logging: helpers.LoggingConfig{
@@ -309,9 +310,6 @@ func initConfig() {
 		DefaultStatWindowSecs:     300,
 		HttpClientTimeout:         10 * time.Second,
 		Health: helpers.HealthConfig{
-			ServerConfig: helpers.ServerConfig{
-				Port: healthport,
-			},
 			HealthCheckUsername: "healthcheckuser",
 			HealthCheckPassword: "healthcheckpassword",
 		},

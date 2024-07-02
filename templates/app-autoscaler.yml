@@ -190,9 +190,10 @@ instance_groups:
             client_id: "((cf_client_id))"
             secret: "((cf_client_secret))"
             skip_ssl_validation: "((skip_ssl_validation))"
+          sever:
+            port: &scalingEngineServerPort 6104
           scalingengine:
             health:
-              port: &scalingEngineHealthPort 6204
               username: scalingengine
               password: ((autoscaler_scalingengine_health_password))
             logging:
@@ -209,7 +210,7 @@ instance_groups:
           routes:
             - name: autoscaler_scalingengine_health
               registration_interval: 20s
-              port: *scalingEngineHealthPort
+              port: *scalingEngineServerPort
               tags:
                 component: autoscaler_scalingengine_health
               uris:
@@ -376,9 +377,10 @@ instance_groups:
         scheduler.host: *scheduler_domain
         cf: *cf_credentials
         operator:
+          server:
+            port: &operatorServerPort 6208
           enable_db_lock: true
           health:
-            port: &operatorHealthPort 6208
             username: operator
             password: ((autoscaler_operator_health_password))
           scaling_engine:
@@ -402,7 +404,7 @@ instance_groups:
         routes:
           - name: autoscaler_operator_health
             registration_interval: 20s
-            port: *operatorHealthPort
+            port: *operatorServerPort
             tags:
               component: autoscaler_operator_health
             uris:
@@ -428,8 +430,9 @@ instance_groups:
         policy_db_connection_config: *databaseConnectionConfig
         lock_db: *database
         eventgenerator:
+          server:
+            port: &eventGeneratorServerPort 6105
           health:
-            port: &eventGeneratorHealthPort 6205
             username: eventgenerator
             password: ((autoscaler_eventgenerator_health_password))
           logging:
@@ -458,7 +461,7 @@ instance_groups:
         routes:
           - name: autoscaler_eventgenerator_health
             registration_interval: 20s
-            port: *eventGeneratorHealthPort
+            port: *eventGeneratorServerPort
             tags:
               component: autoscaler_eventgenerator_health
             uris:

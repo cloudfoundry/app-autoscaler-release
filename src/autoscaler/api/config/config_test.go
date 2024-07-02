@@ -184,19 +184,6 @@ public_api_server:
 				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal.*into int")))
 			})
 		})
-		Context("when it gives a non integer health server port", func() {
-			BeforeEach(func() {
-				configBytes = `
-health:
-  port: port
-`
-			})
-
-			It("should error", func() {
-				Expect(err).To(BeAssignableToTypeOf(&yaml.TypeError{}))
-				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal.*into int")))
-			})
-		})
 
 		Context("when max_amount of rate_limit is not an integer", func() {
 			BeforeEach(func() {

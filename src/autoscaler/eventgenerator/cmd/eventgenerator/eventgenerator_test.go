@@ -9,6 +9,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -19,11 +20,15 @@ import (
 
 var _ = Describe("Eventgenerator", func() {
 	var (
-		runner *EventGeneratorRunner
+		runner      *EventGeneratorRunner
+		httpsClient *http.Client
+		serverURL   string
 	)
 
 	BeforeEach(func() {
 		runner = NewEventGeneratorRunner()
+		httpsClient = testhelpers.NewEventGeneratorClient()
+		serverURL = fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port)
 	})
 
 	AfterEach(func() {
@@ -129,14 +134,12 @@ var _ = Describe("Eventgenerator", func() {
 			})
 
 			It("returns with a 200", func() {
-				rsp, err := httpClient.Get(fmt.Sprintf("https://127.0.0.1:%d/v1/apps/an-app-id/aggregated_metric_histories/a-metric-type", egPort))
+				rsp, err := httpClient.Get(fmt.Sprintf("%s/v1/apps/an-app-id/aggregated_metric_histories/a-metric-type", serverURL))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
 			})
-
 		})
-
 	})
 
 	Describe("when Health server is ready to serve RESTful API", func() {
@@ -152,10 +155,13 @@ var _ = Describe("Eventgenerator", func() {
 
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d/health", healthport))
+				rsp, err := httpsClient.Get(fmt.Sprintf("%s/health", serverURL))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-				raw, _ := io.ReadAll(rsp.Body)
+
+				raw, err := io.ReadAll(rsp.Body)
+				Expect(err).NotTo(HaveOccurred())
+
 				healthData := string(raw)
 				Expect(healthData).To(ContainSubstring("autoscaler_eventgenerator_concurrent_http_request"))
 				Expect(healthData).To(ContainSubstring("autoscaler_eventgenerator_policyDB"))
@@ -163,7 +169,6 @@ var _ = Describe("Eventgenerator", func() {
 				Expect(healthData).To(ContainSubstring("go_goroutines"))
 				Expect(healthData).To(ContainSubstring("go_memstats_alloc_bytes"))
 				rsp.Body.Close()
-
 			})
 		})
 	})
@@ -174,13 +179,12 @@ var _ = Describe("Eventgenerator", func() {
 		})
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := httpsClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 			})
@@ -188,13 +192,12 @@ var _ = Describe("Eventgenerator", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := httpsClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 			})
@@ -208,12 +211,12 @@ var _ = Describe("Eventgenerator", func() {
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := httpsClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 			})
@@ -221,13 +224,12 @@ var _ = Describe("Eventgenerator", func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
 
-				rsp, err := healthHttpClient.Do(req)
+				rsp, err := httpsClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 			})

@@ -25,7 +25,6 @@ var _ = Describe("Health Config", func() {
 	When("Readiness is not supplied", func() {
 		BeforeEach(func() {
 			healthConfigBytes = []byte(`
-port: 9999
 username: test-username
 password: password
 readiness_enabled: false
@@ -38,9 +37,6 @@ readiness_enabled: false
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(healthConfig).To(Equal(helpers.HealthConfig{
-				ServerConfig: helpers.ServerConfig{
-					Port: 9999,
-				},
 				HealthCheckUsername:   "test-username",
 				HealthCheckPassword:   "password",
 				ReadinessCheckEnabled: false,
@@ -63,9 +59,6 @@ readiness_enabled: true
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(healthConfig).To(Equal(helpers.HealthConfig{
-				ServerConfig: helpers.ServerConfig{
-					Port: 9999,
-				},
 				HealthCheckUsername:   "test-username",
 				HealthCheckPassword:   "password",
 				ReadinessCheckEnabled: true,
@@ -76,7 +69,6 @@ readiness_enabled: true
 	When("both password password_hash are supplied", func() {
 		BeforeEach(func() {
 			healthConfigBytes = []byte(`
-port: 9999
 username: test-username
 password: password
 password_hash: password_hash
