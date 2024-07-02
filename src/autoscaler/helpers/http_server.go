@@ -26,14 +26,5 @@ func NewHTTPServer(logger lager.Logger, conf ServerConfig, handler http.Handler)
 
 	logger.Info("new-http-server", lager.Data{"serverConfig": conf})
 
-	if (conf.TLS.KeyFile != "") && (conf.TLS.CertFile != "") {
-		tlsConfig, err := conf.TLS.CreateServerConfig()
-		if err != nil {
-			logger.Error("failed-new-server-new-tls-config", err, lager.Data{"tls": conf.TLS})
-			return nil, fmt.Errorf("server tls config error: %w", err)
-		}
-		return http_server.NewTLSServer(addr, handler, tlsConfig), nil
-	}
-
 	return http_server.New(addr, handler), nil
 }

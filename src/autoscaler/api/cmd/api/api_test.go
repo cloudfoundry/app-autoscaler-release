@@ -29,7 +29,7 @@ var _ = Describe("Api", func() {
 	BeforeEach(func() {
 		brokerHttpClient = NewServiceBrokerClient()
 		runner = NewApiRunner()
-		serverURL = fmt.Sprintf("https://127.0.0.1:%d", cfg.PublicApiServer.Port)
+		serverURL = fmt.Sprintf("http://127.0.0.1:%d", cfg.PublicApiServer.Port)
 	})
 
 	Describe("Api configuration check", func() {
@@ -120,8 +120,9 @@ var _ = Describe("Api", func() {
 			BeforeEach(func() {
 				runner.Start()
 			})
+
 			It("succeeds with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v2/catalog", brokerPort), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/v2/catalog", brokerPort), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(username, password)
@@ -155,7 +156,7 @@ var _ = Describe("Api", func() {
 				runner.Start()
 			})
 			It("succeeds with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v1/info", publicApiPort), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				rsp, err = apiHttpClient.Do(req)
@@ -252,7 +253,7 @@ var _ = Describe("Api", func() {
 		})
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v1/info", publicApiPort), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				rsp, err = apiHttpClient.Do(req)

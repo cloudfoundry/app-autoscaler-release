@@ -28,7 +28,7 @@ var _ = Describe("Eventgenerator", func() {
 	BeforeEach(func() {
 		runner = NewEventGeneratorRunner()
 		httpsClient = testhelpers.NewEventGeneratorClient()
-		serverURL = fmt.Sprintf("https://127.0.0.1:%d", conf.Server.Port)
+		serverURL = fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port)
 	})
 
 	AfterEach(func() {
