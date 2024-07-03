@@ -8,6 +8,8 @@ files:
 - autoscaler/*
 - autoscaler/vendor/*
 - autoscaler/eventgenerator/db/*
+- autoscaler/vendor/google.golang.org/genproto/googleapis/api/*
+- autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/*
 - autoscaler/cf/* # gosub
 - autoscaler/collection/* # gosub
 - autoscaler/db/* # gosub
@@ -27,10 +29,10 @@ files:
 - autoscaler/routes/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v2/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v2/internal/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v3/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v3/internal/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/internal/truncate/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/tlsconfig/* # gosub
@@ -146,7 +148,6 @@ files:
 - autoscaler/vendor/golang.org/x/text/unicode/bidi/* # gosub
 - autoscaler/vendor/golang.org/x/text/unicode/norm/* # gosub
 - autoscaler/vendor/golang.org/x/text/width/* # gosub
-- autoscaler/vendor/google.golang.org/genproto/googleapis/api/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/api/annotations/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/api/httpbody/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/rpc/status/* # gosub
@@ -232,7 +233,6 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/reflect/protoregistry/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoiface/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoimpl/* # gosub
-- autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/anypb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/durationpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/fieldmaskpb/* # gosub
