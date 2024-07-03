@@ -14,5 +14,5 @@ make 4.4
 maven 3.8.6
 ruby 3.3.3
 shellcheck 0.10.0
-yq 4.43.1
+yq 4.44.2
 gum 0.13.0
