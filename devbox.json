@@ -30,7 +30,6 @@
     "oha":                               "latest",
     "gum":                               "0.13.0",
     "actionlint":                        "1.7.1",
-    "uutils-coreutils-noprefix":         "latest",
     "gnutar":                            "latest",
     "golangci-lint":                     "1.59.1",
     "yq-go":                             "4.44.2",
@@ -39,7 +38,8 @@
     "cloudfoundry-cli":                  "8.7.11",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-17":                    "latest",
-    "ruby":                              "latest"
+    "ruby":                              "latest",
+    "coreutils":                         "latest"
   },
   "shell": {
     "init_hook": [

@@ -5,10 +5,10 @@ go 1.22.1
 require (
 	code.cloudfoundry.org/cfhttp/v2 v2.1.0
 	code.cloudfoundry.org/clock v1.2.0
-	code.cloudfoundry.org/go-log-cache/v2 v2.0.7
-	code.cloudfoundry.org/go-loggregator/v9/v10 v10.0.0
+	code.cloudfoundry.org/go-log-cache/v3 v3.0.1
+	code.cloudfoundry.org/go-loggregator/v10 v10.0.0
 	code.cloudfoundry.org/lager/v3 v3.0.3
-	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20240723222507-f3307e073100
+	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20240730181045-a0abd75d08df
 	code.cloudfoundry.org/tlsconfig v0.0.0-20240712175922-ffce9516cec8
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/go-chi/chi/v5 v5.1.0
@@ -23,8 +23,8 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
 	github.com/ogen-go/ogen v1.2.2
-	github.com/onsi/ginkgo/v2 v2.19.0
-	github.com/onsi/gomega v1.33.1
+	github.com/onsi/ginkgo/v2 v2.19.1
+	github.com/onsi/gomega v1.34.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pivotal-cf/brokerapi/v11 v11.0.4
 	github.com/prometheus/client_golang v1.19.1
@@ -49,7 +49,7 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/go-diodes v0.0.0-20240604201846-c756bfed2ed3 // indirect
+	code.cloudfoundry.org/go-diodes v0.0.0-20240723012033-bf559dd3d0b1 // indirect
 	code.cloudfoundry.org/go-metric-registry v0.0.0-20240604201903-7cef498efb7a // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
@@ -68,8 +68,8 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20240721033354-7089f98c1d14 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
+	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.21.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
@@ -96,8 +96,8 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240711142825-46eb208f015d // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240711142825-46eb208f015d // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240725223205-93522f1f2a9f // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240725223205-93522f1f2a9f // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
