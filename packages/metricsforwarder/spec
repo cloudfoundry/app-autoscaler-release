@@ -29,9 +29,9 @@ files:
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-diodes/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v9/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v9/rfc5424/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v10/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v10/rfc5424/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-metric-registry/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/internal/truncate/* # gosub

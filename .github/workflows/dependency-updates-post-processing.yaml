@@ -9,6 +9,7 @@ on:
 jobs:
   dependency-updates-post-processing:
     name: "Dependency Updates Post-Processing"
+    if: "!contains(github.event.pull_request.labels.*.name, 'skip-dependency-postprocessing')"
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
