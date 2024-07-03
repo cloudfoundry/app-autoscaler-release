@@ -20,7 +20,6 @@
     "maven":                             "3.8.6",
     "pre-commit":                        "latest",
     "bosh-cli":                          "7.3.1",
-    "yq-go":                             "4.43.1",
     "which":                             "latest",
     "jq":                                "latest",
     "fly":                               "7.10.0",
@@ -39,7 +38,8 @@
     "act":                               "latest",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-17":                    "latest",
-    "ruby":                              "latest"
+    "ruby":                              "latest",
+    "yq-go":                             "4.44.2"
   },
   "shell": {
     "init_hook": [
