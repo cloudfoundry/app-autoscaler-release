@@ -779,14 +779,6 @@ variables:
     - client_auth
     key_length: 4096
     duration: 180
-- name: metric_scraper_ca
-  type: certificate
-  update_mode: converge
-  options:
-    common_name: metricScraperCA
-    is_ca: true
-    key_length: 4096
-    duration: 180
 
   # metricsforwarder loggregator certificates
 - name: metricsforwarder_autoscaler_metricsforwarder_loggregator_tls
