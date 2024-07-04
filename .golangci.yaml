@@ -113,7 +113,7 @@ linters:
     - testpackage
     - typecheck
       #    - unconvert
-      #    - unparam
+      # - unparam
     - unused
     - whitespace
       #    - godox
