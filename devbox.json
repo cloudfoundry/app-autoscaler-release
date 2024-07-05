@@ -33,13 +33,13 @@
     "actionlint":                        "1.7.1",
     "uutils-coreutils-noprefix":         "latest",
     "gnutar":                            "latest",
-    "go":                                "1.22.0",
     "golangci-lint":                     "1.59.1",
-    "act":                               "latest",
+    "yq-go":                             "4.44.2",
+    "act":                               "0.2.64",
     "google-cloud-sdk":                  "latest",
+    "go":                                "1.22.1",
     "temurin-bin-17":                    "latest",
-    "ruby":                              "latest",
-    "yq-go":                             "4.44.2"
+    "ruby":                              "latest"
   },
   "shell": {
     "init_hook": [
