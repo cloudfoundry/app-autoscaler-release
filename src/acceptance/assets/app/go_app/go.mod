@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app
 
-go 1.22.0
+go 1.22.1
 
 require (
 	github.com/cloudfoundry-community/go-cfenv v1.18.0
