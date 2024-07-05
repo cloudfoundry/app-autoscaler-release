@@ -258,6 +258,4 @@ describe "golangapiserver" do
       end
     end
   end
-
-
 end

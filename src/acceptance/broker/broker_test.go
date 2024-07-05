@@ -107,6 +107,27 @@ var _ = Describe("AutoScaler Service Broker", func() {
 			instance.unbind(appName)
 		})
 
+		It("binds&unbinds with policy having credential-type as x509", func() {
+			policyFile := "../assets/file/policy/policy-with-credential-type.json"
+			_, err := os.ReadFile(policyFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("checking broker bind response does not have username/password/url but mtls_url only ")
+			appEnvCmd := cf.Cf("env", appName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(appEnvCmd).To(Exit(0), "failed getting app env")
+
+			appEnvCmdOutput := appEnvCmd.Out.Contents()
+			Expect(appEnvCmdOutput).NotTo(ContainSubstring("username"))
+			Expect(appEnvCmdOutput).NotTo(ContainSubstring("password"))
+			Expect(appEnvCmdOutput).NotTo(ContainSubstring("\"url\": \"https://"))
+			Expect(appEnvCmdOutput).To(ContainSubstring("\"mtls_url\": \"https://"))
+
+			instance.unbind(appName)
+		})
+
 		It("bind&unbinds without policy", func() {
 			helpers.BindServiceToApp(cfg, appName, instance.name())
 			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
@@ -245,4 +266,24 @@ func (p ServicePlans) getSourceAndTargetForPlanUpdate() (source, target ServiceP
 	source = p[updatablePlanIndex]
 	target = p[(updatablePlanIndex+1)%p.length()] // simply update to any other plan
 	return source, target, nil
+}
+
+func GetCredentialsFromAppEnv(cfg *config.Config, appName string) []byte {
+	instanceEnvCmd := cf.Cf("env", appName).Wait(cfg.DefaultTimeoutDuration())
+	Expect(instanceEnvCmd).To(Exit(0), "failed getting application env")
+	instanceEnvCmdOutput := instanceEnvCmd.Out.Contents()
+
+	var appEnv AppEnv
+	err := json.Unmarshal(instanceEnvCmdOutput, &appEnv)
+	Expect(err).NotTo(HaveOccurred())
+
+	return instanceEnvCmdOutput
+}
+
+type AppEnv struct {
+	Credentials struct {
+		CustomMetrics struct {
+			URL string `json:"url"`
+		} `json:"custom_metrics"`
+	} `json:"credentials"`
 }
