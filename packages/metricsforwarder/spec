@@ -167,6 +167,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/balancer/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/base/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/grpclb/state/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/balancer/pickfirst/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/roundrobin/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/binarylog/grpc_binarylog_v1/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/channelz/* # gosub
@@ -187,7 +188,6 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/internal/credentials/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/envconfig/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/grpclog/* # gosub
-- autoscaler/vendor/google.golang.org/grpc/internal/grpcrand/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/grpcsync/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/grpcutil/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/idle/* # gosub
