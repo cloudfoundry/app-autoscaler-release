@@ -88,7 +88,7 @@ catalog_schema_path: /var/vcap/packages/golangapiserver/catalog.schema.json
 info_file_path: /var/vcap/jobs/golangapiserver/config/info.json
 policy_schema_path: /var/vcap/packages/golangapiserver/policy_json.schema.json
 dashboard_redirect_uri: <%= p("autoscaler.apiserver.broker.server.dashboard_redirect_uri") %>
-credential_type: <%= p("autoscaler.apiserver.broker.credential_type") %>
+default_credential_type: <%= p("autoscaler.apiserver.broker.default_credential_type") %>
 
 health:
   port: <%= p("autoscaler.apiserver.health.port") %>

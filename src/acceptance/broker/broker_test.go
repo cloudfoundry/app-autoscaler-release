@@ -267,23 +267,3 @@ func (p ServicePlans) getSourceAndTargetForPlanUpdate() (source, target ServiceP
 	target = p[(updatablePlanIndex+1)%p.length()] // simply update to any other plan
 	return source, target, nil
 }
-
-func GetCredentialsFromAppEnv(cfg *config.Config, appName string) []byte {
-	instanceEnvCmd := cf.Cf("env", appName).Wait(cfg.DefaultTimeoutDuration())
-	Expect(instanceEnvCmd).To(Exit(0), "failed getting application env")
-	instanceEnvCmdOutput := instanceEnvCmd.Out.Contents()
-
-	var appEnv AppEnv
-	err := json.Unmarshal(instanceEnvCmdOutput, &appEnv)
-	Expect(err).NotTo(HaveOccurred())
-
-	return instanceEnvCmdOutput
-}
-
-type AppEnv struct {
-	Credentials struct {
-		CustomMetrics struct {
-			URL string `json:"url"`
-		} `json:"custom_metrics"`
-	} `json:"credentials"`
-}
