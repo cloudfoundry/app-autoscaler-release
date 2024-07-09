@@ -32,7 +32,7 @@ var (
 	configFile       *os.File
 	cfServer         *mocks.Server
 	healthHttpClient *http.Client
-	healthport       int
+	serverport       int
 )
 
 func TestOperator(t *testing.T) {
@@ -73,8 +73,8 @@ func initConfig() {
 		ClientID: "client-id",
 		Secret:   "secret",
 	}
-	healthport = 8000 + GinkgoParallelProcess()
-	cfg.Server.Port = healthport
+	serverport = 8000 + GinkgoParallelProcess()
+	cfg.Server.Port = serverport
 	cfg.Logging.Level = "debug"
 	dbUrl := testhelpers.GetDbUrl()
 
@@ -124,8 +124,8 @@ func initConfig() {
 	cfg.AppSyncer.SyncInterval = 60 * time.Second
 	cfg.HttpClientTimeout = 10 * time.Second
 
-	cfg.Health.HealthCheckUsername = "operatorhealthcheckuser"
-	cfg.Health.HealthCheckPassword = "operatorhealthcheckuser"
+	cfg.Health.BasicAuth.Username = "operatorhealthcheckuser"
+	cfg.Health.BasicAuth.Password = "operatorhealthcheckuser"
 }
 
 func writeConfig(c *config.Config) *os.File {

@@ -63,6 +63,14 @@ var _ = Describe("Config", func() {
 						CertFile:   "/var/vcap/jobs/autoscaler/config/certs/api.crt",
 					},
 				))
+
+				Expect(conf.EventGenerator.BasicAuth).To(Equal(
+					models.BasicAuth{
+						Username: "eventgenerator",
+						Password: "eventgenerator-password",
+					},
+				))
+
 				Expect(conf.DB[db.BindingDb]).To(Equal(
 					db.DatabaseConfig{
 						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",

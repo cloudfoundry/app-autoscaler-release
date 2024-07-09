@@ -248,11 +248,6 @@ func initConfig() {
 		Server: config.ServerConfig{
 			ServerConfig: helpers.ServerConfig{
 				Port: egPort,
-				TLS: models.TLSCerts{
-					KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-					CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-					CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-				},
 			},
 			NodeAddrs: []string{"localhost"},
 			NodeIndex: 0,
@@ -310,8 +305,10 @@ func initConfig() {
 		DefaultStatWindowSecs:     300,
 		HttpClientTimeout:         10 * time.Second,
 		Health: helpers.HealthConfig{
-			HealthCheckUsername: "healthcheckuser",
-			HealthCheckPassword: "healthcheckpassword",
+			BasicAuth: models.BasicAuth{
+				Username: "healthcheckuser",
+				Password: "healthcheckpassword",
+			},
 		},
 	}
 	configFile = writeConfig(&conf)

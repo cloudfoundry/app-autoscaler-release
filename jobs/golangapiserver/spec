@@ -6,24 +6,15 @@ templates:
   liquibase.properties: bin/liquibase.properties
   info.json.erb: config/info.json
   catalog.json.erb: config/catalog.json
-  apiserver_ca.crt.erb: config/certs/apiserver/ca.crt
-  apiserver_server.crt.erb: config/certs/apiserver/server.crt
-  apiserver_server.key.erb: config/certs/apiserver/server.key
   brokerserver_ca.crt.erb: config/certs/brokerserver/ca.crt
   brokerserver.crt.erb: config/certs/brokerserver/server.crt
   brokerserver.key.erb: config/certs/brokerserver/server.key
-  healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
-  healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
-  healthendpoint.key.erb: config/certs/healthendpoint/server.key
   scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
   scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
   scalingengine_client.key.erb: config/certs/scalingengine/client.key
   scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
   scheduler_client.crt.erb: config/certs/scheduler/client.crt
   scheduler_client.key.erb: config/certs/scheduler/client.key
-  eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
-  eventgenerator_client.crt.erb: config/certs/eventgenerator/client.crt
-  eventgenerator_client.key.erb: config/certs/eventgenerator/client.key
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
@@ -70,23 +61,17 @@ properties:
     description: ""
   autoscaler.apiserver.broker.server.dashboard_redirect_uri:
     description: ""
+
   autoscaler.apiserver.public_api.server.port:
     description: "Port where broker server will run"
     default: 6102
-  autoscaler.apiserver.public_api.server.ca_cert:
-    description: "PEM-encoded CA certificate"
-  autoscaler.apiserver.public_api.server.server_cert:
-    description: "PEM-encoded server certificate"
-  autoscaler.apiserver.public_api.server.server_key:
-    description: "PEM-encoded server key"
-  autoscaler.apiserver.health.port:
-    default: 1080
-  autoscaler.apiserver.health.ca_cert:
-    description: "PEM-encoded CA certificate for the health endpoint"
-  autoscaler.apiserver.health.server_cert:
-    description: "PEM-encoded server certificate for the health endpoint"
-  autoscaler.apiserver.health.server_key:
-    description: "PEM-encoded server key for the health endpoint"
+  autoscaler.apiserver.public_api.health.username:
+    description: "the username for the health endpoint"
+    default: ''
+  autoscaler.apiserver.public_api.health.password:
+    description: "the password for the health endpoint"
+    default: ''
+
   autoscaler.apiserver.info.name:
     description: "Name of the autoscaler application to be shown in /info path"
     default: "Autoscaler"
@@ -123,21 +108,25 @@ properties:
     description: "PEM-encoded client certificate"
   autoscaler.apiserver.scaling_engine.client_key:
     description: "PEM-encoded client key"
+
   autoscaler.apiserver.event_generator.host:
     description: "Host where eventGenerator is running"
     default: "eventgenerator.service.cf.internal"
   autoscaler.apiserver.event_generator.port:
     description: "Port where eventGenerator will listen"
     default: 6105
-  autoscaler.apiserver.event_generator.ca_cert:
-    description: "PEM-encoded CA certificate"
-  autoscaler.apiserver.event_generator.client_cert:
-    description: "PEM-encoded client certificate"
-  autoscaler.apiserver.event_generator.client_key:
-    description: "PEM-encoded client key"
+
+  autoscaler.apiserver.event_generator.username:
+    description: "the basic auth username for server endpoint"
+    default: ''
+  autoscaler.apiserver.event_generator.password:
+    description: "the basic auth password for server endpoint"
+    default: ''
+
   autoscaler.apiserver.metrics_forwarder.host:
     description: "Host where metricsforwarder is running"
     default: "autoscalermetrics.bosh-lite.com"
+
   autoscaler.apiserver.metrics_forwarder.mtls_host:
     description: "Host where metricsforwarder mtls authentication route is available"
     default: ""

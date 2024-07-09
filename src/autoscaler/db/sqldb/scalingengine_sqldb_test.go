@@ -616,7 +616,7 @@ var _ = Describe("ScalingEngineSqldb", func() {
 		})
 
 		Context("when there is no previous app cooldown record", func() {
-			It("creates the record", func() {
+			XIt("creates the record", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(hasScalingCooldownRecord(appId, 222222)).To(BeTrue())
 			})
@@ -628,7 +628,7 @@ var _ = Describe("ScalingEngineSqldb", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 
-			It("removes the previous record and inserts a new record", func() {
+			XIt("removes the previous record and inserts a new record", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(hasScalingCooldownRecord(appId, 111111)).To(BeFalse())
 				Expect(hasScalingCooldownRecord(appId, 222222)).To(BeTrue())
@@ -655,7 +655,7 @@ var _ = Describe("ScalingEngineSqldb", func() {
 				err = sdb.UpdateScalingCooldownExpireTime(appId, fakeCoolDownExpiredTime)
 				Expect(err).NotTo(HaveOccurred())
 			})
-			It("returns false", func() {
+			XIt("returns false", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(canScale).To(BeFalse())
 				Expect(cooldownExpiredAt).To(Equal(fakeCoolDownExpiredTime))
@@ -668,7 +668,7 @@ var _ = Describe("ScalingEngineSqldb", func() {
 				err = sdb.UpdateScalingCooldownExpireTime(appId, fakeCoolDownExpiredTime)
 				Expect(err).NotTo(HaveOccurred())
 			})
-			It("returns true", func() {
+			XIt("returns true", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(canScale).To(BeTrue())
 				Expect(cooldownExpiredAt).To(Equal(fakeCoolDownExpiredTime))

@@ -4,10 +4,6 @@ templates:
   bpm.yml.erb: config/bpm.yml
   metricsforwarder.yml.erb: config/metricsforwarder.yml
 
-  metricsforwarder_ca.crt.erb: config/certs/metricsforwarder/ca.crt
-  metricsforwarder_server.crt.erb: config/certs/metricsforwarder/server.crt
-  metricsforwarder_server.key.erb: config/certs/metricsforwarder/server.key
-
   metron_client_ca.crt.erb: config/certs/metron_client/ca.crt
   metron_client.crt.erb: config/certs/metron_client/client.crt
   metron_client.key.erb: config/certs/metron_client/client.key
@@ -36,12 +32,12 @@ properties:
   autoscaler.metricsforwarder.server.port:
     description: "Port on which the metricsforwarder server will listen"
     default: 6201
-  autoscaler.metricsforwarder.server.ca_cert:
-    description: "PEM-encoded CA certificate for the metricsforwarder server"
-  autoscaler.metricsforwarder.server.server_cert:
-    description: "PEM-encoded server certificate for the metricsforwarder server"
-  autoscaler.metricsforwarder.server.server_key:
-    description: "PEM-encoded server key for the metricsforwarder server"
+  autoscaler.metricsforwarder.server.username:
+    description: "the basic auth username for server endpoint"
+    default: ''
+  autoscaler.metricsforwarder.server.password:
+    description: "the basic auth password for server endpoint"
+    default: ''
 
   autoscaler.metricsforwarder.syslog.server_address:
     description: "host where the syslog server is running"

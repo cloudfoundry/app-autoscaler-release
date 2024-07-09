@@ -45,7 +45,6 @@ var (
 	catalogBytes     string
 	schedulerServer  *ghttp.Server
 	brokerPort       int
-	publicApiPort    int
 	infoBytes        string
 	ccServer         *mocks.Server
 )
@@ -113,7 +112,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	catalogBytes = info.CatalogBytes
 	infoBytes = info.InfoBytes
 	brokerPort = 8000 + GinkgoParallelProcess()
-	publicApiPort = 9000 + GinkgoParallelProcess()
+	publicApiPort := 9000 + GinkgoParallelProcess()
 
 	cfg.BrokerServer = helpers.ServerConfig{
 		Port: brokerPort,
@@ -125,11 +124,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	}
 	cfg.PublicApiServer = helpers.ServerConfig{
 		Port: publicApiPort,
-		TLS: models.TLSCerts{
-			KeyFile:    filepath.Join(testCertDir, "api.key"),
-			CertFile:   filepath.Join(testCertDir, "api.crt"),
-			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-		},
 	}
 	cfg.Logging.Level = "info"
 	cfg.DB = make(map[string]db.DatabaseConfig)
@@ -173,10 +167,9 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 
 	cfg.EventGenerator = config.EventGeneratorConfig{
 		EventGeneratorUrl: "http://localhost:8084",
-		TLSClientCerts: models.TLSCerts{
-			KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-			CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+		BasicAuth: models.BasicAuth{
+			Username: "eventgenerator",
+			Password: "eventgenerator-password",
 		},
 	}
 	cfg.ScalingEngine = config.ScalingEngineConfig{
@@ -196,8 +189,10 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	cfg.CF.Secret = "client-secret"
 	cfg.CF.SkipSSLValidation = true
 	cfg.Health = helpers.HealthConfig{
-		HealthCheckUsername: "healthcheckuser",
-		HealthCheckPassword: "healthcheckpassword",
+		BasicAuth: models.BasicAuth{
+			Username: "healthcheckuser",
+			Password: "healthcheckpassword",
+		},
 	}
 	cfg.RateLimit.MaxAmount = 10
 	cfg.RateLimit.ValidDuration = 1 * time.Second

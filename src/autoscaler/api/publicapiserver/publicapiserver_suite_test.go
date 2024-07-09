@@ -91,18 +91,8 @@ var _ = BeforeSuite(func() {
 
 	conf = CreateConfig(apiPort)
 
-	// verify MetricCollector certs
-	_, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.KeyFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = os.ReadFile(conf.EventGenerator.TLSClientCerts.CertFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = os.ReadFile(conf.EventGenerator.TLSClientCerts.CACertFile)
-	Expect(err).NotTo(HaveOccurred())
-
 	// verify ScalingEngine certs
-	_, err = os.ReadFile(conf.ScalingEngine.TLSClientCerts.KeyFile)
+	_, err := os.ReadFile(conf.ScalingEngine.TLSClientCerts.KeyFile)
 	Expect(err).NotTo(HaveOccurred())
 
 	_, err = os.ReadFile(conf.ScalingEngine.TLSClientCerts.CertFile)
@@ -193,10 +183,9 @@ func CreateConfig(apiServerPort int) *config.Config {
 		InfoFilePath: "../exampleconfig/info-file.json",
 		EventGenerator: config.EventGeneratorConfig{
 			EventGeneratorUrl: eventGeneratorServer.URL(),
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: "eventgenerator",
+				Password: "eventgenerator-password",
 			},
 		},
 		ScalingEngine: config.ScalingEngineConfig{

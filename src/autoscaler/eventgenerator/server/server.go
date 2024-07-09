@@ -26,28 +26,35 @@ func (vh VarsFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	vh(w, r, vars)
 }
-
-func NewServer(logger lager.Logger, conf *config.Config, appMetricDB db.AppMetricDB, policyDb db.PolicyDB, queryAppMetric aggregator.QueryAppMetricsFunc, httpStatusCollector healthendpoint.HTTPStatusCollector) (ifrit.Runner, error) {
-	eh := NewEventGenHandler(logger, queryAppMetric)
+func createEventGeneratorRouter(logger lager.Logger, queryAppMetric aggregator.QueryAppMetricsFunc, httpStatusCollector healthendpoint.HTTPStatusCollector, serverConfig config.ServerConfig) (*mux.Router, error) {
+	ba, _ := helpers.CreateBasicAuthMiddleware(logger, serverConfig.BasicAuth)
 	httpStatusCollectMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
+	eh := NewEventGenHandler(logger, queryAppMetric)
 	r := routes.EventGeneratorRoutes()
 	r.Use(otelmux.Middleware("eventgenerator"))
+	r.Use(ba.BasicAuthenticationMiddleware)
 	r.Use(httpStatusCollectMiddleware.Collect)
 	r.Get(routes.GetAggregatedMetricHistoriesRouteName).Handler(VarsFunc(eh.GetAggregatedMetricHistories))
+	return r, nil
+}
+
+func NewServer(logger lager.Logger, conf *config.Config, appMetricDB db.AppMetricDB, policyDb db.PolicyDB, queryAppMetric aggregator.QueryAppMetricsFunc, httpStatusCollector healthendpoint.HTTPStatusCollector) (ifrit.Runner, error) {
+	eventGeneratorRouter, _ := createEventGeneratorRouter(logger, queryAppMetric, httpStatusCollector, conf.Server)
 
 	healthRouter, err := createHealthRouter(appMetricDB, policyDb, logger, conf, httpStatusCollector)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create health router: %w", err)
 	}
 
-	mainRouter := setupMainRouter(r, healthRouter)
+	mainRouter := setupMainRouter(eventGeneratorRouter, healthRouter)
 	return helpers.NewHTTPServer(logger, serverConfigFrom(conf), mainRouter)
 }
 
 func serverConfigFrom(conf *config.Config) helpers.ServerConfig {
 	return helpers.ServerConfig{
-		Port: conf.Server.Port,
-		TLS:  conf.Server.TLS,
+		BasicAuth: conf.Server.BasicAuth,
+		Port:      conf.Server.Port,
+		TLS:       conf.Server.TLS,
 	}
 }
 

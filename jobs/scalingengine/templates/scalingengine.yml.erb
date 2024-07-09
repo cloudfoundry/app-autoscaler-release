@@ -54,6 +54,10 @@ cf:
 
 server:
   port:  <%= p("autoscaler.scalingengine.server.port") %>
+  tls:
+    key_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/server.key
+    cert_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/server.crt
+    ca_file: /var/vcap/jobs/scalingengine/config/certs/scalingengine/ca.crt
 
 logging:
   level: <%= p("autoscaler.scalingengine.logging.level") %>

@@ -133,8 +133,8 @@ var _ = Describe("Operator", Serial, func() {
 				Eventually(runner.Session.Buffer, 5*time.Second).Should(Say("operator.started"))
 				secondRunner = NewOperatorRunner()
 				secondRunner.startCheck = ""
-				cfg.Health.HealthCheckUsername = ""
-				cfg.Health.HealthCheckPassword = ""
+				cfg.Health.BasicAuth.Username = ""
+				cfg.Health.BasicAuth.Password = ""
 				cfg.Server.Port = 9000 + GinkgoParallelProcess()
 				secondRunner.configPath = writeConfig(&cfg).Name()
 				secondRunner.Start()
@@ -166,8 +166,8 @@ var _ = Describe("Operator", Serial, func() {
 				secondRunner = NewOperatorRunner()
 				secondRunner.startCheck = ""
 
-				cfg.Health.HealthCheckUsername = ""
-				cfg.Health.HealthCheckPassword = ""
+				cfg.Health.BasicAuth.Username = ""
+				cfg.Health.BasicAuth.Password = ""
 				cfg.Server.Port = 9000 + GinkgoParallelProcess()
 				secondRunner.configPath = writeConfig(&cfg).Name()
 				secondRunner.Start()
@@ -315,8 +315,8 @@ var _ = Describe("Operator", Serial, func() {
 	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
 			basicAuthConfig := cfg
-			basicAuthConfig.Health.HealthCheckUsername = ""
-			basicAuthConfig.Health.HealthCheckPassword = ""
+			basicAuthConfig.Health.BasicAuth.Username = ""
+			basicAuthConfig.Health.BasicAuth.Password = ""
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 
 			runner.Start()
@@ -329,7 +329,7 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", healthport))
+				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", serverport))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
@@ -358,7 +358,7 @@ var _ = Describe("Operator", Serial, func() {
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", serverport), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -372,10 +372,10 @@ var _ = Describe("Operator", Serial, func() {
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", serverport), nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
+				req.SetBasicAuth(cfg.Health.BasicAuth.Username, cfg.Health.BasicAuth.Password)
 
 				rsp, err := healthHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
@@ -398,7 +398,7 @@ var _ = Describe("Operator", Serial, func() {
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", serverport), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth("wrongusername", "wrongpassword")
@@ -412,10 +412,10 @@ var _ = Describe("Operator", Serial, func() {
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
 
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", serverport), nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
+				req.SetBasicAuth(cfg.Health.BasicAuth.Username, cfg.Health.BasicAuth.Password)
 
 				rsp, err := healthHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())

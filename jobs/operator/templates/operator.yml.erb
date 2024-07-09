@@ -60,8 +60,9 @@ server:
 logging:
   level: <%= p("autoscaler.operator.logging.level") %>
 health:
-  username: <%= p("autoscaler.operator.health.username") %>
-  password: <%= p("autoscaler.operator.health.password") %>
+  basic_auth:
+    username: <%= p("autoscaler.operator.health.username") %>
+    password: <%= p("autoscaler.operator.health.password") %>
 
 http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
 

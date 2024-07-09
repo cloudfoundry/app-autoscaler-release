@@ -234,6 +234,11 @@ instance_groups:
           public_api:
             server:
               port: &publicApiServerPort 6101
+              username: apiserver
+              password: ((autoscaler_apiserver_server_password))
+            health:
+              username: scheduler
+              password: ((autoscaler_apiserver_health_password))
           use_buildin_mode: false
           scheduler:
             ca_cert: ((!scheduler_client_cert.ca))
@@ -246,9 +251,8 @@ instance_groups:
             client_key: ((!scalingengine_client_cert.private_key))
             host: *scalingengine_domain
           event_generator:
-            ca_cert: ((!eventgenerator_client_cert.ca))
-            client_cert: ((!eventgenerator_client_cert.certificate))
-            client_key: ((!eventgenerator_client_cert.private_key))
+            username: eventgenerator
+            password: ((autoscaler_eventgenerator_server_password))
             host: *eventgenerator_domain
           metrics_forwarder:
             host: *metricsforwarder_public_domain
@@ -432,14 +436,13 @@ instance_groups:
         eventgenerator:
           server:
             port: &eventGeneratorServerPort 6105
+            username: eventgenerator
+            password: ((autoscaler_eventgenerator_server_password))
           health:
             username: eventgenerator
             password: ((autoscaler_eventgenerator_health_password))
           logging:
             level: info
-          ca_cert: ((!eventgenerator_server_cert.ca))
-          server_cert: ((!eventgenerator_server_cert.certificate))
-          server_key: ((!eventgenerator_server_cert.private_key))
           enable_db_lock: false
           scaling_engine:
             ca_cert: ((!scalingengine_client_cert.ca))
@@ -492,6 +495,8 @@ instance_groups:
             level: info
           server:
             port: &metricsforwarderServerPort 6201
+            username: metricsforwarder
+            password: ((autoscaler_metricsforwarder_server_password))
           loggregator:
             tls:
               ca_cert: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.ca))
@@ -599,6 +604,8 @@ variables:
     length: 128
 - name: autoscaler_eventgenerator_health_password
   type: password
+- name: autoscaler_eventgenerator_server_password
+  type: password
 - name: service_broker_password
   type: password
   options:
@@ -608,6 +615,8 @@ variables:
   options:
     length: 128
 - name: autoscaler_metricsforwarder_health_password
+  type: password
+- name: autoscaler_metricsforwarder_server_password
   type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password
   type: password
@@ -635,50 +644,14 @@ variables:
   type: password
   options:
     length: 128
-- name: auditlog_monitor_basic_auth_password
+- name: autoscaler_apiserver_server_password
   type: password
-  options:
-    length: 128
-- name: dashboard_monitor_basic_auth_password
+- name: autoscaler_apiserver_health_password
   type: password
-  options:
-    length: 128
 - name: autoscaler_scheduler_health_password
   type: password
-- name: ratelimiter_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: metriccollector_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: scalingengine_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: eventgenerator_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: scheduler_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: apiserver_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: metricsforwarder_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
 - name: autoscaler_scalingengine_health_password
   type: password
-- name: operator_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
 - name: app_autoscaler_ca_cert
   type: certificate
   update_mode: converge
@@ -732,29 +705,6 @@ variables:
   options:
     ca: app_autoscaler_ca_cert
     common_name: scheduler_client
-    extended_key_usage:
-    - client_auth
-    key_length: 4096
-    duration: 180
-- name: eventgenerator_server_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: *eventgenerator_domain
-    alternative_names:
-    - *eventgenerator_domain
-    extended_key_usage:
-    - client_auth
-    - server_auth
-    key_length: 4096
-    duration: 180
-- name: eventgenerator_client_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: eventgenerator_client
     extended_key_usage:
     - client_auth
     key_length: 4096

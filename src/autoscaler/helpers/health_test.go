@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -25,8 +26,9 @@ var _ = Describe("Health Config", func() {
 	When("Readiness is not supplied", func() {
 		BeforeEach(func() {
 			healthConfigBytes = []byte(`
-username: test-username
-password: password
+basic_auth:
+  username: test-username
+  password: password
 readiness_enabled: false
 `)
 		})
@@ -37,8 +39,10 @@ readiness_enabled: false
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(healthConfig).To(Equal(helpers.HealthConfig{
-				HealthCheckUsername:   "test-username",
-				HealthCheckPassword:   "password",
+				BasicAuth: models.BasicAuth{
+					Username: "test-username",
+					Password: "password",
+				},
 				ReadinessCheckEnabled: false,
 			}))
 		})
@@ -47,8 +51,9 @@ readiness_enabled: false
 		BeforeEach(func() {
 			healthConfigBytes = []byte(`
 port: 9999
-username: test-username
-password: password
+basic_auth:
+  username: test-username
+  password: password
 readiness_enabled: true
 `)
 		})
@@ -59,8 +64,10 @@ readiness_enabled: true
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(healthConfig).To(Equal(helpers.HealthConfig{
-				HealthCheckUsername:   "test-username",
-				HealthCheckPassword:   "password",
+				BasicAuth: models.BasicAuth{
+					Username: "test-username",
+					Password: "password",
+				},
 				ReadinessCheckEnabled: true,
 			}))
 		})
@@ -69,9 +76,10 @@ readiness_enabled: true
 	When("both password password_hash are supplied", func() {
 		BeforeEach(func() {
 			healthConfigBytes = []byte(`
-username: test-username
-password: password
-password_hash: password_hash
+basic_auth:
+  username: test-username
+  password: password
+  password_hash: password_hash
 `)
 		})
 		It("should fail validation", func() {

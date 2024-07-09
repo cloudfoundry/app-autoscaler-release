@@ -81,12 +81,12 @@ func main() {
 	policyDb := sqldb.CreatePolicyDb(conf.AppSyncer.DB, logger)
 	defer func() { _ = policyDb.Close() }()
 
-	scalingEngineHttpclient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
+	scalingEngineHttpclient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
 	if err != nil {
 		logger.Error("failed to create http client for scalingengine", err, lager.Data{"scalingengineTLS": conf.ScalingEngine.TLSClientCerts})
 		os.Exit(1)
 	}
-	schedulerHttpclient, err := helpers.CreateHTTPClient(&conf.Scheduler.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scheduler_client"))
+	schedulerHttpclient, err := helpers.CreateHTTPSClient(&conf.Scheduler.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scheduler_client"))
 	if err != nil {
 		logger.Error("failed to create http client for scheduler", err, lager.Data{"schedulerTLS": conf.Scheduler.TLSClientCerts})
 		os.Exit(1)

@@ -128,30 +128,6 @@ describe "golangapiserver" do
       end
     end
 
-    context "public_api_server" do
-      it "by default TLS is not configured" do
-        expect(rendered_template["public_api_server"]["tls"]).to be_nil
-      end
-
-      it "TLS can be enabled" do
-        public_api = (properties["autoscaler"]["apiserver"]["public_api"] ||= {})
-        public_api["server"] = {
-          "ca_cert" => "SOME_CA",
-          "server_cert" => "SOME_CERT",
-          "server_key" => "SOME_KEY"
-        }
-
-        rendered_template = YAML.safe_load(template.render(properties))
-
-        expect(rendered_template["public_api_server"]["tls"]).not_to be_nil
-        expect(rendered_template["public_api_server"]["tls"]).to include({
-          "key_file" => "/var/vcap/jobs/golangapiserver/config/certs/apiserver/server.key",
-          "ca_file" => "/var/vcap/jobs/golangapiserver/config/certs/apiserver/ca.crt",
-          "cert_file" => "/var/vcap/jobs/golangapiserver/config/certs/apiserver/server.crt"
-        })
-      end
-    end
-
     context "cred_helper_impl" do
       it "has a cred helper impl by default" do
         expect(rendered_template).to include(

@@ -57,11 +57,10 @@ end
 
 
 server:
+  basic_auth:
+    username: <%= p("autoscaler.eventgenerator.server.username") %>
+    password: <%= p("autoscaler.eventgenerator.server.password") %>
   port:  <%= p("autoscaler.eventgenerator.server.port") %>
-  tls:
-    key_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.key
-    cert_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.crt
-    ca_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/ca.crt
   node_addrs: <%= nodeAddrs %>
   node_index: <%= nodeIndex %>
 
@@ -69,8 +68,9 @@ logging:
   level: <%= p("autoscaler.eventgenerator.logging.level") %>
 http_client_timeout: <%= p("autoscaler.eventgenerator.http_client_timeout") %>
 health:
-  username: <%= p("autoscaler.eventgenerator.health.username") %>
-  password: <%= p("autoscaler.eventgenerator.health.password") %>
+  basic_auth:
+    username: <%= p("autoscaler.eventgenerator.health.username") %>
+    password: <%= p("autoscaler.eventgenerator.health.password") %>
 
 db:
   policy_db:

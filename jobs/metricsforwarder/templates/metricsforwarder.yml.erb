@@ -46,12 +46,9 @@ end
 
 server:
   port: <%= p("autoscaler.metricsforwarder.server.port") %>
-  <% if_p("autoscaler.metricsforwarder.server.ca_cert", "autoscaler.metricsforwarder.server.server_cert", "autoscaler.metricsforwarder.server.server_key") do %>
-  tls:
-    ca_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/ca.crt
-    cert_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/server.crt
-    key_file: /var/vcap/jobs/metricsforwarder/config/certs/metricsforwarder/server.key
-  <% end %>
+  basic_auth:
+    username: <%= p("autoscaler.metricsforwarder.server.username") %>
+    password: <%= p("autoscaler.metricsforwarder.server.password") %>
 
 logging:
   level: <%= p("autoscaler.metricsforwarder.logging.level") %>
@@ -91,8 +88,9 @@ cache_ttl: <%= p("autoscaler.metricsforwarder.cache_ttl") %>
 cache_cleanup_interval: <%= p("autoscaler.metricsforwarder.cache_cleanup_interval") %>
 policy_poller_interval: <%= p("autoscaler.metricsforwarder.policy_poller_interval") %>
 health:
-  username: <%= p("autoscaler.metricsforwarder.health.username") %>
-  password: <%= p("autoscaler.metricsforwarder.health.password") %>
+  basic_auth:
+    username: <%= p("autoscaler.metricsforwarder.health.username") %>
+    password: <%= p("autoscaler.metricsforwarder.health.password") %>
 
 rate_limit:
   valid_duration: <%= p("autoscaler.metricsforwarder.rate_limit.valid_duration") %>

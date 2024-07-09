@@ -204,8 +204,8 @@ var _ = Describe("Main", func() {
 	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
 			basicAuthConfig := conf
-			basicAuthConfig.Health.HealthCheckUsername = ""
-			basicAuthConfig.Health.HealthCheckPassword = ""
+			basicAuthConfig.Health.BasicAuth.Username = ""
+			basicAuthConfig.Health.BasicAuth.Password = ""
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 		})
 
@@ -256,7 +256,7 @@ var _ = Describe("Main", func() {
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
+				req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
 
 				rsp, err := httpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
@@ -290,7 +290,7 @@ var _ = Describe("Main", func() {
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
+				req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
 
 				rsp, err := httpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())

@@ -57,17 +57,19 @@ func createHealthRouter(logger lager.Logger, conf *config.Config, policyDB db.Po
 	return healthRouter, nil
 }
 
-func NewServer(logger lager.Logger, conf *config.Config, policyDB db.PolicyDB, scalingEngineDB db.ScalingEngineDB, schedulerDB db.SchedulerDB, scalingEngine scalingengine.ScalingEngine, synchronizer schedule.ActiveScheduleSychronizer) (ifrit.Runner, error) {
-	handler := NewScalingHandler(logger, scalingEngineDB, scalingEngine)
-	syncHandler := NewSyncHandler(logger, synchronizer)
-	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "scalingengine")
-
+func createScalingEngineRouter(logger lager.Logger, scalingEngineDB db.ScalingEngineDB, scalingEngine scalingengine.ScalingEngine, synchronizer schedule.ActiveScheduleSychronizer, httpStatusCollector healthendpoint.HTTPStatusCollector, serverConfig helpers.ServerConfig) (*mux.Router, error) {
+	//ba, _ := helpers.CreateBasicAuthMiddleware(logger, serverConfig.BasicAuth)
 	httpStatusCollectMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
+
+	se := NewScalingHandler(logger, scalingEngineDB, scalingEngine)
+	syncHandler := NewSyncHandler(logger, synchronizer)
+
 	r := routes.ScalingEngineRoutes()
 	r.Use(otelmux.Middleware("scalingengine"))
+	//r.Use(ba.BasicAuthenticationMiddleware)
 
 	r.Use(httpStatusCollectMiddleware.Collect)
-	r.Get(routes.ScaleRouteName).Handler(VarsFunc(handler.Scale))
+	r.Get(routes.ScaleRouteName).Handler(VarsFunc(se.Scale))
 
 	scalingHistoryHandler, err := newScalingHistoryHandler(logger, scalingEngineDB)
 	if err != nil {
@@ -75,18 +77,25 @@ func NewServer(logger lager.Logger, conf *config.Config, policyDB db.PolicyDB, s
 	}
 	r.Get(routes.GetScalingHistoriesRouteName).Handler(scalingHistoryHandler)
 
-	r.Get(routes.SetActiveScheduleRouteName).Handler(VarsFunc(handler.StartActiveSchedule))
-	r.Get(routes.DeleteActiveScheduleRouteName).Handler(VarsFunc(handler.RemoveActiveSchedule))
-	r.Get(routes.GetActiveSchedulesRouteName).Handler(VarsFunc(handler.GetActiveSchedule))
+	r.Get(routes.SetActiveScheduleRouteName).Handler(VarsFunc(se.StartActiveSchedule))
+	r.Get(routes.DeleteActiveScheduleRouteName).Handler(VarsFunc(se.RemoveActiveSchedule))
+	r.Get(routes.GetActiveSchedulesRouteName).Handler(VarsFunc(se.GetActiveSchedule))
 
 	r.Get(routes.SyncActiveSchedulesRouteName).Handler(VarsFunc(syncHandler.Sync))
+	return r, nil
+}
+
+func NewServer(logger lager.Logger, conf *config.Config, policyDB db.PolicyDB, scalingEngineDB db.ScalingEngineDB, schedulerDB db.SchedulerDB, scalingEngine scalingengine.ScalingEngine, synchronizer schedule.ActiveScheduleSychronizer) (ifrit.Runner, error) {
+	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "scalingengine")
+
+	scalingEngineRouter, _ := createScalingEngineRouter(logger, scalingEngineDB, scalingEngine, synchronizer, httpStatusCollector, conf.Server)
 
 	healthRouter, err := createHealthRouter(logger, conf, policyDB, scalingEngineDB, schedulerDB, httpStatusCollector)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create health router: %w", err)
 	}
 
-	mainRouter := setupMainRouter(r, healthRouter)
+	mainRouter := setupMainRouter(scalingEngineRouter, healthRouter)
 
 	return helpers.NewHTTPServer(logger, conf.Server, mainRouter)
 }

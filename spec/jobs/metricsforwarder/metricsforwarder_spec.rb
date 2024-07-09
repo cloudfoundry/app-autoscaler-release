@@ -37,21 +37,16 @@ describe "metricsforwarder" do
 
     it "does not set username nor password if not configured" do
       properties["autoscaler"]["metricsforwarder"] = {
-        "health" => {
-          "port" => 1234
-        }
+        "health" => { }
       }
 
       expect(rendered_template["health"])
-        .to include(
-          {"port" => 1234}
-        )
+        .to include({})
     end
 
     it "check metricsforwarder basic auth username and password" do
       properties["autoscaler"]["metricsforwarder"] = {
         "health" => {
-          "port" => 1234,
           "username" => "test-user",
           "password" => "test-user-password"
         }
@@ -59,9 +54,10 @@ describe "metricsforwarder" do
 
       expect(rendered_template["health"])
         .to include(
-          {"port" => 1234,
+          {
+           "basic_auth" => {
            "username" => "test-user",
-           "password" => "test-user-password"}
+           "password" => "test-user-password"} }
         )
     end
 

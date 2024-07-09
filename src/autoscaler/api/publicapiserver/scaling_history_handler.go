@@ -24,7 +24,7 @@ type ScalingHistoryHandler struct {
 }
 
 func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*ScalingHistoryHandler, error) {
-	seClient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
+	seClient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
 	if err != nil {
 		return nil, fmt.Errorf("error creating scaling history HTTP client: %w", err)
 	}

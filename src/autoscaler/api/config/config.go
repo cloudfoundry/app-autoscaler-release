@@ -54,9 +54,10 @@ type ScalingEngineConfig struct {
 }
 
 type EventGeneratorConfig struct {
-	EventGeneratorUrl string          `yaml:"event_generator_url"`
-	TLSClientCerts    models.TLSCerts `yaml:"tls"`
+	EventGeneratorUrl string           `yaml:"event_generator_url"`
+	BasicAuth         models.BasicAuth `yaml:"basic_auth"`
 }
+
 type MetricsForwarderConfig struct {
 	MetricsForwarderUrl     string `yaml:"metrics_forwarder_url"`
 	MetricsForwarderMtlsUrl string `yaml:"metrics_forwarder_mtls_url"`

@@ -29,7 +29,7 @@ var _ = Describe("Api", func() {
 	BeforeEach(func() {
 		brokerHttpClient = NewServiceBrokerClient()
 		runner = NewApiRunner()
-		serverURL = fmt.Sprintf("https://127.0.0.1:%d", cfg.PublicApiServer.Port)
+		serverURL = fmt.Sprintf("http://127.0.0.1:%d", cfg.PublicApiServer.Port)
 	})
 
 	Describe("Api configuration check", func() {
@@ -120,6 +120,7 @@ var _ = Describe("Api", func() {
 			BeforeEach(func() {
 				runner.Start()
 			})
+
 			It("succeeds with a 200", func() {
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v2/catalog", brokerPort), nil)
 				Expect(err).NotTo(HaveOccurred())
@@ -155,7 +156,7 @@ var _ = Describe("Api", func() {
 				runner.Start()
 			})
 			It("succeeds with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v1/info", publicApiPort), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				rsp, err = apiHttpClient.Do(req)
@@ -171,8 +172,8 @@ var _ = Describe("Api", func() {
 	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
 			basicAuthConfig := cfg
-			basicAuthConfig.Health.HealthCheckUsername = ""
-			basicAuthConfig.Health.HealthCheckPassword = ""
+			basicAuthConfig.Health.BasicAuth.Username = ""
+			basicAuthConfig.Health.BasicAuth.Password = ""
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 			runner.Start()
 		})
@@ -230,7 +231,7 @@ var _ = Describe("Api", func() {
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
+				req.SetBasicAuth(cfg.Health.BasicAuth.Username, cfg.Health.BasicAuth.Password)
 
 				rsp, err := apiHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
@@ -252,7 +253,7 @@ var _ = Describe("Api", func() {
 		})
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v1/info", publicApiPort), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				rsp, err = apiHttpClient.Do(req)

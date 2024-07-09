@@ -5,9 +5,6 @@ templates:
   bpm-pre-start.erb: bin/bpm-pre-start
   liquibase.properties: bin/liquibase.properties
   eventgenerator.yml.erb: config/eventgenerator.yml
-  eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
-  eventgenerator_server.crt.erb: config/certs/eventgenerator/server.crt
-  eventgenerator_server.key.erb: config/certs/eventgenerator/server.key
   healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
   healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
   healthendpoint.key.erb: config/certs/healthendpoint/server.key
@@ -113,6 +110,12 @@ properties:
   autoscaler.eventgenerator.server.port:
     description: "the listening port of server"
     default: 6105
+  autoscaler.eventgenerator.server.username:
+    description: "the basic auth username for server endpoint"
+    default: ''
+  autoscaler.eventgenerator.server.password:
+    description: "the basic auth password for server endpoint"
+    default: ''
   autoscaler.eventgenerator.http_client_timeout:
     description: "Http client imeout for eventgenerator to communicate with other autoscaler components"
     default: 60s

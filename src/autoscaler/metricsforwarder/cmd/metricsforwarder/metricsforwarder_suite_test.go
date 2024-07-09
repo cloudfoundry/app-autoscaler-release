@@ -134,8 +134,8 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	cfg.RateLimit.ValidDuration = 1 * time.Second
 	cfg.Logging.Level = "debug"
 
-	cfg.Health.HealthCheckUsername = "metricsforwarderhealthcheckuser"
-	cfg.Health.HealthCheckPassword = "metricsforwarderhealthcheckpassword"
+	cfg.Health.BasicAuth.Username = "metricsforwarderhealthcheckuser"
+	cfg.Health.BasicAuth.Password = "metricsforwarderhealthcheckpassword"
 	cfg.Health.ReadinessCheckEnabled = true
 
 	cfg.Server.Port = 10000 + GinkgoParallelProcess()

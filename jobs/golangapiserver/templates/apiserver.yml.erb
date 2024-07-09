@@ -59,12 +59,6 @@ cf:
 
 public_api_server:
   port:  <%= p("autoscaler.apiserver.public_api.server.port") %>
-  <% if_p("autoscaler.apiserver.public_api.server.ca_cert", "autoscaler.apiserver.public_api.server.server_cert", "autoscaler.apiserver.public_api.server.server_key") do %>
-  tls:
-    ca_file: /var/vcap/jobs/golangapiserver/config/certs/apiserver/ca.crt
-    cert_file: /var/vcap/jobs/golangapiserver/config/certs/apiserver/server.crt
-    key_file: /var/vcap/jobs/golangapiserver/config/certs/apiserver/server.key
-  <% end %>
 
 broker_server:
   port:  <%= p("autoscaler.apiserver.broker.server.port") %>
@@ -90,12 +84,9 @@ policy_schema_path: /var/vcap/packages/golangapiserver/policy_json.schema.json
 dashboard_redirect_uri: <%= p("autoscaler.apiserver.broker.server.dashboard_redirect_uri") %>
 
 health:
-  <% if_p("autoscaler.apiserver.health.ca_cert", "autoscaler.apiserver.health.server_cert", "autoscaler.apiserver.health.server_key") do %>
-  tls:
-    ca_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/ca.crt
-    cert_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/server.crt
-    key_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/server.key
-  <% end %>
+  basic_auth:
+    username: <%= p("autoscaler.apiserver.public_api.health.username") %>
+    password: <%= p("autoscaler.apiserver.public_api.health.password") %>
 
 db:
   policy_db:
@@ -132,10 +123,9 @@ scheduler:
 
 event_generator:
   event_generator_url: https://<%= p("autoscaler.apiserver.event_generator.host") %>:<%= p("autoscaler.apiserver.event_generator.port") %>
-  tls:
-    key_file: /var/vcap/jobs/golangapiserver/config/certs/eventgenerator/client.key
-    cert_file: /var/vcap/jobs/golangapiserver/config/certs/eventgenerator/client.crt
-    ca_file: /var/vcap/jobs/golangapiserver/config/certs/eventgenerator/ca.crt
+  basic_auth:
+    username: <%= p("autoscaler.apiserver.event_generator.username") %>
+    password: <%= p("autoscaler.apiserver.event_generator.username") %>
 
 metrics_forwarder:
   metrics_forwarder_url: https://<%= p("autoscaler.apiserver.metrics_forwarder.host") %>

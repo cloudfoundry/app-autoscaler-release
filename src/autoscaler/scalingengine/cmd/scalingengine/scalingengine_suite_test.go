@@ -102,8 +102,8 @@ var _ = SynchronizedBeforeSuite(
 		conf.LockSize = 32
 		conf.HttpClientTimeout = 10 * time.Second
 
-		conf.Health.HealthCheckUsername = "scalingenginehealthcheckuser"
-		conf.Health.HealthCheckPassword = "scalingenginehealthcheckpassword"
+		conf.Health.BasicAuth.Username = "scalingenginehealthcheckuser"
+		conf.Health.BasicAuth.Password = "scalingenginehealthcheckpassword"
 
 		configFile = writeConfig(&conf)
 

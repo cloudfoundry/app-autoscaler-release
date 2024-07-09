@@ -14,7 +14,7 @@ describe "operator" do
 
   context "config/operator.yml" do
     it "does not set username nor password if not configured" do
-      expect(rendered_template["health"]).to include(
+      expect(rendered_template["health"]["basic_auth"]).to include(
         {
           "username" => nil,
           "password" => nil
@@ -34,7 +34,7 @@ describe "operator" do
         }
       }
 
-      expect(rendered_template["health"]).to include(
+      expect(rendered_template["health"]["basic_auth"]).to include(
         {
           "username" => "test-user",
           "password" => "test-user-password"

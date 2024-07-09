@@ -225,7 +225,7 @@ var _ = Describe("CustomMetrics Server", func() {
 				It("returns with a 200", func() {
 					req, err = http.NewRequest("GET", serverUrl, nil)
 					Expect(err).NotTo(HaveOccurred())
-					req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
+					req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
 					rsp, err := client.Do(req)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
@@ -242,7 +242,7 @@ var _ = Describe("CustomMetrics Server", func() {
 			It("should return 200 for /health", func() {
 				req, err = http.NewRequest("GET", serverUrl+"/health", nil)
 				Expect(err).NotTo(HaveOccurred())
-				req.SetBasicAuth(conf.Health.HealthCheckUsername, conf.Health.HealthCheckPassword)
+				req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
 				rsp, err := client.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))

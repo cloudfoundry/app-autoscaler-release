@@ -72,8 +72,10 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 
 	healthConfig := helpers.HealthConfig{
 		ReadinessCheckEnabled: true,
-		HealthCheckUsername:   "metricsforwarderhealthcheckuser",
-		HealthCheckPassword:   "metricsforwarderhealthcheckpassword",
+		BasicAuth: models.BasicAuth{
+			Username: "metricsforwarderhealthcheckuser",
+			Password: "metricsforwarderhealthcheckpassword",
+		},
 	}
 	conf = &config.Config{
 		Server:            serverConfig,

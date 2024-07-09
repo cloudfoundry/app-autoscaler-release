@@ -38,10 +38,9 @@ scaling_engine:
     ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
 event_generator:
   event_generator_url: https://localhost:8083
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/eg.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/eg.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
+  basic_auth:
+    username: eventgenerator
+    password: eventgenerator-password
 info_file_path: /var/vcap/jobs/autoscaer/config/info-file.json
 cf:
   api: https://api.example.com
