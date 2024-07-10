@@ -372,12 +372,19 @@ build-test-app:
 deploy-test-app:
 	@make --directory='./src/acceptance/assets/app/go_app' deploy
 
-.PHONY: acceptance-tests
-acceptance-tests: build-test-app
-	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
-acceptance-cleanup:
-	${CI_DIR}/autoscaler/scripts/cleanup-acceptance.sh;
+.PHONY: build-acceptance-test-app
+build-acceptance-test-app:
+	@make --directory='./src/acceptance' build_tests
 
+.PHONY: acceptance-tests
+acceptance-tests: build-test-app acceptance-tests-config
+	@make --directory='./src/acceptance' run-acceptance-tests
+.PHONY: acceptance-cleanup
+acceptance-cleanup:
+	@make --directory='./src/acceptance' acceptance-cleanup
+.PHONY: acceptance-tests-config
+acceptance-tests-config:
+	@make --directory='./src/acceptance' acceptance-tests-config
 
 .PHONY: cleanup-concourse
 cleanup-concourse:

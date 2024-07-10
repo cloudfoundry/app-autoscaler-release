@@ -10,6 +10,9 @@ GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
 PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
 								 | grep --invert-match --regexp='e2e')
 
+AUTOSCALER_DIR ?= $(shell pwd)/../..
+CI_DIR ?= ${AUTOSCALER_DIR}/ci
+
 CGO_ENABLED := 0
 export GOWORK := off
 
@@ -60,10 +63,19 @@ build_test-%:
 check: lint build_tests
 
 test-unit:
-	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} --race run helpers config
+	go r github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} --race run helpers config
 
 test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
 lint:
 	make -C ../.. lint_acceptance OPTS=${OPTS}
+
+ACCEPTANCE_CONFIG_PATH := ./acceptance-config.json
+
+.PHONY: acceptance-tests-config
+
+acceptance-tests-config: ${ACCEPTANCE_CONFIG_PATH}
+
+${ACCEPTANCE_CONFIG_PATH}:
+	ACCEPTANCE_CONFIG_PATH='${ACCEPTANCE_CONFIG_PATH}' ${CI_DIR}/autoscaler/scripts/acceptance-tests-config.sh
