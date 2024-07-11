@@ -89,19 +89,15 @@ logging:
 ############################################################
 client:
     httpClientTimeout: 5
-    ssl:
-        key-store: src/test/resources/certs/test-scheduler.p12
-        key-store-password: 123456
-        key-store-type: PKCS12
-        protocol: TLSv1.3
-        trust-store: src/test/resources/certs/test.truststore
-        trust-store-password: 123456
 ############################################################
 #    Scalingengine
 ############################################################
 autoscaler:
     scalingengine:
-        url: https://localhost:8091
+      url: http://localhost:8091
+      basic_auth:
+        username: scalingengine
+        password: scalingengine-password
 scalingengine:
     notification:
         reschedule:

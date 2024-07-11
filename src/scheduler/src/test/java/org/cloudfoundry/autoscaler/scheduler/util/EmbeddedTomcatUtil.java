@@ -1,28 +1,26 @@
 package org.cloudfoundry.autoscaler.scheduler.util;
 
+import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.Hashtable;
+
+import java.util.Base64;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.apache.tomcat.util.net.SSLHostConfig;
-import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 
 public class EmbeddedTomcatUtil {
-
   private File baseDir = null;
-
   private File applicationDir;
-
   private Context appContext;
-
   private Tomcat tomcat = new Tomcat();
 
   public EmbeddedTomcatUtil() {
@@ -30,17 +28,15 @@ public class EmbeddedTomcatUtil {
     tomcat.setBaseDir(baseDir.getAbsolutePath());
 
     Connector httpsConnector = new Connector();
-    setupSslConfig(httpsConnector);
+    httpsConnector.setPort(8091);
 
     Service service = tomcat.getService();
     service.addConnector(httpsConnector);
-
     applicationDir = new File(baseDir + "/webapps", "/ROOT");
 
     if (!applicationDir.exists()) {
       applicationDir.mkdirs();
     }
-    tomcat.setPort(8090);
     tomcat.setSilent(false);
   }
 
@@ -77,35 +73,16 @@ public class EmbeddedTomcatUtil {
     appContext.addServletMappingDecoded(url, appId);
   }
 
-  private void setupSslConfig(Connector httpsConnector) {
-    httpsConnector.setPort(8091);
-    httpsConnector.setSecure(true);
-    httpsConnector.setScheme("https");
-
-    httpsConnector.setProperty("clientAuth", "true");
-    httpsConnector.setProperty("sslProtocol", "TLSv1.2");
-    httpsConnector.setProperty("SSLEnabled", "true");
-
-    SSLHostConfig sslConfig = new SSLHostConfig();
-
-    SSLHostConfigCertificate certConfig =
-        new SSLHostConfigCertificate(sslConfig, SSLHostConfigCertificate.Type.RSA);
-    certConfig.setCertificateKeystoreFile("../src/test/resources/certs/fake-scalingengine.p12");
-    certConfig.setCertificateKeystorePassword("123456");
-    certConfig.setCertificateKeyAlias("fake-scalingengine");
-
-    sslConfig.addCertificate(certConfig);
-
-    sslConfig.setTruststoreFile("../src/test/resources/certs/test.truststore");
-    sslConfig.setTruststorePassword("123456");
-
-    httpsConnector.addSslHostConfig(sslConfig);
-  }
-
   static class ScalingEngineMock extends HttpServlet {
-
+    // Declare and initialize with a "scalingengine:scalingengine-password", "authorized"
     private int returnStatus;
     private String returnMessage;
+    private Hashtable<String, String> validUsers = new Hashtable<>();
+
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+        this.validUsers.put("scalingengine:scalingengine-password","authorized");
+    }
 
     ScalingEngineMock(int status, String returnMessage) {
       this.returnStatus = status;
@@ -115,22 +92,48 @@ public class EmbeddedTomcatUtil {
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-
-      response.setStatus(this.returnStatus);
-      if (returnMessage != null && !returnMessage.isEmpty()) {
-        response.getWriter().write(returnMessage);
         response.setContentType("application/json");
-      }
+
+        if (allowRequest(request)) {
+          response.setStatus(this.returnStatus);
+          if (returnMessage != null && !returnMessage.isEmpty()) {
+            response.getWriter().write(returnMessage);
+          }
+        } else {
+            response.setHeader("WWW-Authenticate", "BASIC realm=\"jswan test\"");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        }
     }
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-
-      response.setStatus(this.returnStatus);
-      if (returnMessage != null && !returnMessage.isEmpty()) {
-        response.getWriter().write(returnMessage);
         response.setContentType("application/json");
+
+        if (allowRequest(request)) {
+          response.setStatus(this.returnStatus);
+          if (returnMessage != null && !returnMessage.isEmpty()) {
+            response.getWriter().write(returnMessage);
+          }
+        } else {
+            response.setHeader("WWW-Authenticate", "BASIC realm=\"jswan test\"");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        }
+    }
+
+    protected boolean allowRequest(HttpServletRequest request) throws IOException {
+      String auth = request.getHeader("Authorization");
+      if (auth == null || !auth.toUpperCase().startsWith("BASIC ")) { 
+          return false;  
+      }
+      String userpassEncoded = auth.substring(6);
+      byte[] decodedBytes = Base64.getDecoder().decode(userpassEncoded);
+      String userpassDecoded = new String(decodedBytes);
+  
+      if ("authorized".equals(this.validUsers.get(userpassDecoded))) {
+          return true;
+      } else {
+          return false;
       }
     }
   }
