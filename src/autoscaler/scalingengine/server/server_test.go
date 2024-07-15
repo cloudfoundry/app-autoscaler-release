@@ -1,8 +1,6 @@
 package server_test
 
 import (
-	"fmt"
-	"io/ioutil"
 	"strconv"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
@@ -18,6 +16,7 @@ import (
 	"github.com/tedsuo/ifrit/ginkgomon_v2"
 
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -52,7 +51,7 @@ var _ = Describe("Server", func() {
 				Port: port,
 				BasicAuth: models.BasicAuth{
 					Username: "scalingengine",
-					Password: "some-password",
+					Password: "scalingengine-password",
 				},
 			},
 		}
@@ -72,24 +71,29 @@ var _ = Describe("Server", func() {
 	AfterEach(func() {
 		ginkgomon_v2.Interrupt(server)
 	})
+	JustBeforeEach(func() {
+		req, err = http.NewRequest(method, serverUrl.String(), bodyReader)
+		auth := username + ":" + password
+		base64Auth := base64.StdEncoding.EncodeToString([]byte(auth))
+		req.Header.Set("Authorization", "Basic "+base64Auth)
+		Expect(err).NotTo(HaveOccurred())
+		rsp, err = http.DefaultClient.Do(req)
+	})
 
 	Context("when triggering scaling action", func() {
 		BeforeEach(func() {
 			body, err = json.Marshal(models.Trigger{Adjustment: "+1"})
 			Expect(err).NotTo(HaveOccurred())
 
+			bodyReader = bytes.NewReader(body)
 			uPath, err := route.Get(routes.ScaleRouteName).URLPath("appid", "test-app-id")
 			Expect(err).NotTo(HaveOccurred())
 			serverUrl.Path = uPath.Path
 		})
 
-		JustBeforeEach(func() {
-			serverUrl.User = url.UserPassword(username, password)
-			rsp, err = http.Post(serverUrl.String(), "application/json", bytes.NewReader(body))
-		})
-
 		When("requesting correctly", func() {
 			BeforeEach(func() {
+				method = http.MethodPost
 				username = conf.Server.BasicAuth.Username
 				password = conf.Server.BasicAuth.Password
 			})
@@ -111,26 +115,26 @@ var _ = Describe("Server", func() {
 
 		JustBeforeEach(func() {
 			serverUrl.User = url.UserPassword(username, password)
-			// TODO: Understand what type of authentication this endpoint should support
-			req, err = http.NewRequest(http.MethodGet, serverUrl.String(), nil)
-			req.Header.Set("Authorization", "Bearer ignore")
+			req, err = http.NewRequest(method, serverUrl.String(), nil)
 			Expect(err).NotTo(HaveOccurred())
+
+			auth := username + ":" + password
+			base64Auth := base64.StdEncoding.EncodeToString([]byte(auth))
+			req.Header.Set("Authorization", "Basic "+base64Auth)
+
 			rsp, err = (&http.Client{}).Do(req)
 			Expect(err).NotTo(HaveOccurred())
-
-			// print body
-			body, err := ioutil.ReadAll(rsp.Body)
-			Expect(err).NotTo(HaveOccurred())
-			fmt.Println(string(body))
 		})
 
-		When("requesting correctly", func() {
+		When("credentials are correct", func() {
 			BeforeEach(func() {
+				method = http.MethodGet
 				username = conf.Server.BasicAuth.Username
 				password = conf.Server.BasicAuth.Password
 			})
 
 			It("should return 200", func() {
+				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
 			})
@@ -139,23 +143,22 @@ var _ = Describe("Server", func() {
 
 	Context("when requesting active shedule", func() {
 
-		JustBeforeEach(func() {
-			req, err = http.NewRequest(method, serverUrl.String(), bodyReader)
+		BeforeEach(func() {
+			uPath, err := route.Get(routes.SetActiveScheduleRouteName).URLPath("appid", "test-app-id", "scheduleid", "test-schedule-id")
 			Expect(err).NotTo(HaveOccurred())
-			rsp, err = http.DefaultClient.Do(req)
+			serverUrl.Path = uPath.Path
 		})
 
 		Context("when setting active schedule", func() {
 			BeforeEach(func() {
-				uPath, err := route.Get(routes.SetActiveScheduleRouteName).URLPath("appid", "test-app-id", "scheduleid", "test-schedule-id")
-				Expect(err).NotTo(HaveOccurred())
-				serverUrl.Path = uPath.Path
 				bodyReader = bytes.NewReader([]byte(`{"instance_min_count":1, "instance_max_count":5, "initial_min_instance_count":3}`))
 			})
 
-			Context("when requesting correctly", func() {
+			Context("credentials are correct", func() {
 				BeforeEach(func() {
 					method = http.MethodPut
+					username = conf.Server.BasicAuth.Username
+					password = conf.Server.BasicAuth.Password
 				})
 
 				It("should return 200", func() {
@@ -214,21 +217,18 @@ var _ = Describe("Server", func() {
 	})
 
 	Context("when requesting sync shedule", func() {
-		JustBeforeEach(func() {
+		BeforeEach(func() {
 			uPath, err := route.Get(routes.SyncActiveSchedulesRouteName).URLPath()
 			Expect(err).NotTo(HaveOccurred())
 			serverUrl.Path = uPath.Path
 			bodyReader = nil
-
-			req, err = http.NewRequest(method, serverUrl.String(), bodyReader)
-			Expect(err).NotTo(HaveOccurred())
-			rsp, err = http.DefaultClient.Do(req)
-			Expect(err).NotTo(HaveOccurred())
 		})
 
 		Context("when requesting correctly", func() {
 			BeforeEach(func() {
 				method = http.MethodPut
+				username = conf.Server.BasicAuth.Username
+				password = conf.Server.BasicAuth.Password
 			})
 
 			It("should return 200", func() {

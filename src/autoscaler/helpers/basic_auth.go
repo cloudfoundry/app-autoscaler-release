@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"fmt"
 	"net/http"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -36,7 +35,6 @@ func (bam *BasicAuthenticationMiddleware) BasicAuthenticationMiddleware(next htt
 
 func CreateBasicAuthMiddleware(logger lager.Logger, ba models.BasicAuth) (*BasicAuthenticationMiddleware, error) {
 	var basicAuthentication *BasicAuthenticationMiddleware
-	fmt.Println(ba)
 	usernameHash, username, passwordHash, password := ba.UsernameHash, ba.Username, ba.PasswordHash, ba.Password
 
 	usernameHashByte, err := getUserHashBytes(logger, usernameHash, username)

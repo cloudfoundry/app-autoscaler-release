@@ -27,7 +27,8 @@ GINKGO_VERSION = v$(shell cat ../../.tool-versions | grep ginkgo  | cut --delimi
 
 
 # ogen generated OpenAPI clients and servers
-openapi-generated-clients-and-servers-dir := ./helpers/apis/scalinghistory
+openapi-generated-clients-and-servers-api-dir := ./api/apis/scalinghistory
+openapi-generated-clients-and-servers-scalingengine-dir := ./scalingengine/apis/scalinghistory
 openapi-spec-path := ../../api
 openapi-specs-list = $(wildcard ${openapi-spec-path}/*.yaml)
 
@@ -35,11 +36,12 @@ openapi-generated-clients-and-servers-files = $(wildcard ${openapi-generated-cli
 
 .PHONY: generate-openapi-generated-clients-and-servers
 generate-openapi-generated-clients-and-servers: ${openapi-generated-clients-and-servers-dir} ${openapi-generated-clients-and-servers-files}
-${openapi-generated-clients-and-servers-dir} ${openapi-generated-clients-and-servers-files} &: $(wildcard ./helpers/apis/generate.go) ${openapi-specs-list} ./go.mod ./go.sum
+${openapi-generated-clients-and-servers-dir} ${openapi-generated-clients-and-servers-files} &: $(wildcard ./scalingengine/apis/generate.go) $(wildcard ./api/apis/generate.go) ${openapi-specs-list} ./go.mod ./go.sum
 	@echo "# Generating OpenAPI clients and servers"
-	# $(wildcard ./helpers/apis/generate.go) causes the target to always being executed, no matter if file exists or not.
+	# $(wildcard ./api/apis/generate.go) causes the target to always being executed, no matter if file exists or not.
 	# so let's don't fail if file can't be found, e.g. the eventgenerator bosh package does not contain it.
-	go generate ./helpers/apis/generate.go || true
+	go generate ./api/apis/generate.go || true
+	go generate ./scalingengine/apis/generate.go || true
 
 # The presence of the subsequent directory indicates whether the fakes still need to be generated
 # or not.

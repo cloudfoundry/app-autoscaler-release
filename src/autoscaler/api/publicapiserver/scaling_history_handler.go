@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/apis/scalinghistory"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
 	"code.cloudfoundry.org/lager/v3"
 )
 
@@ -55,8 +55,8 @@ func (h *ScalingHistoryHandler) NewError(_ context.Context, _ error) *scalinghis
 }
 
 func (h *ScalingHistoryHandler) HandleBearerAuth(ctx context.Context, operationName string, t scalinghistory.BearerAuth) (context.Context, error) {
-	// This handler is a no-op, as this handler shall only be available used behind our own auth middleware.
-	// Having this handler is required by the interface `SecurityHandler` in “oas_security_gen”.
+	// this handler is a no-op, as this handler shall only be available used behind our own auth middleware.
+	// having this handler is required by the interface `securityhandler` in “oas_security_gen”.
 	return ctx, nil
 }
 

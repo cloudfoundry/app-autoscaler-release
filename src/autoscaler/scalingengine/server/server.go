@@ -6,9 +6,9 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/apis/scalinghistory"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/schedule"
 
@@ -58,7 +58,7 @@ func createHealthRouter(logger lager.Logger, conf *config.Config, policyDB db.Po
 }
 
 func createScalingEngineRouter(logger lager.Logger, scalingEngineDB db.ScalingEngineDB, scalingEngine scalingengine.ScalingEngine, synchronizer schedule.ActiveScheduleSychronizer, httpStatusCollector healthendpoint.HTTPStatusCollector, serverConfig helpers.ServerConfig) (*mux.Router, error) {
-	//ba, _ := helpers.CreateBasicAuthMiddleware(logger, serverConfig.BasicAuth)
+	ba, _ := helpers.CreateBasicAuthMiddleware(logger, serverConfig.BasicAuth)
 	httpStatusCollectMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
 
 	se := NewScalingHandler(logger, scalingEngineDB, scalingEngine)
@@ -66,7 +66,7 @@ func createScalingEngineRouter(logger lager.Logger, scalingEngineDB db.ScalingEn
 
 	r := routes.ScalingEngineRoutes()
 	r.Use(otelmux.Middleware("scalingengine"))
-	//r.Use(ba.BasicAuthenticationMiddleware)
+	r.Use(ba.BasicAuthenticationMiddleware)
 
 	r.Use(httpStatusCollectMiddleware.Collect)
 	r.Get(routes.ScaleRouteName).Handler(VarsFunc(se.Scale))

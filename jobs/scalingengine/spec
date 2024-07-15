@@ -14,10 +14,6 @@ templates:
   scalingengine_db.crt.erb: config/certs/scalingengine_db/crt
   scalingengine_db.key.erb: config/certs/scalingengine_db/key
 
-  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
-  scalingengine_server.crt.erb: config/certs/scalingengine/server.crt
-  scalingengine_server.key.erb: config/certs/scalingengine/server.key
-
   scheduler_db.crt.erb: config/certs/scheduler_db/crt
   scheduler_db.key.erb: config/certs/scheduler_db/key
   scheduler_db_ca.crt.erb: config/certs/scheduler_db/ca.crt
@@ -157,12 +153,12 @@ properties:
   autoscaler.scalingengine.server.port:
     description: "the listening port of server"
     default: 6104
-  autoscaler.scalingengine.ca_cert:
-    description: "PEM-encoded CA certificate"
-  autoscaler.scalingengine.server_cert:
-    description: "PEM-encoded server certificate"
-  autoscaler.scalingengine.server_key:
-    description: "PEM-encoded server key"
+  autoscaler.eventgenerator.server.username:
+    description: "the basic auth username for server endpoint"
+    default: ''
+  autoscaler.eventgenerator.server.password:
+    description: "the basic auth password for server endpoint"
+    default: ''
   autoscaler.scalingengine.health.username:
     description: "the username of health endpoint"
     default: ''

@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"testing"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
+	internalscalinghistory "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/apis/scalinghistory"
 
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
@@ -62,7 +62,7 @@ var (
 	schedulerStatus        int
 	schedulerErrJson       string
 
-	scalingEngineResponse    scalinghistory.History
+	scalingEngineResponse    internalscalinghistory.History
 	metricsCollectorResponse []models.AppInstanceMetric
 	eventGeneratorResponse   []models.AppMetric
 

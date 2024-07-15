@@ -12,9 +12,9 @@ import (
 	"github.com/ogen-go/ogen/ogenerrors"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/apis/scalinghistory"
 	"code.cloudfoundry.org/lager/v3"
 
 	"net/http"
@@ -45,7 +45,7 @@ func (h *ScalingHistoryHandler) NewError(_ context.Context, err error) *scalingh
 		result.SetStatusCode(http.StatusUnauthorized)
 		result.SetResponse(scalinghistory.ErrorResponse{
 			Code:    scalinghistory.NewOptString(http.StatusText(http.StatusUnauthorized)),
-			Message: scalinghistory.NewOptString("missing bearer authentication"),
+			Message: scalinghistory.NewOptString("missing basic authentication"),
 		})
 	} else {
 		result.SetStatusCode(http.StatusInternalServerError)
@@ -57,8 +57,9 @@ func (h *ScalingHistoryHandler) NewError(_ context.Context, err error) *scalingh
 	return result
 }
 
-func (h *ScalingHistoryHandler) HandleBearerAuth(ctx context.Context, operationName string, t scalinghistory.BearerAuth) (context.Context, error) {
-	// This handler is a no-op, as this handler shall only be available internally via mTLS
+func (h *ScalingHistoryHandler) HandleBasicAuth(ctx context.Context, operationName string, v scalinghistory.BasicAuth) (context.Context, error) {
+	// this handler is a no-op, as this handler shall only be available used behind our own	basicauth middleware.
+	// having this handler is required by the interface `securityhandler` in “oas_security_gen”.
 	return ctx, nil
 }
 
