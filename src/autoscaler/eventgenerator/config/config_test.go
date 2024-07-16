@@ -35,10 +35,9 @@ logging:
 http_client_timeout: 10s
 server:
   port: 9080
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/server.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/server.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
+  basic_auth:
+    username: eventgenerator
+    password: eventgenerator-password
   node_addrs: [address1, address2]
   node_index: 1
 db:
@@ -92,10 +91,9 @@ circuitBreaker:
 					Server: ServerConfig{
 						ServerConfig: helpers.ServerConfig{
 							Port: 9080,
-							TLS: models.TLSCerts{
-								KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/server.key",
-								CertFile:   "/var/vcap/jobs/autoscaler/config/certs/server.crt",
-								CACertFile: "/var/vcap/jobs/autoscaler/config/certs/ca.crt",
+							BasicAuth: models.BasicAuth{
+								Username: "eventgenerator",
+								Password: "eventgenerator-password",
 							},
 						},
 						NodeAddrs: []string{"address1", "address2"},

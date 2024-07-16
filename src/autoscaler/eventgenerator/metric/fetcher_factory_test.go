@@ -101,6 +101,7 @@ var _ = Describe("logCacheFetcherFactory", func() {
 					MetricCollector: config.MetricCollectorConfig{
 						MetricCollectorURL: "foo",
 						TLSClientCerts: models.TLSCerts{
+							// should this test cert be eventgenerator.crt?
 							CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
 							CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
 							KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
