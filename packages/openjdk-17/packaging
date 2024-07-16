@@ -1,0 +1,11 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+# compile and runtime bosh env vars
+export JAVA_HOME=/var/vcap/packages/openjdk-17
+export PATH=$JAVA_HOME/bin:$PATH
+
+cd ${BOSH_INSTALL_TARGET}
+
+# extract jdk from src/binaries/jdk
+tar zxvf ${BOSH_COMPILE_TARGET}/binaries/jdk/*.tar.gz --strip 1
