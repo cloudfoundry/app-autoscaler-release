@@ -6,10 +6,6 @@ templates:
   operator.yml.erb: config/operator.yml
   liquibase.properties: bin/liquibase.properties
 
-  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
-  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
-  scalingengine_client.key.erb: config/certs/scalingengine/client.key
-
   scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
   scheduler_client.crt.erb: config/certs/scheduler/client.crt
   scheduler_client.key.erb: config/certs/scheduler/client.key
@@ -191,14 +187,10 @@ properties:
     description: "Port where the scaling engine will listen"
     default: 6104
 
-  autoscaler.operator.scaling_engine.ca_cert:
-    description: "PEM-encoded CA certificate"
-
-  autoscaler.operator.scaling_engine.client_cert:
-    description: "PEM-encoded client certificate"
-
-  autoscaler.operator.scaling_engine.client_key:
-    description: "PEM-encoded client key"
+  autoscaler.operator.scaling_engine.username:
+    description: "the basic auth username for scalingengine service"
+  autoscaler.operator.scaling_engine.password:
+    description: "the basic auth password for scalingengine service"
 
   autoscaler.operator.scaling_engine.sync_interval:
     description: "the time interval to synchronize the scaling engine active schedules"

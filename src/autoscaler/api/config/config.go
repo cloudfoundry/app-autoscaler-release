@@ -49,8 +49,8 @@ type SchedulerConfig struct {
 	TLSClientCerts models.TLSCerts `yaml:"tls"`
 }
 type ScalingEngineConfig struct {
-	ScalingEngineUrl string          `yaml:"scaling_engine_url"`
-	TLSClientCerts   models.TLSCerts `yaml:"tls"`
+	ScalingEngineUrl string           `yaml:"scaling_engine_url"`
+	BasicAuth        models.BasicAuth `yaml:"basic_auth"`
 }
 
 type EventGeneratorConfig struct {

@@ -174,10 +174,9 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	}
 	cfg.ScalingEngine = config.ScalingEngineConfig{
 		ScalingEngineUrl: "http://localhost:8085",
-		TLSClientCerts: models.TLSCerts{
-			KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
-			CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
-			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+		BasicAuth: models.BasicAuth{
+			Username: "scalingengine",
+			Password: "scalingengine-password",
 		},
 	}
 	cfg.MetricsForwarder = config.MetricsForwarderConfig{

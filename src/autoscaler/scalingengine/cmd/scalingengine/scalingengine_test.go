@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"io"
+	"strconv"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
@@ -17,19 +18,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 )
 
 var _ = Describe("Main", func() {
-
 	var (
 		runner    *ScalingEngineRunner
-		serverURL string
+		serverURL *url.URL
+		err       error
 	)
 
 	BeforeEach(func() {
 		runner = NewScalingEngineRunner()
-		serverURL = fmt.Sprintf("https://127.0.0.1:%d", conf.Server.Port)
+		serverURL, err = url.Parse("http://127.0.0.1:" + strconv.Itoa(conf.Server.Port))
+		serverURL.User = url.UserPassword(conf.Server.BasicAuth.Username, conf.Server.BasicAuth.Password)
+		Expect(err).ToNot(HaveOccurred())
 	})
 
 	JustBeforeEach(func() {
@@ -41,7 +45,6 @@ var _ = Describe("Main", func() {
 	})
 
 	Describe("with a correct config", func() {
-
 		Context("when starting 1 scaling engine instance", func() {
 			It("scaling engine should start", func() {
 				Eventually(runner.Session.Buffer, 2*time.Second).Should(gbytes.Say(runner.startCheck))
@@ -153,12 +156,13 @@ var _ = Describe("Main", func() {
 		})
 
 		Context("when a request to trigger scaling comes", func() {
+
 			It("returns with a 200", func() {
 				body, err := json.Marshal(models.Trigger{Adjustment: "+1"})
 				Expect(err).NotTo(HaveOccurred())
 
-				rsp, err := httpClient.Post(fmt.Sprintf("%s/v1/apps/%s/scale", serverURL, appId),
-					"application/json", bytes.NewReader(body))
+				serverURL.Path = fmt.Sprintf("/v1/apps/%s/scale", appId)
+				rsp, err := httpClient.Post(serverURL.String(), "application/json", bytes.NewReader(body))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
@@ -167,9 +171,9 @@ var _ = Describe("Main", func() {
 
 		Context("when a request to retrieve scaling history comes", func() {
 			It("returns with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/apps/%s/scaling_histories", serverURL, appId), nil)
+				serverURL.Path = fmt.Sprintf("/v1/apps/%s/scaling_histories", appId)
+				req, err := http.NewRequest(http.MethodGet, serverURL.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
-				req.Header.Set("Authorization", "Bearer none")
 				rsp, err := httpClient.Do(req)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
@@ -179,10 +183,11 @@ var _ = Describe("Main", func() {
 
 		It("handles the start and end of a schedule", func() {
 			By("start of a schedule")
-			url := fmt.Sprintf("%s/v1/apps/%s/active_schedules/111111", serverURL, appId)
+			serverURL.Path = fmt.Sprintf("/v1/apps/%s/active_schedules/111111", appId)
+
 			bodyReader := bytes.NewReader([]byte(`{"instance_min_count":1, "instance_max_count":5, "initial_min_instance_count":3}`))
 
-			req, err := http.NewRequest(http.MethodPut, url, bodyReader)
+			req, err := http.NewRequest(http.MethodPut, serverURL.String(), bodyReader)
 			Expect(err).NotTo(HaveOccurred())
 
 			rsp, err := httpClient.Do(req)
@@ -191,7 +196,7 @@ var _ = Describe("Main", func() {
 			rsp.Body.Close()
 
 			By("end of a schedule")
-			req, err = http.NewRequest(http.MethodDelete, url, nil)
+			req, err = http.NewRequest(http.MethodDelete, serverURL.String(), nil)
 			Expect(err).NotTo(HaveOccurred())
 
 			rsp, err = httpClient.Do(req)
@@ -215,7 +220,7 @@ var _ = Describe("Main", func() {
 
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := httpClient.Get(serverURL)
+				rsp, err := httpClient.Get(serverURL.String())
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)

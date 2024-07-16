@@ -66,10 +66,9 @@ evaluator:
   trigger_array_channel_size: 100
 scalingEngine:
   scaling_engine_url: http://localhost:8082
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/se.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/se.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
+  basic_auth:
+    username: scalingengine
+    password: scalingengine-password
 metricCollector:
   metric_collector_url: log-cache:1234
   tls:
@@ -131,10 +130,9 @@ circuitBreaker:
 						TriggerArrayChannelSize:   100},
 					ScalingEngine: ScalingEngineConfig{
 						ScalingEngineURL: "http://localhost:8082",
-						TLSClientCerts: models.TLSCerts{
-							KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/se.key",
-							CertFile:   "/var/vcap/jobs/autoscaler/config/certs/se.crt",
-							CACertFile: "/var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt",
+						BasicAuth: models.BasicAuth{
+							Username: "scalingengine",
+							Password: "scalingengine-password",
 						},
 					},
 					MetricCollector: MetricCollectorConfig{

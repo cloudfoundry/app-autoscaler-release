@@ -59,8 +59,8 @@ type EvaluatorConfig struct {
 }
 
 type ScalingEngineConfig struct {
-	ScalingEngineURL string          `yaml:"scaling_engine_url"`
-	TLSClientCerts   models.TLSCerts `yaml:"tls"`
+	ScalingEngineURL string           `yaml:"scaling_engine_url"`
+	BasicAuth        models.BasicAuth `yaml:"basic_auth"`
 }
 
 type MetricCollectorConfig struct {

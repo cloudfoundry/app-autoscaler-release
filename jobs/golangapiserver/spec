@@ -9,9 +9,6 @@ templates:
   brokerserver_ca.crt.erb: config/certs/brokerserver/ca.crt
   brokerserver.crt.erb: config/certs/brokerserver/server.crt
   brokerserver.key.erb: config/certs/brokerserver/server.key
-  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
-  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
-  scalingengine_client.key.erb: config/certs/scalingengine/client.key
   scheduler_ca.crt.erb: config/certs/scheduler/ca.crt
   scheduler_client.crt.erb: config/certs/scheduler/client.crt
   scheduler_client.key.erb: config/certs/scheduler/client.key

@@ -27,10 +27,9 @@ scaling_engine_db:
 scaling_engine:
   scaling_engine_url: http://localhost:8082
   sync_interval: 60s
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/se.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/se.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
+  basic_auth:
+    username: scalingengine
+    password: scalingengine-password
 scheduler:
   scheduler_url: http://localhost:8083
   sync_interval: 60s

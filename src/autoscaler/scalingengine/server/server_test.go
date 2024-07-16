@@ -177,7 +177,14 @@ var _ = Describe("Server", func() {
 				bodyReader = nil
 				method = http.MethodDelete
 			})
+
 			Context("when requesting correctly", func() {
+
+				BeforeEach(func() {
+					username = conf.Server.BasicAuth.Username
+					password = conf.Server.BasicAuth.Password
+				})
+
 				It("should return 200", func() {
 					Expect(err).ToNot(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
@@ -197,6 +204,9 @@ var _ = Describe("Server", func() {
 
 			Context("when requesting correctly", func() {
 				BeforeEach(func() {
+					username = conf.Server.BasicAuth.Username
+					password = conf.Server.BasicAuth.Password
+
 					activeSchedule := &models.ActiveSchedule{
 						ScheduleId:         "a-schedule-id",
 						InstanceMin:        1,

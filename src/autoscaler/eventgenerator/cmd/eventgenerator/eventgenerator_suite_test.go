@@ -230,8 +230,7 @@ func initHttpEndPoints() {
 	Expect(err).ToNot(HaveOccurred())
 
 	mockScalingEngine = ghttp.NewUnstartedServer()
-	mockScalingEngine.HTTPTestServer.TLS = testhelpers.ServerTlsConfig("scalingengine")
-	mockScalingEngine.HTTPTestServer.StartTLS()
+	mockScalingEngine.HTTPTestServer.Start()
 
 	mockScalingEngine.RouteToHandler("POST", regPath, ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult))
 }
@@ -282,11 +281,6 @@ func initConfig() {
 		},
 		ScalingEngine: config.ScalingEngineConfig{
 			ScalingEngineURL: mockScalingEngine.URL(),
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-			},
 		},
 		MetricCollector: config.MetricCollectorConfig{
 			MetricCollectorURL: mockLogCache.URL(),

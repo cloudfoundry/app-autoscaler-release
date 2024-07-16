@@ -87,10 +87,9 @@ scaling_engine_db:
 scaling_engine:
   scaling_engine_url: https://<%= p("autoscaler.operator.scaling_engine.host") %>:<%= p("autoscaler.operator.scaling_engine.port") %>
   sync_interval: <%= p("autoscaler.operator.scaling_engine.sync_interval") %>
-  tls:
-    key_file: /var/vcap/jobs/operator/config/certs/scalingengine/client.key
-    cert_file: /var/vcap/jobs/operator/config/certs/scalingengine/client.crt
-    ca_file: /var/vcap/jobs/operator/config/certs/scalingengine/ca.crt
+  basic_auth:
+    username: "<%=p('autoscaler.operator.scaling_engine.username') %>"
+    password: "<%=p('autoscaler.operator.scaling_engine.password') %>"
 
 scheduler:
   scheduler_url: https://<%= p("autoscaler.operator.scheduler.host") %>:<%= p("autoscaler.operator.scheduler.port") %>

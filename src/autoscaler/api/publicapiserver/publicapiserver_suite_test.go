@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"testing"
@@ -90,16 +89,6 @@ var _ = BeforeSuite(func() {
 	schedulerServer = ghttp.NewServer()
 
 	conf = CreateConfig(apiPort)
-
-	// verify ScalingEngine certs
-	_, err := os.ReadFile(conf.ScalingEngine.TLSClientCerts.KeyFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = os.ReadFile(conf.ScalingEngine.TLSClientCerts.CertFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = os.ReadFile(conf.ScalingEngine.TLSClientCerts.CACertFile)
-	Expect(err).NotTo(HaveOccurred())
 
 	fakePolicyDB = &fakes.FakePolicyDB{}
 	fakeBindingDB = &fakes.FakeBindingDB{}
@@ -190,10 +179,9 @@ func CreateConfig(apiServerPort int) *config.Config {
 		},
 		ScalingEngine: config.ScalingEngineConfig{
 			ScalingEngineUrl: scalingEngineServer.URL(),
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
-				CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: "scalingengine",
+				Password: "scalingengine-password",
 			},
 		},
 		MetricsForwarder: config.MetricsForwarderConfig{

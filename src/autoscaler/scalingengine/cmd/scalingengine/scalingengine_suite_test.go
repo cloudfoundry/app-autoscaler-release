@@ -73,9 +73,6 @@ var _ = SynchronizedBeforeSuite(
 		verifyCertExistence(testCertDir)
 
 		conf.Server.Port = port
-		conf.Server.TLS.KeyFile = filepath.Join(testCertDir, "scalingengine.key")
-		conf.Server.TLS.CertFile = filepath.Join(testCertDir, "scalingengine.crt")
-		conf.Server.TLS.CACertFile = filepath.Join(testCertDir, "autoscaler-ca.crt")
 		conf.Logging.Level = "debug"
 
 		dbUrl := GetDbUrl()

@@ -171,15 +171,15 @@ func loadConfig(path string) (*config.Config, error) {
 func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan chan []*models.Trigger, queryMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) ([]*generator.Evaluator, error) {
 	count := conf.Evaluator.EvaluatorCount
 
-	aClient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
+	seClient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.BasicAuth, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
 	if err != nil {
-		logger.Error("failed to create http client for ScalingEngine", err, lager.Data{"scalingengineTLS": conf.ScalingEngine.TLSClientCerts})
+		logger.Error("failed to create http client for ScalingEngine", err, lager.Data{"scalingengine": conf.ScalingEngine.BasicAuth})
 		os.Exit(1)
 	}
 
 	evaluators := make([]*generator.Evaluator, count)
 	for i := 0; i < count; i++ {
-		evaluators[i] = generator.NewEvaluator(logger, aClient, conf.ScalingEngine.ScalingEngineURL, triggersChan,
+		evaluators[i] = generator.NewEvaluator(logger, seClient, conf.ScalingEngine.ScalingEngineURL, triggersChan,
 			conf.DefaultBreachDurationSecs, queryMetrics, getBreaker, setCoolDownExpired)
 	}
 

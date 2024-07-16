@@ -39,10 +39,9 @@ scheduler:
     ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
 scaling_engine:
   scaling_engine_url: https://localhost:8083
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/se.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/se.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
+  basic_auth:
+    username: scalingengine
+    password: scalingengine-password
 event_generator:
   event_generator_url: https://localhost:8083
   basic_auth:

@@ -42,9 +42,9 @@ var defaultDBLockConfig = DBLockConfig{
 }
 
 type ScalingEngineConfig struct {
-	URL            string          `yaml:"scaling_engine_url"`
-	SyncInterval   time.Duration   `yaml:"sync_interval"`
-	TLSClientCerts models.TLSCerts `yaml:"tls"`
+	URL          string           `yaml:"scaling_engine_url"`
+	BasicAuth    models.BasicAuth `yaml:"basic_auth"`
+	SyncInterval time.Duration    `yaml:"sync_interval"`
 }
 
 type SchedulerConfig struct {
