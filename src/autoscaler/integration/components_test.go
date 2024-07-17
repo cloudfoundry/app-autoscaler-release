@@ -327,10 +327,9 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 		Server: egConfig.ServerConfig{
 			ServerConfig: helpers.ServerConfig{
 				Port: port,
-				TLS: models.TLSCerts{
-					KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-					CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-					CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+				BasicAuth: models.BasicAuth{
+					Username: "eventgenerator",
+					Password: "eventgenerator-password",
 				},
 			},
 			NodeAddrs: []string{"localhost"},
