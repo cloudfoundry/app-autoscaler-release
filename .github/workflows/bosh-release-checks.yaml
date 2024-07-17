@@ -31,6 +31,7 @@ jobs:
             [ $(git status --porcelain | wc -l) -eq 0 ] || \
             { \
               git status;\
+              git status;\
               echo "::error::Specs are out of date, run \"make package-specs\" to update";\
               exit 1;\
             }
