@@ -252,7 +252,7 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: bosh-release
-bosh-release: go-mod-tidy go-mod-vendor scheduler db build/autoscaler-test.tgz
+bosh-release: go-mod-tidy go-mod-vendor scheduler download-java-bosh-package db build/autoscaler-test.tgz
 build/autoscaler-test.tgz:
 	@echo " - building bosh release into build/autoscaler-test.tgz"
 	@mkdir -p build
@@ -345,7 +345,7 @@ deploy-cleanup:
 PHONY: download-java-bosh-package
 download-java-bosh-package:
 	echo " - Download JDK dependency autoscaler"
-	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/tasks/update-sdk/update-java.sh
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/tasks/update-sdk/download-java.sh
 
 bosh-release-path := ./target/bosh-releases
 prometheus-bosh-release-path := ${bosh-release-path}/prometheus
