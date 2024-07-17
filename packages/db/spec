@@ -2,7 +2,7 @@
 name: db
 
 dependencies:
-- openjdk-21
+- openjdk-17
 
 files:
 - db/**/*

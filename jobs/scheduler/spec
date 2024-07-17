@@ -31,7 +31,7 @@ templates:
 packages:
   - scheduler
   - db
-  - openjdk-21
+  - openjdk-17
   - common
   - changeloglockcleaner
 
