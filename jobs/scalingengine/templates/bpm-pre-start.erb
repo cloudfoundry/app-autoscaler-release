@@ -12,7 +12,7 @@ source /var/vcap/packages/common/dns-helper.sh
 source /var/vcap/packages/common/retry-helper.sh
 source /var/vcap/packages/common/cert-helper.sh
 
-export PATH=/var/vcap/packages/openjdk-17/bin:$PATH
+export PATH=/var/vcap/packages/openjdk-21/bin:$PATH
 
 HOST='<%= p("autoscaler.scalingengine_db.address") %>'
 DBNAME='<%= database['name'] %>'

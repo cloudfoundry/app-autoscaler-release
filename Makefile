@@ -332,7 +332,7 @@ markdownlint-cli:
 	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac download-jdk-bosh-package db scheduler deploy-autoscaler-bosh deploy-register-cf
+deploy-autoscaler: go-mod-vendor uaac download-java-bosh-package db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh
@@ -342,10 +342,10 @@ deploy-autoscaler-bosh:
 deploy-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
-PHONY: download-jdk-bosh-package
-download-jdk-bosh-package:
+PHONY: download-java-bosh-package
+download-java-bosh-package:
 	echo " - Download JDK dependency autoscaler"
-	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/tasks/update-sdk/java/get-java.sh
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/tasks/update-sdk/update-java.sh
 
 bosh-release-path := ./target/bosh-releases
 prometheus-bosh-release-path := ${bosh-release-path}/prometheus
