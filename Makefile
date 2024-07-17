@@ -85,8 +85,7 @@ clean-bosh-release:
 	@rm -rf dev_releases
 	@rm -rf .dev_builds
 clean-acceptance:
-	@echo " - cleaning acceptance"
-	@rm src/acceptance/acceptance_config.json &> /dev/null || true
+	@echo ' - cleaning acceptance (⚠️ This keeps the file “src/acceptance/acceptance_config.json” if present!)'
 	@rm src/acceptance/ginkgo* &> /dev/null || true
 	@rm -rf src/acceptance/results &> /dev/null || true
 
@@ -381,10 +380,10 @@ acceptance-tests: build-test-app acceptance-tests-config
 	@make --directory='./src/acceptance' run-acceptance-tests
 .PHONY: acceptance-cleanup
 acceptance-cleanup:
-	@make --directory='./src/acceptance' acceptance-cleanup
+	@make --directory='./src/acceptance' acceptance-tests-cleanup
 .PHONY: acceptance-tests-config
 acceptance-tests-config:
-	@make --directory='./src/acceptance' acceptance-tests-config
+	make --directory='./src/acceptance' acceptance-tests-config
 
 .PHONY: cleanup-concourse
 cleanup-concourse:

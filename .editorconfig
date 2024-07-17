@@ -23,6 +23,6 @@ eclint_indent_style = unset
 indent_size = 4
 indent_style = tab
 
-[*.sh]
+[{*.bash,*.sh}]
 indent_size = 2
 indent_style = tab
