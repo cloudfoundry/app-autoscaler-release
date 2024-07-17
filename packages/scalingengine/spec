@@ -1,9 +1,7 @@
 ---
 name: scalingengine
-
 dependencies:
 - golang-1-linux
-
 files:
 - autoscaler/*
 - autoscaler/vendor/*
@@ -20,22 +18,22 @@ files:
 - autoscaler/routes/* # gosub
 - autoscaler/scalingengine/* # gosub
 - autoscaler/scalingengine/cmd/scalingengine/* # gosub
-- autoscaler/scalingengine/config/* # gosub
-- autoscaler/scalingengine/schedule/* # gosub
-- autoscaler/scalingengine/server/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/lager/v3/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/lager/v3/internal/truncate/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/tlsconfig/* # gosub
-- autoscaler/vendor/filippo.io/edwards25519/* # gosub
-- autoscaler/vendor/filippo.io/edwards25519/field/* # gosub
-- autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
-- autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
-- autoscaler/vendor/github.com/dlclark/regexp2/* # gosub
-- autoscaler/vendor/github.com/dlclark/regexp2/syntax/* # gosub
-- autoscaler/vendor/github.com/fatih/color/* # gosub
-- autoscaler/vendor/github.com/felixge/httpsnoop/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/internal/baggage/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/internal/global/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/metric/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/metric/embedded/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/propagation/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/instrumentation/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/internal/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/internal/env/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/resource/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/trace/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/internal/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.10.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.19.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.20.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.21.0/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.25.0/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/trace/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/trace/embedded/* # gosub

@@ -1,9 +1,7 @@
 ---
 name: golangapiserver
-
 dependencies:
 - golang-1-linux
-
 files:
 - autoscaler/*
 - autoscaler/vendor/*
@@ -46,26 +44,26 @@ files:
 - autoscaler/vendor/github.com/felixge/httpsnoop/* # gosub
 - autoscaler/vendor/github.com/ghodss/yaml/* # gosub
 - autoscaler/vendor/github.com/go-chi/chi/v5/* # gosub
-- autoscaler/vendor/github.com/go-faster/errors/* # gosub
-- autoscaler/vendor/github.com/go-faster/jx/* # gosub
-- autoscaler/vendor/github.com/go-faster/jx/internal/byteseq/* # gosub
-- autoscaler/vendor/github.com/go-faster/yaml/* # gosub
-- autoscaler/vendor/github.com/go-logr/logr/* # gosub
-- autoscaler/vendor/github.com/go-logr/logr/funcr/* # gosub
-- autoscaler/vendor/github.com/go-logr/stdr/* # gosub
-- autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
-- autoscaler/vendor/github.com/google/uuid/* # gosub
-- autoscaler/vendor/github.com/gorilla/mux/* # gosub
-- autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
-- autoscaler/vendor/github.com/hashicorp/go-retryablehttp/* # gosub
-- autoscaler/vendor/github.com/jackc/pgpassfile/* # gosub
-- autoscaler/vendor/github.com/jackc/pgservicefile/* # gosub
-- autoscaler/vendor/github.com/jackc/pgx/v5/* # gosub
-- autoscaler/vendor/github.com/jackc/pgx/v5/internal/iobufpool/* # gosub
-- autoscaler/vendor/github.com/jackc/pgx/v5/internal/pgio/* # gosub
-- autoscaler/vendor/github.com/jackc/pgx/v5/internal/sanitize/* # gosub
-- autoscaler/vendor/github.com/jackc/pgx/v5/internal/stmtcache/* # gosub
-- autoscaler/vendor/github.com/jackc/pgx/v5/pgconn/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/instrumentation/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/internal/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/internal/env/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/resource/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/sdk/trace/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/internal/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.10.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.19.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.20.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.21.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/semconv/v1.25.0/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/trace/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/trace/embedded/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/trace/noop/* # gosub
+- autoscaler/vendor/go.uber.org/multierr/* # gosub
+- autoscaler/vendor/go.uber.org/zap/* # gosub
+- autoscaler/vendor/go.uber.org/zap/buffer/* # gosub
+- autoscaler/vendor/go.uber.org/zap/internal/* # gosub
+- autoscaler/vendor/go.uber.org/zap/internal/bufferpool/* # gosub
 - autoscaler/vendor/go.uber.org/zap/internal/color/* # gosub
 - autoscaler/vendor/go.uber.org/zap/internal/exit/* # gosub
 - autoscaler/vendor/go.uber.org/zap/internal/pool/* # gosub
