@@ -1,7 +1,9 @@
 ---
 name: metricsforwarder
+
 dependencies:
 - golang-1-linux
+
 files:
 - autoscaler/*
 - autoscaler/vendor/*
@@ -47,7 +49,6 @@ files:
 - autoscaler/vendor/github.com/go-logr/logr/funcr/* # gosub
 - autoscaler/vendor/github.com/go-logr/stdr/* # gosub
 - autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
-- autoscaler/vendor/github.com/google/uuid/* # gosub
 - autoscaler/vendor/github.com/gorilla/mux/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-retryablehttp/* # gosub
@@ -74,11 +75,13 @@ files:
 - autoscaler/vendor/github.com/klauspost/compress/fse/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/gzip/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/huff0/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/internal/cpuinfo/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/internal/snapref/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zlib/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zstd/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
+- autoscaler/vendor/github.com/nu7hatch/gouuid/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
 - autoscaler/vendor/github.com/patrickmn/go-cache/* # gosub

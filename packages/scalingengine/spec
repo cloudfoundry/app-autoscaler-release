@@ -1,7 +1,9 @@
 ---
 name: scalingengine
+
 dependencies:
 - golang-1-linux
+
 files:
 - autoscaler/*
 - autoscaler/vendor/*
@@ -68,6 +70,7 @@ files:
 - autoscaler/vendor/github.com/mattn/go-colorable/* # gosub
 - autoscaler/vendor/github.com/mattn/go-isatty/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
+- autoscaler/vendor/github.com/nu7hatch/gouuid/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/conv/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/http/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/internal/httpcookie/* # gosub
@@ -98,6 +101,11 @@ files:
 - autoscaler/vendor/github.com/prometheus/procfs/internal/fs/* # gosub
 - autoscaler/vendor/github.com/prometheus/procfs/internal/util/* # gosub
 - autoscaler/vendor/github.com/segmentio/asm/base64/* # gosub
+- autoscaler/vendor/github.com/segmentio/asm/cpu/* # gosub
+- autoscaler/vendor/github.com/segmentio/asm/cpu/arm/* # gosub
+- autoscaler/vendor/github.com/segmentio/asm/cpu/arm64/* # gosub
+- autoscaler/vendor/github.com/segmentio/asm/cpu/cpuid/* # gosub
+- autoscaler/vendor/github.com/segmentio/asm/cpu/x86/* # gosub
 - autoscaler/vendor/github.com/segmentio/asm/internal/unsafebytes/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/* # gosub
 - autoscaler/vendor/github.com/tedsuo/ifrit/grouper/* # gosub
@@ -153,6 +161,7 @@ files:
 - autoscaler/vendor/golang.org/x/net/idna/* # gosub
 - autoscaler/vendor/golang.org/x/sync/errgroup/* # gosub
 - autoscaler/vendor/golang.org/x/sync/semaphore/* # gosub
+- autoscaler/vendor/golang.org/x/sys/cpu/* # gosub
 - autoscaler/vendor/golang.org/x/sys/unix/* # gosub
 - autoscaler/vendor/golang.org/x/sys/windows/* # gosub
 - autoscaler/vendor/golang.org/x/sys/windows/registry/* # gosub
