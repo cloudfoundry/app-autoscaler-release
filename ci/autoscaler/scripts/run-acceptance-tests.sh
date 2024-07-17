@@ -34,21 +34,20 @@ fi
 
 suites_to_run=""
 for suite in $suites; do
-  log "checking suite $suite"
-  if [[ -d "$suite" ]]; then
-     log "Adding suite '$suite' to list"
-     suites_to_run="$suites_to_run $suite"
+  log "checking suite ${suite}"
+  if [[ -d "${suite}" ]]
+  then
+    log "Adding suite '${suite}' to list"
+    suites_to_run="${suites_to_run} ${suite}"
   fi
 done
 
-step "running $suites_to_run"
+step "running ${suites_to_run}"
 
 #run suites
 if [ "${suites_to_run}" != "" ]; then
   # shellcheck disable=SC2086
   SKIP_TEARDOWN="${skip_teardown}" CONFIG="${PWD}/acceptance_config.json" DEBUG='true' ./bin/test -race -nodes="${nodes}" -trace $ginkgo_opts ${suites_to_run}
 else
-  log "Nothing to run!"
+  log 'Nothing to run!'
 fi
-
-popd >/dev/null
