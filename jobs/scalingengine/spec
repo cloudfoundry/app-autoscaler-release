@@ -153,6 +153,12 @@ properties:
   autoscaler.scalingengine.server.port:
     description: "the listening port of server"
     default: 6104
+  autoscaler.scalingengine.server.username:
+    description: "the basic auth username for server endpoint"
+    default: ''
+  autoscaler.scalingengine.server.password:
+    description: "the basic auth password for server endpoint"
+    default: ''
   autoscaler.eventgenerator.server.username:
     description: "the basic auth username for server endpoint"
     default: ''
