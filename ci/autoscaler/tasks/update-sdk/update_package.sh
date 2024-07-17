@@ -7,5 +7,5 @@ source "${script_dir}/vars.source.sh"
 create_pr=${CREATE_PR:-"false"}
 
 # shellcheck disable=SC2154
-"${script_dir}"/update_"${type}"_package.sh
+"${script_dir}"/update_"${type}"_package.sh "$1"
 [[ ${create_pr} == "true" ]] && "${script_dir}"/create_pr.sh

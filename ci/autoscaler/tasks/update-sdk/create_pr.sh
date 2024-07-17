@@ -54,13 +54,19 @@ popd > /dev/null
 dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
 update_branch="${type}-version-bump-${dashed_version}_${package_sha}"
 pr_title="Update ${type} version to ${package_version}"
-pr_description="Automatic version bump of ${type} to \`${package_version}\`<br/>Package commit sha: [${package_sha}](https://github.com/bosh-packages/${type}-release/commit/${package_sha})"
+package_download_link="https://github.com/bosh-packages/${type}-release/commit/${package_sha}"
+if [ "$type" == "java" ]; then
+  package_download_link="https://github.com/SAP/SapMachine/releases/tag/sapmachine-${package_version}"
+fi
+pr_description="Automatic version bump of ${type} to \`${package_version}\`<br/>Package commit sha: [${package_sha}]($package_download_link)"
+
 add_private_key
 configure_git_credentials
 login_gh
 
 pushd "${autoscaler_dir}" > /dev/null
   git checkout -b "${update_branch}"
+  git add packages/openjdk*
   git commit -a -m "${pr_title}"
   git push --set-upstream origin "${update_branch}"
   gh pr create --base main --head "${update_branch}" --title "${pr_title}" --body "${pr_description}" --label 'dependencies'
