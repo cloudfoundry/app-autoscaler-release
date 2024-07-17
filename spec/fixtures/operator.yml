@@ -1,4 +1,8 @@
 autoscaler:
+  operator:
+    scaling_engine:
+      username: operator
+      password: operator-password
   policy_db:
     address: 10.11.137.101
     databases:
