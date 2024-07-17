@@ -125,12 +125,7 @@ func (b *Broker) Provision(ctx context.Context, instanceID string, details domai
 	}
 
 	if policy != nil {
-		policyGuid := uuid.NewString()
-		if err != nil {
-			b.logger.Error("get-default-policy-create-guid", err, lager.Data{"instanceID": instanceID})
-			return result, apiresponses.NewFailureResponse(errors.New("error generating policy guid"), http.StatusInternalServerError, "get-default-policy-create-guid")
-		}
-		policyGuidStr = policyGuid
+		policyGuidStr = uuid.NewString()
 		policyBytes, err := json.Marshal(policy)
 		if err != nil {
 			b.logger.Error("marshal policy failed", err, lager.Data{"instanceID": instanceID})
