@@ -1,5 +1,5 @@
 ---
-name: openjdk-17
+name: openjdk-21
 
 dependencies: []
 
