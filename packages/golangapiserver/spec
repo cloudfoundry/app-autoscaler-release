@@ -11,6 +11,8 @@ files:
 - autoscaler/api/policyvalidator/*
 - autoscaler/api/schemas/*
 - autoscaler/api/* # gosub
+- autoscaler/api/apis/* # gosub
+- autoscaler/api/apis/scalinghistory/* # gosub
 - autoscaler/api/broker/* # gosub
 - autoscaler/api/brokerserver/* # gosub
 - autoscaler/api/cmd/api/* # gosub
@@ -25,7 +27,6 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
-- autoscaler/helpers/apis/scalinghistory/* # gosub
 - autoscaler/helpers/handlers/* # gosub
 - autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/models/* # gosub
