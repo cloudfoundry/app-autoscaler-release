@@ -100,10 +100,9 @@ evaluator:
 
 scalingEngine:
   scaling_engine_url: https://<%= p("autoscaler.eventgenerator.scaling_engine.host") %>:<%= p("autoscaler.eventgenerator.scaling_engine.port") %>
-  tls:
-    key_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/client.key
-    cert_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/client.crt
-    ca_file: /var/vcap/jobs/eventgenerator/config/certs/scalingengine/ca.crt
+  basic_auth:
+    username: "<%=p('autoscaler.eventgenerator.scaling_engine.username') %>"
+    password: "<%=p('autoscaler.eventgenerator.scaling_engine.password') %>"
 
 metricCollector:
   metric_collector_url: <%= metric_collector_url %>

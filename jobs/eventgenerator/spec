@@ -11,9 +11,6 @@ templates:
   metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
   metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
   metricscollector_client.key.erb: config/certs/metricscollector/client.key
-  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
-  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
-  scalingengine_client.key.erb: config/certs/scalingengine/client.key
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
@@ -167,14 +164,10 @@ properties:
     description: "Port where the scaling engine will listen"
     default: 6104
 
-  autoscaler.eventgenerator.scaling_engine.ca_cert:
-    description: "PEM-encoded CA certificate"
-
-  autoscaler.eventgenerator.scaling_engine.client_cert:
-    description: "PEM-encoded client certificate"
-
-  autoscaler.eventgenerator.scaling_engine.client_key:
-    description: "PEM-encoded client key"
+  autoscaler.eventgenerator.scaling_engine.username:
+    description: "the basic auth username for scalingengine service"
+  autoscaler.eventgenerator.scaling_engine.password:
+    description: "the basic auth password for scalingengine service"
 
   autoscaler.eventgenerator.metricscollector.host:
     description: "Host where the metrics collector is running"

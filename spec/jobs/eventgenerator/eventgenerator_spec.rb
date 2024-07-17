@@ -24,19 +24,16 @@ describe "eventgenerator" do
     let(:rendered_template) { YAML.safe_load(template.render(properties, consumes: links)) }
 
     it "does not set username nor password if not configured" do
-      properties["autoscaler"]["eventgenerator"] = {
-        "health" => {}
-      }
+      properties["autoscaler"]["eventgenerator"]["health"] = {}
+
       expect(rendered_template["health"]["password"]).to be_nil
       expect(rendered_template["health"]["username"]).to be_nil
     end
 
     it "check eventgenerator username and password" do
-      properties["autoscaler"]["eventgenerator"] = {
-        "health" => {
+      properties["autoscaler"]["eventgenerator"]["health"] = {
           "username" => "test-user",
           "password" => "test-user-password"
-        }
       }
 
       expect(rendered_template["health"]["basic_auth"])
@@ -48,15 +45,13 @@ describe "eventgenerator" do
 
     describe "when using log-cache via https/uaa" do
       before do
-        properties["autoscaler"]["eventgenerator"] = {
-          "metricscollector" => {
-            "host" => "logcache.cf.test.com",
-            "port" => "",
-            "uaa" => {
-              "client_id" => "logs_admin_client_id",
-              "client_secret" => "logs_admin_client_secret",
-              "url" => "uaa.cf.test.com"
-            }
+        properties["autoscaler"]["eventgenerator"]["metricscollector"] = {
+          "host" => "logcache.cf.test.com",
+          "port" => "",
+          "uaa" => {
+            "client_id" => "logs_admin_client_id",
+            "client_secret" => "logs_admin_client_secret",
+            "url" => "uaa.cf.test.com"
           }
         }
       end

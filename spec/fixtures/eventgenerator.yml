@@ -1,4 +1,8 @@
 autoscaler:
+  eventgenerator:
+    scaling_engine:
+      username: scalingengine
+      password: scalingengine-password
   policy_db:
     address: 10.11.137.101
     databases:
