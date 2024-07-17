@@ -246,9 +246,8 @@ instance_groups:
             client_key: ((!scheduler_client_cert.private_key))
             host: *scheduler_domain
           scaling_engine:
-            ca_cert: ((!scalingengine_client_cert.ca))
-            client_cert: ((!scalingengine_client_cert.certificate))
-            client_key: ((!scalingengine_client_cert.private_key))
+            username: scalingengine
+            password: ((autoscaler_scalingengine_server_password))
             host: *scalingengine_domain
           event_generator:
             username: eventgenerator
@@ -336,9 +335,8 @@ instance_groups:
           server_cert: ((!scheduler_server_cert.certificate))
           server_key: ((!scheduler_server_cert.private_key))
           scaling_engine:
-            ca_cert: ((!scalingengine_client_cert.ca))
-            client_cert: ((!scalingengine_client_cert.certificate))
-            client_key: ((!scalingengine_client_cert.private_key))
+            username: scalingengine
+            password: ((autoscaler_scalingengine_server_password))
             host: *scalingengine_domain
   - name: route_registrar
     release: routing
@@ -388,11 +386,11 @@ instance_groups:
             username: operator
             password: ((autoscaler_operator_health_password))
           scaling_engine:
-            ca_cert: ((!scalingengine_client_cert.ca))
-            client_cert: ((!scalingengine_client_cert.certificate))
-            client_key: ((!scalingengine_client_cert.private_key))
+            username: scalingengine
+            password: ((autoscaler_scalingengine_server_password))
             host: *scalingengine_domain
           scheduler:
+            username: scheduler
             ca_cert: ((!scheduler_client_cert.ca))
             client_cert: ((!scheduler_client_cert.certificate))
             client_key: ((!scheduler_client_cert.private_key))
@@ -445,9 +443,8 @@ instance_groups:
             level: info
           enable_db_lock: false
           scaling_engine:
-            ca_cert: ((!scalingengine_client_cert.ca))
-            client_cert: ((!scalingengine_client_cert.certificate))
-            client_key: ((!scalingengine_client_cert.private_key))
+            username: scalingengine
+            password: ((autoscaler_scalingengine_server_password))
             host: *scalingengine_domain
           metricscollector:
             ca_cert: ((metricscollector_ca_cert))
@@ -650,6 +647,8 @@ variables:
   type: password
 - name: autoscaler_scheduler_health_password
   type: password
+- name: autoscaler_scalingengine_server_password
+  type: password
 - name: autoscaler_scalingengine_health_password
   type: password
 - name: app_autoscaler_ca_cert
@@ -720,16 +719,6 @@ variables:
     extended_key_usage:
     - client_auth
     - server_auth
-    key_length: 4096
-    duration: 180
-- name: scalingengine_client_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: scalingengine_client
-    extended_key_usage:
-    - client_auth
     key_length: 4096
     duration: 180
 

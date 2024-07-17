@@ -102,12 +102,10 @@ properties:
   autoscaler.apiserver.scaling_engine.port:
     description: "Port where scalingengine will listen"
     default: 6104
-  autoscaler.apiserver.scaling_engine.ca_cert:
-    description: "PEM-encoded CA certificate"
-  autoscaler.apiserver.scaling_engine.client_cert:
-    description: "PEM-encoded client certificate"
-  autoscaler.apiserver.scaling_engine.client_key:
-    description: "PEM-encoded client key"
+  autoscaler.apiserver.scaling_engine.username:
+    description: "the basic auth username for scalingengine service"
+  autoscaler.apiserver.scaling_engine.password:
+    description: "the basic auth password for scalingengine service"
 
   autoscaler.apiserver.event_generator.host:
     description: "Host where eventGenerator is running"
