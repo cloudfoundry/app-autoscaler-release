@@ -221,7 +221,7 @@ stop-db: check-db_type
 .PHONY: integration
 integration: build init-db test-certs
 	@echo " - using DBURL=${DBURL}"
-	@make --directory='./src/autoscaler' integration DBURL="${DBURL}"
+	@make --directory='./src/autoscaler' integration GINKGO_OPTS="${GINKGO_OPTS}" DBURL="${DBURL}"
 
 
 .PHONY:lint $(addprefix lint_,$(go_modules))
