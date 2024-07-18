@@ -15,7 +15,7 @@ source /var/vcap/packages/common/cert-helper.sh
 DB_DIR=/var/vcap/packages/db
 operator_DIR=/var/vcap/packages/operator
 
-export PATH=/var/vcap/packages/openjdk-17/bin:$PATH
+export PATH=/var/vcap/packages/openjdk-21/bin:$PATH
 
 # Getting Database config
 HOST='<%= p("autoscaler.lock_db.address") %>'
