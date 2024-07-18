@@ -219,7 +219,6 @@ defaultBreachDurationSecs: 600
 					Server: ServerConfig{
 						ServerConfig: helpers.ServerConfig{
 							Port: 8080,
-							TLS:  models.TLSCerts{},
 						},
 					},
 					DB: DBConfig{

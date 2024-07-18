@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -52,7 +51,6 @@ var _ = Describe("Config", func() {
 				Expect(conf.CF.Secret).To(Equal("client-secret"))
 				Expect(conf.CF.SkipSSLValidation).To(Equal(false))
 				Expect(conf.Server.Port).To(Equal(9999))
-				Expect(conf.Server.TLS).To(Equal(models.TLSCerts{}))
 				Expect(conf.Logging.Level).To(Equal("debug"))
 
 				Expect(conf.AppMetricsDB.DB).To(Equal(db.DatabaseConfig{

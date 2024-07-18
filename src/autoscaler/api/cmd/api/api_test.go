@@ -122,7 +122,7 @@ var _ = Describe("Api", func() {
 			})
 
 			It("succeeds with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v2/catalog", brokerPort), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/v2/catalog", brokerPort), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(username, password)

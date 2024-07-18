@@ -1,15 +1,7 @@
 broker_server:
   port: 8080
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/broker.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/broker.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
 public_api_server:
   port: 8081
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/api.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/api.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
 logging:
   level: debug
 broker_credentials:

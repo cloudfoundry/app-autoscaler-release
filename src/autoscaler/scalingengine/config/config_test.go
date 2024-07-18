@@ -51,10 +51,6 @@ var _ = Describe("Config", func() {
 				Expect(conf.CF.SkipSSLValidation).To(Equal(false))
 
 				Expect(conf.Server.Port).To(Equal(8989))
-				Expect(conf.Server.TLS.KeyFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/server.key"))
-				Expect(conf.Server.TLS.CertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/server.crt"))
-				Expect(conf.Server.TLS.CACertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/ca.crt"))
-
 				Expect(conf.Logging.Level).To(Equal("debug"))
 
 				Expect(conf.DB.PolicyDB).To(Equal(

@@ -54,7 +54,6 @@ func serverConfigFrom(conf *config.Config) helpers.ServerConfig {
 	return helpers.ServerConfig{
 		BasicAuth: conf.Server.BasicAuth,
 		Port:      conf.Server.Port,
-		TLS:       conf.Server.TLS,
 	}
 }
 

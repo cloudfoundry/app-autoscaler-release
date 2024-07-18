@@ -5,10 +5,6 @@ cf:
   skip_ssl_validation: false
 server:
   port: 8989
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/server.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/server.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
 
 logging:
   level: DeBug

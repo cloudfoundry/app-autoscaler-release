@@ -145,8 +145,8 @@ func main() {
 	}
 
 	httpServerConfig := helpers.ServerConfig{
-		Port: conf.Server.Port,
-		TLS:  conf.Server.TLS,
+		Port:      conf.Server.Port,
+		BasicAuth: conf.Server.BasicAuth,
 	}
 
 	healthServer, err := helpers.NewHTTPServer(logger, httpServerConfig, healthRouter)

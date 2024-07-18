@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf/mocks"
@@ -116,11 +115,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 
 	cfg.BrokerServer = helpers.ServerConfig{
 		Port: brokerPort,
-		TLS: models.TLSCerts{
-			KeyFile:    filepath.Join(testCertDir, "servicebroker.key"),
-			CertFile:   filepath.Join(testCertDir, "servicebroker.crt"),
-			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-		},
 	}
 	cfg.PublicApiServer = helpers.ServerConfig{
 		Port: publicApiPort,
