@@ -3,6 +3,7 @@ package integration_test
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -17,15 +18,23 @@ var _ = Describe("Integration_Eventgenerator_Scalingengine", func() {
 		testAppId         string
 		timeout           = 2 * time.Duration(breachDurationSecs) * time.Second
 		initInstanceCount = 2
+		scalingEngineURL  url.URL
 	)
+
 	BeforeEach(func() {
+		scalingEngineURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[ScalingEngine]),
+		}
+
 		testAppId = getRandomIdRef("testAppId")
 		startFakeCCNOAAUAA(initInstanceCount)
 		startMockLogCache()
 	})
 
 	JustBeforeEach(func() {
-		eventGeneratorConfPath = components.PrepareEventGeneratorConfig(dbUrl, components.Ports[EventGenerator], mockLogCache.URL(), fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), aggregatorExecuteInterval, policyPollerInterval, saveInterval, evaluationManagerInterval, defaultHttpClientTimeout, tmpDir)
+
+		eventGeneratorConfPath = components.PrepareEventGeneratorConfig(dbUrl, components.Ports[EventGenerator], mockLogCache.URL(), scalingEngineURL.String(), aggregatorExecuteInterval, policyPollerInterval, saveInterval, evaluationManagerInterval, defaultHttpClientTimeout, tmpDir)
 		scalingEngineConfPath = components.PrepareScalingEngineConfig(dbUrl, components.Ports[ScalingEngine], fakeCCNOAAUAA.URL(), defaultHttpClientTimeout, tmpDir)
 
 		startEventGenerator()

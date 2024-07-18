@@ -31,8 +31,8 @@ var _ = Describe("Integration_GolangApi_ScalingEngine", func() {
 			components.Ports[GolangServiceBroker],
 			fakeCCNOAAUAA.URL(),
 			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator]),
+			fmt.Sprintf("http://127.0.0.1:%d", components.Ports[ScalingEngine]),
+			fmt.Sprintf("http://127.0.0.1:%d", components.Ports[EventGenerator]),
 			"https://127.0.0.1:8888",
 			tmpDir)
 		startGolangApiServer()

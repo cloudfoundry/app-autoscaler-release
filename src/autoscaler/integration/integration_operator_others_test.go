@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -24,6 +25,9 @@ var _ = Describe("Integration_Operator_Others", func() {
 		bindingId         string
 		orgId             string
 		spaceId           string
+		scalingEngineURL  url.URL
+		schedulerURL      url.URL
+		eventgeneratorURL url.URL
 	)
 
 	BeforeEach(func() {
@@ -38,14 +42,29 @@ var _ = Describe("Integration_Operator_Others", func() {
 
 		startFakeCCNOAAUAA(initInstanceCount)
 
+		scalingEngineURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[ScalingEngine]),
+		}
+
+		schedulerURL = url.URL{
+			Scheme: "https",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[Scheduler]),
+		}
+
+		eventgeneratorURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[EventGenerator]),
+		}
+
 		golangApiServerConfPath = components.PrepareGolangApiServerConfig(
 			dbUrl,
 			components.Ports[GolangAPIServer],
 			components.Ports[GolangServiceBroker],
 			fakeCCNOAAUAA.URL(),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator]),
+			schedulerURL.String(),
+			scalingEngineURL.String(),
+			eventgeneratorURL.String(),
 			"https://127.0.0.1:8888",
 			tmpDir)
 		startGolangApiServer()
@@ -55,13 +74,13 @@ var _ = Describe("Integration_Operator_Others", func() {
 		scalingEngineConfPath = components.PrepareScalingEngineConfig(dbUrl, components.Ports[ScalingEngine], fakeCCNOAAUAA.URL(), defaultHttpClientTimeout, tmpDir)
 		startScalingEngine()
 
-		schedulerConfPath = components.PrepareSchedulerConfig(dbUrl, fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), tmpDir, defaultHttpClientTimeout)
+		schedulerConfPath = components.PrepareSchedulerConfig(dbUrl, scalingEngineURL.String(), tmpDir, defaultHttpClientTimeout)
 		startScheduler()
 
 	})
 
 	JustBeforeEach(func() {
-		operatorConfPath = components.PrepareOperatorConfig(dbUrl, fakeCCNOAAUAA.URL(), fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]), 10*time.Second, 1*24*time.Hour, defaultHttpClientTimeout, tmpDir)
+		operatorConfPath = components.PrepareOperatorConfig(dbUrl, fakeCCNOAAUAA.URL(), scalingEngineURL.String(), schedulerURL.String(), 10*time.Second, 1*24*time.Hour, defaultHttpClientTimeout, tmpDir)
 		startOperator()
 	})
 

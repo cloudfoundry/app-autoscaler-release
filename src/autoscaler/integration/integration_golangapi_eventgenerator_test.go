@@ -3,6 +3,7 @@ package integration_test
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -12,12 +13,18 @@ import (
 
 var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 	var (
-		appId             string
-		pathVariables     []string
-		parameters        map[string]string
-		metric            *models.AppMetric
-		metricType        = "memoryused"
+		appId         string
+		pathVariables []string
+		parameters    map[string]string
+		metric        *models.AppMetric
+		metricType    = "memoryused"
+
 		initInstanceCount = 2
+
+		scalingEngineURL    url.URL
+		schedulerURL        url.URL
+		eventgeneratorURL   url.URL
+		metricsCollectorURL url.URL
 	)
 
 	BeforeEach(func() {
@@ -25,16 +32,36 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 		httpClient = testhelpers.NewApiClient()
 		httpClientForPublicApi = testhelpers.NewPublicApiClient()
 
-		eventGeneratorConfPath = components.PrepareEventGeneratorConfig(dbUrl, components.Ports[EventGenerator], fmt.Sprintf("https://127.0.0.1:%d", components.Ports[MetricsCollector]), fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), aggregatorExecuteInterval, policyPollerInterval, saveInterval, evaluationManagerInterval, defaultHttpClientTimeout, tmpDir)
+		scalingEngineURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[ScalingEngine]),
+		}
+
+		schedulerURL = url.URL{
+			Scheme: "https",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[Scheduler]),
+		}
+
+		eventgeneratorURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[EventGenerator]),
+		}
+
+		metricsCollectorURL = url.URL{
+			Scheme: "https",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[MetricsCollector]),
+		}
+
+		eventGeneratorConfPath = components.PrepareEventGeneratorConfig(dbUrl, components.Ports[EventGenerator], metricsCollectorURL.String(), scalingEngineURL.String(), aggregatorExecuteInterval, policyPollerInterval, saveInterval, evaluationManagerInterval, defaultHttpClientTimeout, tmpDir)
 		startEventGenerator()
 		golangApiServerConfPath = components.PrepareGolangApiServerConfig(
 			dbUrl,
 			components.Ports[GolangAPIServer],
 			components.Ports[GolangServiceBroker],
 			fakeCCNOAAUAA.URL(),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator]),
+			schedulerURL.String(),
+			scalingEngineURL.String(),
+			eventgeneratorURL.String(),
 			"https://127.0.0.1:8888",
 			tmpDir)
 		startGolangApiServer()
