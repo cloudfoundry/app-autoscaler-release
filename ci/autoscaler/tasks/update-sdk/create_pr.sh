@@ -65,6 +65,7 @@ login_gh
 
 pushd "${autoscaler_dir}" > /dev/null
   git checkout -b "${update_branch}"
+  git add packages/openjdk*
   git commit -a -m "${pr_title}"
   git push --set-upstream origin "${update_branch}"
   gh pr create --base main --head "${update_branch}" --title "${pr_title}" --body "${pr_description}" --label 'dependencies'
