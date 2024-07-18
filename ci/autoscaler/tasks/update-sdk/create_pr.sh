@@ -9,6 +9,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
 export github_access_token=${GITHUB_ACCESS_TOKEN:-}
 export github_private_key=${GITHUB_PRIVATE_KEY:-}
+type=${type:-"java"}
 
 function add_private_key(){
   if [ -n "${github_private_key}" ]; then
@@ -38,8 +39,12 @@ function configure_git_credentials(){
   fi
 }
 
+
 package_version=$(cat "${root_dir}/version") && rm "${root_dir}/version"
 package_sha=$(cat "${root_dir}/vendored-commit") && rm "${root_dir}/vendored-commit"
+echo " root dir is : ${root_dir}"
+echo " package version is : ${package_version}"
+echo " package sha is : ${package_sha}"
 
 pushd "${autoscaler_dir}" > /dev/null
   if [ "$( git status -s | wc -l)" -eq 0 ]; then
@@ -52,8 +57,8 @@ pushd "${autoscaler_dir}" > /dev/null
 popd > /dev/null
 
 dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
-update_branch="${type}-version-bump-${dashed_version}_${package_sha}"
-pr_title="Update ${type} version to ${package_version}"
+update_branch="${type}-version-bump-${dashed_version:-""}"
+pr_title="Update ${type} version to ${package_version-""}"
 pr_description="Automatic version bump of ${type} to \`${package_version}\`<br/>Package commit sha: [${package_sha}](https://github.com/bosh-packages/${type}-release/commit/${package_sha})"
 add_private_key
 configure_git_credentials

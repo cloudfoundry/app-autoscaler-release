@@ -36,5 +36,4 @@ find . -type f ! -name "*.yml" ! -name "update_java_package.sh" ! -path '*/\.*' 
 # creates pr
 echo -n "${JAVA_VERSION}" > "./packages/openjdk-${desired_major_version}/version"
 create_pr="true"
-[[ ${create_pr} == "true" ]] && "${script_dir}"/create_pr.sh
-
+[[ ${create_pr} == "true" ]] && "${script_dir}"/create_pr.sh type="java"

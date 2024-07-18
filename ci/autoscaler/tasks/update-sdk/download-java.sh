@@ -12,16 +12,12 @@ JAVA_VERSION=${1:-"21.0.3"}
 # Step 1 --> Download java from https://github.com/SAP/SapMachine/releases/download/sapmachine-21.0.3/sapmachine-jdk-21.0.3_linux-x64_bin.tar.gz
 SAP_MACHINE_BASE_URL="https://github.com/SAP/SapMachine"
 binary_name="sapmachine-jdk-${JAVA_VERSION}_linux-x64_bin.tar.gz"
-
-echo "Fetching latest SAP Machine Java ${JAVA_VERSION} JDK for Linux"
-printf "\n"
-
 jdk_download_url="${SAP_MACHINE_BASE_URL}/releases/download/sapmachine-${JAVA_VERSION}/${binary_name}"
 
-echo "Fetching ${jdk_download_url}"
-mkdir -p src/binaries/jdk && pushd src/binaries/jdk
+echo "Fetching SAP Machine Java ${JAVA_VERSION} JDK for Linux-x86 from ${jdk_download_url}"
+mkdir -p src/binaries/jdk && pushd src/binaries/jdk > /dev/null
   curl -JLO "${jdk_download_url}"
-popd
+popd  > /dev/null
 
 # Step 2 --> Build java
 jdk_version="$(find . -name "sapmachine*.tar.gz" |   cut -d'-' -f3 | cut -d'_' -f1)"
