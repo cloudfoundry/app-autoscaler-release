@@ -294,14 +294,16 @@ func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngine
 	}
 
 	templateParameters := TemplateParameters{
-		ScalingEngineUri:  scalingEngineUri,
-		HttpClientTimeout: int(httpClientTimeout / time.Second),
-		TestCertDir:       testCertDir,
-		Port:              components.Ports[Scheduler],
-		DriverClassName:   driverClassName,
-		DBUser:            userName,
-		DBPassword:        password,
-		JDBCURI:           jdbcDBUri,
+		ScalingEngineUri:      scalingEngineURL.String(),
+		ScalingEngineUsername: "scalingengine",
+		ScalingEnginePassword: "scalingengine-password",
+		HttpClientTimeout:     int(httpClientTimeout / time.Second),
+		TestCertDir:           testCertDir,
+		Port:                  components.Ports[Scheduler],
+		DriverClassName:       driverClassName,
+		DBUser:                userName,
+		DBPassword:            password,
+		JDBCURI:               jdbcDBUri,
 	}
 
 	ut, err := template.New("application.yaml").Parse(schedulerApplicationConfigTemplate)
