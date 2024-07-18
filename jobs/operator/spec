@@ -38,7 +38,7 @@ packages:
   - operator
   - common
   - db
-  - openjdk-22
+  - openjdk-21
   - changeloglockcleaner
 
 properties:

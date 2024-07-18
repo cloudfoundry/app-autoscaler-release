@@ -32,5 +32,8 @@ mv ./packages/openjdk-"${current_java_version}" ./packages/openjdk-"${desired_ma
 find . -type f ! -name "*.yml" ! -name "update_java_package.sh" ! -path '*/\.*' -exec grep -l "openjdk-${current_java_version}" {} \;| xargs sed -i "s/openjdk-${current_java_version}/openjdk-${desired_major_version}/g"
 
 # creates pr
+echo -n "${JAVA_VERSION}" > "${AUTOSCALER_DIR}/version"
+echo -n "${JAVA_VERSION}" > "${AUTOSCALER_DIR}/vendored-commit"
+
 echo -n "${JAVA_VERSION}" > "./packages/openjdk-${desired_major_version}/version"
 [[ ${create_pr} == "true" ]] && "${script_dir}"/create_pr.sh

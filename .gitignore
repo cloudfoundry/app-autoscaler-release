@@ -61,7 +61,7 @@ keys/
 # easy sharing, see:
 # <https://code.visualstudio.com/docs/editor/extension-marketplace#_workspace-recommended-extensions>
 !.vscode/extensions.json
-
+.vscode
 
 # ==================== 📦 Devbox ====================
 .devbox
@@ -71,4 +71,6 @@ keys/
 # Ignore links to  build-output:
 /result
 /result-*
+
+.direnv
 
