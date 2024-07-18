@@ -2,7 +2,7 @@
 set -e
 
 # compile and runtime bosh env vars
-export JAVA_HOME=/var/vcap/packages/openjdk-22
+export JAVA_HOME=/var/vcap/packages/openjdk-21
 export PATH=$JAVA_HOME/bin:$PATH
 
 cd ${BOSH_INSTALL_TARGET}

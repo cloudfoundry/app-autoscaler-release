@@ -41,9 +41,6 @@ function configure_git_credentials(){
 
 package_version=$(cat "${root_dir}/version") && rm "${root_dir}/version"
 package_sha=$(cat "${root_dir}/vendored-commit") && rm "${root_dir}/vendored-commit"
-echo " root dir is : ${root_dir}"
-echo " package version is : ${package_version}"
-echo " package sha is : ${package_sha}"
 
 pushd "${autoscaler_dir}" > /dev/null
   if [ "$( git status -s | wc -l)" -eq 0 ]; then
@@ -58,7 +55,11 @@ popd > /dev/null
 dashed_version=$(echo "${package_version}" | sed -E 's/[._]/-/g' )
 update_branch="${type}-version-bump-${dashed_version}"
 pr_title="Update ${type} version to ${package_version}"
-pr_description="Automatic version bump of ${type} to \`${package_version}\`<br/>Package commit sha: [${package_sha}](https://github.com/bosh-packages/${type}-release/commit/${package_sha})"
+pr_description="https://github.com/bosh-packages/${type}-release/commit/${package_sha}"
+if [ "$type" == "java" ]; then
+  pr_description="https://github.com/SAP/SapMachine/releases/tag/sapmachine-${package_version}"
+fi
+
 add_private_key
 configure_git_credentials
 login_gh

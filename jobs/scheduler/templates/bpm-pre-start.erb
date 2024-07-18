@@ -17,7 +17,7 @@ source /var/vcap/packages/common/cert-helper.sh
 DB_DIR=/var/vcap/packages/db
 SCHEDULER_DIR=/var/vcap/packages/scheduler
 
-export PATH=/var/vcap/packages/openjdk-22/bin:$PATH
+export PATH=/var/vcap/packages/openjdk-21/bin:$PATH
 
 # Getting Database config
 HOST='<%= p("autoscaler.scheduler_db.address") %>'

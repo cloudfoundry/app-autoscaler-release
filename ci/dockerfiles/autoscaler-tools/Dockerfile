@@ -27,7 +27,7 @@ RUN apt-get update && \
             openssl \
             unzip \
             gcc \
-            openjdk-22-jdk \
+            openjdk-21-jdk \
             zip \
             ruby \
             ruby-dev \
