@@ -73,7 +73,6 @@ var (
 	checkBindingFunc api.CheckBindingFunc
 	hasBinding       = true
 	apiPort          = 0
-	testCertDir      = "../../../../test-certs"
 )
 
 func TestPublicapiserver(t *testing.T) {

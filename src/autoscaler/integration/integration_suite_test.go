@@ -69,8 +69,6 @@ var (
 	logger                 lager.Logger
 
 	testCertDir = "../../../test-certs"
-
-	serviceBrokerURL url.URL
 )
 
 func TestIntegration(t *testing.T) {
