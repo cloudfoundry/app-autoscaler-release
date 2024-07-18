@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-export JDK_HOME=/var/vcap/packages/openjdk-21
+export JDK_HOME=/var/vcap/packages/openjdk-17
 
 function manage_truststore() {
   set -euo pipefail
