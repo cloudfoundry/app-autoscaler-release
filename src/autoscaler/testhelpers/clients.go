@@ -17,22 +17,22 @@ func NewApiClient() *http.Client {
 }
 
 func NewPublicApiClient() *http.Client {
-	return createTLSClientFor("api_public")
+	return createClient()
 }
 
 func NewEventGeneratorClient() *http.Client {
-	return createTLSClientFor("eventgenerator")
+	return createClient()
 }
 
 func NewServiceBrokerClient() *http.Client {
-	return createTLSClientFor("servicebroker")
+	return createClient()
 }
 func NewSchedulerClient() *http.Client {
 	return createTLSClientFor("scheduler")
 }
 
 func NewScalingEngineClient() *http.Client {
-	return createTLSClientFor("scalingengine")
+	return createClient()
 }
 
 func createTLSClientFor(name string) *http.Client {

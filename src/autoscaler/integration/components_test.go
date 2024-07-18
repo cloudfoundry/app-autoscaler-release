@@ -184,11 +184,6 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		},
 		PublicApiServer: helpers.ServerConfig{
 			Port: publicApiPort,
-			TLS: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "api.key"),
-				CertFile:   filepath.Join(testCertDir, "api.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-			},
 		},
 		BrokerServer: helpers.ServerConfig{
 			Port: brokerPort,
