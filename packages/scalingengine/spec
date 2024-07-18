@@ -44,10 +44,10 @@ files:
 - autoscaler/vendor/github.com/go-logr/logr/* # gosub
 - autoscaler/vendor/github.com/go-logr/logr/funcr/* # gosub
 - autoscaler/vendor/github.com/go-logr/stdr/* # gosub
-- autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
-- autoscaler/vendor/github.com/google/uuid/* # gosub
-- autoscaler/vendor/github.com/gorilla/mux/* # gosub
-- autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
+- autoscaler/vendor/go.uber.org/zap/internal/bufferpool/* # gosub
+- autoscaler/vendor/go.uber.org/zap/internal/color/* # gosub
+- autoscaler/vendor/go.uber.org/zap/internal/exit/* # gosub
+- autoscaler/vendor/go.uber.org/zap/internal/pool/* # gosub
 - autoscaler/vendor/go.uber.org/zap/internal/stacktrace/* # gosub
 - autoscaler/vendor/go.uber.org/zap/zapcore/* # gosub
 - autoscaler/vendor/golang.org/x/crypto/bcrypt/* # gosub
