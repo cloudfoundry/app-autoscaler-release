@@ -345,7 +345,7 @@ deploy-cleanup:
 PHONY: download-java-bosh-package
 download-java-bosh-package:
 	echo " - Download JDK dependency autoscaler"
-	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/tasks/update-sdk/download-java.sh
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/tasks/update-sdk/download_java.sh
 
 bosh-release-path := ./target/bosh-releases
 prometheus-bosh-release-path := ${bosh-release-path}/prometheus

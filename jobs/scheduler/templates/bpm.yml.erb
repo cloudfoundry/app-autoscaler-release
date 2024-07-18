@@ -1,6 +1,6 @@
 processes:
   - name: scheduler
-    executable: /var/vcap/packages/openjdk-21/bin/java
+    executable: /var/vcap/packages/openjdk-17/bin/java
     args:
       - -Dspring.config.location=/var/vcap/jobs/scheduler/config/scheduler.yml
       - -jar

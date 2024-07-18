@@ -37,7 +37,7 @@ packages:
   - golang-1-linux
   - golangapiserver
   - db
-  - openjdk-21
+  - openjdk-17
   - common
   - changeloglockcleaner
 properties:
