@@ -30,9 +30,13 @@ jobs:
         run: |
           if [ $(git status --porcelain | wc -l) -ne 0 ]; then
             git status
+            sleep 2
             cat packages/golangapiserver/spec
+            sleep 2
             cat packages/metricsforwarder/spec
+            sleep 2
             cat packages/scalingengine/spec
+            sleep 2
             echo "::error::Specs are out of date, run \"make package-specs\" to update"
             exit 1
           fi
