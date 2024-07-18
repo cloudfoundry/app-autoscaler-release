@@ -69,6 +69,8 @@ var (
 	logger                 lager.Logger
 
 	testCertDir = "../../../test-certs"
+
+	serviceBrokerURL url.URL
 )
 
 func TestIntegration(t *testing.T) {
@@ -262,7 +264,7 @@ func testFileFragment(filename string) string {
 	return base
 }
 
-func provisionServiceInstance(serviceInstanceId string, orgId string, spaceId string, defaultPolicy []byte, brokerPort int, httpClient *http.Client) (*http.Response, error) {
+func provisionServiceInstance(serviceInstanceId string, orgId string, spaceId string, defaultPolicy []byte, serviceBrokerURL url.URL, httpClient *http.Client) (*http.Response, error) {
 	By("provisionServiceInstance")
 	var bindBody map[string]interface{}
 	if defaultPolicy != nil {
@@ -288,14 +290,16 @@ func provisionServiceInstance(serviceInstanceId string, orgId string, spaceId st
 
 	body, err := json.Marshal(bindBody)
 	Expect(err).NotTo(HaveOccurred())
-	req, err := http.NewRequest("PUT", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s", brokerPort, serviceInstanceId), bytes.NewReader(body))
+
+	serviceBrokerURL.Path = "/v2/service_instances/" + serviceInstanceId
+	req, err := http.NewRequest("PUT", serviceBrokerURL.String(), bytes.NewReader(body))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
 	return httpClient.Do(req)
 }
 
-func updateServiceInstance(serviceInstanceId string, defaultPolicy []byte, brokerPort int, httpClient *http.Client) (*http.Response, error) {
+func updateServiceInstance(serviceInstanceId string, defaultPolicy []byte, serviceBrokerURL url.URL, httpClient *http.Client) (*http.Response, error) {
 	By("updateServiceInstance")
 	var updateBody map[string]interface{}
 	if defaultPolicy != nil {
@@ -312,7 +316,8 @@ func updateServiceInstance(serviceInstanceId string, defaultPolicy []byte, broke
 	body, err := json.Marshal(updateBody)
 	Expect(err).NotTo(HaveOccurred())
 
-	req, err := http.NewRequest("PATCH", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s", brokerPort, serviceInstanceId), bytes.NewReader(body))
+	serviceBrokerURL.Path = fmt.Sprintf("/v2/service_instances/%s", serviceInstanceId)
+	req, err := http.NewRequest("PATCH", serviceBrokerURL.String(), bytes.NewReader(body))
 	Expect(err).NotTo(HaveOccurred())
 
 	req.Header.Set("Content-Type", "application/json")
@@ -320,16 +325,18 @@ func updateServiceInstance(serviceInstanceId string, defaultPolicy []byte, broke
 	return httpClient.Do(req)
 }
 
-func deProvisionServiceInstance(serviceInstanceId string, brokerPort int, httpClient *http.Client) (*http.Response, error) {
+func deProvisionServiceInstance(serviceInstanceId string, serviceBrokerURL url.URL, httpClient *http.Client) (*http.Response, error) {
 	By("deProvisionServiceInstance")
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s?service_id=%s&plan_id=%s", brokerPort, serviceInstanceId, serviceId, planId), nil)
+	serviceBrokerURL.Path = fmt.Sprintf("/v2/service_instances/%s", serviceInstanceId)
+	serviceBrokerURL.RawQuery = fmt.Sprintf("service_id=%s&plan_id=%s", serviceId, planId)
+	req, err := http.NewRequest("DELETE", serviceBrokerURL.String(), nil)
 	ExpectWithOffset(2, err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
 	return httpClient.Do(req)
 }
 
-func bindService(bindingId string, appId string, serviceInstanceId string, policy []byte, brokerPort int, httpClient *http.Client) (*http.Response, error) {
+func bindService(bindingId string, appId string, serviceInstanceId string, policy []byte, serviceBrokerURL url.URL, httpClient *http.Client) (*http.Response, error) {
 	By("bindService")
 	var bindBody map[string]interface{}
 	if policy != nil {
@@ -350,83 +357,93 @@ func bindService(bindingId string, appId string, serviceInstanceId string, polic
 
 	body, err := json.Marshal(bindBody)
 	Expect(err).NotTo(HaveOccurred())
-	req, err := http.NewRequest("PUT", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s/service_bindings/%s", brokerPort, serviceInstanceId, bindingId), bytes.NewReader(body))
+	serviceBrokerURL.Path = fmt.Sprintf("/v2/service_instances/%s/service_bindings/%s", serviceInstanceId, bindingId)
+	req, err := http.NewRequest("PUT", serviceBrokerURL.String(), bytes.NewReader(body))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
 	return httpClient.Do(req)
 }
 
-func unbindService(bindingId string, appId string, serviceInstanceId string, brokerPort int, httpClient *http.Client) (*http.Response, error) {
+func unbindService(bindingId string, appId string, serviceInstanceId string, serviceBrokerURL url.URL, httpClient *http.Client) (*http.Response, error) {
 	By("unbindService")
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s/service_bindings/%s?service_id=%s&plan_id=%s", brokerPort, serviceInstanceId, bindingId, serviceId, planId), nil)
+
+	serviceBrokerURL.Path = fmt.Sprintf("/v2/service_instances/%s/service_bindings/%s", serviceInstanceId, bindingId)
+	serviceBrokerURL.RawQuery = fmt.Sprintf("service_id=%s&plan_id=%s", serviceId, planId)
+	req, err := http.NewRequest("DELETE", serviceBrokerURL.String(), nil)
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
 	return httpClient.Do(req)
 }
 
-func provisionAndBind(serviceInstanceId string, orgId string, spaceId string, bindingId string, appId string, brokerPort int, httpClient *http.Client) {
-	resp, err := provisionServiceInstance(serviceInstanceId, orgId, spaceId, nil, brokerPort, httpClient)
+func provisionAndBind(serviceInstanceId string, orgId string, spaceId string, bindingId string, appId string, serviceBrokerURL url.URL, httpClient *http.Client) {
+	resp, err := provisionServiceInstance(serviceInstanceId, orgId, spaceId, nil, serviceBrokerURL, httpClient)
 	Expect(err).WithOffset(1).NotTo(HaveOccurred())
 	Expect(resp.StatusCode).WithOffset(1).To(Equal(http.StatusCreated), fmt.Sprintf("response was '%s'", MustReadAll(resp.Body)))
 	_ = resp.Body.Close()
 
-	resp, err = bindService(bindingId, appId, serviceInstanceId, nil, brokerPort, httpClient)
+	resp, err = bindService(bindingId, appId, serviceInstanceId, nil, serviceBrokerURL, httpClient)
 	Expect(err).WithOffset(1).NotTo(HaveOccurred())
 	Expect(resp.StatusCode).WithOffset(1).To(Equal(http.StatusCreated), fmt.Sprintf("response was '%s'", MustReadAll(resp.Body)))
 	_ = resp.Body.Close()
 }
 
-func unbindAndDeProvision(bindingId string, appId string, serviceInstanceId string, brokerPort int, httpClient *http.Client) {
-	resp, err := unbindService(bindingId, appId, serviceInstanceId, brokerPort, httpClient)
+func unbindAndDeProvision(bindingId string, appId string, serviceInstanceId string, serviceBrokerURL url.URL, httpClient *http.Client) {
+	resp, err := unbindService(bindingId, appId, serviceInstanceId, serviceBrokerURL, httpClient)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(http.StatusOK))
 	_ = resp.Body.Close()
 
-	resp, err = deProvisionServiceInstance(serviceInstanceId, brokerPort, httpClient)
+	resp, err = deProvisionServiceInstance(serviceInstanceId, serviceBrokerURL, httpClient)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(http.StatusOK))
 	_ = resp.Body.Close()
 }
 
-func getPolicy(appId string, apiServerPort int, httpClient *http.Client) (*http.Response, error) {
+func getPolicy(appId string, apiURL url.URL, httpClient *http.Client) (*http.Response, error) {
 	By("getPolicy")
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/policy", apiServerPort, appId), nil)
+	apiURL.Path = fmt.Sprintf("/v1/apps/%s/policy", appId)
+	req, err := http.NewRequest("GET", apiURL.String(), nil)
 	req.Header.Set("Authorization", "bearer fake-token")
 	Expect(err).NotTo(HaveOccurred())
 	return httpClient.Do(req)
 }
 
-func detachPolicy(appId string, apiServerPort int, httpClient *http.Client) (*http.Response, error) {
+func detachPolicy(appId string, apiURL url.URL, httpClient *http.Client) (*http.Response, error) {
 	By("detachPolicy")
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/policy", apiServerPort, appId), strings.NewReader(""))
+	apiURL.Path = fmt.Sprintf("/v1/apps/%s/policy", appId)
+	req, err := http.NewRequest("DELETE", apiURL.String(), strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "bearer fake-token")
 	return httpClient.Do(req)
 }
 
-func attachPolicy(appId string, policy []byte, apiServerPort int, httpClient *http.Client) (*http.Response, error) {
+func attachPolicy(appId string, policy []byte, apiURL url.URL, httpClient *http.Client) (*http.Response, error) {
 	By("attachPolicy")
-	req, err := http.NewRequest("PUT", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/policy", apiServerPort, appId), bytes.NewReader(policy))
+	apiURL.Path = fmt.Sprintf("/v1/apps/%s/policy", appId)
+	req, err := http.NewRequest("PUT", apiURL.String(), bytes.NewReader(policy))
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "bearer fake-token")
 	return httpClient.Do(req)
 }
 
-func getSchedules(appId string) (*http.Response, error) {
+func getSchedules(schedulerURL url.URL, appId string) (*http.Response, error) {
 	By("getSchedules")
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/schedules", components.Ports[Scheduler], appId), strings.NewReader(""))
+	schedulerURL.Path = fmt.Sprintf("/v1/apps/%s/schedules", appId)
+	req, err := http.NewRequest("GET", schedulerURL.String(), strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	return httpClient.Do(req)
 }
 
-func createSchedule(appId string, guid string, schedule string) (*http.Response, error) {
+func createSchedule(appId string, guid string, schedule string, schedulerURL url.URL) (*http.Response, error) {
 	By("createSchedule")
-	req, err := http.NewRequest("PUT", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/schedules?guid=%s", components.Ports[Scheduler], appId, guid), bytes.NewReader([]byte(schedule)))
+	schedulerURL.Path = fmt.Sprintf("/v1/apps/%s/schedules", appId)
+	schedulerURL.RawQuery = fmt.Sprintf("guid=%s", guid)
+	req, err := http.NewRequest("PUT", schedulerURL.String(), bytes.NewReader([]byte(schedule)))
 	if err != nil {
 		panic(err)
 	}
@@ -435,24 +452,26 @@ func createSchedule(appId string, guid string, schedule string) (*http.Response,
 	return httpClient.Do(req)
 }
 
-func deleteSchedule(appId string) (*http.Response, error) {
+func deleteSchedule(schedulerURL url.URL, appId string) (*http.Response, error) {
 	By("deleteSchedule")
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/schedules", components.Ports[Scheduler], appId), strings.NewReader(""))
+	schedulerURL.Path = fmt.Sprintf("/v1/apps/%s/schedules", appId)
+	req, err := http.NewRequest("DELETE", schedulerURL.String(), strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	return httpClient.Do(req)
 }
 
-func getActiveSchedule(appId string) (*http.Response, error) {
+func getActiveSchedule(scalingEngineURL url.URL, appId string) (*http.Response, error) {
 	By("getActiveSchedule")
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/active_schedules", components.Ports[ScalingEngine], appId), strings.NewReader(""))
+	scalingEngineURL.Path = fmt.Sprintf("/v1/apps/%s/active_schedules", appId)
+	req, err := http.NewRequest("GET", scalingEngineURL.String(), strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	return httpClient.Do(req)
 }
 
-func activeScheduleExists(appId string) bool {
-	resp, err := getActiveSchedule(appId)
+func activeScheduleExists(scalingEngineURL url.URL, appId string) bool {
+	resp, err := getActiveSchedule(scalingEngineURL, appId)
 	if err == nil {
 		defer func() { _ = resp.Body.Close() }()
 	}
@@ -500,12 +519,13 @@ func setPolicySpecificDateTime(policyByte []byte, start time.Duration, end time.
 	return fmt.Sprintf(string(policyByte), timeZone, startTime, endTime)
 }
 
-func getScalingHistories(apiServerPort int, pathVariables []string, parameters map[string]string) (*http.Response, error) {
+func getScalingHistories(apiURL url.URL, pathVariables []string, parameters map[string]string) (*http.Response, error) {
+	var getScalingHistoriesURL string
 	By("getScalingHistories")
 	httpClientTmp := httpClientForPublicApi
-	getScalingHistoriesURL := fmt.Sprintf("https://127.0.0.1:%d/v1/apps/%s/scaling_histories", apiServerPort, pathVariables[0])
+	apiURL.Path = fmt.Sprintf("/v1/apps/%s/scaling_histories", pathVariables[0])
 	if len(parameters) > 0 {
-		parsedURL, err := url.Parse(getScalingHistoriesURL)
+		parsedURL, err := url.Parse(apiURL.String())
 		Expect(err).ToNot(HaveOccurred())
 
 		params := url.Values{}
@@ -513,8 +533,12 @@ func getScalingHistories(apiServerPort int, pathVariables []string, parameters m
 			params.Add(paramName, paramValue)
 		}
 		parsedURL.RawQuery = params.Encode()
+
 		getScalingHistoriesURL = parsedURL.String()
+	} else {
+		getScalingHistoriesURL = apiURL.String()
 	}
+
 	req, err := http.NewRequest("GET", getScalingHistoriesURL, strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
@@ -522,17 +546,19 @@ func getScalingHistories(apiServerPort int, pathVariables []string, parameters m
 	return httpClientTmp.Do(req)
 }
 
-func getAppAggregatedMetrics(apiServerPort int, pathVariables []string, parameters map[string]string) (*http.Response, error) {
+func getAppAggregatedMetrics(apiURL url.URL, pathVariables []string, parameters map[string]string) (*http.Response, error) {
+	urlParams := ""
 	By("getAppAggregatedMetrics")
 	httpClientTmp := httpClientForPublicApi
-	url := "https://127.0.0.1:%d/v1/apps/%s/aggregated_metric_histories/%s"
 	if len(parameters) > 0 {
-		url += "?any=any"
+		urlParams += "any=any"
 		for paramName, paramValue := range parameters {
-			url += "&" + paramName + "=" + paramValue
+			urlParams += "&" + paramName + "=" + paramValue
 		}
 	}
-	req, err := http.NewRequest("GET", fmt.Sprintf(url, apiServerPort, pathVariables[0], pathVariables[1]), strings.NewReader(""))
+	apiURL.Path = fmt.Sprintf("/v1/apps/%s/aggregated_metric_histories/%s?%s", pathVariables[0], pathVariables[1], urlParams)
+	req, err := http.NewRequest("GET", apiURL.String(), strings.NewReader(""))
+
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "bearer fake-token")
@@ -656,17 +682,17 @@ func getAppMetricTotalCount(appId string) int {
 	return count
 }
 
-type GetResponse func(id string, port int, httpClient *http.Client) (*http.Response, error)
-type GetResponseWithParameters func(apiServerPort int, pathVariables []string, parameters map[string]string) (*http.Response, error)
+type GetResponse func(id string, url url.URL, httpClient *http.Client) (*http.Response, error)
+type GetResponseWithParameters func(url url.URL, pathVariables []string, parameters map[string]string) (*http.Response, error)
 
-func checkResponseContent(getResponse GetResponse, id string, expectHttpStatus int, expectResponseMap map[string]interface{}, port int, httpClient *http.Client) {
-	resp, err := getResponse(id, port, httpClient)
+func checkResponseContent(getResponse GetResponse, id string, expectHttpStatus int, expectResponseMap map[string]interface{}, url url.URL, httpClient *http.Client) {
+	resp, err := getResponse(id, url, httpClient)
 	defer func() { _ = resp.Body.Close() }()
 	checkResponse(resp, err, expectHttpStatus, expectResponseMap)
 }
 
-func checkPublicAPIResponseContentWithParameters(getResponseWithParameters GetResponseWithParameters, apiServerPort int, pathVariables []string, parameters map[string]string, expectHttpStatus int, expectResponseMap map[string]interface{}) {
-	resp, err := getResponseWithParameters(apiServerPort, pathVariables, parameters)
+func checkPublicAPIResponseContentWithParameters(getResponseWithParameters GetResponseWithParameters, apiURL url.URL, pathVariables []string, parameters map[string]string, expectHttpStatus int, expectResponseMap map[string]interface{}) {
+	resp, err := getResponseWithParameters(apiURL, pathVariables, parameters)
 	defer func() { _ = resp.Body.Close() }()
 	checkResponse(resp, err, expectHttpStatus, expectResponseMap)
 }
@@ -689,9 +715,9 @@ func checkResponseEmptyAndStatusCode(resp *http.Response, err error, expectedSta
 	Expect(resp.StatusCode).To(Equal(expectedStatus))
 }
 
-func assertScheduleContents(appId string, expectHttpStatus int, expectResponseMap map[string]int) {
+func assertScheduleContents(schedulerURL url.URL, appId string, expectHttpStatus int, expectResponseMap map[string]int) {
 	By("checking the schedule contents")
-	resp, err := getSchedules(appId)
+	resp, err := getSchedules(schedulerURL, appId)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Failed to get schedule:%s", err)
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(expectHttpStatus), "Unexpected HTTP status")
 	defer func() { _ = resp.Body.Close() }()
@@ -707,8 +733,8 @@ func assertScheduleContents(appId string, expectHttpStatus int, expectResponseMa
 	ExpectWithOffset(1, len(recurring)).To(Equal(expectResponseMap["recurring_schedule"]), "Expected %d recurring schedules, but found %d: %#v\n", expectResponseMap["recurring_schedule"], len(recurring), recurring)
 }
 
-func checkScheduleContents(appId string, expectHttpStatus int, expectResponseMap map[string]int) bool {
-	resp, err := getSchedules(appId)
+func checkScheduleContents(schedulerURL url.URL, appId string, expectHttpStatus int, expectResponseMap map[string]int) bool {
+	resp, err := getSchedules(schedulerURL, appId)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred(), "Get schedules failed with: %s", err)
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(expectHttpStatus), "Unexpected HTTP status")
 	defer func() { _ = resp.Body.Close() }()

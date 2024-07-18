@@ -248,7 +248,7 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 	return writeYmlConfig(tmpDir, GolangAPIServer, &cfg)
 }
 
-func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngineUri string, tmpDir string, httpClientTimeout time.Duration) string {
+func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngineURL url.URL, tmpDir string, httpClientTimeout time.Duration) string {
 	var (
 		driverClassName string
 		userName        string
@@ -280,7 +280,10 @@ func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngine
 	}
 
 	type TemplateParameters struct {
-		ScalingEngineUri  string
+		ScalingEngineUri      string
+		ScalingEngineUsername string
+		ScalingEnginePassword string
+
 		HttpClientTimeout int
 		TestCertDir       string
 		Port              int

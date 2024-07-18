@@ -58,9 +58,9 @@ func compareUrlValues(actual string, expected string) {
 	Expect(actualQuery).To(Equal(expectedQuery))
 }
 
-func checkAggregatedMetricResult(apiServerPort int, pathVariables []string, parameters map[string]string, result AppAggregatedMetricResult) {
+func checkAggregatedMetricResult(apiURL url.URL, pathVariables []string, parameters map[string]string, result AppAggregatedMetricResult) {
 	var actual AppAggregatedMetricResult
-	resp, err := getAppAggregatedMetrics(apiServerPort, pathVariables, parameters)
+	resp, err := getAppAggregatedMetrics(apiURL, pathVariables, parameters)
 	body := MustReadAll(resp.Body)
 	FailOnError(fmt.Sprintf("getAppAggregatedMetrics failed: %d-%s", resp.StatusCode, body), err)
 	defer func() { _ = resp.Body.Close() }()
@@ -85,10 +85,10 @@ func compareScalingHistoryResult(actual, expected ScalingHistoryResult) {
 	Expect(actual).To(Equal(expected))
 }
 
-func checkScalingHistoryResult(apiServerPort int, pathVariables []string, parameters map[string]string, expected ScalingHistoryResult) {
+func checkScalingHistoryResult(apiURL url.URL, pathVariables []string, parameters map[string]string, expected ScalingHistoryResult) {
 	GinkgoHelper()
 	var actual ScalingHistoryResult
-	resp, err := getScalingHistories(apiServerPort, pathVariables, parameters)
+	resp, err := getScalingHistories(apiURL, pathVariables, parameters)
 	body := MustReadAll(resp.Body)
 	FailOnError(fmt.Sprintf("getScalingHistories failed: %d-%s", resp.StatusCode, body), err)
 	defer func() { _ = resp.Body.Close() }()
@@ -98,8 +98,8 @@ func checkScalingHistoryResult(apiServerPort int, pathVariables []string, parame
 	compareScalingHistoryResult(actual, expected)
 }
 
-func doAttachPolicy(appId string, policyStr []byte, statusCode int, apiServerPort int, httpClient *http.Client) {
-	resp, err := attachPolicy(appId, policyStr, apiServerPort, httpClient)
+func doAttachPolicy(appId string, policyStr []byte, statusCode int, apiURL url.URL, httpClient *http.Client) {
+	resp, err := attachPolicy(appId, policyStr, apiURL, httpClient)
 	body := MustReadAll(resp.Body)
 	FailOnError(fmt.Sprintf("attachPolicy failed: %d-%s", resp.StatusCode, body), err)
 	defer func() { _ = resp.Body.Close() }()
@@ -114,8 +114,8 @@ func MustReadAll(reader io.ReadCloser) string {
 	return string(body)
 }
 
-func doDetachPolicy(appId string, statusCode int, msg string, apiServerPort int, httpClient *http.Client) {
-	resp, err := detachPolicy(appId, apiServerPort, httpClient)
+func doDetachPolicy(appId string, statusCode int, msg string, apiURL url.URL, httpClient *http.Client) {
+	resp, err := detachPolicy(appId, apiURL, httpClient)
 	FailOnError("detachPolicy failed", err)
 	defer func() { _ = resp.Body.Close() }()
 	body := MustReadAll(resp.Body)
@@ -125,25 +125,25 @@ func doDetachPolicy(appId string, statusCode int, msg string, apiServerPort int,
 	}
 }
 
-func checkApiServerStatus(appId string, statusCode int, apiServerPort int, httpClient *http.Client) {
+func checkApiServerStatus(appId string, statusCode int, apiURL url.URL, httpClient *http.Client) {
 	By("checking the API Server")
-	resp, err := getPolicy(appId, apiServerPort, httpClient)
+	resp, err := getPolicy(appId, apiURL, httpClient)
 	FailOnError(fmt.Sprintf("getPolicy failed: %d-%s", resp.StatusCode, MustReadAll(resp.Body)), err)
 	defer func() { _ = resp.Body.Close() }()
 	Expect(resp.StatusCode).To(Equal(statusCode))
 }
 
-func checkApiServerContent(appId string, policyStr []byte, statusCode int, port int, httpClient *http.Client) {
+func checkApiServerContent(appId string, policyStr []byte, statusCode int, apiURL url.URL, httpClient *http.Client) {
 	By("checking the API Server")
 	var expected map[string]interface{}
 	err := json.Unmarshal(policyStr, &expected)
 	Expect(err).NotTo(HaveOccurred())
-	checkResponseContent(getPolicy, appId, statusCode, expected, port, httpClient)
+	checkResponseContent(getPolicy, appId, statusCode, expected, apiURL, httpClient)
 }
 
-func checkSchedulerStatus(appId string, statusCode int) {
+func checkSchedulerStatus(schedulerURL url.URL, appId string, statusCode int) {
 	By("checking the Scheduler")
-	resp, err := getSchedules(appId)
+	resp, err := getSchedules(schedulerURL, appId)
 	Expect(err).NotTo(HaveOccurred())
 	Expect(resp.StatusCode).To(Equal(statusCode))
 	resp.Body.Close()
