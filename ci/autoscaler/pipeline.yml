@@ -165,8 +165,8 @@ resources:
   icon: github
   check_every: 5m
   source:
-    uri: https://github.com/cloudfoundry/bosh-package-java-release.git
-    branch: main
+    uri: https://github.com/SAP/SapMachine.git
+    branch: sapmachine
     version_depth: 20
 
 - name: gcp-jammy-stemcell
@@ -237,7 +237,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor download-java-bosh-package db scheduler
     timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
@@ -290,7 +290,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor download-java-bosh-package db scheduler
     timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
@@ -343,7 +343,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor download-java-bosh-package db scheduler
     timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
@@ -402,7 +402,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor download-java-bosh-package db scheduler
     timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
@@ -467,7 +467,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor download-java-bosh-package db scheduler
     timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
@@ -500,7 +500,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor download-java-bosh-package db scheduler
   - task: release-autoscaler
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
