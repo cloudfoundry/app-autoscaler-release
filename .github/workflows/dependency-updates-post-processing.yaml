@@ -8,7 +8,7 @@ on:
   workflow_dispatch: {}
 jobs:
   dependency-updates-post-processing:
-    if: github.actor == 'renovate[bot]'
+    if: github.actor == 'renovate[bot]' || github.event_name == 'workflow_dispatch'
     name: "Dependency Updates Post-Processing"
     runs-on: ubuntu-latest
     container:
@@ -65,10 +65,8 @@ jobs:
           declare -r commit_author_name="${{steps.configure_git.outputs.commit_author_name}}"
           declare -r commit_message="${{steps.configure_git.outputs.commit_subject}}"
 
-          if [[ ! "${commit_author_name}" == 'renovate[bot]' ]] \
-             || [[ "${commit_message}" == "${tidy_message}" ]]
-          then
-            echo 'This commit was not by a known bot or already an automatic `go mod tidy`! Exiting …'
+          if [[ "${commit_message}" == "${tidy_message}" ]]; then
+            echo 'This commit is already an automatic `go-mod-tidy and make package-specs`! Exiting ...'
             exit 0
           fi
 
