@@ -35,9 +35,9 @@
     "golangci-lint":                     "1.59.1",
     "yq-go":                             "4.44.2",
     "act":                               "0.2.64",
-    "go":                                "1.22.1",
     "cloudfoundry-cli":                  "8.7.11",
     "google-cloud-sdk":                  "latest",
+    "go":                                "1.22.5",
     "temurin-bin-17":                    "latest",
     "ruby":                              "latest"
   },
