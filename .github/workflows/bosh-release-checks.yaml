@@ -26,6 +26,8 @@ jobs:
           make generate-fakes
           make generate-openapi-generated-clients-and-servers
           make package-specs
+
+          cat packages/scalingengine/spec
       - name: Check if there is any change
         run: |
           if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then
