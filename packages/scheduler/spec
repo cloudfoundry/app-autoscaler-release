@@ -2,7 +2,7 @@
 name: scheduler
 
 dependencies:
-- openjdk-17
+- openjdk-22
 
 files:
 - scheduler/**/*

@@ -25,7 +25,7 @@ templates:
   appmetrics_db.key.erb: config/certs/appmetrics_db/key
 
 packages:
-  - openjdk-17
+  - openjdk-22
   - db
   - eventgenerator
   - common

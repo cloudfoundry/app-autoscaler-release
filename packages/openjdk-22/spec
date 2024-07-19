@@ -1,0 +1,5 @@
+---
+name: openjdk-22
+dependencies: []
+files:
+- sapmachine-jdk-22.0.1_linux-x64_bin.tar.gz

@@ -27,7 +27,7 @@ function vendor-package {
 }
 
 vendor-package golang-release golang-1-linux
-vendor-package java-release openjdk-17
+vendor-package java-release openjdk-22
 
 golang_version=$( cat "${script_dir}/../packages/golang-1-linux/version")
 stripped_go_version=$(echo "${golang_version}" | cut -d . -f -2)
