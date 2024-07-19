@@ -92,7 +92,9 @@ jobs:
             git commit --message="${tidy_message}"
             git pull --rebase=true
             git push
-            gh pr review --approve
+            if [ "${{ github.actor }}" == "renovate[bot]" ]; then
+              gh pr review --approve
+            fi
           else
             echo 'No files changed!'
           fi
