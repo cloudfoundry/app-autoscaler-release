@@ -18,9 +18,9 @@ printf "\n"
 jdk_download_url="${SAP_MACHINE_BASE_URL}/releases/download/sapmachine-${JAVA_VERSION}/${binary_name}"
 
 echo "Fetching ${jdk_download_url}"
-mkdir -p src/binaries/jdk && pushd src/binaries/jdk
+mkdir -p src/binaries/jdk && pushd src/binaries/jdk > /dev/null
   curl -JLO "${jdk_download_url}"
-popd
+popd > /dev/null
 
 # Step 2 --> Build java
 jdk_version="$(find . -name "sapmachine*.tar.gz" |   cut -d'-' -f3 | cut -d'_' -f1)"
