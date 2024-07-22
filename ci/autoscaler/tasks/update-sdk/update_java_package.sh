@@ -31,14 +31,17 @@ find . -type f ! -name "*.yml" ! -name "update_java_package.sh" ! -path '*/\.*' 
 
 mv ./packages/openjdk-"${current_java_version}" ./packages/openjdk-"${desired_major_version}"
 
-echo "  -- creating spec file"
 binary_name="sapmachine-jdk-${JAVA_VERSION}_linux-x64_bin.tar.gz"
+bosh add-blob "${autoscaler_dir}/src/binaries/jdk/${binary_name}" "${binary_name}"
+## bosh upload-blob
+
+echo "  -- creating spec file"
 cat > "packages/openjdk-$desired_major_version/spec" <<EOF
 ---
 name: openjdk-${desired_major_version}
 dependencies: []
 files:
-- binaries/**/${binary_name}  # from https://github.com/SAP/SapMachine/releases/download/sapmachine-${JAVA_VERSION}/${binary_name}
+- ${binary_name}  # from https://github.com/SAP/SapMachine/releases/download/sapmachine-${JAVA_VERSION}/${binary_name}
 EOF
 
 echo "  -- creating packaging script "
@@ -53,8 +56,6 @@ cd \${BOSH_INSTALL_TARGET}
 # extract jdk from src/binaries/jdk
 tar zxvf \${BOSH_COMPILE_TARGET}/binaries/jdk/*.tar.gz --strip 1
 EOF
-
-rm "packages/openjdk-$desired_major_version/spec.lock" || true
 
 # creates pr
 echo -n "${JAVA_VERSION}" > "${AUTOSCALER_DIR}/version"
