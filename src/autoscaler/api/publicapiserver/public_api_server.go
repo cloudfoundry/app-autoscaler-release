@@ -122,11 +122,12 @@ func createHealthRouter(logger lager.Logger, conf *config.Config, policyDB db.Po
 }
 
 func newScalingHistoryHandler(logger lager.Logger, conf *config.Config) (http.Handler, error) {
+	ss := SecuritySource{}
 	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, conf)
 	if err != nil {
 		return nil, fmt.Errorf("error creating scaling history handler: %w", err)
 	}
-	scalingHistoryServer, err := scalinghistory.NewServer(scalingHistoryHandler, scalingHistoryHandler)
+	scalingHistoryServer, err := scalinghistory.NewServer(scalingHistoryHandler, ss)
 	if err != nil {
 		return nil, fmt.Errorf("error creating ogen scaling history server: %w", err)
 	}

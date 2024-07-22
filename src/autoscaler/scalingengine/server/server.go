@@ -109,11 +109,12 @@ func setupMainRouter(r *mux.Router, healthRouter *mux.Router) *mux.Router {
 }
 
 func newScalingHistoryHandler(logger lager.Logger, scalingEngineDB db.ScalingEngineDB) (http.Handler, error) {
+	ss := SecuritySource{}
 	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, scalingEngineDB)
 	if err != nil {
 		return nil, fmt.Errorf("error creating scaling history handler: %w", err)
 	}
-	server, err := scalinghistory.NewServer(scalingHistoryHandler, scalingHistoryHandler)
+	server, err := scalinghistory.NewServer(scalingHistoryHandler, ss)
 	if err != nil {
 		return nil, fmt.Errorf("error creating ogen scaling history server: %w", err)
 	}

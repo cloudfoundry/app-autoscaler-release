@@ -21,8 +21,23 @@ import (
 )
 
 var (
-	_ = scalinghistory.SecurityHandler(&ScalingHistoryHandler{})
+	_ = scalinghistory.SecurityHandler(&SecuritySource{})
+	_ = scalinghistory.SecuritySource(&SecuritySource{})
 )
+
+type SecuritySource struct{}
+
+func (h SecuritySource) HandleBasicAuth(ctx context.Context, operationName string, v scalinghistory.BasicAuth) (context.Context, error) {
+	// this handler is a no-op, as this handler shall only be available used behind our own	basicauth middleware.
+	// having this handler is required by the interface `securityhandler` in “oas_security_gen”.
+	return ctx, nil
+}
+
+func (h SecuritySource) BasicAuth(_ context.Context, _ string) (scalinghistory.BasicAuth, error) {
+	// We are calling the scalingengine server authenticated via mTLS, so no bearer token is necessary.
+	// Having this function is required by the interface `SecuritySource`in “oas_security_gen”.
+	return scalinghistory.BasicAuth{}, nil
+}
 
 type ScalingHistoryHandler struct {
 	logger          lager.Logger
@@ -55,12 +70,6 @@ func (h *ScalingHistoryHandler) NewError(_ context.Context, err error) *scalingh
 		})
 	}
 	return result
-}
-
-func (h *ScalingHistoryHandler) HandleBasicAuth(ctx context.Context, operationName string, v scalinghistory.BasicAuth) (context.Context, error) {
-	// this handler is a no-op, as this handler shall only be available used behind our own	basicauth middleware.
-	// having this handler is required by the interface `securityhandler` in “oas_security_gen”.
-	return ctx, nil
 }
 
 func (h *ScalingHistoryHandler) V1AppsGUIDScalingHistoriesGet(ctx context.Context, params scalinghistory.V1AppsGUIDScalingHistoriesGetParams) (*scalinghistory.History, error) {
