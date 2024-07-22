@@ -35,6 +35,9 @@ const (
 	EventGenerator      = "eventGenerator"
 	ScalingEngine       = "scalingEngine"
 	Operator            = "operator"
+
+	ScalingEnginePassword = "scalingengine-password"
+	ScalingEngineUsername = "scalingengine"
 )
 
 var golangAPIInfoFilePath = "../api/exampleconfig/catalog-example.json"
@@ -212,8 +215,8 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		ScalingEngine: apiConfig.ScalingEngineConfig{
 			ScalingEngineUrl: scalingEngineUri,
 			BasicAuth: models.BasicAuth{
-				Username: "scalingengine",
-				Password: "scalingengine-password",
+				Username: ScalingEngineUsername,
+				Password: ScalingEnginePassword,
 			},
 		},
 		EventGenerator: apiConfig.EventGeneratorConfig{
@@ -290,8 +293,8 @@ func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngine
 
 	templateParameters := TemplateParameters{
 		ScalingEngineUri:      scalingEngineURL.String(),
-		ScalingEngineUsername: "scalingengine",
-		ScalingEnginePassword: "scalingengine-password",
+		ScalingEngineUsername: ScalingEngineUsername,
+		ScalingEnginePassword: ScalingEnginePassword,
 		HttpClientTimeout:     int(httpClientTimeout / time.Second),
 		TestCertDir:           testCertDir,
 		Port:                  components.Ports[Scheduler],
@@ -355,8 +358,8 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 		ScalingEngine: egConfig.ScalingEngineConfig{
 			ScalingEngineURL: scalingEngineURL,
 			BasicAuth: models.BasicAuth{
-				Username: "scalingengine",
-				Password: "scalingengine-password",
+				Username: ScalingEngineUsername,
+				Password: ScalingEnginePassword,
 			},
 		},
 		MetricCollector: egConfig.MetricCollectorConfig{
@@ -384,8 +387,8 @@ func (components *Components) PrepareScalingEngineConfig(dbURI string, port int,
 		Server: helpers.ServerConfig{
 			Port: port,
 			BasicAuth: models.BasicAuth{
-				Username: "scalingengine",
-				Password: "scalingengine-password",
+				Username: ScalingEngineUsername,
+				Password: ScalingEnginePassword,
 			},
 		},
 		Logging: helpers.LoggingConfig{
@@ -438,8 +441,8 @@ func (components *Components) PrepareOperatorConfig(dbURI string, ccUAAURL strin
 			URL:          scalingEngineURL,
 			SyncInterval: syncInterval,
 			BasicAuth: models.BasicAuth{
-				Username: "scalingengine",
-				Password: "scalingengine-password",
+				Username: ScalingEngineUsername,
+				Password: ScalingEnginePassword,
 			},
 		},
 		Scheduler: opConfig.SchedulerConfig{
