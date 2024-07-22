@@ -239,44 +239,6 @@ func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func (h *PublicApiHandler) GetScalingHistories(w http.ResponseWriter, req *http.Request, vars map[string]string) {
-	appId := vars["appId"]
-	logger := h.logger.Session("GetScalingHistories", lager.Data{"appId": appId})
-	logger.Info("Get ScalingHistories")
-
-	// be careful about removing this call! There's some backwards compatibility being done in this function
-	parameters, err := parseParameter(req, vars)
-	if err != nil {
-		logger.Error("bad-request", err, lager.Data{"appId": appId})
-		writeErrorResponse(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	path, _ := routes.ScalingEngineRoutes().Get(routes.GetScalingHistoriesRouteName).URLPath("guid", appId)
-	targetURL := h.conf.ScalingEngine.ScalingEngineUrl + path.RequestURI() + "?" + parameters.Encode()
-
-	targetRequest, _ := http.NewRequest(http.MethodGet, targetURL, nil)
-	targetRequest.Header.Set("Authorization", "Bearer none")
-
-	response, err := h.scalingEngineClient.Do(targetRequest)
-
-	if err != nil {
-		logger.Error("error-getting-scaling-history", err, lager.Data{"url": targetURL})
-		writeErrorResponse(w, http.StatusInternalServerError, "Error retrieving scaling history from scaling engine")
-		return
-	}
-	w.Header().Set("Content-Type", response.Header.Get("Content-Type"))
-	w.Header().Set("Content-Length", response.Header.Get("Content-Length"))
-
-	if _, err := io.Copy(w, response.Body); err != nil {
-		logger.Error("copy-response", err)
-		return
-	}
-	err = response.Body.Close()
-	if err != nil {
-		logger.Error("body-close", err)
-	}
-}
-
 func proxyRequest(pathFn func() string, call func(url string) (*http.Response, error), w http.ResponseWriter, reqUrl *url.URL, parameters *url.Values, requestDescription string, logger lager.Logger) {
 	aUrl := pathFn()
 	resp, err := call(aUrl)
