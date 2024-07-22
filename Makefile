@@ -252,7 +252,7 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: bosh-release
-bosh-release: go-mod-tidy go-mod-vendor scheduler download-java-bosh-package db build/autoscaler-test.tgz
+bosh-release: go-mod-tidy go-mod-vendor scheduler db build/autoscaler-test.tgz
 build/autoscaler-test.tgz:
 	@echo " - building bosh release into build/autoscaler-test.tgz"
 	@mkdir -p build
@@ -332,7 +332,7 @@ markdownlint-cli:
 	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac download-java-bosh-package db scheduler deploy-autoscaler-bosh deploy-register-cf
+deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh

@@ -5,5 +5,4 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 cd ${BOSH_INSTALL_TARGET}
 
-# extract jdk from src/binaries/jdk
-tar zxvf ${BOSH_COMPILE_TARGET}/binaries/jdk/*.tar.gz --strip 1
+tar zxvf ${BOSH_COMPILE_TARGET}/*.tar.gz --strip 1

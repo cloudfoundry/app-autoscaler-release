@@ -12,12 +12,11 @@ JAVA_VERSION=${1:-"21.0.3"} # default java version
 SAP_MACHINE_BASE_URL="https://github.com/SAP/SapMachine"
 binary_name="sapmachine-jdk-${JAVA_VERSION}_linux-x64_bin.tar.gz"
 
-echo "Fetching latest SAP Machine Java ${JAVA_VERSION} JDK for Linux"
 printf "\n"
 
 jdk_download_url="${SAP_MACHINE_BASE_URL}/releases/download/sapmachine-${JAVA_VERSION}/${binary_name}"
 
-echo "Fetching ${jdk_download_url}"
+echo "Fetching SAP Machine JDK from ${JAVA_VERSION} ${jdk_download_url}"
 mkdir -p src/binaries/jdk && pushd src/binaries/jdk > /dev/null
   curl -JLO "${jdk_download_url}"
 popd > /dev/null
