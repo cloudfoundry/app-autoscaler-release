@@ -29,7 +29,6 @@ type PublicApiHandler struct {
 	conf                 *config.Config
 	policydb             db.PolicyDB
 	bindingdb            db.BindingDB
-	scalingEngineClient  *http.Client
 	eventGeneratorClient *http.Client
 	policyValidator      *policyvalidator.PolicyValidator
 	schedulerUtil        *schedulerclient.Client
@@ -43,12 +42,6 @@ const (
 )
 
 func NewPublicApiHandler(logger lager.Logger, conf *config.Config, policydb db.PolicyDB, bindingdb db.BindingDB, credentials cred_helper.Credentials) *PublicApiHandler {
-	seClient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.BasicAuth, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
-	if err != nil {
-		logger.Error("Failed to create http client for ScalingEngine", err, lager.Data{"scalingengine": conf.ScalingEngine.BasicAuth})
-		os.Exit(1)
-	}
-
 	egClient, err := helpers.CreateHTTPClient(&conf.EventGenerator.BasicAuth, helpers.DefaultClientConfig(), logger.Session("event_client"))
 	if err != nil {
 		logger.Error("Failed to create http client for EventGenerator", err, lager.Data{"eventgenerator": conf.EventGenerator.BasicAuth})
@@ -60,7 +53,6 @@ func NewPublicApiHandler(logger lager.Logger, conf *config.Config, policydb db.P
 		conf:                 conf,
 		policydb:             policydb,
 		bindingdb:            bindingdb,
-		scalingEngineClient:  seClient,
 		eventGeneratorClient: egClient,
 		policyValidator: policyvalidator.NewPolicyValidator(
 			conf.PolicySchemaPath,
