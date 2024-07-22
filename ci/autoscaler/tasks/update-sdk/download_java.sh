@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-JAVA_VERSION=${1:-"21.0.3"} # default java version
+JAVA_VERSION=${1:-"22.0.1"} # default java version
 
 # Step 1 --> Download java from https://github.com/SAP/SapMachine/releases/download/sapmachine-21.0.3/sapmachine-jdk-21.0.3_linux-x64_bin.tar.gz
 SAP_MACHINE_BASE_URL="https://github.com/SAP/SapMachine"
