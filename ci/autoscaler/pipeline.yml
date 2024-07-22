@@ -167,7 +167,10 @@ resources:
   source:
     uri: https://github.com/SAP/SapMachine.git
     branch: sapmachine
-    version_depth: 20
+    fetch_tags: true
+    tag_filter: sapmachine-21.*
+    #tag_regex: ^sapmachine-(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
+    version_depth: 500
 
 - name: gcp-jammy-stemcell
   type: bosh-io-stemcell
