@@ -33,6 +33,7 @@ files:
 - autoscaler/vendor/github.com/go-logr/logr/funcr/* # gosub
 - autoscaler/vendor/github.com/go-logr/stdr/* # gosub
 - autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
+- autoscaler/vendor/github.com/google/uuid/* # gosub
 - autoscaler/vendor/github.com/gorilla/mux/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-retryablehttp/* # gosub
@@ -55,7 +56,6 @@ files:
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
-- autoscaler/vendor/github.com/nu7hatch/gouuid/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/* # gosub
