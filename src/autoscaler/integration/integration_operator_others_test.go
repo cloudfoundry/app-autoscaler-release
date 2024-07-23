@@ -27,6 +27,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 		spaceId           string
 
 		apiURL            url.URL
+		brokerURL         url.URL
 		scalingEngineURL  url.URL
 		schedulerURL      url.URL
 		eventgeneratorURL url.URL
@@ -61,6 +62,11 @@ var _ = Describe("Integration_Operator_Others", func() {
 
 		apiURL = url.URL{
 			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[GolangAPIServer]),
+		}
+
+		brokerURL = url.URL{
+			Scheme: "http",
 			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[GolangServiceBroker]),
 		}
 
@@ -76,7 +82,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 			tmpDir)
 		startGolangApiServer()
 		brokerAuth = base64.StdEncoding.EncodeToString([]byte("broker_username:broker_password"))
-		provisionAndBind(serviceInstanceId, orgId, spaceId, bindingId, testAppId, apiURL, httpClientForPublicApi)
+		provisionAndBind(serviceInstanceId, orgId, spaceId, bindingId, testAppId, brokerURL, httpClientForPublicApi)
 
 		scalingEngineConfPath = components.PrepareScalingEngineConfig(dbUrl, components.Ports[ScalingEngine], fakeCCNOAAUAA.URL(), defaultHttpClientTimeout, tmpDir)
 		startScalingEngine()

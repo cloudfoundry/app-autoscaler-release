@@ -2,6 +2,7 @@ package integration_test
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -458,7 +459,7 @@ func deleteSchedule(schedulerURL url.URL, appId string) (*http.Response, error) 
 	req, err := http.NewRequest("DELETE", schedulerURL.String(), strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
-	return httpClient.Do(req)
+	return httpClientForScheduler.Do(req)
 }
 
 func getActiveSchedule(scalingEngineURL url.URL, appId string) (*http.Response, error) {
@@ -467,6 +468,9 @@ func getActiveSchedule(scalingEngineURL url.URL, appId string) (*http.Response, 
 	req, err := http.NewRequest("GET", scalingEngineURL.String(), strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
+	req.SetBasicAuth("scalingengine", "scalingengine-password")
+	brokerAuth = base64.StdEncoding.EncodeToString([]byte("scalingengine:scalingengine-password"))
+	req.Header.Set("Authorization", "Basic "+brokerAuth)
 	return httpClient.Do(req)
 }
 
