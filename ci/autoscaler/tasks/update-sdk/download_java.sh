@@ -6,6 +6,9 @@
 
 set -euo pipefail
 
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+source "${script_dir}/vars.source.sh"
+
 JAVA_VERSION=${1:-"22.0.1"} # default java version
 
 # Step 1 --> Download java from https://github.com/SAP/SapMachine/releases/download/sapmachine-21.0.3/sapmachine-jdk-21.0.3_linux-x64_bin.tar.gz
@@ -18,8 +21,12 @@ printf "\n"
 jdk_download_url="${SAP_MACHINE_BASE_URL}/releases/download/sapmachine-${JAVA_VERSION}/${binary_name}"
 
 echo "Fetching ${jdk_download_url}"
-mkdir -p src/binaries/jdk && pushd src/binaries/jdk > /dev/null
+
+# shellcheck disable=SC2154
+pushd "${autoscaler_dir}"
+  mkdir -p src/binaries/jdk && pushd src/binaries/jdk > /dev/null
   curl -JLO "${jdk_download_url}"
+  popd > /dev/null
 popd > /dev/null
 
 # Step 2 --> Build java
