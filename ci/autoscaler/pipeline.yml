@@ -87,16 +87,6 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-- name: http-resource
-  type: docker-image
-  source:
-    repository: jgriff/http-resource
-
-- name: http-jq-resource
-  type: docker-image
-  source:
-    repository: qudini/concourse-http-jq-resource
-    tag: latest
 
 resources:
 - name: every-night
@@ -182,20 +172,6 @@ resources:
     tag_filter: sapmachine-21*
     #tag_regex: ^sapmachine-(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
     version_depth: 50
-
-- name: http-bin
-  type: http-resource
-  source:
-    url: https://api.foojay.io/disco/v3.0/packages/jdks?jdk_version=21&distribution=sap_machine&architecture=x86-64&operating_system=linux&release_status=ga&term_of_support=lts
-    version:
-      jq: ".result[].java_version"
-
-
-- name: api-http-jq-release
-  type: http-jq-resource
-  source:
-    base_url: https://api.foojay.io/disco/v3.0/packages/jdks?jdk_version=21&distribution=sap_machine&architecture=x86-64&operating_system=linux&release_status=ga&term_of_support=lts
-
 
 - name: gcp-jammy-stemcell
   type: bosh-io-stemcell
@@ -622,8 +598,6 @@ jobs:
     - get: app-autoscaler-release
     - get: java-release
       trigger: true
-    - get: http-bin
-    - get: api-http-jq-release
     - get: golang-release
     - get: ci
   - task: update-java-sdk
