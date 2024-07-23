@@ -14,19 +14,26 @@ java_dir=${JAVA_DIR:-"${autoscaler_dir}/../SapMachine"}
 java_dir=$(realpath --canonicalize-existing "${java_dir}")
 
 pushd "${java_dir}"
-  git status
-  git describe --tags
-  cat make/conf/version-numbers.conf
+  java_major_version=$(grep "DEFAULT_JDK_SOURCE_TARGET_VERSION" make/conf/version-numbers.conf | cut -d= -f2)
+  java_version_interim=$(grep "DEFAULT_VERSION_INTERIM" make/conf/version-numbers.conf | cut -d= -f2)
+  java_version_update=$(grep "DEFAULT_VERSION_UPDATE" make/conf/version-numbers.conf | cut -d= -f2)
+  java_version_prerelease=$(grep "DEFAULT_PROMOTED_VERSION_PRE" make/conf/version-numbers.conf | cut -d= -f2)
 popd
 
+sapmachine_java_version="${java_major_version}.${java_version_interim}.${java_version_update}"
+echo "Desired Java Version: ${sapmachine_java_version}"
 
+# consider only lts releases
+if [ "${java_version_prerelease}" != "" ]; then
+     echo "java version ${sapmachine_java_version} is not a LTS release. skipping update"
+     exit 0
+fi
 
-JAVA_VERSION=${1:-"22.0.1"} # default java version
+JAVA_VERSION=${sapmachine_java_version:-"21.0.3"}
 desired_major_version=${JAVA_VERSION%%.*}
 
 # identify current version
 # shellcheck disable=SC2154
-ls -lah "${autoscaler_dir}"
 current_major_version=$(find "${autoscaler_dir}/packages" -type d -name "openjdk-*" -exec bash -c '
                           directory_name="$1"
                           version_number=${directory_name##*-}
@@ -48,16 +55,22 @@ source "${script_dir}/download_java.sh" "${JAVA_VERSION}"
 binary_name="sapmachine-jdk-${JAVA_VERSION}_linux-x64_bin.tar.gz"
 
 # Step 2 --> upload blob to blobstore
-echo "- Adding and uploading blobs to release blobstore "
-bosh add-blob "${autoscaler_dir}/src/binaries/jdk/${binary_name}" "${binary_name}"
-create_bosh_config
-bosh upload-blobs
+pushd "${autoscaler_dir}" > /dev/null
+  echo "- Adding and uploading blobs to release blobstore "
+  bosh add-blob "src/binaries/jdk/${binary_name}" "${binary_name}"
+  create_bosh_config
+  bosh upload-blobs
+popd > /dev/null
 
 # Step 3 --> update bosh java package references
 echo "- updating bosh java packages..."
 # shellcheck disable=SC2038
-find "${autoscaler_dir}" -type f ! -name "*.yml" ! -name "update_java_package.sh" ! -path '*/\.*' -exec grep -l "openjdk-${current_major_version}" {} \;| xargs sed -i "s/openjdk-${current_major_version}/openjdk-${desired_major_version}/g"
-mv "${autoscaler_dir}/packages/openjdk-${current_major_version}" "${autoscaler_dir}/packages/openjdk-${desired_major_version}"
+# only change java references if major versions are different
+if [ "${current_major_version}" != "${desired_major_version}" ]; then
+  find "${autoscaler_dir}" -type f ! -name "*.yml" ! -name "update_java_package.sh" ! -path '*/\.*' -exec grep -l "openjdk-${current_major_version}" {} \;| xargs sed -i "s/openjdk-${current_major_version}/openjdk-${desired_major_version}/g"
+  mv "${autoscaler_dir}/packages/openjdk-${current_major_version}" "${autoscaler_dir}/packages/openjdk-${desired_major_version}"
+  exit 0
+fi
 
 echo " - creating spec file"
 cat > "${autoscaler_dir}/packages/openjdk-$desired_major_version/spec" <<EOF
@@ -81,7 +94,7 @@ cd \${BOSH_INSTALL_TARGET}
 tar zxvf \${BOSH_COMPILE_TARGET}/*.tar.gz --strip 1
 EOF
 
-#required for PR creating
+#required for PR creation
 echo -n "${JAVA_VERSION}" > "${autoscaler_dir}/version"
 echo -n "${JAVA_VERSION}" > "${autoscaler_dir}/vendored-commit"
 echo -n "${JAVA_VERSION}" > "${autoscaler_dir}/packages/openjdk-${desired_major_version}/version"
