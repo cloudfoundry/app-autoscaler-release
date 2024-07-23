@@ -65,8 +65,10 @@ var (
 	breachDurationSecs        = 5
 
 	httpClient             *http.Client
+	httpClientForScheduler *http.Client
 	httpClientForPublicApi *http.Client
-	logger                 lager.Logger
+
+	logger lager.Logger
 
 	testCertDir = "../../../test-certs"
 )
@@ -434,7 +436,7 @@ func getSchedules(schedulerURL url.URL, appId string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", schedulerURL.String(), strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
-	return httpClient.Do(req)
+	return httpClientForScheduler.Do(req)
 }
 
 func createSchedule(appId string, guid string, schedule string, schedulerURL url.URL) (*http.Response, error) {

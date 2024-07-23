@@ -38,6 +38,7 @@ func getAppAggregatedMetricUrl(appId string, metricType string, parameteters map
 }
 
 func compareAppAggregatedMetricResult(o1, o2 AppAggregatedMetricResult) {
+	GinkgoHelper()
 	compareUrlValues(o1.NextUrl, o2.NextUrl)
 	compareUrlValues(o1.PrevUrl, o2.PrevUrl)
 	o1.PrevUrl = ""
@@ -59,6 +60,7 @@ func compareUrlValues(actual string, expected string) {
 }
 
 func checkAggregatedMetricResult(apiURL url.URL, pathVariables []string, parameters map[string]string, result AppAggregatedMetricResult) {
+	GinkgoHelper()
 	var actual AppAggregatedMetricResult
 	resp, err := getAppAggregatedMetrics(apiURL, pathVariables, parameters)
 	body := MustReadAll(resp.Body)

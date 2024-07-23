@@ -36,7 +36,7 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 	BeforeEach(func() {
 		startFakeCCNOAAUAA(initInstanceCount)
 		httpClient = testhelpers.NewApiClient()
-		httpClientForPublicApi = testhelpers.NewPublicApiClient()
+		httpClientForScheduler = testhelpers.NewSchedulerClient()
 
 		serviceBrokerURL = url.URL{
 			Scheme: "http",
