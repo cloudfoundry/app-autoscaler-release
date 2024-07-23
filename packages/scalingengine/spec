@@ -45,6 +45,7 @@ files:
 - autoscaler/vendor/github.com/go-logr/logr/funcr/* # gosub
 - autoscaler/vendor/github.com/go-logr/stdr/* # gosub
 - autoscaler/vendor/github.com/go-sql-driver/mysql/* # gosub
+- autoscaler/vendor/github.com/google/uuid/* # gosub
 - autoscaler/vendor/github.com/gorilla/mux/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-cleanhttp/* # gosub
 - autoscaler/vendor/github.com/hashicorp/go-retryablehttp/* # gosub
