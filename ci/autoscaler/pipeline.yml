@@ -169,8 +169,7 @@ resources:
     uri: https://github.com/SAP/SapMachine.git
     branch: sapmachine21
     fetch_tags: true
-    tag_filter: sapmachine-21*
-    #tag_regex: ^sapmachine-(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
+    tag_regex: 'sapmachine-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+'
     version_depth: 50
 
 - name: gcp-jammy-stemcell
