@@ -7,7 +7,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/apis/scalinghistory"
 	internalscalingenginehistory "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/apis/scalinghistory"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/server"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/client"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
@@ -40,10 +40,9 @@ type ScalingHistoryHandler struct {
 }
 
 func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*ScalingHistoryHandler, error) {
-	ss := server.SecuritySource{}
-	seClient, err := helpers.CreateHTTPClient(&conf.ScalingEngine.BasicAuth, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
-	if err != nil {
-		return nil, fmt.Errorf("error creating scaling history HTTP client: %w", err)
+	ss := client.SecuritySource{
+		Username: conf.ScalingEngine.BasicAuth.Username,
+		Password: conf.ScalingEngine.BasicAuth.Password,
 	}
 
 	newHandler := &ScalingHistoryHandler{
@@ -51,7 +50,7 @@ func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*Scalin
 		conf:   conf,
 	}
 
-	if client, err := internalscalingenginehistory.NewClient(conf.ScalingEngine.ScalingEngineUrl, ss, internalscalingenginehistory.WithClient(seClient)); err != nil {
+	if client, err := internalscalingenginehistory.NewClient(conf.ScalingEngine.ScalingEngineUrl, ss); err != nil {
 
 		return nil, fmt.Errorf("error creating ogen scaling history client: %w", err)
 	} else {

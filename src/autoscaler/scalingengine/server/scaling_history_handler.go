@@ -15,6 +15,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/apis/scalinghistory"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/client"
 	"code.cloudfoundry.org/lager/v3"
 
 	"net/http"
@@ -22,7 +23,7 @@ import (
 
 var (
 	_ = scalinghistory.SecurityHandler(&SecuritySource{})
-	_ = scalinghistory.SecuritySource(&SecuritySource{})
+	_ = scalinghistory.SecuritySource(&client.SecuritySource{})
 )
 
 type SecuritySource struct{}
@@ -31,12 +32,6 @@ func (h SecuritySource) HandleBasicAuth(ctx context.Context, operationName strin
 	// this handler is a no-op, as this handler shall only be available used behind our own	basicauth middleware.
 	// having this handler is required by the interface `securityhandler` in “oas_security_gen”.
 	return ctx, nil
-}
-
-func (h SecuritySource) BasicAuth(_ context.Context, _ string) (scalinghistory.BasicAuth, error) {
-	// We are calling the scalingengine server authenticated via mTLS, so no bearer token is necessary.
-	// Having this function is required by the interface `SecuritySource`in “oas_security_gen”.
-	return scalinghistory.BasicAuth{}, nil
 }
 
 type ScalingHistoryHandler struct {

@@ -14,6 +14,28 @@ import (
 	"code.cloudfoundry.org/cfhttp/v2"
 )
 
+type TransportWithBasicAuth struct {
+	Username string
+	Password string
+	Base     http.RoundTripper
+}
+
+func (t *TransportWithBasicAuth) base() http.RoundTripper {
+	if t.Base != nil {
+		return t.Base
+	}
+	return http.DefaultTransport
+}
+
+func (t *TransportWithBasicAuth) RoundTrip(req *http.Request) (*http.Response, error) {
+	credentials := t.Username + ":" + t.Password
+	basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(credentials))
+	fmt.Println("banana TransportWithBasicAuth:credentials", credentials)
+	fmt.Println("banana TransportWithBasicAuth:", basicAuth)
+	req.Header.Add("Authorization", basicAuth)
+	return t.base().RoundTrip(req)
+}
+
 func DefaultClientConfig() cf.ClientConfig {
 	return cf.ClientConfig{
 		MaxIdleConnsPerHost:     200,
@@ -22,34 +44,19 @@ func DefaultClientConfig() cf.ClientConfig {
 }
 
 func CreateHTTPClient(ba *models.BasicAuth, config cf.ClientConfig, logger lager.Logger) (*http.Client, error) {
-	auth := ba.Username + ":" + ba.Password
-	basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
-
 	client := cfhttp.NewClient(
 		cfhttp.WithDialTimeout(30*time.Second),
 		cfhttp.WithIdleConnTimeout(time.Duration(config.IdleConnectionTimeoutMs)*time.Millisecond),
 		cfhttp.WithMaxIdleConnsPerHost(config.MaxIdleConnsPerHost),
 	)
 
+	client = cf.RetryClient(config, client, logger)
 	client.Transport = &TransportWithBasicAuth{
-		Username:  ba.Username,
-		Password:  ba.Password,
-		BasicAuth: basicAuth,
+		Username: ba.Username,
+		Password: ba.Password,
 	}
 
-	return cf.RetryClient(config, client, logger), nil
-}
-
-// TransportWithBasicAuth is a custom Transport that adds Basic Authentication headers to the request
-type TransportWithBasicAuth struct {
-	Username  string
-	Password  string
-	BasicAuth string
-}
-
-func (t *TransportWithBasicAuth) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Add("Authorization", t.BasicAuth)
-	return http.DefaultTransport.RoundTrip(req)
+	return client, nil
 }
 
 func CreateHTTPSClient(tlsCerts *models.TLSCerts, config cf.ClientConfig, logger lager.Logger) (*http.Client, error) {
