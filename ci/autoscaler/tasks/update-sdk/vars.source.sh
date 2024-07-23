@@ -30,6 +30,21 @@ function step(){
   echo "# $1"
 }
 
+function create_bosh_config(){
+   # generate the private.yml file with the credentials
+   config_file="${autoscaler_dir}/config/private.yml"
+    cat > "$config_file" <<EOF
+---
+blobstore:
+  options:
+    credentials_source: static
+    json_key:
+EOF
+    echo ' - Generating private.yml...'
+    yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "$config_file"
+}
+
+
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir=$(realpath -e "${script_dir}/../../../..")
 

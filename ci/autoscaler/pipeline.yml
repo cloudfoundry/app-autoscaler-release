@@ -87,6 +87,7 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
+
 resources:
 - name: every-night
   type: time
@@ -166,11 +167,11 @@ resources:
   check_every: 5m
   source:
     uri: https://github.com/SAP/SapMachine.git
-    branch: sapmachine
+    branch: sapmachine21
     fetch_tags: true
-    tag_filter: sapmachine-21.*
+    tag_filter: sapmachine-21*
     #tag_regex: ^sapmachine-(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)
-    version_depth: 500
+    version_depth: 50
 
 - name: gcp-jammy-stemcell
   type: bosh-io-stemcell
