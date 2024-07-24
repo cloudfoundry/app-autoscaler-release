@@ -288,6 +288,7 @@ public class ScheduleManager {
 
     return compenstatorySchedule;
   }
+
   /**
    * Calls private helper methods to delete the schedules from the database and calls
    * ScalingJobManager to delete scaling action jobs.
