@@ -9,7 +9,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-
+import java.time.Duration;
 import javax.net.ssl.SSLContext;
 
 
@@ -27,6 +27,7 @@ import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -36,41 +37,20 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RestClientConfig {
-  @Bean
-  public RestOperations restOperations(ClientHttpRequestFactory clientHttpRequestFactory)
-      throws Exception {
-    return new RestTemplate(clientHttpRequestFactory);
-  }
+  @Value("${autoscaler.scalingengine.basic_auth.password}")
+  private String scalingEnginePassword;
+
+  @Value("${autoscaler.scalingengine.basic_auth.username}")
+  private String scalingEngineUsername;
+
+  @Value("${client.httpClientTimeout}")
+  private Integer httpClientTimeout ;
 
   @Bean
-  public ClientHttpRequestFactory clientHttpRequestFactory(HttpClient httpClient) {
-    return new HttpComponentsClientHttpRequestFactory(httpClient);
+  public RestOperations restOperations(RestTemplateBuilder restTemplateBuilder) {
+    return restTemplateBuilder
+      .setConnectTimeout( Duration.ofSeconds(httpClientTimeout))
+      .setReadTimeout( Duration.ofSeconds(httpClientTimeout))
+      .basicAuthentication(scalingEngineUsername, scalingEnginePassword).build();
   }
-
-  @Bean
-  public HttpClient httpClient(@Value("${client.httpClientTimeout}") Integer httpClientTimeout,
-      @Value("${autoscaler.scalingengine.basic_auth.username}") String username,
-      @Value("${autoscaler.scalingengine.basic_auth.password}") String password) throws Exception {
-
-    HttpClientBuilder builder = HttpClientBuilder.create();
-    HttpClientConnectionManager ccm = PoolingHttpClientConnectionManagerBuilder.create().build();
-    builder.setConnectionManager(ccm);
-    RequestConfig requestConfig =
-        RequestConfig.custom().setConnectionRequestTimeout(Timeout.ofSeconds(httpClientTimeout))
-            .setResponseTimeout(Timeout.ofSeconds(httpClientTimeout)).build();
-
-    if (username != null && password != null) {
-      BasicCredentialsProvider provider = new BasicCredentialsProvider();
-      // applies to any host and any port
-      AuthScope authScope = new AuthScope(null, -1);
-      provider.setCredentials(authScope,
-          new UsernamePasswordCredentials(username, password.toCharArray()));
-      builder.setDefaultCredentialsProvider(provider);
-    }
-
-    builder.setDefaultRequestConfig(requestConfig);
-    return builder.build();
-  }
-
-
 }
