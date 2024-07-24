@@ -68,7 +68,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	egPath = string(pathByte)
 	initHttpEndPoints()
 	initConfig()
-	httpClient = testhelpers.NewApiClient()
+	httpClientForPublicApi = testhelpers.NewPublicApiClient()
 })
 
 var _ = SynchronizedAfterSuite(func() {

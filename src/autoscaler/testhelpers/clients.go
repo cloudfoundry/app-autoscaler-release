@@ -12,10 +12,6 @@ import (
 	. "code.cloudfoundry.org/tlsconfig"
 )
 
-func NewApiClient() *http.Client {
-	return createClient()
-}
-
 func NewPublicApiClient() *http.Client {
 	return createClient()
 }

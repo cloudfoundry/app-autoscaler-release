@@ -10,8 +10,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf/mocks"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -61,7 +60,7 @@ type testdata struct {
 
 var _ = SynchronizedBeforeSuite(func() []byte {
 	info := testdata{}
-	dbUrl := GetDbUrl()
+	dbUrl := testhelpers.GetDbUrl()
 
 	database, e := db.GetConnection(dbUrl)
 	if e != nil {
@@ -121,7 +120,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	}
 	cfg.Logging.Level = "info"
 	cfg.DB = make(map[string]db.DatabaseConfig)
-	dbUrl := GetDbUrl()
+	dbUrl := testhelpers.GetDbUrl()
 	cfg.DB[db.BindingDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
@@ -194,7 +193,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 
 	configFile = writeConfig(&cfg)
 
-	apiHttpClient = NewApiClient()
+	apiHttpClient = testhelpers.NewPublicApiClient()
 
 	healthHttpClient = &http.Client{}
 })
@@ -264,6 +263,6 @@ func (ap *ApiRunner) Interrupt() {
 
 func readFile(filename string) string {
 	contents, err := os.ReadFile(filename)
-	FailOnError("Failed to read file:"+filename+" ", err)
+	testhelpers.FailOnError("Failed to read file:"+filename+" ", err)
 	return string(contents)
 }

@@ -65,9 +65,9 @@ var (
 	evaluationManagerInterval = 1 * time.Second
 	breachDurationSecs        = 5
 
-	httpClient             *http.Client
-	httpClientForScheduler *http.Client
-	httpClientForPublicApi *http.Client
+	httpClientForScheduler     *http.Client
+	httpClientForPublicApi     *http.Client
+	httpClientForScalingEngine *http.Client
 
 	logger lager.Logger
 
@@ -131,7 +131,6 @@ var _ = SynchronizedAfterSuite(func() {
 })
 
 var _ = BeforeEach(func() {
-	httpClient = NewApiClient()
 	httpClientForPublicApi = NewPublicApiClient()
 	logger = lager.NewLogger("test")
 	logger.RegisterSink(lager.NewWriterSink(GinkgoWriter, lager.DEBUG))
@@ -468,10 +467,10 @@ func getActiveSchedule(scalingEngineURL url.URL, appId string) (*http.Response, 
 	req, err := http.NewRequest("GET", scalingEngineURL.String(), strings.NewReader(""))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
-	req.SetBasicAuth("scalingengine", "scalingengine-password")
-	brokerAuth = base64.StdEncoding.EncodeToString([]byte("scalingengine:scalingengine-password"))
+	req.SetBasicAuth(ScalingEngineUsername, ScalingEnginePassword)
+	brokerAuth = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", ScalingEngineUsername, ScalingEnginePassword)))
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
-	return httpClient.Do(req)
+	return httpClientForScalingEngine.Do(req)
 }
 
 func activeScheduleExists(scalingEngineURL url.URL, appId string) bool {

@@ -30,7 +30,6 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 
 	BeforeEach(func() {
 		startFakeCCNOAAUAA(initInstanceCount)
-		httpClient = testhelpers.NewApiClient()
 		httpClientForPublicApi = testhelpers.NewPublicApiClient()
 
 		apiURL = url.URL{

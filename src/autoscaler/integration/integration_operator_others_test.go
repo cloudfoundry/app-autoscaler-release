@@ -34,8 +34,9 @@ var _ = Describe("Integration_Operator_Others", func() {
 	)
 
 	BeforeEach(func() {
-		httpClientForPublicApi = testhelpers.NewApiClient()
+		httpClientForPublicApi = testhelpers.NewPublicApiClient()
 		httpClientForScheduler = testhelpers.NewSchedulerClient()
+		httpClientForScalingEngine = testhelpers.NewScalingEngineClient()
 
 		testAppId = getUUID()
 		testGuid = getUUID()

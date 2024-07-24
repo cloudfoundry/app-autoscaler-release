@@ -25,7 +25,6 @@ var _ = Describe("Integration_GolangApi_ScalingEngine", func() {
 	)
 
 	BeforeEach(func() {
-		httpClient = testhelpers.NewApiClient()
 		httpClientForPublicApi = testhelpers.NewPublicApiClient()
 		startFakeCCNOAAUAA(initInstanceCount)
 		scalingEngineConfPath = components.PrepareScalingEngineConfig(dbUrl, components.Ports[ScalingEngine], fakeCCNOAAUAA.URL(), defaultHttpClientTimeout, tmpDir)
