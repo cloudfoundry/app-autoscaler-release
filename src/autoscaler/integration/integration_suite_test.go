@@ -526,7 +526,6 @@ func setPolicySpecificDateTime(policyByte []byte, start time.Duration, end time.
 func getScalingHistories(apiURL url.URL, pathVariables []string, parameters map[string]string) (*http.Response, error) {
 	var getScalingHistoriesURL string
 	By("getScalingHistories")
-	httpClientTmp := httpClientForPublicApi
 	apiURL.Path = fmt.Sprintf("/v1/apps/%s/scaling_histories", pathVariables[0])
 	if len(parameters) > 0 {
 		parsedURL, err := url.Parse(apiURL.String())
@@ -547,13 +546,12 @@ func getScalingHistories(apiURL url.URL, pathVariables []string, parameters map[
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "bearer fake-token")
-	return httpClientTmp.Do(req)
+	return httpClientForPublicApi.Do(req)
 }
 
 func getAppAggregatedMetrics(apiURL url.URL, pathVariables []string, parameters map[string]string) (*http.Response, error) {
 	urlParams := ""
 	By("getAppAggregatedMetrics")
-	httpClientTmp := httpClientForPublicApi
 	if len(parameters) > 0 {
 		urlParams += "any=any"
 		for paramName, paramValue := range parameters {
@@ -566,7 +564,7 @@ func getAppAggregatedMetrics(apiURL url.URL, pathVariables []string, parameters 
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "bearer fake-token")
-	return httpClientTmp.Do(req)
+	return httpClientForPublicApi.Do(req)
 }
 
 func readPolicyFromFile(filename string) []byte {

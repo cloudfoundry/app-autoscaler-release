@@ -38,6 +38,9 @@ const (
 
 	ScalingEnginePassword = "scalingengine-password"
 	ScalingEngineUsername = "scalingengine"
+
+	EventgeneratorUsername = "eventgenerator"
+	EventgeneratorPassword = "eventgenerator-password"
 )
 
 var golangAPIInfoFilePath = "../api/exampleconfig/catalog-example.json"
@@ -222,8 +225,8 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		EventGenerator: apiConfig.EventGeneratorConfig{
 			EventGeneratorUrl: eventGeneratorUri,
 			BasicAuth: models.BasicAuth{
-				Username: "eventgenerator",
-				Password: "eventgenerator-password",
+				Username: EventgeneratorUsername,
+				Password: EventgeneratorPassword,
 			},
 		},
 		CF: cf.Config{
@@ -326,8 +329,8 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 			ServerConfig: helpers.ServerConfig{
 				Port: port,
 				BasicAuth: models.BasicAuth{
-					Username: "eventgenerator",
-					Password: "eventgenerator-password",
+					Username: EventgeneratorUsername,
+					Password: EventgeneratorPassword,
 				},
 			},
 			NodeAddrs: []string{"localhost"},
