@@ -27,7 +27,7 @@ templates:
   scheduler_db_ca.crt.erb: config/certs/scheduler_db/ca.crt
 
 packages:
-  - openjdk-17
+  - openjdk-21
   - db
   - scalingengine
   - common

@@ -1,0 +1,8 @@
+set -ex
+# compile and runtime bosh env vars
+export JAVA_HOME=/var/vcap/packages/openjdk-21
+export PATH=$JAVA_HOME/bin:$PATH
+
+cd ${BOSH_INSTALL_TARGET}
+
+tar zxvf ${BOSH_COMPILE_TARGET}/*.tar.gz --strip 1
