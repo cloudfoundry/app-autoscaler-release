@@ -24,7 +24,7 @@ var _ = Describe("Integration_Scheduler_ScalingEngine", func() {
 	)
 
 	BeforeEach(func() {
-		httpClient = testhelpers.NewSchedulerClient()
+		httpClientForScheduler = testhelpers.NewSchedulerClient()
 
 		testAppId = getUUID()
 		testGuid = getUUID()

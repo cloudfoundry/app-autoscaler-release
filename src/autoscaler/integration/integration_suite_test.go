@@ -450,7 +450,7 @@ func createSchedule(appId string, guid string, schedule string, schedulerURL url
 	}
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
-	return httpClient.Do(req)
+	return httpClientForScheduler.Do(req)
 }
 
 func deleteSchedule(schedulerURL url.URL, appId string) (*http.Response, error) {
@@ -711,7 +711,7 @@ func checkResponse(resp *http.Response, err error, expectHttpStatus int, expectR
 }
 
 func checkResponseEmptyAndStatusCode(resp *http.Response, err error, expectedStatus int) {
-	Expect(err).NotTo(HaveOccurred())
+	Expect(err).WithOffset(1).NotTo(HaveOccurred())
 	defer func() { _ = resp.Body.Close() }()
 	body, err := io.ReadAll(resp.Body)
 	Expect(err).NotTo(HaveOccurred())
