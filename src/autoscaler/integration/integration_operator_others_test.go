@@ -34,7 +34,8 @@ var _ = Describe("Integration_Operator_Others", func() {
 	)
 
 	BeforeEach(func() {
-		httpClient = testhelpers.NewApiClient()
+		httpClientForPublicApi = testhelpers.NewApiClient()
+		httpClientForScheduler = testhelpers.NewSchedulerClient()
 
 		testAppId = getUUID()
 		testGuid = getUUID()
@@ -98,7 +99,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 	})
 
 	AfterEach(func() {
-		_, err := detachPolicy(testAppId, apiURL, httpClient)
+		_, err := detachPolicy(testAppId, apiURL, httpClientForPublicApi)
 		Expect(err).NotTo(HaveOccurred())
 		stopScheduler()
 		stopScalingEngine()
@@ -119,7 +120,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 
 					JustBeforeEach(func() {
 						policyStr = setPolicySpecificDateTime(readPolicyFromFile("fakePolicyWithSpecificDateSchedule.json"), 70*time.Second, 2*time.Hour)
-						doAttachPolicy(testAppId, []byte(policyStr), http.StatusOK, apiURL, httpClient)
+						doAttachPolicy(testAppId, []byte(policyStr), http.StatusOK, apiURL, httpClientForPublicApi)
 					})
 
 					It("should sync the active schedule to scaling engine after restart", func() {
@@ -142,7 +143,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 				Context("Delete an active schedule", func() {
 					BeforeEach(func() {
 						policyStr = setPolicySpecificDateTime(readPolicyFromFile("fakePolicyWithSpecificDateSchedule.json"), 70*time.Second, 140*time.Second)
-						doAttachPolicy(testAppId, []byte(policyStr), http.StatusOK, apiURL, httpClient)
+						doAttachPolicy(testAppId, []byte(policyStr), http.StatusOK, apiURL, httpClientForPublicApi)
 
 						//TODO why just sleep for a minute ?
 						time.Sleep(70 * time.Second)
@@ -211,20 +212,19 @@ var _ = Describe("Integration_Operator_Others", func() {
 					resp, err := getSchedules(schedulerURL, testAppId)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(resp.StatusCode).To(Equal(http.StatusNotFound))
-
 				})
+
 				It("operator should sync the schedule to scheduler ", func() {
 					Eventually(func() bool {
 						resp, _ := getSchedules(schedulerURL, testAppId)
 						return resp.StatusCode == http.StatusOK
 					}, 2*time.Minute, 5*time.Second).Should(BeTrue())
-
 				})
 			})
 
 			Context("when update a policy to another schedule sets only in policy DB without any update in scheduler ", func() {
 				BeforeEach(func() {
-					doAttachPolicy(testAppId, []byte(policyStr), http.StatusOK, apiURL, httpClient)
+					doAttachPolicy(testAppId, []byte(policyStr), http.StatusOK, apiURL, httpClientForPublicApi)
 					assertScheduleContents(schedulerURL, testAppId, http.StatusOK, map[string]int{"recurring_schedule": 4, "specific_date": 2})
 
 					newPolicyStr := string(setPolicyRecurringDate(readPolicyFromFile("fakePolicyWithScheduleAnother.json")))
