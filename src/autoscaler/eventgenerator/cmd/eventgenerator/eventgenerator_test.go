@@ -142,7 +142,7 @@ var _ = Describe("Eventgenerator", func() {
 			})
 
 			It("returns with a 200", func() {
-				rsp, err := httpClient.Get(serverURL.String())
+				rsp, err := httpClientForPublicApi.Get(serverURL.String())
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()

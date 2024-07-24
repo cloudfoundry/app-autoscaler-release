@@ -11,7 +11,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.apache.hc.client5.http.utils.Base64;
 import org.cloudfoundry.autoscaler.scheduler.util.EmbeddedTomcatUtil;
 import org.cloudfoundry.autoscaler.scheduler.util.ScalingEngineUtil;
@@ -41,8 +40,7 @@ public class ConcurrentRequestTest {
   @Value("${autoscaler.scalingengine.basic_auth.password}")
   private String scalingEnginePassword;
 
-  @Autowired
-  private RestOperations restOperations;
+  @Autowired private RestOperations restOperations;
 
   private static EmbeddedTomcatUtil embeddedTomcatUtil;
 
@@ -74,19 +72,19 @@ public class ConcurrentRequestTest {
   private void concurrentRequests(int threadCount, String scalingEnginePathActiveSchedule)
       throws Exception {
 
-
     HttpEntity<String> request = getRequest();
 
-    Callable<Throwable> task = () -> {
-      try {
-        restOperations.exchange(scalingEnginePathActiveSchedule, HttpMethod.DELETE, request,
-            Void.class);
-        return null;
+    Callable<Throwable> task =
+        () -> {
+          try {
+            restOperations.exchange(
+                scalingEnginePathActiveSchedule, HttpMethod.DELETE, request, Void.class);
+            return null;
 
-      } catch (Throwable th) {
-        return th;
-      }
-    };
+          } catch (Throwable th) {
+            return th;
+          }
+        };
 
     List<Callable<Throwable>> tasks = Collections.nCopies(threadCount, task);
     ExecutorService executorService = Executors.newFixedThreadPool(threadCount);

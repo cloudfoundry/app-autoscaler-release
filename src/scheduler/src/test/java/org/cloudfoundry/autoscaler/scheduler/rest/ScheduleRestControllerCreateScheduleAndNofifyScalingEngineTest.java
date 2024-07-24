@@ -5,8 +5,8 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.listeners.MockitoListener;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -41,7 +40,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
-
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -58,19 +56,15 @@ import org.springframework.web.context.WebApplicationContext;
 @Commit
 public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
 
-  @Autowired
-  private MessageBundleResourceHelper messageBundleResourceHelper;
+  @Autowired private MessageBundleResourceHelper messageBundleResourceHelper;
 
-  @Autowired
-  private Scheduler scheduler;
+  @Autowired private Scheduler scheduler;
 
-  @Autowired
-  private WebApplicationContext wac;
+  @Autowired private WebApplicationContext wac;
 
   private MockMvc mockMvc;
 
-  @Autowired
-  private TestDataDbUtil testDataDbUtil;
+  @Autowired private TestDataDbUtil testDataDbUtil;
 
   @Value("${autoscaler.scalingengine.url}")
   private String scalingEngineUrl;
@@ -119,8 +113,10 @@ public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
     // Assert END Job successful message
     endJobListener.waitForJobToFinish(TimeUnit.MINUTES.toMillis(2));
 
-    assertThat("It should have no active schedule",
-        testDataDbUtil.getNumberOfActiveSchedulesByAppId(appId), Matchers.is(0L));
+    assertThat(
+        "It should have no active schedule",
+        testDataDbUtil.getNumberOfActiveSchedulesByAppId(appId),
+        Matchers.is(0L));
   }
 
   @Test
@@ -131,9 +127,9 @@ public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
     startJobListener.waitForJobToFinish(TimeUnit.MINUTES.toMillis(2));
 
     // Delete End job.
-    ResultActions resultActions = mockMvc.perform(
-        delete(TestDataSetupHelper.getSchedulerPath(appId)).accept(MediaType.APPLICATION_JSON));
-
+    ResultActions resultActions =
+        mockMvc.perform(
+            delete(TestDataSetupHelper.getSchedulerPath(appId)).accept(MediaType.APPLICATION_JSON));
 
     // resultActions.andExpect(status().is2xxSuccessful());
     resultActions.andExpect(content().string(""));
@@ -162,16 +158,24 @@ public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
 
     embeddedTomcatUtil.addScalingEngineMockForAppId(appId, 200, null);
 
-    scheduler.getListenerManager().addJobListener(startJobListener,
-        NameMatcher.jobNameEndsWith(JobActionEnum.START.getJobIdSuffix()));
-    scheduler.getListenerManager().addJobListener(endJobListener,
-        NameMatcher.jobNameContains(JobActionEnum.END.getJobIdSuffix()));
+    scheduler
+        .getListenerManager()
+        .addJobListener(
+            startJobListener, NameMatcher.jobNameEndsWith(JobActionEnum.START.getJobIdSuffix()));
+    scheduler
+        .getListenerManager()
+        .addJobListener(
+            endJobListener, NameMatcher.jobNameContains(JobActionEnum.END.getJobIdSuffix()));
 
     ObjectMapper mapper = new ObjectMapper();
     String content = mapper.writeValueAsString(applicationSchedules);
-    ResultActions resultActions = mockMvc.perform(put(TestDataSetupHelper.getSchedulerPath(appId))
-        .param("guid", guid).contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON).content(content));
+    ResultActions resultActions =
+        mockMvc.perform(
+            put(TestDataSetupHelper.getSchedulerPath(appId))
+                .param("guid", guid)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(content));
 
     resultActions.andExpect(MockMvcResultMatchers.content().string(""));
     resultActions.andExpect(status().isOk());

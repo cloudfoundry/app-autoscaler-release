@@ -7,9 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
-
 import java.util.Base64;
+import java.util.Hashtable;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Service;
@@ -80,8 +79,8 @@ public class EmbeddedTomcatUtil {
     private Hashtable<String, String> validUsers = new Hashtable<>();
 
     public void init(ServletConfig config) throws ServletException {
-        super.init(config);
-        this.validUsers.put("scalingengine:scalingengine-password","authorized");
+      super.init(config);
+      this.validUsers.put("scalingengine:scalingengine-password", "authorized");
     }
 
     ScalingEngineMock(int status, String returnMessage) {
@@ -92,48 +91,48 @@ public class EmbeddedTomcatUtil {
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        response.setContentType("application/json");
+      response.setContentType("application/json");
 
-        if (allowRequest(request)) {
-          response.setStatus(this.returnStatus);
-          if (returnMessage != null && !returnMessage.isEmpty()) {
-            response.getWriter().write(returnMessage);
-          }
-        } else {
-            response.setHeader("WWW-Authenticate", "BASIC realm=\"jswan test\"");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      if (allowRequest(request)) {
+        response.setStatus(this.returnStatus);
+        if (returnMessage != null && !returnMessage.isEmpty()) {
+          response.getWriter().write(returnMessage);
         }
+      } else {
+        response.setHeader("WWW-Authenticate", "BASIC realm=\"jswan test\"");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      }
     }
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        response.setContentType("application/json");
+      response.setContentType("application/json");
 
-        if (allowRequest(request)) {
-          response.setStatus(this.returnStatus);
-          if (returnMessage != null && !returnMessage.isEmpty()) {
-            response.getWriter().write(returnMessage);
-          }
-        } else {
-            response.setHeader("WWW-Authenticate", "BASIC realm=\"jswan test\"");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      if (allowRequest(request)) {
+        response.setStatus(this.returnStatus);
+        if (returnMessage != null && !returnMessage.isEmpty()) {
+          response.getWriter().write(returnMessage);
         }
+      } else {
+        response.setHeader("WWW-Authenticate", "BASIC realm=\"jswan test\"");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+      }
     }
 
     protected boolean allowRequest(HttpServletRequest request) throws IOException {
       String auth = request.getHeader("Authorization");
-      if (auth == null || !auth.toUpperCase().startsWith("BASIC ")) { 
-          return false;  
+      if (auth == null || !auth.toUpperCase().startsWith("BASIC ")) {
+        return false;
       }
       String userpassEncoded = auth.substring(6);
       byte[] decodedBytes = Base64.getDecoder().decode(userpassEncoded);
       String userpassDecoded = new String(decodedBytes);
-  
+
       if ("authorized".equals(this.validUsers.get(userpassDecoded))) {
-          return true;
+        return true;
       } else {
-          return false;
+        return false;
       }
     }
   }

@@ -16,13 +16,14 @@ public class RestClientConfig {
   private String scalingEngineUsername;
 
   @Value("${client.httpClientTimeout}")
-  private Integer httpClientTimeout ;
+  private Integer httpClientTimeout;
 
   @Bean
   public RestOperations restOperations(RestTemplateBuilder restTemplateBuilder) {
     return restTemplateBuilder
-      .setConnectTimeout( Duration.ofSeconds(httpClientTimeout))
-      .setReadTimeout( Duration.ofSeconds(httpClientTimeout))
-      .basicAuthentication(scalingEngineUsername, scalingEnginePassword).build();
+        .setConnectTimeout(Duration.ofSeconds(httpClientTimeout))
+        .setReadTimeout(Duration.ofSeconds(httpClientTimeout))
+        .basicAuthentication(scalingEngineUsername, scalingEnginePassword)
+        .build();
   }
 }

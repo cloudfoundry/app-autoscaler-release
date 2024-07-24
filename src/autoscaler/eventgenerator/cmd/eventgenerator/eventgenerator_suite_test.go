@@ -35,11 +35,13 @@ var (
 	metricType = "a-metric-type"
 	metricUnit = "a-metric-unit"
 
-	regPath            = regexp.MustCompile(`^/v1/apps/.*/scale$`)
-	configFile         *os.File
-	conf               config.Config
-	egPort             int
-	httpClient         *http.Client
+	regPath    = regexp.MustCompile(`^/v1/apps/.*/scale$`)
+	configFile *os.File
+	conf       config.Config
+	egPort     int
+
+	httpClientForPublicApi *http.Client
+
 	healthHttpClient   *http.Client
 	mockLogCache       *testhelpers.MockLogCache
 	mockScalingEngine  *ghttp.Server
