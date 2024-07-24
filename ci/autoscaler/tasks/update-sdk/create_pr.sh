@@ -42,12 +42,12 @@ package_version=$(cat "${root_dir}/version") && rm "${root_dir}/version"
 package_sha=$(cat "${root_dir}/vendored-commit") && rm "${root_dir}/vendored-commit"
 
 pushd "${autoscaler_dir}" > /dev/null
-  if [ "$( git status -s | wc -l)" -eq 0 ]; then
+  if [ "$( git status --short | wc --lines)" -eq 0 ]; then
     step "Nothing changed !!"
     exit 0
   else
     step "adding files to PR"
-    git status -s
+    git status --short
   fi
 popd > /dev/null
 

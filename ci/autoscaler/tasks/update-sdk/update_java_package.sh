@@ -38,7 +38,7 @@ bosh upload-blobs
 # Step 3 --> update bosh java package references
 echo "- updating bosh java packages..."
 # shellcheck disable=SC2038
-find . -type f ! -name "*.yml" ! -name "update_java_package.sh" ! -path '*/\.*' -exec grep -l "openjdk-${current_major_version}" {} \;| xargs sed -i "s/openjdk-${current_major_version}/openjdk-${desired_major_version}/g"
+find . -type f ! -name "*.yml" ! -name "update_java_package.sh" ! -path '*/\.*' -exec grep --files-with-matches "openjdk-${current_major_version}" {} \;| xargs sed --in-place "s/openjdk-${current_major_version}/openjdk-${desired_major_version}/g"
 mv ./packages/openjdk-"${current_major_version}" ./packages/openjdk-"${desired_major_version}"
 
 echo " - creating spec file"
