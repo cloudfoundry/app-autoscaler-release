@@ -24,8 +24,8 @@ describe "scalingengine" do
 
       it "check scalingengine basic auth username and password" do
         properties["autoscaler"]["scalingengine"]["health"] = {
-            "username" => "test-user",
-            "password" => "test-user-password"
+          "username" => "test-user",
+          "password" => "test-user-password"
         }
 
         expect(rendered_template["health"]["basic_auth"]).to include(

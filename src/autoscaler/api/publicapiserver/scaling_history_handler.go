@@ -51,7 +51,6 @@ func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*Scalin
 	}
 
 	if client, err := internalscalingenginehistory.NewClient(conf.ScalingEngine.ScalingEngineUrl, ss); err != nil {
-
 		return nil, fmt.Errorf("error creating ogen scaling history client: %w", err)
 	} else {
 		newHandler.client = client
@@ -90,9 +89,18 @@ func (h *ScalingHistoryHandler) V1AppsGUIDScalingHistoriesGet(ctx context.Contex
 	internalResult, err := h.client.V1AppsGUIDScalingHistoriesGet(ctx, internalParams)
 	if err != nil {
 		logger.Error("get", err)
-	} else {
-		jsonResult, _ := internalResult.MarshalJSON()
-		result.UnmarshalJSON(jsonResult)
+		return nil, err
+	}
+	jsonResult, err := internalResult.MarshalJSON()
+	if err != nil {
+		logger.Error("marshal", err)
+		return nil, err
+	}
+
+	err = result.UnmarshalJSON(jsonResult)
+	if err != nil {
+		logger.Error("unmarshal", err)
+		return nil, err
 	}
 
 	return result, err

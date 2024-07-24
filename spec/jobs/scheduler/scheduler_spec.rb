@@ -15,8 +15,8 @@ describe "scheduler" do
   context "Health Configuration" do
     it "does set neither username nor password if not configured" do
       properties["autoscaler"]["scheduler"]["health"] = {
-          "port" => 1234,
-          "unprotected_endpoints" => []
+        "port" => 1234,
+        "unprotected_endpoints" => []
       }
 
       rendered_template = YAML.safe_load(template.render(properties))
@@ -36,10 +36,10 @@ describe "scheduler" do
 
     it "check scheduler username and password and allow access with basic auth" do
       properties["autoscaler"]["scheduler"]["health"] = {
-          "port" => 1234,
-          "username" => "test-user",
-          "password" => "test-user-password",
-          "unprotected_endpoints" => ["/health/liveness"]
+        "port" => 1234,
+        "username" => "test-user",
+        "password" => "test-user-password",
+        "unprotected_endpoints" => ["/health/liveness"]
       }
 
       rendered_template = YAML.safe_load(template.render(properties))
@@ -59,13 +59,13 @@ describe "scheduler" do
 
     it "extension properties are added to the properties file" do
       properties["autoscaler"]["scheduler"]["application"] = {
-          "props" => <<~HEREDOC
-            logging:
-              level:
-                scheduler: "info"
-                quartz: "info"
-          HEREDOC
-        }
+        "props" => <<~HEREDOC
+          logging:
+            level:
+              scheduler: "info"
+              quartz: "info"
+        HEREDOC
+      }
 
       rendered_template = YAML.safe_load(template.render(properties))
 

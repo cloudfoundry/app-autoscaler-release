@@ -32,8 +32,8 @@ describe "eventgenerator" do
 
     it "check eventgenerator username and password" do
       properties["autoscaler"]["eventgenerator"]["health"] = {
-          "username" => "test-user",
-          "password" => "test-user-password"
+        "username" => "test-user",
+        "password" => "test-user-password"
       }
 
       expect(rendered_template["health"]["basic_auth"])

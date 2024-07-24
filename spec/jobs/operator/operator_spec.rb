@@ -28,8 +28,8 @@ describe "operator" do
 
     it "check operator basic auth username and password" do
       properties["autoscaler"]["operator"]["health"] = {
-          "username" => "test-user",
-          "password" => "test-user-password"
+        "username" => "test-user",
+        "password" => "test-user-password"
       }
 
       expect(rendered_template["health"]["basic_auth"]).to include(
