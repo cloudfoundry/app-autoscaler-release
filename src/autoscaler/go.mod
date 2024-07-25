@@ -4,11 +4,11 @@ go 1.22.1
 
 require (
 	code.cloudfoundry.org/cfhttp/v2 v2.1.0
-	code.cloudfoundry.org/clock v1.1.0
+	code.cloudfoundry.org/clock v1.2.0
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1
 	code.cloudfoundry.org/lager/v3 v3.0.3
-	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20240715083120-ba3aa9335b45
+	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20240723222507-f3307e073100
 	code.cloudfoundry.org/tlsconfig v0.0.0-20240712175922-ffce9516cec8
 	dario.cat/mergo v1.0.0
 	github.com/cenkalti/backoff/v4 v4.3.0
@@ -17,17 +17,17 @@ require (
 	github.com/go-faster/jx v1.1.0
 	github.com/go-logr/logr v1.4.2
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
-	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/ogen-go/ogen v1.2.2
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/pivotal-cf/brokerapi/v11 v11.0.2
+	github.com/pivotal-cf/brokerapi/v11 v11.0.4
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.1
 	github.com/rubyist/circuitbreaker v2.2.1+incompatible
@@ -43,7 +43,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.27.0
 	go.opentelemetry.io/otel/trace v1.27.0
 	golang.org/x/crypto v0.25.0
-	golang.org/x/exp v0.0.0-20240707233637-46b078467d37
+	golang.org/x/exp v0.0.0-20240716175740-e3f259677ff7
 	golang.org/x/net v0.27.0
 	golang.org/x/time v0.5.0
 	google.golang.org/grpc v1.65.0
@@ -70,8 +70,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20240711041743-f6c9dda6c6da // indirect
-	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/pprof v0.0.0-20240721033354-7089f98c1d14 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

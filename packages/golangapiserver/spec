@@ -82,7 +82,6 @@ files:
 - autoscaler/vendor/github.com/mattn/go-colorable/* # gosub
 - autoscaler/vendor/github.com/mattn/go-isatty/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
-- autoscaler/vendor/github.com/nu7hatch/gouuid/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/conv/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/http/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/internal/httpcookie/* # gosub

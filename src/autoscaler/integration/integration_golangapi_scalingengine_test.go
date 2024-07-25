@@ -7,6 +7,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/google/uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 )
@@ -61,7 +62,7 @@ var _ = Describe("Integration_GolangApi_ScalingEngine", func() {
 			"https://127.0.0.1:8888",
 			tmpDir)
 		startGolangApiServer()
-		appId = getUUID()
+		appId = uuid.NewString()
 		pathVariables = []string{appId}
 
 	})

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"github.com/google/uuid"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -26,8 +27,8 @@ var _ = Describe("Integration_Scheduler_ScalingEngine", func() {
 	BeforeEach(func() {
 		httpClientForScheduler = testhelpers.NewSchedulerClient()
 
-		testAppId = getUUID()
-		testGuid = getUUID()
+		testAppId = uuid.NewString()
+		testGuid = uuid.NewString()
 		startFakeCCNOAAUAA(initInstanceCount)
 
 		scalingEngineConfPath = components.PrepareScalingEngineConfig(dbUrl, components.Ports[ScalingEngine], fakeCCNOAAUAA.URL(), defaultHttpClientTimeout, tmpDir)
