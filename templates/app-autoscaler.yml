@@ -236,9 +236,6 @@ instance_groups:
               port: &publicApiServerPort 6101
               username: apiserver
               password: ((autoscaler_apiserver_server_password))
-            health:
-              username: scheduler
-              password: ((autoscaler_apiserver_health_password))
           use_buildin_mode: false
           scheduler:
             ca_cert: ((!scheduler_client_cert.ca))
