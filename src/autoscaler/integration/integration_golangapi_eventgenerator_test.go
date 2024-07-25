@@ -183,7 +183,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 				metric.Timestamp = 444444
 				insertAppMetric(metric)
 			})
-			It("should get the metrics ", func() {
+			It("should get the metrics", func() {
 				By("get the 1st page")
 				parameters = map[string]string{"start-time": "111111", "end-time": "999999", "order-direction": "asc", "page": "1", "results-per-page": "2"}
 				result := AppAggregatedMetricResult{

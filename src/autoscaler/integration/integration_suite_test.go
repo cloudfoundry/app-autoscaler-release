@@ -551,9 +551,9 @@ func getAppAggregatedMetrics(apiURL url.URL, pathVariables []string, parameters 
 			urlParams += "&" + paramName + "=" + paramValue
 		}
 	}
-	apiURL.Path = fmt.Sprintf("/v1/apps/%s/aggregated_metric_histories/%s?%s", pathVariables[0], pathVariables[1], urlParams)
+	apiURL.Path = fmt.Sprintf("/v1/apps/%s/aggregated_metric_histories/%s", pathVariables[0], pathVariables[1])
+	apiURL.RawQuery = urlParams
 	req, err := http.NewRequest("GET", apiURL.String(), strings.NewReader(""))
-
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "bearer fake-token")
