@@ -85,7 +85,7 @@ scaling_engine_db:
   cutoff_duration: <%= p("autoscaler.operator.scaling_engine_db.cutoff_duration") %>
 
 scaling_engine:
-  scaling_engine_url: https://<%= p("autoscaler.operator.scaling_engine.host") %>:<%= p("autoscaler.operator.scaling_engine.port") %>
+  scaling_engine_url: http://<%= p("autoscaler.operator.scaling_engine.host") %>:<%= p("autoscaler.operator.scaling_engine.port") %>
   sync_interval: <%= p("autoscaler.operator.scaling_engine.sync_interval") %>
   basic_auth:
     username: "<%=p('autoscaler.operator.scaling_engine.username') %>"

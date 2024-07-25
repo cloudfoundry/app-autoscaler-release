@@ -109,7 +109,7 @@ db:
 <% end %>
 
 scaling_engine:
-  scaling_engine_url: https://<%= p("autoscaler.apiserver.scaling_engine.host") %>:<%= p("autoscaler.apiserver.scaling_engine.port") %>
+  scaling_engine_url: http://<%= p("autoscaler.apiserver.scaling_engine.host") %>:<%= p("autoscaler.apiserver.scaling_engine.port") %>
   basic_auth:
     username: "<%=p('autoscaler.apiserver.scaling_engine.username') %>"
     password: "<%=p('autoscaler.apiserver.scaling_engine.password') %>"
@@ -122,7 +122,7 @@ scheduler:
     ca_file: /var/vcap/jobs/golangapiserver/config/certs/scheduler/ca.crt
 
 event_generator:
-  event_generator_url: https://<%= p("autoscaler.apiserver.event_generator.host") %>:<%= p("autoscaler.apiserver.event_generator.port") %>
+  event_generator_url: http://<%= p("autoscaler.apiserver.event_generator.host") %>:<%= p("autoscaler.apiserver.event_generator.port") %>
   basic_auth:
     username: <%= p("autoscaler.apiserver.event_generator.username") %>
     password: <%= p("autoscaler.apiserver.event_generator.username") %>

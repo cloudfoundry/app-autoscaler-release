@@ -99,7 +99,7 @@ evaluator:
   trigger_array_channel_size: <%= p("autoscaler.eventgenerator.evaluator.trigger_array_channel_size") %>
 
 scalingEngine:
-  scaling_engine_url: https://<%= p("autoscaler.eventgenerator.scaling_engine.host") %>:<%= p("autoscaler.eventgenerator.scaling_engine.port") %>
+  scaling_engine_url: http://<%= p("autoscaler.eventgenerator.scaling_engine.host") %>:<%= p("autoscaler.eventgenerator.scaling_engine.port") %>
   basic_auth:
     username: "<%=p('autoscaler.eventgenerator.scaling_engine.username') %>"
     password: "<%=p('autoscaler.eventgenerator.scaling_engine.password') %>"
