@@ -20,6 +20,7 @@ files:
 - autoscaler/scalingengine/* # gosub
 - autoscaler/scalingengine/apis/* # gosub
 - autoscaler/scalingengine/apis/scalinghistory/* # gosub
+- autoscaler/scalingengine/client/* # gosub
 - autoscaler/scalingengine/cmd/scalingengine/* # gosub
 - autoscaler/scalingengine/config/* # gosub
 - autoscaler/scalingengine/schedule/* # gosub
