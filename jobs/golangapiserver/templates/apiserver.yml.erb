@@ -125,7 +125,7 @@ event_generator:
   event_generator_url: http://<%= p("autoscaler.apiserver.event_generator.host") %>:<%= p("autoscaler.apiserver.event_generator.port") %>
   basic_auth:
     username: <%= p("autoscaler.apiserver.event_generator.username") %>
-    password: <%= p("autoscaler.apiserver.event_generator.username") %>
+    password: <%= p("autoscaler.apiserver.event_generator.password") %>
 
 metrics_forwarder:
   metrics_forwarder_url: https://<%= p("autoscaler.apiserver.metrics_forwarder.host") %>
