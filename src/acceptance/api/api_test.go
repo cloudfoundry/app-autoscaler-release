@@ -179,14 +179,13 @@ var _ = Describe("AutoScaler Public API", func() {
 			})
 		})
 
-		Context("When scale out is triggered ", func() {
+		Context("When scale out is triggered", func() {
 			BeforeEach(func() {
 				totalTime := time.Duration(cfg.AggregateInterval*2)*time.Second + 3*time.Minute
 				WaitForNInstancesRunning(appGUID, 2, totalTime)
 			})
 
 			It("should successfully scale out", func() {
-
 				By("check aggregated metrics")
 				Expect(len(getAggregatedMetrics().Metrics)).Should(BeNumerically(">=", 1))
 
