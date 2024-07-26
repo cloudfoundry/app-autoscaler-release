@@ -26,19 +26,22 @@ const (
 )
 
 var (
-	cfg                 *config.Config
-	setup               *workflowhelpers.ReproducibleTestSuiteSetup
-	otherSetup          *workflowhelpers.ReproducibleTestSuiteSetup
-	appName             string
-	appGUID             string
-	instanceName        string
+	cfg        *config.Config
+	setup      *workflowhelpers.ReproducibleTestSuiteSetup
+	otherSetup *workflowhelpers.ReproducibleTestSuiteSetup
+
+	appName      string
+	appGUID      string
+	instanceName string
+
 	healthURL           string
 	policyURL           string
 	metricURL           string
 	aggregatedMetricURL string
 	historyURL          string
-	client              *http.Client
-	err                 error
+
+	client *http.Client
+	err    error
 )
 
 const componentName = "Public API Suite"
