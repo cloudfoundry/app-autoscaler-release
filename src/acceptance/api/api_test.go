@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	. "acceptance/helpers"
@@ -15,6 +16,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gexec"
+)
+
+const (
+	PolicyPath           = "/v1/apps/%s/policy"
+	AggregatedMetricPath = "/v1/apps/%s/aggregated_metric_histories/%s"
+	HistoryPath          = "/v1/apps/%s/scaling_histories"
 )
 
 type AppInstanceMetric struct {
@@ -202,26 +209,26 @@ var _ = Describe("AutoScaler Public API", func() {
 })
 
 func getHistory() *HistoryResults {
-	raw, status := get(historyURL)
+	historyURL, err := url.Parse(cfg.ASApiEndpoint)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	historyURL.Path = fmt.Sprintf(HistoryPath, appGUID)
+
+	raw, status := get(historyURL.String())
 	Expect(status).To(Equal(200))
 
 	var histories *HistoryResults
-	err := json.Unmarshal(raw, &histories)
+	err = json.Unmarshal(raw, &histories)
 	Expect(err).ShouldNot(HaveOccurred())
 	return histories
 }
 
-func getAggregatedMetrics() *AggregatedMetricsResults {
-	raw, status := get(aggregatedMetricURL)
-	Expect(status).To(Equal(200))
-	var metrics *AggregatedMetricsResults
-	err := json.Unmarshal(raw, &metrics)
-	Expect(err).ShouldNot(HaveOccurred())
-	return metrics
-}
-
 func createPolicy(policy string) ([]byte, int) {
-	return put(policyURL, policy)
+	policyURL, err := url.Parse(cfg.ASApiEndpoint)
+	Expect(err).ShouldNot(HaveOccurred())
+	policyURL.Path = fmt.Sprintf(PolicyPath, appGUID)
+
+	return put(policyURL.String(), policy)
 }
 
 func put(url string, body string) ([]byte, int) {
@@ -242,7 +249,10 @@ func put(url string, body string) ([]byte, int) {
 }
 
 func deletePolicy() ([]byte, int) {
-	return deleteReq(policyURL)
+	policyURL, err := url.Parse(cfg.ASApiEndpoint)
+	Expect(err).ShouldNot(HaveOccurred())
+	policyURL.Path = fmt.Sprintf(PolicyPath, appGUID)
+	return deleteReq(policyURL.String())
 }
 
 func deleteReq(url string) ([]byte, int) {
@@ -259,8 +269,25 @@ func deleteReq(url string) ([]byte, int) {
 	return response, resp.StatusCode
 }
 
+func getAggregatedMetrics() *AggregatedMetricsResults {
+	var metrics *AggregatedMetricsResults
+	aggregatedMetricURL, err := url.Parse(cfg.ASApiEndpoint)
+	aggregatedMetricURL.Path = fmt.Sprintf(AggregatedMetricPath, appGUID, "memoryused")
+
+	raw, status := get(aggregatedMetricURL.String())
+	Expect(status).To(Equal(200))
+
+	err = json.Unmarshal(raw, &metrics)
+	Expect(err).ShouldNot(HaveOccurred())
+	return metrics
+}
+
 func getPolicy() ([]byte, int) {
-	return get(policyURL)
+	policyURL, err := url.Parse(cfg.ASApiEndpoint)
+	Expect(err).ShouldNot(HaveOccurred())
+	policyURL.Path = fmt.Sprintf(PolicyPath, appGUID)
+
+	return get(policyURL.String())
 }
 
 func get(url string) ([]byte, int) {

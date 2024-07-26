@@ -6,17 +6,20 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+	"net/url"
 
 	. "github.com/onsi/gomega"
 )
 
 func GetPolicy(cfg *config.Config, appGUID string) ScalingPolicy {
-	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
+	policyURL, err := url.Parse(cfg.ASApiEndpoint)
+	Expect(err).ShouldNot(HaveOccurred())
+	policyURL.Path = fmt.Sprintf("/v1/apps/%s/policy", appGUID)
+
 	oauthToken := OauthToken(cfg)
 	client := GetHTTPClient(cfg)
 
-	req, err := http.NewRequest("GET", policyURL, nil)
+	req, err := http.NewRequest("GET", policyURL.String(), nil)
 	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
 	req.Header.Add("Content-Type", "application/json")

@@ -20,9 +20,7 @@ import (
 )
 
 const (
-	HealthPath           = "/health"
-	AggregatedMetricPath = "/v1/apps/{appId}/aggregated_metric_histories/{metric_type}"
-	HistoryPath          = "/v1/apps/{appId}/scaling_histories"
+	HealthPath = "/health"
 )
 
 var (
@@ -34,11 +32,8 @@ var (
 	appGUID      string
 	instanceName string
 
-	healthURL           string
-	policyURL           string
-	metricURL           string
-	aggregatedMetricURL string
-	historyURL          string
+	healthURL string
+	metricURL string
 
 	client *http.Client
 	err    error
@@ -99,11 +94,7 @@ var _ = BeforeSuite(func() {
 	}
 
 	healthURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, HealthPath)
-	policyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
 	metricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(metricURL, "{appId}", appGUID, -1))
-	aggregatedMetricURL = strings.Replace(AggregatedMetricPath, "{metric_type}", "memoryused", -1)
-	aggregatedMetricURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(aggregatedMetricURL, "{appId}", appGUID, -1))
-	historyURL = fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(HistoryPath, "{appId}", appGUID, -1))
 })
 
 var _ = AfterSuite(func() {

@@ -2,11 +2,9 @@ package app_test
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 
-	"strings"
 	"testing"
 	"time"
 
@@ -85,19 +83,4 @@ func getStartAndEndTime(location *time.Location, offset, duration time.Duration)
 	}
 	endTime := startTime.Add(duration)
 	return startTime, endTime
-}
-
-func DeletePolicyWithAPI(appGUID string) {
-	By(fmt.Sprintf("Deleting policy using api for appguid :'%s'", appGUID))
-	oauthToken := OauthToken(cfg)
-	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest(http.MethodDelete, policyURL, nil)
-	Expect(err).ShouldNot(HaveOccurred())
-	req.Header.Add("Authorization", oauthToken)
-
-	resp, err := client.Do(req)
-	Expect(err).ShouldNot(HaveOccurred())
-	defer func() { _ = resp.Body.Close() }()
-	body, _ := io.ReadAll(resp.Body)
-	Expect(resp.StatusCode).To(Equal(http.StatusOK), "Failed to delete policy '%s'", string(body))
 }

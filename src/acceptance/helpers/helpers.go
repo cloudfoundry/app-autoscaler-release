@@ -28,8 +28,6 @@ const (
 
 	TestBreachDurationSeconds = 60
 	TestCoolDownSeconds       = 60
-
-	PolicyPath = "/v1/apps/{appId}/policy"
 )
 
 type Days string
@@ -569,23 +567,6 @@ func GetServiceCredentialBindingParameters(cfg *config.Config, instanceName stri
 	cmd := cf.CfSilent("curl", fmt.Sprintf("/v3/service_credential_bindings/%s/parameters", serviceCredentialBindingGuid)).Wait(cfg.DefaultTimeoutDuration())
 	Expect(cmd).To(Exit(0))
 	return strings.TrimSpace(string(cmd.Out.Contents()))
-}
-
-func CreatePolicyWithAPI(cfg *config.Config, appGUID, policy string) {
-	GinkgoHelper()
-	oauthToken := OauthToken(cfg)
-	client := GetHTTPClient(cfg)
-
-	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policy)))
-	Expect(err).ShouldNot(HaveOccurred())
-	req.Header.Add("Authorization", oauthToken)
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	Expect(err).ShouldNot(HaveOccurred())
-	defer func() { _ = resp.Body.Close() }()
-	Expect(resp).Should(HaveHTTPStatus(200, 201), "assigning policy by putting to %s", policyURL)
 }
 
 func GetHTTPClient(cfg *config.Config) *http.Client {
