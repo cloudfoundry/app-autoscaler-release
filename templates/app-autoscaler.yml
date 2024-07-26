@@ -190,9 +190,11 @@ instance_groups:
             client_id: "((cf_client_id))"
             secret: "((cf_client_secret))"
             skip_ssl_validation: "((skip_ssl_validation))"
-          sever:
-            port: &scalingEngineServerPort 6104
           scalingengine:
+            server:
+              port: &scalingEngineServerPort 6104
+              username: scalingengine
+              password: ((autoscaler_scalingengine_server_password))
             health:
               username: scalingengine
               password: ((autoscaler_scalingengine_health_password))
