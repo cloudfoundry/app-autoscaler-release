@@ -166,8 +166,10 @@ resources:
   check_every: 5m
   source:
     uri: https://github.com/SAP/SapMachine.git
-    branch: sapmachine
-    version_depth: 20
+    branch: sapmachine21 # use JDK 21 as the LTS version
+    fetch_tags: true
+    tag_regex: 'sapmachine-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+'
+    version_depth: 50
 
 - name: gcp-jammy-stemcell
   type: bosh-io-stemcell
