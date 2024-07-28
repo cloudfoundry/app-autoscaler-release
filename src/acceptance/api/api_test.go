@@ -272,6 +272,7 @@ func deleteReq(url string) ([]byte, int) {
 func getAggregatedMetrics() *AggregatedMetricsResults {
 	var metrics *AggregatedMetricsResults
 	aggregatedMetricURL, err := url.Parse(cfg.ASApiEndpoint)
+	Expect(err).ShouldNot(HaveOccurred())
 	aggregatedMetricURL.Path = fmt.Sprintf(AggregatedMetricPath, appGUID, "memoryused")
 
 	raw, status := get(aggregatedMetricURL.String())
