@@ -38,11 +38,7 @@ var (
 	regPath    = regexp.MustCompile(`^/v1/apps/.*/scale$`)
 	configFile *os.File
 	conf       config.Config
-	egPort     int
 
-	httpClientForPublicApi *http.Client
-
-	healthHttpClient   *http.Client
 	mockLogCache       *testhelpers.MockLogCache
 	mockScalingEngine  *ghttp.Server
 	breachDurationSecs = 10
@@ -66,11 +62,9 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	initDB()
 	return []byte(eg)
 }, func(pathByte []byte) {
-	healthHttpClient = &http.Client{}
 	egPath = string(pathByte)
 	initHttpEndPoints()
 	initConfig()
-	httpClientForPublicApi = testhelpers.NewPublicApiClient()
 })
 
 var _ = SynchronizedAfterSuite(func() {
@@ -240,7 +234,7 @@ func initHttpEndPoints() {
 func initConfig() {
 	testCertDir := testhelpers.TestCertFolder()
 
-	egPort = 7000 + GinkgoParallelProcess()
+	egPort := 7000 + GinkgoParallelProcess()
 	dbUrl := testhelpers.GetDbUrl()
 	conf = config.Config{
 		Logging: helpers.LoggingConfig{

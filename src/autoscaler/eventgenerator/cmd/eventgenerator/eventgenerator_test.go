@@ -22,15 +22,15 @@ import (
 
 var _ = Describe("Eventgenerator", func() {
 	var (
-		runner      *EventGeneratorRunner
-		httpsClient *http.Client
-		serverURL   *url.URL
-		err         error
+		runner                      *EventGeneratorRunner
+		httpClientForEventGenerator *http.Client
+		serverURL                   *url.URL
+		err                         error
 	)
 
 	BeforeEach(func() {
 		runner = NewEventGeneratorRunner()
-		httpsClient = testhelpers.NewEventGeneratorClient()
+		httpClientForEventGenerator = testhelpers.NewEventGeneratorClient()
 
 		serverURL, err = url.Parse("http://127.0.0.1:" + strconv.Itoa(conf.Server.Port))
 		Expect(err).ToNot(HaveOccurred())
@@ -122,7 +122,7 @@ var _ = Describe("Eventgenerator", func() {
 		})
 	})
 
-	Context("when an interrupt is sent", func() {
+	When("an interrupt is sent", func() {
 		BeforeEach(func() {
 			runner.Start()
 		})
@@ -134,7 +134,7 @@ var _ = Describe("Eventgenerator", func() {
 	})
 
 	Describe("EventGenerator REST API", func() {
-		Context("when a request for aggregated metrics history comes", func() {
+		When("a request for aggregated metrics history comes", func() {
 			BeforeEach(func() {
 				serverURL.User = url.UserPassword(conf.Server.BasicAuth.Username, conf.Server.BasicAuth.Password)
 				serverURL.Path = "/v1/apps/an-app-id/aggregated_metric_histories/a-metric-type"
@@ -142,7 +142,7 @@ var _ = Describe("Eventgenerator", func() {
 			})
 
 			It("returns with a 200", func() {
-				rsp, err := httpClientForPublicApi.Get(serverURL.String())
+				rsp, err := httpClientForEventGenerator.Get(serverURL.String())
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
@@ -157,7 +157,7 @@ var _ = Describe("Eventgenerator", func() {
 			serverURL.Path = "/health"
 		})
 
-		Describe("when Health server is ready to serve RESTful API", func() {
+		When("Health server is ready to serve RESTful API", func() {
 			BeforeEach(func() {
 				basicAuthConfig := conf
 				basicAuthConfig.Health.BasicAuth.Username = ""
@@ -170,7 +170,7 @@ var _ = Describe("Eventgenerator", func() {
 
 			When("a request to query health comes", func() {
 				It("returns with a 200", func() {
-					rsp, err := httpsClient.Get(fmt.Sprintf("%s/health", serverURL))
+					rsp, err := httpClientForEventGenerator.Get(fmt.Sprintf("%s/health", serverURL))
 					Expect(err).NotTo(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 
@@ -188,51 +188,51 @@ var _ = Describe("Eventgenerator", func() {
 			})
 		})
 
-		Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
+		When("Health server is ready to serve RESTful API with basic Auth", func() {
 			BeforeEach(func() {
 				runner.Start()
 			})
 
-			When("when username and password are incorrect for basic authentication during health check", func() {
+			When("username and password are incorrect for basic authentication during health check", func() {
 				It("should return 401", func() {
 					req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 					Expect(err).NotTo(HaveOccurred())
 
 					req.SetBasicAuth("wrongusername", "wrongpassword")
 
-					rsp, err := httpsClient.Do(req)
+					rsp, err := httpClientForEventGenerator.Do(req)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 				})
 			})
 
-			When("when username and password are correct for basic authentication during health check", func() {
+			When("username and password are correct for basic authentication during health check", func() {
 				It("should return 200", func() {
 					req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/health", serverURL), nil)
 					Expect(err).NotTo(HaveOccurred())
 
 					req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
 
-					rsp, err := httpsClient.Do(req)
+					rsp, err := httpClientForEventGenerator.Do(req)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				})
 			})
 		})
 
-		Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
+		When("Health server is ready to serve RESTful API with basic Auth", func() {
 			BeforeEach(func() {
 				runner.Start()
 			})
 
-			When("when username and password are incorrect for basic authentication during health check", func() {
+			When("username and password are incorrect for basic authentication during health check", func() {
 				It("should return 401", func() {
 					req, err := http.NewRequest(http.MethodGet, serverURL.String(), nil)
 					Expect(err).NotTo(HaveOccurred())
 
 					req.SetBasicAuth("wrongusername", "wrongpassword")
 
-					rsp, err := httpsClient.Do(req)
+					rsp, err := httpClientForEventGenerator.Do(req)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 				})
@@ -245,7 +245,7 @@ var _ = Describe("Eventgenerator", func() {
 
 					req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
 
-					rsp, err := httpsClient.Do(req)
+					rsp, err := httpClientForEventGenerator.Do(req)
 					Expect(err).ToNot(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				})
