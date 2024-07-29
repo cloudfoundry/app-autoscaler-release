@@ -27,6 +27,13 @@ function deploy_multiapps_controller() {
     -Dversion=2.45.0-SNAPSHOT \
     -Dpackaging=jar
 
+  mvn install:install-file \
+    -Dfile=multiapps-controller-repo/custom.cloudfoundry-client-reactor-jdk21-5.13.0.BUILD-SNAPSHOT.jar \
+    -DgroupId=org.cloudfoundry \
+    -DartifactId=custom.cloudfoundry-client-reactor \
+    -Dversion=5.13.0.BUILD-SNAPSHOT \
+    -Dpackaging=jar
+
   mvn -Dmaven.test.skip=true -f multiapps-controller-repo/pom.xml clean install
 
 
