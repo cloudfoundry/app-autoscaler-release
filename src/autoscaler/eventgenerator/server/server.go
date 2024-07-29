@@ -27,7 +27,10 @@ func (vh VarsFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	vh(w, r, vars)
 }
 func createEventGeneratorRouter(logger lager.Logger, queryAppMetric aggregator.QueryAppMetricsFunc, httpStatusCollector healthendpoint.HTTPStatusCollector, serverConfig config.ServerConfig) (*mux.Router, error) {
-	ba, _ := helpers.CreateBasicAuthMiddleware(logger, serverConfig.BasicAuth)
+	ba, err := helpers.CreateBasicAuthMiddleware(logger, serverConfig.BasicAuth)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create basic auth middleware: %w", err)
+	}
 	httpStatusCollectMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
 	eh := NewEventGenHandler(logger, queryAppMetric)
 	r := routes.EventGeneratorRoutes()
@@ -39,7 +42,10 @@ func createEventGeneratorRouter(logger lager.Logger, queryAppMetric aggregator.Q
 }
 
 func NewServer(logger lager.Logger, conf *config.Config, appMetricDB db.AppMetricDB, policyDb db.PolicyDB, queryAppMetric aggregator.QueryAppMetricsFunc, httpStatusCollector healthendpoint.HTTPStatusCollector) (ifrit.Runner, error) {
-	eventGeneratorRouter, _ := createEventGeneratorRouter(logger, queryAppMetric, httpStatusCollector, conf.Server)
+	eventGeneratorRouter, err := createEventGeneratorRouter(logger, queryAppMetric, httpStatusCollector, conf.Server)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create event generator router: %w", err)
+	}
 
 	healthRouter, err := createHealthRouter(appMetricDB, policyDb, logger, conf, httpStatusCollector)
 	if err != nil {
