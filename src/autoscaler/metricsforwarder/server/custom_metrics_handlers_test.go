@@ -71,7 +71,7 @@ var _ = Describe("MetricHandler", func() {
 				}, nil)
 				body = []byte(`{
 					   "instance_index":0,
-					   "test" : 
+					   "test" :
 					   "metrics":[
 					      {
 					         "name":"custom_metric1",
@@ -270,7 +270,8 @@ var _ = Describe("MetricHandler", func() {
 })
 
 func CreateRequest(body []byte) *http.Request {
-	req, err := http.NewRequest(http.MethodPost, serverUrl+"/v1/apps/an-app-id/metrics", bytes.NewReader(body))
+	serverUrl.Path = "/v1/apps/an-app-id/metrics"
+	req, err := http.NewRequest(http.MethodPost, serverUrl.String(), bytes.NewReader(body))
 	Expect(err).ToNot(HaveOccurred())
 	req.Header.Add("Content-Type", "application/json")
 	return req

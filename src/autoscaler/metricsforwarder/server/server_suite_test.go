@@ -2,6 +2,7 @@ package server_test
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,7 +27,7 @@ import (
 var (
 	conf            *config.Config
 	serverProcess   ifrit.Process
-	serverUrl       string
+	serverUrl       *url.URL
 	policyDB        *fakes.FakePolicyDB
 	rateLimiter     *fakes.FakeLimiter
 	fakeCredentials *fakes.FakeCredentials
@@ -96,7 +97,9 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	httpServer, err := NewServer(logger, conf, policyDB,
 		fakeCredentials, allowedMetricCache, httpStatusCollector, rateLimiter)
 	Expect(err).NotTo(HaveOccurred())
-	serverUrl = fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port)
+
+	serverUrl, err = url.Parse(fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port))
+	Expect(err).NotTo(HaveOccurred())
 	serverProcess = ginkgomon_v2.Invoke(httpServer)
 })
 

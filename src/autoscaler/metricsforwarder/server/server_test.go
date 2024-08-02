@@ -2,11 +2,11 @@ package server_test
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
@@ -15,33 +15,15 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-// Helper function to create a basic auth string
-func basicAuth(username, password string) string {
-	auth := username + ":" + password
-	return base64.StdEncoding.EncodeToString([]byte(auth))
-}
-
-// Helper function to create a new request
-func newRequest(method, url string, body []byte) (*http.Request, error) {
-	req, err := http.NewRequest(method, url, bytes.NewReader(body))
+// Helper function to set up a new client and request
+func setupRequest(method string, url *url.URL, body []byte) (*http.Request, error) {
+	req, err := http.NewRequest(method, url.String(), bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
+
 	req.Header.Add("Content-Type", "application/json")
 	return req, nil
-}
-
-// Helper function to set up a new client and request
-func setupRequest(method, url, authHeader string, body []byte) (*http.Client, *http.Request, error) {
-	client := &http.Client{}
-	req, err := newRequest(method, url, body)
-	if err != nil {
-		return nil, nil, err
-	}
-	if authHeader != "" {
-		req.Header.Add("Authorization", authHeader)
-	}
-	return client, req, nil
 }
 
 var _ = Describe("CustomMetrics Server", func() {
@@ -52,7 +34,6 @@ var _ = Describe("CustomMetrics Server", func() {
 		err           error
 		scalingPolicy *models.ScalingPolicy
 		client        *http.Client
-		authHeader    string
 	)
 
 	BeforeEach(func() {
@@ -79,8 +60,9 @@ var _ = Describe("CustomMetrics Server", func() {
 			body, err = json.Marshal(models.MetricsConsumer{InstanceIndex: 0, CustomMetrics: customMetrics})
 			Expect(err).NotTo(HaveOccurred())
 
-			authHeader = "Basic " + basicAuth("username", "Password")
-			client, req, err = setupRequest("POST", serverUrl+"/v1/apps/an-app-id/metrics", authHeader, body)
+			serverUrl.Path = "/v1/apps/an-app-id/metrics"
+			req, err = setupRequest("POST", serverUrl, body)
+			req.SetBasicAuth("username", "password")
 			Expect(err).NotTo(HaveOccurred())
 			resp, err = client.Do(req)
 			Expect(err).NotTo(HaveOccurred())
@@ -98,7 +80,8 @@ var _ = Describe("CustomMetrics Server", func() {
 			body, err = json.Marshal(models.CustomMetric{Name: "queuelength", Value: 12, Unit: "unit", InstanceIndex: 123, AppGUID: "an-app-id"})
 			Expect(err).NotTo(HaveOccurred())
 
-			client, req, err = setupRequest("POST", serverUrl+"/v1/apps/an-app-id/metrics", "", body)
+			serverUrl.Path = "/v1/apps/an-app-id/metrics"
+			req, err = setupRequest("POST", serverUrl, body)
 			Expect(err).NotTo(HaveOccurred())
 			resp, err = client.Do(req)
 			Expect(err).NotTo(HaveOccurred())
@@ -115,8 +98,8 @@ var _ = Describe("CustomMetrics Server", func() {
 			body, err = json.Marshal(models.CustomMetric{Name: "queuelength", Value: 12, Unit: "unit", InstanceIndex: 123, AppGUID: "an-app-id"})
 			Expect(err).NotTo(HaveOccurred())
 
-			authHeader = basicAuth("username", "password")
-			client, req, err = setupRequest("POST", serverUrl+"/v1/apps/san-app-id/metrics", authHeader, body)
+			serverUrl.Path = "/v1/apps/an-app-id/metrics"
+			req, err = setupRequest("POST", serverUrl, body)
 			Expect(err).NotTo(HaveOccurred())
 			resp, err = client.Do(req)
 			Expect(err).NotTo(HaveOccurred())
@@ -135,8 +118,9 @@ var _ = Describe("CustomMetrics Server", func() {
 
 			fakeCredentials.ValidateReturns(false, errors.New("wrong credentials"))
 
-			authHeader = "Basic " + basicAuth("invalidUsername", "invalidPassword")
-			client, req, err = setupRequest("POST", serverUrl+"/v1/apps/an-app-id/metrics", authHeader, body)
+			serverUrl.Path = "/v1/apps/an-app-id/metrics"
+			req, err = setupRequest("POST", serverUrl, body)
+			req.SetBasicAuth("invalidUsername", "invalidPassword")
 			Expect(err).NotTo(HaveOccurred())
 			resp, err = client.Do(req)
 			Expect(err).NotTo(HaveOccurred())
@@ -153,8 +137,9 @@ var _ = Describe("CustomMetrics Server", func() {
 			body, err = json.Marshal(models.CustomMetric{Name: "queuelength", Value: 12, Unit: "unit", InstanceIndex: 123, AppGUID: "an-app-id"})
 			Expect(err).NotTo(HaveOccurred())
 
-			authHeader = "Basic " + basicAuth("username", "password")
-			client, req, err = setupRequest("POST", serverUrl+"/v1/apps/an-app-id/metrics", authHeader, body)
+			serverUrl.Path = "/v1/apps/an-app-id/metrics"
+			req, err = setupRequest("POST", serverUrl, body)
+			req.SetBasicAuth("username", "password")
 			Expect(err).NotTo(HaveOccurred())
 			resp, err = client.Do(req)
 			Expect(err).NotTo(HaveOccurred())
@@ -186,8 +171,9 @@ var _ = Describe("CustomMetrics Server", func() {
 			body, err = json.Marshal(models.MetricsConsumer{InstanceIndex: 0, CustomMetrics: customMetrics})
 			Expect(err).NotTo(HaveOccurred())
 
-			authHeader = "Basic " + basicAuth("username", "password")
-			client, req, err = setupRequest("POST", serverUrl+"/v1/apps/an-app-id/metrics", authHeader, body)
+			serverUrl.Path = "/v1/apps/an-app-id/metrics"
+			req, err = setupRequest("POST", serverUrl, body)
+			req.SetBasicAuth("username", "password")
 			Expect(err).NotTo(HaveOccurred())
 			resp, err = client.Do(req)
 			Expect(err).NotTo(HaveOccurred())
@@ -204,10 +190,14 @@ var _ = Describe("CustomMetrics Server", func() {
 	})
 
 	When("the Health server is ready to serve RESTful API with basic Auth", func() {
+		BeforeEach(func() {
+			serverUrl.Path = "/health"
+		})
+
 		When("username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
 				client := &http.Client{}
-				req, err = http.NewRequest("GET", serverUrl+"/health", nil)
+				req, err = http.NewRequest("GET", serverUrl.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.SetBasicAuth("wrongusername", "wrongpassword")
 				rsp, err := client.Do(req)
@@ -223,7 +213,7 @@ var _ = Describe("CustomMetrics Server", func() {
 
 			When("a request to query health comes", func() {
 				It("returns with a 200", func() {
-					req, err = http.NewRequest("GET", serverUrl, nil)
+					req, err = http.NewRequest("GET", serverUrl.String(), nil)
 					Expect(err).NotTo(HaveOccurred())
 					req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
 					rsp, err := client.Do(req)
@@ -240,7 +230,8 @@ var _ = Describe("CustomMetrics Server", func() {
 			})
 
 			It("should return 200 for /health", func() {
-				req, err = http.NewRequest("GET", serverUrl+"/health", nil)
+				serverUrl.Path = "/health"
+				req, err = http.NewRequest("GET", serverUrl.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
 				req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
 				rsp, err := client.Do(req)
@@ -249,7 +240,8 @@ var _ = Describe("CustomMetrics Server", func() {
 			})
 
 			It("should return 200 for /health/readiness", func() {
-				req, err = http.NewRequest("GET", serverUrl+"/health/readiness", nil)
+				serverUrl.Path = "/health/readiness"
+				req, err = http.NewRequest("GET", serverUrl.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
 				rsp, err := client.Do(req)
 				Expect(err).ToNot(HaveOccurred())
