@@ -73,14 +73,12 @@ var _ = Describe("Server", func() {
 	})
 	JustBeforeEach(func() {
 		req, err = http.NewRequest(method, serverUrl.String(), bodyReader)
-		auth := username + ":" + password
-		base64Auth := base64.StdEncoding.EncodeToString([]byte(auth))
-		req.Header.Set("Authorization", "Basic "+base64Auth)
+		req.SetBasicAuth(username, password)
 		Expect(err).NotTo(HaveOccurred())
 		rsp, err = http.DefaultClient.Do(req)
 	})
 
-	Context("when triggering scaling action", func() {
+	When("triggering scaling action", func() {
 		BeforeEach(func() {
 			body, err = json.Marshal(models.Trigger{Adjustment: "+1"})
 			Expect(err).NotTo(HaveOccurred())
@@ -106,7 +104,7 @@ var _ = Describe("Server", func() {
 		})
 	})
 
-	Context("when getting scaling histories", func() {
+	When("getting scaling histories", func() {
 		BeforeEach(func() {
 			uPath, err := route.Get(routes.GetScalingHistoriesRouteName).URLPath("guid", "8ea70e4e-e0bc-4e15-9d32-cd69daaf012a")
 			Expect(err).NotTo(HaveOccurred())
@@ -141,7 +139,7 @@ var _ = Describe("Server", func() {
 		})
 	})
 
-	Context("when requesting active shedule", func() {
+	When("requesting active shedule", func() {
 
 		BeforeEach(func() {
 			uPath, err := route.Get(routes.SetActiveScheduleRouteName).URLPath("appid", "test-app-id", "scheduleid", "test-schedule-id")
@@ -149,12 +147,12 @@ var _ = Describe("Server", func() {
 			serverUrl.Path = uPath.Path
 		})
 
-		Context("when setting active schedule", func() {
+		When("setting active schedule", func() {
 			BeforeEach(func() {
 				bodyReader = bytes.NewReader([]byte(`{"instance_min_count":1, "instance_max_count":5, "initial_min_instance_count":3}`))
 			})
 
-			Context("credentials are correct", func() {
+			When("credentials are correct", func() {
 				BeforeEach(func() {
 					method = http.MethodPut
 					username = conf.Server.BasicAuth.Username
@@ -169,7 +167,7 @@ var _ = Describe("Server", func() {
 			})
 		})
 
-		Context("when deleting active schedule", func() {
+		When("deleting active schedule", func() {
 			BeforeEach(func() {
 				uPath, err := route.Get(routes.DeleteActiveScheduleRouteName).URLPath("appid", "test-app-id", "scheduleid", "test-schedule-id")
 				Expect(err).NotTo(HaveOccurred())
@@ -178,7 +176,7 @@ var _ = Describe("Server", func() {
 				method = http.MethodDelete
 			})
 
-			Context("when requesting correctly", func() {
+			When("requesting correctly", func() {
 
 				BeforeEach(func() {
 					username = conf.Server.BasicAuth.Username
@@ -193,7 +191,7 @@ var _ = Describe("Server", func() {
 			})
 		})
 
-		Context("when getting active schedule", func() {
+		When("getting active schedule", func() {
 			BeforeEach(func() {
 				uPath, err := route.Get(routes.GetActiveSchedulesRouteName).URLPath("appid", "test-app-id")
 				Expect(err).NotTo(HaveOccurred())
@@ -202,7 +200,7 @@ var _ = Describe("Server", func() {
 				method = http.MethodGet
 			})
 
-			Context("when requesting correctly", func() {
+			When("requesting correctly", func() {
 				BeforeEach(func() {
 					username = conf.Server.BasicAuth.Username
 					password = conf.Server.BasicAuth.Password
@@ -226,7 +224,7 @@ var _ = Describe("Server", func() {
 		})
 	})
 
-	Context("when requesting sync shedule", func() {
+	When("requesting sync shedule", func() {
 		BeforeEach(func() {
 			uPath, err := route.Get(routes.SyncActiveSchedulesRouteName).URLPath()
 			Expect(err).NotTo(HaveOccurred())
@@ -234,7 +232,7 @@ var _ = Describe("Server", func() {
 			bodyReader = nil
 		})
 
-		Context("when requesting correctly", func() {
+		When("requesting correctly", func() {
 			BeforeEach(func() {
 				method = http.MethodPut
 				username = conf.Server.BasicAuth.Username
@@ -249,7 +247,7 @@ var _ = Describe("Server", func() {
 			})
 		})
 
-		Context("when requesting with incorrect http method", func() {
+		When("requesting with incorrect http method", func() {
 			BeforeEach(func() {
 				method = http.MethodGet
 			})
