@@ -7,7 +7,6 @@
     ":automergeAll",
     "schedule:nonOfficeHours"
   ],
-  "transitiveRemediation": true,
   "postUpdateOptions": [
     "gomodTidy",
     "gomodUpdateImportPaths"
@@ -46,8 +45,8 @@
     {
       "description": "Group Ginkgo CLI and library updates together",
       "groupName": "ginkgo updates",
-      "matchPackagePatterns": [
-        "onsi/ginkgo"
+      "matchPackageNames": [
+        "/onsi/ginkgo/"
       ]
     }
   ],
