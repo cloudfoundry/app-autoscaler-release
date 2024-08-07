@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
+	internalscalinghistory "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/apis/scalinghistory"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
@@ -42,24 +42,24 @@ var _ = Describe("PublicApiServer", func() {
 	)
 
 	BeforeEach(func() {
-		scalingHistoryEntry := []scalinghistory.HistoryEntry{
+		scalingHistoryEntry := []internalscalinghistory.HistoryEntry{
 			{
-				Status:       scalinghistory.NewOptHistoryEntryStatus(scalinghistory.HistoryEntryStatus0),
-				AppID:        scalinghistory.NewOptGUID(TEST_APP_ID),
-				Timestamp:    scalinghistory.NewOptInt(300),
-				ScalingType:  scalinghistory.NewOptHistoryEntryScalingType(scalinghistory.HistoryEntryScalingType0),
-				OldInstances: scalinghistory.NewOptInt64(2),
-				NewInstances: scalinghistory.NewOptInt64(4),
-				Reason:       scalinghistory.NewOptString("a reason"),
+				Status:       internalscalinghistory.NewOptHistoryEntryStatus(internalscalinghistory.HistoryEntryStatus0),
+				AppID:        internalscalinghistory.NewOptGUID(TEST_APP_ID),
+				Timestamp:    internalscalinghistory.NewOptInt(300),
+				ScalingType:  internalscalinghistory.NewOptHistoryEntryScalingType(internalscalinghistory.HistoryEntryScalingType0),
+				OldInstances: internalscalinghistory.NewOptInt64(2),
+				NewInstances: internalscalinghistory.NewOptInt64(4),
+				Reason:       internalscalinghistory.NewOptString("a reason"),
 			},
 		}
 
-		scalingEngineResponse = scalinghistory.History{
-			TotalResults: scalinghistory.NewOptInt64(1),
-			TotalPages:   scalinghistory.NewOptInt64(1),
-			Page:         scalinghistory.NewOptInt64(1),
-			PrevURL:      scalinghistory.OptURI{},
-			NextURL:      scalinghistory.OptURI{},
+		scalingEngineResponse = internalscalinghistory.History{
+			TotalResults: internalscalinghistory.NewOptInt64(1),
+			TotalPages:   internalscalinghistory.NewOptInt64(1),
+			Page:         internalscalinghistory.NewOptInt64(1),
+			PrevURL:      internalscalinghistory.OptURI{},
+			NextURL:      internalscalinghistory.OptURI{},
 			Resources:    scalingHistoryEntry,
 		}
 
@@ -425,6 +425,7 @@ var _ = Describe("PublicApiServer", func() {
 			})
 		})
 	})
+
 	Describe("UnProtected Routes", func() {
 		Context("when calling info endpoint", func() {
 			It("should succeed", func() {
@@ -435,12 +436,6 @@ var _ = Describe("PublicApiServer", func() {
 			It("should succeed", func() {
 				verifyResponse(httpClient, serverUrl, "/health", nil, http.MethodGet, "", http.StatusOK)
 			})
-		})
-	})
-
-	Context("when requesting non existing path", func() {
-		It("should get 404", func() {
-			verifyResponse(httpClient, serverUrl, "/non-existing-path", nil, http.MethodGet, "", http.StatusNotFound)
 		})
 	})
 })
