@@ -86,7 +86,14 @@ func (c *CtxClient) getUserScope(ctx context.Context, userToken string) ([]strin
 		c.logger.Error("Failed to create getuserscope request", err, lager.Data{"userScopeEndpoint": userScopeEndpoint})
 		return nil, err
 	}
-	req.SetBasicAuth(c.conf.ClientID, c.conf.Secret)
+
+	tokens, err := c.GetTokens(ctx)
+	if err != nil {
+		c.logger.Error("Failed to retrieve oauth token from cf client", err, lager.Data{"userScopeEndpoint": userScopeEndpoint})
+		return nil, err
+	}
+	bearer := "Bearer " + tokens.AccessToken
+	req.Header.Add("Authorization", bearer)
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
@@ -176,6 +183,6 @@ func (c *CtxClient) getUserScopeEndpoint(ctx context.Context, userToken string) 
 	if err != nil {
 		return "", err
 	}
-	userScopeEndpoint := endpoints.Uaa.Url + "/check_token?" + parameters.Encode()
+	userScopeEndpoint := endpoints.Uaa.Url + "/introspect?" + parameters.Encode()
 	return userScopeEndpoint, nil
 }
