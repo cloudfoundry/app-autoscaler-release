@@ -3,6 +3,7 @@ package server_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
@@ -15,6 +16,7 @@ import (
 
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 
 	"github.com/patrickmn/go-cache"
 )
@@ -32,7 +34,6 @@ var _ = Describe("MetricHandler", func() {
 		metricsforwarder *fakes.FakeMetricForwarder
 
 		resp *httptest.ResponseRecorder
-		req  *http.Request
 		err  error
 		body []byte
 
@@ -41,6 +42,8 @@ var _ = Describe("MetricHandler", func() {
 		found bool
 
 		scalingPolicy *models.ScalingPolicy
+
+		serverURL *url.URL
 	)
 
 	BeforeEach(func() {
@@ -53,11 +56,17 @@ var _ = Describe("MetricHandler", func() {
 		resp = httptest.NewRecorder()
 		handler = NewCustomMetricsHandler(logger, metricsforwarder, policyDB, allowedMetricCache)
 		allowedMetricCache.Flush()
+
+		serverURL, err = url.Parse(fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port))
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Describe("PublishMetrics", func() {
 		JustBeforeEach(func() {
-			req = CreateRequest(body)
+			serverURL.Path = "/v1/apps/an-app-id/metrics"
+			req, err := http.NewRequest(http.MethodPost, serverURL.String(), bytes.NewReader(body))
+			Expect(err).ToNot(HaveOccurred())
+			req.Header.Add("Content-Type", "application/json")
 			Expect(err).ToNot(HaveOccurred())
 			vars["appid"] = "an-app-id"
 			handler.VerifyCredentialsAndPublishMetrics(resp, req, vars)
@@ -71,7 +80,7 @@ var _ = Describe("MetricHandler", func() {
 				}, nil)
 				body = []byte(`{
 					   "instance_index":0,
-					   "test" : 
+					   "test" :
 					   "metrics":[
 					      {
 					         "name":"custom_metric1",
@@ -268,10 +277,3 @@ var _ = Describe("MetricHandler", func() {
 	})
 
 })
-
-func CreateRequest(body []byte) *http.Request {
-	req, err := http.NewRequest(http.MethodPost, serverUrl+"/v1/apps/an-app-id/metrics", bytes.NewReader(body))
-	Expect(err).ToNot(HaveOccurred())
-	req.Header.Add("Content-Type", "application/json")
-	return req
-}
