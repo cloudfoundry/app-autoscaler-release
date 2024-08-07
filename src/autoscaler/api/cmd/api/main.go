@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/brokerserver"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/publicapiserver"
@@ -20,7 +19,6 @@ import (
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager/v3"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/grouper"
 	"github.com/tedsuo/ifrit/sigmon"
@@ -69,10 +67,6 @@ func main() {
 	defer func() { _ = credentialProvider.Close() }()
 
 	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "golangapiserver")
-	prometheusCollectors := []prometheus.Collector{
-		healthendpoint.NewDatabaseStatusCollector("autoscaler", "golangapiserver", "policyDB", policyDb),
-		httpStatusCollector,
-	}
 
 	paClock := clock.NewClock()
 	cfClient := cf.NewCFClient(&conf.CF, logger.Session("cf"), paClock)
@@ -89,7 +83,6 @@ func main() {
 		os.Exit(1)
 	}
 	defer func() { _ = bindingDB.Close() }()
-	prometheusCollectors = append(prometheusCollectors, healthendpoint.NewDatabaseStatusCollector("autoscaler", "golangapiserver", "bindingDB", bindingDB))
 	checkBindingFunc := func(appId string) bool {
 		return bindingDB.CheckServiceBinding(appId)
 	}
@@ -99,21 +92,26 @@ func main() {
 		logger.Error("failed to create broker http server", err)
 		os.Exit(1)
 	}
-	members = append(members, grouper.Member{"broker_http_server", brokerHttpServer})
 
-	promRegistry := prometheus.NewRegistry()
-	healthendpoint.RegisterCollectors(promRegistry, prometheusCollectors, true, logger.Session("golangapiserver-prometheus"))
+	rateLimiter := ratelimiter.DefaultRateLimiter(conf.RateLimit.MaxAmount, conf.RateLimit.ValidDuration, logger.Session("api-ratelimiter"))
 
-	publicApiHttpServer := createApiServer(conf, logger, policyDb, credentialProvider, checkBindingFunc, cfClient, httpStatusCollector, bindingDB)
-	healthServer, err := healthendpoint.NewServerWithBasicAuth(conf.Health, []healthendpoint.Checker{}, logger.Session("health-server"), promRegistry, time.Now)
+	publicApiHttpServer := publicapiserver.NewPublicApiServer(
+		logger.Session("public_api_http_server"), conf, policyDb, bindingDB,
+		credentialProvider, checkBindingFunc, cfClient, httpStatusCollector,
+		rateLimiter)
+
+	vmServer, err := publicApiHttpServer.GetMtlsServer()
 	if err != nil {
-		logger.Fatal("Failed to create health server", err)
+		logger.Error("failed to create public api http server", err)
 		os.Exit(1)
 	}
+
 	logger.Debug("Successfully created health server")
 
+	healthServer, _ := publicApiHttpServer.GetHealthServer()
 	members = append(members,
-		grouper.Member{"public_api_http_server", publicApiHttpServer},
+		grouper.Member{"public_api_http_server", vmServer},
+		grouper.Member{"broker", brokerHttpServer},
 		grouper.Member{"health_server", healthServer},
 	)
 
@@ -129,14 +127,4 @@ func main() {
 	}
 
 	logger.Info("exited")
-}
-
-func createApiServer(conf *config.Config, logger lager.Logger, policyDb *sqldb.PolicySQLDB, credentialProvider cred_helper.Credentials, checkBindingFunc api.CheckBindingFunc, cfClient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector, bindingDB db.BindingDB) ifrit.Runner {
-	rateLimiter := ratelimiter.DefaultRateLimiter(conf.RateLimit.MaxAmount, conf.RateLimit.ValidDuration, logger.Session("api-ratelimiter"))
-	publicApiHttpServer, err := publicapiserver.NewPublicApiServer(logger.Session("public_api_http_server"), conf, policyDb, credentialProvider, checkBindingFunc, cfClient, httpStatusCollector, rateLimiter, bindingDB)
-	if err != nil {
-		logger.Error("failed to create public api http server", err)
-		os.Exit(1)
-	}
-	return publicApiHttpServer
 }
