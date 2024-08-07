@@ -126,10 +126,10 @@ target/scheduler_test_certs:
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
 test-autoscaler: check-db_type init-db test-certs
-	@echo " - using DBURL=${DBURL}"
-	@make --directory='./src/autoscaler' test DBURL="${DBURL}"
+	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
+	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
 test-autoscaler-suite: check-db_type init-db test-certs
-	@make --directory='./src/autoscaler' testsuite TEST=${TEST} DBURL="${DBURL}"
+	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}'
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
