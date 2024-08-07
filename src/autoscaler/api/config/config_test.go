@@ -188,7 +188,8 @@ public_api_server:
 			BeforeEach(func() {
 				configBytes = `
 health:
-  port: port
+  server_config:
+    port: port
 `
 			})
 

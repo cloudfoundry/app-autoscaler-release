@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
@@ -20,14 +22,36 @@ import (
 
 var _ = Describe("Api", func() {
 	var (
-		runner           *ApiRunner
-		rsp              *http.Response
+		runner *ApiRunner
+		rsp    *http.Response
+
 		brokerHttpClient *http.Client
+		healthHttpClient *http.Client
+		apiHttpClient    *http.Client
+
+		serverURL *url.URL
+		brokerURL *url.URL
+		healthURL *url.URL
+
+		err error
 	)
 
 	BeforeEach(func() {
-		brokerHttpClient = NewServiceBrokerClient()
 		runner = NewApiRunner()
+
+		brokerHttpClient = NewServiceBrokerClient()
+		healthHttpClient = &http.Client{}
+		apiHttpClient = testhelpers.NewPublicApiClient()
+
+		serverURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.PublicApiServer.Port))
+		Expect(err).NotTo(HaveOccurred())
+
+		brokerURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.BrokerServer.Port))
+		Expect(err).NotTo(HaveOccurred())
+
+		healthURL, err = url.Parse(fmt.Sprintf("http://127.0.0.1:%d", cfg.Health.ServerConfig.Port))
+		Expect(err).NotTo(HaveOccurred())
+
 	})
 
 	Describe("Api configuration check", func() {
@@ -118,14 +142,17 @@ var _ = Describe("Api", func() {
 			BeforeEach(func() {
 				runner.Start()
 			})
+
 			It("succeeds with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v2/catalog", brokerPort), nil)
+				brokerURL.Path = "/v2/catalog"
+				req, err := http.NewRequest(http.MethodGet, brokerURL.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				req.SetBasicAuth(username, password)
 
 				rsp, err = brokerHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
+
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				if rsp.StatusCode != http.StatusOK {
 					Fail(fmt.Sprintf("Not ok:%d", rsp.StatusCode))
@@ -153,7 +180,8 @@ var _ = Describe("Api", func() {
 				runner.Start()
 			})
 			It("succeeds with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v1/info", publicApiPort), nil)
+				serverURL.Path = "/v1/info"
+				req, err := http.NewRequest(http.MethodGet, serverURL.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				rsp, err = apiHttpClient.Do(req)
@@ -169,8 +197,8 @@ var _ = Describe("Api", func() {
 	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
 			basicAuthConfig := cfg
-			basicAuthConfig.Health.HealthCheckUsername = ""
-			basicAuthConfig.Health.HealthCheckPassword = ""
+			basicAuthConfig.Health.BasicAuth.Username = ""
+			basicAuthConfig.Health.BasicAuth.Password = ""
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 			runner.Start()
 		})
@@ -180,7 +208,8 @@ var _ = Describe("Api", func() {
 		})
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", healthport))
+				rsp, err := healthHttpClient.Get(healthURL.String())
+
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
@@ -224,7 +253,7 @@ var _ = Describe("Api", func() {
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				req.SetBasicAuth(cfg.Health.HealthCheckUsername, cfg.Health.HealthCheckPassword)
+				req.SetBasicAuth(cfg.Health.BasicAuth.Username, cfg.Health.BasicAuth.Password)
 
 				rsp, err := healthHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
@@ -246,7 +275,7 @@ var _ = Describe("Api", func() {
 		})
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://127.0.0.1:%d/v1/info", publicApiPort), nil)
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", serverURL), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				rsp, err = apiHttpClient.Do(req)
