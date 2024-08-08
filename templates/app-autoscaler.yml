@@ -366,7 +366,6 @@ instance_groups:
     release: app-autoscaler
     properties:
       autoscaler:
-        instancemetrics_db: *database
         appmetrics_db: *database
         appmetrics_db_connection_config: *databaseConnectionConfig
         scalingengine_db: *database
@@ -778,14 +777,6 @@ variables:
     common_name: scalingengine_client
     extended_key_usage:
     - client_auth
-    key_length: 4096
-    duration: 180
-- name: metric_scraper_ca
-  type: certificate
-  update_mode: converge
-  options:
-    common_name: metricScraperCA
-    is_ca: true
     key_length: 4096
     duration: 180
 

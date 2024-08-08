@@ -1,0 +1,5 @@
+---
+name: openjdk-21
+dependencies: []
+files:
+- sapmachine-jdk-21.0.4_linux-x64_bin.tar.gz  # from https://github.com/SAP/SapMachine/releases/download/sapmachine-21.0.4/sapmachine-jdk-21.0.4_linux-x64_bin.tar.gz

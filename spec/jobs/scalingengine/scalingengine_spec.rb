@@ -3,6 +3,7 @@ require "json"
 require "bosh/template/test"
 require "rspec/file_fixtures"
 require "yaml"
+require_relative "../utils"
 
 describe "scalingengine" do
   let(:release) { Bosh::Template::Test::ReleaseDir.new(File.join(File.dirname(__FILE__), "../../..")) }

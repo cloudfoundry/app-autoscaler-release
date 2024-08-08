@@ -1,0 +1,132 @@
+name: app-autoscaler
+version: 14.0.0
+commit_hash: 8cf76285c
+uncommitted_changes: false
+jobs:
+- name: eventgenerator
+  version: 7b661855f25b17690b0bea56557a4553ee64c3b559866d73bede9c2aab451bee
+  fingerprint: 7b661855f25b17690b0bea56557a4553ee64c3b559866d73bede9c2aab451bee
+  sha1: sha256:94a8ce91eec09122ef2fd2e0f773d0df8adad0355671c7081e5c8c5cd9c424e2
+  packages:
+  - openjdk-17
+  - db
+  - eventgenerator
+  - common
+  - changeloglockcleaner
+- name: golangapiserver
+  version: 1ef290f6ad6cd69dc5a7e6ae14e3c00f6a210f4235bc255392a39470c7b772fe
+  fingerprint: 1ef290f6ad6cd69dc5a7e6ae14e3c00f6a210f4235bc255392a39470c7b772fe
+  sha1: sha256:b997aa0e97b486979e5dea88eb250e450b95491d75bc7829f5d91478bf836a22
+  packages:
+  - golang-1-linux
+  - golangapiserver
+  - db
+  - openjdk-17
+  - common
+  - changeloglockcleaner
+- name: metricsforwarder
+  version: 8d0b8d5a1f17f01079172163d6a78147cde52d4b0c81ea2771b3af1f5bd0e649
+  fingerprint: 8d0b8d5a1f17f01079172163d6a78147cde52d4b0c81ea2771b3af1f5bd0e649
+  sha1: sha256:07bcd92da7f7f66257110d6e1f91d9c624dbb7937b9bd11c9b26784317c8c641
+  packages:
+  - db
+  - metricsforwarder
+  - common
+- name: operator
+  version: e5cd03d5bb9ec7b6b08c65936e14f0d6fb9b4b7acdd1c8352388270a86bd8241
+  fingerprint: e5cd03d5bb9ec7b6b08c65936e14f0d6fb9b4b7acdd1c8352388270a86bd8241
+  sha1: sha256:cf741475455a0e51d4c5ab7d1b020917665eb7db6d56624ab3f07ddf74e4bb8a
+  packages:
+  - operator
+  - common
+  - db
+  - openjdk-17
+  - changeloglockcleaner
+- name: scalingengine
+  version: fbd7ee3f304cf1ac2ec8fdc10e67f003d50d949ab25a58df838f0497ac503f5f
+  fingerprint: fbd7ee3f304cf1ac2ec8fdc10e67f003d50d949ab25a58df838f0497ac503f5f
+  sha1: sha256:d55638d6a6f8ebc26ea9fd29a5aa3dd83db59be9aa3f0fad2a4d3dda3721941f
+  packages:
+  - openjdk-17
+  - db
+  - scalingengine
+  - common
+  - changeloglockcleaner
+- name: scheduler
+  version: 81741f07889700443355701c5afdaa04c492acf69d5f89b94dc32b4b997bc288
+  fingerprint: 81741f07889700443355701c5afdaa04c492acf69d5f89b94dc32b4b997bc288
+  sha1: sha256:57067b1b7c6884b17db77bc691cce8de2a71db5ca5076d619d158a9be608e514
+  packages:
+  - scheduler
+  - db
+  - openjdk-17
+  - common
+  - changeloglockcleaner
+packages:
+- name: changeloglockcleaner
+  version: ce9be5cce207009a889a305a1dc96774bd60fe319dbe7c97ce4b1f3b5248f654
+  fingerprint: ce9be5cce207009a889a305a1dc96774bd60fe319dbe7c97ce4b1f3b5248f654
+  sha1: sha256:34b6f5db7aad87bae7bf13308b2fdd46cf31cccb2ae69079fe992317d96095b6
+  dependencies:
+  - golang-1-linux
+- name: common
+  version: 9d7726aa454227e3087cd4a04425acae72d883a5bb19d314930ab58e83f04d0e
+  fingerprint: 9d7726aa454227e3087cd4a04425acae72d883a5bb19d314930ab58e83f04d0e
+  sha1: sha256:979ff40c6e44031bec55344aa4a522cac3d265ab23deaea0f7bc7541aa2b4124
+  dependencies: []
+- name: db
+  version: b99ed9f99c38d3a8e2b59ed2231038519f6ddacc8680c664e02f155c4271e70b
+  fingerprint: b99ed9f99c38d3a8e2b59ed2231038519f6ddacc8680c664e02f155c4271e70b
+  sha1: sha256:c48d23e191829d2f8e070c951cd3964cd7bf2872958660ec31dc8670ae80b01d
+  dependencies:
+  - openjdk-17
+- name: eventgenerator
+  version: b32343e0a594b4391cae796e7a5c8f722b4f88aa0555419aa63c2e0e0c14c0eb
+  fingerprint: b32343e0a594b4391cae796e7a5c8f722b4f88aa0555419aa63c2e0e0c14c0eb
+  sha1: sha256:3eda902537b59c9ac34bf7adaf9c632692ca3be0402221287e6e9dfcb6fbcc8c
+  dependencies:
+  - golang-1-linux
+- name: golang-1-linux
+  version: c2342901fca75f4c7ec3f32e6a757e923089c6c50d8eb3effd2c25eac1009e31
+  fingerprint: c2342901fca75f4c7ec3f32e6a757e923089c6c50d8eb3effd2c25eac1009e31
+  sha1: sha256:d354b084ed879adc3218f89b9109b474a68c3eafb5c0ea204c4b77963e4736b0
+  dependencies: []
+- name: golangapiserver
+  version: 6d11de094fc9cc17fe7ce88cfb210b3be832f78d594bcdb3b106c04ba8573ae5
+  fingerprint: 6d11de094fc9cc17fe7ce88cfb210b3be832f78d594bcdb3b106c04ba8573ae5
+  sha1: sha256:859414dedf4e6027513a9b6abe5df09f7771bef9912072b0cdde911983e4d95e
+  dependencies:
+  - golang-1-linux
+- name: metricsforwarder
+  version: 03b26f8298ed058f48adde5220c62f949ee42198a2591037dae76ca2a8da6307
+  fingerprint: 03b26f8298ed058f48adde5220c62f949ee42198a2591037dae76ca2a8da6307
+  sha1: sha256:2df5a3e3c08a1f43116befbfe2ccb5027e7f2eb0411b56f4d612f86d2a2af418
+  dependencies:
+  - golang-1-linux
+- name: openjdk-17
+  version: be13f95495365f8879a75d9237320cd587774f6cbc087020bd6508fb8a82184a
+  fingerprint: be13f95495365f8879a75d9237320cd587774f6cbc087020bd6508fb8a82184a
+  sha1: sha256:99e2ef396973d7bbbfddffad6968b419627c20bb426117f8c3115cad5b206227
+  dependencies: []
+- name: operator
+  version: 7ed28368d76e84b62decb11dac26989981c423b6fdfb008094187a0d19c7cc6c
+  fingerprint: 7ed28368d76e84b62decb11dac26989981c423b6fdfb008094187a0d19c7cc6c
+  sha1: sha256:7fc361281933a528281ad8c27e2b47fbd7a412cacec16dda4f4718155536ef0b
+  dependencies:
+  - golang-1-linux
+- name: scalingengine
+  version: 00c2ff355536fbc5cefb65c50742639fbae9083568bfa9fa73f50d19e53c0f05
+  fingerprint: 00c2ff355536fbc5cefb65c50742639fbae9083568bfa9fa73f50d19e53c0f05
+  sha1: sha256:adc6501586a5cac8d0d342d4ea0dd39ddd586713d6d876b9a455a63c06c839f7
+  dependencies:
+  - golang-1-linux
+- name: scheduler
+  version: 28d5dfcc9358e2423327b1f6ad262524a5cc0dd11fbfb858211ba1bce19bce31
+  fingerprint: 28d5dfcc9358e2423327b1f6ad262524a5cc0dd11fbfb858211ba1bce19bce31
+  sha1: sha256:a06c08002487b24478157509bffe613d523c682c67cd3b7fda355ae2592ed5fa
+  dependencies:
+  - openjdk-17
+license:
+  version: 15eb386a0db48f190d29bd28058f5d0d6605f5acde7c6cfc6f014d57747e41f9
+  fingerprint: 15eb386a0db48f190d29bd28058f5d0d6605f5acde7c6cfc6f014d57747e41f9
+  sha1: sha256:6c7a834097b96efc340787fbe5876c1e366de0235def5e2b93fa016c8655535c

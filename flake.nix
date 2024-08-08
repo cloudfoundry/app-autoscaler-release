@@ -4,10 +4,9 @@
   inputs = {
     nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
     nixpkgs-bosh-cli-v7-3-1.url = github:NixOS/nixpkgs/1179c6c3705509ba25bd35196fca507d2a227bd0;
-    local-flake.url = "path:./local-flake";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-bosh-cli-v7-3-1, local-flake }:
+  outputs = { self, nixpkgs, nixpkgs-bosh-cli-v7-3-1 }:
     let
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
@@ -18,6 +17,13 @@
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
       nixpkgsFor-bosh-cli-v7-3-1 = forAllSystems (system: import nixpkgs-bosh-cli-v7-3-1 { inherit system; });
     in {
+      packages = forAllSystems (system:
+        let
+          nixpkgs = nixpkgsFor.${system};
+          callPackages = nixpkgs.lib.customisation.callPackagesWith nixpkgs;
+        in callPackages ./nix/packages.nix {}
+      );
+
       openapi-specifications = {
         app-autoscaler-api =
           let
@@ -36,8 +42,8 @@
             buildInputs = with pkgs; [
               act
               actionlint
-              local-flake.packages.${system}.app-autoscaler-cli-plugin
-              local-flake.packages.${system}.bosh-bootloader
+              self.packages.${system}.app-autoscaler-cli-plugin
+              self.packages.${system}.bosh-bootloader
               # to make `bosh create-release` work in a Nix shell on macOS, use an older bosh-cli version that reuses
               # a bosh-utils version under the hood that doesn't use the tar option `--no-mac-metadata`.
               # unfortunately, Nix provides gnutar by default, which doesn't have the `--no-mac-metadata` option.
@@ -83,6 +89,7 @@
               shellcheck
               swagger-cli
               temurin-bin
+              uutils-coreutils-noprefix
               yq-go
             ];
 
@@ -92,7 +99,7 @@
             shellHook = ''
               # install required CF CLI plugins
               cf install-plugin -f \
-                '${local-flake.packages.${system}.app-autoscaler-cli-plugin}/bin/app-autoscaler-cli-plugin'
+                '${self.packages.${system}.app-autoscaler-cli-plugin}/bin/app-autoscaler-cli-plugin'
 
               aes_terminal_font_yellow='\e[38;2;255;255;0m'
               aes_terminal_font_blink='\e[5m'

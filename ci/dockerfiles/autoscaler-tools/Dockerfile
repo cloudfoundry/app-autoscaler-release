@@ -27,7 +27,7 @@ RUN apt-get update && \
             openssl \
             unzip \
             gcc \
-            openjdk-17-jdk \
+            openjdk-21-jdk \
             zip \
             ruby \
             ruby-dev \
@@ -47,7 +47,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 
 # install golang
 # renovate: datasource=golang-version depName=golang
-ARG GO_VERSION=1.22.4
+ARG GO_VERSION=1.22.5
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
@@ -64,14 +64,14 @@ RUN apt-get update && \
 
 # Install bosh_cli
 # renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
-ARG BOSH_VERSION=7.6.1
+ARG BOSH_VERSION=7.6.2
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
-ARG BBL_VERSION=v9.0.22
+ARG BBL_VERSION=v9.0.23
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_amd64 && \
   mv bbl-* /usr/local/bin/bbl &&\
   chmod +x /usr/local/bin/bbl &&\
@@ -79,7 +79,7 @@ RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${
 
 # Install credhub
 # renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
-ARG CREDHUB_VERSION=2.9.31
+ARG CREDHUB_VERSION=2.9.35
 RUN wget -q https://github.com/cloudfoundry/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   mv credhub /usr/local/bin/credhub &&\
@@ -107,7 +107,7 @@ RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download
 
 # get maven
 # renovate: datasource=maven depName=org.apache.maven:maven-core
-ARG MAVEN_VERSION=3.9.7
+ARG MAVEN_VERSION=3.9.8
 ENV MAVEN_HOME /opt/maven
 RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
 	tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \

@@ -3,6 +3,7 @@ require "json"
 require "bosh/template/test"
 require "rspec/file_fixtures"
 require "yaml"
+require_relative "../utils"
 
 describe "golangapiserver" do
   context "apiserver.yml.erb" do
@@ -248,6 +249,12 @@ describe "golangapiserver" do
             check_if_certs_not_in_url(url, "storedprocedure_db")
           end
         end
+      end
+    end
+
+    context "default_credential_type for custom metrics" do
+      it "has a value of binding-secret by default" do
+        expect(rendered_template).to include({"default_credential_type" => "binding-secret"})
       end
     end
   end

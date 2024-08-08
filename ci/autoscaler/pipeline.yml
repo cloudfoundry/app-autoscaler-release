@@ -19,7 +19,6 @@ anchors:
       operations/enable-nats-tls.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
 
   app-autoscaler-ops-files-log-cache-syslog-cf: &app-autoscaler-ops-files-log-cache-syslog-cf
@@ -166,9 +165,11 @@ resources:
   icon: github
   check_every: 5m
   source:
-    uri: https://github.com/cloudfoundry/bosh-package-java-release.git
-    branch: main
-    version_depth: 20
+    uri: https://github.com/SAP/SapMachine.git
+    branch: sapmachine21 # use JDK 21 as the LTS version
+    fetch_tags: true
+    tag_regex: 'sapmachine-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+'
+    version_depth: 50
 
 - name: gcp-jammy-stemcell
   type: bosh-io-stemcell
@@ -344,7 +345,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor  db scheduler
     timeout: 15m
   - task: deploy-autoscaler
     file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
@@ -578,12 +579,11 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-release
-    - get: java-release
     - get: golang-release
       trigger: true
     - get: ci
   - task: update-golang-sdk
-    file: ci/ci/autoscaler/tasks/update-sdk/task.yml
+    file: ci/ci/autoscaler/tasks/update-sdk/go_task.yml
     params:
       type: golang
 
@@ -595,9 +595,8 @@ jobs:
     - get: app-autoscaler-release
     - get: java-release
       trigger: true
-    - get: golang-release
     - get: ci
   - task: update-java-sdk
-    file: ci/ci/autoscaler/tasks/update-sdk/task.yml
+    file: ci/ci/autoscaler/tasks/update-sdk/java_task.yml
     params:
       type: java

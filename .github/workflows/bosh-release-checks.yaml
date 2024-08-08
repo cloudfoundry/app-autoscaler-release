@@ -28,12 +28,12 @@ jobs:
           make package-specs
       - name: Check if there is any change
         run: |
-            [ $(git status --porcelain | wc -l) -eq 0 ] || \
-            { \
-              git status;\
-              echo "::error::Specs are out of date, run \"make package-specs\" to update";\
-              exit 1;\
-            }
+          if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then
+            git status
+            git diff
+            echo "::error::Specs are out of date, run \"make package-specs\" to update"
+            exit 1
+          fi
   bosh-release:
     needs: generate-gosub
     name: Create Bosh Release

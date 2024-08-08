@@ -107,6 +107,27 @@ var _ = Describe("AutoScaler Service Broker", func() {
 			instance.unbind(appName)
 		})
 
+		It("binds&unbinds with policy having credential-type as x509", func() {
+			policyFile := "../assets/file/policy/policy-with-credential-type.json"
+			_, err := os.ReadFile(policyFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("checking broker bind response does not have username/password/url but mtls_url only ")
+			appEnvCmd := cf.Cf("env", appName).Wait(cfg.DefaultTimeoutDuration())
+			Expect(appEnvCmd).To(Exit(0), "failed getting app env")
+
+			appEnvCmdOutput := appEnvCmd.Out.Contents()
+			Expect(appEnvCmdOutput).NotTo(ContainSubstring("username"))
+			Expect(appEnvCmdOutput).NotTo(ContainSubstring("password"))
+			Expect(appEnvCmdOutput).NotTo(ContainSubstring("\"url\": \"https://"))
+			Expect(appEnvCmdOutput).To(ContainSubstring("\"mtls_url\": \"https://"))
+
+			instance.unbind(appName)
+		})
+
 		It("bind&unbinds without policy", func() {
 			helpers.BindServiceToApp(cfg, appName, instance.name())
 			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
