@@ -43,8 +43,12 @@
   },
   "shell": {
     "init_hook": [
-      "cf install-plugin -f $(which app-autoscaler-cli-plugin)",
-      "cf install-plugin -f $(which log-cache-cli)"
+      "install_plugin_if_needed() {",
+      "  sum=$(sha1sum $(which $1) | cut -d ' ' -f 1)",
+      "  cf plugins --checksum | grep -q $sum || cf install-plugin -f $(which $1)",
+      "}",
+      "install_plugin_if_needed 'app-autoscaler-cli-plugin'",
+      "install_plugin_if_needed 'log-cache-cli'"
     ]
   }
 }
