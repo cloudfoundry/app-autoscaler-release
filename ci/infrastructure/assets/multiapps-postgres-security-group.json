@@ -3,6 +3,6 @@
         "protocol": "tcp",
         "destination": "10.0.255.0/24",
         "ports": "5524",
-        "description": "Allow postgres traffic from"
+        "description": "Allow postgres traffic to the complete postgres subnet because postgres ip may change"
       }
  ]
