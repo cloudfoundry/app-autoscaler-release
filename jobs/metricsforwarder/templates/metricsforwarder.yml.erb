@@ -36,11 +36,12 @@ end
 ###########################################
 #           Template Main                 #
 ###########################################
-  job_name = 'metricsforwarder'
-  policy_db_url = build_db_url('policy_db', job_name)
-  if p("autoscaler.storedprocedure_db.address") != ''
-    storedprocedure_db_url = build_db_url('storedprocedure_db', job_name)
-  end
+job_name = 'metricsforwarder'
+policy_db_url = build_db_url('policy_db', job_name)
+binding_db_url = build_db_url('binding_db', job_name)
+if p("autoscaler.storedprocedure_db.address") != ''
+  storedprocedure_db_url = build_db_url('storedprocedure_db', job_name)
+end
 
 %>
 
@@ -80,6 +81,11 @@ db:
     max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+  binding_db:
+    url: <%= binding_db_url %>
+    max_open_connections: <%= p("autoscaler.binding_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.binding_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.binding_db_connection_config.connection_max_lifetime") %>
 <% if p("autoscaler.storedprocedure_db.address") != '' %>
   storedprocedure_db:
     url: <%= storedprocedure_db_url %>
