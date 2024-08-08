@@ -9,7 +9,6 @@ groups:
   - bosh-cleanup
   - fetch-latest-stemcell
   - deploy-prometheus
-  - deploy-postgres
   - deploy-multiapps-controller
 
 - name: others
@@ -115,14 +114,23 @@ resources:
     #uri: https://github.com/asalan316/multiapps-controller.git
     uri: https://github.com/cloudfoundry/multiapps-controller.git
 
-- name: multiapps-controller-artifact
+- name: multiapps-controller-artifact-war
   type: maven-resource
   source:
     # groupId:artifactId:type[:classifier]
+    type: war
     repository: https://repo.maven.apache.org/maven2
     artifactId: multiapps-controller-web
     groupId: org.cloudfoundry.multiapps
-    type: war
+
+- name: multiapps-controller-artifact-yml
+  type: maven-resource
+  source:
+    # groupId:artifactId:type[:classifier]
+    type: yml
+    repository: https://repo.maven.apache.org/maven2
+    artifactId: multiapps-controller-web
+    groupId: org.cloudfoundry.multiapps
 
 jobs:
 - name: set-pipeline
@@ -294,8 +302,7 @@ jobs:
     params:
       ERRAND_NAME: smoke-tests
 
-
-- name: deploy-postgres
+- name: deploy-multiapps-controller
   serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
@@ -307,7 +314,9 @@ jobs:
     - get: ci
     - get: postgres-repo
     - get: postgres-release
-      trigger: true
+    - get: multiapps-controller-artifact-war
+    - get: multiapps-controller-artifact-yml
+    - get: multiapps-controller-repo
   - task: deploy-postgres
     file: ci/ci/infrastructure/tasks/deploy-postgres.yml
     params:
@@ -315,18 +324,6 @@ jobs:
       BBL_GCP_REGION: europe-west3
       BBL_GCP_ZONE: europe-west3-a
       SLACK_WEBHOOK: ((slack_webhook))
-- name: deploy-multiapps-controller
-  serial_groups: [infra]
-  public: true
-  build_logs_to_retain: 100
-  plan:
-  - in_parallel:
-    - get: bbl-state
-      trigger: true
-      passed: [setup-infrastructure]
-    - get: ci
-    - get: multiapps-controller-artifact
-    - get: multiapps-controller-repo
   - task: deploy-multiapps-controller
     file: ci/ci/infrastructure/tasks/deploy-multiapps-controller.yml
     params:
