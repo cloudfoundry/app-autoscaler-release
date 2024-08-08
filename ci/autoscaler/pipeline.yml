@@ -579,7 +579,6 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-release
-    - get: java-release
     - get: golang-release
       trigger: true
     - get: ci
@@ -596,7 +595,6 @@ jobs:
     - get: app-autoscaler-release
     - get: java-release
       trigger: true
-    - get: golang-release
     - get: ci
   - task: update-java-sdk
     file: ci/ci/autoscaler/tasks/update-sdk/task.yml
