@@ -13,8 +13,8 @@ params:
 inputs:
 - name: bbl-state
 - name: ci
-- name: multiapps-controller-artifact-war
-- name: multiapps-controller-artifact-yml
+- name: multiapps-controller-web-war
+- name: multiapps-controller-web-manifest
 - name: multiapps-controller-repo
 
 run:

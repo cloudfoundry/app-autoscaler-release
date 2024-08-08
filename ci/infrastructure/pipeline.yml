@@ -16,6 +16,12 @@ groups:
   - set-pipeline
 
 resource_types:
+- name: file-url
+  type: docker-image
+  source:
+    repository: pivotalservices/concourse-curl-resource
+    tag: latest
+
 - name: maven-resource
   type: registry-image
   source:
@@ -28,6 +34,18 @@ resource_types:
     repository: frodenas/gcs-resource
 
 resources:
+- name: multiapps-controller-web-war
+  type: file-url
+  source:
+    url: https://repo.maven.apache.org/maven2/org/cloudfoundry/multiapps/multiapps-controller-web/1.174.0/multiapps-controller-web-1.174.0.war
+    filename: multiapps-controller-web-1.174.0.war
+
+- name: multiapps-controller-web-manifest
+  type: file-url
+  source:
+    url: https://repo.maven.apache.org/maven2/org/cloudfoundry/multiapps/multiapps-controller-web/1.174.0/multiapps-controller-web-1.174.0-manifest.yml
+    filename: multiapps-controller-web-1.174.0-manifest.yml
+
 - name: ci
   type: git
   icon: github
@@ -110,27 +128,7 @@ resources:
   type: git
   icon: github
   source:
-    #branch: skip-ssl-cf-api
-    #uri: https://github.com/asalan316/multiapps-controller.git
     uri: https://github.com/cloudfoundry/multiapps-controller.git
-
-- name: multiapps-controller-artifact-war
-  type: maven-resource
-  source:
-    # groupId:artifactId:type[:classifier]
-    type: war
-    repository: https://repo.maven.apache.org/maven2
-    artifactId: multiapps-controller-web
-    groupId: org.cloudfoundry.multiapps
-
-- name: multiapps-controller-artifact-yml
-  type: maven-resource
-  source:
-    # groupId:artifactId:type[:classifier]
-    type: yml
-    repository: https://repo.maven.apache.org/maven2
-    artifactId: multiapps-controller-web
-    groupId: org.cloudfoundry.multiapps
 
 jobs:
 - name: set-pipeline
@@ -314,8 +312,8 @@ jobs:
     - get: ci
     - get: postgres-repo
     - get: postgres-release
-    - get: multiapps-controller-artifact-war
-    - get: multiapps-controller-artifact-yml
+    - get: multiapps-controller-web-war
+    - get: multiapps-controller-web-manifest
     - get: multiapps-controller-repo
   - task: deploy-postgres
     file: ci/ci/infrastructure/tasks/deploy-postgres.yml
