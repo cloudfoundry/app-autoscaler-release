@@ -9,9 +9,6 @@ source "${script_dir}/utils.source.sh"
 bosh_deploy_opts=${BOSH_DEPLOY_OPTS:-}
 deployment_name="${DEPLOYMENT_NAME:-postgres}"
 
-slack_channel="${SLACK_CHANNEL:-cf-dev-autoscaler-alerts}"
-slack_webhook="${SLACK_WEBHOOK}"
-
 release_dir="${POSTGRES_DIR:-$(realpath -e ${root_dir}/../postgres-release)}"
 repo_dir="${REPO_DIR:-$(realpath -e ${root_dir}/../postgres-repo)}"
 deployment_manifest=${DEPLOYMENT_MANIFEST:-"${repo_dir}/templates/postgres.yml"}
