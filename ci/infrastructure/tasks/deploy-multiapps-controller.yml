@@ -15,7 +15,6 @@ inputs:
 - name: ci
 - name: multiapps-controller-web-war
 - name: multiapps-controller-web-manifest
-- name: multiapps-controller-repo
 
 run:
   path: ci/ci/infrastructure/scripts/deploy-multiapps-controller.sh

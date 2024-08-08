@@ -113,12 +113,6 @@ resources:
   source:
     name: bosh-google-kvm-ubuntu-jammy-go_agent
 
-- name: multiapps-controller-repo
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/cloudfoundry/multiapps-controller.git
-
 jobs:
 - name: set-pipeline
   public: true
@@ -303,7 +297,6 @@ jobs:
     - get: postgres-release
     - get: multiapps-controller-web-war
     - get: multiapps-controller-web-manifest
-    - get: multiapps-controller-repo
   - task: deploy-postgres
     file: ci/ci/infrastructure/tasks/deploy-postgres.yml
     params:
