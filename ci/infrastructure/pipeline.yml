@@ -22,17 +22,6 @@ resource_types:
     repository: pivotalservices/concourse-curl-resource
     tag: latest
 
-- name: maven-resource
-  type: registry-image
-  source:
-    repository: ghcr.io/garethjevans/maven-resource
-    tag: latest
-
-- name: gcs-resource
-  type: registry-image
-  source:
-    repository: frodenas/gcs-resource
-
 resources:
 - name: multiapps-controller-web-war
   type: file-url
@@ -318,11 +307,7 @@ jobs:
   - task: deploy-postgres
     file: ci/ci/infrastructure/tasks/deploy-postgres.yml
     params:
-      DEBUG: true
       BBL_GCP_REGION: europe-west3
       BBL_GCP_ZONE: europe-west3-a
-      SLACK_WEBHOOK: ((slack_webhook))
   - task: deploy-multiapps-controller
     file: ci/ci/infrastructure/tasks/deploy-multiapps-controller.yml
-    params:
-
