@@ -10,7 +10,6 @@ image_resource:
 inputs:
 - name: app-autoscaler-release
 - name: golang-release
-- name: java-release
 
 params:
   GIT_USER_NAME: app-autoscaler-ci-bot
@@ -19,7 +18,6 @@ params:
   GITHUB_ACCESS_TOKEN: ((autoscaler_access_token))
   GITHUB_PRIVATE_KEY: ((autoscaler-deploy-key-private))
   type:
-  JAVA_DIR: java-release
   GOLANG_DIR: golang-release
   CREATE_PR: true
 

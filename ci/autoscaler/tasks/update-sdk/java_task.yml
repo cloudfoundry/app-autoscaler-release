@@ -1,0 +1,26 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+    tag: main
+
+inputs:
+- name: app-autoscaler-release
+- name: java-release
+
+params:
+  GIT_USER_NAME: app-autoscaler-ci-bot
+  GIT_USER_EMAIL: ApplicationAutoscaler@sap.com
+  UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
+  GITHUB_ACCESS_TOKEN: ((autoscaler_access_token))
+  GITHUB_PRIVATE_KEY: ((autoscaler-deploy-key-private))
+  type:
+  JAVA_DIR: java-release
+  CREATE_PR: true
+
+run:
+  path: app-autoscaler-release/ci/autoscaler/tasks/update-sdk/update_package.sh
+
