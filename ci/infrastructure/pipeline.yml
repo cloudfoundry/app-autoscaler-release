@@ -111,9 +111,9 @@ resources:
   type: git
   icon: github
   source:
-    branch: skip-ssl-cf-api
-    uri: https://github.com/asalan316/multiapps-controller.git
-    #uri: https://github.com/cloudfoundry/multiapps-controller.git
+    #branch: skip-ssl-cf-api
+    #uri: https://github.com/asalan316/multiapps-controller.git
+    uri: https://github.com/cloudfoundry/multiapps-controller.git
 
 - name: multiapps-controller-artifact
   type: maven-resource
