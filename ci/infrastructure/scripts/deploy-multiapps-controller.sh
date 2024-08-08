@@ -23,7 +23,8 @@ function deploy_multiapps_controller() {
 
   mv multiapps-controller-web-war/*.war .
   pushd multiapps-controller-web-manifest
-  cf push -f *.yml "${app_name}"
+  cf push -f ./*.yml "${app_name}"
+
   popd
 }
 
@@ -42,7 +43,7 @@ function cleanup_multiapps_controller() {
 }
 
 load_bbl_vars
-cf_login
+cf_login "${system_domain}"
 cleanup_multiapps_controller
 create_postgres_service
 add_postrgres_security_group

@@ -1,4 +1,5 @@
 
+# shellcheck disable=SC2086
 bosh_upload_stemcell_opts="${BOSH_UPLOAD_STEMCELL_OPTS:-""}"
 
 function find_or_upload_stemcell_from(){
@@ -14,7 +15,6 @@ function find_or_upload_stemcell_from(){
 	    URL="${URL}?v=${stemcell_version}"
     fi
     wget "$URL" -O stemcell.tgz
-    # shellcheck disable=SC2086
     bosh -n upload-stemcell $bosh_upload_stemcell_opts stemcell.tgz
   fi
 }
@@ -26,7 +26,7 @@ function upload_release(){
   pushd "${release_dir}" > /dev/null || exit
     echo "Uploading release from ${release_dir}"
     echo "Listing files in ${release_dir}:"
-    log $(ls -1 *.tgz)
+    log "$(ls -1 ./*.tgz)"
     bosh -n upload-release release.tgz
   popd > /dev/null || exit
 }
@@ -51,6 +51,8 @@ function load_bbl_vars() {
 }
 
 function validate_ops_files() {
+  local ops_files=$1
+
   for ops_file in ${ops_files}; do
     if [ ! -f "${ops_file}" ]; then
       echo "ERROR: could not find ops file ${ops_file} in ${PWD}"
@@ -66,6 +68,8 @@ function add_var_to_bosh_deploy_opts() {
 }
 
 function cf_login(){
+  local system_domain=$1
+
   cf api "https://api.${system_domain}" --skip-ssl-validation
   CF_ADMIN_PASSWORD=$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)
   cf auth admin "$CF_ADMIN_PASSWORD"
