@@ -342,8 +342,6 @@ deploy-autoscaler-bosh:
 deploy-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
-
-
 bosh-release-path := ./target/bosh-releases
 prometheus-bosh-release-path := ${bosh-release-path}/prometheus
 $(shell mkdir -p ${prometheus-bosh-release-path})
@@ -353,7 +351,6 @@ ${prometheus-bosh-release-path}/manifests &:
 	pushd '${prometheus-bosh-release-path}' > /dev/null ;\
 		git clone --recurse-submodules 'https://github.com/bosh-prometheus/prometheus-boshrelease' . ;\
 	popd > /dev/null
-
 
 
 deploy-prometheus: ${prometheus-bosh-release-path}/manifests

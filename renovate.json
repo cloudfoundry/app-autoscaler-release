@@ -7,7 +7,6 @@
     ":automergeAll",
     "schedule:nonOfficeHours"
   ],
-  "transitiveRemediation": true,
   "postUpdateOptions": [
     "gomodTidy",
     "gomodUpdateImportPaths"
@@ -45,9 +44,24 @@
     },
     {
       "description": "Group Ginkgo CLI and library updates together",
-      "groupName": "ginkgo updates",
-      "matchPackagePatterns": [
-        "onsi/ginkgo"
+      "groupName": "ginkgo",
+      "matchPackageNames": [
+        "/onsi/ginkgo/"
+      ]
+    },
+    {
+      "description": "Group OpenTelemetry updates together",
+      "groupName": "opentelemetry",
+      "matchPackageNames": [
+        "/opentelemetry/"
+      ]
+    },
+    {
+      "description": "Group Cloud Foundry Logging and Metrics updates together",
+      "groupName": "Cloud Foundry Logging and Metrics",
+      "matchPackageNames": [
+        "/loggregator/",
+        "/log-cache/"
       ]
     }
   ],

@@ -89,6 +89,7 @@
               shellcheck
               swagger-cli
               temurin-bin
+              uutils-coreutils-noprefix
               yq-go
             ];
 
