@@ -79,3 +79,7 @@ autoscaler:
     client_id: "client_id"
     secret: "uaa_secret"
     uaa_api: https://login.cf.domain/uaa
+  scalingengine:
+    server:
+      username: scalingengine
+      password: scalingengine-password

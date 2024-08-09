@@ -191,8 +191,11 @@ instance_groups:
             secret: "((cf_client_secret))"
             skip_ssl_validation: "((skip_ssl_validation))"
           scalingengine:
+            server:
+              port: &scalingEngineServerPort 6104
+              username: scalingengine
+              password: ((autoscaler_scalingengine_server_password))
             health:
-              port: &scalingEngineHealthPort 6204
               username: scalingengine
               password: ((autoscaler_scalingengine_health_password))
             logging:
@@ -209,7 +212,7 @@ instance_groups:
           routes:
             - name: autoscaler_scalingengine_health
               registration_interval: 20s
-              port: *scalingEngineHealthPort
+              port: *scalingEngineServerPort
               tags:
                 component: autoscaler_scalingengine_health
               uris:
@@ -233,6 +236,8 @@ instance_groups:
           public_api:
             server:
               port: &publicApiServerPort 6101
+              username: apiserver
+              password: ((autoscaler_apiserver_server_password))
           use_buildin_mode: false
           scheduler:
             ca_cert: ((!scheduler_client_cert.ca))
@@ -240,14 +245,12 @@ instance_groups:
             client_key: ((!scheduler_client_cert.private_key))
             host: *scheduler_domain
           scaling_engine:
-            ca_cert: ((!scalingengine_client_cert.ca))
-            client_cert: ((!scalingengine_client_cert.certificate))
-            client_key: ((!scalingengine_client_cert.private_key))
+            username: scalingengine
+            password: ((autoscaler_scalingengine_server_password))
             host: *scalingengine_domain
           event_generator:
-            ca_cert: ((!eventgenerator_client_cert.ca))
-            client_cert: ((!eventgenerator_client_cert.certificate))
-            client_key: ((!eventgenerator_client_cert.private_key))
+            username: eventgenerator
+            password: ((autoscaler_eventgenerator_server_password))
             host: *eventgenerator_domain
           metrics_forwarder:
             host: *metricsforwarder_public_domain
@@ -331,9 +334,8 @@ instance_groups:
           server_cert: ((!scheduler_server_cert.certificate))
           server_key: ((!scheduler_server_cert.private_key))
           scaling_engine:
-            ca_cert: ((!scalingengine_client_cert.ca))
-            client_cert: ((!scalingengine_client_cert.certificate))
-            client_key: ((!scalingengine_client_cert.private_key))
+            username: scalingengine
+            password: ((autoscaler_scalingengine_server_password))
             host: *scalingengine_domain
   - name: route_registrar
     release: routing
@@ -376,17 +378,18 @@ instance_groups:
         scheduler.host: *scheduler_domain
         cf: *cf_credentials
         operator:
+          server:
+            port: &operatorServerPort 6208
           enable_db_lock: true
           health:
-            port: &operatorHealthPort 6208
             username: operator
             password: ((autoscaler_operator_health_password))
           scaling_engine:
-            ca_cert: ((!scalingengine_client_cert.ca))
-            client_cert: ((!scalingengine_client_cert.certificate))
-            client_key: ((!scalingengine_client_cert.private_key))
+            username: scalingengine
+            password: ((autoscaler_scalingengine_server_password))
             host: *scalingengine_domain
           scheduler:
+            username: scheduler
             ca_cert: ((!scheduler_client_cert.ca))
             client_cert: ((!scheduler_client_cert.certificate))
             client_key: ((!scheduler_client_cert.private_key))
@@ -402,7 +405,7 @@ instance_groups:
         routes:
           - name: autoscaler_operator_health
             registration_interval: 20s
-            port: *operatorHealthPort
+            port: *operatorServerPort
             tags:
               component: autoscaler_operator_health
             uris:
@@ -428,20 +431,19 @@ instance_groups:
         policy_db_connection_config: *databaseConnectionConfig
         lock_db: *database
         eventgenerator:
+          server:
+            port: &eventGeneratorServerPort 6105
+            username: eventgenerator
+            password: ((autoscaler_eventgenerator_server_password))
           health:
-            port: &eventGeneratorHealthPort 6205
             username: eventgenerator
             password: ((autoscaler_eventgenerator_health_password))
           logging:
             level: info
-          ca_cert: ((!eventgenerator_server_cert.ca))
-          server_cert: ((!eventgenerator_server_cert.certificate))
-          server_key: ((!eventgenerator_server_cert.private_key))
           enable_db_lock: false
           scaling_engine:
-            ca_cert: ((!scalingengine_client_cert.ca))
-            client_cert: ((!scalingengine_client_cert.certificate))
-            client_key: ((!scalingengine_client_cert.private_key))
+            username: scalingengine
+            password: ((autoscaler_scalingengine_server_password))
             host: *scalingengine_domain
           metricscollector:
             ca_cert: ((metricscollector_ca_cert))
@@ -458,7 +460,7 @@ instance_groups:
         routes:
           - name: autoscaler_eventgenerator_health
             registration_interval: 20s
-            port: *eventGeneratorHealthPort
+            port: *eventGeneratorServerPort
             tags:
               component: autoscaler_eventgenerator_health
             uris:
@@ -489,6 +491,8 @@ instance_groups:
             level: info
           server:
             port: &metricsforwarderServerPort 6201
+            username: metricsforwarder
+            password: ((autoscaler_metricsforwarder_server_password))
           loggregator:
             tls:
               ca_cert: ((!metricsforwarder_autoscaler_metricsforwarder_loggregator_tls.ca))
@@ -596,6 +600,8 @@ variables:
     length: 128
 - name: autoscaler_eventgenerator_health_password
   type: password
+- name: autoscaler_eventgenerator_server_password
+  type: password
 - name: service_broker_password
   type: password
   options:
@@ -605,6 +611,8 @@ variables:
   options:
     length: 128
 - name: autoscaler_metricsforwarder_health_password
+  type: password
+- name: autoscaler_metricsforwarder_server_password
   type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password
   type: password
@@ -632,50 +640,16 @@ variables:
   type: password
   options:
     length: 128
-- name: auditlog_monitor_basic_auth_password
+- name: autoscaler_apiserver_server_password
   type: password
-  options:
-    length: 128
-- name: dashboard_monitor_basic_auth_password
+- name: autoscaler_apiserver_health_password
   type: password
-  options:
-    length: 128
 - name: autoscaler_scheduler_health_password
   type: password
-- name: ratelimiter_monitor_basic_auth_password
+- name: autoscaler_scalingengine_server_password
   type: password
-  options:
-    length: 128
-- name: metriccollector_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: scalingengine_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: eventgenerator_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: scheduler_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: apiserver_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
-- name: metricsforwarder_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
 - name: autoscaler_scalingengine_health_password
   type: password
-- name: operator_monitor_basic_auth_password
-  type: password
-  options:
-    length: 128
 - name: app_autoscaler_ca_cert
   type: certificate
   update_mode: converge
@@ -733,29 +707,6 @@ variables:
     - client_auth
     key_length: 4096
     duration: 180
-- name: eventgenerator_server_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: *eventgenerator_domain
-    alternative_names:
-    - *eventgenerator_domain
-    extended_key_usage:
-    - client_auth
-    - server_auth
-    key_length: 4096
-    duration: 180
-- name: eventgenerator_client_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: eventgenerator_client
-    extended_key_usage:
-    - client_auth
-    key_length: 4096
-    duration: 180
 - name: scalingengine_server_cert
   type: certificate
   update_mode: converge
@@ -767,16 +718,6 @@ variables:
     extended_key_usage:
     - client_auth
     - server_auth
-    key_length: 4096
-    duration: 180
-- name: scalingengine_client_cert
-  type: certificate
-  update_mode: converge
-  options:
-    ca: app_autoscaler_ca_cert
-    common_name: scalingengine_client
-    extended_key_usage:
-    - client_auth
     key_length: 4096
     duration: 180
 

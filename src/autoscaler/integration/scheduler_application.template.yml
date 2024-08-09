@@ -1,15 +1,11 @@
 autoscaler:
     scalingengine:
         url: {{ .ScalingEngineUri }}
+        basic_auth:
+            username: {{ .ScalingEngineUsername }}
+            password: {{ .ScalingEnginePassword }}
 client:
     httpClientTimeout: {{ .HttpClientTimeout }}
-    ssl:
-        key-store: {{ .TestCertDir }}/scheduler.p12
-        key-store-password: 123456
-        key-store-type: PKCS12
-        protocol: TLSv1.3
-        trust-store: {{ .TestCertDir }}/autoscaler.truststore
-        trust-store-password: 123456
 endpoints:
     enabled: false
 org:

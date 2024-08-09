@@ -3,6 +3,7 @@ package integration_test
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -18,10 +19,14 @@ var _ = Describe("Integration_Scheduler_ScalingEngine", func() {
 		testGuid          string
 		initInstanceCount = 2
 		policyStr         string
+
+		schedulerURL     url.URL
+		scalingEngineURL url.URL
 	)
 
 	BeforeEach(func() {
-		httpClient = testhelpers.NewSchedulerClient()
+		httpClientForScheduler = testhelpers.NewSchedulerClient()
+		httpClientForScalingEngine = testhelpers.NewScalingEngineClient()
 
 		testAppId = uuid.NewString()
 		testGuid = uuid.NewString()
@@ -30,7 +35,18 @@ var _ = Describe("Integration_Scheduler_ScalingEngine", func() {
 		scalingEngineConfPath = components.PrepareScalingEngineConfig(dbUrl, components.Ports[ScalingEngine], fakeCCNOAAUAA.URL(), defaultHttpClientTimeout, tmpDir)
 		startScalingEngine()
 
-		schedulerConfPath = components.PrepareSchedulerConfig(dbUrl, fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), tmpDir, defaultHttpClientTimeout)
+		schedulerURL = url.URL{
+			Scheme: "https",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[Scheduler]),
+		}
+
+		scalingEngineURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[ScalingEngine]),
+		}
+
+		schedulerConfPath = components.PrepareSchedulerConfig(dbUrl, scalingEngineURL, tmpDir, defaultHttpClientTimeout)
+		schedulerConfPath = components.PrepareSchedulerConfig(dbUrl, scalingEngineURL, tmpDir, defaultHttpClientTimeout)
 		startScheduler()
 
 		policyStr = setPolicySpecificDateTime(readPolicyFromFile("fakePolicyWithSpecificDateSchedule.json"), 70*time.Second, 2*time.Hour)
@@ -47,16 +63,16 @@ var _ = Describe("Integration_Scheduler_ScalingEngine", func() {
 		Context("Valid specific date schedule", func() {
 
 			AfterEach(func() {
-				_, err := deleteSchedule(testAppId)
+				_, err := deleteSchedule(schedulerURL, testAppId)
 				Expect(err).NotTo(HaveOccurred())
 			})
 
 			It("creates active schedule in scaling engine", func() {
-				resp, err := createSchedule(testAppId, testGuid, policyStr)
+				resp, err := createSchedule(testAppId, testGuid, policyStr, schedulerURL)
 				checkResponseEmptyAndStatusCode(resp, err, http.StatusOK)
 
 				Eventually(func() bool {
-					return activeScheduleExists(testAppId)
+					return activeScheduleExists(scalingEngineURL, testAppId)
 				}, 2*time.Minute, 1*time.Second).Should(BeTrue())
 
 			})
@@ -66,20 +82,20 @@ var _ = Describe("Integration_Scheduler_ScalingEngine", func() {
 
 	Describe("Delete Schedule", func() {
 		BeforeEach(func() {
-			resp, err := createSchedule(testAppId, testGuid, policyStr)
+			resp, err := createSchedule(testAppId, testGuid, policyStr, schedulerURL)
 			checkResponseEmptyAndStatusCode(resp, err, http.StatusOK)
 
 			Eventually(func() bool {
-				return activeScheduleExists(testAppId)
+				return activeScheduleExists(scalingEngineURL, testAppId)
 			}, 2*time.Minute, 1*time.Second).Should(BeTrue())
 		})
 
 		It("deletes active schedule in scaling engine", func() {
-			resp, err := deleteSchedule(testAppId)
+			resp, err := deleteSchedule(schedulerURL, testAppId)
 			checkResponseEmptyAndStatusCode(resp, err, http.StatusNoContent)
 
 			Eventually(func() bool {
-				return activeScheduleExists(testAppId)
+				return activeScheduleExists(scalingEngineURL, testAppId)
 			}, 2*time.Minute, 1*time.Second).Should(BeFalse())
 		})
 	})

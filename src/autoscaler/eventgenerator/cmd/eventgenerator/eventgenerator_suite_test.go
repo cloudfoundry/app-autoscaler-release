@@ -35,13 +35,10 @@ var (
 	metricType = "a-metric-type"
 	metricUnit = "a-metric-unit"
 
-	regPath            = regexp.MustCompile(`^/v1/apps/.*/scale$`)
-	configFile         *os.File
-	conf               config.Config
-	egPort             int
-	healthport         int
-	httpClient         *http.Client
-	healthHttpClient   *http.Client
+	regPath    = regexp.MustCompile(`^/v1/apps/.*/scale$`)
+	configFile *os.File
+	conf       config.Config
+
 	mockLogCache       *testhelpers.MockLogCache
 	mockScalingEngine  *ghttp.Server
 	breachDurationSecs = 10
@@ -65,15 +62,16 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	initDB()
 	return []byte(eg)
 }, func(pathByte []byte) {
-	healthHttpClient = &http.Client{}
 	egPath = string(pathByte)
 	initHttpEndPoints()
 	initConfig()
-	httpClient = testhelpers.NewApiClient()
 })
 
 var _ = SynchronizedAfterSuite(func() {
-	_ = os.Remove(configFile.Name())
+	if configFile != nil {
+		err := os.Remove(configFile.Name())
+		Expect(err).NotTo(HaveOccurred())
+	}
 }, func() {
 	gexec.CleanupBuildArtifacts()
 })
@@ -228,8 +226,7 @@ func initHttpEndPoints() {
 	Expect(err).ToNot(HaveOccurred())
 
 	mockScalingEngine = ghttp.NewUnstartedServer()
-	mockScalingEngine.HTTPTestServer.TLS = testhelpers.ServerTlsConfig("scalingengine")
-	mockScalingEngine.HTTPTestServer.StartTLS()
+	mockScalingEngine.HTTPTestServer.Start()
 
 	mockScalingEngine.RouteToHandler("POST", regPath, ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult))
 }
@@ -237,8 +234,7 @@ func initHttpEndPoints() {
 func initConfig() {
 	testCertDir := testhelpers.TestCertFolder()
 
-	egPort = 7000 + GinkgoParallelProcess()
-	healthport = 8000 + GinkgoParallelProcess()
+	egPort := 7000 + GinkgoParallelProcess()
 	dbUrl := testhelpers.GetDbUrl()
 	conf = config.Config{
 		Logging: helpers.LoggingConfig{
@@ -247,11 +243,6 @@ func initConfig() {
 		Server: config.ServerConfig{
 			ServerConfig: helpers.ServerConfig{
 				Port: egPort,
-				TLS: models.TLSCerts{
-					KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-					CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-					CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-				},
 			},
 			NodeAddrs: []string{"localhost"},
 			NodeIndex: 0,
@@ -286,11 +277,6 @@ func initConfig() {
 		},
 		ScalingEngine: config.ScalingEngineConfig{
 			ScalingEngineURL: mockScalingEngine.URL(),
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-			},
 		},
 		MetricCollector: config.MetricCollectorConfig{
 			MetricCollectorURL: mockLogCache.URL(),
@@ -309,11 +295,10 @@ func initConfig() {
 		DefaultStatWindowSecs:     300,
 		HttpClientTimeout:         10 * time.Second,
 		Health: helpers.HealthConfig{
-			ServerConfig: helpers.ServerConfig{
-				Port: healthport,
+			BasicAuth: models.BasicAuth{
+				Username: "healthcheckuser",
+				Password: "healthcheckpassword",
 			},
-			HealthCheckUsername: "healthcheckuser",
-			HealthCheckPassword: "healthcheckpassword",
 		},
 	}
 	configFile = writeConfig(&conf)

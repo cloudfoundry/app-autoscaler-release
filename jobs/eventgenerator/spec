@@ -5,18 +5,12 @@ templates:
   bpm-pre-start.erb: bin/bpm-pre-start
   liquibase.properties: bin/liquibase.properties
   eventgenerator.yml.erb: config/eventgenerator.yml
-  eventgenerator_ca.crt.erb: config/certs/eventgenerator/ca.crt
-  eventgenerator_server.crt.erb: config/certs/eventgenerator/server.crt
-  eventgenerator_server.key.erb: config/certs/eventgenerator/server.key
   healthendpoint_ca.crt.erb: config/certs/healthendpoint/ca.crt
   healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
   healthendpoint.key.erb: config/certs/healthendpoint/server.key
   metricscollector_ca.crt.erb: config/certs/metricscollector/ca.crt
   metricscollector_client.crt.erb: config/certs/metricscollector/client.crt
   metricscollector_client.key.erb: config/certs/metricscollector/client.key
-  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
-  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
-  scalingengine_client.key.erb: config/certs/scalingengine/client.key
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
@@ -113,6 +107,12 @@ properties:
   autoscaler.eventgenerator.server.port:
     description: "the listening port of server"
     default: 6105
+  autoscaler.eventgenerator.server.username:
+    description: "the basic auth username for server endpoint"
+    default: ''
+  autoscaler.eventgenerator.server.password:
+    description: "the basic auth password for server endpoint"
+    default: ''
   autoscaler.eventgenerator.http_client_timeout:
     description: "Http client imeout for eventgenerator to communicate with other autoscaler components"
     default: 60s
@@ -164,14 +164,10 @@ properties:
     description: "Port where the scaling engine will listen"
     default: 6104
 
-  autoscaler.eventgenerator.scaling_engine.ca_cert:
-    description: "PEM-encoded CA certificate"
-
-  autoscaler.eventgenerator.scaling_engine.client_cert:
-    description: "PEM-encoded client certificate"
-
-  autoscaler.eventgenerator.scaling_engine.client_key:
-    description: "PEM-encoded client key"
+  autoscaler.eventgenerator.scaling_engine.username:
+    description: "the basic auth username for scalingengine service"
+  autoscaler.eventgenerator.scaling_engine.password:
+    description: "the basic auth password for scalingengine service"
 
   autoscaler.eventgenerator.metricscollector.host:
     description: "Host where the metrics collector is running"
@@ -223,22 +219,13 @@ properties:
     description: "Number of consecutive failure to trip the circuit down"
     default: 3
 
-  autoscaler.eventgenerator.health.port:
-    description: "the listening port of health endpoint"
-    default: 6204
-  autoscaler.eventgenerator.health.ca_cert:
-    description: "PEM-encoded CA certificate for the health endpoint"
-  autoscaler.eventgenerator.health.server_cert:
-    description: "PEM-encoded server certificate for the health endpoint"
-  autoscaler.eventgenerator.health.server_key:
-    description: "PEM-encoded server key for the health endpoint"
-
   autoscaler.eventgenerator.health.username:
     description: "the username for the health endpoint"
     default: ''
   autoscaler.eventgenerator.health.password:
     description: "the password for the health endpoint"
     default: ''
+
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"

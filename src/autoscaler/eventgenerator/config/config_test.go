@@ -35,14 +35,11 @@ logging:
 http_client_timeout: 10s
 server:
   port: 9080
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/server.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/server.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
+  basic_auth:
+    username: eventgenerator
+    password: eventgenerator-password
   node_addrs: [address1, address2]
   node_index: 1
-health:
-  port: 9999
 db:
   policy_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
@@ -68,10 +65,9 @@ evaluator:
   trigger_array_channel_size: 100
 scalingEngine:
   scaling_engine_url: http://localhost:8082
-  tls:
-    key_file: /var/vcap/jobs/autoscaler/config/certs/se.key
-    cert_file: /var/vcap/jobs/autoscaler/config/certs/se.crt
-    ca_file: /var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt
+  basic_auth:
+    username: scalingengine
+    password: scalingengine-password
 metricCollector:
   metric_collector_url: log-cache:1234
   tls:
@@ -95,19 +91,13 @@ circuitBreaker:
 					Server: ServerConfig{
 						ServerConfig: helpers.ServerConfig{
 							Port: 9080,
-							TLS: models.TLSCerts{
-								KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/server.key",
-								CertFile:   "/var/vcap/jobs/autoscaler/config/certs/server.crt",
-								CACertFile: "/var/vcap/jobs/autoscaler/config/certs/ca.crt",
+							BasicAuth: models.BasicAuth{
+								Username: "eventgenerator",
+								Password: "eventgenerator-password",
 							},
 						},
 						NodeAddrs: []string{"address1", "address2"},
 						NodeIndex: 1,
-					},
-					Health: helpers.HealthConfig{
-						ServerConfig: helpers.ServerConfig{
-							Port: 9999,
-						},
 					},
 					DB: DBConfig{
 						PolicyDB: db.DatabaseConfig{
@@ -138,10 +128,9 @@ circuitBreaker:
 						TriggerArrayChannelSize:   100},
 					ScalingEngine: ScalingEngineConfig{
 						ScalingEngineURL: "http://localhost:8082",
-						TLSClientCerts: models.TLSCerts{
-							KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/se.key",
-							CertFile:   "/var/vcap/jobs/autoscaler/config/certs/se.crt",
-							CACertFile: "/var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt",
+						BasicAuth: models.BasicAuth{
+							Username: "scalingengine",
+							Password: "scalingengine-password",
 						},
 					},
 					MetricCollector: MetricCollectorConfig{
@@ -230,12 +219,6 @@ defaultBreachDurationSecs: 600
 					Server: ServerConfig{
 						ServerConfig: helpers.ServerConfig{
 							Port: 8080,
-							TLS:  models.TLSCerts{},
-						},
-					},
-					Health: helpers.HealthConfig{
-						ServerConfig: helpers.ServerConfig{
-							Port: 8081,
 						},
 					},
 					DB: DBConfig{
@@ -1027,49 +1010,6 @@ defaultBreachDurationSecs: NOT-INTEGER-VALUE
 				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal !!str `NOT-INT...` into int")))
 			})
 		})
-
-		Context("when it gives a non integer health port", func() {
-			BeforeEach(func() {
-				configBytes = []byte(`
-logging:
-  level: info
-db:
-  policy_db:
-    url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
-    max_open_connections: 10
-    max_idle_connections: 5
-    connection_max_lifetime: 60s
-  app_metrics_db:
-    url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
-    max_open_connections: 10
-    max_idle_connections: 5
-    connection_max_lifetime: 60s
-aggregator:
-  aggregator_execute_interval: 30s
-  policy_poller_interval: 30s
-  metric_poller_count: 10
-  app_monitor_channel_size: 100
-evaluator:
-  evaluation_manager_execute_interval: 30s
-  evaluator_count: 10
-  trigger_array_channel_size: 100
-scalingEngine:
-  scaling_engine_url: http://localhost:8082
-metricCollector:
-  metric_collector_url: log-cache:1234
-defaultStatWindowSecs: 300
-defaultBreachDurationSecs: 300
-health:
-  port: NOT-INTEGER-VALUE
-`)
-			})
-
-			It("should error", func() {
-				Expect(err).To(BeAssignableToTypeOf(&yaml.TypeError{}))
-				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal !!str `NOT-INT...` into int")))
-			})
-		})
-
 	})
 
 	Describe("Validate", func() {

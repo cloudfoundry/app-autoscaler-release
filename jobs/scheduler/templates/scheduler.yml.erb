@@ -129,19 +129,15 @@ spring:
 ############################################################
 client:
   httpClientTimeout: <%=p('autoscaler.scheduler.http_client_timeout') %>
-  ssl:
-    key-store: /var/vcap/jobs/scheduler/config/certs/scalingengine/client.p12
-    key-store-password: 123456
-    key-store-type: PKCS12
-    protocol: TLSv1.3
-    trust-store: /var/vcap/jobs/scheduler/config/certs/scalingengine/cacerts
-    trust-store-password: 123456
 ############################################################
 #    Scalingengine
 ############################################################
 autoscaler:
   scalingengine:
-    url: https://<%=p('autoscaler.scheduler.scaling_engine.host') %>:<%=p('autoscaler.scheduler.scaling_engine.port') %>
+    url: http://<%=p('autoscaler.scheduler.scaling_engine.host')%>:<%=p('autoscaler.scheduler.scaling_engine.port') %>
+    basic_auth:
+      username: "<%=p('autoscaler.scheduler.scaling_engine.username') %>"
+      password: "<%=p('autoscaler.scheduler.scaling_engine.password') %>"
 scalingengine:
   notification:
     reschedule:

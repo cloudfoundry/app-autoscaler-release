@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"io"
 	"net/http"
 	"strings"
 
@@ -58,6 +59,17 @@ func Get(url string) int {
 	Expect(err).ShouldNot(HaveOccurred())
 	resp, err := client.Do(req)
 	Expect(err).ShouldNot(HaveOccurred())
+
+	By("GET " + url)
+
+	// check body content
+	body, err := io.ReadAll(resp.Body)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	// body to string
+	bodyStr := string(body)
+	By("BODY:" + bodyStr)
+
 	defer func() { _ = resp.Body.Close() }()
 	Expect(err).ShouldNot(HaveOccurred())
 	return resp.StatusCode

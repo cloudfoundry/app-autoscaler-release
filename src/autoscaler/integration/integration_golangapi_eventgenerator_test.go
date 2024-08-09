@@ -3,6 +3,7 @@ package integration_test
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -12,29 +13,60 @@ import (
 
 var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 	var (
-		appId             string
-		pathVariables     []string
-		parameters        map[string]string
-		metric            *models.AppMetric
-		metricType        = "memoryused"
+		appId         string
+		pathVariables []string
+		parameters    map[string]string
+		metric        *models.AppMetric
+		metricType    = "memoryused"
+
 		initInstanceCount = 2
+
+		apiURL              url.URL
+		scalingEngineURL    url.URL
+		schedulerURL        url.URL
+		eventgeneratorURL   url.URL
+		metricsCollectorURL url.URL
 	)
 
 	BeforeEach(func() {
 		startFakeCCNOAAUAA(initInstanceCount)
-		httpClient = testhelpers.NewApiClient()
 		httpClientForPublicApi = testhelpers.NewPublicApiClient()
 
-		eventGeneratorConfPath = components.PrepareEventGeneratorConfig(dbUrl, components.Ports[EventGenerator], fmt.Sprintf("https://127.0.0.1:%d", components.Ports[MetricsCollector]), fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]), aggregatorExecuteInterval, policyPollerInterval, saveInterval, evaluationManagerInterval, defaultHttpClientTimeout, tmpDir)
+		apiURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[GolangAPIServer]),
+		}
+
+		scalingEngineURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[ScalingEngine]),
+		}
+
+		schedulerURL = url.URL{
+			Scheme: "https",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[Scheduler]),
+		}
+
+		eventgeneratorURL = url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[EventGenerator]),
+		}
+
+		metricsCollectorURL = url.URL{
+			Scheme: "https",
+			Host:   fmt.Sprintf("127.0.0.1:%d", components.Ports[MetricsCollector]),
+		}
+
+		eventGeneratorConfPath = components.PrepareEventGeneratorConfig(dbUrl, components.Ports[EventGenerator], metricsCollectorURL.String(), scalingEngineURL.String(), aggregatorExecuteInterval, policyPollerInterval, saveInterval, evaluationManagerInterval, defaultHttpClientTimeout, tmpDir)
 		startEventGenerator()
 		golangApiServerConfPath = components.PrepareGolangApiServerConfig(
 			dbUrl,
 			components.Ports[GolangAPIServer],
 			components.Ports[GolangServiceBroker],
 			fakeCCNOAAUAA.URL(),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
-			fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator]),
+			schedulerURL.String(),
+			scalingEngineURL.String(),
+			eventgeneratorURL.String(),
 			"https://127.0.0.1:8888",
 			tmpDir)
 		startGolangApiServer()
@@ -55,7 +87,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 				fakeCCNOAAUAA.AllowUnhandledRequests = true
 			})
 			It("should error with status code 500", func() {
-				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, components.Ports[GolangAPIServer], pathVariables, parameters, http.StatusInternalServerError, map[string]interface{}{
+				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, apiURL, pathVariables, parameters, http.StatusInternalServerError, map[string]interface{}{
 					"code":    "Internal-Server-Error",
 					"message": "Failed to check if user is admin",
 				})
@@ -69,7 +101,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 				fakeCCNOAAUAA.Add().Info(fakeCCNOAAUAA.URL())
 			})
 			It("should error with status code 500", func() {
-				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, components.Ports[GolangAPIServer], pathVariables, parameters, http.StatusInternalServerError, map[string]interface{}{
+				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, apiURL, pathVariables, parameters, http.StatusInternalServerError, map[string]interface{}{
 					"code":    "Internal-Server-Error",
 					"message": "Failed to check if user is admin",
 				})
@@ -82,7 +114,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 				fakeCCNOAAUAA.Add().Info(fakeCCNOAAUAA.URL()).CheckToken(testUserScope).UserInfo(http.StatusUnauthorized, "ERR")
 			})
 			It("should error with status code 401", func() {
-				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, components.Ports[GolangAPIServer], pathVariables,
+				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, apiURL, pathVariables,
 					parameters, http.StatusUnauthorized, map[string]interface{}{
 						"code":    "Unauthorized",
 						"message": "You are not authorized to perform the requested action"})
@@ -94,7 +126,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 				fakeCCNOAAUAA.Add().Roles(http.StatusOK)
 			})
 			It("should error with status code 401", func() {
-				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, components.Ports[GolangAPIServer],
+				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, apiURL,
 					pathVariables, parameters, http.StatusUnauthorized, map[string]interface{}{
 						"code":    "Unauthorized",
 						"message": "You are not authorized to perform the requested action",
@@ -108,7 +140,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 			})
 
 			It("should error with status code 500", func() {
-				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, components.Ports[GolangAPIServer], pathVariables, parameters, http.StatusInternalServerError, map[string]interface{}{
+				checkPublicAPIResponseContentWithParameters(getAppAggregatedMetrics, apiURL, pathVariables, parameters, http.StatusInternalServerError, map[string]interface{}{
 					"code":    "Internal Server Error",
 					"message": "Error retrieving metrics history from eventgenerator",
 				})
@@ -151,7 +183,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 				metric.Timestamp = 444444
 				insertAppMetric(metric)
 			})
-			It("should get the metrics ", func() {
+			It("should get the metrics", func() {
 				By("get the 1st page")
 				parameters = map[string]string{"start-time": "111111", "end-time": "999999", "order-direction": "asc", "page": "1", "results-per-page": "2"}
 				result := AppAggregatedMetricResult{
@@ -176,7 +208,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 						},
 					},
 				}
-				checkAggregatedMetricResult(components.Ports[GolangAPIServer], pathVariables, parameters, result)
+				checkAggregatedMetricResult(apiURL, pathVariables, parameters, result)
 
 				By("get the 2nd page")
 				parameters = map[string]string{"start-time": "111111", "end-time": "999999", "order-direction": "asc", "page": "2", "results-per-page": "2"}
@@ -203,7 +235,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 						},
 					},
 				}
-				checkAggregatedMetricResult(components.Ports[GolangAPIServer], pathVariables, parameters, result)
+				checkAggregatedMetricResult(apiURL, pathVariables, parameters, result)
 
 				By("get the 3rd page")
 				parameters = map[string]string{"start-time": "111111", "end-time": "999999", "order-direction": "asc", "page": "3", "results-per-page": "2"}
@@ -222,7 +254,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 						},
 					},
 				}
-				checkAggregatedMetricResult(components.Ports[GolangAPIServer], pathVariables, parameters, result)
+				checkAggregatedMetricResult(apiURL, pathVariables, parameters, result)
 
 				By("the 4th page should be empty")
 				parameters = map[string]string{"start-time": "111111", "end-time": "999999", "order-direction": "asc", "page": "4", "results-per-page": "2"}
@@ -233,7 +265,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 					PrevUrl:      getAppAggregatedMetricUrl(appId, metricType, parameters, 3),
 					Resources:    []models.AppMetric{},
 				}
-				checkAggregatedMetricResult(components.Ports[GolangAPIServer], pathVariables, parameters, result)
+				checkAggregatedMetricResult(apiURL, pathVariables, parameters, result)
 			})
 			It("should get the metrics in specified time scope", func() {
 				By("get the results from 555555")
@@ -266,7 +298,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 						},
 					},
 				}
-				checkAggregatedMetricResult(components.Ports[GolangAPIServer], pathVariables, parameters, result)
+				checkAggregatedMetricResult(apiURL, pathVariables, parameters, result)
 
 				By("get the results to 444444")
 				parameters = map[string]string{"end-time": "444444", "order-direction": "asc", "page": "1", "results-per-page": "10"}
@@ -291,7 +323,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 						},
 					},
 				}
-				checkAggregatedMetricResult(components.Ports[GolangAPIServer], pathVariables, parameters, result)
+				checkAggregatedMetricResult(apiURL, pathVariables, parameters, result)
 
 				By("get the results from 444444 to 555556")
 				parameters = map[string]string{"start-time": "444444", "end-time": "555556", "order-direction": "asc", "page": "1", "results-per-page": "10"}
@@ -323,7 +355,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 						},
 					},
 				}
-				checkAggregatedMetricResult(components.Ports[GolangAPIServer], pathVariables, parameters, result)
+				checkAggregatedMetricResult(apiURL, pathVariables, parameters, result)
 			})
 		})
 	})

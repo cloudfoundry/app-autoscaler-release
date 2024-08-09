@@ -6,12 +6,11 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"testing"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
+	internalscalinghistory "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/apis/scalinghistory"
 
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
@@ -62,18 +61,18 @@ var (
 	schedulerStatus        int
 	schedulerErrJson       string
 
-	scalingEngineResponse    scalinghistory.History
+	scalingEngineResponse    internalscalinghistory.History
 	metricsCollectorResponse []models.AppInstanceMetric
 	eventGeneratorResponse   []models.AppMetric
 
 	fakeCFClient     *fakes.FakeCFClient
 	fakePolicyDB     *fakes.FakePolicyDB
+	fakeBindingDB    *fakes.FakeBindingDB
 	fakeRateLimiter  *fakes.FakeLimiter
 	fakeCredentials  *fakes.FakeCredentials
 	checkBindingFunc api.CheckBindingFunc
 	hasBinding       = true
 	apiPort          = 0
-	testCertDir      = "../../../../test-certs"
 )
 
 func TestPublicapiserver(t *testing.T) {
@@ -90,27 +89,8 @@ var _ = BeforeSuite(func() {
 
 	conf = CreateConfig(apiPort)
 
-	// verify MetricCollector certs
-	_, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.KeyFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = os.ReadFile(conf.EventGenerator.TLSClientCerts.CertFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = os.ReadFile(conf.EventGenerator.TLSClientCerts.CACertFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	// verify ScalingEngine certs
-	_, err = os.ReadFile(conf.ScalingEngine.TLSClientCerts.KeyFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = os.ReadFile(conf.ScalingEngine.TLSClientCerts.CertFile)
-	Expect(err).NotTo(HaveOccurred())
-
-	_, err = os.ReadFile(conf.ScalingEngine.TLSClientCerts.CACertFile)
-	Expect(err).NotTo(HaveOccurred())
-
 	fakePolicyDB = &fakes.FakePolicyDB{}
+	fakeBindingDB = &fakes.FakeBindingDB{}
 	checkBindingFunc = func(appId string) bool {
 		return hasBinding
 	}
@@ -118,10 +98,10 @@ var _ = BeforeSuite(func() {
 	httpStatusCollector := &fakes.FakeHTTPStatusCollector{}
 	fakeRateLimiter = &fakes.FakeLimiter{}
 	fakeCredentials = &fakes.FakeCredentials{}
-	httpServer, err := publicapiserver.NewPublicApiServer(lagertest.NewTestLogger("public_apiserver"), conf,
-		fakePolicyDB, fakeCredentials,
-		checkBindingFunc, fakeCFClient,
-		httpStatusCollector, fakeRateLimiter, nil)
+	httpServer, err := publicapiserver.NewPublicApiServer(
+		lagertest.NewTestLogger("public_apiserver"), conf, fakePolicyDB,
+		fakeBindingDB, fakeCredentials, checkBindingFunc, fakeCFClient,
+		httpStatusCollector, fakeRateLimiter)
 	Expect(err).NotTo(HaveOccurred())
 
 	serverUrl, err = url.Parse("http://127.0.0.1:" + strconv.Itoa(apiPort))
@@ -191,18 +171,16 @@ func CreateConfig(apiServerPort int) *config.Config {
 		InfoFilePath: "../exampleconfig/info-file.json",
 		EventGenerator: config.EventGeneratorConfig{
 			EventGeneratorUrl: eventGeneratorServer.URL(),
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: "eventgenerator",
+				Password: "eventgenerator-password",
 			},
 		},
 		ScalingEngine: config.ScalingEngineConfig{
 			ScalingEngineUrl: scalingEngineServer.URL(),
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
-				CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: "scalingengine",
+				Password: "scalingengine-password",
 			},
 		},
 		MetricsForwarder: config.MetricsForwarderConfig{

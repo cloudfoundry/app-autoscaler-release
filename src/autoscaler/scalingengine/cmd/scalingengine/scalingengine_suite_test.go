@@ -33,15 +33,13 @@ func TestScalingengine(t *testing.T) {
 }
 
 var (
-	enginePath       string
-	conf             config.Config
-	port             int
-	healthport       int
-	configFile       *os.File
-	ccUAA            *mocks.Server
-	appId            string
-	httpClient       *http.Client
-	healthHttpClient *http.Client
+	enginePath string
+	conf       config.Config
+	port       int
+	configFile *os.File
+	ccUAA      *mocks.Server
+	appId      string
+	httpClient *http.Client
 )
 
 var _ = SynchronizedBeforeSuite(
@@ -69,16 +67,11 @@ var _ = SynchronizedBeforeSuite(
 		}
 
 		port = 7000 + GinkgoParallelProcess()
-		healthport = 8000 + GinkgoParallelProcess()
 		testCertDir := "../../../../../test-certs"
 
 		verifyCertExistence(testCertDir)
 
 		conf.Server.Port = port
-		conf.Server.TLS.KeyFile = filepath.Join(testCertDir, "scalingengine.key")
-		conf.Server.TLS.CertFile = filepath.Join(testCertDir, "scalingengine.crt")
-		conf.Server.TLS.CACertFile = filepath.Join(testCertDir, "autoscaler-ca.crt")
-		conf.Health.Port = healthport
 		conf.Logging.Level = "debug"
 
 		dbUrl := GetDbUrl()
@@ -105,8 +98,8 @@ var _ = SynchronizedBeforeSuite(
 		conf.LockSize = 32
 		conf.HttpClientTimeout = 10 * time.Second
 
-		conf.Health.HealthCheckUsername = "scalingenginehealthcheckuser"
-		conf.Health.HealthCheckPassword = "scalingenginehealthcheckpassword"
+		conf.Health.BasicAuth.Username = "scalingenginehealthcheckuser"
+		conf.Health.BasicAuth.Password = "scalingenginehealthcheckpassword"
 
 		configFile = writeConfig(&conf)
 
@@ -137,8 +130,7 @@ var _ = SynchronizedBeforeSuite(
 		_, err = testDB.Exec(testDB.Rebind("INSERT INTO policy_json(app_id, policy_json, guid) values(?, ?, ?)"), appId, policy, "1234")
 		FailOnError("insert failed", err)
 
-		httpClient = NewEventGeneratorClient()
-		healthHttpClient = &http.Client{}
+		httpClient = NewScalingEngineClient()
 	})
 
 func verifyCertExistence(testCertDir string) {

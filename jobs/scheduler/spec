@@ -16,10 +16,6 @@ templates:
   healthendpoint.crt.erb: config/certs/healthendpoint/server.crt
   healthendpoint.key.erb: config/certs/healthendpoint/server.key
 
-  scalingengine_ca.crt.erb: config/certs/scalingengine/ca.crt
-  scalingengine_client.crt.erb: config/certs/scalingengine/client.crt
-  scalingengine_client.key.erb: config/certs/scalingengine/client.key
-
   policy_db_ca.crt.erb: config/certs/policy_db/ca.crt
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
@@ -64,12 +60,11 @@ properties:
   autoscaler.scheduler.scaling_engine.port:
     description: "Scaling Engine's port"
     default: 6104
-  autoscaler.scheduler.scaling_engine.ca_cert:
-    description: "PEM-encoded CA certificate"
-  autoscaler.scheduler.scaling_engine.client_cert:
-    description: "PEM-encoded client certificate"
-  autoscaler.scheduler.scaling_engine.client_key:
-    description: "PEM-encoded client key"
+
+  autoscaler.scheduler.scaling_engine.username:
+    description: "the basic auth username for scalingengine service"
+  autoscaler.scheduler.scaling_engine.password:
+    description: "the basic auth password for scalingengine service"
 
   autoscaler.scheduler_db.address:
     description: "IP address on which the schedulerdb server will listen"

@@ -5,6 +5,7 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.core.Is.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,6 +61,7 @@ public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
   @Autowired private Scheduler scheduler;
 
   @Autowired private WebApplicationContext wac;
+
   private MockMvc mockMvc;
 
   @Autowired private TestDataDbUtil testDataDbUtil;
@@ -108,8 +110,6 @@ public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
     // Assert START Job successful message
     startJobListener.waitForJobToFinish(TimeUnit.MINUTES.toMillis(2));
 
-    Long currentSequenceSchedulerId = testDataDbUtil.getCurrentSpecificDateSchedulerId();
-
     // Assert END Job successful message
     endJobListener.waitForJobToFinish(TimeUnit.MINUTES.toMillis(2));
 
@@ -126,14 +126,13 @@ public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
     // Assert START Job successful message
     startJobListener.waitForJobToFinish(TimeUnit.MINUTES.toMillis(2));
 
-    Long currentSequenceSchedulerId = testDataDbUtil.getCurrentSpecificDateSchedulerId();
-
     // Delete End job.
     ResultActions resultActions =
         mockMvc.perform(
             delete(TestDataSetupHelper.getSchedulerPath(appId)).accept(MediaType.APPLICATION_JSON));
 
-    resultActions.andExpect(MockMvcResultMatchers.content().string(""));
+    // resultActions.andExpect(status().is2xxSuccessful());
+    resultActions.andExpect(content().string(""));
     resultActions.andExpect(status().isNoContent());
 
     // Assert END Job doesn't exist

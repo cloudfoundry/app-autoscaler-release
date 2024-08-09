@@ -35,6 +35,12 @@ const (
 	EventGenerator      = "eventGenerator"
 	ScalingEngine       = "scalingEngine"
 	Operator            = "operator"
+
+	ScalingEnginePassword = "scalingengine-password"
+	ScalingEngineUsername = "scalingengine"
+
+	EventgeneratorUsername = "eventgenerator"
+	EventgeneratorPassword = "eventgenerator-password"
 )
 
 var golangAPIInfoFilePath = "../api/exampleconfig/catalog-example.json"
@@ -184,19 +190,9 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		},
 		PublicApiServer: helpers.ServerConfig{
 			Port: publicApiPort,
-			TLS: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "api.key"),
-				CertFile:   filepath.Join(testCertDir, "api.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-			},
 		},
 		BrokerServer: helpers.ServerConfig{
 			Port: brokerPort,
-			TLS: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "servicebroker.key"),
-				CertFile:   filepath.Join(testCertDir, "servicebroker.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-			},
 		},
 		DB: map[string]db.DatabaseConfig{
 			"policy_db": {
@@ -221,18 +217,16 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		},
 		ScalingEngine: apiConfig.ScalingEngineConfig{
 			ScalingEngineUrl: scalingEngineUri,
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
-				CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: ScalingEngineUsername,
+				Password: ScalingEnginePassword,
 			},
 		},
 		EventGenerator: apiConfig.EventGeneratorConfig{
 			EventGeneratorUrl: eventGeneratorUri,
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: EventgeneratorUsername,
+				Password: EventgeneratorPassword,
 			},
 		},
 		CF: cf.Config{
@@ -255,7 +249,7 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 	return writeYmlConfig(tmpDir, GolangAPIServer, &cfg)
 }
 
-func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngineUri string, tmpDir string, httpClientTimeout time.Duration) string {
+func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngineURL url.URL, tmpDir string, httpClientTimeout time.Duration) string {
 	var (
 		driverClassName string
 		userName        string
@@ -287,7 +281,10 @@ func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngine
 	}
 
 	type TemplateParameters struct {
-		ScalingEngineUri  string
+		ScalingEngineUri      string
+		ScalingEngineUsername string
+		ScalingEnginePassword string
+
 		HttpClientTimeout int
 		TestCertDir       string
 		Port              int
@@ -298,14 +295,16 @@ func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngine
 	}
 
 	templateParameters := TemplateParameters{
-		ScalingEngineUri:  scalingEngineUri,
-		HttpClientTimeout: int(httpClientTimeout / time.Second),
-		TestCertDir:       testCertDir,
-		Port:              components.Ports[Scheduler],
-		DriverClassName:   driverClassName,
-		DBUser:            userName,
-		DBPassword:        password,
-		JDBCURI:           jdbcDBUri,
+		ScalingEngineUri:      scalingEngineURL.String(),
+		ScalingEngineUsername: ScalingEngineUsername,
+		ScalingEnginePassword: ScalingEnginePassword,
+		HttpClientTimeout:     int(httpClientTimeout / time.Second),
+		TestCertDir:           testCertDir,
+		Port:                  components.Ports[Scheduler],
+		DriverClassName:       driverClassName,
+		DBUser:                userName,
+		DBPassword:            password,
+		JDBCURI:               jdbcDBUri,
 	}
 
 	ut, err := template.New("application.yaml").Parse(schedulerApplicationConfigTemplate)
@@ -329,10 +328,9 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 		Server: egConfig.ServerConfig{
 			ServerConfig: helpers.ServerConfig{
 				Port: port,
-				TLS: models.TLSCerts{
-					KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-					CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-					CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+				BasicAuth: models.BasicAuth{
+					Username: EventgeneratorUsername,
+					Password: EventgeneratorPassword,
 				},
 			},
 			NodeAddrs: []string{"localhost"},
@@ -362,10 +360,9 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 		},
 		ScalingEngine: egConfig.ScalingEngineConfig{
 			ScalingEngineURL: scalingEngineURL,
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: ScalingEngineUsername,
+				Password: ScalingEnginePassword,
 			},
 		},
 		MetricCollector: egConfig.MetricCollectorConfig{
@@ -392,10 +389,9 @@ func (components *Components) PrepareScalingEngineConfig(dbURI string, port int,
 		},
 		Server: helpers.ServerConfig{
 			Port: port,
-			TLS: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
-				CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: ScalingEngineUsername,
+				Password: ScalingEnginePassword,
 			},
 		},
 		Logging: helpers.LoggingConfig{
@@ -447,10 +443,9 @@ func (components *Components) PrepareOperatorConfig(dbURI string, ccUAAURL strin
 		ScalingEngine: opConfig.ScalingEngineConfig{
 			URL:          scalingEngineURL,
 			SyncInterval: syncInterval,
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
-				CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+			BasicAuth: models.BasicAuth{
+				Username: ScalingEngineUsername,
+				Password: ScalingEnginePassword,
 			},
 		},
 		Scheduler: opConfig.SchedulerConfig{

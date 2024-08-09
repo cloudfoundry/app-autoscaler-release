@@ -48,21 +48,14 @@ var _ = Describe("Config", func() {
 
 				Expect(conf.Logging.Level).To(Equal("debug"))
 				Expect(conf.BrokerServer.Port).To(Equal(8080))
-				Expect(conf.BrokerServer.TLS).To(Equal(
-					models.TLSCerts{
-						KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/broker.key",
-						CACertFile: "/var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt",
-						CertFile:   "/var/vcap/jobs/autoscaler/config/certs/broker.crt",
-					},
-				))
 				Expect(conf.PublicApiServer.Port).To(Equal(8081))
-				Expect(conf.PublicApiServer.TLS).To(Equal(
-					models.TLSCerts{
-						KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/api.key",
-						CACertFile: "/var/vcap/jobs/autoscaler/config/certs/autoscaler-ca.crt",
-						CertFile:   "/var/vcap/jobs/autoscaler/config/certs/api.crt",
+				Expect(conf.EventGenerator.BasicAuth).To(Equal(
+					models.BasicAuth{
+						Username: "eventgenerator",
+						Password: "eventgenerator-password",
 					},
 				))
+
 				Expect(conf.DB[db.BindingDb]).To(Equal(
 					db.DatabaseConfig{
 						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
@@ -175,19 +168,6 @@ broker_server:
 			BeforeEach(func() {
 				configBytes = `
 public_api_server:
-  port: port
-`
-			})
-
-			It("should error", func() {
-				Expect(err).To(BeAssignableToTypeOf(&yaml.TypeError{}))
-				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal.*into int")))
-			})
-		})
-		Context("when it gives a non integer health server port", func() {
-			BeforeEach(func() {
-				configBytes = `
-health:
   port: port
 `
 			})

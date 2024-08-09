@@ -55,6 +55,9 @@ autoscaler:
     secret: "uaa_secret"
     uaa_api: https://login.cf.domain/uaa
   apiserver:
+    scaling_engine:
+      username: scalingengine
+      password: scalingengine-password
     broker:
       server:
         dashboard_redirect_uri: https://application-autoscaler-dashboard.cf.domain

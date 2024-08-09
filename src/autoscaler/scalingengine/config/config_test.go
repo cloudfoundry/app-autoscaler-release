@@ -51,11 +51,6 @@ var _ = Describe("Config", func() {
 				Expect(conf.CF.SkipSSLValidation).To(Equal(false))
 
 				Expect(conf.Server.Port).To(Equal(8989))
-				Expect(conf.Server.TLS.KeyFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/server.key"))
-				Expect(conf.Server.TLS.CertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/server.crt"))
-				Expect(conf.Server.TLS.CACertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/ca.crt"))
-
-				Expect(conf.Health.Port).To(Equal(9999))
 				Expect(conf.Logging.Level).To(Equal("debug"))
 
 				Expect(conf.DB.PolicyDB).To(Equal(
@@ -98,7 +93,6 @@ var _ = Describe("Config", func() {
 
 				Expect(conf.CF.SkipSSLValidation).To(Equal(false))
 				Expect(conf.Server.Port).To(Equal(8080))
-				Expect(conf.Health.Port).To(Equal(8081))
 				Expect(conf.Logging.Level).To(Equal("info"))
 				Expect(conf.DB.PolicyDB).To(Equal(
 					db.DatabaseConfig{
@@ -130,20 +124,6 @@ var _ = Describe("Config", func() {
 			BeforeEach(func() {
 				configBytes = []byte(`
 server:
-  port: port
-`)
-			})
-
-			It("should error", func() {
-				Expect(err).To(BeAssignableToTypeOf(&yaml.TypeError{}))
-				Expect(err).To(MatchError(MatchRegexp("cannot unmarshal .* into int")))
-			})
-		})
-
-		Context("when it gives a non integer health port", func() {
-			BeforeEach(func() {
-				configBytes = []byte(`
-health:
   port: port
 `)
 			})

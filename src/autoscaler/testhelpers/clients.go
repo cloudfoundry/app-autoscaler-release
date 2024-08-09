@@ -12,33 +12,37 @@ import (
 	. "code.cloudfoundry.org/tlsconfig"
 )
 
-func NewApiClient() *http.Client {
-	return CreateClientFor("api")
-}
-
 func NewPublicApiClient() *http.Client {
-	return CreateClientFor("api_public")
+	return createClient()
 }
 
 func NewEventGeneratorClient() *http.Client {
-	return CreateClientFor("eventgenerator")
+	return createClient()
 }
 
 func NewServiceBrokerClient() *http.Client {
-	return CreateClientFor("servicebroker")
+	return createClient()
 }
 func NewSchedulerClient() *http.Client {
-	return CreateClientFor("scheduler")
+	return createTLSClientFor("scheduler")
 }
 
-func CreateClientFor(name string) *http.Client {
+func NewScalingEngineClient() *http.Client {
+	return createClient()
+}
+
+func createTLSClientFor(name string) *http.Client {
 	certFolder := TestCertFolder()
-	return CreateClient(filepath.Join(certFolder, name+".crt"),
+	return createTLSClient(filepath.Join(certFolder, name+".crt"),
 		filepath.Join(certFolder, name+".key"),
 		filepath.Join(certFolder, "autoscaler-ca.crt"))
 }
 
-func CreateClient(certFileName, keyFileName, caCertFileName string) *http.Client {
+func createClient() *http.Client {
+	return &http.Client{}
+}
+
+func createTLSClient(certFileName, keyFileName, caCertFileName string) *http.Client {
 	clientTls, err := Build(
 		WithInternalServiceDefaults(),
 		WithIdentityFromFile(certFileName, keyFileName),

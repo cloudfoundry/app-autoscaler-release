@@ -42,9 +42,9 @@ var defaultDBLockConfig = DBLockConfig{
 }
 
 type ScalingEngineConfig struct {
-	URL            string          `yaml:"scaling_engine_url"`
-	SyncInterval   time.Duration   `yaml:"sync_interval"`
-	TLSClientCerts models.TLSCerts `yaml:"tls"`
+	URL          string           `yaml:"scaling_engine_url"`
+	BasicAuth    models.BasicAuth `yaml:"basic_auth"`
+	SyncInterval time.Duration    `yaml:"sync_interval"`
 }
 
 type SchedulerConfig struct {
@@ -58,13 +58,8 @@ type AppSyncerConfig struct {
 	SyncInterval time.Duration     `yaml:"sync_interval"`
 }
 
-var defaultHealthConfig = helpers.HealthConfig{
-	ServerConfig: helpers.ServerConfig{
-		Port: 8081,
-	},
-}
-
 type Config struct {
+	Server            helpers.ServerConfig  `yaml:"server"`
 	CF                cf.Config             `yaml:"cf"`
 	Health            helpers.HealthConfig  `yaml:"health"`
 	Logging           helpers.LoggingConfig `yaml:"logging"`
@@ -77,11 +72,15 @@ type Config struct {
 	HttpClientTimeout time.Duration         `yaml:"http_client_timeout"`
 }
 
+var defaultServerConfig = helpers.ServerConfig{
+	Port: 8081,
+}
+
 var defaultConfig = Config{
+	Server: defaultServerConfig,
 	CF: cf.Config{
 		ClientConfig: cf.ClientConfig{SkipSSLValidation: false},
 	},
-	Health:  defaultHealthConfig,
 	Logging: helpers.LoggingConfig{Level: DefaultLoggingLevel},
 	AppMetricsDB: DbPrunerConfig{
 		RefreshInterval: DefaultRefreshInterval,

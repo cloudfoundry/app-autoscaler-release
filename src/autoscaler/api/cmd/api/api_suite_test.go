@@ -6,13 +6,11 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf/mocks"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -45,8 +43,6 @@ var (
 	catalogBytes     string
 	schedulerServer  *ghttp.Server
 	brokerPort       int
-	publicApiPort    int
-	healthport       int
 	infoBytes        string
 	ccServer         *mocks.Server
 )
@@ -64,7 +60,7 @@ type testdata struct {
 
 var _ = SynchronizedBeforeSuite(func() []byte {
 	info := testdata{}
-	dbUrl := GetDbUrl()
+	dbUrl := testhelpers.GetDbUrl()
 
 	database, e := db.GetConnection(dbUrl)
 	if e != nil {
@@ -114,28 +110,17 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	catalogBytes = info.CatalogBytes
 	infoBytes = info.InfoBytes
 	brokerPort = 8000 + GinkgoParallelProcess()
-	publicApiPort = 9000 + GinkgoParallelProcess()
-	healthport = 7000 + GinkgoParallelProcess()
+	publicApiPort := 9000 + GinkgoParallelProcess()
 
 	cfg.BrokerServer = helpers.ServerConfig{
 		Port: brokerPort,
-		TLS: models.TLSCerts{
-			KeyFile:    filepath.Join(testCertDir, "servicebroker.key"),
-			CertFile:   filepath.Join(testCertDir, "servicebroker.crt"),
-			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-		},
 	}
 	cfg.PublicApiServer = helpers.ServerConfig{
 		Port: publicApiPort,
-		TLS: models.TLSCerts{
-			KeyFile:    filepath.Join(testCertDir, "api.key"),
-			CertFile:   filepath.Join(testCertDir, "api.crt"),
-			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-		},
 	}
 	cfg.Logging.Level = "info"
 	cfg.DB = make(map[string]db.DatabaseConfig)
-	dbUrl := GetDbUrl()
+	dbUrl := testhelpers.GetDbUrl()
 	cfg.DB[db.BindingDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
@@ -175,18 +160,16 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 
 	cfg.EventGenerator = config.EventGeneratorConfig{
 		EventGeneratorUrl: "http://localhost:8084",
-		TLSClientCerts: models.TLSCerts{
-			KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-			CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+		BasicAuth: models.BasicAuth{
+			Username: "eventgenerator",
+			Password: "eventgenerator-password",
 		},
 	}
 	cfg.ScalingEngine = config.ScalingEngineConfig{
 		ScalingEngineUrl: "http://localhost:8085",
-		TLSClientCerts: models.TLSCerts{
-			KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
-			CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
-			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+		BasicAuth: models.BasicAuth{
+			Username: "scalingengine",
+			Password: "scalingengine-password",
 		},
 	}
 	cfg.MetricsForwarder = config.MetricsForwarderConfig{
@@ -198,11 +181,10 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	cfg.CF.Secret = "client-secret"
 	cfg.CF.SkipSSLValidation = true
 	cfg.Health = helpers.HealthConfig{
-		ServerConfig: helpers.ServerConfig{
-			Port: healthport,
+		BasicAuth: models.BasicAuth{
+			Username: "healthcheckuser",
+			Password: "healthcheckpassword",
 		},
-		HealthCheckUsername: "healthcheckuser",
-		HealthCheckPassword: "healthcheckpassword",
 	}
 	cfg.RateLimit.MaxAmount = 10
 	cfg.RateLimit.ValidDuration = 1 * time.Second
@@ -211,7 +193,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 
 	configFile = writeConfig(&cfg)
 
-	apiHttpClient = NewApiClient()
+	apiHttpClient = testhelpers.NewPublicApiClient()
 
 	healthHttpClient = &http.Client{}
 })
@@ -281,6 +263,6 @@ func (ap *ApiRunner) Interrupt() {
 
 func readFile(filename string) string {
 	contents, err := os.ReadFile(filename)
-	FailOnError("Failed to read file:"+filename+" ", err)
+	testhelpers.FailOnError("Failed to read file:"+filename+" ", err)
 	return string(contents)
 }

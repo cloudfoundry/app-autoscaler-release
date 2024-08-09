@@ -11,5 +11,6 @@ func GetDbUrl() string {
 	if dbUrl == "" {
 		Fail("environment variable $DBURL is not set")
 	}
+	defer GinkgoRecover()
 	return dbUrl
 }
