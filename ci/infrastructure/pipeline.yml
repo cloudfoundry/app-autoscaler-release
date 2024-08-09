@@ -65,13 +65,11 @@ resources:
     uri: https://github.com/cloudfoundry/postgres-release.git
     branch: v52
 
-
 - name: postgres-release
   type: bosh-io-release
   source:
     repository: cloudfoundry/postgres-release
     version: v52
-
 
 - name: bbl-state
   type: git
