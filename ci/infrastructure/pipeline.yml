@@ -41,7 +41,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler-deploy-key-private))
-    branch: main
+    branch: feature/739-setup-mtar-controller
     fetch_tags: true
     paths:
       - ci/infrastructure
