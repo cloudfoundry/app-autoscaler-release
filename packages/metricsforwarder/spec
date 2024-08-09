@@ -83,6 +83,7 @@ files:
 - autoscaler/vendor/github.com/klauspost/compress/zlib/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zstd/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
+- autoscaler/vendor/github.com/mitchellh/mapstructure/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
