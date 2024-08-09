@@ -478,7 +478,6 @@ instance_groups:
     release: app-autoscaler
     properties:
       autoscaler:
-        binding_db: *database
         policy_db: *database
         policy_db_connection_config: *databaseConnectionConfig
         metricsforwarder:

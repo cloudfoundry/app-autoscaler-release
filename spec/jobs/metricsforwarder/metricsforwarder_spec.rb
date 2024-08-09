@@ -100,21 +100,6 @@ describe "metricsforwarder" do
     end
 
     context "uses tls" do
-      context "binding_db" do
-        it "includes the ca, cert and key in url when configured" do
-          rendered_template["db"]["binding_db"]["url"].tap do |url|
-            check_if_certs_in_url(url, "binding_db")
-          end
-        end
-
-        it "does not include the ca, cert and key in url when not configured" do
-          properties["autoscaler"]["binding_db"]["tls"] = nil
-          rendered_template["db"]["binding_db"]["url"].tap do |url|
-            check_if_certs_not_in_url(url, "binding_db")
-          end
-        end
-      end
-
       context "policy_db" do
         it "includes the ca, cert and key in url when configured" do
           rendered_template["db"]["policy_db"]["url"].tap do |url|
