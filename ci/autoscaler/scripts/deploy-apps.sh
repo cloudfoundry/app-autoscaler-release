@@ -8,9 +8,9 @@ source "${script_dir}/vars.source.sh"
 
 function deploy() {
   log "Deploying autoscaler apps for bosh deployment '${deployment_name}' "
-  pushd "${autoscaler_dir}/src/autoscaler/metricsforwarder" > /dev/null
+  pushd "${autoscaler_dir}/src/autoscaler" > /dev/null
     log "Deploying autoscaler apps"
-    make cf-push
+    make mta-deploy
   popd > /dev/null
 }
 
