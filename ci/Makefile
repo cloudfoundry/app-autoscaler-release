@@ -3,7 +3,7 @@
 set-autoscaler-pipeline:
 	@./autoscaler/set-pipeline.sh
 
-.PHONY: set-autoscaler-pipeline
+.PHONY: set-infrastructure-pipeline
 set-infrastructure-pipeline:
 	@./infrastructure/set-pipeline.sh
 
