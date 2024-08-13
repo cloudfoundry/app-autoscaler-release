@@ -445,3 +445,7 @@ go-get-u: $(addsuffix .go-get-u,$(go_modules))
 	@echo " - go get -u" $<
 	cd src/$< && \
 	go get -u ./...
+
+
+mta-deploy:
+	@make --directory='./src/autoscaler' mta-deploy
