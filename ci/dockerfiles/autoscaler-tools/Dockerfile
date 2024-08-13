@@ -146,9 +146,20 @@ RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
 # Install swagger-cli as described on <https://apitools.dev/swagger-cli>
 RUN npm install --global --ignore-scripts 'https://github.com/empire-medical/swagger-cli'
 
+# install MBT
+#renovate: datasource=github-releases depName=mbt lookupName=SAP/cloud-mta-build-tool
+ARG MBT_VERSION=1.2.31
+
+RUN wget -q https://github.com/SAP/cloud-mta-build-tool/releases/download/v1.2.31/cloud-mta-build-tool_${MBT_VERSION}_Linux_amd64.tar.gz &&\
+  tar xvfz cloud-mta-build-tool_${MBT_VERSION}_Linux_amd64.tar.gz && \
+  mv mbt /usr/local/bin/mbt &&\
+  rm cloud-mta-build-tool_${MBT_VERSION}_Linux_amd64.tar.gz &&\
+  mbt -v
+
 ENV CF_PLUGIN_HOME "/cf_plugins"
 RUN mkdir -p "${CF_PLUGIN_HOME}" \
     && cf install-plugin -f -r CF-Community app-autoscaler-plugin \
+    && cf install-plugin -f -r CF-Community multiapps \
     && echo "${CF_PLUGIN_HOME}" \
     && ls -la "${CF_PLUGIN_HOME}" \
     && cf plugins
