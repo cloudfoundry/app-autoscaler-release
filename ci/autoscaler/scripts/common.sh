@@ -98,6 +98,7 @@ function find_or_create_org(){
   if ! cf orgs | grep --quiet --regexp="${org_name}"; then
     cf create-org "${org_name}"
   fi
+  echo "targeting org ${org_name}"
   cf target -o "${org_name}"
 }
 
@@ -106,6 +107,7 @@ function find_or_create_space(){
   if ! cf spaces | grep --quiet --regexp="${space_name}"; then
     cf create-space "${space_name}"
   fi
+  echo "targeting space ${space_name}"
   cf target -s "${space_name}"
 }
 
