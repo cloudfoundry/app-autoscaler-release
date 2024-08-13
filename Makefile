@@ -371,8 +371,8 @@ build-test-app:
 deploy-test-app:
 	@make --directory='./src/acceptance/assets/app/go_app' deploy
 
-.PHONY: build-acceptance-test-app
-build-acceptance-test-app:
+.PHONY: build-acceptance-tests
+build-acceptance-tests:
 	@make --directory='./src/acceptance' build_tests
 
 .PHONY: acceptance-tests

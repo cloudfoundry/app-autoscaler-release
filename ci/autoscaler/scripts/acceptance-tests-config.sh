@@ -55,9 +55,6 @@ function write_app_config() {
 EOF
 }
 
-echo "${ACCEPTANCE_CONFIG_PATH}" \
-			"${use_existing_organization}" "${use_existing_space}" "${existing_organization}" "${existing_space}"
-
 write_app_config \
 	"${ACCEPTANCE_CONFIG_PATH}" \
 	"${use_existing_organization}" "${use_existing_space}" "${existing_organization}" "${existing_space}"
