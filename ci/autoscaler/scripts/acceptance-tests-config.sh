@@ -17,6 +17,15 @@ performance_setup_workers="${PERFORMANCE_SETUP_WORKERS:-}"
 performance_update_existing_org_quota=${PERFORMANCE_UPDATE_EXISTING_ORG_QUOTA:-true}
 cpu_upper_threshold=${CPU_UPPER_THRESHOLD:-100}
 
+if [[ -z "${cf_admin_password}" ]]
+then
+	pushd "${bbl_state_path}"
+		eval "$(bbl print-env)"
+	popd
+
+	cf_admin_password="$(credhub get --quiet --name='/bosh-autoscaler/cf/cf_admin_password')"
+fi
+
 function write_app_config() {
 	local -r config_path="$1"
 	local -r use_existing_organization="$2"
