@@ -4,7 +4,6 @@ set -eu -o pipefail
 script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
 
-cf_admin_password="${CF_ADMIN_PASSWORD:-}"
 skip_teardown="${SKIP_TEARDOWN:-false}"
 suites="${SUITES:-"api app broker"}"
 ginkgo_opts="${GINKGO_OPTS:-}"
