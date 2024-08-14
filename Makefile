@@ -80,6 +80,7 @@ clean-scheduler:
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f test-certs/*
+	@rm --force --recursive src/scheduler/src/test/resources/certs
 clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
@@ -115,13 +116,12 @@ $(addprefix test_,$(go_modules)):
 
 
 .PHONY: test-certs
-test-certs: target/autoscaler_test_certs target/scheduler_test_certs
+test-certs: target/autoscaler_test_certs src/scheduler/src/test/resources/certs
 target/autoscaler_test_certs:
 	@./scripts/generate_test_certs.sh
 	@touch $@
-target/scheduler_test_certs:
+src/scheduler/src/test/resources/certs:
 	@./src/scheduler/scripts/generate_unit_test_certs.sh
-	@touch $@
 
 
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
