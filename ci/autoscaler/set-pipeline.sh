@@ -83,7 +83,6 @@ function main(){
       export PIPELINE_NAME="app-autoscaler-release-${current_branch_without_slashes}"
       set_pipeline "$PIPELINE_NAME"
       pause_jobs "$PIPELINE_NAME"
-      unpause_job "$PIPELINE_NAME/set-pipeline"
     fi
 
   popd > /dev/null

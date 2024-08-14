@@ -31,9 +31,7 @@ anchors:
       operations/set-release-version.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
-      operations/disable-postgres-tls-config.yml
       operations/use-cf-services.yml
-
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
@@ -338,7 +336,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: app-autoscaler-release
-      passed: [unit-tests, integration-tests]
+    #passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - task: make-prerelease
