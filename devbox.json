@@ -39,7 +39,8 @@
     "cloudfoundry-cli":                  "8.7.11",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-17":                    "latest",
-    "ruby":                              "latest"
+    "ruby":                              "latest",
+    "postgresql":                        "latest"
   },
   "shell": {
     "init_hook": [
