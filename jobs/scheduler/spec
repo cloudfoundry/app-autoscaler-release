@@ -5,7 +5,6 @@ templates:
   bpm.yml.erb: config/bpm.yml
   liquibase.properties: bin/liquibase.properties
   scheduler.yml.erb: config/scheduler.yml
-  install_crt_keystore.sh: bin/install_crt_keystore
   install_crt_truststore.sh: bin/install_crt_truststore
 
   scheduler_ca.crt.erb: config/certs/ca.crt

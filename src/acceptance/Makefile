@@ -10,6 +10,9 @@ GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
 PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
 								 | grep --invert-match --regexp='e2e')
 
+AUTOSCALER_DIR ?= $(shell pwd)/../..
+CI_DIR ?= ${AUTOSCALER_DIR}/ci
+
 CGO_ENABLED := 0
 export GOWORK := off
 
@@ -67,3 +70,20 @@ test:
 
 lint:
 	make -C ../.. lint_acceptance OPTS=${OPTS}
+
+
+ACCEPTANCE_CONFIG_PATH := ./acceptance_config.json
+.PHONY: acceptance-tests-config
+acceptance-tests-config: ${ACCEPTANCE_CONFIG_PATH}
+${ACCEPTANCE_CONFIG_PATH}:
+	ACCEPTANCE_CONFIG_PATH='${ACCEPTANCE_CONFIG_PATH}' ${CI_DIR}/autoscaler/scripts/acceptance-tests-config.sh
+
+
+.PHONY: run-acceptance-tests
+run-acceptance-tests:
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
+
+
+.PHONY: acceptance-tests-cleanup
+acceptance-tests-cleanup:
+	${CI_DIR}/autoscaler/scripts/cleanup-acceptance.sh

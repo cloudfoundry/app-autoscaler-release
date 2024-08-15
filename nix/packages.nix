@@ -34,35 +34,35 @@
 
   cloud-mta-build-tool = buildGoModule rec {
     pname = "Cloud MTA Build Tool";
-    version = "1.2.26";
+    version = "1.2.30";
 
     src = fetchFromGitHub {
       owner = "SAP";
       repo = "cloud-mta-build-tool";
       rev = "v${version}";
-      hash = "sha256-DKZ9Nj/sNC9dRjyiu4MKjLrIJWluYlZzUHWqEqtrNt4=";
+      hash = "sha256-iuNaaApnyfyqm3SvYG3en+a78MUP1BxSM3JZz+JhEFs=";
     };
 
-    vendorHash = "sha256-h8LPsuxvbr/aRhH1vR1fYgBot37yrfiemZTJMKj0zbk=";
+    vendorHash = "sha256-pyXeuZGg3Yv6p8GNKC598EdZqX8KLc3rkewMkq4vA7c=";
 
     ldflags = ["-s" "-w" "-X main.Version=${version}"];
 
     doCheck = false;
 
     postInstall = ''
-      pushd "$out/bin" &> /dev/null
-        ln -s 'cloud-mta-build-tool' 'mbt'
+      pushd "''${out}/bin" &> /dev/null
+        ln --symbolic 'cloud-mta-build-tool' 'mbt'
       popd
     '';
   };
 
   log-cache-cli-plugin = buildGoModule rec {
     pname = "log-cache-cli";
-    version = "6.0.1";
+    version = "6.0.2";
     src = fetchgit {
       url = "https://github.com/cloudfoundry/log-cache-cli";
       rev = "v${version}";
-      hash = "sha256-XMxZPmqjOo/yaMFHY+zTjamB2FmPn2eh0zEtwQevt+I=";
+      hash = "sha256-NhYpDxq5MhVOIMVulY1MG22cN3gaQi5agU7Aaw9Dr0A=";
       fetchSubmodules = true;
     };
     doCheck = false;
