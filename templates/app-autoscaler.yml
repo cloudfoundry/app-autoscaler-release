@@ -163,21 +163,6 @@ instance_groups:
             max_open_connections: 100
             max_idle_connections: 10
             connection_max_lifetime: 60s
-    - name: route_registrar
-      release: routing
-      consumes:
-        nats: { from: nats, deployment: cf }
-      properties:
-        route_registrar:
-          routes:
-            - name: autoscaler_postgres
-              registration_interval: 20s
-              port: 5432
-              type: tcp
-              tags:
-                component: autoscaler_postgres
-              uris:
-                - ((deployment_name))-postgres.((system_domain))
 
 # Scalingengine Instance Group
 - name: scalingengine

@@ -88,7 +88,12 @@ function create_manifest(){
       -v system_domain="${system_domain}" \
       -v deployment_name="${deployment_name}" \
       -v app_autoscaler_version="${bosh_release_version}" \
-      -v admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)" \
+      -v admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)"\
+      -v routing_api_ca_certs="$(credhub get -n /bosh-autoscaler/cf/router_ssl --key ca --quiet)"\
+      -v routing_api_client_secret="$(credhub get -n /bosh-autoscaler/cf/uaa_clients_routing_api_client_secret --quiet)"\
+      -v routing_api_tls_client_cert="$(credhub get -n /bosh-autoscaler/cf/routing_api_tls_client --key certificate --quiet)"\
+      -v routing_api_tls_client_private_key="$(credhub get -n /bosh-autoscaler/cf/routing_api_tls_client --key private_key --quiet)"\
+      -v routing_api_server_ca_cert="$(credhub get -n /bosh-autoscaler/cf/router_ssl --key ca --quiet)"\
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
       -v log_cache_syslog_tls_ca="$(credhub get -n /bosh-autoscaler/cf/log_cache_syslog_tls --key ca --quiet)"\
