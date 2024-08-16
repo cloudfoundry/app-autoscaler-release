@@ -12,8 +12,8 @@ import (
 )
 
 type Database struct {
-	DriverName string
-	DSN        string
+	DriverName     string
+	DataSourceName string
 }
 
 type MySQLConfig struct {
@@ -53,9 +53,9 @@ func GetConnection(dbUrl string) (*Database, error) {
 		if err != nil {
 			return nil, err
 		}
-		database.DSN = cfg.config.FormatDSN()
+		database.DataSourceName = cfg.config.FormatDSN()
 	case PostgresDriverName:
-		database.DSN = dbUrl
+		database.DataSourceName = dbUrl
 	}
 	return database, nil
 }
