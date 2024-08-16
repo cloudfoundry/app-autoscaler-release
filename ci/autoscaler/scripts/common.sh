@@ -80,6 +80,15 @@ function cleanup_credhub(){
   retry 3 credhub delete --path="/bosh-autoscaler/${deployment_name}"
 }
 
+function cleanup_apps(){
+  cf undeploy com.github.cloudfoundry.app-autoscaler-release
+
+  if ! cf spaces | grep --quiet --regexp="^${AUTOSCALER_SPACE}$"; then
+    cf delete-space -f "${AUTOSCALER_SPACE}"
+  fi
+}
+
+
 function unset_vars() {
   unset PR_NUMBER
   unset DEPLOYMENT_NAME
@@ -94,6 +103,7 @@ function unset_vars() {
 }
 
 function find_or_create_org(){
+  step "finding or creating org"
   local org_name="$1"
   if ! cf orgs | grep --quiet --regexp="^${org_name}$"; then
     cf create-org "${org_name}"
@@ -103,6 +113,7 @@ function find_or_create_org(){
 }
 
 function find_or_create_space(){
+  step "finding or creating space"
   local space_name="$1"
   if ! cf spaces | grep --quiet --regexp="^${space_name}$"; then
     cf create-space "${space_name}"
