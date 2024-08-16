@@ -27,7 +27,7 @@ var _ = Describe("Helper", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(database).To(Equal(&Database{
 					DriverName: "mysql",
-					DSN:        "root@tcp(localhost:3306)/autoscaler?parseTime=true&tls=preferred",
+					DataSourceName:        "root@tcp(localhost:3306)/autoscaler?parseTime=true&tls=preferred",
 				}))
 			})
 		})
@@ -40,7 +40,7 @@ var _ = Describe("Helper", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(database).To(Equal(&Database{
 					DriverName: "mysql",
-					DSN:        "root@tcp(localhost:3306)/autoscaler?parseTime=true",
+					DataSourceName:        "root@tcp(localhost:3306)/autoscaler?parseTime=true",
 				}))
 			})
 
@@ -64,7 +64,7 @@ var _ = Describe("Helper", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(database).To(Equal(&Database{
 					DriverName: "pgx",
-					DSN:        "postgres://postgres:password@localhost:5432/autoscaler?sslmode=disable",
+					DataSourceName:        "postgres://postgres:password@localhost:5432/autoscaler?sslmode=disable",
 				}))
 			})
 		})

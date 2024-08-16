@@ -33,7 +33,7 @@ var _ = BeforeSuite(func() {
 		Fail("failed to parse database connection: " + e.Error())
 	}
 
-	dbHelper, e = sqlx.Open(database.DriverName, database.DSN)
+	dbHelper, e = sqlx.Open(database.DriverName, database.DataSourceName)
 	if e != nil {
 		Fail("can not connect database: " + e.Error())
 	}
