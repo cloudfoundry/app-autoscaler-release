@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - ".tool-versions"
+      - "scripts/asdf2devbox.py"
+      - ".github/workflows/asdf2devbox.yaml"
 jobs:
   asdf2devbox:
     runs-on: ubuntu-latest
