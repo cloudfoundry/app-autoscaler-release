@@ -1,15 +1,16 @@
 {
   "packages": {
-    "path:.#bosh-bootloader":           "",
-    "path:.#app-autoscaler-cli-plugin": "",
-    "path:.#log-cache-cli-plugin":      "",
-    "path:.#cloud-mta-build-tool":      "",
-    "path:.#uaac":                      "",
-    "act":                                        "0.2.63",
+    "path:.#bosh-bootloader":            "",
+    "path:.#app-autoscaler-cli-plugin":  "",
+    "path:.#log-cache-cli-plugin":       "",
+    "path:.#cloud-mta-build-tool":       "",
+    "path:.#uaac":                       "",
+    "act":                               "0.2.64",
     "actionlint":                                 "1.7.1",
     "bosh-cli":                                   "7.3.1",
     "bundix":                                     "latest",
     "cloudfoundry-cli":                           "8.7.10",
+    "coreutils":                         "latest",
     "credhub-cli":                                "2.9.29",
     "delve":                                      "latest",
     "direnv":                                     "2.34.0",
@@ -20,7 +21,7 @@
     "gnutar":                                     "latest",
     "go":                                         "1.22.1",
     "go-tools":                                   "latest",
-    "golangci-lint":                              "latest",
+    "golangci-lint":                     "1.59.1",
     "google-cloud-sdk":                           "latest",
     "gopls":                                      "latest",
     "gum":                                        "0.13.0",
@@ -37,14 +38,18 @@
     "shellcheck":                                 "0.10.0",
     "swagger-cli":                                "latest",
     "temurin-bin-17":                             "latest",
-    "uutils-coreutils-noprefix":                  "latest",
     "which":                                      "latest",
-    "yq-go":                                      "4.43.1"
+    "yq-go":                             "4.44.2",
+    "postgresql":                        "latest"
   },
   "shell": {
     "init_hook": [
-      "cf install-plugin -f $(which app-autoscaler-cli-plugin)",
-      "cf install-plugin -f $(which log-cache-cli)"
+      "install_plugin_if_needed() {",
+      "  sum=$(sha1sum $(which $1) | cut --delimiter=' ' --fields='1')",
+      "  cf plugins --checksum | grep --quiet ${sum} || cf install-plugin -f $(which $1)",
+      "}",
+      "install_plugin_if_needed 'app-autoscaler-cli-plugin'",
+      "install_plugin_if_needed 'log-cache-cli'"
     ]
   }
 }

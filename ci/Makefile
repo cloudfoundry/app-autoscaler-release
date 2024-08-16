@@ -3,10 +3,13 @@
 set-autoscaler-pipeline:
 	@./autoscaler/set-pipeline.sh
 
+.PHONY: set-infrastructure-pipeline
+set-infrastructure-pipeline:
+	@./infrastructure/set-pipeline.sh
+
 .PHONY: unpause-pipeline
 unpause-pipeline:
 	@./scripts/unpause-pipeline.sh
-
 
 .PHONY: delete-pipeline
 delete-pipeline:

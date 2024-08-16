@@ -95,17 +95,19 @@ function unset_vars() {
 
 function find_or_create_org(){
   local org_name="$1"
-  if ! cf orgs | grep --quiet --regexp="${org_name}"; then
+  if ! cf orgs | grep --quiet --regexp="^${org_name}$"; then
     cf create-org "${org_name}"
   fi
+  echo "targeting org ${org_name}"
   cf target -o "${org_name}"
 }
 
 function find_or_create_space(){
   local space_name="$1"
-  if ! cf spaces | grep --quiet --regexp="${space_name}"; then
+  if ! cf spaces | grep --quiet --regexp="^${space_name}$"; then
     cf create-space "${space_name}"
   fi
+  echo "targeting space ${space_name}"
   cf target -s "${space_name}"
 }
 

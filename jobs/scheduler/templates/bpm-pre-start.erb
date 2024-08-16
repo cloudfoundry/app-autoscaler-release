@@ -81,11 +81,3 @@ detect_dns $HOST $PORT
   retry java -cp "$DB_DIR/target/lib/*:$SCHEDULER_DIR/db" -Dliquibase.headless=true liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
   --driver=com.mysql.cj.jdbc.Driver --changeLogFile=quartz.changelog-master.yaml update
 <% end %>
-
-# Generate key store for the clients communicate with scheduler.
-/var/vcap/jobs/scheduler/bin/install_crt_keystore scheduler server.crt server.key /var/vcap/jobs/scheduler/config/certs/server.p12
-/var/vcap/jobs/scheduler/bin/install_crt_keystore scalingengine scalingengine/client.crt scalingengine/client.key /var/vcap/jobs/scheduler/config/certs/scalingengine/client.p12
-
-# Generate trust stores.
-/var/vcap/jobs/scheduler/bin/install_crt_truststore scheduler ca.crt "/var/vcap/jobs/scheduler/config/certs/cacerts"
-/var/vcap/jobs/scheduler/bin/install_crt_truststore scalingengine scalingengine/ca.crt "/var/vcap/jobs/scheduler/config/certs/scalingengine/cacerts"
