@@ -39,7 +39,8 @@
     "swagger-cli":                                "latest",
     "temurin-bin-17":                             "latest",
     "which":                                      "latest",
-    "yq-go":                             "4.44.2"
+    "yq-go":                             "4.44.2",
+    "postgresql":                        "latest"
   },
   "shell": {
     "init_hook": [
