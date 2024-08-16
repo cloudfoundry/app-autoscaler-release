@@ -38,7 +38,7 @@
     "rubyPackages.solargraph":                    "latest",
     "shellcheck":                                 "0.10.0",
     "swagger-cli":                                "latest",
-    "temurin-bin-17":                             "latest",
+    "temurin-bin-21":                             "latest",
     "which":                                      "latest",
     "yq-go":                             "4.44.2"
   },
