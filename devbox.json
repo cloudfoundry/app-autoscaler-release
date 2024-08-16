@@ -37,8 +37,9 @@
     "yq-go":                             "4.44.2",
     "postgresql":                        "latest",
     "cloudfoundry-cli":                  "8.7.11",
-    "google-cloud-sdk":                  "latest",
     "ginkgo":                            "2.20.0",
+    "google-cloud-sdk":                  "latest",
+    "temurin-bin-21":                    "latest",
     "ruby":                              "latest"
   },
   "shell": {
