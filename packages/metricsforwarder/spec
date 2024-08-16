@@ -72,7 +72,6 @@ files:
 - autoscaler/vendor/github.com/jackc/puddle/v2/internal/genstack/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
-- autoscaler/vendor/github.com/kelseyhightower/envconfig/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/flate/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/fse/* # gosub
