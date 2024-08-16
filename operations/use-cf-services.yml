@@ -8,3 +8,48 @@
 - type: replace
   path: /instance_groups/name=metricsforwarder/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/port
   value: 6201
+
+  ## add router tcp route for postgres
+- type: replace
+  path: /instance_groups/name=postgres/jobs/-
+  value:
+    name: route_registrar
+    release: routing
+    consumes:
+      nats-tls: { from: nats-tls, deployment: cf }
+    properties:
+      nats:
+        tls:
+          enabled: true
+          client_cert: ((/bosh-autoscaler/cf/nats_client_cert.certificate))
+          client_key: ((/bosh-autoscaler/cf/nats_client_cert.private_key))
+      route_registrar:
+        routing_api:
+          ca_certs:
+          - ((!routing_api_ca_certs))
+          client_cert: ((!routing_api_tls_client_cert))
+          client_secret: ((routing_api_client_secret))
+          client_private_key: ((!routing_api_tls_client_private_key))
+          server_ca_cert: ((!routing_api_server_ca_cert))
+          api_url: "https://api.((system_domain)):443"
+          oauth_url: "https://uaa.((system_domain)):443"
+        routes:
+          - name: autoscaler_postgres
+            registration_interval: 20s
+            port: 5432
+            external_port: 5432
+            type: tcp
+            router_group: default-tcp
+            tags:
+              component: autoscaler_postgres
+            uris:
+              - ((deployment_name))-postgres.tcp.((system_domain))
+
+
+- type: replace
+  path: /variables/name=postgres_server/options/alternative_names/-
+  value: ((deployment_name))-postgres.tcp.((system_domain))
+
+- type: replace
+  path: /variables/name=postgres_client/options/alternative_names/-
+  value: ((deployment_name))-postgres.tcp.((system_domain))
