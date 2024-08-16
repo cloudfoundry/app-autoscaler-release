@@ -15,6 +15,7 @@ function main() {
   cleanup_bosh_deployment
   delete_releases
   cleanup_credhub
+  cleanup_apps
 }
 
 [ "${BASH_SOURCE[0]}" == "${0}" ] && main "$@"

@@ -80,6 +80,15 @@ function cleanup_credhub(){
   retry 3 credhub delete --path="/bosh-autoscaler/${deployment_name}"
 }
 
+function cleanup_apps(){
+  cf undeploy com.github.cloudfoundry.app-autoscaler-release
+
+  if ! cf spaces | grep --quiet --regexp="^${AUTOSCALER_SPACE}$"; then
+    cf delete-space -f "${AUTOSCALER_SPACE}"
+  fi
+}
+
+
 function unset_vars() {
   unset PR_NUMBER
   unset DEPLOYMENT_NAME
