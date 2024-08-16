@@ -39,7 +39,6 @@
     "cloudfoundry-cli":                  "8.7.11",
     "google-cloud-sdk":                  "latest",
     "ginkgo":                            "2.20.0",
-    "temurin-bin-17":                    "latest",
     "ruby":                              "latest"
   },
   "shell": {
