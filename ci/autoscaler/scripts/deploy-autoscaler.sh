@@ -63,12 +63,20 @@ function setup_autoscaler_uaac(){
       --secret "$autoscaler_secret" > /dev/null
   fi
 }
+function get_postgres_external_port(){
+	if [ -z "${PR_NUMBER}" ]; then
+		echo "5432"
+	else
+		echo "${PR_NUMBER}"
+	fi
+}
 
 function create_manifest(){
   # Set the local tmp_dir depending on if we run on github-actions or not, see:
   # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
   local tmp_dir
   local perform_as_gh_action
+
   perform_as_gh_action="${GITHUB_ACTIONS:-false}"
   if "${perform_as_gh_action}" != 'false'
   then
@@ -102,6 +110,7 @@ function create_manifest(){
       -v metricscollector_ca_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key ca --quiet)"\
       -v metricscollector_client_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key certificate --quiet)"\
       -v metricsforwarder_host="${metricsforwarder_host}"\
+      -v postgres_external_port="$(get_postgres_external_port)"\
       -v metricscollector_client_key="$(credhub get -n /bosh-autoscaler/cf/log_cache --key private_key --quiet)"\
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"

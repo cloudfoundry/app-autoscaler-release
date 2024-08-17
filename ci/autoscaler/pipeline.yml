@@ -332,6 +332,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-syslog-cf-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_syslog_cf))
+      PR_NUMBER: ((pr_number))
   plan:
   - in_parallel:
     - get: bbl-state
