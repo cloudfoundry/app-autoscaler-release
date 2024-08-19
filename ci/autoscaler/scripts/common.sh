@@ -81,7 +81,8 @@ function cleanup_credhub(){
 }
 
 function cleanup_apps(){
-  cf undeploy com.github.cloudfoundry.app-autoscaler-release
+  cf_target "${autoscaler_org}" "${autoscaler_space}"
+  cf undeploy com.github.cloudfoundry.app-autoscaler-release -f
 
   if ! cf spaces | grep --quiet --regexp="^${AUTOSCALER_SPACE}$"; then
     cf delete-space -f "${AUTOSCALER_SPACE}"
