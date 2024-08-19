@@ -29,7 +29,7 @@ func NewChangelogSQLDB(dbUrl string) (*ChangelogSQLDB, error) {
 		return nil, err
 	}
 
-	sqldb, err := sqlx.Open(database.DriverName, database.DSN)
+	sqldb, err := sqlx.Open(database.DriverName, database.DataSourceName)
 	if err != nil {
 		return nil, err
 	}
@@ -61,18 +61,18 @@ func (cdb *ChangelogSQLDB) Close() error {
 func (cdb *ChangelogSQLDB) DeleteExpiredLock(timeoutInSecond int) error {
 	switch cdb.sqldb.DriverName() {
 	case "pgx":
-		query := fmt.Sprintf(`DO $$                  
-    BEGIN 
-        IF EXISTS
-            ( SELECT 1
-              FROM   information_schema.tables 
-              WHERE  table_schema = 'public'
-              AND    table_name = 'databasechangeloglock'
-            )
-        THEN
+		query := fmt.Sprintf(`DO $$
+	BEGIN
+		IF EXISTS
+			( SELECT 1
+			  FROM   information_schema.tables
+			  WHERE  table_schema = 'public'
+			  AND    table_name = 'databasechangeloglock'
+			)
+		THEN
 			DELETE FROM databasechangeloglock WHERE EXTRACT(epoch FROM (now()::timestamp - lockgranted))::int > %d;
-        END IF ;
-    END
+		END IF ;
+	END
    $$ ;
 	`, timeoutInSecond)
 		_, err := cdb.sqldb.Exec(query)

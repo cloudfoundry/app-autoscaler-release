@@ -30,11 +30,13 @@ function set_pipeline(){
   local pipeline_name="$1"
   add_var branch_name "${CURRENT_BRANCH}"
   if [[ -z $PR_NUMBER ]]; then
+    add_var pr_number "${PR_NUMBER}"
     add_var acceptance_deployment_name          "acceptance"
     add_var acceptance_deployment_name_logcache_metron "acceptance-lc"
     add_var acceptance_deployment_name_logcache_syslog "acceptance-lc-sl"
     add_var acceptance_deployment_name_logcache_syslog_cf "acceptance-lc-sl-cf"
   else
+    add_var pr_number "${PR_NUMBER}"
     add_var acceptance_deployment_name          "${PR_NUMBER}-acceptance"
     add_var acceptance_deployment_name_logcache_metron "${PR_NUMBER}-acceptance-lc"
     add_var acceptance_deployment_name_logcache_syslog "${PR_NUMBER}-acceptance-lc-sl"

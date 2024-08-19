@@ -37,7 +37,7 @@
           - name: autoscaler_postgres
             registration_interval: 20s
             port: 5432
-            external_port: 5432
+            external_port: ((postgres_external_port))
             type: tcp
             router_group: default-tcp
             tags:
