@@ -81,8 +81,16 @@ function cleanup_credhub(){
 }
 
 function cleanup_apps(){
+	step "cleaning up apps"
   cf_target "${autoscaler_org}" "${autoscaler_space}"
-  cf undeploy com.github.cloudfoundry.app-autoscaler-release -f
+
+  local mtar_app="$(curl --header "Authorization: $(cf oauth-token)" "deploy-service.$(SYSTEM_DOMAIN)/api/v2/spaces/$(cf space --guid $AUTOSCALER_SPACE)/mtas"  | jq ". | .[] | .metadata | .id" -r)"
+
+  if [ -n "${mtar_app}" ]; then
+    cf undeploy "${mtar_app}"-f
+  else
+     echo "No app to undeploy"
+  fi
 
   if ! cf spaces | grep --quiet --regexp="^${AUTOSCALER_SPACE}$"; then
     cf delete-space -f "${AUTOSCALER_SPACE}"
