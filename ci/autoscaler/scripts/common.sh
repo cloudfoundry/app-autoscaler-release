@@ -83,10 +83,12 @@ function cleanup_credhub(){
 function cleanup_apps(){
 	step "cleaning up apps"
   local mtar_app
+  local space_guid
 
   cf_target "${autoscaler_org}" "${autoscaler_space}"
 
-  mtar_app="$(curl --header "Authorization: $(cf oauth-token)" "deploy-service.${system_domain}/api/v2/spaces/$(cf space --guid ${autoscaler_space})/mtas"  | jq ". | .[] | .metadata | .id" -r)"
+	space_guid="$(cf space --guid "${autoscaler_space}")"
+  mtar_app="$(curl --header "Authorization: $(cf oauth-token)" "deploy-service.${system_domain}/api/v2/spaces/${space_guid}/mtas"  | jq ". | .[] | .metadata | .id" -r)"
 
   if [ -n "${mtar_app}" ]; then
     cf undeploy "${mtar_app}" -f
