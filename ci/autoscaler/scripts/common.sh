@@ -84,10 +84,10 @@ function cleanup_apps(){
 	step "cleaning up apps"
   cf_target "${autoscaler_org}" "${autoscaler_space}"
 
-  local mtar_app="$(curl --header "Authorization: $(cf oauth-token)" "deploy-service.$(SYSTEM_DOMAIN)/api/v2/spaces/$(cf space --guid $AUTOSCALER_SPACE)/mtas"  | jq ". | .[] | .metadata | .id" -r)"
+  local mtar_app="$(curl --header "Authorization: $(cf oauth-token)" "deploy-service.${system_domain}/api/v2/spaces/$(cf space --guid $AUTOSCALER_SPACE)/mtas"  | jq ". | .[] | .metadata | .id" -r)"
 
   if [ -n "${mtar_app}" ]; then
-    cf undeploy "${mtar_app}"-f
+    cf undeploy "${mtar_app}" -f
   else
      echo "No app to undeploy"
   fi
