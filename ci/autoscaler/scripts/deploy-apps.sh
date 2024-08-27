@@ -6,6 +6,10 @@ script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/common.sh"
 source "${script_dir}/vars.source.sh"
 
+pushd "${bbl_state_path}" > /dev/null
+  eval "$(bbl print-env)"
+popd > /dev/null
+
 function deploy() {
   log "Deploying autoscaler apps for bosh deployment '${deployment_name}' "
   pushd "${autoscaler_dir}/src/autoscaler" > /dev/null

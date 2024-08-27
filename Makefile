@@ -453,5 +453,7 @@ go-get-u: $(addsuffix .go-get-u,$(go_modules))
 	go get -u ./...
 
 
-mta-deploy:
-	@make --directory='./src/autoscaler' mta-deploy
+deploy-apps:
+	echo " - deploying apps"
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-apps.sh
+
