@@ -19,11 +19,11 @@ require (
 	github.com/onsi/gomega v1.34.1
 	github.com/prometheus/procfs v0.15.1
 	github.com/steinfletcher/apitest v1.5.16
-	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.51.0
-	go.opentelemetry.io/otel v1.28.0
-	go.opentelemetry.io/otel/metric v1.28.0
-	go.opentelemetry.io/otel/sdk v1.28.0
-	go.opentelemetry.io/otel/trace v1.28.0
+	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.54.0
+	go.opentelemetry.io/otel v1.29.0
+	go.opentelemetry.io/otel/metric v1.29.0
+	go.opentelemetry.io/otel/sdk v1.29.0
+	go.opentelemetry.io/otel/trace v1.29.0
 	go.uber.org/zap v1.27.0
 )
 
