@@ -23,7 +23,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		maxHeapLimitMb int
 	)
 
-	const minimalMemoryUsage = 28 // observed minimal memory usage by the test app
+	const minimalMemoryUsage = 17 // observed minimal memory usage by the test app
 
 	JustBeforeEach(func() {
 		appName = CreateTestApp(cfg, "dynamic-policy", initialInstanceCount)
@@ -42,17 +42,17 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	Context("when scaling by memoryused", func() {
 
 		Context("There is a scale out and scale in policy", func() {
-			var heapToUse int
+			var heapToUse float64
 			BeforeEach(func() {
-				heapToUse = min(maxHeapLimitMb, 200)
+				heapToUse = float64(min(maxHeapLimitMb, 200))
 				expectedAverageUsageAfterScaling := float64(heapToUse)/2 + minimalMemoryUsage
-				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", int64(0.9*expectedAverageUsageAfterScaling), int64(heapToUse))
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "memoryused", int64(0.9*expectedAverageUsageAfterScaling), int64(0.9*heapToUse))
 				initialInstanceCount = 1
 			})
 
 			It("should scale out and then back in.", func() {
-				By(fmt.Sprintf("Use heap %d MB of heap on app", heapToUse))
-				CurlAppInstance(cfg, appName, 0, fmt.Sprintf("/memory/%d/5", heapToUse))
+				By(fmt.Sprintf("Use heap %d MB of heap on app", int64(heapToUse)))
+				CurlAppInstance(cfg, appName, 0, fmt.Sprintf("/memory/%d/5", int64(heapToUse)))
 
 				By("wait for scale to 2")
 				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
