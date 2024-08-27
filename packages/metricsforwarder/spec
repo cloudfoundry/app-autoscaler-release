@@ -8,6 +8,7 @@ files:
 - autoscaler/*
 - autoscaler/vendor/*
 - autoscaler/cf/* # gosub
+- autoscaler/configutil/* # gosub
 - autoscaler/cred_helper/* # gosub
 - autoscaler/db/* # gosub
 - autoscaler/db/sqldb/* # gosub
