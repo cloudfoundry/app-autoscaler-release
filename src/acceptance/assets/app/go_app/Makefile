@@ -72,12 +72,6 @@ build: ./build/app ./build/manifest.yml
 	CGO_ENABLED='${CGO_ENABLED}' GOOS='linux' GOARCH='amd64' go build -o './build/app'
 	cp './app_manifest.yml' './build/manifest.yml'
 
-.PHONY: cf-build
-cf-build: ./build/app ./build/manifest.yml
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o './build/app'
-	cp './app_manifest.yml' './build/manifest.yml'
-
-
 .PHONY: build_tests
 build_tests: $(addprefix build_test-,$(test_dirs))
 
