@@ -45,7 +45,7 @@ files:
 - autoscaler/vendor/github.com/andybalholm/brotli/matchfinder/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
-- autoscaler/vendor/github.com/cloudfoundry-community/go-cfenv/* # gosub
+- autoscaler/vendor/github.com/cloud-gov/go-cfenv/* # gosub
 - autoscaler/vendor/github.com/felixge/httpsnoop/* # gosub
 - autoscaler/vendor/github.com/go-logr/logr/* # gosub
 - autoscaler/vendor/github.com/go-logr/logr/funcr/* # gosub
