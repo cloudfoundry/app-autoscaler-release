@@ -1,6 +1,7 @@
 package app_test
 
 import (
+	"math"
 	"net/http"
 	"runtime"
 	"time"
@@ -22,7 +23,7 @@ var _ = Describe("Memory tests", func() {
 				Get("/memory/invalid/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
-				Body(`{"error":{"description":"invalid memoryMiB: strconv.ParseUint: parsing \"invalid\": invalid syntax"}}`).
+				Body(`{"error":{"description":"invalid memoryMiB: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
 				End()
 		})
 		It("should err if memory out of bounds", func() {
@@ -30,7 +31,7 @@ var _ = Describe("Memory tests", func() {
 				Get("/memory/100001010101010249032897287298719874687936483275648273632429479827398798271/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
-				Body(`{"error":{"description":"invalid memoryMiB: strconv.ParseUint: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
+				Body(`{"error":{"description":"invalid memoryMiB: strconv.ParseInt: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
 				End()
 		})
 		It("should err if memory not an int", func() {
@@ -38,7 +39,7 @@ var _ = Describe("Memory tests", func() {
 				Get("/memory/5/invalid").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
-				Body(`{"error":{"description":"invalid minutes: strconv.ParseUint: parsing \"invalid\": invalid syntax"}}`).
+				Body(`{"error":{"description":"invalid minutes: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
 				End()
 		})
 		It("should return ok and sleep correctDuration", func() {
@@ -55,7 +56,7 @@ var _ = Describe("Memory tests", func() {
 			// http-features (i.e. returing http-status-code 202 etc.) which would involve a lot of
 			// new lines of code.
 			Eventually(func() int { return fakeMemoryTest.UseMemoryCallCount() }).Should(Equal(1))
-			Expect(fakeMemoryTest.UseMemoryArgsForCall(0)).To(Equal(uint64(5 * app.Mebi)))
+			Expect(fakeMemoryTest.UseMemoryArgsForCall(0)).To(Equal(int64(5 * app.Mebi)))
 			Eventually(func() int { return fakeMemoryTest.SleepCallCount() }).Should(Equal(1))
 			Expect(fakeMemoryTest.SleepArgsForCall(0)).To(Equal(4 * time.Minute))
 			Eventually(func() int { return fakeMemoryTest.StopTestCallCount() }).Should(Equal(1))
@@ -63,7 +64,7 @@ var _ = Describe("Memory tests", func() {
 	})
 	Context("memTest info tests", func() {
 		It("should gobble memory and release when stopped", func() {
-			var allocInMebi uint64 = 50 * app.Mebi
+			var allocInMebi int64 = 50 * app.Mebi
 
 			oldMem := getTotalMemoryUsage("before memTest info test")
 
@@ -95,7 +96,7 @@ var _ = Describe("Memory tests", func() {
 	})
 })
 
-func getTotalMemoryUsage(action string) uint64 {
+func getTotalMemoryUsage(action string) int64 {
 	GinkgoHelper()
 
 	runtime.GC()
@@ -106,7 +107,7 @@ func getTotalMemoryUsage(action string) uint64 {
 	result := m.Alloc
 	GinkgoWriter.Printf("total memory usage %s: %d MiB\n", action, result/app.Mebi)
 
-	return result
+	return clampUint64ToInt64(result)
 }
 
 // HeapInuse minus HeapAlloc estimates the amount of memory
@@ -114,7 +115,7 @@ func getTotalMemoryUsage(action string) uint64 {
 // not currently being used. This is an upper bound on
 // fragmentation, but in general this memory can be reused
 // efficiently.
-func getMemorySlack() uint64 {
+func getMemorySlack() int64 {
 	runtime.GC()
 	var ms runtime.MemStats
 	runtime.ReadMemStats(&ms)
@@ -123,5 +124,16 @@ func getMemorySlack() uint64 {
 
 	GinkgoWriter.Printf("slack: %d MiB\n", slack/app.Mebi)
 
-	return slack
+	return clampUint64ToInt64(slack)
+}
+
+func clampUint64ToInt64(value uint64) int64 {
+	var result int64
+
+	if value > math.MaxInt64 {
+		result = math.MaxInt64
+	} else {
+		result = int64(value) //#nosec G115 -- https://github.com/securego/gosec/issues/1187
+	}
+	return result
 }

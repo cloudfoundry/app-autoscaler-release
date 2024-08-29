@@ -24,7 +24,7 @@ const (
 
 //counterfeiter:generate . MemoryGobbler
 type MemoryGobbler interface {
-	UseMemory(numBytes uint64)
+	UseMemory(numBytes int64)
 	Sleep(sleepTime time.Duration)
 	IsRunning() bool
 	StopTest()
@@ -44,15 +44,15 @@ func MemoryTests(logger logr.Logger, r *gin.RouterGroup, memoryTest MemoryGobble
 			Error(c, http.StatusConflict, "memory test is already running")
 			return
 		}
-		var memoryMiB uint64
-		var minutes uint64
+		var memoryMiB int64
+		var minutes int64
 		var err error
-		memoryMiB, err = strconv.ParseUint(c.Param("memoryMiB"), 10, 64)
+		memoryMiB, err = strconv.ParseInt(c.Param("memoryMiB"), 10, 64)
 		if err != nil {
 			Error(c, http.StatusBadRequest, "invalid memoryMiB: %s", err.Error())
 			return
 		}
-		if minutes, err = strconv.ParseUint(c.Param("minutes"), 10, 64); err != nil {
+		if minutes, err = strconv.ParseInt(c.Param("minutes"), 10, 64); err != nil {
 			Error(c, http.StatusBadRequest, "invalid minutes: %s", err.Error())
 			return
 		}
@@ -97,12 +97,12 @@ func Error(c *gin.Context, status int, descriptionf string, args ...any) {
 
 const chunkSize = 4 * Kibi
 
-func (m *ListBasedMemoryGobbler) UseMemory(numBytes uint64) {
+func (m *ListBasedMemoryGobbler) UseMemory(numBytes int64) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.isRunning = true
 	m.used = list.New()
-	used := uint64(0)
+	used := int64(0)
 	for used <= numBytes {
 		m.used.PushBack(bytes.Repeat([]byte("X"), chunkSize)) // The bytes need to be non-zero to force memory allocation
 		used += chunkSize
