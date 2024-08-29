@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:noble
 MAINTAINER autoscaler-team
 
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/London"
@@ -36,7 +36,6 @@ RUN apt-get update && \
             cf8-cli \
             gnupg \
             gnupg2 \
-            netcat \
             gh  \
             make \
             mysql-client && \

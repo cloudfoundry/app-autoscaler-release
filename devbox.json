@@ -11,7 +11,7 @@
     "bundix":                            "latest",
     "cloudfoundry-cli":                  "8.7.11",
     "coreutils":                         "latest",
-    "credhub-cli":                       "2.9.29",
+    "credhub-cli":                       "2.9.35",
     "delve":                             "latest",
     "direnv":                            "2.34.0",
     "fly":                               "7.10.0",

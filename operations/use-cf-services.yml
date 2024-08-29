@@ -4,11 +4,6 @@
     host: ((metricsforwarder_host))
     mtls_host: ((metricsforwarder_host))
 
-# Set the same port for metricsforwarder and healthenpoint routes
-- type: replace
-  path: /instance_groups/name=metricsforwarder/jobs/name=route_registrar/properties/route_registrar/routes/name=autoscaler_metricsforwarder_health/port
-  value: 6201
-
   ## add router tcp route for postgres
 - type: replace
   path: /instance_groups/name=postgres/jobs/-
@@ -53,3 +48,6 @@
 - type: replace
   path: /variables/name=postgres_client/options/alternative_names/-
   value: ((deployment_name))-postgres.tcp.((system_domain))
+
+- type: remove
+  path: /instance_groups/name=metricsforwarder
