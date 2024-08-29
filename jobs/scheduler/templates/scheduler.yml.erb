@@ -104,25 +104,28 @@ spring:
   ############################################################
   ssl:
     bundle:
-      jks:
-        server:
-          key:
-            alias: "scheduler"
-          keystore:
-            location: "/var/vcap/jobs/scheduler/config/certs/server.p12"
-            password: "123456"
-          truststore:
-            location: "/var/vcap/jobs/scheduler/config/certs/cacerts"
-            password: "123456"
-      <% if_p("autoscaler.scheduler.health.ca_cert", "autoscaler.scheduler.health.server_cert", "autoscaler.scheduler.health.server_key") do %>
       pem:
+        server:
+          keystore:
+            certificate: "/var/vcap/jobs/scheduler/config/certs/server.crt"
+            private-key: "/var/vcap/jobs/scheduler/config/certs/server.key"
+          truststore:
+            certificate: "/var/vcap/jobs/scheduler/config/certs/ca.crt"
+        <% if_p("autoscaler.scheduler.health.ca_cert", "autoscaler.scheduler.health.server_cert", "autoscaler.scheduler.health.server_key") do %>
         healthendpoint:
           keystore:
             certificate: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/server.crt"
             private-key: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/server.key"
           truststore:
             certificate: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/ca.crt"
-      <% end %>
+        <% end %>
+        scalingengine:
+          keystore:
+            certificate: "/var/vcap/jobs/scheduler/config/certs/scalingengine/client.crt"
+            private-key: "/var/vcap/jobs/scheduler/config/certs/scalingengine/client.key"
+          truststore:
+            certificate: "/var/vcap/jobs/scheduler/config/certs/scalingengine/ca.crt"
+
 
 ############################################################
 #    Client SSL keys
@@ -130,12 +133,7 @@ spring:
 client:
   httpClientTimeout: <%=p('autoscaler.scheduler.http_client_timeout') %>
   ssl:
-    key-store: /var/vcap/jobs/scheduler/config/certs/scalingengine/client.p12
-    key-store-password: 123456
-    key-store-type: PKCS12
     protocol: TLSv1.3
-    trust-store: /var/vcap/jobs/scheduler/config/certs/scalingengine/cacerts
-    trust-store-password: 123456
 ############################################################
 #    Scalingengine
 ############################################################

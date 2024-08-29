@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 # shellcheck disable=SC2086,SC2034,SC2155
 set -euo pipefail
+
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
@@ -62,12 +63,20 @@ function setup_autoscaler_uaac(){
       --secret "$autoscaler_secret" > /dev/null
   fi
 }
+function get_postgres_external_port(){
+	if [ -z "${PR_NUMBER}" ]; then
+		echo "5432"
+	else
+		echo "${PR_NUMBER}"
+	fi
+}
 
 function create_manifest(){
   # Set the local tmp_dir depending on if we run on github-actions or not, see:
   # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables
   local tmp_dir
   local perform_as_gh_action
+
   perform_as_gh_action="${GITHUB_ACTIONS:-false}"
   if "${perform_as_gh_action}" != 'false'
   then
@@ -87,7 +96,12 @@ function create_manifest(){
       -v system_domain="${system_domain}" \
       -v deployment_name="${deployment_name}" \
       -v app_autoscaler_version="${bosh_release_version}" \
-      -v admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)" \
+      -v admin_password="$(credhub get -n /bosh-autoscaler/cf/cf_admin_password -q)"\
+      -v routing_api_ca_certs="$(credhub get -n /bosh-autoscaler/cf/router_ssl --key ca --quiet)"\
+      -v routing_api_client_secret="$(credhub get -n /bosh-autoscaler/cf/uaa_clients_routing_api_client_secret --quiet)"\
+      -v routing_api_tls_client_cert="$(credhub get -n /bosh-autoscaler/cf/routing_api_tls_client --key certificate --quiet)"\
+      -v routing_api_tls_client_private_key="$(credhub get -n /bosh-autoscaler/cf/routing_api_tls_client --key private_key --quiet)"\
+      -v routing_api_server_ca_cert="$(credhub get -n /bosh-autoscaler/cf/router_ssl --key ca --quiet)"\
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
       -v log_cache_syslog_tls_ca="$(credhub get -n /bosh-autoscaler/cf/log_cache_syslog_tls --key ca --quiet)"\
@@ -96,6 +110,7 @@ function create_manifest(){
       -v metricscollector_ca_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key ca --quiet)"\
       -v metricscollector_client_cert="$(credhub get -n /bosh-autoscaler/cf/log_cache --key certificate --quiet)"\
       -v metricsforwarder_host="${metricsforwarder_host}"\
+      -v postgres_external_port="$(get_postgres_external_port)"\
       -v metricscollector_client_key="$(credhub get -n /bosh-autoscaler/cf/log_cache --key private_key --quiet)"\
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"

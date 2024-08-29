@@ -12,6 +12,9 @@ PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/'
 DB_HOST ?= localhost
 DBURL ?= "postgres://postgres:postgres@${DB_HOST}/autoscaler?sslmode=disable"
 
+MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
+EXTENSION_FILE := $(shell mktemp)
+
 export GOWORK=off
 BUILDFLAGS := -ldflags '-linkmode=external'
 
@@ -91,15 +94,10 @@ go-mod-vendor: ${go-vendoring-folder} ${go-vendored-files}
 ${go-vendoring-folder} ${go-vendored-files} &: ${app-fakes-dir} ${app-fakes-files}
 	go mod vendor
 
-build-cf-%:
-	@echo "# building for cf $*"
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $*/$* $*/cmd/$*/main.go
-
 # CGO_ENABLED := 1 is required to enforce dynamic linking which is a requirement of dynatrace.
 build-%: ${openapi-generated-clients-and-servers-api-dir} ${openapi-generated-clients-and-servers-api-files} ${openapi-generated-clients-and-servers-scalingengine-dir} ${openapi-generated-clients-and-servers-scalingengine-files}
 	@echo "# building $*"
 	@CGO_ENABLED=1 go build $(BUILDTAGS) $(BUILDFLAGS) -o build/$* $*/cmd/$*/main.go
-
 
 build: $(addprefix build-,$(binaries))
 
@@ -121,7 +119,7 @@ check: fmt lint build test
 
 test: generate-fakes
 	@echo "Running tests"
-	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} --skip-package='integration'
+	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} ${TEST} --skip-package='integration'
 
 testsuite: generate-fakes
 	@echo " - using DBURL=${DBURL} TEST=${TEST}"
@@ -152,3 +150,25 @@ clean:
 	@rm --force --recursive 'vendor'
 	@rm --force --recursive "${openapi-generated-clients-and-servers-api-dir}"
 	@rm --force --recursive "${openapi-generated-clients-and-servers-scalingengine-dir}"
+
+.PHONY: mta-deploy
+mta-deploy: mta-build build-extension-file
+	$(MAKE) -f metricsforwarder/Makefile set-security-group
+	@echo "Deploying with extension file: $(EXTENSION_FILE)"
+	@cf deploy mta_archives/*.mtar -f --delete-services -e $(EXTENSION_FILE)
+
+build-extension-file:
+	echo "extension file at: $(EXTENSION_FILE)"
+	$(MAKEFILE_DIR)/build-extension-file.sh $(EXTENSION_FILE);
+
+mta-logs:
+	rm -rf mta-*
+	cf dmol --mta com.github.cloudfoundry.app-autoscaler-release --last 1
+	vim mta-*
+
+.PHONY: mta-build
+mta-build: mta-build-clean
+	mbt build
+
+mta-build-clean:
+	rm -rf mta_archives

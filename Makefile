@@ -80,13 +80,13 @@ clean-scheduler:
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f test-certs/*
+	@rm --force --recursive src/scheduler/src/test/resources/certs
 clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
 	@rm -rf .dev_builds
 clean-acceptance:
-	@echo " - cleaning acceptance"
-	@rm src/acceptance/acceptance_config.json &> /dev/null || true
+	@echo ' - cleaning acceptance (⚠️ This keeps the file “src/acceptance/acceptance_config.json” if present!)'
 	@rm src/acceptance/ginkgo* &> /dev/null || true
 	@rm -rf src/acceptance/results &> /dev/null || true
 
@@ -115,22 +115,21 @@ $(addprefix test_,$(go_modules)):
 
 
 .PHONY: test-certs
-test-certs: target/autoscaler_test_certs target/scheduler_test_certs
+test-certs: target/autoscaler_test_certs src/scheduler/src/test/resources/certs
 target/autoscaler_test_certs:
 	@./scripts/generate_test_certs.sh
 	@touch $@
-target/scheduler_test_certs:
+src/scheduler/src/test/resources/certs:
 	@./src/scheduler/scripts/generate_unit_test_certs.sh
-	@touch $@
 
 
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
 test-autoscaler: check-db_type init-db test-certs
-	@echo " - using DBURL=${DBURL}"
-	@make --directory='./src/autoscaler' test DBURL="${DBURL}"
+	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
+	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
 test-autoscaler-suite: check-db_type init-db test-certs
-	@make --directory='./src/autoscaler' testsuite TEST=${TEST} DBURL="${DBURL}"
+	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}'
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
@@ -372,12 +371,19 @@ build-test-app:
 deploy-test-app:
 	@make --directory='./src/acceptance/assets/app/go_app' deploy
 
-.PHONY: acceptance-tests
-acceptance-tests: build-test-app
-	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
-acceptance-cleanup:
-	${CI_DIR}/autoscaler/scripts/cleanup-acceptance.sh;
+.PHONY: build-acceptance-tests
+build-acceptance-tests:
+	@make --directory='./src/acceptance' build_tests
 
+.PHONY: acceptance-tests
+acceptance-tests: build-test-app acceptance-tests-config
+	@make --directory='./src/acceptance' run-acceptance-tests
+.PHONY: acceptance-cleanup
+acceptance-cleanup:
+	@make --directory='./src/acceptance' acceptance-tests-cleanup
+.PHONY: acceptance-tests-config
+acceptance-tests-config:
+	make --directory='./src/acceptance' acceptance-tests-config
 
 .PHONY: cleanup-concourse
 cleanup-concourse:
@@ -388,7 +394,7 @@ cf-login:
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
 
 .PHONY: setup-performance
-setup-performance: build-test-app
+setup-performance: build-test-app acceptance-tests-config
 	export NODES=1;\
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
@@ -445,3 +451,9 @@ go-get-u: $(addsuffix .go-get-u,$(go_modules))
 	@echo " - go get -u" $<
 	cd src/$< && \
 	go get -u ./...
+
+
+deploy-apps:
+	echo " - deploying apps"
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-apps.sh
+

@@ -31,9 +31,7 @@ anchors:
       operations/set-release-version.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
-      operations/disable-postgres-tls-config.yml
       operations/use-cf-services.yml
-
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
@@ -190,6 +188,7 @@ jobs:
       acceptance_deployment_name_logcache_metron: ((acceptance_deployment_name_logcache_metron))
       acceptance_deployment_name_logcache_syslog: ((acceptance_deployment_name_logcache_syslog))
       acceptance_deployment_name_logcache_syslog_cf: ((acceptance_deployment_name_logcache_syslog_cf))
+      pr_number: ((pr_number))
 
 - name: unit-tests
   public: true
@@ -334,6 +333,7 @@ jobs:
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-syslog-cf-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_syslog_cf))
+      PR_NUMBER: ((pr_number))
   plan:
   - in_parallel:
     - get: bbl-state
@@ -579,12 +579,11 @@ jobs:
   plan:
   - in_parallel:
     - get: app-autoscaler-release
-    - get: java-release
     - get: golang-release
       trigger: true
     - get: ci
   - task: update-golang-sdk
-    file: ci/ci/autoscaler/tasks/update-sdk/task.yml
+    file: ci/ci/autoscaler/tasks/update-sdk/go_task.yml
     params:
       type: golang
 
@@ -596,9 +595,8 @@ jobs:
     - get: app-autoscaler-release
     - get: java-release
       trigger: true
-    - get: golang-release
     - get: ci
   - task: update-java-sdk
-    file: ci/ci/autoscaler/tasks/update-sdk/task.yml
+    file: ci/ci/autoscaler/tasks/update-sdk/java_task.yml
     params:
       type: java

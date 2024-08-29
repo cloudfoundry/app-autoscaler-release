@@ -52,16 +52,19 @@ spring:
     ############################################################
     ssl:
         bundle:
-            jks:
+            pem:
                 server:
-                    key:
-                        alias: "test-scheduler"
                     keystore:
-                        location: "src/test/resources/certs/test-scheduler.p12"
-                        password: "123456"
+                        certificate:  "src/test/resources/certs/test-scheduler.crt"
+                        private-key:  "src/test/resources/certs/test-scheduler.key"
                     truststore:
-                        location: "src/test/resources/certs/test.truststore"
-                        password: "123456"
+                        certificate: "src/test/resources/certs/test-ca.crt"
+                scalingengine:
+                  keystore:
+                    certificate:  "src/test/resources/certs/test-scheduler.crt"
+                    private-key:  "src/test/resources/certs/test-scheduler.key"
+                  truststore:
+                    certificate: "src/test/resources/certs/test-ca.crt"
 
 ############################################################
 #    Logging
@@ -90,12 +93,7 @@ logging:
 client:
     httpClientTimeout: 5
     ssl:
-        key-store: src/test/resources/certs/test-scheduler.p12
-        key-store-password: 123456
-        key-store-type: PKCS12
         protocol: TLSv1.3
-        trust-store: src/test/resources/certs/test.truststore
-        trust-store-password: 123456
 ############################################################
 #    Scalingengine
 ############################################################

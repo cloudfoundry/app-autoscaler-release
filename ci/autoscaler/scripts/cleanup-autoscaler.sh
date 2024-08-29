@@ -10,6 +10,7 @@ function main() {
   bosh_login
   cf_login
 
+  cleanup_apps
   cleanup_acceptance_run
   cleanup_service_broker
   cleanup_bosh_deployment

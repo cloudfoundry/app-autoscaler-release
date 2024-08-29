@@ -74,7 +74,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		AbortSuite(err.Error())
 	}
 
-	apDB, err := sql.Open(database.DriverName, database.DSN)
+	apDB, err := sql.Open(database.DriverName, database.DataSourceName)
 	if err != nil {
 		AbortSuite(err.Error())
 	}
