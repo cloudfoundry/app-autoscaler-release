@@ -21,7 +21,7 @@ var _ = Describe("CPU tests", func() {
 				Get("/cpu/invalid/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
-				Body(`{"error":{"description":"invalid utilization: strconv.ParseUint: parsing \"invalid\": invalid syntax"}}`).
+				Body(`{"error":{"description":"invalid utilization: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
 				End()
 		})
 		It("should err if cpu out of bounds", func() {
@@ -29,7 +29,7 @@ var _ = Describe("CPU tests", func() {
 				Get("/cpu/100001010101010249032897287298719874687936483275648273632429479827398798271/4").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
-				Body(`{"error":{"description":"invalid utilization: strconv.ParseUint: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
+				Body(`{"error":{"description":"invalid utilization: strconv.ParseInt: parsing \"100001010101010249032897287298719874687936483275648273632429479827398798271\": value out of range"}}`).
 				End()
 		})
 		It("should err if cpu not an int", func() {
@@ -37,7 +37,7 @@ var _ = Describe("CPU tests", func() {
 				Get("/cpu/5/invalid").
 				Expect(GinkgoT()).
 				Status(http.StatusBadRequest).
-				Body(`{"error":{"description":"invalid minutes: strconv.ParseUint: parsing \"invalid\": invalid syntax"}}`).
+				Body(`{"error":{"description":"invalid minutes: strconv.ParseInt: parsing \"invalid\": invalid syntax"}}`).
 				End()
 		})
 		It("should return ok and sleep correctDuration", func() {
@@ -51,7 +51,7 @@ var _ = Describe("CPU tests", func() {
 			Eventually(func() int { return fakeCPUWaster.UseCPUCallCount() }).Should(Equal(1))
 			utilization, duration := fakeCPUWaster.UseCPUArgsForCall(0)
 			Expect(duration).Should(Equal(4 * time.Minute))
-			Expect(utilization).Should(Equal(uint64(5)))
+			Expect(utilization).Should(Equal(int64(5)))
 		})
 	})
 
@@ -59,7 +59,7 @@ var _ = Describe("CPU tests", func() {
 	Context("ConcurrentBusyLoopCPUWaster", func() {
 		Context("UseCPU", FlakeAttempts(3), func() {
 			DescribeTable("should use cpu",
-				func(utilisation uint64, duration time.Duration) {
+				func(utilisation int64, duration time.Duration) {
 					oldCpu := getTotalCPUUsage("before test")
 
 					By("wasting cpu time")
@@ -86,11 +86,11 @@ var _ = Describe("CPU tests", func() {
 					}
 					Expect(newCpu - oldCpu).To(BeNumerically("~", expectedCPUUsage, tolerance))
 				},
-				Entry("25% for 10 seconds", uint64(25), time.Second*10),
-				Entry("50% for 10 seconds", uint64(50), time.Second*10),
-				Entry("100% for 10 seconds", uint64(100), time.Second*10),
-				Entry("200% for 10 seconds", uint64(200), time.Second*10),
-				Entry("400% for 10 seconds", uint64(400), time.Second*10),
+				Entry("25% for 10 seconds", int64(25), time.Second*10),
+				Entry("50% for 10 seconds", int64(50), time.Second*10),
+				Entry("100% for 10 seconds", int64(100), time.Second*10),
+				Entry("200% for 10 seconds", int64(200), time.Second*10),
+				Entry("400% for 10 seconds", int64(400), time.Second*10),
 			)
 		})
 	})
@@ -107,6 +107,6 @@ func getTotalCPUUsage(action string) time.Duration {
 	return cpuTotalDuration
 }
 
-func multiplyDurationByPercentage(duration time.Duration, percentage uint64) time.Duration {
+func multiplyDurationByPercentage(duration time.Duration, percentage int64) time.Duration {
 	return time.Duration(float64(duration) * float64(percentage) / 100)
 }
