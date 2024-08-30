@@ -1714,7 +1714,6 @@
     },
     "ruby@latest": {
       "last_modified": "2024-08-14T11:41:26Z",
-      "plugin_version": "0.0.2",
       "resolved": "github:NixOS/nixpkgs/0cb2fd7c59fed0cd82ef858cbcbdb552b9a33465#ruby_3_3",
       "source": "devbox-search",
       "version": "3.3.4",
