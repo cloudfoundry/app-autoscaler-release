@@ -20,9 +20,9 @@ var _ TimeWaster = Sleeper{}
 
 func ResponseTimeTests(logger logr.Logger, r *gin.RouterGroup, timeWaster TimeWaster) *gin.RouterGroup {
 	r.GET("/slow/:delayInMS", func(c *gin.Context) {
-		var milliseconds uint64
+		var milliseconds int64
 		var err error
-		if milliseconds, err = strconv.ParseUint(c.Param("delayInMS"), 10, 64); err != nil {
+		if milliseconds, err = strconv.ParseInt(c.Param("delayInMS"), 10, 64); err != nil {
 			Error(c, http.StatusBadRequest, "invalid milliseconds: %s", err.Error())
 			return
 		}

@@ -238,7 +238,7 @@ func (g GitHub) FetchPullRequests(startingCommitSHA, lastCommitSHA string) ([]Pu
 	}
 }
 
-func (g GitHub) FetchLabelsForPullRequest(owner, repo string, pullRequestNumber int) ([]string, error) {
+func (g GitHub) FetchLabelsForPullRequest(owner, repo string, pullRequestNumber int32) ([]string, error) {
 	var PullRequestlabelsQuery struct {
 		Repository struct {
 			PullRequest struct {

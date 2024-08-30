@@ -8,6 +8,8 @@ files:
 - autoscaler/*
 - autoscaler/vendor/*
 - autoscaler/eventgenerator/db/*
+- autoscaler/vendor/google.golang.org/genproto/googleapis/api/*
+- autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/*
 - autoscaler/cf/* # gosub
 - autoscaler/collection/* # gosub
 - autoscaler/db/* # gosub
@@ -27,10 +29,10 @@ files:
 - autoscaler/routes/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v2/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v2/internal/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1/* # gosub
-- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v3/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v3/internal/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1/* # gosub
+- autoscaler/vendor/code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/internal/truncate/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/tlsconfig/* # gosub
@@ -72,9 +74,18 @@ files:
 - autoscaler/vendor/github.com/jackc/puddle/v2/internal/genstack/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/fse/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/huff0/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/internal/cpuinfo/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/internal/snapref/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/zstd/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
+- autoscaler/vendor/github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil/* # gosub
+- autoscaler/vendor/github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil/header/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/collectors/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/internal/* # gosub
@@ -146,7 +157,6 @@ files:
 - autoscaler/vendor/golang.org/x/text/unicode/bidi/* # gosub
 - autoscaler/vendor/golang.org/x/text/unicode/norm/* # gosub
 - autoscaler/vendor/golang.org/x/text/width/* # gosub
-- autoscaler/vendor/google.golang.org/genproto/googleapis/api/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/api/annotations/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/api/httpbody/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/rpc/status/* # gosub
@@ -166,7 +176,9 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/credentials/insecure/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/encoding/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/encoding/proto/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/experimental/stats/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/grpclog/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/grpclog/internal/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/health/grpc_health_v1/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/backoff/* # gosub
@@ -189,11 +201,13 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/passthrough/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/unix/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/serviceconfig/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/internal/stats/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/status/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/syscall/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/transport/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/transport/networktype/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/keepalive/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/mem/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/metadata/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/peer/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/resolver/* # gosub
@@ -232,7 +246,6 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/reflect/protoregistry/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoiface/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoimpl/* # gosub
-- autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/anypb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/durationpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/fieldmaskpb/* # gosub

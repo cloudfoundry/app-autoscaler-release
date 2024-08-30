@@ -169,8 +169,7 @@ func getCFInstanceIdentityCertificateClient() (*http.Client, error) {
 	caCertPool := x509.NewCertPool()
 	caCertPool.AppendCertsFromPEM(caCertBytes)
 
-	/* #nosec G402 -- test app that shall run on dev foundations without proper certs */
-	//nolint:gosec // #nosec G402 -- due to https://github.com/securego/gosec/issues/1105
+	//#nosec G402 -- test app that shall run on dev foundations without proper certs
 	tlsConfig := &tls.Config{
 		Certificates:       []tls.Certificate{cert},
 		InsecureSkipVerify: true,

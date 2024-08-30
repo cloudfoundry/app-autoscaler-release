@@ -61,7 +61,8 @@
       "groupName": "Cloud Foundry Logging and Metrics",
       "matchPackageNames": [
         "/loggregator/",
-        "/log-cache/"
+        "/log-cache/",
+        "/loggregator-agent-release/"
       ]
     }
   ],

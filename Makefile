@@ -58,7 +58,7 @@ target/init-db-${db_type}:
 	@touch $@
 
 .PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance
+clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance ## Clean all build and test artifacts
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 clean-build:
@@ -94,7 +94,7 @@ clean-acceptance:
 build: $(all_modules)
 build-tests: build-test
 build-test: $(addprefix test_,$(go_modules))
-build-all: build build-test build-test-app
+build-all: build build-test build-test-app ## Build all modules and tests
 db: target/db
 target/db:
 	@echo "# building $@"
@@ -124,7 +124,7 @@ src/scheduler/src/test/resources/certs:
 
 
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
-test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit
+test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit ## Run all unit tests
 test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
 	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
@@ -218,32 +218,35 @@ stop-db: check-db_type
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
 .PHONY: integration
-integration: build init-db test-certs
+integration: build init-db test-certs ## Run all integration tests
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='./src/autoscaler' integration DBURL="${DBURL}"
 
 
-.PHONY:lint $(addprefix lint_,$(go_modules))
-lint: $(addprefix lint_,$(go_modules))  rubocop
+.PHONY: lint
+lint: lint-go lint-ruby lint-actions lint-markdown ## Run all linters
 
-rubocop:
+.PHONY:lint $(addprefix lint_,$(go_modules))
+lint-go: build-all $(addprefix lint_,$(go_modules))
+
+lint-ruby:
 	@echo " - ruby scripts"
 	@bundle install
 	@bundle exec rubocop ${RUBOCOP_OPTS} ./spec ./packages
 
-.PHONY: markdownlint
-markdownlint: markdownlint-cli
+.PHONY: lint-markdown
+lint-markdown:
 	@echo " - linting markdown files"
-	@markdownlint .
+	@markdownlint-cli2 .
 
 .PHONY: lint-actions
 lint-actions:
 	@echo " - linting GitHub actions"
-	go run github.com/rhysd/actionlint/cmd/actionlint@latest
+	actionlint
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --config ${lint_config} ${OPTS} --timeout 5m
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS} --timeout 5m
 
 .PHONY: spec-test
 spec-test:
@@ -326,12 +329,8 @@ workspace:
 uaac:
 	which uaac || gem install cf-uaac
 
-.PHONY: markdownlint-cli
-markdownlint-cli:
-	which markdownlint || npm install -g --omit=dev markdownlint-cli
-
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
+deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf ## Deploy autoscaler to OSS dev environment
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh
@@ -376,7 +375,7 @@ build-acceptance-tests:
 	@make --directory='./src/acceptance' build_tests
 
 .PHONY: acceptance-tests
-acceptance-tests: build-test-app acceptance-tests-config
+acceptance-tests: build-test-app acceptance-tests-config ## Run acceptance tests against OSS dev environment (requrires a previous deployment of the autoscaler)
 	@make --directory='./src/acceptance' run-acceptance-tests
 .PHONY: acceptance-cleanup
 acceptance-cleanup:
@@ -390,7 +389,7 @@ cleanup-concourse:
 	@${CI_DIR}/autoscaler/scripts/cleanup-concourse.sh
 
 .PHONY: cf-login
-cf-login:
+cf-login: ## Login to OSS CF dev environment
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
 
 .PHONY: setup-performance
@@ -457,3 +456,5 @@ deploy-apps:
 	echo " - deploying apps"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-apps.sh
 
+help: ## Show this help
+	@grep --extended-regexp --no-filename '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
