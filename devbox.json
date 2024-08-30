@@ -35,11 +35,11 @@
     "which":                             "latest",
     "yq-go":                             "4.44.2",
     "go":                                "1.22.2",
-    "golangci-lint":                     "1.60.2",
     "credhub-cli":                       "2.9.29",
     "markdownlint-cli2":                 "latest",
     "act":                               "0.2.63",
     "google-cloud-sdk":                  "latest",
+    "golangci-lint":                     "1.60.3",
     "temurin-bin-21":                    "latest",
     "ruby":                              "latest"
   },
