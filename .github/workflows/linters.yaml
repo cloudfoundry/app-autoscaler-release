@@ -6,40 +6,24 @@ jobs:
   linters:
     name: reviewdog
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
-      - name: make build-all
-        run: |
-          make build-all
-
-      - name: get golangci-lint version
-        id: get-golangci-lint-version
-        run: |
-          version=v$(grep golangci-lint .tool-versions | cut -d " " -f 2 )
-          echo "golangci-lint version from .tool-versions: '${version}'"
-          echo "version=${version}" >> "$GITHUB_OUTPUT";
-
-      - name: get go version
-        id: get-golang-version
-        run: |
-          version="$(grep "golang " .tool-versions|  cut -f 2 -d " ")"
-          echo "Go version from .tool-versions: '${version}'"
-          echo "version=${version}" >> "$GITHUB_OUTPUT";
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@a03caf5813591bc882139eba6ae947930a83a427 # v0.11.0
         with:
-          # runs 'bundle install' and caches installed gems automatically
-          bundler-cache: true
-        env:
-          # Needed for self-hosted runner
-          ImageOS: ubuntu22
+          enable-cache: 'true'
+      - name: Make devbox shellenv available
+        run: |
+          eval "$(devbox shellenv)"
+          printenv >> $GITHUB_ENV
+
+      - name: Run Go linter
+        run: |
+          make lint-go
 
       - name: shellcheck
         uses: reviewdog/action-shellcheck@v1
@@ -63,53 +47,3 @@ jobs:
         uses: reviewdog/action-markdownlint@v0
         with:
           reporter: github-pr-review
-
-      - name: lint acceptance
-        uses: reviewdog/action-golangci-lint@v2
-        with:
-          workdir: src/acceptance
-          go_version: ${{ steps.get-golang-version.outputs.version }}
-          golangci_lint_version: ${{ steps.get-golangci-lint-version.outputs.version }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_on_error: true
-
-      - name: lint go test app
-        uses: reviewdog/action-golangci-lint@v2
-        with:
-          workdir: src/acceptance/assets/app/go_app
-          go_version: ${{ steps.get-golang-version.outputs.version }}
-          golangci_lint_version: ${{ steps.get-golangci-lint-version.outputs.version }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_on_error: true
-
-      - name: lint autoscaler
-        uses: reviewdog/action-golangci-lint@v2
-        with:
-          workdir: src/autoscaler
-          go_version: ${{ steps.get-golang-version.outputs.version }}
-          golangci_lint_version: ${{ steps.get-golangci-lint-version.outputs.version }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_on_error: true
-
-      - name: lint changelog
-        uses: reviewdog/action-golangci-lint@v2
-        with:
-          workdir: src/changelog
-          go_version: ${{ steps.get-golang-version.outputs.version }}
-          golangci_lint_version: ${{ steps.get-golangci-lint-version.outputs.version }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_on_error: true
-
-      - name: lint changeloglockcleaner
-        uses: reviewdog/action-golangci-lint@v2
-        with:
-          workdir: src/changeloglockcleaner
-          go_version: ${{ steps.get-golang-version.outputs.version }}
-          golangci_lint_version: ${{ steps.get-golangci-lint-version.outputs.version }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_on_error: true

@@ -5,7 +5,6 @@
     "path:.#log-cache-cli-plugin":       "",
     "path:.#cloud-mta-build-tool":       "",
     "path:.#uaac":                       "",
-    "act":                               "0.2.64",
     "actionlint":                        "1.7.1",
     "bosh-cli":                          "7.3.1",
     "bundix":                            "latest",
@@ -40,7 +39,9 @@
     "credhub-cli":                       "2.9.29",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-21":                    "latest",
-    "ruby":                              "latest"
+    "ruby":                              "latest",
+    "markdownlint-cli2":                 "latest",
+    "act":                               "0.2.63"
   },
   "shell": {
     "init_hook": [

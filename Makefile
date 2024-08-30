@@ -223,27 +223,30 @@ integration: build init-db test-certs
 	@make --directory='./src/autoscaler' integration DBURL="${DBURL}"
 
 
-.PHONY:lint $(addprefix lint_,$(go_modules))
-lint: $(addprefix lint_,$(go_modules))  rubocop
+.PHONY: lint
+lint: lint-go lint-ruby lint-actions lint-markdown
 
-rubocop:
+.PHONY:lint $(addprefix lint_,$(go_modules))
+lint-go: $(addprefix lint_,$(go_modules))
+
+lint-ruby:
 	@echo " - ruby scripts"
 	@bundle install
 	@bundle exec rubocop ${RUBOCOP_OPTS} ./spec ./packages
 
-.PHONY: markdownlint
-markdownlint: markdownlint-cli
+.PHONY: lint-markdown
+lint-markdown:
 	@echo " - linting markdown files"
-	@markdownlint .
+	@markdownlint-cli2 .
 
 .PHONY: lint-actions
 lint-actions:
 	@echo " - linting GitHub actions"
-	go run github.com/rhysd/actionlint/cmd/actionlint@latest
+	actionlint
 
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --config ${lint_config} ${OPTS} --timeout 5m
+	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS} --timeout 5m
 
 .PHONY: spec-test
 spec-test:
@@ -325,10 +328,6 @@ workspace:
 .PHONY: uuac
 uaac:
 	which uaac || gem install cf-uaac
-
-.PHONY: markdownlint-cli
-markdownlint-cli:
-	which markdownlint || npm install -g --omit=dev markdownlint-cli
 
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
 deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf
