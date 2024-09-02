@@ -99,6 +99,10 @@ function cleanup_apps(){
   if ! cf spaces | grep --quiet --regexp="^${AUTOSCALER_SPACE}$"; then
     cf delete-space -f "${AUTOSCALER_SPACE}"
   fi
+
+  if ! cf orgs | grep --quiet --regexp="^${AUTOSCALER_ORG}$"; then
+    cf delete-org -f "${AUTOSCALER_ORG}"
+  fi
 }
 
 
