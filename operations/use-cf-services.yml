@@ -37,6 +37,7 @@
             router_group: default-tcp
             tags:
               component: autoscaler_postgres
+              deployment: ((deployment_name))
             uris:
               - ((deployment_name))-postgres.tcp.((system_domain))
 
