@@ -94,7 +94,7 @@ clean-acceptance:
 build: $(all_modules)
 build-tests: build-test
 build-test: $(addprefix test_,$(go_modules))
-build-all: build build-test build-test-app ## Build all modules and tests
+build-all: build build-test build-test-app mta-build ## Build all modules and tests
 db: target/db
 target/db:
 	@echo "# building $@"
@@ -260,13 +260,6 @@ build/autoscaler-test.tgz:
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
 
-.PHONY: acceptance-release
-acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
-	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
-	@mkdir -p ${DEST}
-	${AUTOSCALER_DIR}/scripts/compile-acceptance-tests.sh
-	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
-
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
 generate-fakes: autoscaler.generate-fakes test-app.generate-fakes
 autoscaler.generate-fakes:
@@ -360,7 +353,21 @@ deploy-prometheus: ${prometheus-bosh-release-path}/manifests
 	${CI_DIR}/infrastructure/scripts/deploy-prometheus.sh;
 
 
+.PHONY: mta-release
+mta-release: mta-build
+	@echo " - building mtar release '${VERSION}' to dir: '${DEST}' "
 
+.PHONY: acceptance-release
+acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
+	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
+	@mkdir -p ${DEST}
+	${AUTOSCALER_DIR}/scripts/compile-acceptance-tests.sh
+	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
+
+.PHONY: mta-build
+mta-build:
+	@echo " - building mta"
+	@make --directory='./src/autoscaler' mta-build
 
 .PHONY: build-test-app
 build-test-app:
