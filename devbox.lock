@@ -553,51 +553,51 @@
         }
       }
     },
-    "ginkgo@2.20.0": {
-      "last_modified": "2024-08-08T21:09:49Z",
-      "resolved": "github:NixOS/nixpkgs/13fe00cb6c75461901f072ae62b5805baef9f8b2#ginkgo",
+    "ginkgo@2.20.1": {
+      "last_modified": "2024-08-23T06:49:21Z",
+      "resolved": "github:NixOS/nixpkgs/ae815cee91b417be55d43781eb4b73ae1ecc396c#ginkgo",
       "source": "devbox-search",
-      "version": "2.20.0",
+      "version": "2.20.1",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/s38rkqbrfqwx0vwhikidmzaglsfgvapd-ginkgo-2.20.0",
+              "path": "/nix/store/qwwwh5d6my1qn4djwhk4cicpf82dpnr9-ginkgo-2.20.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/s38rkqbrfqwx0vwhikidmzaglsfgvapd-ginkgo-2.20.0"
+          "store_path": "/nix/store/qwwwh5d6my1qn4djwhk4cicpf82dpnr9-ginkgo-2.20.1"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/gcr2704w8m41mzy9w3f54n40sbjq2qi2-ginkgo-2.20.0",
+              "path": "/nix/store/8msc2bnjyfvl59jwjal30ri7sw9qincg-ginkgo-2.20.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/gcr2704w8m41mzy9w3f54n40sbjq2qi2-ginkgo-2.20.0"
+          "store_path": "/nix/store/8msc2bnjyfvl59jwjal30ri7sw9qincg-ginkgo-2.20.1"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/4sfyf29dm2d6jahl8p2qcbr3r6kfz3bh-ginkgo-2.20.0",
+              "path": "/nix/store/03l4mxhixikm7shjb11k75g0b39fzqdd-ginkgo-2.20.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/4sfyf29dm2d6jahl8p2qcbr3r6kfz3bh-ginkgo-2.20.0"
+          "store_path": "/nix/store/03l4mxhixikm7shjb11k75g0b39fzqdd-ginkgo-2.20.1"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dzsgndcsg52dnvql57k0gq4vamm9ph11-ginkgo-2.20.0",
+              "path": "/nix/store/p48y00223dd70dmhp7aka3ama4az4a33-ginkgo-2.20.1",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dzsgndcsg52dnvql57k0gq4vamm9ph11-ginkgo-2.20.0"
+          "store_path": "/nix/store/p48y00223dd70dmhp7aka3ama4az4a33-ginkgo-2.20.1"
         }
       }
     },

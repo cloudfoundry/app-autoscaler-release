@@ -14,7 +14,7 @@
     "direnv":                            "2.34.0",
     "fly":                               "7.10.0",
     "gh":                                "latest",
-    "ginkgo":                            "2.20.0",
+    "ginkgo":                            "2.20.1",
     "gnumake":                           "4.4",
     "gnutar":                            "latest",
     "go-tools":                          "latest",
