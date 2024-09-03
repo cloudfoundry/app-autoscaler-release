@@ -33,7 +33,6 @@
     "shellcheck":                        "0.10.0",
     "swagger-cli":                       "latest",
     "which":                             "latest",
-    "yq-go":                             "4.44.2",
     "go":                                "1.22.2",
     "credhub-cli":                       "2.9.29",
     "markdownlint-cli2":                 "latest",
@@ -41,7 +40,8 @@
     "act":                               "latest",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-21":                    "latest",
-    "ruby":                              "latest"
+    "ruby":                              "latest",
+    "yq-go":                             "4.44.3"
   },
   "shell": {
     "init_hook": [
