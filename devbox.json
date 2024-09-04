@@ -37,9 +37,9 @@
     "markdownlint-cli2":                 "latest",
     "golangci-lint":                     "1.60.3",
     "yq-go":                             "4.44.3",
+    "ginkgo":                            "2.20.2",
     "act":                               "latest",
     "google-cloud-sdk":                  "latest",
-    "ginkgo":                            "2.20.2",
     "temurin-bin-21":                    "latest",
     "ruby":                              "latest"
   },
