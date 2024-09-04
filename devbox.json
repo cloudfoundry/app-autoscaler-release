@@ -14,7 +14,6 @@
     "direnv":                            "2.34.0",
     "fly":                               "7.10.0",
     "gh":                                "latest",
-    "ginkgo":                            "2.20.0",
     "gnumake":                           "4.4",
     "gnutar":                            "latest",
     "go-tools":                          "latest",
@@ -37,11 +36,12 @@
     "credhub-cli":                       "2.9.29",
     "markdownlint-cli2":                 "latest",
     "golangci-lint":                     "1.60.3",
+    "yq-go":                             "4.44.3",
     "act":                               "latest",
     "google-cloud-sdk":                  "latest",
+    "ginkgo":                            "2.20.2",
     "temurin-bin-21":                    "latest",
-    "ruby":                              "latest",
-    "yq-go":                             "4.44.3"
+    "ruby":                              "latest"
   },
   "shell": {
     "init_hook": [
