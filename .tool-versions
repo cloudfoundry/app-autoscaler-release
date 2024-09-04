@@ -12,7 +12,7 @@ golangci-lint 1.60.3
 java temurin-21.0.4+7.0.LTS
 make 4.4
 maven 3.8.6
-ruby 3.3.3
+ruby 3.3.5
 shellcheck 0.10.0
 yq 4.44.3
 gum 0.13.0
