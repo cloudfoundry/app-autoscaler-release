@@ -106,7 +106,7 @@ RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download
 
 # get maven
 # renovate: datasource=maven depName=org.apache.maven:maven-core
-ARG MAVEN_VERSION=3.9.8
+ARG MAVEN_VERSION=3.9.9
 ENV MAVEN_HOME /opt/maven
 RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz && \
 	tar xzf /tmp/apache-maven-${MAVEN_VERSION}.tar.gz -C /opt/ && \
@@ -130,7 +130,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
   gcloud version
 
 # renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
-ARG GINKGO_VERSION=v2.20.0
+ARG GINKGO_VERSION=v2.20.2
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} && \
     ginkgo version
 
