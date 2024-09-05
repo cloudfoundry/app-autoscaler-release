@@ -8,7 +8,6 @@
     "actionlint":                        "1.7.1",
     "bosh-cli":                          "7.3.1",
     "bundix":                            "latest",
-    "cloudfoundry-cli":                  "8.7.11",
     "coreutils":                         "latest",
     "delve":                             "latest",
     "direnv":                            "2.34.0",
@@ -39,6 +38,7 @@
     "yq-go":                             "4.44.3",
     "ginkgo":                            "2.20.2",
     "act":                               "latest",
+    "cloudfoundry-cli":                  "latest",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-21":                    "latest",
     "ruby":                              "latest"
