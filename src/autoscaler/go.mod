@@ -3,13 +3,13 @@ module code.cloudfoundry.org/app-autoscaler/src/autoscaler
 go 1.22.2
 
 require (
-	code.cloudfoundry.org/cfhttp/v2 v2.7.0
-	code.cloudfoundry.org/clock v1.8.0
+	code.cloudfoundry.org/cfhttp/v2 v2.10.0
+	code.cloudfoundry.org/clock v1.11.0
 	code.cloudfoundry.org/go-log-cache/v3 v3.0.3
 	code.cloudfoundry.org/go-loggregator/v10 v10.0.1
 	code.cloudfoundry.org/lager/v3 v3.3.0
-	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20240905083138-96d9f8d605dd
-	code.cloudfoundry.org/tlsconfig v0.3.0
+	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20240906161641-df9f0f72b48d
+	code.cloudfoundry.org/tlsconfig v0.4.0
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/cloud-gov/go-cfenv v1.19.1
 	github.com/go-chi/chi/v5 v5.1.0
@@ -20,10 +20,10 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/hashicorp/go-retryablehttp v0.7.7
-	github.com/jackc/pgx/v5 v5.6.0
+	github.com/jackc/pgx/v5 v5.7.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
-	github.com/ogen-go/ogen v1.3.0
+	github.com/ogen-go/ogen v1.4.0
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -41,9 +41,9 @@ require (
 	go.opentelemetry.io/otel/metric v1.29.0
 	go.opentelemetry.io/otel/sdk v1.29.0
 	go.opentelemetry.io/otel/trace v1.29.0
-	golang.org/x/crypto v0.26.0
+	golang.org/x/crypto v0.27.0
 	golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e
-	golang.org/x/net v0.28.0
+	golang.org/x/net v0.29.0
 	golang.org/x/time v0.6.0
 	google.golang.org/grpc v1.66.0
 	gopkg.in/errgo.v2 v2.1.0
@@ -87,7 +87,7 @@ require (
 	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.58.0 // indirect
+	github.com/prometheus/common v0.59.1 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
@@ -96,7 +96,7 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/mod v0.20.0 // indirect
+	golang.org/x/mod v0.21.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
