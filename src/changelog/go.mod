@@ -1,6 +1,6 @@
 module changelog
 
-go 1.22.2
+go 1.22.3
 
 require (
 	github.com/Masterminds/semver/v3 v3.3.0
