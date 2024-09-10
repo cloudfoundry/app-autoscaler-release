@@ -1,7 +1,7 @@
 {
   "lockfile_version": "1",
   "packages": {
-    "act@0.2.66": {
+    "act@latest": {
       "last_modified": "2024-09-02T11:22:49Z",
       "resolved": "github:NixOS/nixpkgs/51b45dc262830ab95c7b9b039bb4f911d4b2509b#act",
       "source": "devbox-search",
