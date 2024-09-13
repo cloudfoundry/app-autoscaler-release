@@ -173,7 +173,7 @@ var _ = Describe("Evaluator", func() {
 					BeforeEach(func() {
 						Expect(triggerChan).To(BeSent(triggerArrayGT))
 					})
-					FContext("when the appMetrics breach the trigger", func() {
+					Context("when the appMetrics breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{600, 650, 620}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {

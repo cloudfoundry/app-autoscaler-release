@@ -109,13 +109,5 @@ openssl x509 -req -in "${depot_path}"/validmtls_client-1.csr -CA "${depot_path}"
 openssl  req -new -newkey rsa:2048  -nodes -subj "/CN=sap.com/O=SAP SE/OU=organization:AB1234ORG/OU=app:an-app-id/OU=space:AB1234SPACE" -out "${depot_path}"/validmtls_client-2.csr
 openssl x509 -req -in "${depot_path}"/validmtls_client-2.csr -CA "${depot_path}"/valid-mtls-local-ca-2.crt -CAkey "${depot_path}"/valid-mtls-local-ca-2.key -CAcreateserial -out "${depot_path}"/validmtls_client-2.crt -days 365 -sha256
 
-# client cert for neighbour app
-openssl  req -new -newkey rsa:2048  -nodes -subj "/CN=sap.com/O=SAP SE/OU=organization:AB1234ORG/OU=app:a-neighbour-app-id/OU=space:AB1234SPACE" -out "${depot_path}"/validmtls_client-neighbour-app.csr
-openssl x509 -req -in "${depot_path}"/validmtls_client-neighbour-app.csr -CA "${depot_path}"/valid-mtls-local-ca-2.crt -CAkey "${depot_path}"/valid-mtls-local-ca-2.key -CAcreateserial -out "${depot_path}"/validmtls_client-neighbour-app.crt -days 365 -sha256
-
-
-
-
-
 # remove the generated key
 rm privkey.pem

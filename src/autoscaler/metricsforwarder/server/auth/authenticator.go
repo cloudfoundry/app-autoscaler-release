@@ -35,9 +35,7 @@ func (a *Auth) Authenticate(next http.Handler) http.Handler {
 
 func (a *Auth) AuthenticateHandler(next http.Handler) func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	return func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
-		appId := vars["appid"]
-		appToScale := vars["appToScale"]
-		err := a.CheckAuth(r, appId, appToScale)
+		err := a.CheckAuth(r, vars["appid"])
 		if err != nil {
 			a.logger.Info("Authentication Failed", lager.Data{"error": err.Error()})
 			if errors.Is(err, ErrorAppIDWrong) {
@@ -55,9 +53,9 @@ func (a *Auth) AuthenticateHandler(next http.Handler) func(w http.ResponseWriter
 	}
 }
 
-func (a *Auth) CheckAuth(r *http.Request, appID string, appToScale string) error {
+func (a *Auth) CheckAuth(r *http.Request, appID string) error {
 	var errAuth error
-	errAuth = a.XFCCAuth(r, a.bindingDB, appID, appToScale)
+	errAuth = a.XFCCAuth(r, a.bindingDB, appID)
 	if errAuth != nil {
 		if errors.Is(errAuth, ErrXFCCHeaderNotFound) {
 			a.logger.Info("Trying basic auth")

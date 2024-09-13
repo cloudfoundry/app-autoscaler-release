@@ -385,18 +385,18 @@ get all bounded apps to the same autoscaler instance - How to check this? check 
 -> app_id->binding_id->service_instance_id-> all bound apps
 */
 
-func (bdb *BindingSQLDB) IsAppBoundToSameAutoscaler(ctx context.Context, appId string, appToScaleId string) (bool, error) {
+func (bdb *BindingSQLDB) IsAppBoundToSameAutoscaler(ctx context.Context, metricSubmitterAppId string, appToScaleId string) (bool, error) {
 
-	serviceInstanceId, err := bdb.GetServiceInstanceIdByAppId(appId)
+	serviceInstanceId, err := bdb.GetServiceInstanceIdByAppId(metricSubmitterAppId)
 	if err != nil {
-		bdb.logger.Error("get-service-instance-by-appId", err, lager.Data{"appId": appId})
+		bdb.logger.Error("get-service-instance-by-appId", err, lager.Data{"appId": metricSubmitterAppId})
 		return false, err
 	}
 	if serviceInstanceId == "" {
-		bdb.logger.Error("no-service-instance-found-by-appId", err, lager.Data{"appId": appId, "serviceInstanceId": serviceInstanceId})
+		bdb.logger.Error("no-service-instance-found-by-appId", err, lager.Data{"appId": metricSubmitterAppId, "serviceInstanceId": serviceInstanceId})
 		return false, nil
 	}
-	// find all apps which are bound to a service instance
+	// find all apps which are bound to the same service instance
 	appIds, err := bdb.GetAppIdsByInstanceId(ctx, serviceInstanceId)
 	if err != nil {
 		bdb.logger.Error("get-apps-by-service-instance-id", err, lager.Data{"serviceInstanceId": serviceInstanceId})

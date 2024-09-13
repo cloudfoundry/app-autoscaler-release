@@ -182,12 +182,13 @@ var _ = Describe("Authentication", func() {
 		})
 
 		When("Request from neighbour (different) app arrives", func() {
-			const validClientNeighbourAppCert = "../../../../../test-certs/validmtls_client-neighbour-app.crt"
+			const validClientCert2 = "../../../../../test-certs/validmtls_client-2.crt"
 			Context("custom-metrics-submission-strategy is not set in the scaling policy", func() {
-				FIt("It should not call next handler and return with status code 403", func() {
-
+				It("It should not call next handler and return with status code 403", func() {
+					testAppId = "app-to-scale-id"
 					req = CreateRequest(body, testAppId)
-					req.Header.Add("X-Forwarded-Client-Cert", MustReadXFCCcert(validClientCert1))
+					vars["appid"] = testAppId
+					req.Header.Add("X-Forwarded-Client-Cert", MustReadXFCCcert(validClientCert2))
 					req.Header.Add("custom-metrics-submission-strategy", "")
 					nextCalled := 0
 					nextFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -205,11 +206,10 @@ var _ = Describe("Authentication", func() {
 			Context("custom-metrics-submission-strategy is set to bound_app in the scaling policy", func() {
 				It("It should call next handler and return with status code 200", func() {
 					req = CreateRequest(body, testAppId)
-					testAppId = "a-neighbour-app-id"
+					testAppId = "app-to-scale-id"
 					vars["appid"] = testAppId
-					vars["appToScale"] = "an-app-id"
-					req.Header.Add("X-Forwarded-Client-Cert", MustReadXFCCcert(validClientNeighbourAppCert))
-					// this should be read via configurations aka scaling policy binding parameters
+					req.Header.Add("X-Forwarded-Client-Cert", MustReadXFCCcert(validClientCert2))
+					// ToDO: this should be read via configurations aka scaling policy binding parameters
 					req.Header.Add("custom-metrics-submission-strategy", "bound_app")
 					nextCalled := 0
 					nextFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

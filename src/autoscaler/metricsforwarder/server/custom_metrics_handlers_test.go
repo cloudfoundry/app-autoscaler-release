@@ -31,12 +31,12 @@ var _ = Describe("MetricHandler", func() {
 		policyDB         *fakes.FakePolicyDB
 		metricsforwarder *fakes.FakeMetricForwarder
 
-		resp    *httptest.ResponseRecorder
-		req     *http.Request
-		err     error
-		body    []byte
-		testApp = "an-app-id-1"
-		vars    map[string]string
+		resp *httptest.ResponseRecorder
+		req  *http.Request
+		err  error
+		body []byte
+
+		vars map[string]string
 
 		found bool
 
@@ -59,7 +59,7 @@ var _ = Describe("MetricHandler", func() {
 		JustBeforeEach(func() {
 			req = CreateRequest(body)
 			Expect(err).ToNot(HaveOccurred())
-			vars["appid"] = testApp
+			vars["appid"] = "an-app-id"
 			handler.VerifyCredentialsAndPublishMetrics(resp, req, vars)
 		})
 
@@ -266,46 +266,9 @@ var _ = Describe("MetricHandler", func() {
 
 		})
 
-		FContext("when a valid request to publish custom metrics comes from a neighbour App", func() {
-
-			Context("neighbour app is not bound to same autoscaler instance", func() {
+		Context("when a valid request to publish custom metrics comes from a neighbour App", func() {
+			When("neighbour app is bound to same autoscaler instance with policy", func() {
 				BeforeEach(func() {
-					testApp = "a-neighbour-app-id"
-					scalingPolicy = &models.ScalingPolicy{
-						InstanceMin: 1,
-						InstanceMax: 6,
-						ScalingRules: []*models.ScalingRule{{
-							MetricType:            "queuelength",
-							BreachDurationSeconds: 60,
-							Threshold:             10,
-							Operator:              ">",
-							CoolDownSeconds:       60,
-							Adjustment:            "+1"}}}
-					policyDB.GetAppPolicyReturns(scalingPolicy, nil)
-					allowedMetricTypeSet["queuelength"] = struct{}{}
-					allowedMetricCache.Set(testApp, allowedMetricTypeSet, 10*time.Minute)
-					customMetrics := []*models.CustomMetric{
-						{
-							Name: "queuelength", Value: 12, Unit: "unit", InstanceIndex: 1, AppGUID: testApp,
-						},
-					}
-					body, err = json.Marshal(models.MetricsConsumer{InstanceIndex: 0, CustomMetrics: customMetrics})
-					Expect(err).NotTo(HaveOccurred())
-				})
-
-				It("should returns status code 401", func() {
-					Expect(resp.Code).To(Equal(http.StatusUnauthorized))
-					errJson := &models.ErrorResponse{}
-					err = json.Unmarshal(resp.Body.Bytes(), errJson)
-					Expect(errJson).To(Equal(&models.ErrorResponse{
-						Code:    "unauthorized",
-						Message: "app is not allowed to send custom metrics on as it not bound to the autoscaler service instance",
-					}))
-				})
-			})
-			FWhen("neighbour app is bound to same autoscaler instance with policy", func() {
-				BeforeEach(func() {
-					testApp = "a-neighbour-app-id"
 					scalingPolicy = &models.ScalingPolicy{
 						InstanceMin: 1,
 						InstanceMax: 6,
@@ -319,7 +282,7 @@ var _ = Describe("MetricHandler", func() {
 					policyDB.GetAppPolicyReturns(scalingPolicy, nil)
 					customMetrics := []*models.CustomMetric{
 						{
-							Name: "queuelength", Value: 12, Unit: "unit", InstanceIndex: 1, AppGUID: testApp,
+							Name: "queuelength", Value: 12, Unit: "unit", InstanceIndex: 1, AppGUID: "an-app-id",
 						},
 					}
 					body, err = json.Marshal(models.MetricsConsumer{InstanceIndex: 0, CustomMetrics: customMetrics})

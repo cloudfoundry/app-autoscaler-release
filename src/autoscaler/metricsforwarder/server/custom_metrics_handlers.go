@@ -102,7 +102,7 @@ func (mh *CustomMetricsHandler) PublishMetrics(w http.ResponseWriter, r *http.Re
 	}
 	err = mh.validateCustomMetricTypes(appID, metricsConsumer)
 	if err != nil {
-		mh.logger.Error("failed-validating-metric types", err, lager.Data{"metrics": metricsConsumer})
+		mh.logger.Error("failed-validating-metric-types", err, lager.Data{"metrics": metricsConsumer})
 		return fmt.Errorf("metric validation Failed %w", err)
 	}
 
