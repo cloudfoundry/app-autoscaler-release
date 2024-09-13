@@ -24,6 +24,10 @@ templates:
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
 
+  binding_db_ca.crt.erb: config/certs/binding_db/ca.crt
+  binding_db.crt.erb: config/certs/binding_db/crt
+  binding_db.key.erb: config/certs/binding_db/key
+
   storedprocedure_db_ca.crt.erb: config/certs/storedprocedure_db/ca.crt
   storedprocedure_db.crt.erb: config/certs/storedprocedure_db/crt
   storedprocedure_db.key.erb: config/certs/storedprocedure_db/key
@@ -124,6 +128,37 @@ properties:
   autoscaler.policy_db_connection_config.max_idle_connections:
     default: 10
   autoscaler.policy_db_connection_config.connection_max_lifetime:
+    default: 60s
+
+  autoscaler.binding_db.address:
+    description: "IP address on which the bindingdb server will listen"
+    default: "autoscalerpostgres.service.cf.internal"
+  autoscaler.binding_db.databases:
+    description: "The list of databases used in bindingdb database including name"
+  autoscaler.binding_db.db_scheme:
+    description: "Database scheme to be used to access bindingdb"
+    default: postgres
+  autoscaler.binding_db.port:
+    description: "Port on which the bindingdb server will listen"
+  autoscaler.binding_db.roles:
+    description: "The list of database roles used in bindingdb database including name/password"
+  autoscaler.binding_db.tls.ca:
+    default: ''
+    description: 'PEM-encoded ca certificate for TLS database server'
+  autoscaler.binding_db.tls.certificate:
+    default: ''
+    description: 'PEM-encoded certificate for TLS database client'
+  autoscaler.binding_db.tls.private_key:
+    default: ''
+    description: 'PEM-encoded key for TLS database client'
+  autoscaler.binding_db.sslmode:
+    default: disable
+    description: "sslmode to connect to postgres server"
+  autoscaler.binding_db_connection_config.max_open_connections:
+    default: 20
+  autoscaler.binding_db_connection_config.max_idle_connections:
+    default: 10
+  autoscaler.binding_db_connection_config.connection_max_lifetime:
     default: 60s
 
   autoscaler.storedprocedure_db.address:

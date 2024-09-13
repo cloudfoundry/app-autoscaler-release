@@ -479,6 +479,7 @@ instance_groups:
     properties:
       autoscaler:
         policy_db: *database
+        binding_db: *database
         policy_db_connection_config: *databaseConnectionConfig
         metricsforwarder:
           health:
