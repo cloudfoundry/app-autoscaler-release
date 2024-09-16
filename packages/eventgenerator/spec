@@ -157,6 +157,7 @@ files:
 - autoscaler/vendor/golang.org/x/text/unicode/bidi/* # gosub
 - autoscaler/vendor/golang.org/x/text/unicode/norm/* # gosub
 - autoscaler/vendor/golang.org/x/text/width/* # gosub
+- autoscaler/vendor/google.golang.org/genproto/googleapis/api/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/api/annotations/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/api/httpbody/* # gosub
 - autoscaler/vendor/google.golang.org/genproto/googleapis/rpc/status/* # gosub
@@ -246,6 +247,7 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/reflect/protoregistry/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoiface/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoimpl/* # gosub
+- autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/anypb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/durationpb/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/fieldmaskpb/* # gosub

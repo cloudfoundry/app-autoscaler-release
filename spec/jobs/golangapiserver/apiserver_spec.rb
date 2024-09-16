@@ -14,7 +14,6 @@ describe "golangapiserver" do
     let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
     context "handles broker credentials" do
-
       it "writes service_broker_usernames" do
         properties["autoscaler"]["apiserver"]["broker"]["broker_credentials"] = [
           {"broker_username" => "fake_b_user_1",
