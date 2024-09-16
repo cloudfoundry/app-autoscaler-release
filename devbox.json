@@ -41,7 +41,8 @@
     "cloudfoundry-cli":                  "latest",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-21":                    "latest",
-    "ruby":                              "latest"
+    "ruby":                              "latest",
+    "bundler":                           "latest"
   },
   "shell": {
     "init_hook": [
