@@ -24,6 +24,10 @@ templates:
   policy_db.crt.erb: config/certs/policy_db/crt
   policy_db.key.erb: config/certs/policy_db/key
 
+  binding_db_ca.crt.erb: config/certs/binding_db/ca.crt
+  binding_db.crt.erb: config/certs/binding_db/crt
+  binding_db.key.erb: config/certs/binding_db/key
+
   storedprocedure_db_ca.crt.erb: config/certs/storedprocedure_db/ca.crt
   storedprocedure_db.crt.erb: config/certs/storedprocedure_db/crt
   storedprocedure_db.key.erb: config/certs/storedprocedure_db/key
