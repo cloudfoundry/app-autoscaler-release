@@ -37,12 +37,12 @@
     "yq-go":                             "4.44.3",
     "ginkgo":                            "2.20.2",
     "go":                                "1.22.3",
+    "bundler":                           "latest",
     "act":                               "latest",
     "cloudfoundry-cli":                  "latest",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-21":                    "latest",
-    "ruby":                              "latest",
-    "bundler":                           "latest"
+    "ruby":                              "latest"
   },
   "shell": {
     "init_hook": [
