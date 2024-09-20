@@ -34,6 +34,27 @@ const (
 
 type Days string
 
+type BindingConfig struct {
+	Configuration Configuration `json:"configuration"`
+	ScalingPolicy
+}
+
+type Configuration struct {
+	CustomMetrics CustomMetricsConfig `json:"custom_metrics"`
+}
+
+type CustomMetricsConfig struct {
+	Auth                     Auth                      `json:"auth,omitempty"`
+	MetricSubmissionStrategy MetricsSubmissionStrategy `json:"metric_submission_strategy"`
+}
+
+type Auth struct {
+	CredentialType string `json:"credential_type"`
+}
+type MetricsSubmissionStrategy struct {
+	AllowFrom string `json:"allow_from"`
+}
+
 type ScalingPolicy struct {
 	InstanceMin  int               `json:"instance_min_count"`
 	InstanceMax  int               `json:"instance_max_count"`
@@ -162,7 +183,28 @@ func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
 	return url.String()
 }
 
+func GenerateBinding(allowFrom string, instanceMin, instanceMax int, metricName string, threshold int64) string {
+	bindingConfig := BindingConfig{
+		Configuration: Configuration{CustomMetrics: CustomMetricsConfig{
+			MetricSubmissionStrategy: MetricsSubmissionStrategy{AllowFrom: allowFrom},
+		}},
+		ScalingPolicy: buildScalingPolicy(instanceMin, instanceMax, metricName, threshold),
+	}
+	marshalledBinding, err := MarshalWithoutHTMLEscape(bindingConfig)
+	Expect(err).NotTo(HaveOccurred())
+	return string(marshalledBinding)
+}
+
 func GenerateDynamicScaleOutPolicy(instanceMin, instanceMax int, metricName string, threshold int64) string {
+
+	policy := buildScalingPolicy(instanceMin, instanceMax, metricName, threshold)
+	marshaled, err := MarshalWithoutHTMLEscape(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(marshaled)
+}
+
+func buildScalingPolicy(instanceMin int, instanceMax int, metricName string, threshold int64) ScalingPolicy {
 	scalingOutRule := ScalingRule{
 		MetricType:            metricName,
 		BreachDurationSeconds: TestBreachDurationSeconds,
@@ -171,16 +213,12 @@ func GenerateDynamicScaleOutPolicy(instanceMin, instanceMax int, metricName stri
 		CoolDownSeconds:       TestCoolDownSeconds,
 		Adjustment:            "+1",
 	}
-
 	policy := ScalingPolicy{
 		InstanceMin:  instanceMin,
 		InstanceMax:  instanceMax,
 		ScalingRules: []*ScalingRule{&scalingOutRule},
 	}
-	marshaled, err := MarshalWithoutHTMLEscape(policy)
-	Expect(err).NotTo(HaveOccurred())
-
-	return string(marshaled)
+	return policy
 }
 
 func GenerateDynamicScaleOutPolicyWithExtraFields(instanceMin, instanceMax int, metricName string, threshold int64) (string, string) {

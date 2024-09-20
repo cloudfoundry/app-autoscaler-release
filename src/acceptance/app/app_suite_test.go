@@ -29,8 +29,12 @@ var (
 	instanceName         string
 	initialInstanceCount int
 
-	appName string
-	appGUID string
+	appToScaleName string
+	appToScaleGUID string
+
+	neighbourAppName string
+
+	neighbourAppGUID string
 )
 
 const componentName = "Application Scale Suite"
@@ -59,10 +63,10 @@ func AppAfterEach() {
 	if os.Getenv("SKIP_TEARDOWN") == "true" {
 		fmt.Println("Skipping Teardown...")
 	} else {
-		DebugInfo(cfg, setup, appName)
-		if appName != "" {
-			DeleteService(cfg, instanceName, appName)
-			DeleteTestApp(appName, cfg.DefaultTimeoutDuration())
+		DebugInfo(cfg, setup, appToScaleName)
+		if appToScaleName != "" {
+			DeleteService(cfg, instanceName, appToScaleName)
+			DeleteTestApp(appToScaleName, cfg.DefaultTimeoutDuration())
 		}
 	}
 }
