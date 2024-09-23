@@ -236,7 +236,5 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoiface/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/runtime/protoimpl/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/types/known/timestamppb/* # gosub
-- autoscaler/vendor/gopkg.in/errgo.v2/errors/* # gosub
-- autoscaler/vendor/gopkg.in/errgo.v2/fmt/errors/* # gosub
 - autoscaler/vendor/gopkg.in/yaml.v2/* # gosub
 - autoscaler/vendor/gopkg.in/yaml.v3/* # gosub
