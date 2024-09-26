@@ -32,7 +32,6 @@
     "which":                             "latest",
     "credhub-cli":                       "2.9.29",
     "markdownlint-cli2":                 "latest",
-    "golangci-lint":                     "1.60.3",
     "yq-go":                             "4.44.3",
     "ginkgo":                            "2.20.2",
     "bundler":                           "latest",
@@ -41,6 +40,7 @@
     "cloudfoundry-cli":                  "8.8.1",
     "google-cloud-sdk":                  "latest",
     "go":                                "1.22.3",
+    "golangci-lint":                     "1.61.0",
     "temurin-bin-21":                    "latest",
     "ruby":                              "latest"
   },
