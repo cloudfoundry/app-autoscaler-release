@@ -501,6 +501,11 @@ func BindServiceToAppWithPolicy(cfg *config.Config, appName string, instanceName
 	return err
 }
 
+func UnbindServiceFromApp(cfg *config.Config, appName string, instanceName string) {
+	unbindService := cf.Cf("unbind-service", appName, instanceName).Wait(cfg.DefaultTimeoutDuration())
+	Expect(unbindService).To(Exit(0), fmt.Sprintf("Failed to unbind service %s from app %s \n CLI Output:\n %s %s", instanceName, appName, unbindService.Buffer().Contents(), unbindService.Err.Contents()))
+}
+
 func CreateService(cfg *config.Config) string {
 	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 	FailOnError(CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName))
