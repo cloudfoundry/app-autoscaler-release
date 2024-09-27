@@ -65,7 +65,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 
 		})
 	})
-	FDescribe("Custom metrics policy with neighbour app", func() {
+	Describe("Custom metrics policy with neighbour app", func() {
 		JustBeforeEach(func() {
 			neighbourAppName = CreateTestApp(cfg, "go-neighbour-app", 1)
 			neighbourAppGUID, err = GetAppGuid(cfg, neighbourAppName)
@@ -130,7 +130,6 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 
 		})
 	})
-
 })
 
 func sendMetricToAutoscaler(config *config.Config, appToScaleGUID string, neighbourAppName string, metricThreshold int, mtls bool) func() (int, error) {
