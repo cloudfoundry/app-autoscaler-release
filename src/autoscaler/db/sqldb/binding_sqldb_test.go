@@ -669,7 +669,7 @@ var _ = Describe("BindingSqldb", func() {
 			err = bdb.CreateServiceInstance(context.Background(), models.ServiceInstance{ServiceInstanceId: testInstanceId, OrgId: testOrgGuid, SpaceId: testSpaceGuid, DefaultPolicy: policyJsonStr, DefaultPolicyGuid: policyGuid})
 			Expect(err).NotTo(HaveOccurred())
 		})
-		Context("When configuration bounded_app is provided", func() {
+		When("configuration bounded_app is provided", func() {
 			JustBeforeEach(func() {
 				err = bdb.CreateServiceBindingWithConfigs(context.Background(), testBindingId, testInstanceId, testAppId, "bound_app")
 				Expect(err).NotTo(HaveOccurred())
@@ -679,7 +679,7 @@ var _ = Describe("BindingSqldb", func() {
 
 			})
 		})
-		Context("When default configuration is provided", func() {
+		When("default configuration is provided", func() {
 			JustBeforeEach(func() {
 				err = bdb.CreateServiceBindingWithConfigs(context.Background(), testBindingId, testInstanceId, testAppId, "same_app")
 				Expect(err).NotTo(HaveOccurred())
@@ -690,10 +690,19 @@ var _ = Describe("BindingSqldb", func() {
 
 			})
 		})
+		When("configuration is not provided", func() {
+			JustBeforeEach(func() {
+				err = bdb.CreateServiceBindingWithConfigs(context.Background(), testBindingId, testInstanceId, testAppId, "")
+
+			})
+			It("should throw an error with foreign key violation", func() {
+				Expect(err).To(HaveOccurred())
+			})
+		})
 
 	})
 
-	FDescribe("GetCustomMetricStrategyByAppId", func() {
+	Describe("GetCustomMetricStrategyByAppId", func() {
 		BeforeEach(func() {
 			err = bdb.CreateServiceInstance(context.Background(), models.ServiceInstance{ServiceInstanceId: testInstanceId, OrgId: testOrgGuid, SpaceId: testSpaceGuid, DefaultPolicy: policyJsonStr, DefaultPolicyGuid: policyGuid})
 			Expect(err).NotTo(HaveOccurred())
