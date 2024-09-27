@@ -183,12 +183,12 @@ func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
 	return url.String()
 }
 
-func GenerateBinding(allowFrom string, instanceMin, instanceMax int, metricName string, threshold int64) string {
+func GenerateBindingsWithScalingPolicy(allowFrom string, instanceMin, instanceMax int, metricName string, scaleInThreshold, scaleOutThreshold int64) string {
 	bindingConfig := BindingConfig{
 		Configuration: Configuration{CustomMetrics: CustomMetricsConfig{
 			MetricSubmissionStrategy: MetricsSubmissionStrategy{AllowFrom: allowFrom},
 		}},
-		ScalingPolicy: buildScalingPolicy(instanceMin, instanceMax, metricName, threshold),
+		ScalingPolicy: buildScaleOutScaleInPolicy(instanceMin, instanceMax, metricName, scaleInThreshold, scaleOutThreshold),
 	}
 	marshalledBinding, err := MarshalWithoutHTMLEscape(bindingConfig)
 	Expect(err).NotTo(HaveOccurred())
@@ -284,6 +284,14 @@ func GenerateDynamicScaleInPolicy(instanceMin, instanceMax int, metricName strin
 }
 
 func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName string, scaleInWhenBelowThreshold int64, scaleOutWhenGreaterOrEqualThreshold int64) string {
+	policy := buildScaleOutScaleInPolicy(instanceMin, instanceMax, metricName, scaleInWhenBelowThreshold, scaleOutWhenGreaterOrEqualThreshold)
+	marshaled, err := MarshalWithoutHTMLEscape(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(marshaled)
+}
+
+func buildScaleOutScaleInPolicy(instanceMin int, instanceMax int, metricName string, scaleInWhenBelowThreshold int64, scaleOutWhenGreaterOrEqualThreshold int64) ScalingPolicy {
 	scalingOutRule := ScalingRule{
 		MetricType:            metricName,
 		BreachDurationSeconds: TestBreachDurationSeconds,
@@ -305,11 +313,7 @@ func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName
 		InstanceMax:  instanceMax,
 		ScalingRules: []*ScalingRule{&scalingOutRule, &scalingInRule},
 	}
-
-	marshaled, err := MarshalWithoutHTMLEscape(policy)
-	Expect(err).NotTo(HaveOccurred())
-
-	return string(marshaled)
+	return policy
 }
 
 // GenerateDynamicScaleInPolicyBetween creates a scaling policy that scales down from 2 instances to 1, if the metric value is in a range of [upper, lower].
