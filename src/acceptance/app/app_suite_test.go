@@ -32,9 +32,9 @@ var (
 	appToScaleName string
 	appToScaleGUID string
 
-	neighbourAppName string
+	metricProducerAppName string
 
-	neighbourAppGUID string
+	metricProducerAppGUID string
 )
 
 const componentName = "Application Scale Suite"
@@ -67,6 +67,11 @@ func AppAfterEach() {
 		if appToScaleName != "" {
 			DeleteService(cfg, instanceName, appToScaleName)
 			DeleteTestApp(appToScaleName, cfg.DefaultTimeoutDuration())
+		}
+		if metricProducerAppName != "" {
+			DebugInfo(cfg, setup, metricProducerAppName)
+			DeleteService(cfg, instanceName, metricProducerAppName)
+			DeleteTestApp(metricProducerAppName, cfg.DefaultTimeoutDuration())
 		}
 	}
 }

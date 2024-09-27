@@ -2,8 +2,9 @@ package app_test
 
 import (
 	"context"
-	"github.com/go-logr/logr"
 	"net/http"
+
+	"github.com/go-logr/logr"
 
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
@@ -43,7 +44,7 @@ var _ = Describe("custom metrics tests", func() {
 				Body(`{"mtls":false}`).
 				End()
 			Expect(fakeCustomMetricClient.PostCustomMetricCallCount()).To(Equal(1))
-			_, _, sentValue, sentMetric, mtlsUsed, _ := fakeCustomMetricClient.PostCustomMetricArgsForCall(0)
+			_, _, _, sentValue, sentMetric, mtlsUsed := fakeCustomMetricClient.PostCustomMetricArgsForCall(0)
 			Expect(sentMetric).Should(Equal("test"))
 			Expect(sentValue).Should(Equal(4.0))
 			Expect(mtlsUsed).Should(Equal(false))

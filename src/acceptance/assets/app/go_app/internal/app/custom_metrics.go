@@ -58,14 +58,9 @@ func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetr
 		if appToScaleGuid != "" {
 			logger.Info("neighbour-app-relationship-found", "appToScaleGuid", appToScaleGuid)
 			appConfig.AppID = appToScaleGuid
+			//assuming the neighbour app has the same autoscaler service as the appToScale
 			currentApp, _ := cfenv.Current()
 			appConfig.Services = currentApp.Services
-
-			/*var services []cfenv.Service
-
-			// include custom metrics credentials mtls_url in the service
-			services = append(services, cfenv.Service{Tags: []string{"app-autoscaler"}, Credentials: map[string]interface{}{"custom_metrics": map[string]interface{}{"mtls_url": ""}}})
-			appConfig.Services = cfenv.Services{"app-autoscaler": services}*/
 		}
 		err = customMetricTest.PostCustomMetric(c, logger, appConfig, float64(metricValue), metricName, useMtls)
 		if err != nil {

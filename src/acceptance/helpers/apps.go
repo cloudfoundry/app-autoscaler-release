@@ -108,7 +108,7 @@ func StartApp(appName string, timeout time.Duration) bool {
 
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
 	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
-	By("Creating test app")
+	By(fmt.Sprintf("Creating test app %s", appName))
 	CreateTestAppByName(cfg, appName, initialInstanceCount)
 	return appName
 }
