@@ -43,9 +43,15 @@ if __name__ == "__main__":
                 try:
                     subprocess.run(['devbox', 'add', f"{program}@{version}"], check=True)
                 except subprocess.CalledProcessError:
-                    # Fallback to latest in case the exact version is not available
-                    subprocess.run(['devbox', 'add', f"{program}@latest"], check=True)
-                    print(f"Could not find {program}@{version}, using latest instead:")
+                    # Fallback to latest in case the exact version is not available and there's no previous version installed
+                    if installed_version is None:
+                        print(f"Could not find {program}@{version}, using latest instead")
+                        subprocess.run(['devbox', 'add', f"{program}@latest"], check=True)
+                    else:
+                        # Readd the previously installed version
+                        print(f"Could not find {program}@{version}, readding {program}@{installed_version}")
+                        subprocess.run(['devbox', 'add', f"{program}@{installed_version}"], check=True)
+
                     subprocess.run(['devbox', 'info', program], check=True)
             else:
                 print(f"{program}@{version} is already installed")

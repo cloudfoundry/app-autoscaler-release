@@ -1,6 +1,6 @@
 module changeloglockcleaner
 
-go 1.22.3
+go 1.22.4
 
 require (
 	github.com/go-sql-driver/mysql v1.8.1

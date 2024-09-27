@@ -79,7 +79,7 @@ var _ = Describe("AutoScaler Public API", func() {
 		Expect(appGUID).NotTo(BeEmpty())
 	})
 
-	Context("when no policy defined", func() {
+	When("no scaling policy is set", func() {
 
 		BeforeEach(func() {
 			_, status := deletePolicy()
@@ -114,7 +114,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 	})
 
-	Context("When policy is defined", func() {
+	When("a scaling policy is set", func() {
 		memThreshold := int64(10)
 		var policy string
 
@@ -161,7 +161,7 @@ var _ = Describe("AutoScaler Public API", func() {
 
 		})
 
-		Context("for an unrelated user", func() {
+		When("an unrelated user tries to access the API", func() {
 			BeforeEach(func() {
 				workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
 					// Make "other user" a space auditor in the space along with a space developer in the other space
@@ -179,7 +179,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			})
 		})
 
-		Context("When scale out is triggered ", func() {
+		When("a scale out is triggered ", func() {
 			BeforeEach(func() {
 				totalTime := time.Duration(cfg.AggregateInterval*2)*time.Second + 3*time.Minute
 				WaitForNInstancesRunning(appGUID, 2, totalTime)
@@ -199,6 +199,27 @@ var _ = Describe("AutoScaler Public API", func() {
 				}
 			})
 		})
+
+		When("trying to get info for an app not bound to the service", func() {
+			BeforeEach(func() {
+				UnbindServiceFromApp(cfg, appName, instanceName)
+			})
+
+			It("should not be possible to get information from the API", func() {
+				By("getting the policy")
+				_, status := getPolicy()
+				Expect(status).To(Equal(http.StatusForbidden))
+
+				By("getting the history")
+				_, status = get(historyURL)
+				Expect(status).To(Equal(http.StatusForbidden))
+
+				By("getting the aggregated metrics")
+				_, status = get(aggregatedMetricURL)
+				Expect(status).To(Equal(http.StatusForbidden))
+			})
+		})
+
 	})
 })
 

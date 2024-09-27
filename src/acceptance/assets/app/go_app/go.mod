@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app
 
-go 1.22.3
+go 1.22.4
 
 require (
 	github.com/cloudfoundry-community/go-cfenv v1.18.0
@@ -12,7 +12,7 @@ require (
 	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/zapr v1.3.0
 	github.com/json-iterator/go v1.1.12
-	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1
+	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/ogen-go/ogen v1.4.1
 	github.com/onsi/ginkgo/v2 v2.20.2
