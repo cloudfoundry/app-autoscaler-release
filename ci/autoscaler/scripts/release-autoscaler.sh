@@ -1,21 +1,8 @@
 #! /usr/bin/env bash
 
 # NOTE: you can run this locally for testing !!!
-# beware that it adds a commit you need to drop each time also you need to remove dev_releases from root.
 #
-# DEPLOYMENT=foo \
-# GITHUB_TOKEN="ghp_..." \
-# PREV_VERSION=12.2.1 \
-# DEST="${PWD}/../../../build" \
-# VERSION="12.3.0" \
-# BUILD_OPTS="--force" \
-# AUTOSCALER_CI_BOT_NAME="foo" \
-# AUTOSCALER_CI_BOT_EMAIL="foo@bar.baz" \
-# AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC="ssh-ed25519 AAAA... foo@bar.baz" \
-# AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE="-----BEGIN OPENSSH PRIVATE KEY-----
-# b3Bl...
-# -----END OPENSSH PRIVATE KEY-----" \
-# ./ci/autoscaler/scripts/release-autoscaler.sh
+# ./script/local_release_autoscaler.sh
 
 
 [ -n "${DEBUG}" ] && set -x
@@ -47,6 +34,8 @@ function create_release() {
 
    yq eval -i ".properties.\"autoscaler.apiserver.info.build\".default = \"${version}\"" jobs/golangapiserver/spec
    git add jobs/golangapiserver/spec
+   echo "${version}" VERSION
+   git add VERSION
    [ "${CI}" = "true" ] && git commit -S -m "Updated release version to ${version} in golangapiserver"
 
    # shellcheck disable=SC2086
@@ -54,6 +43,17 @@ function create_release() {
         ${build_opts} \
         --version "${version}" \
         --tarball="${build_path}/artifacts/${release_file}"
+}
+
+function create_mtar() {
+  set -e
+  mkdir -p "${build_path}/artifacts"
+  local version=$1
+  local build_path=$2
+  echo " - creating autorscaler mtar artifact"
+  pushd "${autoscaler_dir}" > /dev/null
+    make mta-release VERSION="${version}" DEST="${build_path}/artifacts/"
+  popd > /dev/null
 }
 
 function create_tests() {
@@ -136,19 +136,24 @@ pushd "${autoscaler_dir}" > /dev/null
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
     ACCEPTANCE_TEST_TGZ="app-autoscaler-acceptance-tests-v${VERSION}.tgz"
+    AUTOSCALER_MTAR="app-autoscaler-release-v${VERSION}.mtar"
     create_release "${VERSION}" "${build_path}" "${RELEASE_TGZ}"
     create_tests "${VERSION}" "${build_path}"
+    create_mtar "${VERSION}" "${build_path}"
     [ "${CI}" = "true" ] && commit_release
 
     sha256sum "${build_path}/artifacts/"* > "${build_path}/artifacts/files.sum.sha256"
     ACCEPTANCE_SHA256=$( grep "${ACCEPTANCE_TEST_TGZ}$" "${SUM_FILE}" | awk '{print $1}' )
     RELEASE_SHA256=$( grep "${RELEASE_TGZ}$" "${SUM_FILE}" | awk '{print $1}')
+    MTAR_SHA256=$( grep "${AUTOSCALER_MTAR}$" "${SUM_FILE}" | awk '{print $1}')
   else
     ACCEPTANCE_SHA256="dummy-sha"
     RELEASE_SHA256="dummy-sha"
+    MTAR_SHA256="dummy-sha"
   fi
   export ACCEPTANCE_SHA256
   export RELEASE_SHA256
+	export MTAR_SHA256
 
   cat >> "${build_path}/changelog.md" <<EOF
 
@@ -164,6 +169,10 @@ releases:
   version: ${VERSION}
   url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-acceptance-tests-v${VERSION}.tgz
   sha1: sha256:${ACCEPTANCE_SHA256}
+- name: app-autoscaler-mtar
+  version: ${VERSION}
+  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-release-v${VERSION}.tgz
+  sha1: sha256:${MTAR_SHA256}
 \`\`\`
 EOF
   echo "---------- Changelog file ----------"
