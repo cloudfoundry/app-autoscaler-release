@@ -20,6 +20,7 @@ files:
 - autoscaler/api/publicapiserver/* # gosub
 - autoscaler/api/schedulerclient/* # gosub
 - autoscaler/cf/* # gosub
+- autoscaler/configutil/* # gosub
 - autoscaler/cred_helper/* # gosub
 - autoscaler/db/* # gosub
 - autoscaler/db/sqldb/* # gosub
@@ -40,6 +41,7 @@ files:
 - autoscaler/vendor/filippo.io/edwards25519/field/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
+- autoscaler/vendor/github.com/cloud-gov/go-cfenv/* # gosub
 - autoscaler/vendor/github.com/dlclark/regexp2/* # gosub
 - autoscaler/vendor/github.com/dlclark/regexp2/syntax/* # gosub
 - autoscaler/vendor/github.com/fatih/color/* # gosub
@@ -85,6 +87,7 @@ files:
 - autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
 - autoscaler/vendor/github.com/mattn/go-colorable/* # gosub
 - autoscaler/vendor/github.com/mattn/go-isatty/* # gosub
+- autoscaler/vendor/github.com/mitchellh/mapstructure/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/conv/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/http/* # gosub

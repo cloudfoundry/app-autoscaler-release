@@ -12,6 +12,7 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/types/descriptorpb/*
 - autoscaler/cf/* # gosub
 - autoscaler/collection/* # gosub
+- autoscaler/configutil/* # gosub
 - autoscaler/db/* # gosub
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/envelopeprocessor/* # gosub
@@ -43,6 +44,7 @@ files:
 - autoscaler/vendor/github.com/cenk/backoff/* # gosub
 - autoscaler/vendor/github.com/cenkalti/backoff/v4/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
+- autoscaler/vendor/github.com/cloud-gov/go-cfenv/* # gosub
 - autoscaler/vendor/github.com/facebookgo/clock/* # gosub
 - autoscaler/vendor/github.com/felixge/httpsnoop/* # gosub
 - autoscaler/vendor/github.com/go-logr/logr/* # gosub
@@ -81,6 +83,7 @@ files:
 - autoscaler/vendor/github.com/klauspost/compress/internal/snapref/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zstd/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
+- autoscaler/vendor/github.com/mitchellh/mapstructure/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
