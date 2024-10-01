@@ -1,19 +1,27 @@
 #! /usr/bin/env bash
 #
+# shellcheck disable=SC1091
+#
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 DEPLOYMENT=foo
-export DEBUG=true
-export PREV_VERSION=12.2.1
-export DEST="${script_dir}/../build"
-export VERSION="12.3.0"
-export BUILD_OPTS="--force"
-export AUTOSCALER_CI_BOT_NAME="foo"
-export AUTOSCALER_CI_BOT_EMAIL="foo@bar.baz"
-export PREV_VERSION=$(cat ${script_dir}/../VERSION)
-export VERSION=$(cat ${script_dir}/../VERSION)-pre
+DEBUG=true
+DEST="${script_dir}/../build"
+BUILD_OPTS="--force"
+AUTOSCALER_CI_BOT_NAME="foo"
+AUTOSCALER_CI_BOT_EMAIL="foo@bar.baz"
+PREV_VERSION="$(cat "${script_dir}/../VERSION")"
+VERSION="$(cat "${script_dir}/../VERSION")-pre"
 
+export DEPLOYMENT
+export DEBUG
+export DEST
+export BUILD_OPTS
+export AUTOSCALER_CI_BOT_NAME
+export AUTOSCALER_CI_BOT_EMAIL
+export PREV_VERSION
+export VERSION
 
 # check for GITHUB_TOKEN
 if [ -z "${GITHUB_TOKEN}" ]; then
@@ -43,8 +51,11 @@ delete_dev_releases() {
 
 
 release_autoscaler() {
-	export AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC=$(cat ~/.ssh/id_ed25519.pub)
-	export AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE=$(cat ~/.ssh/id_ed25519)
+	AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC=$(cat ~/.ssh/id_ed25519.pub)
+	AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE=$(cat ~/.ssh/id_ed25519)
+	export AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC
+	export AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE
+
 	source "${script_dir}/../ci/autoscaler/scripts/release-autoscaler.sh"
 	echo "beware that it adds a commit you need to drop each time also you need to remove dev_releases from root."
 }
