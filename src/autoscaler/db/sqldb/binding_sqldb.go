@@ -200,7 +200,7 @@ func (bdb *BindingSQLDB) DeleteServiceInstance(ctx context.Context, serviceInsta
 	return db.ErrDoesNotExist
 }
 
-func (bdb *BindingSQLDB) CreateServiceBinding(ctx context.Context, bindingId string, serviceInstanceId string, appId string) error {
+func (bdb *BindingSQLDB) CreateServiceBinding(ctx context.Context, bindingId string, serviceInstanceId string, appId string, customMetricsStrategy string) error {
 
 	err := bdb.isBindingExists(ctx, bindingId, serviceInstanceId, appId)
 	if err != nil {

@@ -928,7 +928,7 @@ var _ = Describe("BrokerHandler", func() {
 				Expect(creds.Credentials.CustomMetrics.MtlsUrl).To(Equal("Mtls-someURL"))
 			})
 		})
-		XContext("Binding configurations are present", func() {
+		Context("Binding configurations are present", func() {
 			BeforeEach(func() {
 				bindingPolicy = `{
 				  "configuration": {
@@ -969,20 +969,40 @@ var _ = Describe("BrokerHandler", func() {
 				bindingRequestBody.Policy = json.RawMessage(bindingPolicy)
 				body, err = json.Marshal(bindingRequestBody)
 				Expect(err).NotTo(HaveOccurred())
+				bindingPolicy = `{
+				  "instance_max_count":4,
+				  "instance_min_count":1,
+				  "schedules": {
+					"timezone": "Asia/Shanghai",
+					"recurring_schedule": [{
+					  "start_time": "10:00",
+					  "end_time": "18:00",
+					  "days_of_week": [
+						1,
+						2,
+						3
+					  ],
+					  "instance_min_count": 1,
+					  "instance_max_count": 10,
+					  "initial_min_instance_count": 5
+					}]
+				  },
+				  "scaling_rules":[
+					{
+					  "metric_type":"memoryused",
+					  "threshold":30,
+					  "operator":"<",
+					  "adjustment":"-1"
+					}]
+				}`
+				verifyScheduleIsUpdatedInScheduler(testAppId, bindingPolicy)
 			})
 			It("succeeds with 201", func() {
 				Expect(resp.Code).To(Equal(http.StatusCreated))
 
 				By("updating the scheduler")
 				Expect(schedulerServer.ReceivedRequests()).To(HaveLen(1))
-			})
-
-			It("save config to database and returns with 201", func() {
-				// bindingdb.SaveCustomMetricsStrategyReturns(nil)
-				Expect(resp.Code).To(Equal(http.StatusCreated))
-
-				By("CreateServiceBindingWithConfigs should have called one time only")
-				// Expect(bindingdb.SaveCustomMetricsStrategyCallCount()).To(Equal(1))
+				Expect(bindingdb.CreateServiceBindingCallCount()).To(Equal(1))
 			})
 		})
 

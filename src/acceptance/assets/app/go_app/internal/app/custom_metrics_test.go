@@ -43,7 +43,7 @@ var _ = Describe("custom metrics tests", func() {
 				Body(`{"mtls":false}`).
 				End()
 			Expect(fakeCustomMetricClient.PostCustomMetricCallCount()).To(Equal(1))
-			_, _, sentValue, sentMetric, mtlsUsed, _ := fakeCustomMetricClient.PostCustomMetricArgsForCall(0)
+			_, _, _, sentValue, sentMetric, mtlsUsed := fakeCustomMetricClient.PostCustomMetricArgsForCall(0)
 			Expect(sentMetric).Should(Equal("test"))
 			Expect(sentValue).Should(Equal(4.0))
 			Expect(mtlsUsed).Should(Equal(false))
