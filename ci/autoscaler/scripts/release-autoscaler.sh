@@ -169,7 +169,7 @@ releases:
   sha1: sha256:${ACCEPTANCE_SHA256}
 - name: app-autoscaler-mtar
   version: ${VERSION}
-  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-release-v${VERSION}.tgz
+  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-release-v${VERSION}.mtar
   sha1: sha256:${MTAR_SHA256}
 \`\`\`
 EOF
