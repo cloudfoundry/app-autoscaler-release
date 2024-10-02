@@ -34,8 +34,6 @@ function create_release() {
 
    yq eval -i ".properties.\"autoscaler.apiserver.info.build\".default = \"${version}\"" jobs/golangapiserver/spec
    git add jobs/golangapiserver/spec
-   echo "${version}" VERSION
-   git add VERSION
    [ "${CI}" = "true" ] && git commit -S -m "Updated release version to ${version} in golangapiserver"
 
    # shellcheck disable=SC2086

@@ -11,7 +11,8 @@ DEST="${script_dir}/../build"
 BUILD_OPTS="--force"
 AUTOSCALER_CI_BOT_NAME="foo"
 AUTOSCALER_CI_BOT_EMAIL="foo@bar.baz"
-PREV_VERSION="$(cat "${script_dir}/../VERSION")"
+PREV_VERSION="$(yq  ".properties.\"autoscaler.apiserver.info.build\".default" jobs/golangapiserver/spec)"
+
 VERSION="$(cat "${script_dir}/../VERSION")-pre"
 
 export DEPLOYMENT
@@ -28,7 +29,6 @@ if [ -z "${GITHUB_TOKEN}" ]; then
 	echo "GITHUB_TOKEN is not set"
 	exit 1
 fi
-
 
 find_or_create_ssh_key() {
 	if [ -f ~/.ssh/id_ed25519 ]; then
