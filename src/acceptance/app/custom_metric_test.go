@@ -65,12 +65,13 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 
 		})
 	})
+
 	Describe("Custom metrics policy with neighbour app", func() {
 		JustBeforeEach(func() {
 			neighbourAppName = CreateTestApp(cfg, "go-neighbour-app", 1)
 			neighbourAppGUID, err = GetAppGuid(cfg, neighbourAppName)
 			Expect(err).NotTo(HaveOccurred())
-			err := BindServiceToAppWithPolicy(cfg, neighbourAppName, instanceName, policy)
+			err := BindServiceToAppWithPolicy(cfg, appToScaleName, instanceName, policy)
 			Expect(err).NotTo(HaveOccurred())
 			StartApp(neighbourAppName, cfg.CfPushTimeoutDuration())
 		})
