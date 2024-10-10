@@ -47,7 +47,6 @@ func (m *XFCCAuthMiddleware) checkAuth(r *http.Request) error {
 	}
 
 	return nil
-
 }
 
 func (m *XFCCAuthMiddleware) XFCCAuthenticationMiddleware(next http.Handler) http.Handler {
@@ -75,7 +74,6 @@ func NewXfccAuthMiddleware(logger lager.Logger, orgGuid, spaceGuid string) *XFCC
 func getSpaceGuid(cert *x509.Certificate) string {
 	var certSpaceGuid string
 	for _, ou := range cert.Subject.OrganizationalUnit {
-
 		if strings.Contains(ou, "space:") {
 			kv := mapFrom(ou)
 			certSpaceGuid = kv["space"]

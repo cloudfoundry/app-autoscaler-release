@@ -39,7 +39,6 @@ type ScalingHistoryHandler struct {
 }
 
 func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*ScalingHistoryHandler, error) {
-
 	newHandler := &ScalingHistoryHandler{
 		logger: logger.Session("scaling-history-handler"),
 		conf:   conf,

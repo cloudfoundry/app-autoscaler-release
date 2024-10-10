@@ -46,7 +46,6 @@ type Server struct {
 }
 
 func (s *Server) GetMtlsServer() (ifrit.Runner, error) {
-
 	eventGeneratorRouter, err := createEventGeneratorRouter(s.logger, s.queryAppMetric, s.httpStatusCollector, s.conf.Server)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create event generator router: %w", err)
@@ -74,7 +73,6 @@ func serverConfigFrom(conf *config.Config) helpers.ServerConfig {
 }
 
 func (s *Server) GetHealthServer() (ifrit.Runner, error) {
-
 	healthRouter, err := createHealthRouter(s.appMetricDB, s.policyDb, s.logger, s.conf, s.httpStatusCollector)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create health router: %w", err)
