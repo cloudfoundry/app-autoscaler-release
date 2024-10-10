@@ -3,7 +3,6 @@ package main_test
 import (
 	"database/sql"
 	"encoding/json"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -39,7 +38,6 @@ var (
 	apPath          string
 	cfg             config.Config
 	configFile      *os.File
-	apiHttpClient   *http.Client
 	schedulerServer *ghttp.Server
 	catalogBytes    string
 	brokerPort      int
