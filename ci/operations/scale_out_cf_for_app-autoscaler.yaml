@@ -4,9 +4,6 @@
   path: /instance_groups/name=diego-cell/instances
   value: ((diego_cell_instances))
 - type: replace
-  path: /instance_groups/name=diego-cell/azs
-  value: [z1, z2]
-- type: replace
   path: /instance_groups/name=diego-cell/vm_type
   value: large
 - type: replace
