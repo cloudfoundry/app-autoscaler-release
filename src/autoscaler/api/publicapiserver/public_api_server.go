@@ -92,13 +92,6 @@ func (s *PublicApiServer) GetMtlsServer() (ifrit.Runner, error) {
 	rpolicy.Get(routes.PublicApiAttachPolicyRouteName).Handler(VarsFunc(pah.AttachScalingPolicy))
 	rpolicy.Get(routes.PublicApiDetachPolicyRouteName).Handler(VarsFunc(pah.DetachScalingPolicy))
 
-	rcredential := routes.ApiCredentialRoutes()
-	rcredential.Use(rateLimiterMiddleware.CheckRateLimit)
-
-	rcredential.Use(httpStatusCollectMiddleware.Collect)
-	rcredential.Use(mw.HasClientToken)
-	rcredential.Use(mw.Oauth)
-
 	healthRouter, err := createHealthRouter(s.logger, s.conf, s.policyDB, s.bindingDB, s.httpStatusCollector)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create health router: %w", err)
