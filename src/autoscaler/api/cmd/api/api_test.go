@@ -7,11 +7,10 @@ import (
 	"net/url"
 	"os"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
-
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+
+	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -41,7 +40,7 @@ var _ = Describe("Api", func() {
 
 		brokerHttpClient = NewServiceBrokerClient()
 		healthHttpClient = &http.Client{}
-		apiHttpClient = testhelpers.NewPublicApiClient()
+		apiHttpClient = NewPublicApiClient()
 
 		serverURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.PublicApiServer.Port))
 		Expect(err).NotTo(HaveOccurred())
