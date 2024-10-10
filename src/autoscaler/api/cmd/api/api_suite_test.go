@@ -10,7 +10,6 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf/mocks"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -21,6 +20,8 @@ import (
 	"github.com/onsi/gomega/gbytes"
 	"github.com/onsi/gomega/gexec"
 	"gopkg.in/yaml.v3"
+
+	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -60,7 +61,7 @@ type testdata struct {
 
 var _ = SynchronizedBeforeSuite(func() []byte {
 	info := testdata{}
-	dbUrl := testhelpers.GetDbUrl()
+	dbUrl := GetDbUrl()
 
 	database, e := db.GetConnection(dbUrl)
 	if e != nil {
@@ -131,7 +132,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	}
 	cfg.Logging.Level = "info"
 	cfg.DB = make(map[string]db.DatabaseConfig)
-	dbUrl := testhelpers.GetDbUrl()
+	dbUrl := GetDbUrl()
 	cfg.DB[db.BindingDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
@@ -276,6 +277,6 @@ func (ap *ApiRunner) Interrupt() {
 
 func readFile(filename string) string {
 	contents, err := os.ReadFile(filename)
-	testhelpers.FailOnError("Failed to read file:"+filename+" ", err)
+	FailOnError("Failed to read file:"+filename+" ", err)
 	return string(contents)
 }
