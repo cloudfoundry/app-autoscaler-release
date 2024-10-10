@@ -127,13 +127,13 @@ func createScalingEngineRouter(logger lager.Logger, scalingEngineDB db.ScalingEn
 	return r, nil
 }
 
-func setupMainRouter(r *mux.Router, healthRouter *mux.Router) *mux.Router {
-	mainRouter := mux.NewRouter()
-	mainRouter.PathPrefix("/v1").Handler(r)
-	mainRouter.PathPrefix("/health").Handler(healthRouter)
-	mainRouter.PathPrefix("/").Handler(healthRouter)
-	return mainRouter
-}
+//  func setupMainRouter(r *mux.Router, healthRouter *mux.Router) *mux.Router {
+//  	mainRouter := mux.NewRouter()
+//  	mainRouter.PathPrefix("/v1").Handler(r)
+//  	mainRouter.PathPrefix("/health").Handler(healthRouter)
+//  	mainRouter.PathPrefix("/").Handler(healthRouter)
+//  	return mainRouter
+//  }
 
 func newScalingHistoryHandler(logger lager.Logger, scalingEngineDB db.ScalingEngineDB) (http.Handler, error) {
 	scalingHistoryHandler, err := NewScalingHistoryHandler(logger, scalingEngineDB)
