@@ -1,21 +1,26 @@
 { buildGoModule
+, buildGo123Module
 , callPackage
 , fetchFromGitHub
 , fetchgit
 , lib
 }: {
-  app-autoscaler-cli-plugin = buildGoModule rec {
+  app-autoscaler-cli-plugin = buildGo123Module rec {
     pname = "app-autoscaler-cli-plugin";
-    gitCommit = "f46dc1ea62c4c7bd426c82f4e2a525b3a3c42300";
-    version = "${gitCommit}";
+
+    major = "4";
+    minor = "0";
+    patch = "1";
+    version = "${major}.${minor}.${patch}";
     src = fetchgit {
       url = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
-      rev = "${gitCommit}";
-      hash = "sha256-j8IAUhjYjEFvtRbA6o2vA7P2uUmKVYsd9uJmN0WtVCM=";
+      rev = "v${version}";
+      hash = "sha256-si0tj8xPpkp7VbPDreEkqcudohWS7rlSPAr8GUtveUk=";
       fetchSubmodules = true;
     };
     doCheck = false;
-    vendorHash = "sha256-NzEStcOv8ZQsHOA8abLABKy+ZE3/SiYbRD/ZVxo0CEk=";
+    vendorHash = "sha256-/3bcnrn7KUUOXHKBe2WcnN9ozFQiNKXeNw2ctLKGUJg=";
+    ldflags = ["-s" "-w" "-X 'main.BuildMajorVersion=${major}'" "-X 'main.BuildMinorVersion=${minor}'" "-X 'main.BuildPatchVersion=${patch}'"];
   };
 
   # this bosh-bootloader custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.

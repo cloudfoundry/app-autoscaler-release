@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -267,7 +268,7 @@ func (c *Config) Validate() error {
 			}
 		}
 		errString += "}"
-		return fmt.Errorf(errString)
+		return errors.New(errString)
 	}
 
 	return nil

@@ -12,9 +12,6 @@ export golang_dir
 
 golang_version=$(cat "${golang_dir}/packages/golang-1-linux/version")
 
-step "updating go.work file with golang version ${golang_version}"
-go work edit -go "${golang_version}" "${autoscaler_dir}/go.work"
-
 step "updating go.mod files with golang version ${golang_version}"
 find "${autoscaler_dir}" -name go.mod -type f -exec go mod edit -go "${golang_version}" "{}" \;
 

@@ -75,6 +75,7 @@ func (s *PublicApiServer) GetMtlsServer() (ifrit.Runner, error) {
 	rp.Use(rateLimiterMiddleware.CheckRateLimit)
 	rp.Use(mw.HasClientToken)
 	rp.Use(mw.Oauth)
+	rp.Use(mw.CheckServiceBinding)
 	rp.Use(httpStatusCollectMiddleware.Collect)
 
 	rp.Get(routes.PublicApiScalingHistoryRouteName).Handler(scalingHistoryHandler)

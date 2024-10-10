@@ -9,6 +9,7 @@ files:
 - autoscaler/vendor/*
 - autoscaler/scalingengine/db/*
 - autoscaler/cf/* # gosub
+- autoscaler/configutil/* # gosub
 - autoscaler/db/* # gosub
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
@@ -32,6 +33,7 @@ files:
 - autoscaler/vendor/filippo.io/edwards25519/field/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
+- autoscaler/vendor/github.com/cloud-gov/go-cfenv/* # gosub
 - autoscaler/vendor/github.com/dlclark/regexp2/* # gosub
 - autoscaler/vendor/github.com/dlclark/regexp2/syntax/* # gosub
 - autoscaler/vendor/github.com/fatih/color/* # gosub
@@ -67,8 +69,16 @@ files:
 - autoscaler/vendor/github.com/jackc/puddle/v2/internal/genstack/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/fse/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/huff0/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/internal/cpuinfo/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/internal/snapref/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/zstd/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
 - autoscaler/vendor/github.com/mattn/go-colorable/* # gosub
 - autoscaler/vendor/github.com/mattn/go-isatty/* # gosub
+- autoscaler/vendor/github.com/mitchellh/mapstructure/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/conv/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/http/* # gosub
@@ -89,6 +99,8 @@ files:
 - autoscaler/vendor/github.com/ogen-go/ogen/validate/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
+- autoscaler/vendor/github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil/* # gosub
+- autoscaler/vendor/github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil/header/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/collectors/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/internal/* # gosub

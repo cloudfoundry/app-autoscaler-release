@@ -15,6 +15,8 @@ builds:
     version: 5.0.6
   1387679b-119f-4f75-6e0c-2de502b1e2c2:
     version: 3.4.2
+  13d0297b-8151-4a6b-56d1-1a704fb63d62:
+    version: 14.1.5
   16819cc6-96db-4762-6c99-d063a0e63ef9:
     version: 11.4.2
   185fc36f-1155-46c1-60d8-077250defef0:
@@ -39,6 +41,10 @@ builds:
     version: 6.1.1
   490c5e69-006c-4ded-64d4-33750ec71462:
     version: 10.0.4
+  4959b4dc-88d0-4009-62d1-b2e307464513:
+    version: 14.2.0
+  4d43c1e2-9bcf-4a3e-6482-95c849bed28a:
+    version: 14.1.4
   51187c13-6490-4cb3-79e7-ebaf252cfd8b:
     version: 11.4.0
   53eeae9d-bd7c-4e51-60f3-ec9440b3b2cd:

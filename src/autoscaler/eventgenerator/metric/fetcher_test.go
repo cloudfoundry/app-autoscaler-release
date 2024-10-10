@@ -10,9 +10,9 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/metric"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	logcache "code.cloudfoundry.org/go-log-cache/v2"
-	"code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
-	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
+	logcache "code.cloudfoundry.org/go-log-cache/v3"
+	"code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -77,7 +77,7 @@ var _ = Describe("logCacheFetcher", func() {
 					Expect(err).ToNot(HaveOccurred())
 					Expect(metrics).To(HaveLen(1))
 					Expect(metrics[0].AppId).To(Equal("app-id"))
-					Expect(metrics[0].InstanceIndex).To(Equal(uint32(0)))
+					Expect(metrics[0].InstanceIndex).To(Equal(uint64(0)))
 					Expect(metrics[0].Name).To(Equal("throughput"))
 					Expect(metrics[0].Unit).To(Equal("rps"))
 					Expect(metrics[0].Value).To(Equal("0"))
@@ -178,13 +178,13 @@ var _ = Describe("logCacheFetcher", func() {
 					Expect(err).ToNot(HaveOccurred())
 					Expect(metrics).To(HaveLen(2))
 					Expect(metrics[0].AppId).To(Equal("app-id"))
-					Expect(metrics[0].InstanceIndex).To(Equal(uint32(0)))
+					Expect(metrics[0].InstanceIndex).To(Equal(uint64(0)))
 					Expect(metrics[0].Name).To(Equal("responsetime"))
 					Expect(metrics[0].Unit).To(Equal("ms"))
 					Expect(metrics[0].Value).To(Equal("200"))
 
 					Expect(metrics[1].AppId).To(Equal("app-id"))
-					Expect(metrics[1].InstanceIndex).To(Equal(uint32(1)))
+					Expect(metrics[1].InstanceIndex).To(Equal(uint64(1)))
 					Expect(metrics[1].Name).To(Equal("responsetime"))
 					Expect(metrics[1].Unit).To(Equal("ms"))
 					Expect(metrics[1].Value).To(Equal("300"))
@@ -227,13 +227,13 @@ var _ = Describe("logCacheFetcher", func() {
 					Expect(metrics).To(HaveLen(2))
 
 					Expect(metrics[0].AppId).To(Equal("app-id"))
-					Expect(metrics[0].InstanceIndex).To(Equal(uint32(0)))
+					Expect(metrics[0].InstanceIndex).To(Equal(uint64(0)))
 					Expect(metrics[0].Name).To(Equal("throughput"))
 					Expect(metrics[0].Unit).To(Equal("rps"))
 					Expect(metrics[0].Value).To(Equal("123"))
 
 					Expect(metrics[1].AppId).To(Equal("app-id"))
-					Expect(metrics[1].InstanceIndex).To(Equal(uint32(1)))
+					Expect(metrics[1].InstanceIndex).To(Equal(uint64(1)))
 					Expect(metrics[1].Name).To(Equal("throughput"))
 					Expect(metrics[1].Unit).To(Equal("rps"))
 					Expect(metrics[1].Value).To(Equal("321"))

@@ -1,9 +1,0 @@
-go 1.22.2
-
-use (
-	./src/acceptance
-	./src/acceptance/assets/app/go_app
-	./src/autoscaler
-	./src/changelog
-	./src/changeloglockcleaner
-)

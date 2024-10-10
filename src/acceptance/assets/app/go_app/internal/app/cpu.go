@@ -13,7 +13,7 @@ import (
 
 //counterfeiter:generate . CPUWaster
 type CPUWaster interface {
-	UseCPU(utilisation uint64, duration time.Duration)
+	UseCPU(utilisation int64, duration time.Duration)
 	IsRunning() bool
 	StopTest()
 }
@@ -31,15 +31,15 @@ func CPUTests(logger logr.Logger, r *gin.RouterGroup, cpuTest CPUWaster) *gin.Ro
 			Error(c, http.StatusConflict, "CPU test is already running")
 			return
 		}
-		var utilization uint64
-		var minutes uint64
+		var utilization int64
+		var minutes int64
 		var err error
-		utilization, err = strconv.ParseUint(c.Param("utilization"), 10, 64)
+		utilization, err = strconv.ParseInt(c.Param("utilization"), 10, 64)
 		if err != nil {
 			Error(c, http.StatusBadRequest, "invalid utilization: %s", err.Error())
 			return
 		}
-		if minutes, err = strconv.ParseUint(c.Param("minutes"), 10, 64); err != nil {
+		if minutes, err = strconv.ParseInt(c.Param("minutes"), 10, 64); err != nil {
 			Error(c, http.StatusBadRequest, "invalid minutes: %s", err.Error())
 			return
 		}
@@ -62,7 +62,7 @@ func CPUTests(logger logr.Logger, r *gin.RouterGroup, cpuTest CPUWaster) *gin.Ro
 	return r
 }
 
-func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.Duration) {
+func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation int64, duration time.Duration) {
 	m.startTest()
 
 	for utilisation > 0 {
@@ -71,7 +71,7 @@ func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation uint64, duration time.D
 		utilisation = utilisation - perGoRoutineUtilisation
 
 		// the core cpu wasting goroutine
-		go func(util uint64) {
+		go func(util int64) {
 			// to achieve a desired utilisation, we run a busy loop for a certain percentage of time and then wait for the remainder
 			// concretely, we split a second into two parts: one busy loop and one sleep
 			// we repeat this "second" until the test is stopped

@@ -10,9 +10,9 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/envelopeprocessor"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	logcache "code.cloudfoundry.org/go-log-cache/v2"
-	"code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
-	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
+	logcache "code.cloudfoundry.org/go-log-cache/v3"
+	"code.cloudfoundry.org/go-log-cache/v3/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
 	"code.cloudfoundry.org/lager/v3"
 )
 
@@ -116,7 +116,7 @@ func (l *logCacheFetcher) getMetricsPromQLAPI(appId string, metricType string, c
 			return []models.AppInstanceMetric{}, fmt.Errorf("sample does not contain a point")
 		}
 
-		instanceId := uint32(instanceIdUInt)
+		instanceId := instanceIdUInt
 		valueWithoutDecimalsRoundedToCeiling := fmt.Sprintf("%.0f", math.Ceil(point.GetValue()))
 
 		metrics = append(metrics, models.AppInstanceMetric{
