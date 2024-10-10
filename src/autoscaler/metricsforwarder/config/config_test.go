@@ -250,7 +250,6 @@ cred_helper_impl: default
 				It("returns the config", func() {
 					Expect(conf.Server.Port).To(Equal(8081))
 					Expect(conf.Logging.Level).To(Equal("debug"))
-					Expect(conf.Health.Port).To(Equal(9999))
 					Expect(conf.LoggregatorConfig.MetronAddress).To(Equal("127.0.0.1:3457"))
 					Expect(conf.Db[db.PolicyDb]).To(Equal(
 						db.DatabaseConfig{
@@ -289,7 +288,6 @@ health:
 					Expect(conf.LoggregatorConfig.MetronAddress).To(Equal(DefaultMetronAddress))
 					Expect(conf.CacheTTL).To(Equal(DefaultCacheTTL))
 					Expect(conf.CacheCleanupInterval).To(Equal(DefaultCacheCleanupInterval))
-					Expect(conf.Health.Port).To(Equal(8081))
 				})
 			})
 
@@ -302,7 +300,6 @@ health:
 			conf = &Config{}
 			conf.Server.Port = 8081
 			conf.Logging.Level = "debug"
-			conf.Health.Port = 8081
 			conf.LoggregatorConfig.MetronAddress = "127.0.0.1:3458"
 			conf.LoggregatorConfig.TLS.CACertFile = "../testcerts/ca.crt"
 			conf.LoggregatorConfig.TLS.CertFile = "../testcerts/client.crt"
