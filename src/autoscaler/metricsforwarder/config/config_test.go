@@ -242,7 +242,8 @@ db:
     max_idle_connections: 5
     connection_max_lifetime: 60s
 health:
-  port: 9999
+  server_config:
+    port: 9999
 cred_helper_impl: default
 `)
 				})
@@ -277,7 +278,8 @@ db:
     max_idle_connections: 5
     connection_max_lifetime: 60s
 health:
-  port: 8081
+  server_config:
+    port: 8081
 `)
 				})
 
