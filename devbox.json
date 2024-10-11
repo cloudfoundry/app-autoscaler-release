@@ -37,10 +37,10 @@
     "bundler":                           "latest",
     "golangci-lint":                     "1.61.0",
     "act":                               "0.2.67",
-    "actionlint":                        "latest",
+    "actionlint":                        "1.7.3",
     "cloudfoundry-cli":                  "8.8.1",
     "google-cloud-sdk":                  "latest",
-    "go":                                "1.22.3",
+    "go":                                "1.22.5",
     "temurin-bin-21":                    "latest",
     "ruby":                              "latest"
   },
