@@ -183,6 +183,17 @@ func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
 	return url.String()
 }
 
+func GenerateBindingConfiguration(allowFrom string) string {
+	bindingConfig := BindingConfig{
+		Configuration: Configuration{CustomMetrics: CustomMetricsConfig{
+			MetricSubmissionStrategy: MetricsSubmissionStrategy{AllowFrom: allowFrom},
+		}},
+	}
+	marshalledBinding, err := MarshalWithoutHTMLEscape(bindingConfig)
+	Expect(err).NotTo(HaveOccurred())
+	return string(marshalledBinding)
+}
+
 func GenerateBindingsWithScalingPolicy(allowFrom string, instanceMin, instanceMax int, metricName string, scaleInThreshold, scaleOutThreshold int64) string {
 	bindingConfig := BindingConfig{
 		Configuration: Configuration{CustomMetrics: CustomMetricsConfig{

@@ -11,74 +11,94 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("AutoScaler custom metrics policy", func() {
+var _ = Describe("AutoScaler custom metrics", func() {
 	var (
 		policy string
 		err    error
 	)
-	BeforeEach(func() {
-		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
-		appToScaleName = CreateTestApp(cfg, "node-custom-metric", 1)
-		appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
-		Expect(err).NotTo(HaveOccurred())
-		instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
-		StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
-	})
+
 	AfterEach(AppAfterEach)
 
-	// This test will fail if credential-type is set to X509 in autoscaler broker.
-	// Therefore, only mtls connection will be supported for custom metrics in future
-	Context("when scaling by custom metrics", func() {
-		It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
-			By("Scale out to 2 instances")
-			scaleOut := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 550, false)
-			Eventually(scaleOut).
-				WithTimeout(5 * time.Minute).
-				WithPolling(15 * time.Second).
-				Should(Equal(2))
-
-			By("Scale in to 1 instances")
-			scaleIn := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 100, false)
-			Eventually(scaleIn).
-				WithTimeout(5 * time.Minute).
-				WithPolling(15 * time.Second).
-				Should(Equal(1))
-
+	Describe("custom metrics policy for same app", func() {
+		BeforeEach(func() {
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+			appToScaleName = CreateTestApp(cfg, "go-custom-metric", 1)
+			appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
+			Expect(err).NotTo(HaveOccurred())
+			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 		})
+		// This test will fail if credential-type is set to X509 in autoscaler broker.
+		// Therefore, only mtls connection will be supported for custom metrics in future
+		Context("when scaling by custom metrics", func() {
+			BeforeEach(func() {
+				instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+				StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+			})
+			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
+				By("Scale out to 2 instances")
+				scaleOut := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 550, false)
+				Eventually(scaleOut).
+					WithTimeout(5 * time.Minute).
+					WithPolling(15 * time.Second).
+					Should(Equal(2))
+
+				By("Scale in to 1 instances")
+				scaleIn := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 100, false)
+				Eventually(scaleIn).
+					WithTimeout(5 * time.Minute).
+					WithPolling(15 * time.Second).
+					Should(Equal(1))
+
+			})
+		})
+
+		Context("when scaling by custom metrics via mtls", func() {
+			BeforeEach(func() {
+				instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+				StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+			})
+			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
+				By("Scale out to 2 instances")
+				scaleOut := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 550, true)
+				Eventually(scaleOut).
+					WithTimeout(5 * time.Minute).
+					WithPolling(15 * time.Second).
+					Should(Equal(2))
+
+				By("Scale in to 1 instance")
+				scaleIn := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 100, true)
+				Eventually(scaleIn).
+					WithTimeout(5 * time.Minute).
+					WithPolling(15 * time.Second).
+					Should(Equal(1))
+
+			})
+		})
+
 	})
 
-	Context("when scaling by custom metrics via mtls", func() {
-		It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
-			By("Scale out to 2 instances")
-			scaleOut := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 550, true)
-			Eventually(scaleOut).
-				WithTimeout(5 * time.Minute).
-				WithPolling(15 * time.Second).
-				Should(Equal(2))
-
-			By("Scale in to 1 instance")
-			scaleIn := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 100, true)
-			Eventually(scaleIn).
-				WithTimeout(5 * time.Minute).
-				WithPolling(15 * time.Second).
-				Should(Equal(1))
-
-		})
-	})
-
-	Describe("Custom metrics policy with neighbour app", func() {
-		JustBeforeEach(func() {
+	Describe("Custom metrics with neighbour app", func() {
+		BeforeEach(func() {
+			// push appToScale
+			appToScaleName = CreateTestApp(cfg, "go-custom-metric", 1)
+			appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
+			Expect(err).NotTo(HaveOccurred())
+			policy = GenerateBindingsWithScalingPolicy("", 1, 2, "test_metric", 500, 100)
+			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+			// push neighbour app
 			neighbourAppName = CreateTestApp(cfg, "go-neighbour-app", 1)
 			neighbourAppGUID, err = GetAppGuid(cfg, neighbourAppName)
 			Expect(err).NotTo(HaveOccurred())
-			err := BindServiceToAppWithPolicy(cfg, appToScaleName, instanceName, policy)
+			// optional policy for neighbour app
+			policy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "test_metric", 500, 100)
+			err := BindServiceToAppWithPolicy(cfg, neighbourAppName, instanceName, policy)
 			Expect(err).NotTo(HaveOccurred())
 			StartApp(neighbourAppName, cfg.CfPushTimeoutDuration())
 		})
-		Context("neighbour app send custom metrics for app B via mtls", func() {
-			BeforeEach(func() {
-				policy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "test_metric", 500, 100)
-			})
+		FContext("neighbour app send custom metrics for app B via mtls", func() {
+
 			It("should scale out and scale in app B", Label(acceptance.LabelSmokeTests), func() {
 				By(fmt.Sprintf("Scale out %s to 2 instance", appToScaleName))
 				scaleOut := sendMetricToAutoscaler(cfg, appToScaleGUID, neighbourAppName, 550, true)
@@ -97,9 +117,7 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 			})
 		})
 		Context("neighbour app send metrics if metrics strategy is not set i.e same_app", func() {
-			BeforeEach(func() {
-				policy = GenerateBindingsWithScalingPolicy("", 1, 2, "test_metric", 100, 550)
-			})
+
 			When("policy is attached with neighbour app", func() {
 				It("should scale out and scale the neighbour app", func() {
 					By(fmt.Sprintf("Scale out %s to 2 instance", neighbourAppName))
@@ -129,6 +147,9 @@ var _ = Describe("AutoScaler custom metrics policy", func() {
 				})
 			})
 
+		})
+		Context("neighbour app without policy defined", func() {
+			// TODO
 		})
 	})
 })

@@ -68,6 +68,10 @@ func AppAfterEach() {
 			DeleteService(cfg, instanceName, appToScaleName)
 			DeleteTestApp(appToScaleName, cfg.DefaultTimeoutDuration())
 		}
+		if neighbourAppName != "" {
+			DeleteService(cfg, instanceName, neighbourAppName)
+			DeleteTestApp(neighbourAppName, cfg.DefaultTimeoutDuration())
+		}
 	}
 }
 
