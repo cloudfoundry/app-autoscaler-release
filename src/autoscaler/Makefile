@@ -42,7 +42,6 @@ openapi-specs-list = $(wildcard ${openapi-spec-path}/*.yaml)
 openapi-generated-clients-and-servers-api-files = $(wildcard ${openapi-generated-clients-and-servers-api-dir}/*.go)
 openapi-generated-clients-and-servers-scalingengine-files = $(wildcard ${openapi-generated-clients-and-servers-scalingengine-dir}/*.go)
 
-
 .PHONY: generate-openapi-generated-clients-and-servers
 generate-openapi-generated-clients-and-servers: ${openapi-generated-clients-and-servers-api-dir} ${openapi-generated-clients-and-servers-api-files} ${openapi-generated-clients-and-servers-scalingengine-dir} ${openapi-generated-clients-and-servers-scalingengine-files}
 ${openapi-generated-clients-and-servers-api-dir} ${openapi-generated-clients-and-servers-api-files} ${openapi-generated-clients-and-servers-scalingengine-dir} ${openapi-generated-clients-and-servers-scalingengine-files} &: $(wildcard ./scalingengine/apis/generate.go) $(wildcard ./api/apis/generate.go) ${openapi-specs-list} ./go.mod ./go.sum
@@ -97,8 +96,9 @@ go-mod-vendor: ${go-vendoring-folder} ${go-vendored-files}
 ${go-vendoring-folder} ${go-vendored-files} &: ${app-fakes-dir} ${app-fakes-files}
 	go mod vendor
 
+
 # CGO_ENABLED := 1 is required to enforce dynamic linking which is a requirement of dynatrace.
-build-%: ${openapi-generated-clients-and-servers-api-dir} ${openapi-generated-clients-and-servers-api-files} ${openapi-generated-clients-and-servers-scalingengine-dir} ${openapi-generated-clients-and-servers-scalingengine-files}
+build-%:
 	@echo "# building $*"
 	@CGO_ENABLED=1 go build $(BUILDTAGS) $(BUILDFLAGS) -o build/$* $*/cmd/$*/main.go
 
