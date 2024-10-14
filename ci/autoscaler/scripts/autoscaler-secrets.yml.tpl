@@ -1,0 +1,13 @@
+---
+admin_password: ((/bosh-autoscaler/cf/cf_admin_password))
+routing_api_tls_client_cert: ((/bosh-autoscaler/cf/routing_api_tls_client.certificate))
+routing_api_ca_certs: ((/bosh-autoscaler/cf/router_ssl.ca))
+routing_api_client_secret: ((/bosh-autoscaler/cf/uaa_clients_routing_api_client_secret))
+routing_api_tls_client_private_key: ((/bosh-autoscaler/cf/routing_api_tls_client.private_key))
+routing_api_server_ca_cert: ((/bosh-autoscaler/cf/router_ssl.ca))
+log_cache_syslog_tls_ca: ((/bosh-autoscaler/cf/log_cache_syslog_tls.ca))
+syslog_agent_log_cache_tls_certificate: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.certificate))
+syslog_agent_log_cache_tls_key: ((/bosh-autoscaler/cf/syslog_agent_log_cache_tls.private_key))
+metricscollector_ca_cert: ((/bosh-autoscaler/cf/log_cache.ca))
+metricscollector_client_cert: ((/bosh-autoscaler/cf/log_cache.certificate))
+metricscollector_client_key: ((/bosh-autoscaler/cf/log_cache.private_key))
