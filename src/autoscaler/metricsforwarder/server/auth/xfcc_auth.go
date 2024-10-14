@@ -48,7 +48,8 @@ func (a *Auth) XFCCAuth(r *http.Request, bindingDB db.BindingDB, appID string) e
 	if appID != submitterAppCert {
 		var metricSubmissionStrategy MetricsSubmissionStrategy
 		customMetricSubmissionStrategy, err := bindingDB.GetCustomMetricStrategyByAppId(r.Context(), submitterAppCert)
-		a.logger.Info("custom-metrics-submission-strategy", lager.Data{"submitterAppCert": submitterAppCert, "strategy": customMetricSubmissionStrategy})
+		a.logger.Info("custom-metrics-submission-strategy", lager.Data{"appID": appID, "submitterAppCert": submitterAppCert, "strategy": customMetricSubmissionStrategy})
+
 		if customMetricSubmissionStrategy == customMetricsStrategyType {
 			metricSubmissionStrategy = &BoundedMetricsSubmissionStrategy{}
 		} else {

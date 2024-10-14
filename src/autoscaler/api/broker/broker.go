@@ -513,10 +513,11 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 				Build()
 		}
 	}
-	logger.Info("binding-configuration", lager.Data{"bindingConfiguration": bindingConfiguration})
 	if bindingConfiguration.GetCustomMetricsStrategy() == "" {
 		bindingConfiguration.SetDefaultCustomMetricsStrategy("same_app")
 	}
+	logger.Info("binding-configuration", lager.Data{"bindingConfiguration": bindingConfiguration})
+
 	policy, err := b.getPolicyFromJsonRawMessage(policyJson, instanceID, details.PlanID)
 	if err != nil {
 		logger.Error("get-default-policy", err)
