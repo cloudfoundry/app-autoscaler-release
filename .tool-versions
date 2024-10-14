@@ -4,10 +4,10 @@ bosh 7.3.1
 credhub 2.9.29
 cf 8.8.2
 concourse 7.10.0
-direnv 2.34.0
+direnv 2.35.0
 gcloud 473.0.0
 ginkgo 2.20.2
-golang 1.22.4
+golang 1.22.5
 golangci-lint 1.61.0
 java temurin-21.0.4+7.0.LTS
 make 4.4
