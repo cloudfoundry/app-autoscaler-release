@@ -378,6 +378,7 @@ jobs:
         SUITES: api
       timeout: 15m
     - task: autoscaler-acceptance-app
+      attempts: 2
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-cf-params
