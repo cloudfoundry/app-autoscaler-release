@@ -208,12 +208,12 @@ func (bdb *BindingSQLDB) CreateServiceBinding(ctx context.Context, bindingId str
 	}
 
 	query := bdb.sqldb.Rebind("INSERT INTO binding" +
-		"(binding_id, service_instance_id, app_id, created_at) " +
-		"VALUES(?, ?, ?, ?)")
-	_, err = bdb.sqldb.ExecContext(ctx, query, bindingId, serviceInstanceId, appId, time.Now())
+		"(binding_id, service_instance_id, app_id, created_at, custom_metrics_strategy) " +
+		"VALUES(?, ?, ?, ?,?)")
+	_, err = bdb.sqldb.ExecContext(ctx, query, bindingId, serviceInstanceId, appId, time.Now(), customMetricsStrategy)
 
 	if err != nil {
-		bdb.logger.Error("create-service-binding", err, lager.Data{"query": query, "serviceinstanceid": serviceInstanceId, "bindingid": bindingId, "appid": appId})
+		bdb.logger.Error("create-service-binding", err, lager.Data{"query": query, "serviceinstanceid": serviceInstanceId, "bindingid": bindingId, "appid": appId, "customMetricsStrategy": customMetricsStrategy})
 	}
 	return err
 }

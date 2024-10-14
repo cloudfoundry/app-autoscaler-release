@@ -352,8 +352,10 @@ var _ = Describe("BindingSqldb", func() {
 	})
 
 	Describe("CreateServiceBinding", func() {
+		var customMetricsStrategy string
+
 		JustBeforeEach(func() {
-			err = bdb.CreateServiceBinding(context.Background(), testBindingId, testInstanceId, testAppId, "")
+			err = bdb.CreateServiceBinding(context.Background(), testBindingId, testInstanceId, testAppId, customMetricsStrategy)
 		})
 		Context("When service instance doesn't exist", func() {
 			It("should error", func() {
@@ -381,7 +383,15 @@ var _ = Describe("BindingSqldb", func() {
 					Expect(err).To(Equal(db.ErrAlreadyExists))
 				})
 			})
-
+			Context("When service binding is created with custom metrics strategy", func() {
+				BeforeEach(func() {
+					customMetricsStrategy = "bound_app"
+				})
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId, customMetricsStrategy)).To(BeTrue())
+				})
+			})
 		})
 	})
 
@@ -675,7 +685,7 @@ var _ = Describe("BindingSqldb", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("should save the binding in the database", func() {
-				Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId)).To(BeTrue())
+				Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId, "bound_app")).To(BeTrue())
 
 			})
 		})
@@ -685,7 +695,7 @@ var _ = Describe("BindingSqldb", func() {
 				Expect(err).NotTo(HaveOccurred())
 			})
 			It("should save the binding in the database", func() {
-				Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId)).To(BeFalse())
+				Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId, "same_app")).To(BeFalse())
 				//TODO check if the default was set
 
 			})
