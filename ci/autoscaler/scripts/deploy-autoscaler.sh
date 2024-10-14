@@ -126,9 +126,9 @@ function check_ops_files(){
 
 function deploy() {
   # Try to silence Prometheus but do not fail deployment if there's an error
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill" || true
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy" || true
-  ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy" || true
+# ${script_dir}/silence_prometheus_alert.sh "BOSHJobEphemeralDiskPredictWillFill" || true
+#  ${script_dir}/silence_prometheus_alert.sh "BOSHJobProcessUnhealthy" || true
+#  ${script_dir}/silence_prometheus_alert.sh "BOSHJobUnhealthy" || true
 
   create_manifest
 
