@@ -42,10 +42,7 @@ describe "metricsforwarder" do
         }
       }
 
-      expect(rendered_template["health"])
-        .to include(
-          {"port" => 1234}
-        )
+      expect(rendered_template["health"]["server_config"]["port"]).to eq(properties["autoscaler"]["metricsforwarder"]["health"]["port"])
     end
 
     it "check metricsforwarder basic auth username and password" do
@@ -57,12 +54,9 @@ describe "metricsforwarder" do
         }
       }
 
-      expect(rendered_template["health"])
-        .to include(
-          {"port" => 1234,
-           "username" => "test-user",
-           "password" => "test-user-password"}
-        )
+      expect(rendered_template["health"]["server_config"]["port"]).to eq(properties["autoscaler"]["metricsforwarder"]["health"]["port"])
+      expect(rendered_template["health"]["basic_auth"]["username"]).to eq(properties["autoscaler"]["metricsforwarder"]["health"]["username"])
+      expect(rendered_template["health"]["basic_auth"]["password"]).to eq(properties["autoscaler"]["metricsforwarder"]["health"]["password"])
     end
 
     it "has a cred helper impl by default" do

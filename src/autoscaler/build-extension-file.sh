@@ -40,15 +40,18 @@ _schema-version: 3.3.0
 modules:
   - name: metricsforwarder
     requires:
-    - name: config
+    - name: metricsforwarder-config
     - name: policydb
     - name: syslog-client
     parameters:
       routes:
       - route: ${METRICSFORWARDER_APPNAME}.\${default-domain}
+  - name: publicapiserver
+    parameters:
+      instances: 0
 
 resources:
-- name: config
+- name: metricsforwarder-config
   parameters:
     config:
       metricsforwarder:
