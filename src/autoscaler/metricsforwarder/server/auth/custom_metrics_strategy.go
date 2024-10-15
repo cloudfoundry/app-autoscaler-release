@@ -32,7 +32,6 @@ func (c *BoundedMetricsSubmissionStrategy) validate(appId string, submitterAppId
 }
 
 func (c *BoundedMetricsSubmissionStrategy) verifyMetricSubmissionStrategy(r *http.Request, logger lager.Logger, bindingDB db.BindingDB, submitterAppCert string, appID string) error {
-	logger.Info("custom-metrics-submission-strategy-found", lager.Data{"appID": appID, "submitterAppCertID": submitterAppCert})
 
 	isAppBound, err := bindingDB.IsAppBoundToSameAutoscaler(r.Context(), submitterAppCert, appID)
 	if err != nil {

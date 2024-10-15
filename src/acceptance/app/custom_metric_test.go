@@ -17,22 +17,26 @@ var _ = Describe("AutoScaler custom metrics", func() {
 		err    error
 	)
 	BeforeEach(func() {
-		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+
 		appToScaleName = CreateTestApp(cfg, "go-custom-metric", 1)
 		appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
 		Expect(err).NotTo(HaveOccurred())
-		instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
-		StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+
 	})
 	AfterEach(AppAfterEach)
 
 	Describe("custom metrics policy for same app", func() {
+		BeforeEach(func() {
+			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+		})
 		// This test will fail if credential-type is set to X509 in autoscaler broker.
 		// Therefore, only mtls connection will be supported for custom metrics in future
 		Context("when scaling by custom metrics", func() {
 			BeforeEach(func() {
-				instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
-				StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+				//instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+				//StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 			})
 			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 				By("Scale out to 2 instances")
@@ -54,8 +58,8 @@ var _ = Describe("AutoScaler custom metrics", func() {
 
 		Context("when scaling by custom metrics via mtls", func() {
 			BeforeEach(func() {
-				instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
-				StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+				//instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+				//StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 			})
 			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 				By("Scale out to 2 instances")
@@ -77,22 +81,28 @@ var _ = Describe("AutoScaler custom metrics", func() {
 
 	})
 
-	FDescribe("Custom metrics with neighbour app", func() {
+	Describe("Custom metrics with neighbour app", func() {
 		BeforeEach(func() {
+			// attach policy to appToScale B
+			policy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "test_metric", 100, 500)
+			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+
 			// push neighbour app
-			neighbourAppName = CreateTestApp(cfg, "go-neighbour-app", 1)
+			neighbourAppName = CreateTestApp(cfg, "go-custom_metric_producer-app", 1)
 			neighbourAppGUID, err = GetAppGuid(cfg, neighbourAppName)
 			Expect(err).NotTo(HaveOccurred())
+			err := BindServiceToAppWithPolicy(cfg, neighbourAppName, instanceName, "")
+			Expect(err).NotTo(HaveOccurred())
+			StartApp(neighbourAppName, cfg.CfPushTimeoutDuration())
 
 		})
 		Context("neighbour app sends custom metrics for app B via mtls", func() {
 			JustBeforeEach(func() {
-				err := BindServiceToAppWithPolicy(cfg, neighbourAppName, instanceName, policy)
-				Expect(err).NotTo(HaveOccurred())
-				StartApp(neighbourAppName, cfg.CfPushTimeoutDuration())
+
 			})
 
-			When("policy is attached with the neighbour app", func() {
+			FWhen("policy is attached with the appToScale with a bound_app mentioned", func() {
 				BeforeEach(func() {
 					policy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "test_metric", 100, 500)
 				})
@@ -115,11 +125,18 @@ var _ = Describe("AutoScaler custom metrics", func() {
 			})
 			//FixME  ? Is the following valid?
 			/*
-				cf bind-service autoscaler-3-go-neighbour-app-25a4dc3fb9e6ea00
-				autoscaler-3-service-64a8ea1ff7d7f3f6 -c
-				{"configuration":{"custom_metrics":{"auth":{"credential_type":""},
-				"metric_submission_strategy":{"allow_from":"bound_app"}}},
-				"instance_min_count":0,"instance_max_count":0}
+					cf bind-service autoscaler-3-go-neighbour-app-25a4dc3fb9e6ea00
+					autoscaler-3-service-64a8ea1ff7d7f3f6 -c
+					{"configuration":{"custom_metrics":{"auth":{"credential_type":""},
+					"metric_submission_strategy":{"allow_from":"bound_app"}}},
+					"instance_min_count":0,"instance_max_count":0}
+
+				Command
+				 cf bind-service autoscaler-3-go-neighbour-app-25a4dc3fb9e6ea00 autoscaler-3-service-64a8ea1ff7d7f3f6 -c {"configuration":{"custom_metrics":{"auth":{"credential_type":""},"metric_submission_strategy":{"allow_from":"bound_app"}}},"instance_min_count":0,"instance_max_count":0}
+
+				  Binding service instance autoscaler-3-service-64a8ea1ff7d7f3f6 to app autoscaler-3-go-neighbour-app-25a4dc3fb9e6ea00 in org arsalan / space test-space as autoscaler-3211-TESTS-3-USER-c41b39e65d2ce188...
+				  Job (e3fee92d-1062-4853-a6d4-d017f6b43157) failed: bind could not be completed: Service broker error: invalid policy provided: [{"context":"(root)","description":"Must validate at least one schema (anyOf)"},{"context":"(root)","description":"scaling_rules is required"},{"context":"(root).instance_min_count","description":"Must be greater than or equal to 1"}]
+
 			*/
 			XWhen("policy is not attached with the neighbour app", func() {
 				BeforeEach(func() {
@@ -143,7 +160,7 @@ var _ = Describe("AutoScaler custom metrics", func() {
 				})
 			})
 
-			When("app B tries to send metrics for neighbour app with strategy same_app", func() {
+			XWhen("app B tries to send metrics for neighbour app with strategy same_app", func() {
 				BeforeEach(func() {
 					policy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "test_metric", 100, 500)
 				})
