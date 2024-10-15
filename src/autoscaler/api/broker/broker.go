@@ -513,6 +513,7 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 				Build()
 		}
 	}
+	// set the default custom metrics strategy if not provided
 	if bindingConfiguration.GetCustomMetricsStrategy() == "" {
 		bindingConfiguration.SetDefaultCustomMetricsStrategy("same_app")
 	}
