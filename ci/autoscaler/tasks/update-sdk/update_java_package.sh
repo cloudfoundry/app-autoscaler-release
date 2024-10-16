@@ -17,13 +17,15 @@ pushd "${java_dir}"
   java_version_interim=$(grep "DEFAULT_VERSION_INTERIM" make/conf/version-numbers.conf | cut -d= -f2)
   java_version_update=$(grep "DEFAULT_VERSION_UPDATE" make/conf/version-numbers.conf | cut -d= -f2)
   java_version_prerelease=$(grep "DEFAULT_PROMOTED_VERSION_PRE" make/conf/version-numbers.conf | cut -d= -f2)
+  java_full_version=$(grep '^version=' .jcheck/conf | cut -d'=' -f2 | tr -d '[:space:]' | sed 's/.$//')
+
 popd
 
 sapmachine_java_version="${java_major_version}.${java_version_interim}.${java_version_update}"
 echo "Desired Java Version: ${sapmachine_java_version}"
 
 # consider only lts releases
-if [ "${java_version_prerelease}" != "" ]; then
+if [ "${java_full_version}" != "${sapmachine_java_version}" ]; then
      echo "java version ${sapmachine_java_version} is not a LTS release. skipping update"
      exit 0
 fi
