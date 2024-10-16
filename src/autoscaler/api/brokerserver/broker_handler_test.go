@@ -920,15 +920,10 @@ var _ = Describe("BrokerHandler", func() {
 				Expect(schedulerServer.ReceivedRequests()).To(HaveLen(1))
 			})
 			It("returns the correct binding parameters", func() {
-				creds := &models.CredentialResponse{}
-				responseString := resp.Body.String()
-				err := json.Unmarshal([]byte(responseString), creds)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(*creds.Credentials.CustomMetrics.URL).To(Equal("someURL"))
-				Expect(creds.Credentials.CustomMetrics.MtlsUrl).To(Equal("Mtls-someURL"))
+				verifyCredentialsGenerated(resp)
 			})
 		})
-		Context("Binding configurations are present", func() {
+		When("Binding configurations are present", func() {
 			BeforeEach(func() {
 				bindingPolicy = `{
 				  "configuration": {
@@ -999,10 +994,10 @@ var _ = Describe("BrokerHandler", func() {
 			})
 			It("succeeds with 201", func() {
 				Expect(resp.Code).To(Equal(http.StatusCreated))
-
 				By("updating the scheduler")
 				Expect(schedulerServer.ReceivedRequests()).To(HaveLen(1))
 				Expect(bindingdb.CreateServiceBindingCallCount()).To(Equal(1))
+				verifyCredentialsGenerated(resp)
 			})
 		})
 
@@ -1506,6 +1501,15 @@ var _ = Describe("BrokerHandler", func() {
 		})
 	})
 })
+
+func verifyCredentialsGenerated(resp *httptest.ResponseRecorder) {
+	creds := &models.CredentialResponse{}
+	responseString := resp.Body.String()
+	err := json.Unmarshal([]byte(responseString), creds)
+	Expect(err).NotTo(HaveOccurred())
+	Expect(*creds.Credentials.CustomMetrics.URL).To(Equal("someURL"))
+	Expect(creds.Credentials.CustomMetrics.MtlsUrl).To(Equal("Mtls-someURL"))
+}
 
 func createInstanceCreationRequestBody(defaultPolicy string) []byte {
 	m := json.RawMessage(defaultPolicy)

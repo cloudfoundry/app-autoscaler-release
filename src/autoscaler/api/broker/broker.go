@@ -515,7 +515,7 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 	}
 	// set the default custom metrics strategy if not provided
 	if bindingConfiguration.GetCustomMetricsStrategy() == "" {
-		bindingConfiguration.SetDefaultCustomMetricsStrategy("same_app")
+		bindingConfiguration.SetDefaultCustomMetricsStrategy(models.CustomMetricsSameApp)
 	}
 	logger.Info("binding-configuration", lager.Data{"bindingConfiguration": bindingConfiguration})
 
@@ -871,9 +871,7 @@ func isValidCredentialType(credentialType string) bool {
 }
 
 func createServiceBinding(ctx context.Context, bindingDB db.BindingDB, bindingID, instanceID, appGUID string, customMetricsStrategy string) error {
-	//TODO call bindingDB.CreateServiceBindingWithConfigs method. No need to call CreateServiceBinding method
-	// Caution: CHECK the below code may break the existing functionality ??
-	if customMetricsStrategy == "bound_app" || customMetricsStrategy == "same_app" {
+	if customMetricsStrategy == models.CustomMetricsBoundApp || customMetricsStrategy == models.CustomMetricsSameApp {
 		return bindingDB.CreateServiceBinding(ctx, bindingID, instanceID, appGUID, customMetricsStrategy)
 	}
 	return ErrInvalidCustomMetricsStrategy

@@ -75,10 +75,8 @@ var _ = Describe("AutoScaler custom metrics", func() {
 					WithTimeout(5 * time.Minute).
 					WithPolling(15 * time.Second).
 					Should(Equal(1))
-
 			})
 		})
-
 	})
 
 	Describe("Custom metrics with neighbour app", func() {
@@ -98,11 +96,7 @@ var _ = Describe("AutoScaler custom metrics", func() {
 
 		})
 		Context("neighbour app sends custom metrics for app B via mtls", func() {
-			JustBeforeEach(func() {
-
-			})
-
-			FWhen("policy is attached with the appToScale with a bound_app mentioned", func() {
+			When("policy is attached with the appToScale with a bound_app mentioned", func() {
 				BeforeEach(func() {
 					policy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "test_metric", 100, 500)
 				})
@@ -138,7 +132,7 @@ var _ = Describe("AutoScaler custom metrics", func() {
 				  Job (e3fee92d-1062-4853-a6d4-d017f6b43157) failed: bind could not be completed: Service broker error: invalid policy provided: [{"context":"(root)","description":"Must validate at least one schema (anyOf)"},{"context":"(root)","description":"scaling_rules is required"},{"context":"(root).instance_min_count","description":"Must be greater than or equal to 1"}]
 
 			*/
-			XWhen("policy is not attached with the neighbour app", func() {
+			/*When("policy is not attached with the neighbour app", func() {
 				BeforeEach(func() {
 					policy = GenerateBindingConfiguration("bound_app")
 				})
@@ -156,11 +150,10 @@ var _ = Describe("AutoScaler custom metrics", func() {
 						WithTimeout(5 * time.Minute).
 						WithPolling(15 * time.Second).
 						Should(Equal(1))
-
 				})
-			})
+			})*/
 
-			XWhen("app B tries to send metrics for neighbour app with strategy same_app", func() {
+			When("app B tries to send metrics for neighbour app with strategy same_app", func() {
 				BeforeEach(func() {
 					policy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "test_metric", 100, 500)
 				})
@@ -176,7 +169,6 @@ var _ = Describe("AutoScaler custom metrics", func() {
 
 func sendMetricToAutoscaler(config *config.Config, appToScaleGUID string, neighbourAppName string, metricThreshold int, mtls bool) func() (int, error) {
 	return func() (int, error) {
-
 		if mtls {
 			SendMetricMTLS(config, appToScaleGUID, neighbourAppName, metricThreshold)
 		} else {

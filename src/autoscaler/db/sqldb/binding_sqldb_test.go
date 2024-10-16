@@ -383,13 +383,32 @@ var _ = Describe("BindingSqldb", func() {
 					Expect(err).To(Equal(db.ErrAlreadyExists))
 				})
 			})
-			Context("When service binding is created with custom metrics strategy", func() {
+			Context("When service binding is created with custom metrics strategy 'bound_app'", func() {
 				BeforeEach(func() {
 					customMetricsStrategy = "bound_app"
 				})
 				It("should succeed", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId, customMetricsStrategy)).To(BeTrue())
+				})
+			})
+			Context("When service binding is created with custom metrics strategy 'same_app'", func() {
+				BeforeEach(func() {
+					customMetricsStrategy = "same_app"
+				})
+				It("should succeed", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId, customMetricsStrategy)).To(BeTrue())
+				})
+			})
+
+			When("service binding is created with invalid custom metrics strategy", func() {
+				BeforeEach(func() {
+					customMetricsStrategy = ""
+				})
+				It("should throw an error with foreign key violation", func() {
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("foreign key constraint"))
 				})
 			})
 		})
@@ -674,57 +693,29 @@ var _ = Describe("BindingSqldb", func() {
 
 	})
 
-	Describe("CreateServiceBindingWithConfigs", func() {
-		BeforeEach(func() {
-			err = bdb.CreateServiceInstance(context.Background(), models.ServiceInstance{ServiceInstanceId: testInstanceId, OrgId: testOrgGuid, SpaceId: testSpaceGuid, DefaultPolicy: policyJsonStr, DefaultPolicyGuid: policyGuid})
-			Expect(err).NotTo(HaveOccurred())
-		})
-		When("configuration bounded_app is provided", func() {
-			JustBeforeEach(func() {
-				err = bdb.CreateServiceBindingWithConfigs(context.Background(), testBindingId, testInstanceId, testAppId, "bound_app")
-				Expect(err).NotTo(HaveOccurred())
-			})
-			It("should save the binding in the database", func() {
-				Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId, "bound_app")).To(BeTrue())
-
-			})
-		})
-		When("default configuration is provided", func() {
-			JustBeforeEach(func() {
-				err = bdb.CreateServiceBindingWithConfigs(context.Background(), testBindingId, testInstanceId, testAppId, "same_app")
-				Expect(err).NotTo(HaveOccurred())
-			})
-			It("should save the binding in the database", func() {
-				Expect(hasServiceBindingWithCustomMetricStrategy(testBindingId, testInstanceId, "same_app")).To(BeTrue())
-				//TODO check if the default was set
-
-			})
-		})
-		When("configuration is not provided", func() {
-			JustBeforeEach(func() {
-				err = bdb.CreateServiceBindingWithConfigs(context.Background(), testBindingId, testInstanceId, testAppId, "")
-
-			})
-			It("should throw an error with foreign key violation", func() {
-				Expect(err).To(HaveOccurred())
-			})
-		})
-
-	})
-
 	Describe("GetCustomMetricStrategyByAppId", func() {
 		BeforeEach(func() {
 			err = bdb.CreateServiceInstance(context.Background(), models.ServiceInstance{ServiceInstanceId: testInstanceId, OrgId: testOrgGuid, SpaceId: testSpaceGuid, DefaultPolicy: policyJsonStr, DefaultPolicyGuid: policyGuid})
 			Expect(err).NotTo(HaveOccurred())
-			// FIXME Use the original createServiceBinding
-			err = bdb.CreateServiceBindingWithConfigs(context.Background(), testBindingId, testInstanceId, testAppId, "bound_app")
-			Expect(err).NotTo(HaveOccurred())
-
 		})
-		Context("When service instance and binding exists", func() {
+		Context("When service instance and binding exists with custom metrics strategy 'bound_app'", func() {
+			BeforeEach(func() {
+				err = bdb.CreateServiceBinding(context.Background(), testBindingId, testInstanceId, testAppId, "bound_app")
+				Expect(err).NotTo(HaveOccurred())
+			})
 			It("should get the custom metrics strategy from the database", func() {
 				customMetricStrategy, _ := bdb.GetCustomMetricStrategyByAppId(context.Background(), testAppId)
 				Expect(customMetricStrategy).To(Equal("bound_app"))
+			})
+		})
+		Context("When service instance and binding exists with custom metrics strategy 'same_app'", func() {
+			BeforeEach(func() {
+				err = bdb.CreateServiceBinding(context.Background(), testBindingId, testInstanceId, testAppId, "same_app")
+				Expect(err).NotTo(HaveOccurred())
+			})
+			It("should get the custom metrics strategy from the database", func() {
+				customMetricStrategy, _ := bdb.GetCustomMetricStrategyByAppId(context.Background(), testAppId)
+				Expect(customMetricStrategy).To(Equal("same_app"))
 			})
 		})
 

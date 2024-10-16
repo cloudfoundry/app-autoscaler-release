@@ -2,6 +2,7 @@ package auth
 
 import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/lager/v3"
 	"crypto/x509"
 	"encoding/base64"
@@ -10,8 +11,6 @@ import (
 	"net/http"
 	"strings"
 )
-
-const customMetricsStrategyBoundApp = "bound_app"
 
 var ErrXFCCHeaderNotFound = errors.New("mTLS authentication method not found")
 var ErrorNoAppIDFound = errors.New("certificate does not contain an app id")
@@ -54,7 +53,7 @@ func (a *Auth) XFCCAuth(r *http.Request, bindingDB db.BindingDB, appID string) e
 		}
 		a.logger.Info("custom-metrics-submission-strategy", lager.Data{"appID": appID, "submitterAppCert": submitterAppCert, "strategy": customMetricSubmissionStrategy})
 
-		if customMetricSubmissionStrategy == customMetricsStrategyBoundApp {
+		if customMetricSubmissionStrategy == models.CustomMetricsBoundApp {
 			metricSubmissionStrategy = &BoundedMetricsSubmissionStrategy{}
 		} else {
 			metricSubmissionStrategy = &DefaultMetricsSubmissionStrategy{}
