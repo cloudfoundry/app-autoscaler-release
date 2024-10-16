@@ -4,26 +4,24 @@
 # It downloads the given SAP Machine java distribution and updates the bosh packaging with the new version.
 
 [ -n "${DEBUG}" ] && set -x
-set -euo pipefail
+set -euox pipefail
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
-
+ls -lah
 java_dir=${JAVA_DIR:-"${autoscaler_dir}/../SapMachine"}
 java_dir=$(realpath --canonicalize-existing "${java_dir}")
 
 pushd "${java_dir}"
-  java_major_version=$(grep "DEFAULT_JDK_SOURCE_TARGET_VERSION" make/conf/version-numbers.conf | cut -d= -f2)
-  java_version_interim=$(grep "DEFAULT_VERSION_INTERIM" make/conf/version-numbers.conf | cut -d= -f2)
-  java_version_update=$(grep "DEFAULT_VERSION_UPDATE" make/conf/version-numbers.conf | cut -d= -f2)
-  java_version_prerelease=$(grep "DEFAULT_PROMOTED_VERSION_PRE" make/conf/version-numbers.conf | cut -d= -f2)
+#	java_full_version=$(cat version | sed 's/^sapmachine-//' | sed 's/+//')
+java_full_version=$(sed 's/^sapmachine-//; s/+//' version)
 popd
 
-sapmachine_java_version="${java_major_version}.${java_version_interim}.${java_version_update}"
-echo "Desired Java Version: ${sapmachine_java_version}"
+sapmachine_java_version="${java_full_version}"
+echo "Desired Java Version: ${java_full_version}"
 
 # consider only lts releases
-if [ "${java_version_prerelease}" != "" ]; then
+if [ "${java_full_version}" != "${sapmachine_java_version}" ]; then
      echo "java version ${sapmachine_java_version} is not a LTS release. skipping update"
      exit 0
 fi
@@ -48,12 +46,14 @@ if [ "${JAVA_VERSION}" == "${current_java_version}" ]; then
   exit 0
 fi
 
-# Step 1 --> Download java...
-source "${script_dir}/download_java.sh" "${JAVA_VERSION}"
-printf "\n"
+#Step 1 --> Download java...
+binary_name="sapmachine-jdk-${JAVA_VERSION}_linux-x64_bin.tar.gz"
+mkdir -p "${autoscaler_dir}/src/binaries/jdk"
+mv "${java_dir}/${binary_name}" "${autoscaler_dir}/src/binaries/jdk/${binary_name}"
+#source "${script_dir}/download_java.sh" "${JAVA_VERSION}"
+#printf "\n"
 
 # Step 2 --> upload blob to blobstore
-binary_name="sapmachine-jdk-${JAVA_VERSION}_linux-x64_bin.tar.gz"
 pushd "${autoscaler_dir}" > /dev/null
   echo "- Adding and uploading blobs to release blobstore "
   bosh add-blob "src/binaries/jdk/${binary_name}" "${binary_name}"
