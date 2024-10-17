@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/go-logr/logr"
+
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
 	api "code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/custommetrics"
@@ -42,7 +44,7 @@ var _ = Describe("custom metrics tests", func() {
 				Body(`{"mtls":false}`).
 				End()
 			Expect(fakeCustomMetricClient.PostCustomMetricCallCount()).To(Equal(1))
-			_, _, sentValue, sentMetric, mtlsUsed := fakeCustomMetricClient.PostCustomMetricArgsForCall(0)
+			_, _, _, sentValue, sentMetric, mtlsUsed := fakeCustomMetricClient.PostCustomMetricArgsForCall(0)
 			Expect(sentMetric).Should(Equal("test"))
 			Expect(sentValue).Should(Equal(4.0))
 			Expect(mtlsUsed).Should(Equal(false))
@@ -90,7 +92,7 @@ var _ = Describe("custom metrics tests", func() {
 			}
 
 			client := &app.CustomMetricAPIClient{}
-			err := client.PostCustomMetric(context.TODO(), &appEnv, 42, "test", false)
+			err := client.PostCustomMetric(context.TODO(), logr.Logger{}, &appEnv, 42, "test", false)
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(len(fakeServer.ReceivedRequests())).To(Equal(1))

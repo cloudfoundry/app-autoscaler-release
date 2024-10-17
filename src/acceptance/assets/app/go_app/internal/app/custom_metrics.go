@@ -19,7 +19,7 @@ import (
 
 //counterfeiter:generate . CustomMetricClient
 type CustomMetricClient interface {
-	PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error
+	PostCustomMetric(ctx context.Context, logger logr.Logger, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error
 }
 
 type CustomMetricAPIClient struct{}
@@ -52,8 +52,17 @@ func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetr
 			Error(c, http.StatusBadRequest, "invalid metric value: %s", err.Error())
 			return
 		}
-
-		err = customMetricTest.PostCustomMetric(c, nil, float64(metricValue), metricName, useMtls)
+		// required if neighbour app is sending metric for appToScaleGuid
+		appConfig := &cfenv.App{}
+		appToScaleGuid := c.Query("appToScaleGuid")
+		if appToScaleGuid != "" {
+			logger.Info("neighbour-app-relationship-found", "appToScaleGuid", appToScaleGuid)
+			appConfig.AppID = appToScaleGuid
+			//assuming the neighbour app has the same autoscaler service as the appToScale
+			currentApp, _ := cfenv.Current()
+			appConfig.Services = currentApp.Services
+		}
+		err = customMetricTest.PostCustomMetric(c, logger, appConfig, float64(metricValue), metricName, useMtls)
 		if err != nil {
 			logger.Error(err, "failed to submit custom metric")
 			Error(c, http.StatusInternalServerError, "failed to submit custom metric: %s", err.Error())
@@ -63,9 +72,10 @@ func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetr
 	}
 }
 
-func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
+func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, logger logr.Logger, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
 	var err error
-	if appConfig == nil {
+	logger.Info("sending custom metric", "appConfig", appConfig)
+	if appConfig == nil || appConfig.AppID == "" {
 		appConfig, err = cfenv.Current()
 		if err != nil {
 			return fmt.Errorf("cloud foundry environment not found %w", err)
@@ -103,7 +113,7 @@ func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig *c
 	}
 
 	metrics := createSingletonMetric(metricName, metricValue)
-
+	logger.Info("sending metric to autoscaler for app", "appId", appId, "metricName", metricName, "metricValue", metricValue)
 	params := api.V1AppsAppGuidMetricsPostParams{AppGuid: appId}
 
 	return apiClient.V1AppsAppGuidMetricsPost(ctx, metrics, params)

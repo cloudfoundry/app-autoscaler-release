@@ -202,6 +202,10 @@ var _ = Describe("AutoScaler Service Broker", func() {
 			instance.delete()
 		})
 	})
+
+	Describe("check configuration binding object", func() {
+		// TODO
+	})
 })
 
 type ServicePlans []ServicePlan

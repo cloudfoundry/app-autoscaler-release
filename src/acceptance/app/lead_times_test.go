@@ -15,11 +15,11 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 	)
 	BeforeEach(func() {
 		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
-		appName = CreateTestApp(cfg, "labeled-go_app", 1)
-		appGUID, err = GetAppGuid(cfg, appName)
+		appToScaleName = CreateTestApp(cfg, "labeled-go_app", 1)
+		appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
 		Expect(err).NotTo(HaveOccurred())
-		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
-		StartApp(appName, cfg.CfPushTimeoutDuration())
+		instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+		StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 	})
 	AfterEach(AppAfterEach)
 
@@ -29,8 +29,8 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 			coolDown := TestCoolDownSeconds * time.Second
 			scalingTimewindow := 130 * time.Second // be friendly and allow some time for "internal autoscaler processes" (metric polling interval etc.) to take place before actual scaling happens
 
-			sendMetricForScaleOutAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appGUID, appName, 510, false)
-			sendMetricForScaleInAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appGUID, appName, 490, false)
+			sendMetricForScaleOutAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 510, false)
+			sendMetricForScaleInAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 490, false)
 
 			By("checking that no scaling out happens before breach_duration_secs have passed")
 			Consistently(sendMetricForScaleOutAndReturnNumInstancesFunc).
