@@ -1,9 +1,10 @@
 package auth
 
 import (
+	"net/http"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/lager/v3"
-	"net/http"
 )
 
 type MetricsSubmissionStrategy interface {
@@ -32,7 +33,6 @@ func (c *BoundedMetricsSubmissionStrategy) validate(appId string, submitterAppId
 }
 
 func (c *BoundedMetricsSubmissionStrategy) verifyMetricSubmissionStrategy(r *http.Request, logger lager.Logger, bindingDB db.BindingDB, submitterAppCert string, appID string) error {
-
 	isAppBound, err := bindingDB.IsAppBoundToSameAutoscaler(r.Context(), submitterAppCert, appID)
 	if err != nil {
 		logger.Error("error-checking-app-bound-to-same-service", err, lager.Data{"metric-submitter-app-id": submitterAppCert})

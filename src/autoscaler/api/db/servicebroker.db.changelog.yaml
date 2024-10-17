@@ -78,6 +78,8 @@ databaseChangeLog:
               - column:
                   name: custom_metrics_strategy
                   type: varchar(40)
+                  constraints:
+                    nullable: false
   - changeSet:
       id: 3
       author: Arsalan
@@ -96,6 +98,7 @@ databaseChangeLog:
                   type: varchar(40)
                   constraints:
                     primaryKey: true
+                    nullable: false
         - insert:
             tableName: metrics_submission
             columns:

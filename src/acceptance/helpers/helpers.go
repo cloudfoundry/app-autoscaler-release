@@ -207,7 +207,6 @@ func GenerateBindingsWithScalingPolicy(allowFrom string, instanceMin, instanceMa
 }
 
 func GenerateDynamicScaleOutPolicy(instanceMin, instanceMax int, metricName string, threshold int64) string {
-
 	policy := buildScalingPolicy(instanceMin, instanceMax, metricName, threshold)
 	marshaled, err := MarshalWithoutHTMLEscape(policy)
 	Expect(err).NotTo(HaveOccurred())

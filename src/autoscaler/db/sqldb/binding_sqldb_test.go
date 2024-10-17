@@ -61,13 +61,14 @@ var _ = Describe("BindingSqldb", func() {
 						"adjustment":"+1"
 					}]
 				}`
-		policyGuid2     = addProcessIdTo("test-policy-guid-2")
-		testInstanceId2 = testInstanceId + "2"
-		testInstanceId3 = testInstanceId + "3"
-		testAppId2      = testAppId + "2"
-		testAppId3      = testAppId + "3"
-		testBindingId3  = testBindingId + "3"
-		testBindingId2  = testBindingId + "2"
+		policyGuid2           = addProcessIdTo("test-policy-guid-2")
+		testInstanceId2       = testInstanceId + "2"
+		testInstanceId3       = testInstanceId + "3"
+		testAppId2            = testAppId + "2"
+		testAppId3            = testAppId + "3"
+		testBindingId3        = testBindingId + "3"
+		testBindingId2        = testBindingId + "2"
+		customMetricsStrategy = "same_app"
 	)
 
 	dbUrl := testhelpers.GetDbUrl()
@@ -352,7 +353,6 @@ var _ = Describe("BindingSqldb", func() {
 	})
 
 	Describe("CreateServiceBinding", func() {
-		var customMetricsStrategy = "same_app"
 
 		JustBeforeEach(func() {
 			err = bdb.CreateServiceBinding(context.Background(), testBindingId, testInstanceId, testAppId, customMetricsStrategy)
@@ -378,7 +378,7 @@ var _ = Describe("BindingSqldb", func() {
 			})
 			Context("When service binding already exists", func() {
 				It("should error", func() {
-					err := bdb.CreateServiceBinding(context.Background(), testBindingId, testInstanceId, testAppId, "same_app")
+					err = bdb.CreateServiceBinding(context.Background(), testBindingId, testInstanceId, testAppId, "same_app")
 					Expect(err).To(HaveOccurred())
 					Expect(err).To(Equal(db.ErrAlreadyExists))
 				})

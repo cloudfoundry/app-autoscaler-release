@@ -2,8 +2,9 @@ package app_test
 
 import (
 	"context"
-	"github.com/go-logr/logr"
 	"net/http"
+
+	"github.com/go-logr/logr"
 
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app/appfakes"
