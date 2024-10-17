@@ -69,15 +69,17 @@ logging:
   level: <%= p("autoscaler.eventgenerator.logging.level") %>
 http_client_timeout: <%= p("autoscaler.eventgenerator.http_client_timeout") %>
 health:
-  port: <%= p("autoscaler.eventgenerator.health.port") %>
-  username: <%= p("autoscaler.eventgenerator.health.username") %>
-  password: <%= p("autoscaler.eventgenerator.health.password") %>
-  <% if_p("autoscaler.eventgenerator.health.ca_cert", "autoscaler.eventgenerator.health.server_cert", "autoscaler.eventgenerator.health.server_key") do %>
-  tls:
-    ca_file: /var/vcap/jobs/eventgenerator/config/certs/healthendpoint/ca.crt
-    cert_file: /var/vcap/jobs/eventgenerator/config/certs/healthendpoint/server.crt
-    key_file: /var/vcap/jobs/eventgenerator/config/certs/healthendpoint/server.key
-  <% end %>
+  server_config:
+    port: <%= p("autoscaler.eventgenerator.health.port") %>
+    <% if_p("autoscaler.eventgenerator.health.ca_cert", "autoscaler.eventgenerator.health.server_cert", "autoscaler.eventgenerator.health.server_key") do %>
+    tls:
+      ca_file: /var/vcap/jobs/eventgenerator/config/certs/healthendpoint/ca.crt
+      cert_file: /var/vcap/jobs/eventgenerator/config/certs/healthendpoint/server.crt
+      key_file: /var/vcap/jobs/eventgenerator/config/certs/healthendpoint/server.key
+    <% end %>
+  basic_auth:
+    username: <%= p("autoscaler.eventgenerator.health.username") %>
+    password: <%= p("autoscaler.eventgenerator.health.password") %>
 
 db:
   policy_db:

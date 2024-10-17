@@ -11,7 +11,8 @@ import (
 	"strconv"
 	"testing"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/apis/scalinghistory"
+	internalscalinghistory "code.cloudfoundry.org/app-autoscaler/src/autoscaler/scalingengine/apis/scalinghistory"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
@@ -62,18 +63,18 @@ var (
 	schedulerStatus        int
 	schedulerErrJson       string
 
-	scalingEngineResponse    scalinghistory.History
+	scalingEngineResponse    internalscalinghistory.History
 	metricsCollectorResponse []models.AppInstanceMetric
 	eventGeneratorResponse   []models.AppMetric
 
 	fakeCFClient     *fakes.FakeCFClient
 	fakePolicyDB     *fakes.FakePolicyDB
+	fakeBindingDB    *fakes.FakeBindingDB
 	fakeRateLimiter  *fakes.FakeLimiter
 	fakeCredentials  *fakes.FakeCredentials
 	checkBindingFunc api.CheckBindingFunc
 	hasBinding       = true
 	apiPort          = 0
-	testCertDir      = "../../../../test-certs"
 )
 
 func TestPublicapiserver(t *testing.T) {
@@ -111,6 +112,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	fakePolicyDB = &fakes.FakePolicyDB{}
+	fakeBindingDB = &fakes.FakeBindingDB{}
 	checkBindingFunc = func(appId string) bool {
 		return hasBinding
 	}
@@ -118,10 +120,13 @@ var _ = BeforeSuite(func() {
 	httpStatusCollector := &fakes.FakeHTTPStatusCollector{}
 	fakeRateLimiter = &fakes.FakeLimiter{}
 	fakeCredentials = &fakes.FakeCredentials{}
-	httpServer, err := publicapiserver.NewPublicApiServer(lagertest.NewTestLogger("public_apiserver"), conf,
-		fakePolicyDB, fakeCredentials,
-		checkBindingFunc, fakeCFClient,
-		httpStatusCollector, fakeRateLimiter, nil)
+
+	publicApiServer := publicapiserver.NewPublicApiServer(
+		lagertest.NewTestLogger("public_apiserver"), conf, fakePolicyDB,
+		fakeBindingDB, fakeCredentials, checkBindingFunc, fakeCFClient,
+		httpStatusCollector, fakeRateLimiter)
+
+	httpServer, err := publicApiServer.GetMtlsServer()
 	Expect(err).NotTo(HaveOccurred())
 
 	serverUrl, err = url.Parse("http://127.0.0.1:" + strconv.Itoa(apiPort))
@@ -177,6 +182,7 @@ func CheckResponse(resp *httptest.ResponseRecorder, statusCode int, errResponse 
 }
 
 func CreateConfig(apiServerPort int) *config.Config {
+	testCertDir := testhelpers.TestCertFolder()
 	return &config.Config{
 		Logging: helpers.LoggingConfig{
 			Level: "debug",

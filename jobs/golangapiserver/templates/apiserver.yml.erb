@@ -91,13 +91,14 @@ dashboard_redirect_uri: <%= p("autoscaler.apiserver.broker.server.dashboard_redi
 default_credential_type: <%= p("autoscaler.apiserver.broker.default_credential_type") %>
 
 health:
-  port: <%= p("autoscaler.apiserver.health.port") %>
-  <% if_p("autoscaler.apiserver.health.ca_cert", "autoscaler.apiserver.health.server_cert", "autoscaler.apiserver.health.server_key") do %>
-  tls:
-    ca_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/ca.crt
-    cert_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/server.crt
-    key_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/server.key
-  <% end %>
+  server_config:
+    port: <%= p("autoscaler.apiserver.health.port") %>
+    <% if_p("autoscaler.apiserver.health.ca_cert", "autoscaler.apiserver.health.server_cert", "autoscaler.apiserver.health.server_key") do %>
+    tls:
+      ca_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/ca.crt
+      cert_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/server.crt
+      key_file: /var/vcap/jobs/golangapiserver/config/certs/healthendpoint/server.key
+    <% end %>
 
 db:
   policy_db:

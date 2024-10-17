@@ -58,15 +58,17 @@ cf:
 logging:
   level: <%= p("autoscaler.operator.logging.level") %>
 health:
-  port: <%= p("autoscaler.operator.health.port") %>
-  username: <%= p("autoscaler.operator.health.username") %>
-  password: <%= p("autoscaler.operator.health.password") %>
-  <% if_p("autoscaler.operator.health.ca_cert", "autoscaler.operator.health.server_cert", "autoscaler.operator.health.server_key") do %>
-  tls:
-    ca_file: /var/vcap/jobs/operator/config/certs/healthendpoint/ca.crt
-    cert_file: /var/vcap/jobs/operator/config/certs/healthendpoint/server.crt
-    key_file: /var/vcap/jobs/operator/config/certs/healthendpoint/server.key
-  <% end %>
+  server_config:
+    port: <%= p("autoscaler.operator.health.port") %>
+    <% if_p("autoscaler.operator.health.ca_cert", "autoscaler.operator.health.server_cert", "autoscaler.operator.health.server_key") do %>
+    tls:
+      ca_file: /var/vcap/jobs/operator/config/certs/healthendpoint/ca.crt
+      cert_file: /var/vcap/jobs/operator/config/certs/healthendpoint/server.crt
+      key_file: /var/vcap/jobs/operator/config/certs/healthendpoint/server.key
+    <% end %>
+  basic_auth:
+    username: <%= p("autoscaler.operator.health.username") %>
+    password: <%= p("autoscaler.operator.health.password") %>
 
 http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
 
