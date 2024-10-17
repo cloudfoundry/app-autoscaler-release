@@ -167,15 +167,15 @@ resources:
     tag_filter: v0.*
 
 - name: java-release
-  type: git
+  type: github-release
   icon: github
   check_every: 5m
   source:
-    uri: https://github.com/SAP/SapMachine.git
-    branch: sapmachine21 # use JDK 21 as the LTS version
-    fetch_tags: true
-    tag_regex: 'sapmachine-[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+'
-    version_depth: 50
+    owner: SAP
+    repository: SapMachine
+    access_token: ((autoscaler_access_token))
+    release: true
+    tag_filter: "sapmachine-21.*"
 
 - name: gcp-jammy-stemcell
   type: bosh-io-stemcell
