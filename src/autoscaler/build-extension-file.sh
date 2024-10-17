@@ -20,7 +20,10 @@ export POSTGRES_ADDRESS="${DEPLOYMENT_NAME}-postgres.tcp.${SYSTEM_DOMAIN}"
 export POSTGRES_EXTERNAL_PORT="${PR_NUMBER:-5432}"
 
 export METRICSFORWARDER_HEALTH_PASSWORD="$(credhub get -n /bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_metricsforwarder_health_password --quiet)"
-export METRICSFORWARDER_APPNAME="${METRICSFORWARDER_APPNAME:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
+
+export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
+export PUBLICAPISERVER_HOST="${PUBLICAPISERVER_HOST:-"${DEPLOYMENT_NAME}"}"
+export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
 
 export POLICY_DB_PASSWORD="$(credhub get -n /bosh-autoscaler/${DEPLOYMENT_NAME}/database_password --quiet)"
 export POLICY_DB_SERVER_CA="$(credhub get -n /bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_server --key ca --quiet )"
@@ -45,10 +48,14 @@ modules:
     - name: syslog-client
     parameters:
       routes:
-      - route: ${METRICSFORWARDER_APPNAME}.\${default-domain}
+      - route: ${METRICSFORWARDER_HOST}.\${default-domain}
+
   - name: publicapiserver
     parameters:
       instances: 0
+      routes:
+      - route: ${PUBLICAPISERVER_HOST}.\${default-domain}
+      - route: ${SERVICEBROKER_HOST}.\${default-domain}
 
 resources:
 - name: metricsforwarder-config

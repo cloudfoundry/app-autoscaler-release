@@ -177,7 +177,7 @@ mta-build: mta-build-clean
 	sed -i 's/VERSION/$(VERSION)/g' mta.yaml
 	mkdir -p $(DEST)
 	mbt build
-	@mv mta_archives/com.github.cloudfoundry.app-autoscaler-release_$(VERSION).mtar $(DEST)/app-autoscaler-release-v$(VERSION).mtar
+	@mv ${PWD}/mta_archives/com.github.cloudfoundry.app-autoscaler-release_$(VERSION).mtar $(DEST)/app-autoscaler-release-v$(VERSION).mtar
 
 mta-build-clean:
 	rm -rf mta_archives

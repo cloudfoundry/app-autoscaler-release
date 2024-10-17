@@ -27,7 +27,7 @@ modules:
     build-parameters:
       builder: custom
       commands:
-      - make vendor
+      - make clean vendor
   - name: publicapiserver
     type: go
     path: .
@@ -46,7 +46,7 @@ modules:
     build-parameters:
       builder: custom
       commands:
-      - make vendor
+      - make clean vendor
 
 resources:
 - name: metricsforwarder-config
