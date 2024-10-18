@@ -26,6 +26,8 @@ type CustomMetricAPIClient struct{}
 
 var _ CustomMetricClient = &CustomMetricAPIClient{}
 
+var CfenvCurrent = cfenv.Current
+
 func CustomMetricsTests(logger logr.Logger, r *gin.RouterGroup, customMetricTest CustomMetricClient) *gin.RouterGroup {
 	r.GET("/mtls/:name/:value", handleCustomMetricsEndpoint(logger, customMetricTest, true))
 	r.GET("/:name/:value", handleCustomMetricsEndpoint(logger, customMetricTest, false))
@@ -52,16 +54,10 @@ func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetr
 			Error(c, http.StatusBadRequest, "invalid metric value: %s", err.Error())
 			return
 		}
-		// required if neighbour app is sending metric for appToScaleGuid
-		appConfig := &cfenv.App{}
+		// required if producer app is sending metric for appToScaleGuid
 		appToScaleGuid := c.Query("appToScaleGuid")
-		if appToScaleGuid != "" {
-			logger.Info("neighbour-app-relationship-found", "appToScaleGuid", appToScaleGuid)
-			appConfig.AppID = appToScaleGuid
-			//assuming the neighbour app has the same autoscaler service as the appToScale
-			currentApp, _ := cfenv.Current()
-			appConfig.Services = currentApp.Services
-		}
+		appConfig := &cfenv.App{AppID: appToScaleGuid}
+
 		err = customMetricTest.PostCustomMetric(c, logger, appConfig, float64(metricValue), metricName, useMtls)
 		if err != nil {
 			logger.Error(err, "failed to submit custom metric")
@@ -73,15 +69,19 @@ func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetr
 }
 
 func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, logger logr.Logger, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
-	var err error
-	logger.Info("sending custom metric", "appConfig", appConfig)
-	if appConfig == nil || appConfig.AppID == "" {
-		appConfig, err = cfenv.Current()
-		if err != nil {
-			return fmt.Errorf("cloud foundry environment not found %w", err)
-		}
+	currentApp, err := CfenvCurrent()
+	if err != nil {
+		return fmt.Errorf("cloud foundry environment not found %w", err)
 	}
-
+	// appToScale is provided i.e. producer and consumer app relationship
+	if appConfig != nil && appConfig.AppID != "" {
+		logger.Info("producer-app-relationship-found", "appToScaleGuid", appConfig.AppID)
+		//assuming the producer app has the same autoscaler service credentials as appToScale
+		appConfig.Services = currentApp.Services
+	}
+	if appConfig.AppID == "" {
+		appConfig = currentApp
+	}
 	appId := api.GUID(appConfig.AppID)
 	autoscalerCredentials, err := getAutoscalerCredentials(appConfig)
 	if err != nil {
