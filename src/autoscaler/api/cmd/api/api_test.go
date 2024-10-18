@@ -42,7 +42,7 @@ var _ = Describe("Api", func() {
 		healthHttpClient = &http.Client{}
 		apiHttpClient = NewPublicApiClient()
 
-		serverURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.PublicApiServer.Port))
+		serverURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.Server.Port))
 		Expect(err).NotTo(HaveOccurred())
 
 		brokerURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.BrokerServer.Port))
@@ -95,9 +95,9 @@ var _ = Describe("Api", func() {
 				runner.startCheck = ""
 				missingConfig := cfg
 
-				missingConfig.DB = make(map[string]db.DatabaseConfig)
-				missingConfig.DB[db.PolicyDb] = db.DatabaseConfig{URL: ""}
-				missingConfig.DB[db.BindingDb] = db.DatabaseConfig{URL: ""}
+				missingConfig.Db = make(map[string]db.DatabaseConfig)
+				missingConfig.Db[db.PolicyDb] = db.DatabaseConfig{URL: ""}
+				missingConfig.Db[db.BindingDb] = db.DatabaseConfig{URL: ""}
 
 				var brokerCreds []config.BrokerCredentialsConfig
 				missingConfig.BrokerCredentials = brokerCreds

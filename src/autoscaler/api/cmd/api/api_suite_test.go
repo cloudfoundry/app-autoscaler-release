@@ -122,7 +122,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
 		},
 	}
-	cfg.PublicApiServer = helpers.ServerConfig{
+	cfg.Server = helpers.ServerConfig{
 		Port: publicApiPort,
 		TLS: models.TLSCerts{
 			KeyFile:    filepath.Join(testCertDir, "api.key"),
@@ -131,15 +131,15 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 		},
 	}
 	cfg.Logging.Level = "info"
-	cfg.DB = make(map[string]db.DatabaseConfig)
+	cfg.Db = make(map[string]db.DatabaseConfig)
 	dbUrl := GetDbUrl()
-	cfg.DB[db.BindingDb] = db.DatabaseConfig{
+	cfg.Db[db.BindingDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
 		ConnectionMaxLifetime: 10 * time.Second,
 	}
-	cfg.DB[db.PolicyDb] = db.DatabaseConfig{
+	cfg.Db[db.PolicyDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
