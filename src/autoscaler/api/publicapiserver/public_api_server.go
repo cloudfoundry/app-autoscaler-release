@@ -99,7 +99,7 @@ func (s *PublicApiServer) GetMtlsServer() (ifrit.Runner, error) {
 
 	mainRouter := setupMainRouter(r, healthRouter)
 
-	return helpers.NewHTTPServer(s.logger, s.conf.PublicApiServer, mainRouter)
+	return helpers.NewHTTPServer(s.logger, s.conf.Server, mainRouter)
 }
 
 func NewPublicApiServer(logger lager.Logger, conf *config.Config, policyDB db.PolicyDB,

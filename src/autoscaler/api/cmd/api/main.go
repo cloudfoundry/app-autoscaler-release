@@ -10,6 +10,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/publicapiserver"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
@@ -26,26 +27,23 @@ import (
 
 func main() {
 	var path string
+	var err error
+	var conf *config.Config
+
 	flag.StringVar(&path, "c", "", "config file")
 	flag.Parse()
-	if path == "" {
-		_, _ = fmt.Fprintln(os.Stderr, "missing config file")
-		os.Exit(1)
-	}
 
-	configFile, err := os.Open(path)
+	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to open config file '%s' : %s\n", path, err.Error())
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
 		os.Exit(1)
 	}
 
-	var conf *config.Config
-	conf, err = config.LoadConfig(configFile)
+	conf, err = config.LoadConfig(path, vcapConfiguration)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
 		os.Exit(1)
 	}
-	_ = configFile.Close()
 
 	err = conf.Validate()
 	if err != nil {
@@ -59,11 +57,11 @@ func main() {
 
 	members := grouper.Members{}
 
-	policyDb := sqldb.CreatePolicyDb(conf.DB[db.PolicyDb], logger)
+	policyDb := sqldb.CreatePolicyDb(conf.Db[db.PolicyDb], logger)
 	defer func() { _ = policyDb.Close() }()
-	logger.Debug("Connected to PolicyDB", lager.Data{"dbConfig": conf.DB[db.PolicyDb]})
+	logger.Debug("Connected to PolicyDB", lager.Data{"dbConfig": conf.Db[db.PolicyDb]})
 
-	credentialProvider := cred_helper.CredentialsProvider(conf.CredHelperImpl, conf.StoredProcedureConfig, conf.DB, 10*time.Second, 10*time.Minute, logger, policyDb)
+	credentialProvider := cred_helper.CredentialsProvider(conf.CredHelperImpl, conf.StoredProcedureConfig, conf.Db, 10*time.Second, 10*time.Minute, logger, policyDb)
 	defer func() { _ = credentialProvider.Close() }()
 
 	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "golangapiserver")
@@ -77,9 +75,9 @@ func main() {
 	}
 	logger.Debug("Successfully logged into CF", lager.Data{"API": conf.CF.API})
 
-	bindingDB, err := sqldb.NewBindingSQLDB(conf.DB[db.BindingDb], logger.Session("bindingdb-db"))
+	bindingDB, err := sqldb.NewBindingSQLDB(conf.Db[db.BindingDb], logger.Session("bindingdb-db"))
 	if err != nil {
-		logger.Error("failed to connect bindingdb database", err, lager.Data{"dbConfig": conf.DB[db.BindingDb]})
+		logger.Error("failed to connect bindingdb database", err, lager.Data{"dbConfig": conf.Db[db.BindingDb]})
 		os.Exit(1)
 	}
 	defer func() { _ = bindingDB.Close() }()
