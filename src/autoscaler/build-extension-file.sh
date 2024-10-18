@@ -84,6 +84,8 @@ resources:
   parameters:
     config:
       publicapiserver:
+        cf:
+          skip_ssl_validation: true
         metrics_forwarder:
           metrics_forwarder_url: ${METRICSFORWARDER_HOST}.\${default-domain}
           metrics_forwarder_mtls_url: ${METRICSFORWARDER_MTLS_HOST}.\${default-domain}

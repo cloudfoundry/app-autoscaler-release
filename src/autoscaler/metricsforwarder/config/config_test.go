@@ -9,22 +9,11 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
-
-func bytesToFile(b []byte) string {
-	if len(b) == 0 {
-		return ""
-	}
-
-	file, err := os.CreateTemp("", "")
-	Expect(err).NotTo(HaveOccurred())
-	_, err = file.Write(b)
-	Expect(err).NotTo(HaveOccurred())
-	return file.Name()
-}
 
 var _ = Describe("Config", func() {
 	var (
@@ -191,7 +180,7 @@ var _ = Describe("Config", func() {
 
 		When("config is read from file", func() {
 			JustBeforeEach(func() {
-				configFile = bytesToFile(configBytes)
+				configFile = testhelpers.BytesToFile(configBytes)
 				conf, err = LoadConfig(configFile, mockVCAPConfigurationReader)
 			})
 
