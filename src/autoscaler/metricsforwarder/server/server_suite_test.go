@@ -1,7 +1,6 @@
 package server_test
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -26,7 +25,6 @@ import (
 var (
 	conf            *config.Config
 	serverProcess   ifrit.Process
-	serverUrl       string
 	policyDB        *fakes.FakePolicyDB
 	rateLimiter     *fakes.FakeLimiter
 	fakeCredentials *fakes.FakeCredentials
@@ -72,8 +70,10 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 
 	healthConfig := helpers.HealthConfig{
 		ReadinessCheckEnabled: true,
-		HealthCheckUsername:   "metricsforwarderhealthcheckuser",
-		HealthCheckPassword:   "metricsforwarderhealthcheckpassword",
+		BasicAuth: models.BasicAuth{
+			Username: "metricsforwarderhealthcheckuser",
+			Password: "metricsforwarderhealthcheckpassword",
+		},
 	}
 	conf = &config.Config{
 		Server:            serverConfig,
@@ -94,7 +94,7 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	httpServer, err := NewServer(logger, conf, policyDB,
 		fakeCredentials, allowedMetricCache, httpStatusCollector, rateLimiter)
 	Expect(err).NotTo(HaveOccurred())
-	serverUrl = fmt.Sprintf("http://127.0.0.1:%d", conf.Server.Port)
+
 	serverProcess = ginkgomon_v2.Invoke(httpServer)
 })
 

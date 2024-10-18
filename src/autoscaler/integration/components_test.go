@@ -182,7 +182,7 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
-		PublicApiServer: helpers.ServerConfig{
+		Server: helpers.ServerConfig{
 			Port: publicApiPort,
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "api.key"),
@@ -352,7 +352,7 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 			EvaluatorCount:            1,
 			TriggerArrayChannelSize:   1,
 		},
-		DB: egConfig.DBConfig{
+		Db: egConfig.DBConfig{
 			PolicyDB: db.DatabaseConfig{
 				URL: dbUri,
 			},

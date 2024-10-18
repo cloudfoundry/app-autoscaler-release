@@ -9,22 +9,11 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
-
-func bytesToFile(b []byte) string {
-	if len(b) == 0 {
-		return ""
-	}
-
-	file, err := os.CreateTemp("", "")
-	Expect(err).NotTo(HaveOccurred())
-	_, err = file.Write(b)
-	Expect(err).NotTo(HaveOccurred())
-	return file.Name()
-}
 
 var _ = Describe("Config", func() {
 	var (
@@ -191,7 +180,7 @@ var _ = Describe("Config", func() {
 
 		When("config is read from file", func() {
 			JustBeforeEach(func() {
-				configFile = bytesToFile(configBytes)
+				configFile = testhelpers.BytesToFile(configBytes)
 				conf, err = LoadConfig(configFile, mockVCAPConfigurationReader)
 			})
 
@@ -242,7 +231,8 @@ db:
     max_idle_connections: 5
     connection_max_lifetime: 60s
 health:
-  port: 9999
+  server_config:
+    port: 9999
 cred_helper_impl: default
 `)
 				})
@@ -250,7 +240,6 @@ cred_helper_impl: default
 				It("returns the config", func() {
 					Expect(conf.Server.Port).To(Equal(8081))
 					Expect(conf.Logging.Level).To(Equal("debug"))
-					Expect(conf.Health.Port).To(Equal(9999))
 					Expect(conf.LoggregatorConfig.MetronAddress).To(Equal("127.0.0.1:3457"))
 					Expect(conf.Db[db.PolicyDb]).To(Equal(
 						db.DatabaseConfig{
@@ -278,7 +267,8 @@ db:
     max_idle_connections: 5
     connection_max_lifetime: 60s
 health:
-  port: 8081
+  server_config:
+    port: 8081
 `)
 				})
 
@@ -289,7 +279,6 @@ health:
 					Expect(conf.LoggregatorConfig.MetronAddress).To(Equal(DefaultMetronAddress))
 					Expect(conf.CacheTTL).To(Equal(DefaultCacheTTL))
 					Expect(conf.CacheCleanupInterval).To(Equal(DefaultCacheCleanupInterval))
-					Expect(conf.Health.Port).To(Equal(8081))
 				})
 			})
 
@@ -302,7 +291,6 @@ health:
 			conf = &Config{}
 			conf.Server.Port = 8081
 			conf.Logging.Level = "debug"
-			conf.Health.Port = 8081
 			conf.LoggregatorConfig.MetronAddress = "127.0.0.1:3458"
 			conf.LoggregatorConfig.TLS.CACertFile = "../testcerts/ca.crt"
 			conf.LoggregatorConfig.TLS.CertFile = "../testcerts/client.crt"

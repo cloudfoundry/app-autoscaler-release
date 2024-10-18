@@ -94,7 +94,7 @@ clean-acceptance:
 build: $(all_modules)
 build-tests: build-test
 build-test: $(addprefix test_,$(go_modules))
-build-all: build build-test build-test-app mta-build ## Build all modules and tests
+build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app mta-build ## Build all modules and tests
 db: target/db
 target/db:
 	@echo "# building $@"

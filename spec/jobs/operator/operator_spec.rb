@@ -20,10 +20,7 @@ describe "operator" do
         }
       }
 
-      expect(rendered_template["health"])
-        .to include(
-          {"port" => 1234}
-        )
+      expect(rendered_template["health"]["server_config"]["port"]).to eq(properties["autoscaler"]["operator"]["health"]["port"])
     end
 
     it "check operator basic auth username and password" do
@@ -35,12 +32,9 @@ describe "operator" do
         }
       }
 
-      expect(rendered_template["health"])
-        .to include(
-          {"port" => 1234,
-           "username" => "test-user",
-           "password" => "test-user-password"}
-        )
+      expect(rendered_template["health"]["server_config"]["port"]).to eq(properties["autoscaler"]["operator"]["health"]["port"])
+      expect(rendered_template["health"]["basic_auth"]["username"]).to eq(properties["autoscaler"]["operator"]["health"]["username"])
+      expect(rendered_template["health"]["basic_auth"]["password"]).to eq(properties["autoscaler"]["operator"]["health"]["password"])
     end
 
     context "uses tls" do
