@@ -173,11 +173,10 @@ mta-logs:
 .PHONY: mta-build
 mta-build: mta-build-clean
 	@echo "bulding mtar file for version: $(VERSION)"
-	cp mta.tpl.yaml mta.yaml
-	sed -i 's/VERSION/$(VERSION)/g' mta.yaml
-	mkdir -p $(DEST)
-	mbt build
-	@mv ${PWD}/mta_archives/com.github.cloudfoundry.app-autoscaler-release_$(VERSION).mtar $(DEST)/app-autoscaler-release-v$(VERSION).mtar
+	@cp mta.tpl.yaml mta.yaml
+	@sed -i 's/VERSION/$(VERSION)/g' mta.yaml
+	@mbt build
+	@mkdir -p "${PWD}/$(DEST)" && mv ${PWD}/mta_archives/com.github.cloudfoundry.app-autoscaler-release_$(VERSION).mtar ${PWD}/$(DEST)/app-autoscaler-release-v$(VERSION).mtar
 
 mta-build-clean:
 	rm -rf mta_archives

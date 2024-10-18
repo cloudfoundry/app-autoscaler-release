@@ -32,7 +32,7 @@ modules:
     type: go
     path: .
     properties:
-      GO_INSTALL_PACKAGE_SPEC: code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/cmd/publicapiserver
+      GO_INSTALL_PACKAGE_SPEC: code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api
     requires:
     - name: publicapiserver-config
     - name: policydb

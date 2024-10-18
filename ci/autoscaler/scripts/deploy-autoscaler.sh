@@ -101,7 +101,6 @@ function create_manifest(){
       -v app_autoscaler_version="${bosh_release_version}" \
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
-      -v metricsforwarder_host="${metricsforwarder_host}"\
       -v postgres_external_port="$(get_postgres_external_port)"\
 			--vars-file=/tmp/autoscaler-secrets.yml \
       -v skip_ssl_validation=true \

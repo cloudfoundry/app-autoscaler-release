@@ -21,7 +21,8 @@ export POSTGRES_EXTERNAL_PORT="${PR_NUMBER:-5432}"
 
 export METRICSFORWARDER_HEALTH_PASSWORD="$(credhub get -n /bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_metricsforwarder_health_password --quiet)"
 
-export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
+export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${DEPLOYMENT_NAME}metrics"}"
+export METRICSFORWARDER_MTLS_HOST="${METRICSFORWARDER_MTLS_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder-mtls"}"
 export PUBLICAPISERVER_HOST="${PUBLICAPISERVER_HOST:-"${DEPLOYMENT_NAME}"}"
 export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
 
@@ -49,6 +50,8 @@ modules:
     parameters:
       routes:
       - route: ${METRICSFORWARDER_HOST}.\${default-domain}
+      - route: ${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
+
 
   - name: publicapiserver
     parameters:
@@ -77,4 +80,11 @@ resources:
       client_cert: "${SYSLOG_CLIENT_CERT//$'\n'/\\n}"
       client_key: "${SYSLOG_CLIENT_KEY//$'\n'/\\n}"
       server_ca: "${SYSLOG_CLIENT_CA//$'\n'/\\n}"
+- name: publicapiserver-config
+  parameters:
+    config:
+      publicapiserver:
+        metrics_forwarder:
+          metrics_forwarder_url: ${METRICSFORWARDER_HOST}.\${default-domain}
+          metrics_forwarder_mtls_url: ${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
 EOF
