@@ -34,20 +34,6 @@
         "port": 1080
       }
     },
-    "db": {
-      "policy_db": {
-        "url": "REPLACEME_WITH_SERVICE",
-        "max_open_connections": 100,
-        "max_idle_connections": 10,
-        "connection_max_lifetime": "60s"
-      },
-      "binding_db": {
-        "url": "REPLACEME_WITH_SERVICE",
-        "max_open_connections": 20,
-        "max_idle_connections": 10,
-        "connection_max_lifetime": "60s"
-      }
-    },
     "scaling_engine": {
       "scaling_engine_url": "https://autoscaler-3119.scalingengine.service.cf.internal:6104",
       "tls": {

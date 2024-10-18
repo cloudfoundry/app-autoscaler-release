@@ -63,6 +63,34 @@ var _ = Describe("Config", func() {
 					Expect(err).To(MatchError(MatchRegexp("publicapiserver config service not found")))
 				})
 			})
+
+			When("VCAP_SERVICES has relational db service bind to app for policy db", func() {
+				BeforeEach(func() {
+					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(`{ "cred_helper_impl": "default" }`), nil)                                                                           // #nosec G101
+					expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
+				})
+
+				It("loads the db config from VCAP_SERVICES successfully", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.Db[db.PolicyDb].URL).To(Equal(expectedDbUrl))
+					actualDbName := mockVCAPConfigurationReader.MaterializeDBFromServiceArgsForCall(0)
+					Expect(actualDbName).To(Equal(db.PolicyDb))
+				})
+			})
+
+			When("VCAP_SERVICES has relational db service bind to app for binding db", func() {
+				BeforeEach(func() {
+					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(`{ "cred_helper_impl": "default" }`), nil)                                                                            // #nosec G101
+					expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/binding_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
+				})
+
+				It("loads the db config from VCAP_SERVICES successfully", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.Db[db.BindingDb].URL).To(Equal(expectedDbUrl))
+					actualDbName := mockVCAPConfigurationReader.MaterializeDBFromServiceArgsForCall(1)
+					Expect(actualDbName).To(Equal(db.BindingDb))
+				})
+			})
 		})
 
 		When("config is read from file", func() {
@@ -105,14 +133,14 @@ var _ = Describe("Config", func() {
 							CertFile:   "/var/vcap/jobs/autoscaler/config/certs/api.crt",
 						},
 					))
-					Expect(conf.DB[db.BindingDb]).To(Equal(
+					Expect(conf.Db[db.BindingDb]).To(Equal(
 						db.DatabaseConfig{
 							URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 							MaxOpenConnections:    10,
 							MaxIdleConnections:    5,
 							ConnectionMaxLifetime: 60 * time.Second,
 						}))
-					Expect(conf.DB[db.PolicyDb]).To(Equal(
+					Expect(conf.Db[db.PolicyDb]).To(Equal(
 						db.DatabaseConfig{
 							URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 							MaxOpenConnections:    10,
@@ -175,14 +203,14 @@ var _ = Describe("Config", func() {
 					Expect(conf.Logging.Level).To(Equal("info"))
 					Expect(conf.BrokerServer.Port).To(Equal(8080))
 					Expect(conf.Server.Port).To(Equal(8081))
-					Expect(conf.DB[db.BindingDb]).To(Equal(
+					Expect(conf.Db[db.BindingDb]).To(Equal(
 						db.DatabaseConfig{
 							URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 							MaxOpenConnections:    0,
 							MaxIdleConnections:    0,
 							ConnectionMaxLifetime: 0 * time.Second,
 						}))
-					Expect(conf.DB[db.PolicyDb]).To(Equal(
+					Expect(conf.Db[db.PolicyDb]).To(Equal(
 						db.DatabaseConfig{
 							URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 							MaxOpenConnections:    0,
@@ -230,14 +258,14 @@ rate_limit:
 		Describe("Validate", func() {
 			BeforeEach(func() {
 				conf = &Config{}
-				conf.DB = make(map[string]db.DatabaseConfig)
-				conf.DB[db.BindingDb] = db.DatabaseConfig{
+				conf.Db = make(map[string]db.DatabaseConfig)
+				conf.Db[db.BindingDb] = db.DatabaseConfig{
 					URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 					MaxOpenConnections:    10,
 					MaxIdleConnections:    5,
 					ConnectionMaxLifetime: 60 * time.Second,
 				}
-				conf.DB[db.PolicyDb] = db.DatabaseConfig{
+				conf.Db[db.PolicyDb] = db.DatabaseConfig{
 					URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 					MaxOpenConnections:    10,
 					MaxIdleConnections:    5,
@@ -285,7 +313,7 @@ rate_limit:
 
 			Context("when bindingdb url is not set", func() {
 				BeforeEach(func() {
-					conf.DB[db.BindingDb] = db.DatabaseConfig{URL: ""}
+					conf.Db[db.BindingDb] = db.DatabaseConfig{URL: ""}
 				})
 				It("should err", func() {
 					Expect(err).To(MatchError(MatchRegexp("Configuration error: BindingDB URL is empty")))
@@ -294,7 +322,7 @@ rate_limit:
 
 			Context("when policydb url is not set", func() {
 				BeforeEach(func() {
-					conf.DB[db.PolicyDb] = db.DatabaseConfig{URL: ""}
+					conf.Db[db.PolicyDb] = db.DatabaseConfig{URL: ""}
 				})
 				It("should err", func() {
 					Expect(err).To(MatchError(MatchRegexp("Configuration error: PolicyDB URL is empty")))

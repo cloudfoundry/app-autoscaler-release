@@ -99,7 +99,7 @@ type Config struct {
 	Logging                            helpers.LoggingConfig         `yaml:"logging"`
 	BrokerServer                       helpers.ServerConfig          `yaml:"broker_server"`
 	Server                             helpers.ServerConfig          `yaml:"public_api_server"`
-	DB                                 map[string]db.DatabaseConfig  `yaml:"db"`
+	Db                                 map[string]db.DatabaseConfig  `yaml:"db"`
 	BrokerCredentials                  []BrokerCredentialsConfig     `yaml:"broker_credentials"`
 	APIClientId                        string                        `yaml:"api_client_id"`
 	PlanCheck                          *PlanCheckConfig              `yaml:"plan_check"`
@@ -196,6 +196,48 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
+	if conf.Db == nil {
+		conf.Db = make(map[string]db.DatabaseConfig)
+	}
+
+	if err := configurePolicyDb(conf, vcapReader); err != nil {
+		return err
+	}
+
+	if err := configureBindingDb(conf, vcapReader); err != nil {
+		return err
+	}
+	return nil
+}
+
+func configurePolicyDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	currentPolicyDb, ok := conf.Db[db.PolicyDb]
+	if !ok {
+		conf.Db[db.PolicyDb] = db.DatabaseConfig{}
+	}
+
+	dbURL, err := vcapReader.MaterializeDBFromService(db.PolicyDb)
+	currentPolicyDb.URL = dbURL
+	if err != nil {
+		return err
+	}
+	conf.Db[db.PolicyDb] = currentPolicyDb
+	return nil
+}
+
+func configureBindingDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	currentBindingDb, ok := conf.Db[db.BindingDb]
+	if !ok {
+		conf.Db[db.BindingDb] = db.DatabaseConfig{}
+	}
+
+	dbURL, err := vcapReader.MaterializeDBFromService(db.BindingDb)
+	currentBindingDb.URL = dbURL
+	if err != nil {
+		return err
+	}
+	conf.Db[db.BindingDb] = currentBindingDb
+
 	return nil
 }
 
@@ -221,7 +263,7 @@ func (c *Config) Validate() error {
 		return err
 	}
 
-	if c.DB[db.PolicyDb].URL == "" {
+	if c.Db[db.PolicyDb].URL == "" {
 		return fmt.Errorf("Configuration error: PolicyDB URL is empty")
 	}
 	if c.Scheduler.SchedulerURL == "" {
@@ -261,7 +303,7 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("Configuration error: ScalingRules.CPU.UpperThreshold is less than zero")
 	}
 
-	if c.DB[db.BindingDb].URL == "" {
+	if c.Db[db.BindingDb].URL == "" {
 		return fmt.Errorf("Configuration error: BindingDB URL is empty")
 	}
 
