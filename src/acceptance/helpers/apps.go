@@ -82,9 +82,9 @@ func SendMetric(cfg *config.Config, appName string, metric int) {
 	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), "-f")
 }
 
-func SendMetricMTLS(cfg *config.Config, appName string, metric int) {
+func SendMetricMTLS(cfg *config.Config, appGuid string, appName string, metric int) {
 	GinkgoHelper()
-	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/mtls/test_metric/%d", metric), "-f")
+	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/mtls/test_metric/%d?appToScaleGuid=%s", metric, appGuid), "-f")
 }
 
 func StartAppWithErr(appName string, timeout time.Duration) error {
@@ -108,7 +108,7 @@ func StartApp(appName string, timeout time.Duration) bool {
 
 func CreateTestApp(cfg *config.Config, appType string, initialInstanceCount int) string {
 	appName := generator.PrefixedRandomName(cfg.Prefix, appType)
-	By("Creating test app")
+	By(fmt.Sprintf("Creating test app %s", appName))
 	CreateTestAppByName(cfg, appName, initialInstanceCount)
 	return appName
 }

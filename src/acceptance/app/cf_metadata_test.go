@@ -15,19 +15,19 @@ var _ = Describe("AutoScaler CF metadata support", func() {
 	)
 	BeforeEach(func() {
 		policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
-		appName = CreateTestApp(cfg, "labeled-go_app", 1)
-		appGUID, err = GetAppGuid(cfg, appName)
+		appToScaleName = CreateTestApp(cfg, "labeled-go_app", 1)
+		appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
 		Expect(err).NotTo(HaveOccurred())
-		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
-		StartApp(appName, cfg.CfPushTimeoutDuration())
+		instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+		StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 	})
 	AfterEach(AppAfterEach)
 
 	When("the label app-autoscaler.cloudfoundry.org/disable-autoscaling is set", func() {
 		It("should not scale out", func() {
 			By("Set the label app-autoscaler.cloudfoundry.org/disable-autoscaling to true")
-			SetLabel(cfg, appGUID, "app-autoscaler.cloudfoundry.org/disable-autoscaling", "true")
-			scaleOut := sendMetricToAutoscaler(cfg, appGUID, appName, 550, true)
+			SetLabel(cfg, appToScaleGUID, "app-autoscaler.cloudfoundry.org/disable-autoscaling", "true")
+			scaleOut := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 550, true)
 			Consistently(scaleOut).
 				WithTimeout(5 * time.Minute).
 				WithPolling(15 * time.Second).

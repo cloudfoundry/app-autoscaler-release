@@ -119,7 +119,7 @@ deploy: build
 
 .PHONY: clean
 clean:
-	@echo "# cleaning autoscaler"
+	@echo "# cleaning go_app"
 	@go clean -cache -testcache
 	@rm --force --recursive './build'
 	@rm --force --recursive './internal/app/appfakes'

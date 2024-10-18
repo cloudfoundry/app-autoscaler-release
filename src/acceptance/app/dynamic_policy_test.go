@@ -26,12 +26,12 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 	const minimalMemoryUsage = 17 // observed minimal memory usage by the test app
 
 	JustBeforeEach(func() {
-		appName = CreateTestApp(cfg, "dynamic-policy", initialInstanceCount)
+		appToScaleName = CreateTestApp(cfg, "dynamic-policy", initialInstanceCount)
 
-		appGUID, err = GetAppGuid(cfg, appName)
+		appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
 		Expect(err).NotTo(HaveOccurred())
-		StartApp(appName, cfg.CfPushTimeoutDuration())
-		instanceName = CreatePolicy(cfg, appName, appGUID, policy)
+		StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+		instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
 	})
 	BeforeEach(func() {
 		maxHeapLimitMb = cfg.NodeMemoryLimit - minimalMemoryUsage
@@ -52,16 +52,16 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 			It("should scale out and then back in.", func() {
 				By(fmt.Sprintf("Use heap %d MB of heap on app", int64(heapToUse)))
-				CurlAppInstance(cfg, appName, 0, fmt.Sprintf("/memory/%d/5", int64(heapToUse)))
+				CurlAppInstance(cfg, appToScaleName, 0, fmt.Sprintf("/memory/%d/5", int64(heapToUse)))
 
 				By("wait for scale to 2")
-				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+				WaitForNInstancesRunning(appToScaleGUID, 2, 5*time.Minute)
 
 				By("Drop memory used by app")
-				CurlAppInstance(cfg, appName, 0, "/memory/close")
+				CurlAppInstance(cfg, appToScaleName, 0, "/memory/close")
 
 				By("Wait for scale to minimum instances")
-				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+				WaitForNInstancesRunning(appToScaleGUID, 1, 5*time.Minute)
 			})
 		})
 	})
@@ -78,16 +78,16 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			It("should scale out and back in", func() {
 				heapToUse := min(maxHeapLimitMb, int(float64(cfg.NodeMemoryLimit)*0.80))
 				By(fmt.Sprintf("use 80%% or %d MB of memory in app", heapToUse))
-				CurlAppInstance(cfg, appName, 0, fmt.Sprintf("/memory/%d/5", heapToUse))
+				CurlAppInstance(cfg, appToScaleName, 0, fmt.Sprintf("/memory/%d/5", heapToUse))
 
 				By("Wait for scale to 2 instances")
-				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+				WaitForNInstancesRunning(appToScaleGUID, 2, 5*time.Minute)
 
 				By("drop memory used")
-				CurlAppInstance(cfg, appName, 0, "/memory/close")
+				CurlAppInstance(cfg, appToScaleName, 0, "/memory/close")
 
 				By("Wait for scale down to 1 instance")
-				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+				WaitForNInstancesRunning(appToScaleGUID, 1, 5*time.Minute)
 			})
 		})
 	})
@@ -112,7 +112,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				appUri := cfh.AppUri(appName, "/responsetime/slow/100", cfg)
+				appUri := cfh.AppUri(appToScaleName, "/responsetime/slow/100", cfg)
 				ticker = time.NewTicker(1 * time.Second)
 				rps := 5
 				go func(chan bool) {
@@ -131,7 +131,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			It("should scale out", Label(acceptance.LabelSmokeTests), func() {
-				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+				WaitForNInstancesRunning(appToScaleGUID, 2, 5*time.Minute)
 			})
 		})
 
@@ -143,7 +143,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				appUri := cfh.AppUri(appName, "/responsetime/slow/100", cfg)
+				appUri := cfh.AppUri(appToScaleName, "/responsetime/slow/100", cfg)
 				ticker = time.NewTicker(1 * time.Second)
 				rps := 5
 				go func(chan bool) {
@@ -162,7 +162,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			It("should scale in", func() {
-				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+				WaitForNInstancesRunning(appToScaleGUID, 1, 5*time.Minute)
 			})
 		})
 
@@ -187,7 +187,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
+				appUri := cfh.AppUri(appToScaleName, "/responsetime/fast", cfg)
 				ticker = time.NewTicker(1 * time.Second)
 				rps := 20
 				go func(chan bool) {
@@ -206,7 +206,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			It("should scale out", func() {
-				WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+				WaitForNInstancesRunning(appToScaleGUID, 2, 5*time.Minute)
 			})
 		})
 
@@ -218,7 +218,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			})
 
 			JustBeforeEach(func() {
-				appUri := cfh.AppUri(appName, "/responsetime/fast", cfg)
+				appUri := cfh.AppUri(appToScaleName, "/responsetime/fast", cfg)
 				ticker = time.NewTicker(1 * time.Second)
 				rps := 20
 				go func(chan bool) {
@@ -239,7 +239,7 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			It("should scale in", func() {
 				// because we are generating 20rps but starting with 2 instances,
 				// there should be on average 10rps per instance, which should trigger the scale in
-				WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+				WaitForNInstancesRunning(appToScaleGUID, 1, 5*time.Minute)
 			})
 		})
 	})
@@ -254,14 +254,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 
 		It("when cpu is greater than scaling out threshold", func() {
 			By("should scale out to 2 instances")
-			StartCPUUsage(cfg, appName, int(float64(cfg.CPUUpperThreshold)*0.9), 5)
-			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+			StartCPUUsage(cfg, appToScaleName, int(float64(cfg.CPUUpperThreshold)*0.9), 5)
+			WaitForNInstancesRunning(appToScaleGUID, 2, 5*time.Minute)
 
 			By("should scale in to 1 instance after cpu usage is reduced")
 			//only hit the one instance that was asked to run hot.
-			StopCPUUsage(cfg, appName, 0)
+			StopCPUUsage(cfg, appToScaleName, 0)
 
-			WaitForNInstancesRunning(appGUID, 1, 10*time.Minute)
+			WaitForNInstancesRunning(appToScaleGUID, 1, 10*time.Minute)
 		})
 	})
 
@@ -285,16 +285,16 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 			//   - app memory = 1GB
 			//   - app CPU entitlement = 4096[total shares] / (32[GB host ram] * 1024) * (1[app memory in GB] * 1024) * 0,1953 ~= 25%
 
-			ScaleMemory(cfg, appName, cfg.CPUUtilScalingPolicyTest.AppMemory)
+			ScaleMemory(cfg, appToScaleName, cfg.CPUUtilScalingPolicyTest.AppMemory)
 
 			// cpuutil will be 100% if cpu usage is reaching the value of cpu entitlement
 			maxCPUUsage := cfg.CPUUtilScalingPolicyTest.AppCPUEntitlement
-			StartCPUUsage(cfg, appName, maxCPUUsage, 5)
-			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+			StartCPUUsage(cfg, appToScaleName, maxCPUUsage, 5)
+			WaitForNInstancesRunning(appToScaleGUID, 2, 5*time.Minute)
 
 			// only hit the one instance that was asked to run hot
-			StopCPUUsage(cfg, appName, 0)
-			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+			StopCPUUsage(cfg, appToScaleName, 0)
+			WaitForNInstancesRunning(appToScaleGUID, 1, 5*time.Minute)
 		})
 	})
 
@@ -305,14 +305,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		})
 
 		It("should scale out and in", func() {
-			ScaleDisk(cfg, appName, "1GB")
+			ScaleDisk(cfg, appToScaleName, "1GB")
 
-			StartDiskUsage(cfg, appName, 800, 5)
-			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+			StartDiskUsage(cfg, appToScaleName, 800, 5)
+			WaitForNInstancesRunning(appToScaleGUID, 2, 5*time.Minute)
 
 			// only hit the one instance that was asked to occupy disk space
-			StopDiskUsage(cfg, appName, 0)
-			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+			StopDiskUsage(cfg, appToScaleName, 0)
+			WaitForNInstancesRunning(appToScaleGUID, 1, 5*time.Minute)
 		})
 	})
 
@@ -323,14 +323,14 @@ var _ = Describe("AutoScaler dynamic policy", func() {
 		})
 
 		It("should scale out and in", func() {
-			ScaleDisk(cfg, appName, "1GB")
+			ScaleDisk(cfg, appToScaleName, "1GB")
 
-			StartDiskUsage(cfg, appName, 800, 5)
-			WaitForNInstancesRunning(appGUID, 2, 5*time.Minute)
+			StartDiskUsage(cfg, appToScaleName, 800, 5)
+			WaitForNInstancesRunning(appToScaleGUID, 2, 5*time.Minute)
 
 			// only hit the one instance that was asked to occupy disk space
-			StopDiskUsage(cfg, appName, 0)
-			WaitForNInstancesRunning(appGUID, 1, 5*time.Minute)
+			StopDiskUsage(cfg, appToScaleName, 0)
+			WaitForNInstancesRunning(appToScaleGUID, 1, 5*time.Minute)
 		})
 	})
 })

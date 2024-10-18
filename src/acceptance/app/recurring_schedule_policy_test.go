@@ -22,8 +22,8 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 	BeforeEach(func() {
 		instanceName = CreateService(cfg)
 		initialInstanceCount = 1
-		appName = CreateTestApp(cfg, "recurring-schedule", initialInstanceCount)
-		appGUID, err = GetAppGuid(cfg, appName)
+		appToScaleName = CreateTestApp(cfg, "recurring-schedule", initialInstanceCount)
+		appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
 		Expect(err).NotTo(HaveOccurred())
 	})
 	AfterEach(AppAfterEach)
@@ -36,21 +36,21 @@ var _ = Describe("AutoScaler recurring schedule policy", func() {
 		JustBeforeEach(func() {
 			startTime, endTime = getStartAndEndTime(time.UTC, 70*time.Second, time.Duration(interval+120)*time.Second)
 			policy = GenerateDynamicAndRecurringSchedulePolicy(instanceMinCount, 4, 50, "UTC", startTime, endTime, daysOfMonthOrWeek, scheduleInstanceMinCount, 5, scheduleInitialMinInstanceCount)
-			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
-			StartApp(appName, cfg.CfPushTimeoutDuration())
+			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 		})
 
 		scaleDown := func() {
 			By("setting to initial_min_instance_count")
 			jobRunTime := time.Until(startTime.Add(5 * time.Minute))
-			WaitForNInstancesRunning(appGUID, scheduleInitialMinInstanceCount, jobRunTime, "The schedule should initially trigger scaling to initial_min_instance_count %i", scheduleInitialMinInstanceCount)
+			WaitForNInstancesRunning(appToScaleGUID, scheduleInitialMinInstanceCount, jobRunTime, "The schedule should initially trigger scaling to initial_min_instance_count %i", scheduleInitialMinInstanceCount)
 
 			By("setting schedule's instance_min_count")
 			jobRunTime = time.Until(endTime)
-			WaitForNInstancesRunning(appGUID, scheduleInstanceMinCount, jobRunTime, "The schedule should allow scaling down to instance_min_count %i", scheduleInstanceMinCount)
+			WaitForNInstancesRunning(appToScaleGUID, scheduleInstanceMinCount, jobRunTime, "The schedule should allow scaling down to instance_min_count %i", scheduleInstanceMinCount)
 
 			By("setting to default instance_min_count")
-			WaitForNInstancesRunning(appGUID, instanceMinCount, time.Until(endTime.Add(time.Duration(interval+60)*time.Second)), "After the schedule ended scaling down to instance_min_count %i should be possible", instanceMinCount)
+			WaitForNInstancesRunning(appToScaleGUID, instanceMinCount, time.Until(endTime.Add(time.Duration(interval+60)*time.Second)), "After the schedule ended scaling down to instance_min_count %i should be possible", instanceMinCount)
 		}
 
 		Context("with days of month", func() {

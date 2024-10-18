@@ -106,6 +106,19 @@ var _ = Describe("AutoScaler Service Broker", func() {
 
 			instance.unbind(appName)
 		})
+		It("binds&unbinds with configurations and policy", func() {
+			policyFile := "../assets/file/policy/policy-with-configuration.json"
+			policy, err := os.ReadFile(policyFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
+			Expect(bindingParameters).Should(MatchJSON(policy))
+
+			instance.unbind(appName)
+		})
 
 		It("binds&unbinds with policy having credential-type as x509", func() {
 			policyFile := "../assets/file/policy/policy-with-credential-type.json"

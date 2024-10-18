@@ -219,18 +219,22 @@ func (c *Config) Validate() error {
 
 func (c *Config) validateDbConfig() error {
 	if c.Db[db.PolicyDb].URL == "" {
-		return errors.New("Policy DB url is empty")
+		return errors.New("configuration error: Policy DB url is empty")
 	}
-	return nil
+	if c.Db[db.BindingDb].URL == "" {
+		return errors.New("configuration error: Binding DB url is empty")
+	}
+	if c.UsingSyslog() {
+		return c.validateSyslogConfig()
+	}
+	return c.validateLoggregatorConfig()
 }
-
 func (c *Config) validateSyslogOrLoggregator() error {
 	if c.UsingSyslog() {
 		return c.validateSyslogConfig()
 	}
 	return c.validateLoggregatorConfig()
 }
-
 func (c *Config) validateSyslogConfig() error {
 	if c.SyslogConfig.TLS.CACertFile == "" {
 		return errors.New("SyslogServer Loggregator CACert is empty")
