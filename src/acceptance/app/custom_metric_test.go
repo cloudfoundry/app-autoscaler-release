@@ -138,7 +138,6 @@ func sendMetricToAutoscaler(config *config.Config, appToScaleGUID string, metric
 		} else {
 			SendMetric(config, metricProducerAppName, metricThreshold)
 		}
-		fmt.Println("INVOKED====================")
 		return RunningInstances(appToScaleGUID, 5*time.Second)
 	}
 }
