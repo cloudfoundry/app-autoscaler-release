@@ -92,12 +92,12 @@ func pushAppAndBindService(appName string, runningApps *int32, pendingApps *sync
 	}
 	policy := helpers.GenerateDynamicScaleOutAndInPolicy(
 		1, 2, "test_metric", 500, 500)
-	appGUID, err := helpers.GetAppGuid(cfg, appName)
+	_, err = helpers.GetAppGuid(cfg, appName)
 	if err != nil {
 		errors.Store(appName, err)
 		return
 	}
-	_, err = helpers.CreatePolicyWithErr(cfg, appName, appGUID, policy)
+	_, err = helpers.CreatePolicyWithErr(cfg, appName, policy)
 	if err != nil {
 		errors.Store(appName, err)
 		return

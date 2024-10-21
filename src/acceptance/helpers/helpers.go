@@ -183,17 +183,6 @@ func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
 	return url.String()
 }
 
-func GenerateBindingConfiguration(allowFrom string) string {
-	bindingConfig := BindingConfig{
-		Configuration: Configuration{CustomMetrics: CustomMetricsConfig{
-			MetricSubmissionStrategy: MetricsSubmissionStrategy{AllowFrom: allowFrom},
-		}},
-	}
-	marshalledBinding, err := MarshalWithoutHTMLEscape(bindingConfig)
-	Expect(err).NotTo(HaveOccurred())
-	return string(marshalledBinding)
-}
-
 func GenerateBindingsWithScalingPolicy(allowFrom string, instanceMin, instanceMax int, metricName string, scaleInThreshold, scaleOutThreshold int64) string {
 	bindingConfig := BindingConfig{
 		Configuration: Configuration{CustomMetrics: CustomMetricsConfig{
@@ -270,27 +259,6 @@ func GenerateDynamicScaleOutPolicyWithExtraFields(instanceMin, instanceMax int, 
 	Expect(extraBytes).NotTo(MatchJSON(validBytes))
 
 	return string(extraBytes), string(validBytes)
-}
-
-func GenerateDynamicScaleInPolicy(instanceMin, instanceMax int, metricName string, threshold int64) string {
-	scalingInRule := ScalingRule{
-		MetricType:            metricName,
-		BreachDurationSeconds: TestBreachDurationSeconds,
-		Threshold:             threshold,
-		Operator:              "<",
-		CoolDownSeconds:       TestCoolDownSeconds,
-		Adjustment:            "-1",
-	}
-
-	policy := ScalingPolicy{
-		InstanceMin:  instanceMin,
-		InstanceMax:  instanceMax,
-		ScalingRules: []*ScalingRule{&scalingInRule},
-	}
-	marshaled, err := MarshalWithoutHTMLEscape(policy)
-	Expect(err).NotTo(HaveOccurred())
-
-	return string(marshaled)
 }
 
 func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName string, scaleInWhenBelowThreshold int64, scaleOutWhenGreaterOrEqualThreshold int64) string {
@@ -512,15 +480,15 @@ func MarshalWithoutHTMLEscape(v interface{}) ([]byte, error) {
 
 func CreatePolicy(cfg *config.Config, appName, appGUID, policy string) string {
 	GinkgoHelper()
-	instanceName, _ := createPolicy(cfg, appName, appGUID, policy)
+	instanceName, _ := createPolicy(cfg, appName, policy)
 	return instanceName
 }
 
-func CreatePolicyWithErr(cfg *config.Config, appName, appGUID, policy string) (string, error) {
-	return createPolicy(cfg, appName, appGUID, policy)
+func CreatePolicyWithErr(cfg *config.Config, appName, policy string) (string, error) {
+	return createPolicy(cfg, appName, policy)
 }
 
-func createPolicy(cfg *config.Config, appName, appGUID, policy string) (string, error) {
+func createPolicy(cfg *config.Config, appName, policy string) (string, error) {
 	GinkgoHelper()
 	instanceName := generator.PrefixedRandomName(cfg.Prefix, cfg.InstancePrefix)
 	err := Retry(defaultRetryAttempt, defaultRetryAfter, func() error { return CreateServiceWithPlan(cfg, cfg.ServicePlan, instanceName) })
@@ -628,23 +596,6 @@ func GetServiceCredentialBindingParameters(cfg *config.Config, instanceName stri
 	return strings.TrimSpace(string(cmd.Out.Contents()))
 }
 
-func CreatePolicyWithAPI(cfg *config.Config, appGUID, policy string) {
-	GinkgoHelper()
-	oauthToken := OauthToken(cfg)
-	client := GetHTTPClient(cfg)
-
-	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
-	req, err := http.NewRequest("PUT", policyURL, bytes.NewBuffer([]byte(policy)))
-	Expect(err).ShouldNot(HaveOccurred())
-	req.Header.Add("Authorization", oauthToken)
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	Expect(err).ShouldNot(HaveOccurred())
-	defer func() { _ = resp.Body.Close() }()
-	Expect(resp).Should(HaveHTTPStatus(200, 201), "assigning policy by putting to %s", policyURL)
-}
-
 func GetHTTPClient(cfg *config.Config) *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
@@ -677,13 +628,6 @@ func GetAppGuid(cfg *config.Config, appName string) (string, error) {
 
 	appGuid, err := TRetry(3, 60, getAppGuid)
 	return appGuid, err
-}
-
-func FailOnCommandFailuref(command *Session, format string, args ...any) *Session {
-	if command.ExitCode() != 0 {
-		Fail(fmt.Sprintf(format, args...))
-	}
-	return command
 }
 
 func SetLabel(cfg *config.Config, appGUID string, labelKey string, labelValue string) {

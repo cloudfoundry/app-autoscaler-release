@@ -1,6 +1,9 @@
 {
   "configuration": {
     "custom_metrics": {
+      "auth": {
+        "credential_type": ""
+      },
       "metric_submission_strategy": {
         "allow_from": "bound_app"
       }
