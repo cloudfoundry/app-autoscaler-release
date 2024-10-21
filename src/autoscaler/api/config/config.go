@@ -158,7 +158,6 @@ func defaultConfig() Config {
 			},
 		},
 	}
-
 }
 func loadYamlFile(filepath string, conf *Config) error {
 	if filepath == "" {

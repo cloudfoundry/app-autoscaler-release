@@ -198,7 +198,7 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
 			},
 		},
-		DB: map[string]db.DatabaseConfig{
+		Db: map[string]db.DatabaseConfig{
 			"policy_db": {
 				URL: dbURI,
 			},
@@ -352,7 +352,7 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 			EvaluatorCount:            1,
 			TriggerArrayChannelSize:   1,
 		},
-		Db: egConfig.DBConfig{
+		DB: egConfig.DBConfig{
 			PolicyDB: db.DatabaseConfig{
 				URL: dbUri,
 			},
