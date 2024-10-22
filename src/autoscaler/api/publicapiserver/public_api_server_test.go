@@ -2,6 +2,7 @@ package publicapiserver_test
 
 import (
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -458,5 +459,10 @@ func verifyResponse(httpClient *http.Client, serverUrl *url.URL, path string, he
 		defer func() { _ = resp.Body.Close() }()
 	}
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	ExpectWithOffset(1, err).NotTo(HaveOccurred())
+	ExpectWithOffset(1, string(respBody)).NotTo(BeEmpty())
+
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(expectResponseStatusCode))
 }

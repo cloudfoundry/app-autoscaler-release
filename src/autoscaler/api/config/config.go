@@ -36,7 +36,7 @@ const (
 
 var (
 	ErrReadYaml                      = errors.New("failed to read config file")
-	ErrPublicApiServerConfigNotFound = errors.New("metricsforwarder config service not found")
+	ErrPublicApiServerConfigNotFound = errors.New("publicapiserver config service not found")
 )
 
 var defaultBrokerServerConfig = helpers.ServerConfig{
@@ -178,7 +178,7 @@ func loadYamlFile(filepath string, conf *Config) error {
 	return nil
 }
 func loadPublicApiServerConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	data, err := vcapReader.GetServiceCredentialContent("metricsforwarder-config", "metricsforwarder")
+	data, err := vcapReader.GetServiceCredentialContent("publicapiserver-config", "publicapiserver")
 	if err != nil {
 		return fmt.Errorf("%w: %v", ErrPublicApiServerConfigNotFound, err)
 	}
@@ -186,6 +186,7 @@ func loadPublicApiServerConfig(conf *Config, vcapReader configutil.VCAPConfigura
 }
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}

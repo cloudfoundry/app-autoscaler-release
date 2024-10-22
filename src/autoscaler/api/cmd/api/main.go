@@ -75,17 +75,17 @@ func main() {
 	}
 	logger.Debug("Successfully logged into CF", lager.Data{"API": conf.CF.API})
 
-	bindingDB, err := sqldb.NewBindingSQLDB(conf.Db[db.BindingDb], logger.Session("bindingdb-db"))
+	bindingDb, err := sqldb.NewBindingSQLDB(conf.Db[db.BindingDb], logger.Session("bindingdb-db"))
 	if err != nil {
 		logger.Error("failed to connect bindingdb database", err, lager.Data{"dbConfig": conf.Db[db.BindingDb]})
 		os.Exit(1)
 	}
-	defer func() { _ = bindingDB.Close() }()
+	defer func() { _ = bindingDb.Close() }()
 	checkBindingFunc := func(appId string) bool {
-		return bindingDB.CheckServiceBinding(appId)
+		return bindingDb.CheckServiceBinding(appId)
 	}
 	brokerHttpServer, err := brokerserver.NewBrokerServer(logger.Session("broker_http_server"), conf,
-		bindingDB, policyDb, httpStatusCollector, cfClient, credentialProvider)
+		bindingDb, policyDb, httpStatusCollector, cfClient, credentialProvider)
 	if err != nil {
 		logger.Error("failed to create broker http server", err)
 		os.Exit(1)
@@ -93,24 +93,42 @@ func main() {
 
 	rateLimiter := ratelimiter.DefaultRateLimiter(conf.RateLimit.MaxAmount, conf.RateLimit.ValidDuration, logger.Session("api-ratelimiter"))
 
-	publicApiHttpServer := publicapiserver.NewPublicApiServer(
-		logger.Session("public_api_http_server"), conf, policyDb, bindingDB,
+	publicApiServer := publicapiserver.NewPublicApiServer(
+		logger.Session("public_api_http_server"), conf, policyDb, bindingDb,
 		credentialProvider, checkBindingFunc, cfClient, httpStatusCollector,
 		rateLimiter)
 
-	vmServer, err := publicApiHttpServer.GetMtlsServer()
+	err = publicApiServer.Setup()
+	if err != nil {
+		logger.Error("failed to setup public api server", err)
+		os.Exit(1)
+	}
+
+	mtlsServer, err := publicApiServer.GetMtlsServer()
 	if err != nil {
 		logger.Error("failed to create public api http server", err)
 		os.Exit(1)
 	}
 
+	healthServer, err := publicApiServer.GetHealthServer()
+	if err != nil {
+		logger.Error("failed to create health http server", err)
+		os.Exit(1)
+	}
+
+	//unifiedServer, err := publicApiServer.GetServer()
+	//if err != nil {
+	//	logger.Error("failed to create public api http server", err)
+	//	os.Exit(1)
+	//}
+
 	logger.Debug("Successfully created health server")
 
-	healthServer, _ := publicApiHttpServer.GetHealthServer()
 	members = append(members,
-		grouper.Member{"public_api_http_server", vmServer},
+		grouper.Member{"public_api_http_server", mtlsServer},
 		grouper.Member{"broker", brokerHttpServer},
 		grouper.Member{"health_server", healthServer},
+	//	grouper.Member{"unified_server", unifiedServer},
 	)
 
 	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))

@@ -3,9 +3,11 @@ package main_test
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -24,23 +26,29 @@ var _ = Describe("Api", func() {
 		runner *ApiRunner
 		rsp    *http.Response
 
-		brokerHttpClient *http.Client
-		healthHttpClient *http.Client
-		apiHttpClient    *http.Client
+		brokerHttpClient        *http.Client
+		healthHttpClient        *http.Client
+		apiHttpClient           *http.Client
+		unifiedServerHttpClient *http.Client
 
-		serverURL *url.URL
-		brokerURL *url.URL
-		healthURL *url.URL
+		serverURL        *url.URL
+		brokerURL        *url.URL
+		healthURL        *url.URL
+		unifiedServerURL *url.URL
 
-		err error
+		vcapPort int
+		err      error
 	)
 
 	BeforeEach(func() {
 		runner = NewApiRunner()
 
+		vcapPort = 8080 + GinkgoParallelProcess()
+
 		brokerHttpClient = NewServiceBrokerClient()
 		healthHttpClient = &http.Client{}
 		apiHttpClient = NewPublicApiClient()
+		unifiedServerHttpClient = NewPublicApiClient()
 
 		serverURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.Server.Port))
 		Expect(err).NotTo(HaveOccurred())
@@ -51,8 +59,9 @@ var _ = Describe("Api", func() {
 		healthURL, err = url.Parse(fmt.Sprintf("http://127.0.0.1:%d", cfg.Health.ServerConfig.Port))
 		Expect(err).NotTo(HaveOccurred())
 
-	})
+		unifiedServerURL, err = url.Parse(fmt.Sprintf("http://127.0.0.1:%d", vcapPort))
 
+	})
 	Describe("Api configuration check", func() {
 		Context("with a missing config file", func() {
 			BeforeEach(func() {
@@ -64,7 +73,6 @@ var _ = Describe("Api", func() {
 			It("fails with an error", func() {
 				Eventually(runner.Session).Should(Exit(1))
 				Expect(runner.Session.Buffer()).To(Say("failed to open config file"))
-
 			})
 		})
 
@@ -288,4 +296,65 @@ var _ = Describe("Api", func() {
 		})
 	})
 
+	When("running in CF", func() {
+		BeforeEach(func() {
+			os.Setenv("VCAP_APPLICATION", "{}")
+			os.Setenv("VCAP_SERVICES", getVcapServices())
+			os.Setenv("PORT", fmt.Sprintf("%d", vcapPort))
+			runner.Start()
+		})
+		AfterEach(func() {
+			runner.Interrupt()
+			Eventually(runner.Session, 5).Should(Exit(0))
+			os.Unsetenv("VCAP_APPLICATION")
+			os.Unsetenv("VCAP_SERVICES")
+			os.Unsetenv("PORT")
+		})
+
+		XIt("should start a unified server", func() {
+			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", unifiedServerURL), nil)
+			Expect(err).NotTo(HaveOccurred())
+			rsp, err = unifiedServerHttpClient.Do(req)
+			Expect(err).ToNot(HaveOccurred())
+
+			bodyBytes, err := io.ReadAll(rsp.Body)
+			Expect(err).ToNot(HaveOccurred())
+			fmt.Println(string(bodyBytes))
+
+			Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+		})
+
+	})
+
 })
+
+func getVcapServices() (result string) {
+	// read file
+	dbClientCert, err := ioutil.ReadFile("../../../../../test-certs/postgres.crt")
+	Expect(err).NotTo(HaveOccurred())
+	dbClientKey, err := ioutil.ReadFile("../../../../../test-certs/postgres.key")
+	Expect(err).NotTo(HaveOccurred())
+	dbClientCA, err := ioutil.ReadFile("../../../../../test-certs/autoscaler-ca.crt")
+	Expect(err).NotTo(HaveOccurred())
+
+	dbURL := os.Getenv("DBURL")
+	Expect(dbURL).NotTo(BeEmpty())
+
+	result = `{
+			"user-provided": [ { "name": "config", "tags": ["publicapiserver-config"], "credentials": { "publicapiserver": { } }}],
+			"autoscaler": [ {
+				"name": "some-service",
+				"credentials": {
+					"uri": "` + dbURL + `",
+
+					"client_cert": "` + strings.ReplaceAll(string(dbClientCert), "\n", "\\n") + `",
+					"client_key": "` + strings.ReplaceAll(string(dbClientKey), "\n", "\\n") + `",
+					"server_ca": "` + strings.ReplaceAll(string(dbClientCA), "\n", "\\n") + `"
+				},
+				"syslog_drain_url": "",
+				"tags": ["policy_db", "binding_db"]
+			}]}` // #nosec G101
+
+	return result
+
+}

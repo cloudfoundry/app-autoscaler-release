@@ -58,6 +58,14 @@
         "ca_file": "/var/vcap/jobs/golangapiserver/config/certs/eventgenerator/ca.crt"
       }
     },
+    "scheduler": {
+      "scheduler_url": "https://autoscaler-3119.autoscalerscheduler.service.cf.internal:6102",
+      "tls": {
+        "key_file": "/var/vcap/jobs/golangapiserver/config/certs/scheduler/client.key",
+        "cert_file": "/var/vcap/jobs/golangapiserver/config/certs/scheduler/client.crt",
+        "ca_file": "/var/vcap/jobs/golangapiserver/config/certs/scheduler/ca.crt"
+      }
+    },
     "scaling_rules": {
       "cpu": {
         "lower_threshold": 1,

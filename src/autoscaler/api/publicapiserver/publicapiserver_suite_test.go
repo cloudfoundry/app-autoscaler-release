@@ -125,6 +125,7 @@ var _ = BeforeSuite(func() {
 		lagertest.NewTestLogger("public_apiserver"), conf, fakePolicyDB,
 		fakeBindingDB, fakeCredentials, checkBindingFunc, fakeCFClient,
 		httpStatusCollector, fakeRateLimiter)
+	publicApiServer.Setup()
 
 	httpServer, err := publicApiServer.GetMtlsServer()
 	Expect(err).NotTo(HaveOccurred())

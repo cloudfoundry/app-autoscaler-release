@@ -547,7 +547,6 @@ rate_limit:
 					Expect(err).To(MatchError(MatchRegexp("Configuration error: RateLimit.ValidDuration is equal or less than zero nanosecond")))
 				})
 			})
-
 		})
 	})
 })
