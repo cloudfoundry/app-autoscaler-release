@@ -20,6 +20,12 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
   ${autoscaler_dir}/operations/enable-scheduler-logging.yml"}
 
 
+## if mtar_deployment_enabled, then apply the use-cf operator file
+if [[  "${enable_mtar}"  == "true" ]]; then
+  echo "Deploying with mtar enabled"
+  ops_files+=" ${autoscaler_dir}/operations/use-cf-services.yml"
+fi
+
 case "${cpu_upper_threshold}" in
   "100")
   # default
