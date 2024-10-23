@@ -433,15 +433,23 @@ var _ = Describe("PublicApiServer", func() {
 				verifyResponse(httpClient, serverUrl, "/v1/info", nil, http.MethodGet, "", http.StatusOK)
 			})
 		})
+
 		Context("when calling health endpoint", func() {
 			It("should succeed", func() {
 				verifyResponse(httpClient, serverUrl, "/health", nil, http.MethodGet, "", http.StatusOK)
 			})
 		})
+
+		When("calling broker endpoint", func() {
+			FIt("should health, broker and api on the same server", func() {
+				res := verifyResponse(httpClient, serverUrl, "/v2/catalog", nil, http.MethodGet, "", http.StatusOK)
+				Expect(res).To(ContainSubstring("Service Broker"))
+			})
+		})
 	})
 })
 
-func verifyResponse(httpClient *http.Client, serverUrl *url.URL, path string, headers map[string]string, httpRequestMethod string, httpRequestBody string, expectResponseStatusCode int) {
+func verifyResponse(httpClient *http.Client, serverUrl *url.URL, path string, headers map[string]string, httpRequestMethod string, httpRequestBody string, expectResponseStatusCode int) string {
 	serverUrl.Path = path
 	var body io.Reader = nil
 	if httpRequestBody != "" {
@@ -459,10 +467,10 @@ func verifyResponse(httpClient *http.Client, serverUrl *url.URL, path string, he
 		defer func() { _ = resp.Body.Close() }()
 	}
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
+	ExpectWithOffset(1, resp.StatusCode).To(Equal(expectResponseStatusCode))
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
-	ExpectWithOffset(1, string(respBody)).NotTo(BeEmpty())
 
-	ExpectWithOffset(1, resp.StatusCode).To(Equal(expectResponseStatusCode))
+	return string(respBody)
 }

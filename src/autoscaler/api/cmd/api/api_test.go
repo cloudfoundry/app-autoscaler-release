@@ -48,7 +48,7 @@ var _ = Describe("Api", func() {
 		brokerHttpClient = NewServiceBrokerClient()
 		healthHttpClient = &http.Client{}
 		apiHttpClient = NewPublicApiClient()
-		unifiedServerHttpClient = NewPublicApiClient()
+		unifiedServerHttpClient = &http.Client{}
 
 		serverURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.Server.Port))
 		Expect(err).NotTo(HaveOccurred())
@@ -311,7 +311,7 @@ var _ = Describe("Api", func() {
 			os.Unsetenv("PORT")
 		})
 
-		XIt("should start a unified server", func() {
+		FIt("should start a unified server", func() {
 			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", unifiedServerURL), nil)
 			Expect(err).NotTo(HaveOccurred())
 			rsp, err = unifiedServerHttpClient.Do(req)

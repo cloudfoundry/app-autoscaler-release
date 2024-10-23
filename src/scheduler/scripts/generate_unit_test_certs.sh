@@ -24,6 +24,10 @@ ${CERTSTRAP} --depot-path "${depot_path}" sign test-scalingengine --CA test-ca
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --common-name test-scheduler --domain localhost
 ${CERTSTRAP} --depot-path "${depot_path}" sign test-scheduler --CA test-ca
 
+# database certificate
+${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain postgres --ip 127.0.0.1
+${CERTSTRAP} --depot-path "${depot_path}" sign postgres --CA autoscaler-ca --years "20"
+
 keytool -importcert -alias autoscaler -file "${depot_path}"/test-ca.crt -keystore "${depot_path}"/test.truststore -storeType pkcs12 -storepass 123456 -noprompt
 
 openssl pkcs12 -export -in "${depot_path}"/test-scheduler.crt -inkey "${depot_path}"/test-scheduler.key -out "${depot_path}"/test-scheduler.p12 -name test-scheduler -password pass:123456
