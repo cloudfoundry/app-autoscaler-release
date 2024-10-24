@@ -30,7 +30,7 @@
           oauth_url: "https://uaa.((system_domain)):443"
         routes:
           - name: ((deployment_name))_postgres
-            registration_interval: 10s
+            registration_interval: 5s
             port: 5432
             external_port: ((postgres_external_port))
             type: tcp
