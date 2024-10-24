@@ -6,5 +6,7 @@ source "${script_dir}/common.sh"
 
 bosh_login
 cf_login
+cf_target "${AUTOSCALER_ORG}" "${AUTOSCALER_SPACE}"
+
 
 cf autoscaling-api "https://autoscaler-${PR_NUMBER}.${SYSTEM_DOMAIN}"
