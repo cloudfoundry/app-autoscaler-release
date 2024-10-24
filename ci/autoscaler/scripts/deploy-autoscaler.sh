@@ -112,6 +112,7 @@ function create_manifest(){
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
 
+
     # shellcheck disable=SC2064
   if [ -z "${debug}" ] || [ "${debug}" = "false" ] ; then  trap "rm ${tmp_manifest_file}" EXIT ; fi
 }
@@ -142,6 +143,9 @@ function deploy() {
   step "Using Ops files: '${OPS_FILES_TO_USE}'"
   step "Deploy options: '${bosh_deploy_opts}'"
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
+	postgres_ip="$(bosh curl "/deployments/${deployment_name}/vms" | jq '. | .[] | select(.job == "postgres") | .ips[0]' -r)"
+	credhub set -n "/bosh-autoscaler/${deployment_name}/postgres_ip" -t value -v "${postgres_ip}"
+
 }
 
 function find_or_upload_stemcell() {
