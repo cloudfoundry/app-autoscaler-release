@@ -21,8 +21,8 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 	BeforeEach(func() {
 		instanceName = CreateService(cfg)
 		initialInstanceCount = 1
-		appName = CreateTestApp(cfg, "date-schedule", initialInstanceCount)
-		appGUID, err = GetAppGuid(cfg, appName)
+		appToScaleName = CreateTestApp(cfg, "date-schedule", initialInstanceCount)
+		appToScaleGUID, err = GetAppGuid(cfg, appToScaleName)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -34,22 +34,22 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 		const scheduledInstanceInit = 3
 		JustBeforeEach(func() {
 			//TODO the start app needs to be after the binding but the timings require the app been up already.
-			StartApp(appName, cfg.CfPushTimeoutDuration())
+			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 			startDateTime = time.Now().In(time.UTC).Add(1 * time.Minute)
 			endDateTime = startDateTime.Add(time.Duration(interval+120) * time.Second)
 
 			policy = GenerateSpecificDateSchedulePolicy(startDateTime, endDateTime, scheduleInstanceMin, scheduleInstanceMax, scheduledInstanceInit)
-			instanceName = CreatePolicy(cfg, appName, appGUID, policy)
+			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
 		})
 
 		It("should scale", func() {
 			pollTime := 15 * time.Second
 			By(fmt.Sprintf("waiting for scheduledInstanceInit: %d", scheduledInstanceInit))
-			WaitForNInstancesRunning(appGUID, 3, time.Until(startDateTime.Add(1*time.Minute)))
+			WaitForNInstancesRunning(appToScaleGUID, 3, time.Until(startDateTime.Add(1*time.Minute)))
 
 			By(fmt.Sprintf("waiting for scheduleInstanceMin: %d", scheduleInstanceMin))
 			jobRunTime := time.Until(endDateTime)
-			Eventually(func() (int, error) { return RunningInstances(appGUID, cfg.DefaultTimeoutDuration()) }).
+			Eventually(func() (int, error) { return RunningInstances(appToScaleGUID, cfg.DefaultTimeoutDuration()) }).
 				//+/- poll time error margin.
 				WithTimeout(jobRunTime + pollTime).
 				WithPolling(pollTime).
@@ -58,12 +58,12 @@ var _ = Describe("AutoScaler specific date schedule policy", func() {
 			//+/- poll time error margin.
 			timeout := time.Until(endDateTime) - pollTime
 			By(fmt.Sprintf("waiting till end of schedule %dS and should stay %d instances", int(timeout.Seconds()), scheduleInstanceMin))
-			Consistently(func() (int, error) { return RunningInstances(appGUID, jobRunTime) }).
+			Consistently(func() (int, error) { return RunningInstances(appToScaleGUID, jobRunTime) }).
 				WithTimeout(timeout).
 				WithPolling(pollTime).
 				Should(Equal(2))
 
-			WaitForNInstancesRunning(appGUID, 1, time.Duration(interval+60)*time.Second)
+			WaitForNInstancesRunning(appToScaleGUID, 1, time.Duration(interval+60)*time.Second)
 		})
 	})
 })
