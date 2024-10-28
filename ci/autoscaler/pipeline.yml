@@ -452,6 +452,7 @@ jobs:
       passed:
       - acceptance-log-cache-metron
       - acceptance-log-cache-syslog
+      - acceptance-log-cache-syslog-cf
       trigger: true
     - get: previous-stable-release
   - task: deploy-previous-stable-release

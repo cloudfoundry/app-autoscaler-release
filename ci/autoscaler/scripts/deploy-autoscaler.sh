@@ -20,6 +20,11 @@ ops_files=${OPS_FILES:-"${autoscaler_dir}/operations/add-releases.yml\
   ${autoscaler_dir}/operations/enable-scheduler-logging.yml\
   ${autoscaler_dir}/operations/use-cf-services.yml"}
 
+## if mtar_deployment_enabled, then apply the use-cf operator file
+if [[  "${enable_mtar}"  == "true" ]]; then
+  echo "Deploying with mtar enabled"
+  ops_files+=" ${autoscaler_dir}/operations/use-cf-services.yml"
+fi
 
 case "${cpu_upper_threshold}" in
   "100")
@@ -102,9 +107,11 @@ function create_manifest(){
       -v cf_client_id=autoscaler_client_id \
       -v cf_client_secret=autoscaler_client_secret \
       -v postgres_external_port="$(get_postgres_external_port)"\
+			-v metricsforwarder_host="${metricsforwarder_host}"\
 			--vars-file=/tmp/autoscaler-secrets.yml \
       -v skip_ssl_validation=true \
       > "${tmp_manifest_file}"
+
 
     # shellcheck disable=SC2064
   if [ -z "${debug}" ] || [ "${debug}" = "false" ] ; then  trap "rm ${tmp_manifest_file}" EXIT ; fi
@@ -136,6 +143,9 @@ function deploy() {
   step "Using Ops files: '${OPS_FILES_TO_USE}'"
   step "Deploy options: '${bosh_deploy_opts}'"
   bosh -n -d "${deployment_name}" deploy "${tmp_manifest_file}"
+	postgres_ip="$(bosh curl "/deployments/${deployment_name}/vms" | jq '. | .[] | select(.job == "postgres") | .ips[0]' -r)"
+	credhub set -n "/bosh-autoscaler/${deployment_name}/postgres_ip" -t value -v "${postgres_ip}"
+
 }
 
 function find_or_upload_stemcell() {
