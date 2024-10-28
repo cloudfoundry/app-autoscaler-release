@@ -73,13 +73,11 @@ func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, logger logr.
 	if err != nil {
 		return fmt.Errorf("cloud foundry environment not found %w", err)
 	}
-	// appToScale is provided i.e. producer and consumer app relationship
 	if appConfig != nil && appConfig.AppID != "" {
 		logger.Info("producer-app-relationship-found", "appToScaleGuid", appConfig.AppID)
 		//assuming the producer app has the same autoscaler service credentials as appToScale
 		appConfig.Services = currentApp.Services
-	}
-	if appConfig.AppID == "" {
+	} else { // metric producer =  appToScale (default case)
 		appConfig = currentApp
 	}
 	appId := api.GUID(appConfig.AppID)

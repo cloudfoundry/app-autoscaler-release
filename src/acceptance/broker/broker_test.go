@@ -109,7 +109,6 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		It("binds&unbinds with configurations and policy", func() {
 			policyFile := "../assets/file/policy/policy-with-configuration.json"
 			policy, err := os.ReadFile(policyFile)
-			fmt.Println("policy", string(policy)) //FIXME
 			Expect(err).NotTo(HaveOccurred())
 
 			err = helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
