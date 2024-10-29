@@ -222,7 +222,6 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		var instance serviceInstance
 		It("should update a service instance from one plan to another plan", func() {
 			servicePlans := GetServicePlans(cfg)
-			fmt.Println("servicePlans", servicePlans)
 			source, target, err := servicePlans.getSourceAndTargetForPlanUpdate()
 			Expect(err).NotTo(HaveOccurred(), "failed getting source and target service plans")
 			instance = createService(source.Name)
