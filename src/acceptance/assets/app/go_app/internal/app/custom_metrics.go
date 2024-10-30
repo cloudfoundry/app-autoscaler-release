@@ -19,12 +19,14 @@ import (
 
 //counterfeiter:generate . CustomMetricClient
 type CustomMetricClient interface {
-	PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error
+	PostCustomMetric(ctx context.Context, logger logr.Logger, appConfig *cfenv.App, metricsValue float64, metricName string, useMtls bool) error
 }
 
 type CustomMetricAPIClient struct{}
 
 var _ CustomMetricClient = &CustomMetricAPIClient{}
+
+var CfenvCurrent = cfenv.Current
 
 func CustomMetricsTests(logger logr.Logger, r *gin.RouterGroup, customMetricTest CustomMetricClient) *gin.RouterGroup {
 	r.GET("/mtls/:name/:value", handleCustomMetricsEndpoint(logger, customMetricTest, true))
@@ -52,8 +54,11 @@ func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetr
 			Error(c, http.StatusBadRequest, "invalid metric value: %s", err.Error())
 			return
 		}
+		// required if producer app is sending metric for appToScaleGuid
+		appToScaleGuid := c.Query("appToScaleGuid")
+		appConfig := &cfenv.App{AppID: appToScaleGuid}
 
-		err = customMetricTest.PostCustomMetric(c, nil, float64(metricValue), metricName, useMtls)
+		err = customMetricTest.PostCustomMetric(c, logger, appConfig, float64(metricValue), metricName, useMtls)
 		if err != nil {
 			logger.Error(err, "failed to submit custom metric")
 			Error(c, http.StatusInternalServerError, "failed to submit custom metric: %s", err.Error())
@@ -63,15 +68,18 @@ func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetr
 	}
 }
 
-func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
-	var err error
-	if appConfig == nil {
-		appConfig, err = cfenv.Current()
-		if err != nil {
-			return fmt.Errorf("cloud foundry environment not found %w", err)
-		}
+func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, logger logr.Logger, appConfig *cfenv.App, metricValue float64, metricName string, useMtls bool) error {
+	currentApp, err := CfenvCurrent()
+	if err != nil {
+		return fmt.Errorf("cloud foundry environment not found %w", err)
 	}
-
+	if appConfig != nil && appConfig.AppID != "" {
+		logger.Info("producer-app-relationship-found", "appToScaleGuid", appConfig.AppID)
+		//assuming the producer app has the same autoscaler service credentials as appToScale
+		appConfig.Services = currentApp.Services
+	} else { // metric producer =  appToScale (default case)
+		appConfig = currentApp
+	}
 	appId := api.GUID(appConfig.AppID)
 	autoscalerCredentials, err := getAutoscalerCredentials(appConfig)
 	if err != nil {
@@ -103,7 +111,7 @@ func (*CustomMetricAPIClient) PostCustomMetric(ctx context.Context, appConfig *c
 	}
 
 	metrics := createSingletonMetric(metricName, metricValue)
-
+	logger.Info("sending metric to autoscaler for app", "appId", appId, "metricName", metricName, "metricValue", metricValue)
 	params := api.V1AppsAppGuidMetricsPostParams{AppGuid: appId}
 
 	return apiClient.V1AppsAppGuidMetricsPost(ctx, metrics, params)

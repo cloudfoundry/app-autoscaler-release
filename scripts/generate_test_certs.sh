@@ -106,7 +106,7 @@ if [[ "$OPENSSL_VERSION" == LibreSSL* ]]; then
 	echo "OpenSSL needs to be used rather than LibreSSL"
 	exit 1
 fi
-# valid certificate
+# valid client certificates
 echo "${depot_path}"
 openssl  req -new -newkey rsa:2048  -nodes -subj "/CN=sap.com/O=SAP SE/OU=organization:AB1234ORG/OU=app:an-app-id/OU=space:AB1234SPACE" -out "${depot_path}"/validmtls_client-1.csr
 openssl x509 -req -in "${depot_path}"/validmtls_client-1.csr -CA "${depot_path}"/valid-mtls-local-ca-1.crt -CAkey "${depot_path}"/valid-mtls-local-ca-1.key -CAcreateserial -out "${depot_path}"/validmtls_client-1.crt -days 365 -sha256

@@ -27,7 +27,22 @@ func setupRequest(method string, url *url.URL, body []byte) (*http.Request, erro
 	return req, nil
 }
 
-var _ = Describe("CustomMetrics Server", func() {
+
+// Helper function to set up a new client and request
+func setupRequest(method, url, authHeader string, body []byte) (*http.Client, *http.Request, error) {
+	client := &http.Client{}
+	req, err := newRequest(method, url, body)
+	if err != nil {
+		return nil, nil, err
+	}
+	if authHeader != "" {
+		req.Header.Add("Authorization", authHeader)
+	}
+	return client, req, nil
+}
+
+var _ = Describe("CustomMetricsConfig Server", func() {
+
 	var (
 		resp          *http.Response
 		req           *http.Request
