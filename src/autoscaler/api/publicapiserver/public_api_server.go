@@ -11,6 +11,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/apis/scalinghistory"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/brokerserver"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -19,6 +20,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
 
 	"code.cloudfoundry.org/lager/v3"
+	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tedsuo/ifrit"
@@ -40,6 +42,7 @@ type PublicApiServer struct {
 	cfClient            cf.CFClient
 	httpStatusCollector healthendpoint.HTTPStatusCollector
 	rateLimiter         ratelimiter.Limiter
+	brokerServer        brokerserver.BrokerServer
 
 	healthRouter *mux.Router
 }
@@ -47,7 +50,8 @@ type PublicApiServer struct {
 func NewPublicApiServer(logger lager.Logger, conf *config.Config, policyDB db.PolicyDB,
 	bindingDB db.BindingDB, credentials cred_helper.Credentials, checkBindingFunc api.CheckBindingFunc,
 	cfClient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector,
-	rateLimiter ratelimiter.Limiter) *PublicApiServer {
+	rateLimiter ratelimiter.Limiter, brokerServer brokerserver.BrokerServer) *PublicApiServer {
+
 	return &PublicApiServer{
 		logger:              logger,
 		conf:                conf,
@@ -58,6 +62,7 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policyDB db.Po
 		cfClient:            cfClient,
 		httpStatusCollector: httpStatusCollector,
 		rateLimiter:         rateLimiter,
+		brokerServer:        brokerServer,
 	}
 }
 
@@ -74,6 +79,23 @@ func (s *PublicApiServer) Setup() error {
 
 func (s *PublicApiServer) GetHealthServer() (ifrit.Runner, error) {
 	return helpers.NewHTTPServer(s.logger, s.conf.Health.ServerConfig, s.healthRouter)
+}
+
+func (s *PublicApiServer) GetUnifiedServer() (ifrit.Runner, error) {
+	pah := NewPublicApiHandler(s.logger, s.conf, s.policyDB, s.bindingDB, s.credentials)
+	scalingHistoryHandler, err := s.newScalingHistoryHandler()
+	if err != nil {
+		return nil, err
+	}
+
+	r := s.setupApiRoutes(pah, scalingHistoryHandler)
+
+	brokerRouter, err := s.brokerServer.GetRouter()
+	if err != nil {
+		return nil, err
+	}
+
+	return helpers.NewHTTPServer(s.logger, s.conf.VCAPServer, s.setupVCAPRouter(r, s.healthRouter, brokerRouter))
 }
 
 func (s *PublicApiServer) GetMtlsServer() (ifrit.Runner, error) {
@@ -128,7 +150,6 @@ func (s *PublicApiServer) setupPolicyRoutes(rp *mux.Router, pah *PublicApiHandle
 }
 
 func (s *PublicApiServer) createHealthRouter() (*mux.Router, error) {
-	fmt.Println("createHealthRouter")
 	checkers := []healthendpoint.Checker{}
 	gatherer := s.createPrometheusRegistry()
 	healthRouter, err := healthendpoint.NewHealthRouter(s.conf.Health, checkers, s.logger.Session("health-server"), gatherer, time.Now)
@@ -159,6 +180,17 @@ func (s *PublicApiServer) newScalingHistoryHandler() (http.Handler, error) {
 		return nil, fmt.Errorf("error creating scaling history handler: %w", err)
 	}
 	return scalinghistory.NewServer(scalingHistoryHandler, ss)
+}
+
+func (s *PublicApiServer) setupVCAPRouter(r *mux.Router, healthRouter *mux.Router, brokerRouter *chi.Mux) *mux.Router {
+	mainRouter := mux.NewRouter()
+
+	mainRouter.PathPrefix("/v2").Handler(brokerRouter)
+	mainRouter.PathPrefix("/v1").Handler(r)
+	mainRouter.PathPrefix("/health").Handler(healthRouter)
+	mainRouter.PathPrefix("/").Handler(healthRouter)
+
+	return mainRouter
 }
 
 func (s *PublicApiServer) setupMainRouter(r *mux.Router, healthRouter *mux.Router) *mux.Router {

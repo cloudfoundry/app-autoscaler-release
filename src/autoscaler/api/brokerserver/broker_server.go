@@ -62,20 +62,40 @@ func (am *AuthMiddleware) authenticate(r *http.Request) bool {
 	return false
 }
 
-func NewBrokerServer(logger lager.Logger, conf *config.Config, bindingDB db.BindingDB, policyDB db.PolicyDB, httpStatusCollector healthendpoint.HTTPStatusCollector, cfClient cf.CFClient, credentials cred_helper.Credentials) (ifrit.Runner, error) {
-	credentialsList, err := prepareCredentials(logger, conf)
+type BrokerServer interface {
+	GetServer() (ifrit.Runner, error)
+	GetRouter() (*chi.Mux, error)
+}
+
+type brokerServer struct {
+	logger              lager.Logger
+	conf                *config.Config
+	bindingDB           db.BindingDB
+	policyDB            db.PolicyDB
+	httpStatusCollector healthendpoint.HTTPStatusCollector
+	cfClient            cf.CFClient
+	credentials         cred_helper.Credentials
+}
+
+func NewBrokerServer(logger lager.Logger, conf *config.Config, bindingDB db.BindingDB, policyDB db.PolicyDB, httpStatusCollector healthendpoint.HTTPStatusCollector, cfClient cf.CFClient, credentials cred_helper.Credentials) *brokerServer {
+	return &brokerServer{
+		logger:              logger,
+		conf:                conf,
+		bindingDB:           bindingDB,
+		policyDB:            policyDB,
+		httpStatusCollector: httpStatusCollector,
+		cfClient:            cfClient,
+		credentials:         credentials,
+	}
+}
+
+func (s *brokerServer) GetServer() (ifrit.Runner, error) {
+	router, err := s.GetRouter()
 	if err != nil {
 		return nil, err
 	}
 
-	catalog, err := loadCatalog(conf.CatalogPath, logger)
-	if err != nil {
-		return nil, err
-	}
-
-	router := setupRouter(logger, credentialsList, httpStatusCollector, catalog, conf, bindingDB, policyDB, credentials)
-
-	return helpers.NewHTTPServer(logger, conf.BrokerServer, router)
+	return helpers.NewHTTPServer(s.logger, s.conf.BrokerServer, router)
 }
 
 func prepareCredentials(logger lager.Logger, conf *config.Config) ([]BrokerCredentials, error) {
@@ -120,18 +140,32 @@ func loadCatalog(path string, logger lager.Logger) ([]domain.Service, error) {
 	return catalog.Services, nil
 }
 
-func setupRouter(logger lager.Logger, credentialsList []BrokerCredentials, httpStatusCollector healthendpoint.HTTPStatusCollector, catalog []domain.Service, conf *config.Config, bindingDB db.BindingDB, policyDB db.PolicyDB, credentials cred_helper.Credentials) *chi.Mux {
-	router := chi.NewRouter()
+func (s *brokerServer) GetRouter() (*chi.Mux, error) {
+	credentialsList, err := prepareCredentials(s.logger, s.conf)
+	if err != nil {
+		return nil, err
+	}
+
+	catalog, err := loadCatalog(s.conf.CatalogPath, s.logger)
+	if err != nil {
+		return nil, err
+	}
+
 	authMiddleware := &AuthMiddleware{credentials: credentialsList}
-	httpStatusMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(httpStatusCollector)
-	autoscalerBroker := broker.New(logger.Session("broker"), conf, bindingDB, policyDB, catalog, credentials)
+	httpStatusMiddleware := healthendpoint.NewHTTPStatusCollectMiddleware(s.httpStatusCollector)
+
+	autoscalerBroker := broker.New(s.logger.Session("broker"), s.conf, s.bindingDB, s.policyDB, catalog, s.credentials)
+
+	router := chi.NewRouter()
 
 	router.Use(authMiddleware.Middleware)
 	router.Use(httpStatusMiddleware.Collect)
-	brokerapi.AttachRoutes(router, autoscalerBroker, slog.New(lager.NewHandler(logger.Session("broker_handler"))))
+
+	brokerapi.AttachRoutes(router, autoscalerBroker, slog.New(lager.NewHandler(s.logger.Session("broker_handler"))))
 	router.HandleFunc(routes.BrokerHealthPath, GetHealth)
 
-	return router
+	return router, nil
+
 }
 
 func restrictToMaxBcryptLength(logger lager.Logger, cred config.BrokerCredentialsConfig) config.BrokerCredentialsConfig {

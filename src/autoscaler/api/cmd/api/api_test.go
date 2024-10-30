@@ -311,17 +311,29 @@ var _ = Describe("Api", func() {
 			os.Unsetenv("PORT")
 		})
 
-		FIt("should start a unified server", func() {
+		It("should start a unified server", func() {
 			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", unifiedServerURL), nil)
 			Expect(err).NotTo(HaveOccurred())
+
 			rsp, err = unifiedServerHttpClient.Do(req)
 			Expect(err).ToNot(HaveOccurred())
 
 			bodyBytes, err := io.ReadAll(rsp.Body)
 			Expect(err).ToNot(HaveOccurred())
-			fmt.Println(string(bodyBytes))
+			Expect(bodyBytes).To(ContainSubstring("Automatically increase or decrease the number of application instances based on a policy you define."))
 
+			req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/catalog", unifiedServerURL), nil)
+			Expect(err).NotTo(HaveOccurred())
+			req.SetBasicAuth(username, password)
+
+			rsp, err = unifiedServerHttpClient.Do(req)
+			Expect(err).ToNot(HaveOccurred())
 			Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+
+			bodyBytes, err = io.ReadAll(rsp.Body)
+			Expect(err).ToNot(HaveOccurred())
+			fmt.Println(string(bodyBytes))
+			Expect(bodyBytes).To(ContainSubstring("autoscaler-free-plan-id"))
 		})
 
 	})

@@ -96,9 +96,12 @@ type LowerUpperThresholdConfig struct {
 }
 
 type Config struct {
-	Logging                            helpers.LoggingConfig         `yaml:"logging"`
-	BrokerServer                       helpers.ServerConfig          `yaml:"broker_server"`
-	Server                             helpers.ServerConfig          `yaml:"public_api_server"`
+	Logging      helpers.LoggingConfig `yaml:"logging"`
+	BrokerServer helpers.ServerConfig  `yaml:"broker_server"`
+	Server       helpers.ServerConfig  `yaml:"public_api_server"`
+
+	VCAPServer helpers.ServerConfig `yaml:"vcap_server"`
+
 	Db                                 map[string]db.DatabaseConfig  `yaml:"db"`
 	BrokerCredentials                  []BrokerCredentialsConfig     `yaml:"broker_credentials"`
 	APIClientId                        string                        `yaml:"api_client_id"`
@@ -191,7 +194,7 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return nil
 	}
 
-	conf.Server.Port = vcapReader.GetPort()
+	conf.VCAPServer.Port = vcapReader.GetPort()
 	if err := loadPublicApiServerConfig(conf, vcapReader); err != nil {
 		return err
 	}

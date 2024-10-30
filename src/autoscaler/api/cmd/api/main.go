@@ -84,19 +84,15 @@ func main() {
 	checkBindingFunc := func(appId string) bool {
 		return bindingDb.CheckServiceBinding(appId)
 	}
-	brokerHttpServer, err := brokerserver.NewBrokerServer(logger.Session("broker_http_server"), conf,
+	brokerServer := brokerserver.NewBrokerServer(logger.Session("broker_http_server"), conf,
 		bindingDb, policyDb, httpStatusCollector, cfClient, credentialProvider)
-	if err != nil {
-		logger.Error("failed to create broker http server", err)
-		os.Exit(1)
-	}
 
 	rateLimiter := ratelimiter.DefaultRateLimiter(conf.RateLimit.MaxAmount, conf.RateLimit.ValidDuration, logger.Session("api-ratelimiter"))
 
 	publicApiServer := publicapiserver.NewPublicApiServer(
 		logger.Session("public_api_http_server"), conf, policyDb, bindingDb,
 		credentialProvider, checkBindingFunc, cfClient, httpStatusCollector,
-		rateLimiter)
+		rateLimiter, brokerServer)
 
 	err = publicApiServer.Setup()
 	if err != nil {
@@ -116,11 +112,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	//unifiedServer, err := publicApiServer.GetServer()
-	//if err != nil {
-	//	logger.Error("failed to create public api http server", err)
-	//	os.Exit(1)
-	//}
+	brokerHttpServer, err := brokerServer.GetServer()
+	if err != nil {
+		logger.Error("failed to create broker http server", err)
+		os.Exit(1)
+	}
+
+	unifiedServer, err := publicApiServer.GetUnifiedServer()
+	if err != nil {
+		logger.Error("failed to create public api http server", err)
+		os.Exit(1)
+	}
 
 	logger.Debug("Successfully created health server")
 
@@ -128,7 +130,7 @@ func main() {
 		grouper.Member{"public_api_http_server", mtlsServer},
 		grouper.Member{"broker", brokerHttpServer},
 		grouper.Member{"health_server", healthServer},
-	//	grouper.Member{"unified_server", unifiedServer},
+		grouper.Member{"unified_server", unifiedServer},
 	)
 
 	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))
