@@ -92,10 +92,6 @@ ${CERTSTRAP} --depot-path "${depot_path}" sign cf-app --CA log-cache-syslog-serv
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain log-cache --ip 127.0.0.1
 ${CERTSTRAP} --depot-path "${depot_path}" sign log-cache --CA autoscaler-ca --years "20"
 
-# database certificate
-${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain postgres --ip 127.0.0.1
-${CERTSTRAP} --depot-path "${depot_path}" sign postgres --CA autoscaler-ca --years "20"
-
 # mTLS client certificate for local testing
 ## certstrap with multiple OU not working at the moment. Pull request is created in the upstream. Therefore, using openssl at the moment
 ## https://github.com/square/certstrap/pull/120
