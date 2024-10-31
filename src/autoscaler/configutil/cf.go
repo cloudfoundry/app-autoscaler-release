@@ -194,7 +194,8 @@ func (vc *VCAPConfiguration) addConnectionParams(service *cfenv.Service, dbName 
 func (vc *VCAPConfiguration) addConnectionParam(service *cfenv.Service, dbName, bindingKey, connectionParam string, parameters url.Values) error {
 	content, ok := service.CredentialString(bindingKey)
 	if ok {
-		fileName := fmt.Sprintf("%s.%s", bindingKey, "crt")
+
+		fileName := fmt.Sprintf("%s.%s", bindingKey, connectionParam)
 		createdFile, err := materializeServiceProperty(dbName, fileName, content)
 		if err != nil {
 			return err

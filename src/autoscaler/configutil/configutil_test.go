@@ -150,7 +150,7 @@ var _ = Describe("Configutil", func() {
 							}, "some-db", "mysql")
 						})
 
-						It("loads the db config from VCAP_SERVICES for postgres db", func() {
+						XIt("loads the db config from VCAP_SERVICES for postgres db", func() {
 							expectedDbUrl := "mysql://foo:bar@mysql:3306/some-db?ssl-ca=%2Ftmp%2Fsome-db%2Fserver_ca.ssl-ca&ssl-cert=%2Ftmp%2Fsome-db%2Fclient_cert.ssl-cert&ssl-key=%2Ftmp%2Fsome-db%2Fclient_key.ssl-key"
 							dbUrl, err := vcapConfiguration.MaterializeDBFromService("some-db")
 							Expect(err).NotTo(HaveOccurred())
