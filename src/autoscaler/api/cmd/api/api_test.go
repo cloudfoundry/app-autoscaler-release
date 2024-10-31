@@ -333,7 +333,6 @@ var _ = Describe("Api", func() {
 
 			bodyBytes, err = io.ReadAll(rsp.Body)
 			Expect(err).ToNot(HaveOccurred())
-			fmt.Println(string(bodyBytes))
 			Expect(bodyBytes).To(ContainSubstring("autoscaler-free-plan-id"))
 		})
 
