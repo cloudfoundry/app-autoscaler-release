@@ -38,11 +38,11 @@
     "actionlint":                        "1.7.3",
     "go":                                "1.22.5",
     "direnv":                            "2.35.0",
-    "act":                               "0.2.67",
+    "act":                               "0.2.68",
     "cloudfoundry-cli":                  "8.8.1",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-21":                    "latest",
-    "ruby":                              "latest"
+    "ruby":                              "3.3.5"
   },
   "shell": {
     "init_hook": [
