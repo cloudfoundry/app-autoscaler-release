@@ -282,7 +282,8 @@ var _ = Describe("Api", func() {
 		})
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", serverURL), nil)
+				serverURL.Path = "/v1/info"
+				req, err := http.NewRequest(http.MethodGet, serverURL.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
 
 				rsp, err = apiHttpClient.Do(req)
