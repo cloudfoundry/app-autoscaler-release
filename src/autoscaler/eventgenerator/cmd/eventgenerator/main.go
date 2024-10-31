@@ -104,7 +104,7 @@ func main() {
 
 	httpServer := server.NewServer(logger.Session("http_server"), conf, appMetricDB, policyDb, appManager.QueryAppMetrics, httpStatusCollector)
 
-	vmServer, err := httpServer.GetMtlsServer()
+	mtlsServer, err := httpServer.GetMtlsServer()
 	if err != nil {
 		logger.Error("failed to create http server", err)
 		os.Exit(1)
@@ -117,7 +117,7 @@ func main() {
 	}
 	members := grouper.Members{
 		{"eventGenerator", eventGenerator},
-		{"https_server", vmServer},
+		{"https_server", mtlsServer},
 		{"health_server", healthServer},
 	}
 	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))
