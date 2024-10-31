@@ -14,7 +14,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.9.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/ogen-go/ogen v1.5.0
+	github.com/ogen-go/ogen v1.6.0
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
 	github.com/prometheus/procfs v0.15.1
