@@ -341,6 +341,8 @@ var _ = Describe("Api", func() {
 })
 
 func getVcapServices() (result string) {
+	var dbType string
+
 	// read file
 	dbClientCert, err := ioutil.ReadFile("../../../../../test-certs/postgres.crt")
 	Expect(err).NotTo(HaveOccurred())
@@ -351,6 +353,12 @@ func getVcapServices() (result string) {
 
 	dbURL := os.Getenv("DBURL")
 	Expect(dbURL).NotTo(BeEmpty())
+
+	if strings.Contains(dbURL, "postgres") {
+		dbType = "postgres"
+	} else {
+		dbType = "mysql"
+	}
 
 	result = `{
 			"user-provided": [ { "name": "config", "tags": ["publicapiserver-config"], "credentials": { "publicapiserver": { } }}],
@@ -364,7 +372,7 @@ func getVcapServices() (result string) {
 					"server_ca": "` + strings.ReplaceAll(string(dbClientCA), "\n", "\\n") + `"
 				},
 				"syslog_drain_url": "",
-				"tags": ["policy_db", "binding_db"]
+				"tags": ["policy_db", "binding_db", "` + dbType + `"]
 			}]}` // #nosec G101
 
 	return result

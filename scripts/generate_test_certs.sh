@@ -93,7 +93,7 @@ ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain 
 ${CERTSTRAP} --depot-path "${depot_path}" sign log-cache --CA autoscaler-ca --years "20"
 
 # database certificate
-${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain postgres --ip 127.0.0.1
+${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain postgres,mysql --ip 127.0.0.1
 ${CERTSTRAP} --depot-path "${depot_path}" sign postgres --CA autoscaler-ca --years "20"
 
 # mTLS client certificate for local testing
