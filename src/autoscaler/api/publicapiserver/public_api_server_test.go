@@ -101,7 +101,9 @@ var _ = Describe("PublicApiServer", func() {
 				lagertest.NewTestLogger("public_apiserver"), conf, fakePolicyDB,
 				fakeBindingDB, fakeCredentials, checkBindingFunc, fakeCFClient,
 				httpStatusCollector, fakeRateLimiter, fakeBrokerServer)
-			publicApiServer.Setup()
+
+			err := publicApiServer.Setup()
+			Expect(err).NotTo(HaveOccurred())
 
 			httpServer, err := publicApiServer.GetMtlsServer()
 			Expect(err).NotTo(HaveOccurred())
@@ -463,7 +465,8 @@ var _ = Describe("PublicApiServer", func() {
 				lagertest.NewTestLogger("public_apiserver"), conf, fakePolicyDB,
 				fakeBindingDB, fakeCredentials, checkBindingFunc, fakeCFClient,
 				httpStatusCollector, fakeRateLimiter, fakeBrokerServer)
-			publicApiServer.Setup()
+			err := publicApiServer.Setup()
+			Expect(err).NotTo(HaveOccurred())
 
 			httpServer, err := publicApiServer.GetUnifiedServer()
 			Expect(err).NotTo(HaveOccurred())

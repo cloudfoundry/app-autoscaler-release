@@ -27,7 +27,7 @@ var (
 	serverProcess ifrit.Process
 	policyDB      *fakes.FakePolicyDB
 
-	fakeBindingDB *fakes.FakeBindingDB
+	fakeBindingDB   *fakes.FakeBindingDB
 	rateLimiter     *fakes.FakeLimiter
 	fakeCredentials *fakes.FakeCredentials
 

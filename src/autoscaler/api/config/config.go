@@ -189,7 +189,6 @@ func loadPublicApiServerConfig(conf *Config, vcapReader configutil.VCAPConfigura
 }
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}

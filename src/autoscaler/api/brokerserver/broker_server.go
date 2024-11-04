@@ -165,7 +165,6 @@ func (s *brokerServer) GetRouter() (*chi.Mux, error) {
 	router.HandleFunc(routes.BrokerHealthPath, GetHealth)
 
 	return router, nil
-
 }
 
 func restrictToMaxBcryptLength(logger lager.Logger, cred config.BrokerCredentialsConfig) config.BrokerCredentialsConfig {

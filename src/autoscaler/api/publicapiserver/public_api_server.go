@@ -51,7 +51,6 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policyDB db.Po
 	bindingDB db.BindingDB, credentials cred_helper.Credentials, checkBindingFunc api.CheckBindingFunc,
 	cfClient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector,
 	rateLimiter ratelimiter.Limiter, brokerServer brokerserver.BrokerServer) *PublicApiServer {
-
 	return &PublicApiServer{
 		logger:              logger,
 		conf:                conf,
@@ -66,6 +65,7 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policyDB db.Po
 	}
 }
 
+// TODO: Remove/rename this method?
 func (s *PublicApiServer) Setup() error {
 	hr, err := s.createHealthRouter()
 	if err != nil {

@@ -376,5 +376,4 @@ func getVcapServices() (result string) {
 			}]}` // #nosec G101
 
 	return result
-
 }
