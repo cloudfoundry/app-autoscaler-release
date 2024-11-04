@@ -30,8 +30,6 @@ func (t *TransportWithBasicAuth) base() http.RoundTripper {
 func (t *TransportWithBasicAuth) RoundTrip(req *http.Request) (*http.Response, error) {
 	credentials := t.Username + ":" + t.Password
 	basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(credentials))
-	fmt.Println("banana TransportWithBasicAuth:credentials", credentials)
-	fmt.Println("banana TransportWithBasicAuth:", basicAuth)
 	req.Header.Add("Authorization", basicAuth)
 	return t.base().RoundTrip(req)
 }
