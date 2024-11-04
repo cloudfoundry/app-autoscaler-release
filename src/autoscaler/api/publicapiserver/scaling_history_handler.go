@@ -39,12 +39,16 @@ type ScalingHistoryHandler struct {
 }
 
 func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*ScalingHistoryHandler, error) {
+	seClient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
+	if err != nil {
+		return nil, fmt.Errorf("error creating scaling history HTTP client: %w", err)
+	}
 	newHandler := &ScalingHistoryHandler{
 		logger: logger.Session("scaling-history-handler"),
 		conf:   conf,
 	}
 
-	if client, err := internalscalingenginehistory.NewClient(conf.ScalingEngine.ScalingEngineUrl); err != nil {
+	if client, err := internalscalingenginehistory.NewClient(conf.ScalingEngine.ScalingEngineUrl, internalscalingenginehistory.WithClient(seClient)); err != nil {
 		return nil, fmt.Errorf("error creating ogen scaling history client: %w", err)
 	} else {
 		newHandler.client = client
