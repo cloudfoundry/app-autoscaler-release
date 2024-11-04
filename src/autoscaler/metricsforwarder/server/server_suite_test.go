@@ -25,7 +25,6 @@ import (
 var (
 	conf          *config.Config
 	serverProcess ifrit.Process
-	serverUrl     string
 	policyDB      *fakes.FakePolicyDB
 
 	fakeBindingDB *fakes.FakeBindingDB
