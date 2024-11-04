@@ -2,7 +2,6 @@ package publicapiserver_test
 
 import (
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -490,7 +489,8 @@ var _ = Describe("PublicApiServer", func() {
 				router := chi.NewRouter()
 				router.Get("/v2/catalog", func(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusOK)
-					w.Write([]byte(`Service Broker`))
+					_, err := w.Write([]byte(`Service Broker`))
+					Expect(err).NotTo(HaveOccurred())
 				})
 
 				fakeBrokerServer.GetRouterReturns(router, nil)
@@ -524,7 +524,7 @@ func verifyResponse(httpClient *http.Client, serverUrl *url.URL, path string, he
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(expectResponseStatusCode))
 
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 
 	return string(respBody)

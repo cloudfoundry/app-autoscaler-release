@@ -3,7 +3,6 @@ package main_test
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -344,11 +343,11 @@ func getVcapServices() (result string) {
 	var dbType string
 
 	// read file
-	dbClientCert, err := ioutil.ReadFile("../../../../../test-certs/postgres.crt")
+	dbClientCert, err := os.ReadFile("../../../../../test-certs/postgres.crt")
 	Expect(err).NotTo(HaveOccurred())
-	dbClientKey, err := ioutil.ReadFile("../../../../../test-certs/postgres.key")
+	dbClientKey, err := os.ReadFile("../../../../../test-certs/postgres.key")
 	Expect(err).NotTo(HaveOccurred())
-	dbClientCA, err := ioutil.ReadFile("../../../../../test-certs/autoscaler-ca.crt")
+	dbClientCA, err := os.ReadFile("../../../../../test-certs/autoscaler-ca.crt")
 	Expect(err).NotTo(HaveOccurred())
 
 	dbURL := os.Getenv("DBURL")
