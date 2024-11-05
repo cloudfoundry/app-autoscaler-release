@@ -89,7 +89,8 @@ resources:
     config:
       metricsforwarder:
         health:
-          password: "${METRICSFORWARDER_HEALTH_PASSWORD}"
+          basic_auth:
+            password: "${METRICSFORWARDER_HEALTH_PASSWORD}"
 - name: policydb
   parameters:
     config:
