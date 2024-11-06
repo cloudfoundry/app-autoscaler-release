@@ -51,6 +51,11 @@ cf:
   idle_connection_timeout_ms: <%= p("autoscaler.cf.idle_connection_timeout_ms") %>
   max_idle_conns_per_host_ms: <%= p("autoscaler.cf.max_idle_conns_per_host_ms") %>
 
+cf_server:
+  port: <%= p("autoscaler.cf_server.port") %>
+  xfcc:
+    valid_org_guid: <%= p("autoscaler.cf_server.xfcc.valid_org_guid") %>
+    valid_space_guid: <%= p("autoscaler.cf_server.xfcc.valid_space_guid") %>
 
 server:
   port:  <%= p("autoscaler.scalingengine.server.port") %>

@@ -55,6 +55,10 @@ var _ = Describe("Config", func() {
 				Expect(conf.Server.TLS.CertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/server.crt"))
 				Expect(conf.Server.TLS.CACertFile).To(Equal("/var/vcap/jobs/autoscaler/config/certs/ca.crt"))
 
+				Expect(conf.CfServer.Port).To(Equal(2222))
+				Expect(conf.CfServer.XFCC.ValidOrgGuid).To(Equal("valid_org_guid"))
+				Expect(conf.CfServer.XFCC.ValidSpaceGuid).To(Equal("valid_space_guid"))
+
 				Expect(conf.Health.ServerConfig.Port).To(Equal(9999))
 				Expect(conf.Logging.Level).To(Equal("debug"))
 
