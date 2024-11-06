@@ -35,6 +35,10 @@
             uris:
               - ((deployment_name))-postgres.tcp.((system_domain))
 
+- type: replace
+  path: /instance_groups/name=apiserver/jobs/name=golangapiserver/properties/autoscaler/apiserver/metrics_forwarder/host
+  value: ((deployment_name))-metricsforwarder.((system_domain))
+
 
 - type: replace
   path: /variables/name=postgres_server/options/alternative_names/-
