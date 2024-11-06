@@ -118,6 +118,7 @@ scheduler:
         port: 8081
         unprotectedEndpoints: /health/prometheus,/health/liveness
         username: "test-user"
+
 ############################################################
 #    Server SSL keys
 ############################################################
@@ -130,3 +131,11 @@ server:
         client-auth: NEED
 
 
+############################################################
+#    Unified cf Server - XFCC
+############################################################
+
+cf_server:
+  port: 8082
+  validOrgGuid: "some-org-guid"
+  validSpaceGuid: "some-space-guid"

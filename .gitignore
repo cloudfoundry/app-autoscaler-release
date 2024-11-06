@@ -64,6 +64,8 @@ keys/
 # <https://code.visualstudio.com/docs/editor/extension-marketplace#_workspace-recommended-extensions>
 !.vscode/extensions.json
 
+.trunk
+
 
 # ==================== 📦 Devbox ====================
 .devbox

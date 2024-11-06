@@ -1,6 +1,7 @@
 package server_test
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -70,6 +71,7 @@ var _ = Describe("Server", func() {
 	})
 
 	JustBeforeEach(func() {
+		fmt.Println("serverUrl: ", serverUrl.String())
 		req, err = http.NewRequest(method, serverUrl.String(), bodyReader)
 		Expect(err).NotTo(HaveOccurred())
 		rsp, err = http.DefaultClient.Do(req)
@@ -277,7 +279,6 @@ var _ = Describe("Server", func() {
 			httpServer, err := server.CreateCFServer(xfccAuthMiddleware)
 			Expect(err).NotTo(HaveOccurred())
 			serverProcess = ginkgomon_v2.Invoke(httpServer)
-
 			serverUrl, err = url.Parse("http://127.0.0.1:" + strconv.Itoa(conf.CFServer.Port))
 			Expect(err).ToNot(HaveOccurred())
 		})
