@@ -95,25 +95,12 @@ var _ = Describe("AutoScaler Service Broker", func() {
 
 		It("binds&unbinds with policy", func() {
 			policyFile := "../assets/file/policy/all.json"
-
-			err := helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
-			Expect(err).NotTo(HaveOccurred())
-			expectedPolicyFile := "../assets/file/policy/policy-with-configuration-same-app.json"
-			expectedPolicyWithConfig, err := os.ReadFile(expectedPolicyFile)
-			Expect(err).NotTo(HaveOccurred())
-			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
-			Expect(bindingParameters).Should(MatchJSON(expectedPolicyWithConfig))
-
-			instance.unbind(appName)
-		})
-		It("binds&unbinds with configurations and policy", func() {
-			policyFile := "../assets/file/policy/policy-with-configuration.json"
 			policy, err := os.ReadFile(policyFile)
 			Expect(err).NotTo(HaveOccurred())
 
 			err = helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
 			Expect(err).NotTo(HaveOccurred())
-			By("checking broker bind parameter response should have policy and configuration")
+
 			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
 			Expect(bindingParameters).Should(MatchJSON(policy))
 
@@ -141,21 +128,24 @@ var _ = Describe("AutoScaler Service Broker", func() {
 			instance.unbind(appName)
 		})
 
-		It("bind&unbinds without policy and gives only configuration", func() {
+		It("bind&unbinds without policy", func() {
 			helpers.BindServiceToApp(cfg, appName, instance.name())
-			By("checking broker bind parameter response does not have policy but configuration only")
 			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
-			expectedJSON := `{
-							"configuration": {
-							  "custom_metrics": {
-								"metric_submission_strategy": {
-								  "allow_from": "same_app"
-								}
-							  }
-							}
-						  }`
+			Expect(bindingParameters).Should(MatchJSON("{}"))
+			instance.unbind(appName)
+		})
 
-			Expect(bindingParameters).Should(MatchJSON(expectedJSON))
+		It("binds&unbinds with configurations and policy", func() {
+			policyFile := "../assets/file/policy/policy-with-configuration.json"
+			policyWithConfig, err := os.ReadFile(policyFile)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = helpers.BindServiceToAppWithPolicy(cfg, appName, instance.name(), policyFile)
+			Expect(err).NotTo(HaveOccurred())
+			By("checking broker bind parameter response should have policy and configuration")
+			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
+			Expect(bindingParameters).Should(MatchJSON(policyWithConfig))
+
 			instance.unbind(appName)
 		})
 
@@ -167,7 +157,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 	Describe("allows setting default policies", func() {
 		var instance serviceInstance
 		var defaultPolicy []byte
-		var expectedDefaultPolicyWithConfigsJSON []byte
+		var policy []byte
 
 		BeforeEach(func() {
 			instance = createServiceWithParameters(cfg.ServicePlan, "../assets/file/policy/default_policy.json")
@@ -183,13 +173,7 @@ var _ = Describe("AutoScaler Service Broker", func() {
 			err = json.Unmarshal(defaultPolicy, &serviceParameters)
 			Expect(err).NotTo(HaveOccurred())
 
-			expectedDefaultPolicyWithConfigsJSON, err = os.ReadFile("../assets/file/policy/default_policy-with-configuration.json")
-			Expect(err).NotTo(HaveOccurred())
-			var serviceParametersWithConfigs = struct {
-				Configuration interface{} `json:"configuration"`
-				DefaultPolicy interface{} `json:"default_policy"`
-			}{}
-			err = json.Unmarshal(expectedDefaultPolicyWithConfigsJSON, &serviceParametersWithConfigs)
+			policy, err = json.Marshal(serviceParameters.DefaultPolicy)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
@@ -200,9 +184,9 @@ var _ = Describe("AutoScaler Service Broker", func() {
 
 		It("sets the default policy if no policy is set during binding and allows retrieving the policy via the binding parameters", func() {
 			helpers.BindServiceToApp(cfg, appName, instance.name())
-			By("checking broker bind parameter response should have default policy and configuration")
+			By("checking broker bind parameter response should have default policy")
 			bindingParameters := helpers.GetServiceCredentialBindingParameters(cfg, instance.name(), appName)
-			Expect(bindingParameters).Should(MatchJSON(expectedDefaultPolicyWithConfigsJSON))
+			Expect(bindingParameters).Should(MatchJSON(policy))
 
 			unbindService := cf.Cf("unbind-service", appName, instance.name()).Wait(cfg.DefaultTimeoutDuration())
 			Expect(unbindService).To(Exit(0), "failed unbinding service from app")
@@ -222,7 +206,6 @@ var _ = Describe("AutoScaler Service Broker", func() {
 		var instance serviceInstance
 		It("should update a service instance from one plan to another plan", func() {
 			servicePlans := GetServicePlans(cfg)
-			fmt.Println("servicePlans", servicePlans)
 			source, target, err := servicePlans.getSourceAndTargetForPlanUpdate()
 			Expect(err).NotTo(HaveOccurred(), "failed getting source and target service plans")
 			instance = createService(source.Name)
