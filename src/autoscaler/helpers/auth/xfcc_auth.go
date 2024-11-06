@@ -43,6 +43,8 @@ func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
 		return fmt.Errorf("failed to parse certificate: %w", err)
 	}
 
+	fmt.Println("BANANAAAA", getSpaceGuid(cert))
+	fmt.Println("BANANAAAA", m.spaceGuid)
 	if getSpaceGuid(cert) != m.spaceGuid {
 		return ErrorWrongSpace
 	}
