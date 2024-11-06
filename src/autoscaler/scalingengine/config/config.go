@@ -31,7 +31,7 @@ var defaultHealthConfig = helpers.HealthConfig{
 	},
 }
 
-var defaultCFServerConfig = helpers.ServerConfig{
+var defaultCfServerConfig = helpers.ServerConfig{
 	Port: 8082,
 }
 
@@ -53,7 +53,7 @@ type Config struct {
 	CF                  cf.Config             `yaml:"cf"`
 	Logging             helpers.LoggingConfig `yaml:"logging"`
 	Server              helpers.ServerConfig  `yaml:"server"`
-	CFServer            helpers.ServerConfig  `yaml:"cf_server"`
+	CfServer            helpers.ServerConfig  `yaml:"cf_server"`
 	Health              helpers.HealthConfig  `yaml:"health"`
 	DB                  DBConfig              `yaml:"db"`
 	DefaultCoolDownSecs int                   `yaml:"defaultCoolDownSecs"`
@@ -66,7 +66,7 @@ func LoadConfig(reader io.Reader) (*Config, error) {
 		CF:                defaultCFConfig,
 		Logging:           defaultLoggingConfig,
 		Server:            defaultServerConfig,
-		CFServer:          defaultCFServerConfig,
+		CfServer:          defaultCfServerConfig,
 		Health:            defaultHealthConfig,
 		HttpClientTimeout: DefaultHttpClientTimeout,
 	}
