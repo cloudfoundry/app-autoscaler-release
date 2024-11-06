@@ -14,6 +14,7 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
+- autoscaler/helpers/auth/* # gosub
 - autoscaler/helpers/handlers/* # gosub
 - autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/models/* # gosub
