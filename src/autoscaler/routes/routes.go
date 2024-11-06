@@ -145,10 +145,15 @@ func MetricsCollectorRoutes() *mux.Router {
 	return autoScalerRouteInstance.GetRouter()
 }
 
+<<<<<<< HEAD
 func (r *Router) CreateEventGeneratorRoutes() *mux.Router {
 	r.router.Path(AggregatedMetricHistoriesPath).Methods(http.MethodGet).Name(GetAggregatedMetricHistoriesRouteName)
 	r.router.Path(LivenessPath).Methods(http.MethodGet).Name(LivenessRouteName)
 	return r.router
+=======
+func EventGeneratorRoutes() *mux.Router {
+	return autoScalerRouteInstance.GetRouter()
+>>>>>>> ca4050ddd (Adds xfcc cf endpoint support to scaling engine)
 }
 
 func ScalingEngineRoutes() *mux.Router {
