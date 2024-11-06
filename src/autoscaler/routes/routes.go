@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"github.com/gorilla/mux"
-
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -18,6 +18,9 @@ const (
 
 	ScalingHistoriesPath         = "/v1/apps/{guid}/scaling_histories"
 	GetScalingHistoriesRouteName = "GetScalingHistories"
+
+	LivenessPath      = "/v1/liveness"
+	LivenessRouteName = "Liveness"
 
 	ActiveSchedulePath            = "/v1/apps/{appid}/active_schedules/{scheduleid}"
 	SetActiveScheduleRouteName    = "SetActiveSchedule"
@@ -60,87 +63,105 @@ const (
 )
 
 type AutoScalerRoute struct {
-	schedulerRoutes        *mux.Router
-	metricsCollectorRoutes *mux.Router
-	eventGeneratorRoutes   *mux.Router
-	scalingEngineRoutes    *mux.Router
-	metricsForwarderRoutes *mux.Router
-	apiOpenRoutes          *mux.Router
-	apiRoutes              *mux.Router
-	apiPolicyRoutes        *mux.Router
+	router *mux.Router
 }
 
-var autoScalerRouteInstance = newRouters()
+func NewRouter() *AutoScalerRoute {
+	r := mux.NewRouter()
+	return &AutoScalerRoute{router: r}
+}
 
-func newRouters() *AutoScalerRoute {
-	instance := &AutoScalerRoute{
-		schedulerRoutes:        mux.NewRouter(),
-		metricsCollectorRoutes: mux.NewRouter(),
-		eventGeneratorRoutes:   mux.NewRouter(),
-		scalingEngineRoutes:    mux.NewRouter(),
-		metricsForwarderRoutes: mux.NewRouter(),
-		apiOpenRoutes:          mux.NewRouter(),
-		apiRoutes:              mux.NewRouter(),
-		apiPolicyRoutes:        mux.NewRouter(),
-	}
+func (r *AutoScalerRoute) RegisterRoutes() {
+	r.RegisterScalingEngineRoutes()
+	r.registerMetricsCollectorRoutes()
+	r.registerEventGeneratorRoutes()
+	r.registerMetricsForwarderRoutes()
+	r.registerSchedulerRoutes()
+	r.CreateApiPublicSubrouter()
+	r.CreateApiSubrouter()
+	r.CreateApiPolicySubrouter()
+}
 
-	instance.metricsCollectorRoutes.Path(MetricHistoriesPath).Methods(http.MethodGet).Name(GetMetricHistoriesRouteName)
+func (r *AutoScalerRoute) RegisterScalingEngineRoutes() {
+	r.router.Path(ScalePath).Methods(http.MethodPost).Name(ScaleRouteName)
+	r.router.Path(ScalingHistoriesPath).Methods(http.MethodGet).Name(GetScalingHistoriesRouteName)
+	r.router.Path(ActiveSchedulePath).Methods(http.MethodPut).Name(SetActiveScheduleRouteName)
+	r.router.Path(ActiveSchedulePath).Methods(http.MethodDelete).Name(DeleteActiveScheduleRouteName)
+	r.router.Path(ActiveSchedulesPath).Methods(http.MethodGet).Name(GetActiveSchedulesRouteName)
+	r.router.Path(SyncActiveSchedulesPath).Methods(http.MethodPut).Name(SyncActiveSchedulesRouteName)
+	r.router.Path(LivenessPath).Methods(http.MethodGet).Name(LivenessRouteName)
+}
 
-	instance.eventGeneratorRoutes.Path(AggregatedMetricHistoriesPath).Methods(http.MethodGet).Name(GetAggregatedMetricHistoriesRouteName)
+func (r *AutoScalerRoute) registerMetricsCollectorRoutes() {
+	r.router.Path(MetricHistoriesPath).Methods(http.MethodGet).Name(GetMetricHistoriesRouteName)
+}
 
-	instance.scalingEngineRoutes.Path(ScalePath).Methods(http.MethodPost).Name(ScaleRouteName)
-	instance.scalingEngineRoutes.Path(ScalingHistoriesPath).Methods(http.MethodGet).Name(GetScalingHistoriesRouteName)
-	instance.scalingEngineRoutes.Path(ActiveSchedulePath).Methods(http.MethodPut).Name(SetActiveScheduleRouteName)
-	instance.scalingEngineRoutes.Path(ActiveSchedulePath).Methods(http.MethodDelete).Name(DeleteActiveScheduleRouteName)
-	instance.scalingEngineRoutes.Path(ActiveSchedulesPath).Methods(http.MethodGet).Name(GetActiveSchedulesRouteName)
-	instance.scalingEngineRoutes.Path(SyncActiveSchedulesPath).Methods(http.MethodPut).Name(SyncActiveSchedulesRouteName)
+func (r *AutoScalerRoute) registerEventGeneratorRoutes() {
+	r.router.Path(AggregatedMetricHistoriesPath).Methods(http.MethodGet).Name(GetAggregatedMetricHistoriesRouteName)
+}
 
-	instance.metricsForwarderRoutes.Path(CustomMetricsPath).Methods(http.MethodPost).Name(PostCustomMetricsRouteName)
+func (r *AutoScalerRoute) registerMetricsForwarderRoutes() {
+	r.router.Path(CustomMetricsPath).Methods(http.MethodPost).Name(PostCustomMetricsRouteName)
+}
 
-	instance.schedulerRoutes.Path(SchedulePath).Methods(http.MethodPut).Name(UpdateScheduleRouteName)
-	instance.schedulerRoutes.Path(SchedulePath).Methods(http.MethodDelete).Name(DeleteScheduleRouteName)
-	instance.apiOpenRoutes.Path(PublicApiInfoPath).Methods(http.MethodGet).Name(PublicApiInfoRouteName)
-	instance.apiOpenRoutes.Path(PublicApiHealthPath).Methods(http.MethodGet).Name(PublicApiHealthRouteName)
+func (r *AutoScalerRoute) registerSchedulerRoutes() {
+	r.router.Path(SchedulePath).Methods(http.MethodPut).Name(UpdateScheduleRouteName)
+	r.router.Path(SchedulePath).Methods(http.MethodDelete).Name(DeleteScheduleRouteName)
+}
 
-	instance.apiRoutes = instance.apiOpenRoutes.PathPrefix("/v1/apps").Subrouter()
-	instance.apiRoutes.Path(PublicApiScalingHistoryPath).Methods(http.MethodGet).Name(PublicApiScalingHistoryRouteName)
-	instance.apiRoutes.Path(PublicApiAggregatedMetricsHistoryPath).Methods(http.MethodGet).Name(PublicApiAggregatedMetricsHistoryRouteName)
+func (r *AutoScalerRoute) CreateApiPublicSubrouter() *mux.Router {
+	publicApiRoutes := r.router.PathPrefix("").Subrouter()
+	publicApiRoutes.Path(PublicApiInfoPath).Methods(http.MethodGet).Name(PublicApiInfoRouteName)
+	publicApiRoutes.Path(PublicApiHealthPath).Methods(http.MethodGet).Name(PublicApiHealthRouteName)
 
-	instance.apiPolicyRoutes = instance.apiOpenRoutes.Path(PublicApiPolicyPath).Subrouter()
-	instance.apiPolicyRoutes.Path("").Methods(http.MethodGet).Name(PublicApiGetPolicyRouteName)
-	instance.apiPolicyRoutes.Path("").Methods(http.MethodPut).Name(PublicApiAttachPolicyRouteName)
-	instance.apiPolicyRoutes.Path("").Methods(http.MethodDelete).Name(PublicApiDetachPolicyRouteName)
+	return publicApiRoutes
+}
 
-	return instance
+func (r *AutoScalerRoute) CreateApiSubrouter() *mux.Router {
+	apiRoutes := r.router.PathPrefix("/v1/apps").Subrouter()
+	apiRoutes.Path(PublicApiScalingHistoryPath).Methods(http.MethodGet).Name(PublicApiScalingHistoryRouteName)
+	apiRoutes.Path(PublicApiAggregatedMetricsHistoryPath).Methods(http.MethodGet).Name(PublicApiAggregatedMetricsHistoryRouteName)
+	return apiRoutes
+}
+
+func (r *AutoScalerRoute) CreateApiPolicySubrouter() *mux.Router {
+	apiPolicyRoutes := r.router.Path(PublicApiPolicyPath).Subrouter()
+	apiPolicyRoutes.Path("").Methods(http.MethodGet).Name(PublicApiGetPolicyRouteName)
+	apiPolicyRoutes.Path("").Methods(http.MethodPut).Name(PublicApiAttachPolicyRouteName)
+	apiPolicyRoutes.Path("").Methods(http.MethodDelete).Name(PublicApiDetachPolicyRouteName)
+	return apiPolicyRoutes
+}
+
+func (r *AutoScalerRoute) GetRouter() *mux.Router {
+	return r.router
+}
+
+var autoScalerRouteInstance = NewRouter()
+
+func init() {
+	autoScalerRouteInstance.RegisterRoutes()
 }
 
 func MetricsCollectorRoutes() *mux.Router {
-	return autoScalerRouteInstance.metricsCollectorRoutes
+	return autoScalerRouteInstance.GetRouter()
 }
 
 func EventGeneratorRoutes() *mux.Router {
-	return autoScalerRouteInstance.eventGeneratorRoutes
+	return autoScalerRouteInstance.GetRouter()
 }
 
 func ScalingEngineRoutes() *mux.Router {
-	return autoScalerRouteInstance.scalingEngineRoutes
+	return autoScalerRouteInstance.GetRouter()
 }
 
 func MetricsForwarderRoutes() *mux.Router {
-	return autoScalerRouteInstance.metricsForwarderRoutes
+	return autoScalerRouteInstance.GetRouter()
 }
 
 func SchedulerRoutes() *mux.Router {
-	return autoScalerRouteInstance.schedulerRoutes
+	return autoScalerRouteInstance.GetRouter()
 }
 
-func ApiOpenRoutes() *mux.Router {
-	return autoScalerRouteInstance.apiOpenRoutes
-}
-
-func ApiRoutes() *mux.Router {
-	return autoScalerRouteInstance.apiRoutes
-}
 func ApiPolicyRoutes() *mux.Router {
-	return autoScalerRouteInstance.apiPolicyRoutes
+	return autoScalerRouteInstance.GetRouter()
 }

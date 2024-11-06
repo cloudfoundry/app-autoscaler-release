@@ -33,16 +33,18 @@ func (vh VarsFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 type PublicApiServer struct {
-	logger              lager.Logger
-	conf                *config.Config
-	policyDB            db.PolicyDB
-	bindingDB           db.BindingDB
-	credentials         cred_helper.Credentials
-	checkBindingFunc    api.CheckBindingFunc
-	cfClient            cf.CFClient
-	httpStatusCollector healthendpoint.HTTPStatusCollector
-	rateLimiter         ratelimiter.Limiter
-	brokerServer        brokerserver.BrokerServer
+	logger                    lager.Logger
+	conf                      *config.Config
+	policyDB                  db.PolicyDB
+	bindingDB                 db.BindingDB
+	credentials               cred_helper.Credentials
+	checkBindingFunc          api.CheckBindingFunc
+	cfClient                  cf.CFClient
+	httpStatusCollector       healthendpoint.HTTPStatusCollector
+	brokerServer              brokerserver.BrokerServer
+	AutoscalerRouter          *routes.AutoScalerRoute
+	PublicApiServerMiddleware *Middleware
+	RateLimiterMiddleware     *ratelimiter.RateLimiterMiddleware
 
 	healthRouter *mux.Router
 }
@@ -52,16 +54,18 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policyDB db.Po
 	cfClient cf.CFClient, httpStatusCollector healthendpoint.HTTPStatusCollector,
 	rateLimiter ratelimiter.Limiter, brokerServer brokerserver.BrokerServer) *PublicApiServer {
 	return &PublicApiServer{
-		logger:              logger,
-		conf:                conf,
-		policyDB:            policyDB,
-		bindingDB:           bindingDB,
-		credentials:         credentials,
-		checkBindingFunc:    checkBindingFunc,
-		cfClient:            cfClient,
-		httpStatusCollector: httpStatusCollector,
-		rateLimiter:         rateLimiter,
-		brokerServer:        brokerServer,
+		logger:                    logger,
+		conf:                      conf,
+		policyDB:                  policyDB,
+		bindingDB:                 bindingDB,
+		credentials:               credentials,
+		checkBindingFunc:          checkBindingFunc,
+		cfClient:                  cfClient,
+		httpStatusCollector:       httpStatusCollector,
+		brokerServer:              brokerServer,
+		AutoscalerRouter:          routes.NewRouter(),
+		PublicApiServerMiddleware: NewMiddleware(logger, cfClient, checkBindingFunc, conf.APIClientId),
+		RateLimiterMiddleware:     ratelimiter.NewRateLimiterMiddleware("appId", rateLimiter, logger.Session("api-ratelimiter-middleware")),
 	}
 }
 
@@ -77,81 +81,80 @@ func (s *PublicApiServer) Setup() error {
 	return nil
 }
 
-func (s *PublicApiServer) GetHealthServer() (ifrit.Runner, error) {
+func (s *PublicApiServer) CreateHealthServer() (ifrit.Runner, error) {
 	return helpers.NewHTTPServer(s.logger, s.conf.Health.ServerConfig, s.healthRouter)
 }
 
-func (s *PublicApiServer) GetUnifiedServer() (ifrit.Runner, error) {
+func (s *PublicApiServer) CreateCFServer() (ifrit.Runner, error) {
 	pah := NewPublicApiHandler(s.logger, s.conf, s.policyDB, s.bindingDB, s.credentials)
 	scalingHistoryHandler, err := s.newScalingHistoryHandler()
 	if err != nil {
 		return nil, err
 	}
 
-	r := s.setupApiRoutes(pah, scalingHistoryHandler)
+	s.setupApiRoutes(pah, scalingHistoryHandler)
 
 	brokerRouter, err := s.brokerServer.GetRouter()
 	if err != nil {
 		return nil, err
 	}
 
-	return helpers.NewHTTPServer(s.logger, s.conf.VCAPServer, s.setupVCAPRouter(r, s.healthRouter, brokerRouter))
+	return helpers.NewHTTPServer(s.logger, s.conf.VCAPServer, s.setupCFRouter(s.AutoscalerRouter.GetRouter(), s.healthRouter, brokerRouter))
 }
 
-func (s *PublicApiServer) GetMtlsServer() (ifrit.Runner, error) {
+func (s *PublicApiServer) CreateMtlsServer() (ifrit.Runner, error) {
 	pah := NewPublicApiHandler(s.logger, s.conf, s.policyDB, s.bindingDB, s.credentials)
 	scalingHistoryHandler, err := s.newScalingHistoryHandler()
 	if err != nil {
 		return nil, err
 	}
 
-	r := s.setupApiRoutes(pah, scalingHistoryHandler)
+	s.setupApiRoutes(pah, scalingHistoryHandler)
 
-	return helpers.NewHTTPServer(s.logger, s.conf.Server, s.setupMainRouter(r, s.healthRouter))
+	return helpers.NewHTTPServer(s.logger, s.conf.Server, s.setupMainRouter(s.AutoscalerRouter.GetRouter(), s.healthRouter))
 }
 
-func (s *PublicApiServer) setupApiRoutes(pah *PublicApiHandler, scalingHistoryHandler http.Handler) *mux.Router {
-	r := routes.ApiOpenRoutes()
-	r.Use(otelmux.Middleware("apiserver"))
-	r.Use(healthendpoint.NewHTTPStatusCollectMiddleware(s.httpStatusCollector).Collect)
-
-	r.Get(routes.PublicApiInfoRouteName).Handler(VarsFunc(pah.GetApiInfo))
-	r.Get(routes.PublicApiHealthRouteName).Handler(VarsFunc(pah.GetHealth))
-
-	rp := routes.ApiRoutes()
-	rateLimiterMiddleware := ratelimiter.NewRateLimiterMiddleware("appId", s.rateLimiter, s.logger.Session("api-ratelimiter-middleware"))
-	rp.Use(rateLimiterMiddleware.CheckRateLimit)
-	rp.Use(NewMiddleware(s.logger, s.cfClient, s.checkBindingFunc, s.conf.APIClientId).HasClientToken)
-	rp.Use(NewMiddleware(s.logger, s.cfClient, s.checkBindingFunc, s.conf.APIClientId).Oauth)
-	rp.Use(NewMiddleware(s.logger, s.cfClient, s.checkBindingFunc, s.conf.APIClientId).CheckServiceBinding)
-	rp.Use(healthendpoint.NewHTTPStatusCollectMiddleware(s.httpStatusCollector).Collect)
-
-	rp.Get(routes.PublicApiScalingHistoryRouteName).Handler(scalingHistoryHandler)
-	rp.Get(routes.PublicApiAggregatedMetricsHistoryRouteName).Handler(VarsFunc(pah.GetAggregatedMetricsHistories))
-
-	s.setupPolicyRoutes(rp, pah)
-
-	return r
+func (s *PublicApiServer) setupApiProtectedRoutes(pah *PublicApiHandler, scalingHistoryHandler http.Handler) {
+	apiProtectedRouter := s.AutoscalerRouter.CreateApiSubrouter()
+	apiProtectedRouter.Use(otelmux.Middleware("apiserver"))
+	apiProtectedRouter.Use(healthendpoint.NewHTTPStatusCollectMiddleware(s.httpStatusCollector).Collect)
+	apiProtectedRouter.Use(s.RateLimiterMiddleware.CheckRateLimit)
+	apiProtectedRouter.Use(s.PublicApiServerMiddleware.HasClientToken)
+	apiProtectedRouter.Use(s.PublicApiServerMiddleware.Oauth)
+	apiProtectedRouter.Use(s.PublicApiServerMiddleware.CheckServiceBinding)
+	apiProtectedRouter.Use(healthendpoint.NewHTTPStatusCollectMiddleware(s.httpStatusCollector).Collect)
+	apiProtectedRouter.Get(routes.PublicApiScalingHistoryRouteName).Handler(scalingHistoryHandler)
+	apiProtectedRouter.Get(routes.PublicApiAggregatedMetricsHistoryRouteName).Handler(VarsFunc(pah.GetAggregatedMetricsHistories))
 }
 
-func (s *PublicApiServer) setupPolicyRoutes(rp *mux.Router, pah *PublicApiHandler) {
-	rpolicy := routes.ApiPolicyRoutes()
-	rlm := ratelimiter.NewRateLimiterMiddleware("appId", s.rateLimiter, s.logger.Session("api-ratelimiter-middleware"))
-	pasm := NewMiddleware(s.logger, s.cfClient, s.checkBindingFunc, s.conf.APIClientId)
-	rpolicy.Use(rlm.CheckRateLimit)
-	rpolicy.Use(pasm.HasClientToken)
-	rpolicy.Use(pasm.Oauth)
-	rpolicy.Use(pasm.CheckServiceBinding)
+func (s *PublicApiServer) setupPolicyRoutes(pah *PublicApiHandler) {
+	rpolicy := s.AutoscalerRouter.CreateApiPolicySubrouter()
+	rpolicy.Use(s.RateLimiterMiddleware.CheckRateLimit)
+	rpolicy.Use(s.PublicApiServerMiddleware.HasClientToken)
+	rpolicy.Use(s.PublicApiServerMiddleware.Oauth)
+	rpolicy.Use(s.PublicApiServerMiddleware.CheckServiceBinding)
 	rpolicy.Use(healthendpoint.NewHTTPStatusCollectMiddleware(s.httpStatusCollector).Collect)
-
 	rpolicy.Get(routes.PublicApiGetPolicyRouteName).Handler(VarsFunc(pah.GetScalingPolicy))
 	rpolicy.Get(routes.PublicApiAttachPolicyRouteName).Handler(VarsFunc(pah.AttachScalingPolicy))
 	rpolicy.Get(routes.PublicApiDetachPolicyRouteName).Handler(VarsFunc(pah.DetachScalingPolicy))
 }
 
+func (s *PublicApiServer) setupPublicApiRoutes(pah *PublicApiHandler) {
+	apiPublicRouter := s.AutoscalerRouter.CreateApiPublicSubrouter()
+	apiPublicRouter.Get(routes.PublicApiInfoRouteName).Handler(VarsFunc(pah.GetApiInfo))
+	apiPublicRouter.Get(routes.PublicApiHealthRouteName).Handler(VarsFunc(pah.GetHealth))
+}
+
+func (s *PublicApiServer) setupApiRoutes(publicApiHandler *PublicApiHandler, scalingHistoryHandler http.Handler) {
+	s.setupApiProtectedRoutes(publicApiHandler, scalingHistoryHandler)
+	s.setupPublicApiRoutes(publicApiHandler)
+	s.setupPolicyRoutes(publicApiHandler)
+}
+
 func (s *PublicApiServer) createHealthRouter() (*mux.Router, error) {
 	checkers := []healthendpoint.Checker{}
 	gatherer := s.createPrometheusRegistry()
+
 	healthRouter, err := healthendpoint.NewHealthRouter(s.conf.Health, checkers, s.logger.Session("health-server"), gatherer, time.Now)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create health router: %w", err)
@@ -182,12 +185,12 @@ func (s *PublicApiServer) newScalingHistoryHandler() (http.Handler, error) {
 	return scalinghistory.NewServer(scalingHistoryHandler, ss)
 }
 
-func (s *PublicApiServer) setupVCAPRouter(r *mux.Router, healthRouter *mux.Router, brokerRouter *chi.Mux) *mux.Router {
+func (s *PublicApiServer) setupCFRouter(apiRouter *mux.Router, healthRouter *mux.Router, brokerRouter *chi.Mux) *mux.Router {
 	mainRouter := mux.NewRouter()
 
 	mainRouter.PathPrefix("/v2").Handler(brokerRouter)
-	mainRouter.PathPrefix("/v1").Handler(r)
-	mainRouter.PathPrefix("/health").Handler(healthRouter)
+	mainRouter.PathPrefix("/v1").Handler(apiRouter)
+	mainRouter.PathPrefix("/health").Handler(apiRouter)
 	mainRouter.PathPrefix("/").Handler(healthRouter)
 
 	return mainRouter
@@ -196,7 +199,6 @@ func (s *PublicApiServer) setupVCAPRouter(r *mux.Router, healthRouter *mux.Route
 func (s *PublicApiServer) setupMainRouter(r *mux.Router, healthRouter *mux.Router) *mux.Router {
 	mainRouter := mux.NewRouter()
 	mainRouter.PathPrefix("/v1").Handler(r)
-	mainRouter.PathPrefix("/health").Handler(healthRouter)
 	mainRouter.PathPrefix("/").Handler(healthRouter)
 	return mainRouter
 }

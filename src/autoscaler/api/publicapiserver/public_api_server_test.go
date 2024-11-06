@@ -1,6 +1,7 @@
 package publicapiserver_test
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -85,7 +86,7 @@ var _ = Describe("PublicApiServer", func() {
 		ginkgomon_v2.Interrupt(serverProcess)
 	})
 
-	Describe("GetMtlsServer", func() {
+	Describe("CreateMtlsServer", func() {
 		JustBeforeEach(func() {
 			eventGeneratorResponse = []models.AppMetric{
 				{
@@ -104,9 +105,16 @@ var _ = Describe("PublicApiServer", func() {
 			err := publicApiServer.Setup()
 			Expect(err).NotTo(HaveOccurred())
 
-			httpServer, err := publicApiServer.GetMtlsServer()
+			httpServer, err := publicApiServer.CreateMtlsServer()
 			Expect(err).NotTo(HaveOccurred())
 			serverProcess = ginkgomon_v2.Invoke(httpServer)
+		})
+
+		Context("when calling health endpoint", func() {
+			It("should succeed", func() {
+				res := verifyResponse(httpClient, serverUrl, "/health", nil, http.MethodGet, "", http.StatusOK)
+				Expect(res).To(ContainSubstring("alive"))
+			})
 		})
 
 		Describe("Protected Routes", func() {
@@ -344,6 +352,7 @@ var _ = Describe("PublicApiServer", func() {
 						schedulerStatus = http.StatusOK
 					})
 					It("should fail with 401", func() {
+
 						verifyResponse(httpClient, serverUrl, "/v1/apps/"+TEST_APP_ID+"/policy",
 							map[string]string{"Authorization": TEST_INVALID_USER_TOKEN}, http.MethodGet, "", http.StatusUnauthorized)
 					})
@@ -449,7 +458,27 @@ var _ = Describe("PublicApiServer", func() {
 		})
 	})
 
-	Describe("GetUnifiedServer", func() {
+	Describe("CreateHealthServer", func() {
+		JustBeforeEach(func() {
+			publicApiServer := publicapiserver.NewPublicApiServer(
+				lagertest.NewTestLogger("public_apiserver"), conf, fakePolicyDB,
+				fakeBindingDB, fakeCredentials, checkBindingFunc, fakeCFClient,
+				httpStatusCollector, fakeRateLimiter, fakeBrokerServer)
+			err := publicApiServer.Setup()
+			Expect(err).NotTo(HaveOccurred())
+
+			httpServer, err := publicApiServer.CreateHealthServer()
+			Expect(err).NotTo(HaveOccurred())
+			serverProcess = ginkgomon_v2.Invoke(httpServer)
+		})
+
+		It("should succeed", func() {
+			res := verifyResponse(httpClient, healthUrl, "/health", nil, http.MethodGet, "", http.StatusOK)
+			Expect(res).To(ContainSubstring("autoscaler_golangapiserver_bindingDB_idle"))
+		})
+	})
+
+	Describe("CreateCFServer", func() {
 		JustBeforeEach(func() {
 			eventGeneratorResponse = []models.AppMetric{
 				{
@@ -467,7 +496,7 @@ var _ = Describe("PublicApiServer", func() {
 			err := publicApiServer.Setup()
 			Expect(err).NotTo(HaveOccurred())
 
-			httpServer, err := publicApiServer.GetUnifiedServer()
+			httpServer, err := publicApiServer.CreateCFServer()
 			Expect(err).NotTo(HaveOccurred())
 			serverProcess = ginkgomon_v2.Invoke(httpServer)
 		})
@@ -480,7 +509,8 @@ var _ = Describe("PublicApiServer", func() {
 
 		Context("when calling health endpoint", func() {
 			It("should succeed", func() {
-				verifyResponse(httpClient, serverUrl, "/health", nil, http.MethodGet, "", http.StatusOK)
+				res := verifyResponse(httpClient, serverUrl, "/health", nil, http.MethodGet, "", http.StatusOK)
+				Expect(res).To(ContainSubstring("alive"))
 			})
 		})
 
@@ -521,6 +551,8 @@ func verifyResponse(httpClient *http.Client, serverUrl *url.URL, path string, he
 	if err == nil {
 		defer func() { _ = resp.Body.Close() }()
 	}
+	fmt.Println("req", req)
+	fmt.Println("resp", resp)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(expectResponseStatusCode))
 
