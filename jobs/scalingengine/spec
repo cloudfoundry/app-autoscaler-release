@@ -174,11 +174,11 @@ properties:
     default: 8080
 
   autoscaler.cf_server.xfcc.valid_org_guid:
-    description: allowed org guid for xfcc endpoint
+    description: approve org guid for xfcc endpoint
     default: ''
 
   autoscaler.cf_server.xfcc.valid_space_guid:
-    description: allowed space guid for xfcc endpoint
+    description: approve space guid for xfcc endpoint
     default: ''
 
   autoscaler.scalingengine.health.port:
