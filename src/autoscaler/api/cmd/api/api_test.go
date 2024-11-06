@@ -297,44 +297,50 @@ var _ = Describe("Api", func() {
 	})
 
 	When("running CF server", func() {
-		BeforeEach(func() {
-			os.Setenv("VCAP_APPLICATION", "{}")
-			os.Setenv("VCAP_SERVICES", getVcapServices())
-			os.Setenv("PORT", fmt.Sprintf("%d", vcapPort))
-			runner.Start()
-		})
-		AfterEach(func() {
-			runner.Interrupt()
-			Eventually(runner.Session, 5).Should(Exit(0))
-			os.Unsetenv("VCAP_APPLICATION")
-			os.Unsetenv("VCAP_SERVICES")
-			os.Unsetenv("PORT")
-		})
+		XWhen("running in outside cf", func() {})
+		When("running in CF", func() {
 
-		It("should start a cf server", func() {
-			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", cfServerURL), nil)
-			Expect(err).NotTo(HaveOccurred())
+			BeforeEach(func() {
+				os.Setenv("VCAP_APPLICATION", "{}")
+				os.Setenv("VCAP_SERVICES", getVcapServices())
+				os.Setenv("PORT", fmt.Sprintf("%d", vcapPort))
+				runner.Start()
+			})
+			AfterEach(func() {
+				runner.Interrupt()
+				Eventually(runner.Session, 5).Should(Exit(0))
+				os.Unsetenv("VCAP_APPLICATION")
+				os.Unsetenv("VCAP_SERVICES")
+				os.Unsetenv("PORT")
+			})
 
-			rsp, err = cfServerHttpClient.Do(req)
-			Expect(err).ToNot(HaveOccurred())
+			It("should start a cf server", func() {
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", cfServerURL), nil)
+				Expect(err).NotTo(HaveOccurred())
 
-			bodyBytes, err := io.ReadAll(rsp.Body)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(bodyBytes).To(ContainSubstring("Automatically increase or decrease the number of application instances based on a policy you define."))
+				rsp, err = cfServerHttpClient.Do(req)
+				Expect(err).ToNot(HaveOccurred())
 
-			req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/catalog", cfServerURL), nil)
-			Expect(err).NotTo(HaveOccurred())
-			req.SetBasicAuth(username, password)
+				bodyBytes, err := io.ReadAll(rsp.Body)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(bodyBytes).To(ContainSubstring("Automatically increase or decrease the number of application instances based on a policy you define."))
 
-			rsp, err = cfServerHttpClient.Do(req)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+				req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/catalog", cfServerURL), nil)
+				Expect(err).NotTo(HaveOccurred())
+				req.SetBasicAuth(username, password)
 
-			bodyBytes, err = io.ReadAll(rsp.Body)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(bodyBytes).To(ContainSubstring("autoscaler-free-plan-id"))
+				rsp, err = cfServerHttpClient.Do(req)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+
+				bodyBytes, err = io.ReadAll(rsp.Body)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(bodyBytes).To(ContainSubstring("autoscaler-free-plan-id"))
+			})
+
 		})
 	})
+
 })
 
 func getVcapServices() (result string) {
