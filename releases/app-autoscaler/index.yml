@@ -35,6 +35,8 @@ builds:
     version: 14.1.1
   2ffe5558-cd6f-4be3-43ab-8fe4fc4f9005:
     version: 13.2.0
+  31044f34-681c-4d21-7d26-f534e94e7f2b:
+    version: 14.4.2
   4087e599-6e4b-4a10-6595-eec8e187fb5f:
     version: 7.1.0
   482559bc-07e0-47a6-71b8-e38c35497490:
