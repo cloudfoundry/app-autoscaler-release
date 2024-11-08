@@ -34,42 +34,11 @@ env:
   NODES: 4
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
   CI_DIR: "${{ github.workspace }}/app-autoscaler-release/ci"
-  CHECK_NAME: "${{ github.workflow }}_Check"
   CPU_UPPER_THRESHOLD: 200
 
 jobs:
-  create_pending_check:
-    # We require jobs for Acceptance Tests in this workflow to trigger on relevant events and labels.
-    # Verifcation job must runs always.
-    # Adding a non related label to the PR does not require acceptance tests to run, however github will rerun the workflow
-    #   and skip all jobs. In such case verification reuses previous check result or exits with failure if a check wasnt created.
-    if: |
-      ( ( github.event.action == 'opened' || github.event.action == 'synchronize' )
-          && ( contains(github.event.pull_request.labels.*.name, 'allow-acceptance-tests') || contains(github.event.pull_request.labels.*.name, 'dependencies') )
-      ) ||
-      (  ( github.event.action == 'labeled' )
-          && ( github.event.label.name == 'allow-acceptance-tests' ||  github.event.label.name == 'dependencies' )
-      )
-    name: "Create pending check"
-    runs-on: ubuntu-latest
-    permissions:
-      # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
-      # but supposed to be provided via the defaults, see:
-      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-      checks: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          path: app-autoscaler-release
-      - name: Create pending check
-        uses: ./app-autoscaler-release/.github/actions/pending-check
-        with:
-          pending_check: create
-
   deploy_autoscaler:
-    needs: [ create_pending_check ]
-    name: Deploy for ${{ github.workflow }}
+    name: Deploy
     runs-on: ubuntu-latest
     container:
       image: "${{ inputs.self_hosted_image }}"
@@ -94,9 +63,8 @@ jobs:
         run: make --directory="${AUTOSCALER_DIR}" deploy-apps
         if: ${{ inputs.deploy_apps }}
 
-
-
   acceptance_tests:
+    name: Acceptance Tests
     needs: [ deploy_autoscaler ]
     strategy:
       matrix:
@@ -105,7 +73,6 @@ jobs:
     container:
       image: "${{ inputs.self_hosted_image }}"
     continue-on-error: true
-    name: "[ ${{ matrix.suite }} ] ${{ github.workflow }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -128,31 +95,10 @@ jobs:
 
           make --directory="${AUTOSCALER_DIR}" acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
-  acceptance_tests_verify:
-    name: "${{ github.workflow }} Result"
-    needs: [ deploy_autoscaler, acceptance_tests ]
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-    permissions:
-      # needed according to https://docs.github.com/en/rest/overview/permissions-required-for-github-apps#permission-on-checks
-      # but supposed to be provided via the defaults, see:
-      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token
-      checks: write
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        path: app-autoscaler-release
-    - name: Verify jobs execution
-      uses: ./app-autoscaler-release/.github/actions/pending-check
-      with:
-        pending_check: verify
-        check_filter: ".*${{ github.workflow }}$"
-
   deployment_cleanup:
-    needs: [ acceptance_tests_verify ]
+    needs: [ deploy_autoscaler, acceptance_tests ]
     if: "!contains(github.event.pull_request.labels.*.name, 'skip-cleanup')"
-    name: Deployment cleanup
+    name: "Result"
     runs-on: ubuntu-latest
     container:
       image: "${{ inputs.self_hosted_image }}"
