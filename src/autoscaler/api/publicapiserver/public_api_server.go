@@ -65,7 +65,6 @@ func NewPublicApiServer(logger lager.Logger, conf *config.Config, policyDB db.Po
 	}
 }
 
-// TODO: Remove/rename this method?
 func (s *PublicApiServer) Setup() error {
 	hr, err := s.createHealthRouter()
 	if err != nil {
