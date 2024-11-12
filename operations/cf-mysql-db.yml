@@ -125,7 +125,12 @@
 - type: replace
   path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/policy_db_connection_config
   value: *databaseConnectionConfig
-
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/binding_db
+  value: *external_database
+- type: replace
+  path: /instance_groups/name=asapi/jobs/name=metricsforwarder/properties/autoscaler/binding_db_connection_config
+  value: *databaseConnectionConfig
 
 
 
