@@ -100,11 +100,3 @@ func CreatePrometheusRegistry(appMetricDB db.AppMetricDB, policyDb db.PolicyDB, 
 	}, true, logger.Session("eventgenerator-prometheus"))
 	return promRegistry
 }
-
-//  func setupMainRouter(egRouter, healthRouter *mux.Router) *mux.Router {
-//  	mainRouter := mux.NewRouter()
-//  	mainRouter.PathPrefix("/v1").Handler(egRouter)
-//  	//mainRouter.PathPrefix("/health").Handler(healthRouter)
-//  	//mainRouter.PathPrefix("/").Handler(healthRouter)
-//  	return mainRouter
-//  }
