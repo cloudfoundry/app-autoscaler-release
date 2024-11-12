@@ -92,6 +92,10 @@ ${CERTSTRAP} --depot-path "${depot_path}" sign cf-app --CA log-cache-syslog-serv
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain log-cache --ip 127.0.0.1
 ${CERTSTRAP} --depot-path "${depot_path}" sign log-cache --CA autoscaler-ca --years "20"
 
+# database certificate
+${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain postgres,mysql --ip 127.0.0.1
+${CERTSTRAP} --depot-path "${depot_path}" sign postgres --CA autoscaler-ca --years "20"
+
 # mTLS client certificate for local testing
 ## certstrap with multiple OU not working at the moment. Pull request is created in the upstream. Therefore, using openssl at the moment
 ## https://github.com/square/certstrap/pull/120
@@ -102,7 +106,7 @@ if [[ "$OPENSSL_VERSION" == LibreSSL* ]]; then
 	echo "OpenSSL needs to be used rather than LibreSSL"
 	exit 1
 fi
-# valid client certificates
+# valid certificate
 echo "${depot_path}"
 openssl  req -new -newkey rsa:2048  -nodes -subj "/CN=sap.com/O=SAP SE/OU=organization:AB1234ORG/OU=app:an-app-id/OU=space:AB1234SPACE" -out "${depot_path}"/validmtls_client-1.csr
 openssl x509 -req -in "${depot_path}"/validmtls_client-1.csr -CA "${depot_path}"/valid-mtls-local-ca-1.crt -CAkey "${depot_path}"/valid-mtls-local-ca-1.key -CAcreateserial -out "${depot_path}"/validmtls_client-1.crt -days 365 -sha256

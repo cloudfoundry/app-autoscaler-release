@@ -14,12 +14,14 @@ files:
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
 - autoscaler/helpers/* # gosub
-- autoscaler/helpers/apis/scalinghistory/* # gosub
 - autoscaler/helpers/handlers/* # gosub
 - autoscaler/metricsforwarder/server/common/* # gosub
 - autoscaler/models/* # gosub
 - autoscaler/routes/* # gosub
 - autoscaler/scalingengine/* # gosub
+- autoscaler/scalingengine/apis/* # gosub
+- autoscaler/scalingengine/apis/scalinghistory/* # gosub
+- autoscaler/scalingengine/client/* # gosub
 - autoscaler/scalingengine/cmd/scalingengine/* # gosub
 - autoscaler/scalingengine/config/* # gosub
 - autoscaler/scalingengine/schedule/* # gosub

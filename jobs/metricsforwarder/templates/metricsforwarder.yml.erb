@@ -97,15 +97,17 @@ cache_ttl: <%= p("autoscaler.metricsforwarder.cache_ttl") %>
 cache_cleanup_interval: <%= p("autoscaler.metricsforwarder.cache_cleanup_interval") %>
 policy_poller_interval: <%= p("autoscaler.metricsforwarder.policy_poller_interval") %>
 health:
-  port:  <%= p("autoscaler.metricsforwarder.health.port") %>
-  username: <%= p("autoscaler.metricsforwarder.health.username") %>
-  password: <%= p("autoscaler.metricsforwarder.health.password") %>
-  <% if_p("autoscaler.metricsforwarder.health.ca_cert", "autoscaler.metricsforwarder.health.server_cert", "autoscaler.metricsforwarder.health.server_key") do %>
-  tls:
-    ca_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/ca.crt
-    cert_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/server.crt
-    key_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/server.key
-  <% end %>
+  server_config:
+    port:  <%= p("autoscaler.metricsforwarder.health.port") %>
+    <% if_p("autoscaler.metricsforwarder.health.ca_cert", "autoscaler.metricsforwarder.health.server_cert", "autoscaler.metricsforwarder.health.server_key") do %>
+    tls:
+      ca_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/ca.crt
+      cert_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/server.crt
+      key_file: /var/vcap/jobs/metricsforwarder/config/certs/healthendpoint/server.key
+    <% end %>
+  basic_auth:
+    username: <%= p("autoscaler.metricsforwarder.health.username") %>
+    password: <%= p("autoscaler.metricsforwarder.health.password") %>
 
 rate_limit:
   valid_duration: <%= p("autoscaler.metricsforwarder.rate_limit.valid_duration") %>
