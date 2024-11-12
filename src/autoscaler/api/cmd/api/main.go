@@ -124,8 +124,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Debug("Successfully created health server")
-
 	members = append(members,
 		grouper.Member{"public_api_http_server", mtlsServer},
 		grouper.Member{"broker", brokerHttpServer},
