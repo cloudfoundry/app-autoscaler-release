@@ -35,7 +35,7 @@ modules:
       GO_INSTALL_PACKAGE_SPEC: code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api
     requires:
     - name: publicapiserver-config
-    - name: policydb
+    - name: database
     - name: app-autoscaler-application-logs
     parameters:
       memory: 1G
@@ -61,7 +61,7 @@ resources:
     service-tags:
     - publicapiserver-config
     path: api/default_config.json
-- name: policydb
+- name: database
   type: org.cloudfoundry.user-provided-service
   parameters:
     service-tags:

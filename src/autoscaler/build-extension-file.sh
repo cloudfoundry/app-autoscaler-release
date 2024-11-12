@@ -68,7 +68,7 @@ modules:
   - name: metricsforwarder
     requires:
     - name: metricsforwarder-config
-    - name: policydb
+    - name: database
     - name: syslog-client
     parameters:
       routes:
@@ -91,7 +91,7 @@ resources:
         health:
           basic_auth:
             password: "${METRICSFORWARDER_HEALTH_PASSWORD}"
-- name: policydb
+- name: database
   parameters:
     config:
       uri: "${POSTGRES_URI}"
