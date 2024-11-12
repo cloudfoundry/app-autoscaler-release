@@ -14,7 +14,7 @@ modules:
       DT_RELEASE_BUILD_VERSION: ${mta-version}
     requires:
     - name: metricsforwarder-config
-    - name: policydb
+    - name: database
     - name: syslog-client
     - name: app-autoscaler-application-logs
     - name: app-autoscaler-dynatrace
