@@ -72,6 +72,9 @@ clean-targets:
 clean-vendor:
 	@echo " - cleaning vendored go"
 	@find . -depth -name "vendor" -type d -exec rm -rf {} \;
+clean-fakes:
+	@echo " - cleaning fakes"
+	@find . -depth -name "fakes" -type d -exec rm -rf {} \;
 clean-autoscaler:
 	@make --directory='./src/autoscaler' clean
 clean-scheduler:
