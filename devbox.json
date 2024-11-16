@@ -36,12 +36,12 @@
     "golangci-lint":                     "1.61.0",
     "go":                                "1.22.5",
     "direnv":                            "2.35.0",
-    "ruby":                              "3.3.5",
-    "act":                               "0.2.68",
     "actionlint":                        "1.7.4",
+    "act":                               "0.2.68",
     "cloudfoundry-cli":                  "8.8.1",
     "google-cloud-sdk":                  "latest",
     "temurin-bin-21":                    "latest",
+    "ruby":                              "3.3.5",
     "yq-go":                             "4.44.3"
   },
   "shell": {
