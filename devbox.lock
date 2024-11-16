@@ -2,8 +2,8 @@
   "lockfile_version": "1",
   "packages": {
     "act@0.2.68": {
-      "last_modified": "2024-10-26T14:05:56Z",
-      "resolved": "github:NixOS/nixpkgs/4e0eec54db79d4d0909f45a88037210ff8eaffee#act",
+      "last_modified": "2024-11-03T14:18:04Z",
+      "resolved": "github:NixOS/nixpkgs/4ae2e647537bcdbb82265469442713d066675275#act",
       "source": "devbox-search",
       "version": "0.2.68",
       "systems": {
@@ -11,89 +11,89 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/gal3iyalafzmm0fqwifzzkzjkd3vk9k9-act-0.2.68",
+              "path": "/nix/store/ibgkmgmdpcd32b0n85ri8ah3pmiix42c-act-0.2.68",
               "default": true
             }
           ],
-          "store_path": "/nix/store/gal3iyalafzmm0fqwifzzkzjkd3vk9k9-act-0.2.68"
+          "store_path": "/nix/store/ibgkmgmdpcd32b0n85ri8ah3pmiix42c-act-0.2.68"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dh3w2zxkfr08n0iny62wwjnxzckfmjzx-act-0.2.68",
+              "path": "/nix/store/yrqramdc9cvdj4cnfj598b2flfvr4xgb-act-0.2.68",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dh3w2zxkfr08n0iny62wwjnxzckfmjzx-act-0.2.68"
+          "store_path": "/nix/store/yrqramdc9cvdj4cnfj598b2flfvr4xgb-act-0.2.68"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/7nydizz84xcrhsyrlg5sh0mcj43hcl47-act-0.2.68",
+              "path": "/nix/store/jqp3yghh090jgl00bzsiz64kcqspah8v-act-0.2.68",
               "default": true
             }
           ],
-          "store_path": "/nix/store/7nydizz84xcrhsyrlg5sh0mcj43hcl47-act-0.2.68"
+          "store_path": "/nix/store/jqp3yghh090jgl00bzsiz64kcqspah8v-act-0.2.68"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2x65fp8ygzsvj2rkljr8hjpannrx6zzn-act-0.2.68",
+              "path": "/nix/store/8pprsa389i2rbq0x6mqs3z900lpiqfh2-act-0.2.68",
               "default": true
             }
           ],
-          "store_path": "/nix/store/2x65fp8ygzsvj2rkljr8hjpannrx6zzn-act-0.2.68"
+          "store_path": "/nix/store/8pprsa389i2rbq0x6mqs3z900lpiqfh2-act-0.2.68"
         }
       }
     },
-    "actionlint@1.7.3": {
-      "last_modified": "2024-10-13T23:44:06Z",
-      "resolved": "github:NixOS/nixpkgs/d4f247e89f6e10120f911e2e2d2254a050d0f732#actionlint",
+    "actionlint@1.7.4": {
+      "last_modified": "2024-11-06T21:27:13Z",
+      "resolved": "github:NixOS/nixpkgs/fe348e1a06a2d791e992d46844a83d2d44436c5a#actionlint",
       "source": "devbox-search",
-      "version": "1.7.3",
+      "version": "1.7.4",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/rw7v977ipky8r3ydhl2g0rp6hd5qbs9k-actionlint-1.7.3",
+              "path": "/nix/store/ym50jpc7i79jjs4jh78d2ggjyqyqhjz9-actionlint-1.7.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/rw7v977ipky8r3ydhl2g0rp6hd5qbs9k-actionlint-1.7.3"
+          "store_path": "/nix/store/ym50jpc7i79jjs4jh78d2ggjyqyqhjz9-actionlint-1.7.4"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/panhq42cnq6240mkllnrqshcwa0ii3rl-actionlint-1.7.3",
+              "path": "/nix/store/mz5gkp6yyrw2h3bizjdmjgld10pnqjqq-actionlint-1.7.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/panhq42cnq6240mkllnrqshcwa0ii3rl-actionlint-1.7.3"
+          "store_path": "/nix/store/mz5gkp6yyrw2h3bizjdmjgld10pnqjqq-actionlint-1.7.4"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/rjq12m13p89ljnkb7zmi6p57cz5davdx-actionlint-1.7.3",
+              "path": "/nix/store/2cciiijhrv1swi4554sqi5wlc04nhrbx-actionlint-1.7.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/rjq12m13p89ljnkb7zmi6p57cz5davdx-actionlint-1.7.3"
+          "store_path": "/nix/store/2cciiijhrv1swi4554sqi5wlc04nhrbx-actionlint-1.7.4"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3fxnhvjl93djzmwa8d36gqd9v2s45s29-actionlint-1.7.3",
+              "path": "/nix/store/fxb353fzp1kxp69dimvgyffvrpc8kcsd-actionlint-1.7.4",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3fxnhvjl93djzmwa8d36gqd9v2s45s29-actionlint-1.7.3"
+          "store_path": "/nix/store/fxb353fzp1kxp69dimvgyffvrpc8kcsd-actionlint-1.7.4"
         }
       }
     },
@@ -950,8 +950,8 @@
       }
     },
     "google-cloud-sdk@latest": {
-      "last_modified": "2024-10-13T23:44:06Z",
-      "resolved": "github:NixOS/nixpkgs/d4f247e89f6e10120f911e2e2d2254a050d0f732#google-cloud-sdk",
+      "last_modified": "2024-11-03T14:18:04Z",
+      "resolved": "github:NixOS/nixpkgs/4ae2e647537bcdbb82265469442713d066675275#google-cloud-sdk",
       "source": "devbox-search",
       "version": "494.0.0",
       "systems": {
@@ -959,41 +959,41 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/mif16c9nafdcqgkys5h3959pkclw6lv3-google-cloud-sdk-494.0.0",
+              "path": "/nix/store/20fwrb08cvgkzzc7n0y1z0ak30fp9j2h-google-cloud-sdk-494.0.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/mif16c9nafdcqgkys5h3959pkclw6lv3-google-cloud-sdk-494.0.0"
+          "store_path": "/nix/store/20fwrb08cvgkzzc7n0y1z0ak30fp9j2h-google-cloud-sdk-494.0.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/dk9p4ham0xddx7bl8k4a4n0jwfkr54ky-google-cloud-sdk-494.0.0",
+              "path": "/nix/store/x2ri13cd1nq7bnlc6v6245gcva5br68g-google-cloud-sdk-494.0.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/dk9p4ham0xddx7bl8k4a4n0jwfkr54ky-google-cloud-sdk-494.0.0"
+          "store_path": "/nix/store/x2ri13cd1nq7bnlc6v6245gcva5br68g-google-cloud-sdk-494.0.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/x1jn7qbnjzm0mvg08ml239zz5gaf2wpb-google-cloud-sdk-494.0.0",
+              "path": "/nix/store/f5930424xn1irwgf066qi65fh26a8a72-google-cloud-sdk-494.0.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/x1jn7qbnjzm0mvg08ml239zz5gaf2wpb-google-cloud-sdk-494.0.0"
+          "store_path": "/nix/store/f5930424xn1irwgf066qi65fh26a8a72-google-cloud-sdk-494.0.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/7nl2a2araiaig0ic9xkf8sphb7nvszyz-google-cloud-sdk-494.0.0",
+              "path": "/nix/store/gflxadhqnf9pgm6hl2xk1szwkn2jrwk2-google-cloud-sdk-494.0.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/7nl2a2araiaig0ic9xkf8sphb7nvszyz-google-cloud-sdk-494.0.0"
+          "store_path": "/nix/store/gflxadhqnf9pgm6hl2xk1szwkn2jrwk2-google-cloud-sdk-494.0.0"
         }
       }
     },
@@ -2122,8 +2122,8 @@
       }
     },
     "yq-go@4.44.3": {
-      "last_modified": "2024-08-31T10:12:23Z",
-      "resolved": "github:NixOS/nixpkgs/5629520edecb69630a3f4d17d3d33fc96c13f6fe#yq-go",
+      "last_modified": "2024-11-03T14:18:04Z",
+      "resolved": "github:NixOS/nixpkgs/4ae2e647537bcdbb82265469442713d066675275#yq-go",
       "source": "devbox-search",
       "version": "4.44.3",
       "systems": {
@@ -2131,41 +2131,41 @@
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/jppigm7xxrz14z5qbp70qwk63rqkzlr7-yq-go-4.44.3",
+              "path": "/nix/store/nypcsysgi0n88m3laa0yh94304d2k4gl-yq-go-4.44.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/jppigm7xxrz14z5qbp70qwk63rqkzlr7-yq-go-4.44.3"
+          "store_path": "/nix/store/nypcsysgi0n88m3laa0yh94304d2k4gl-yq-go-4.44.3"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/h1p18ha0hkgf0rwc87cc51nz2m69004s-yq-go-4.44.3",
+              "path": "/nix/store/av2h5x1i6dcg55s9a7cq11maxjsqbmq5-yq-go-4.44.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/h1p18ha0hkgf0rwc87cc51nz2m69004s-yq-go-4.44.3"
+          "store_path": "/nix/store/av2h5x1i6dcg55s9a7cq11maxjsqbmq5-yq-go-4.44.3"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/rfymy667lx1032cxdwyzslxia511dxz7-yq-go-4.44.3",
+              "path": "/nix/store/3gw1mw88j7w5xj2lkvfkqzya5jxhhn82-yq-go-4.44.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/rfymy667lx1032cxdwyzslxia511dxz7-yq-go-4.44.3"
+          "store_path": "/nix/store/3gw1mw88j7w5xj2lkvfkqzya5jxhhn82-yq-go-4.44.3"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/kb2z2ih2yvlpy9p4mx4sqdicjj4p2isw-yq-go-4.44.3",
+              "path": "/nix/store/g4989ys9ngzld6mfcn0frfb82w3jlhb3-yq-go-4.44.3",
               "default": true
             }
           ],
-          "store_path": "/nix/store/kb2z2ih2yvlpy9p4mx4sqdicjj4p2isw-yq-go-4.44.3"
+          "store_path": "/nix/store/g4989ys9ngzld6mfcn0frfb82w3jlhb3-yq-go-4.44.3"
         }
       }
     }
