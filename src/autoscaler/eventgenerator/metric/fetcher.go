@@ -78,12 +78,12 @@ func (l *logCacheFetcher) getMetricsPromQLAPI(appId string, metricType string, c
 		metricTypeUnit = models.UnitMilliseconds
 	}
 
-	l.logger.Info("query-promql-api", lager.Data{"query": query})
+	l.logger.Debug("query-promql-api", lager.Data{"query": query})
 	result, err := l.logCacheClient.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
 	if err != nil {
 		return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL result (metricType: %s, appId: %s, collectionInterval: %s, query: %s, time: %s): %w", metricType, appId, collectionIntervalSeconds, query, now.String(), err)
 	}
-	l.logger.Info("received-promql-api-result", lager.Data{"result": result, "query": query})
+	l.logger.Debug("received-promql-api-result", lager.Data{"result": result, "query": query})
 
 	// safeguard: the query ensures that we get a vector but let's double-check
 	vector := result.GetVector()
