@@ -33,16 +33,16 @@
     "markdownlint-cli2":                 "latest",
     "ginkgo":                            "2.20.2",
     "bundler":                           "latest",
-    "golangci-lint":                     "1.61.0",
     "go":                                "1.22.5",
     "direnv":                            "2.35.0",
     "actionlint":                        "1.7.4",
     "act":                               "0.2.68",
     "cloudfoundry-cli":                  "8.8.1",
     "google-cloud-sdk":                  "latest",
+    "golangci-lint":                     "1.62.0",
     "temurin-bin-21":                    "latest",
     "ruby":                              "3.3.5",
-    "yq-go":                             "4.44.3"
+    "yq-go":                             "4.44.5"
   },
   "shell": {
     "init_hook": [
