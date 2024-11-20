@@ -83,7 +83,7 @@ func (l *logCacheFetcher) getMetricsPromQLAPI(appId string, metricType string, c
 	if err != nil {
 		return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL result (metricType: %s, appId: %s, collectionInterval: %s, query: %s, time: %s): %w", metricType, appId, collectionIntervalSeconds, query, now.String(), err)
 	}
-	l.logger.Debug("received-promql-api-result", lager.Data{"result": result, "query": query})
+	l.logger.Info("received-promql-api-result", lager.Data{"result": result, "query": query})
 
 	// safeguard: the query ensures that we get a vector but let's double-check
 	vector := result.GetVector()
@@ -149,7 +149,7 @@ func (l *logCacheFetcher) emptyAppInstanceMetrics(appId string, name string, uni
 func (l *logCacheFetcher) getMetricsRestAPI(appId string, metricType string, startTime time.Time, endTime time.Time) ([]models.AppInstanceMetric, error) {
 	filters := l.readOptions(endTime, metricType)
 
-	l.logger.Info("querying-rest-api-with-filters", lager.Data{"appId": appId, "metricType": metricType, "startTime": startTime, "endTime": endTime, "filters": l.valuesFrom(filters)})
+	l.logger.Info("query-rest-api-with-filters", lager.Data{"appId": appId, "metricType": metricType, "startTime": startTime, "endTime": endTime, "filters": l.valuesFrom(filters)})
 	envelopes, err := l.logCacheClient.Read(context.Background(), appId, startTime, filters...)
 	if err != nil {
 		return []models.AppInstanceMetric{}, fmt.Errorf("fail to Read %s metric from %s GoLogCache client: %w", logcache_v1.EnvelopeType_GAUGE, appId, err)
