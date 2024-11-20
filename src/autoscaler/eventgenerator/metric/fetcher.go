@@ -78,7 +78,7 @@ func (l *logCacheFetcher) getMetricsPromQLAPI(appId string, metricType string, c
 		metricTypeUnit = models.UnitMilliseconds
 	}
 
-	l.logger.Debug("query-promql-api", lager.Data{"query": query})
+	l.logger.Info("query-promql-api", lager.Data{"query": query})
 	result, err := l.logCacheClient.PromQL(context.Background(), query, logcache.WithPromQLTime(now))
 	if err != nil {
 		return []models.AppInstanceMetric{}, fmt.Errorf("failed getting PromQL result (metricType: %s, appId: %s, collectionInterval: %s, query: %s, time: %s): %w", metricType, appId, collectionIntervalSeconds, query, now.String(), err)
@@ -154,7 +154,7 @@ func (l *logCacheFetcher) getMetricsRestAPI(appId string, metricType string, sta
 	if err != nil {
 		return []models.AppInstanceMetric{}, fmt.Errorf("fail to Read %s metric from %s GoLogCache client: %w", logcache_v1.EnvelopeType_GAUGE, appId, err)
 	}
-	l.logger.Info("received-rest-api-result", lager.Data{"envelopes": envelopes})
+	l.logger.Debug("received-rest-api-result", lager.Data{"envelopes": envelopes})
 
 	metrics := l.envelopeProcessor.GetGaugeMetrics(envelopes, time.Now().UnixNano())
 
