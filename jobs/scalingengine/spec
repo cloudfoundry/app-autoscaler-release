@@ -178,7 +178,7 @@ properties:
     default: ''
 
   autoscaler.cf_server.xfcc.valid_space_guid:
-    description: approve space guid for xfcc endpoint
+    description: allowed space guid for xfcc endpoint
     default: ''
 
   autoscaler.scalingengine.health.port:
