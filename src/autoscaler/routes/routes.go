@@ -10,7 +10,7 @@ const (
 	MetricHistoriesPath         = "/v1/apps/{appid}/metric_histories/{metrictype}"
 	GetMetricHistoriesRouteName = "GetMetricHistories"
 
-	AggregatedMetricHistoriesPath         = "/v1/apps/{appId}/aggregated_metric_histories/{metrictype}"
+	AggregatedMetricHistoriesPath         = "/v1/apps/{appid}/aggregated_metric_histories/{metrictype}"
 	GetAggregatedMetricHistoriesRouteName = "GetAggregatedMetricHistories"
 
 	ScalePath      = "/v1/apps/{appid}/scale"
