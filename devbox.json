@@ -31,18 +31,18 @@
     "which":                             "latest",
     "credhub-cli":                       "2.9.29",
     "markdownlint-cli2":                 "latest",
-    "ginkgo":                            "2.20.2",
     "bundler":                           "latest",
     "go":                                "1.22.5",
     "direnv":                            "2.35.0",
     "actionlint":                        "1.7.4",
+    "golangci-lint":                     "1.62.0",
+    "yq-go":                             "4.44.5",
     "act":                               "0.2.68",
     "cloudfoundry-cli":                  "8.8.1",
     "google-cloud-sdk":                  "latest",
-    "golangci-lint":                     "1.62.0",
+    "ginkgo":                            "2.20.2",
     "temurin-bin-21":                    "latest",
-    "ruby":                              "3.3.5",
-    "yq-go":                             "4.44.5"
+    "ruby":                              "3.3.5"
   },
   "shell": {
     "init_hook": [
