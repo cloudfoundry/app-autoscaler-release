@@ -108,6 +108,7 @@ type Config struct {
 	PlanCheck                          *PlanCheckConfig              `yaml:"plan_check"`
 	CatalogPath                        string                        `yaml:"catalog_path"`
 	CatalogSchemaPath                  string                        `yaml:"catalog_schema_path"`
+	CfInstanceCert                     string                        `yaml:"cf_instance_cert"`
 	DashboardRedirectURI               string                        `yaml:"dashboard_redirect_uri"`
 	PolicySchemaPath                   string                        `yaml:"policy_schema_path"`
 	Scheduler                          SchedulerConfig               `yaml:"scheduler"`

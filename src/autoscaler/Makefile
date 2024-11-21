@@ -131,7 +131,7 @@ testsuite:
 	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} ${TEST}
 
 .PHONY: integration
-integration: generate-fakes
+integration: #generate-fakes
 	@echo "# Running integration tests"
 	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' ${GINKGO_OPTS} integration
 
