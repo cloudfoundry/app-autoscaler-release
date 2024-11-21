@@ -283,7 +283,6 @@ func (h *PublicApiHandler) GetAggregatedMetricsHistories(w http.ResponseWriter, 
 
 		route := router.Get(routes.GetAggregatedMetricHistoriesRouteName)
 		path, err := route.URLPath("appid", appId, "metrictype", metricType)
-		fmt.Println("BANANA path", path)
 		if err != nil {
 			logger.Error("Failed to create path", err)
 			panic(err)
