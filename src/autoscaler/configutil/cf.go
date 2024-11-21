@@ -21,6 +21,7 @@ type VCAPConfigurationReader interface {
 	MaterializeTLSConfigFromService(serviceTag string) (models.TLSCerts, error)
 	GetServiceCredentialContent(serviceTag string, credentialKey string) ([]byte, error)
 	GetPort() int
+	GetCfInstanceCert() ([]byte, error)
 	IsRunningOnCF() bool
 }
 
@@ -39,6 +40,15 @@ func NewVCAPConfigurationReader() (*VCAPConfiguration, error) {
 func (vc *VCAPConfiguration) GetPort() int {
 	return vc.appEnv.Port
 }
+
+func (vc *VCAPConfiguration) GetCfInstanceCert() ([]byte, error) {
+	if os.Getenv("CF_INSTANCE_CERT") == "" {
+		return []byte(""), fmt.Errorf("%w: CF_INSTANCE_CERT", ErrMissingCredential)
+	}
+
+	return []byte(os.Getenv("CF_INSTANCE_CERT")), nil
+}
+
 func (vc *VCAPConfiguration) IsRunningOnCF() bool {
 	return cfenv.IsRunningOnCF()
 }

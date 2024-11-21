@@ -7,19 +7,36 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"regexp"
 	"strings"
 
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/publicapiserver"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/ghttp"
 )
 
 var _ = Describe("PublicApiHandler", func() {
+
+	var eventGeneratorHandler http.HandlerFunc
+
+	JustBeforeEach(func() {
+		eventGeneratorPathMatcher, err := regexp.Compile(`/v1/apps/[A-Za-z0-9\-]+/aggregated_metric_histories/[a-zA-Z0-9_]+`)
+		Expect(err).NotTo(HaveOccurred())
+		eventGeneratorServer.RouteToHandler(http.MethodGet, eventGeneratorPathMatcher, eventGeneratorHandler)
+	})
+
+	BeforeEach(func() {
+		eventGeneratorHandler = ghttp.RespondWithJSONEncodedPtr(&eventGeneratorStatus, &eventGeneratorResponse)
+	})
+
 	const (
 		INVALID_POLICY_STR = `{
 			"instance_max_count":4,
@@ -89,6 +106,7 @@ var _ = Describe("PublicApiHandler", func() {
 		req           *http.Request
 		pathVariables map[string]string
 	)
+
 	BeforeEach(func() {
 		policydb = &fakes.FakePolicyDB{}
 		credentials = &fakes.FakeCredentials{}
@@ -97,6 +115,7 @@ var _ = Describe("PublicApiHandler", func() {
 		req = httptest.NewRequest("GET", "/v1/info", nil)
 		pathVariables = map[string]string{}
 	})
+
 	JustBeforeEach(func() {
 		handler = NewPublicApiHandler(lagertest.NewTestLogger("public_api_handler"), conf, policydb, bindingdb, credentials)
 	})
@@ -105,7 +124,7 @@ var _ = Describe("PublicApiHandler", func() {
 		JustBeforeEach(func() {
 			handler.GetApiInfo(resp, req, map[string]string{})
 		})
-		Context("When GetApiInfo is called", func() {
+		When("GetApiInfo is called", func() {
 			It("gets the info json", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
 				Expect(resp.Body.Bytes()).To(Equal(infoBytes))
@@ -117,7 +136,7 @@ var _ = Describe("PublicApiHandler", func() {
 		JustBeforeEach(func() {
 			handler.GetHealth(resp, req, map[string]string{})
 		})
-		Context("When GetHealth is called", func() {
+		When("GetHealth is called", func() {
 			It("succeeds with 200", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
 				Expect(resp.Body.String()).To(Equal(`{"alive":"true"}`))
@@ -129,13 +148,13 @@ var _ = Describe("PublicApiHandler", func() {
 			handler.GetScalingPolicy(resp, req, pathVariables)
 		})
 
-		Context("When appId is not present", func() {
+		When("appId is not present", func() {
 			It("should fail with 400", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"AppId is required"}`))
 			})
 		})
-		Context("When database gives error", func() {
+		When("database gives error", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				policydb.GetAppPolicyReturns(nil, fmt.Errorf("Failed to retrieve policy"))
@@ -146,7 +165,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When policy doesn't exist", func() {
+		When("policy doesn't exist", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				policydb.GetAppPolicyReturns(nil, nil)
@@ -157,7 +176,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When policy exist", func() {
+		When("policy exist", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				policydb.GetAppPolicyReturns(&models.ScalingPolicy{
@@ -200,13 +219,13 @@ var _ = Describe("PublicApiHandler", func() {
 			handler.AttachScalingPolicy(resp, req, pathVariables)
 		})
 
-		Context("When appId is not present", func() {
+		When("appId is not present", func() {
 			It("should fail with 400", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"AppId is required"}`))
 			})
 		})
-		Context("When the policy is invalid", func() {
+		When("the policy is invalid", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(INVALID_POLICY_STR))
@@ -217,7 +236,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When save policy errors", func() {
+		When("save policy errors", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR))
@@ -229,7 +248,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When scheduler returns non 200 and non 204 status code", func() {
+		When("scheduler returns non 200 and non 204 status code", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR))
@@ -245,7 +264,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When scheduler returns 200 status code", func() {
+		When("scheduler returns 200 status code", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR))
@@ -256,7 +275,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When providing extra fields", func() {
+		When("providing extra fields", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR_WITH_EXTRA_FIELDS))
@@ -268,7 +287,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When scheduler returns 204 status code", func() {
+		When("scheduler returns 204 status code", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
 				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR))
@@ -289,7 +308,7 @@ var _ = Describe("PublicApiHandler", func() {
 			handler.DetachScalingPolicy(resp, req, pathVariables)
 		})
 
-		Context("When appId is not present", func() {
+		When("appId is not present", func() {
 			BeforeEach(func() {
 				delete(pathVariables, "appId")
 			})
@@ -299,7 +318,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When delete policy errors", func() {
+		When("delete policy errors", func() {
 			BeforeEach(func() {
 				policydb.DeletePolicyReturns(fmt.Errorf("Failed to save policy"))
 			})
@@ -309,7 +328,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When scheduler returns non 200 and non 204 status code", func() {
+		When("scheduler returns non 200 and non 204 status code", func() {
 			BeforeEach(func() {
 				schedulerStatus = 500
 			})
@@ -319,7 +338,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When scheduler returns 200 status code", func() {
+		When("scheduler returns 200 status code", func() {
 			BeforeEach(func() {
 				schedulerStatus = 200
 			})
@@ -327,7 +346,7 @@ var _ = Describe("PublicApiHandler", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
 			})
 
-			Context("when the service is offered in brokered mode", func() {
+			When("the service is offered in brokered mode", func() {
 				BeforeEach(func() {
 					bindingdb = &fakes.FakeBindingDB{}
 				})
@@ -379,7 +398,7 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 
-		Context("When scheduler returns 204 status code", func() {
+		When("scheduler returns 204 status code", func() {
 			BeforeEach(func() {
 				schedulerStatus = 204
 			})
@@ -431,402 +450,457 @@ var _ = Describe("PublicApiHandler", func() {
 			handler.GetAggregatedMetricsHistories(resp, req, pathVariables)
 		})
 
-		Context("When appId is not present", func() {
+		XWhen("conf.CfInstanceCert is set", func() {
 			BeforeEach(func() {
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				eventGeneratorStatus = http.StatusOK
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("order-direction", "desc")
-				params.Add("page", "1")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should fail with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"appId is required"}`))
-			})
-		})
-
-		Context("When metricType is not present", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("order-direction", "desc")
-				params.Add("page", "1")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should fail with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Metrictype is required"}`))
-			})
-		})
-
-		Context("When start-time is not integer", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "not-integer")
-				params.Add("end-time", "300")
-				params.Add("order-direction", "desc")
-				params.Add("page", "1")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should fail with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"start-time must be an integer"}`))
-			})
-		})
-
-		Context("When start-time is not provided", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("end-time", "300")
-				params.Add("order-direction", "desc")
-				params.Add("page", "1")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should succeed with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("When end-time is not integer", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "not-integer")
-				params.Add("order-direction", "desc")
-				params.Add("page", "1")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should fail with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"end-time must be an integer"}`))
-			})
-		})
-
-		Context("When end-time is not provided", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("order-direction", "desc")
-				params.Add("page", "1")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should succeed with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("When order-direction is not provided", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("page", "1")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should succeed with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("When order-direction is not desc or asc", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("order-direction", "not-asc-desc")
-				params.Add("page", "1")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should fail with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"order-direction must be DESC or ASC"}`))
-			})
-		})
-
-		Context("When page is not integer", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("order-direction", "desc")
-				params.Add("page", "not-integer")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should fail with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"page must be an integer"}`))
-			})
-		})
-
-		Context("When page is not provided", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("order-direction", "desc")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should succeed with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("when results-per-page is not integer", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("page", "1")
-				params.Add("order-direction", "desc")
-				params.Add("results-per-page", "not-integer")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should fail with 400", func() {
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"results-per-page must be an integer"}`))
-			})
-		})
-		Context("when results-per-page is not provided", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("page", "1")
-				params.Add("order-direction", "desc")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should succeed with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("when scaling engine returns 500", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusInternalServerError
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("page", "1")
-				params.Add("order-direction", "desc")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should succeed with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-			})
-		})
-
-		Context("when getting 1st page", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("page", "1")
-				params.Add("order-direction", "desc")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should get full page", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-				var result models.AppMetricResponse
-				err := json.Unmarshal(resp.Body.Bytes(), &result)
+				certBytes, err := testhelpers.GenerateClientCert("org-guid", "space-guid")
+				cert := string(certBytes)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(result).To(Equal(
-					models.AppMetricResponse{
-						PublicApiResponseBase: models.PublicApiResponseBase{
-							TotalResults: 5,
-							TotalPages:   3,
-							Page:         1,
-							PrevUrl:      "",
-							NextUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=2\u0026results-per-page=2\u0026start-time=100",
-						},
-						Resources: eventGeneratorResponse[0:2],
-					},
-				))
-
+				conf.CfInstanceCert = cert
+				eventGeneratorHandler = ghttp.CombineHandlers(
+					ghttp.VerifyHeader(http.Header{"X-Forwarded-Client-Cert": []string{cert}}),
+					ghttp.RespondWithJSONEncodedPtr(&eventGeneratorStatus, &eventGeneratorResponse),
+				)
 			})
-		})
-		Context("when getting 2nd page", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
 
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("page", "2")
-				params.Add("order-direction", "desc")
-				params.Add("results-per-page", "2")
+			When("getting 1st page", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
 
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should get full page", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-				var result models.AppMetricResponse
-				err := json.Unmarshal(resp.Body.Bytes(), &result)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result).To(Equal(
-					models.AppMetricResponse{
-						PublicApiResponseBase: models.PublicApiResponseBase{
-							TotalResults: 5,
-							TotalPages:   3,
-							Page:         2,
-							PrevUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=1\u0026results-per-page=2\u0026start-time=100",
-							NextUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=3\u0026results-per-page=2\u0026start-time=100",
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "1")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should get full page", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+					var result models.AppMetricResponse
+					err := json.Unmarshal(resp.Body.Bytes(), &result)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result).To(Equal(
+						models.AppMetricResponse{
+							PublicApiResponseBase: models.PublicApiResponseBase{
+								TotalResults: 5,
+								TotalPages:   3,
+								Page:         1,
+								PrevUrl:      "",
+								NextUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=2\u0026results-per-page=2\u0026start-time=100",
+							},
+							Resources: eventGeneratorResponse[0:2],
 						},
-						Resources: eventGeneratorResponse[2:4],
-					},
-				))
+					))
+
+				})
 			})
 		})
 
-		Context("when getting 3rd page", func() {
+		When("CF_INSTANCE_CERT is not set", func() {
 			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
-
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("page", "3")
-				params.Add("order-direction", "desc")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				os.Unsetenv("CF_INSTANCE_CERT")
 			})
-			It("should get only one record", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-				var result models.AppMetricResponse
-				err := json.Unmarshal(resp.Body.Bytes(), &result)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result).To(Equal(
-					models.AppMetricResponse{
-						PublicApiResponseBase: models.PublicApiResponseBase{
-							TotalResults: 5,
-							TotalPages:   3,
-							Page:         3,
-							PrevUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=2\u0026results-per-page=2\u0026start-time=100",
-							NextUrl:      "",
+
+			When("appId is not present", func() {
+				BeforeEach(func() {
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					eventGeneratorStatus = http.StatusOK
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("order-direction", "desc")
+					params.Add("page", "1")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should fail with 400", func() {
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"appId is required"}`))
+				})
+			})
+
+			When("metricType is not present", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("order-direction", "desc")
+					params.Add("page", "1")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should fail with 400", func() {
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"Metrictype is required"}`))
+				})
+			})
+
+			When("start-time is not integer", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "not-integer")
+					params.Add("end-time", "300")
+					params.Add("order-direction", "desc")
+					params.Add("page", "1")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should fail with 400", func() {
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"start-time must be an integer"}`))
+				})
+			})
+
+			When("start-time is not provided", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("end-time", "300")
+					params.Add("order-direction", "desc")
+					params.Add("page", "1")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should succeed with 200", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+				})
+			})
+
+			When("end-time is not integer", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "not-integer")
+					params.Add("order-direction", "desc")
+					params.Add("page", "1")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should fail with 400", func() {
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"end-time must be an integer"}`))
+				})
+			})
+
+			When("end-time is not provided", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("order-direction", "desc")
+					params.Add("page", "1")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should succeed with 200", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+				})
+			})
+
+			When("order-direction is not provided", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "1")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should succeed with 200", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+				})
+			})
+
+			When("order-direction is not desc or asc", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("order-direction", "not-asc-desc")
+					params.Add("page", "1")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should fail with 400", func() {
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"order-direction must be DESC or ASC"}`))
+				})
+			})
+
+			When("page is not integer", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("order-direction", "desc")
+					params.Add("page", "not-integer")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should fail with 400", func() {
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"page must be an integer"}`))
+				})
+			})
+
+			When("page is not provided", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should succeed with 200", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+				})
+			})
+
+			When("results-per-page is not integer", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "1")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "not-integer")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should fail with 400", func() {
+					Expect(resp.Code).To(Equal(http.StatusBadRequest))
+					Expect(resp.Body.String()).To(Equal(`{"code":"Bad Request","message":"results-per-page must be an integer"}`))
+				})
+			})
+			When("results-per-page is not provided", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "1")
+					params.Add("order-direction", "desc")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should succeed with 200", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+				})
+			})
+
+			When("scaling engine returns 500", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusInternalServerError
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "1")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should succeed with 200", func() {
+					Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+				})
+			})
+
+			When("getting 1st page", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "1")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should get full page", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+					var result models.AppMetricResponse
+					err := json.Unmarshal(resp.Body.Bytes(), &result)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result).To(Equal(
+						models.AppMetricResponse{
+							PublicApiResponseBase: models.PublicApiResponseBase{
+								TotalResults: 5,
+								TotalPages:   3,
+								Page:         1,
+								PrevUrl:      "",
+								NextUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=2\u0026results-per-page=2\u0026start-time=100",
+							},
+							Resources: eventGeneratorResponse[0:2],
 						},
-						Resources: eventGeneratorResponse[4:5],
-					},
-				))
+					))
+
+				})
 			})
-		})
+			When("getting 2nd page", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
 
-		Context("when getting 4th page", func() {
-			BeforeEach(func() {
-				eventGeneratorStatus = http.StatusOK
-				pathVariables["appId"] = TEST_APP_ID
-				pathVariables["metricType"] = TEST_METRIC_TYPE
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "2")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "2")
 
-				params := url.Values{}
-				params.Add("start-time", "100")
-				params.Add("end-time", "300")
-				params.Add("page", "4")
-				params.Add("order-direction", "desc")
-				params.Add("results-per-page", "2")
-
-				req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-			})
-			It("should get no records", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-				var result models.AppMetricResponse
-				err := json.Unmarshal(resp.Body.Bytes(), &result)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result).To(Equal(
-					models.AppMetricResponse{
-						PublicApiResponseBase: models.PublicApiResponseBase{
-							TotalResults: 5,
-							TotalPages:   3,
-							Page:         4,
-							PrevUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=3\u0026results-per-page=2\u0026start-time=100",
-							NextUrl:      "",
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should get full page", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+					var result models.AppMetricResponse
+					err := json.Unmarshal(resp.Body.Bytes(), &result)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result).To(Equal(
+						models.AppMetricResponse{
+							PublicApiResponseBase: models.PublicApiResponseBase{
+								TotalResults: 5,
+								TotalPages:   3,
+								Page:         2,
+								PrevUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=1\u0026results-per-page=2\u0026start-time=100",
+								NextUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=3\u0026results-per-page=2\u0026start-time=100",
+							},
+							Resources: eventGeneratorResponse[2:4],
 						},
-						Resources: []models.AppMetric{},
-					},
-				))
+					))
+				})
+			})
+
+			When("getting 3rd page", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "3")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should get only one record", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+					var result models.AppMetricResponse
+					err := json.Unmarshal(resp.Body.Bytes(), &result)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result).To(Equal(
+						models.AppMetricResponse{
+							PublicApiResponseBase: models.PublicApiResponseBase{
+								TotalResults: 5,
+								TotalPages:   3,
+								Page:         3,
+								PrevUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=2\u0026results-per-page=2\u0026start-time=100",
+								NextUrl:      "",
+							},
+							Resources: eventGeneratorResponse[4:5],
+						},
+					))
+				})
+			})
+
+			When("getting 4th page", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "4")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should get no records", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+					var result models.AppMetricResponse
+					err := json.Unmarshal(resp.Body.Bytes(), &result)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result).To(Equal(
+						models.AppMetricResponse{
+							PublicApiResponseBase: models.PublicApiResponseBase{
+								TotalResults: 5,
+								TotalPages:   3,
+								Page:         4,
+								PrevUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=3\u0026results-per-page=2\u0026start-time=100",
+								NextUrl:      "",
+							},
+							Resources: []models.AppMetric{},
+						},
+					))
+				})
 			})
 		})
 

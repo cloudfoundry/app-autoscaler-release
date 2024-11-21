@@ -1,6 +1,7 @@
 package publicapiserver
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -225,9 +226,42 @@ func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func proxyRequest(pathFn func() string, call func(url string) (*http.Response, error), w http.ResponseWriter, reqUrl *url.URL, parameters *url.Values, requestDescription string, logger lager.Logger) {
-	aUrl := pathFn()
-	resp, err := call(aUrl)
+func (h *PublicApiHandler) proxyRequest(logger lager.Logger, appId string, metricType string, w http.ResponseWriter, req *http.Request, parameters *url.Values, requestDescription string) {
+	reqUrl := req.URL
+	r := routes.NewRouter()
+	router := r.CreateEventGeneratorRoutes()
+	if router == nil {
+		panic("Failed to create event generator routes")
+	}
+
+	route := router.Get(routes.GetAggregatedMetricHistoriesRouteName)
+	path, err := route.URLPath("appid", appId, "metrictype", metricType)
+	if err != nil {
+		logger.Error("Failed to create path", err)
+		panic(err)
+	}
+
+	aUrl := h.conf.EventGenerator.EventGeneratorUrl + path.RequestURI() + "?" + parameters.Encode()
+
+	req, err = http.NewRequest("GET", aUrl, nil)
+
+	if h.conf.CfInstanceCert != "" {
+		certPEM := []byte(h.conf.CfInstanceCert)
+
+		// Calculate SHA-256 hash of the certificate
+		hash := sha256.Sum256(certPEM)
+
+		// URL encode the PEM certificate
+		encodedCert := url.QueryEscape(string(certPEM))
+
+		// Construct the XFCC header value
+		xfccHeader := fmt.Sprintf("Hash=%x;Cert=\"%s\"", hash, encodedCert)
+
+		req.Header.Set("X-Forwarded-Client-Cert", xfccHeader)
+	}
+
+	resp, err := h.eventGeneratorClient.Do(req)
+
 	if err != nil {
 		logger.Error("Failed to retrieve "+requestDescription, err, lager.Data{"url": aUrl})
 		writeErrorResponse(w, http.StatusInternalServerError, "Error retrieving "+requestDescription)
@@ -274,22 +308,8 @@ func (h *PublicApiHandler) GetAggregatedMetricsHistories(w http.ResponseWriter, 
 		return
 	}
 
-	pathFn := func() string {
-		r := routes.NewRouter()
-		router := r.CreateEventGeneratorRoutes()
-		if router == nil {
-			panic("Failed to create event generator routes")
-		}
-
-		route := router.Get(routes.GetAggregatedMetricHistoriesRouteName)
-		path, err := route.URLPath("appid", appId, "metrictype", metricType)
-		if err != nil {
-			logger.Error("Failed to create path", err)
-			panic(err)
-		}
-		return h.conf.EventGenerator.EventGeneratorUrl + path.RequestURI() + "?" + parameters.Encode()
-	}
-	proxyRequest(pathFn, h.eventGeneratorClient.Get, w, req.URL, parameters, "metrics history from eventgenerator", logger)
+	h.proxyRequest(logger, appId, metricType, w, req, parameters, "metrics history from eventgenerator")
+	//proxyRequest(pathFn, h.eventGeneratorClient, w, req.URL, parameters, "metrics history from eventgenerator", logger)
 }
 
 func (h *PublicApiHandler) GetApiInfo(w http.ResponseWriter, _ *http.Request, _ map[string]string) {
