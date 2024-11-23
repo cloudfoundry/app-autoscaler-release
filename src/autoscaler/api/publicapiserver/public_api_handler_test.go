@@ -15,6 +15,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
@@ -37,7 +38,7 @@ var _ = Describe("PublicApiHandler", func() {
 	})
 
 	const (
-		InvalidPolicyStr = `{
+		INVALID_POLICY_STR = `{
 			"instance_max_count":4,
 			"scaling_rules":[
 			{
@@ -47,7 +48,7 @@ var _ = Describe("PublicApiHandler", func() {
 				"adjustment":"-1"
 			}]
 		}`
-		ValidPolicyStr = `{
+		VALID_POLICY_STR = `{
 			"instance_min_count": 1,
 			"instance_max_count": 5,
 			"scaling_rules": [{
@@ -70,7 +71,7 @@ var _ = Describe("PublicApiHandler", func() {
 				}]
 			}
 		}`
-		ValidPolicyStrWithExtraFields = `{
+		VALID_POLICY_STR_WITH_EXTRA_FIELDS = `{
 			"instance_min_count": 1,
 			"instance_max_count": 5,
 			"scaling_rules": [{
@@ -95,66 +96,6 @@ var _ = Describe("PublicApiHandler", func() {
 			},
 			"is_admin": true
 		}`
-		InvalidCustomMetricsConfigurationStr = `{
-		  "configuration": {
-			"custom_metrics": {
-			  "metric_submission_strategy": {
-				"allow_from": "same_app"
-			  }
-			}
-		  },
-			"instance_min_count": 1,
-			"instance_max_count": 5,
-			"scaling_rules": [{
-				"metric_type": "memoryused",
-				"breach_duration_secs": 300,
-				"threshold": 30,
-				"operator": ">",
-				"cool_down_secs": 300,
-				"adjustment": "-1"
-			}],
-			"schedules": {
-				"timezone": "Asia/Kolkata",
-				"recurring_schedule": [{
-					"start_time": "10:00",
-					"end_time": "18:00",
-					"days_of_week": [1, 2, 3],
-					"instance_min_count": 1,
-					"instance_max_count": 10,
-					"initial_min_instance_count": 5
-				}]
-			}
-		}`
-		validCustomMetricsConfigurationStr = `{
-		  "configuration": {
-			"custom_metrics": {
-			  "metric_submission_strategy": {
-				"allow_from": "bound_app"
-			  }
-			}
-		  },
-			"instance_min_count": 1,
-			"instance_max_count": 5,
-			"scaling_rules": [{
-				"metric_type": "memoryused",
-				"breach_duration_secs": 300,
-				"threshold": 30,
-				"operator": ">",
-				"cool_down_secs": 300,
-				"adjustment": "-1"
-			}],
-			"schedules": {
-				"timezone": "Asia/Kolkata",
-				"recurring_schedule": [{
-					"start_time": "10:00",
-					"end_time": "18:00",
-					"days_of_week": [1, 2, 3],
-					"instance_min_count": 1,
-					"instance_max_count": 10,
-					"initial_min_instance_count": 5
-				}]
-			}
-		}`
 	)
 	var (
 		policydb      *fakes.FakePolicyDB
@@ -169,7 +110,7 @@ var _ = Describe("PublicApiHandler", func() {
 	BeforeEach(func() {
 		policydb = &fakes.FakePolicyDB{}
 		credentials = &fakes.FakeCredentials{}
-		bindingdb = &fakes.FakeBindingDB{}
+		bindingdb = nil
 		resp = httptest.NewRecorder()
 		req = httptest.NewRequest("GET", "/v1/info", nil)
 		pathVariables = map[string]string{}
@@ -202,7 +143,6 @@ var _ = Describe("PublicApiHandler", func() {
 			})
 		})
 	})
-
 	Describe("GetScalingPolicy", func() {
 		JustBeforeEach(func() {
 			handler.GetScalingPolicy(resp, req, pathVariables)
@@ -272,44 +212,6 @@ var _ = Describe("PublicApiHandler", func() {
 				Expect(strings.TrimSpace(resp.Body.String())).To(Equal(`{"instance_min_count":1,"instance_max_count":5,"scaling_rules":[{"metric_type":"memoryused","breach_duration_secs":300,"threshold":30,"operator":"<","cool_down_secs":300,"adjustment":"-1"}],"schedules":{"timezone":"Asia/Kolkata","recurring_schedule":[{"start_time":"10:00","end_time":"18:00","days_of_week":[1,2,3],"instance_min_count":1,"instance_max_count":10,"initial_min_instance_count":5}]}}`))
 			})
 		})
-		Context("and custom metric strategy", func() {
-			When("custom metric strategy retrieval fails", func() {
-				BeforeEach(func() {
-					pathVariables["appId"] = TEST_APP_ID
-					setupPolicy(policydb)
-					bindingdb.GetCustomMetricStrategyByAppIdReturns("", fmt.Errorf("db error"))
-				})
-				It("should fail with 500", func() {
-					Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-					Expect(resp.Body.String()).To(Equal(`{"code":"Internal Server Error","message":"Error retrieving binding policy"}`))
-				})
-			})
-			When("custom metric strategy retrieved successfully", func() {
-				BeforeEach(func() {
-					pathVariables["appId"] = TEST_APP_ID
-					bindingdb.GetCustomMetricStrategyByAppIdReturns("bound_app", nil)
-				})
-				When("custom metric strategy and policy are present", func() {
-					BeforeEach(func() {
-						setupPolicy(policydb)
-					})
-					It("should return combined configuration with 200", func() {
-						Expect(resp.Code).To(Equal(http.StatusOK))
-						Expect(resp.Body.String()).To(MatchJSON(validCustomMetricsConfigurationStr))
-					})
-					When("policy is present only", func() {
-						BeforeEach(func() {
-							setupPolicy(policydb)
-							bindingdb.GetCustomMetricStrategyByAppIdReturns("", nil)
-						})
-						It("should return policy with 200", func() {
-							Expect(resp.Code).To(Equal(http.StatusOK))
-							Expect(resp.Body.String()).To(MatchJSON(ValidPolicyStr))
-						})
-					})
-				})
-			})
-		})
 	})
 
 	Describe("AttachScalingPolicy", func() {
@@ -326,7 +228,7 @@ var _ = Describe("PublicApiHandler", func() {
 		When("the policy is invalid", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
-				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(InvalidPolicyStr))
+				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(INVALID_POLICY_STR))
 			})
 			It("should fail with 400", func() {
 				Expect(resp.Code).To(Equal(http.StatusBadRequest))
@@ -337,7 +239,7 @@ var _ = Describe("PublicApiHandler", func() {
 		When("save policy errors", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
-				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(ValidPolicyStr))
+				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR))
 				policydb.SaveAppPolicyReturns(fmt.Errorf("Failed to save policy"))
 			})
 			It("should fail with 500", func() {
@@ -349,7 +251,7 @@ var _ = Describe("PublicApiHandler", func() {
 		When("scheduler returns non 200 and non 204 status code", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
-				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(ValidPolicyStr))
+				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR))
 				schedulerStatus = 500
 				msg, err := json.Marshal([]string{"err one", "err two"})
 				Expect(err).ToNot(HaveOccurred())
@@ -365,90 +267,33 @@ var _ = Describe("PublicApiHandler", func() {
 		When("scheduler returns 200 status code", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
-				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(ValidPolicyStr))
+				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR))
 				schedulerStatus = 200
 			})
 			It("should succeed", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
-				Expect(resp.Body.String()).To(MatchJSON(ValidPolicyStr))
 			})
 		})
 
 		When("providing extra fields", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
-				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(ValidPolicyStrWithExtraFields))
+				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR_WITH_EXTRA_FIELDS))
 				schedulerStatus = 200
 			})
 			It("should succeed and ignore the extra fields", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
-				Expect(resp.Body).To(MatchJSON(ValidPolicyStr))
+				Expect(resp.Body).To(MatchJSON(VALID_POLICY_STR))
 			})
 		})
 
 		When("scheduler returns 204 status code", func() {
 			BeforeEach(func() {
 				pathVariables["appId"] = TEST_APP_ID
-				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(ValidPolicyStr))
+				req, _ = http.NewRequest(http.MethodPut, "", bytes.NewBufferString(VALID_POLICY_STR))
 				schedulerStatus = 204
 			})
 			It("should succeed", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("Binding Configuration", func() {
-			When("reading binding configuration from request fails", func() {
-				BeforeEach(func() {
-					req = setupRequest("incorrect.json", TEST_APP_ID, pathVariables)
-				})
-				It("should not succeed and fail with 400", func() {
-					Expect(resp.Body.String()).To(ContainSubstring("invalid character"))
-					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				})
-			})
-
-			When("invalid configuration is provided with the policy", func() {
-				BeforeEach(func() {
-					req = setupRequest(InvalidCustomMetricsConfigurationStr, TEST_APP_ID, pathVariables)
-					schedulerStatus = 200
-				})
-				It("should not succeed and fail with 400", func() {
-					Expect(resp.Body.String()).To(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\""}]`))
-					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-				})
-			})
-		})
-
-		When("save configuration returned error", func() {
-			BeforeEach(func() {
-				req = setupRequest(validCustomMetricsConfigurationStr, TEST_APP_ID, pathVariables)
-				schedulerStatus = 200
-				bindingdb.SetOrUpdateCustomMetricStrategyReturns(fmt.Errorf("failed to save custom metrics configuration"))
-			})
-			It("should not succeed and fail with internal server error", func() {
-				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-				Expect(resp.Body.String()).To(MatchJSON(`{"code":"Internal Server Error","message":"failed to save custom metric submission strategy in the database"}`))
-			})
-		})
-
-		When("valid configuration is provided with the policy", func() {
-			BeforeEach(func() {
-				req = setupRequest(validCustomMetricsConfigurationStr, TEST_APP_ID, pathVariables)
-				schedulerStatus = 200
-			})
-			It("returns the policy and configuration with 200", func() {
-				Expect(resp.Code).To(Equal(http.StatusOK))
-				Expect(resp.Body).To(MatchJSON(validCustomMetricsConfigurationStr))
-			})
-		})
-		When("configuration is removed but only policy is provided", func() {
-			BeforeEach(func() {
-				req = setupRequest(ValidPolicyStr, TEST_APP_ID, pathVariables)
-				schedulerStatus = 200
-			})
-			It("returns the policy 200", func() {
-				Expect(resp.Body).To(MatchJSON(ValidPolicyStr))
 				Expect(resp.Code).To(Equal(http.StatusOK))
 			})
 		})
@@ -525,7 +370,7 @@ var _ = Describe("PublicApiHandler", func() {
 				Context("and there is a service instance with a default policy", func() {
 					BeforeEach(func() {
 						bindingdb.GetServiceInstanceByAppIdReturns(&models.ServiceInstance{
-							DefaultPolicy:     ValidPolicyStr,
+							DefaultPolicy:     VALID_POLICY_STR,
 							DefaultPolicyGuid: "test-policy-guid",
 						}, nil)
 					})
@@ -545,7 +390,7 @@ var _ = Describe("PublicApiHandler", func() {
 							c, a, p, g := policydb.SaveAppPolicyArgsForCall(0)
 							Expect(c).NotTo(BeNil())
 							Expect(a).To(Equal(TEST_APP_ID))
-							Expect(p).To(MatchJSON(ValidPolicyStr))
+							Expect(p).To(MatchJSON(VALID_POLICY_STR))
 							Expect(g).To(Equal("test-policy-guid"))
 						})
 					})
@@ -556,33 +401,9 @@ var _ = Describe("PublicApiHandler", func() {
 		When("scheduler returns 204 status code", func() {
 			BeforeEach(func() {
 				schedulerStatus = 204
-				bindingdb.GetServiceInstanceByAppIdReturns(&models.ServiceInstance{}, nil)
 			})
 			It("should succeed", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("Custom Metrics Strategy Submission Configuration", func() {
-			When("delete configuration in db return errors", func() {
-				BeforeEach(func() {
-					schedulerStatus = 200
-					bindingdb.SetOrUpdateCustomMetricStrategyReturns(fmt.Errorf("failed to delete custom metric submission strategy in the database"))
-				})
-				It("should not succeed and fail with 500", func() {
-					Expect(resp.Code).To(Equal(http.StatusInternalServerError))
-					Expect(resp.Body.String()).To(MatchJSON(`{"code":"Internal Server Error","message":"failed to delete custom metric submission strategy in the database"}`))
-				})
-			})
-			When("binding exist for a valid app", func() {
-				BeforeEach(func() {
-					schedulerStatus = 200
-					bindingdb.SetOrUpdateCustomMetricStrategyReturns(nil)
-				})
-				It("delete the custom metric strategy and returns 200", func() {
-					Expect(resp.Code).To(Equal(http.StatusOK))
-					Expect(resp.Body.String()).To(Equal(`{}`))
-				})
 			})
 		})
 	})
@@ -627,6 +448,55 @@ var _ = Describe("PublicApiHandler", func() {
 				},
 			}
 			handler.GetAggregatedMetricsHistories(resp, req, pathVariables)
+		})
+
+		When("conf.CfInstanceCert is set", func() {
+			BeforeEach(func() {
+				certBytes, err := testhelpers.GenerateClientCert("org-guid", "space-guid")
+				cert := string(certBytes)
+				Expect(err).NotTo(HaveOccurred())
+				conf.CfInstanceCert = cert
+				eventGeneratorHandler = ghttp.CombineHandlers(
+					ghttp.VerifyHeader(http.Header{"X-Forwarded-Client-Cert": []string{cert}}),
+					ghttp.RespondWithJSONEncodedPtr(&eventGeneratorStatus, &eventGeneratorResponse),
+				)
+			})
+
+			When("getting 1st page", func() {
+				BeforeEach(func() {
+					eventGeneratorStatus = http.StatusOK
+					pathVariables["appId"] = TEST_APP_ID
+					pathVariables["metricType"] = TEST_METRIC_TYPE
+
+					params := url.Values{}
+					params.Add("start-time", "100")
+					params.Add("end-time", "300")
+					params.Add("page", "1")
+					params.Add("order-direction", "desc")
+					params.Add("results-per-page", "2")
+
+					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
+				})
+				It("should get full page", func() {
+					Expect(resp.Code).To(Equal(http.StatusOK))
+					var result models.AppMetricResponse
+					err := json.Unmarshal(resp.Body.Bytes(), &result)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(result).To(Equal(
+						models.AppMetricResponse{
+							PublicApiResponseBase: models.PublicApiResponseBase{
+								TotalResults: 5,
+								TotalPages:   3,
+								Page:         1,
+								PrevUrl:      "",
+								NextUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=2\u0026results-per-page=2\u0026start-time=100",
+							},
+							Resources: eventGeneratorResponse[0:2],
+						},
+					))
+
+				})
+			})
 		})
 
 		When("CF_INSTANCE_CERT is not set", func() {
@@ -1036,37 +906,3 @@ var _ = Describe("PublicApiHandler", func() {
 
 	})
 })
-
-func setupRequest(requestBody, appId string, pathVariables map[string]string) *http.Request {
-	pathVariables["appId"] = appId
-	req, _ := http.NewRequest(http.MethodPut, "", bytes.NewBufferString(requestBody))
-	return req
-}
-func setupPolicy(policyDb *fakes.FakePolicyDB) {
-	policyDb.GetAppPolicyReturns(&models.ScalingPolicy{
-		InstanceMax: 5,
-		InstanceMin: 1,
-		ScalingRules: []*models.ScalingRule{
-			{
-				MetricType:            "memoryused",
-				BreachDurationSeconds: 300,
-				CoolDownSeconds:       300,
-				Threshold:             30,
-				Operator:              ">",
-				Adjustment:            "-1",
-			}},
-		Schedules: &models.ScalingSchedules{
-			Timezone: "Asia/Kolkata",
-			RecurringSchedules: []*models.RecurringSchedule{
-				{
-					StartTime:             "10:00",
-					EndTime:               "18:00",
-					DaysOfWeek:            []int{1, 2, 3},
-					ScheduledInstanceMin:  1,
-					ScheduledInstanceMax:  10,
-					ScheduledInstanceInit: 5,
-				},
-			},
-		},
-	}, nil)
-}

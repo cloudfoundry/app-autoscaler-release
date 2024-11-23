@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
@@ -44,20 +43,23 @@ var _ = Describe("Config", func() {
 
 			When("vcap CF_INSTANCE_CERT is set", func() {
 				BeforeEach(func() {
-					os.Setenv("CF_INSTANCE_KEY", "some/path/in/container/eventgenerator.key")
-					os.Setenv("CF_INSTANCE_CERT", "some/path/in/container/eventgenerator.crt")
+					mockVCAPConfigurationReader.GetCfInstanceCertReturns("cert", nil)
 				})
 
-				AfterEach(func() {
-					os.Unsetenv("CF_INSTANCE_KEY")
-					os.Unsetenv("CF_INSTANCE_CERT")
+				It("sets env variable over config file", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.CfInstanceCert).To(Equal("cert"))
+				})
+			})
 
+			When("vcap CF_INSTANCE_CERT is not set", func() {
+				BeforeEach(func() {
+					mockVCAPConfigurationReader.GetCfInstanceCertReturns("", fmt.Errorf("failed to get required credential from service"))
 				})
 
-				It("sets EventGenerator TlSClientCert", func() {
-					Expect(conf.EventGenerator.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/eventgenerator.key"))
-					Expect(conf.EventGenerator.TLSClientCerts.CertFile).To(Equal("some/path/in/container/eventgenerator.crt"))
-
+				It("sets env variable over config file", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.CfInstanceCert).To(Equal(""))
 				})
 			})
 

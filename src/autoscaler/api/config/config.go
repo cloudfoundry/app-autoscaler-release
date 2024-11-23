@@ -211,14 +211,15 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	configureEventGenerator(conf)
+	configureCfInstanceCert(conf, vcapReader)
 
 	return nil
 }
 
-func configureEventGenerator(conf *Config) {
-	conf.EventGenerator.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
-	conf.EventGenerator.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
+func configureCfInstanceCert(conf *Config, vcapReader configutil.VCAPConfigurationReader) {
+	if cert, err := vcapReader.GetCfInstanceCert(); err == nil {
+		conf.CfInstanceCert = cert
+	}
 }
 
 func configurePolicyDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
