@@ -210,7 +210,16 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	if err := configureBindingDb(conf, vcapReader); err != nil {
 		return err
 	}
+
+	configureCfInstanceCert(conf, vcapReader)
+
 	return nil
+}
+
+func configureCfInstanceCert(conf *Config, vcapReader configutil.VCAPConfigurationReader) {
+	if cert, err := vcapReader.GetCfInstanceCert(); err == nil {
+		conf.CfInstanceCert = cert
+	}
 }
 
 func configurePolicyDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {

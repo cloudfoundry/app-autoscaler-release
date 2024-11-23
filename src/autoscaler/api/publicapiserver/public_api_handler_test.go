@@ -450,7 +450,7 @@ var _ = Describe("PublicApiHandler", func() {
 			handler.GetAggregatedMetricsHistories(resp, req, pathVariables)
 		})
 
-		XWhen("conf.CfInstanceCert is set", func() {
+		When("conf.CfInstanceCert is set", func() {
 			BeforeEach(func() {
 				certBytes, err := testhelpers.GenerateClientCert("org-guid", "space-guid")
 				cert := string(certBytes)
