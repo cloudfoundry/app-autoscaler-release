@@ -55,16 +55,16 @@ spring:
             pem:
                 server:
                     keystore:
-                        certificate:  "src/test/resources/certs/test-scheduler.crt"
-                        private-key:  "src/test/resources/certs/test-scheduler.key"
+                        certificate:  "file:src/test/resources/certs/test-scheduler.crt"
+                        private-key:  "file:src/test/resources/certs/test-scheduler.key"
                     truststore:
-                        certificate: "src/test/resources/certs/test-ca.crt"
+                        certificate: "file:src/test/resources/certs/test-ca.crt"
                 scalingengine:
                   keystore:
-                    certificate:  "src/test/resources/certs/test-scheduler.crt"
-                    private-key:  "src/test/resources/certs/test-scheduler.key"
+                    certificate:  "file:src/test/resources/certs/test-scheduler.crt"
+                    private-key:  "file:src/test/resources/certs/test-scheduler.key"
                   truststore:
-                    certificate: "src/test/resources/certs/test-ca.crt"
+                    certificate: "file:src/test/resources/certs/test-ca.crt"
 
 ############################################################
 #    Logging
