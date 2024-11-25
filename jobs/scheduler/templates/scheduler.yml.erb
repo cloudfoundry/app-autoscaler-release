@@ -107,24 +107,24 @@ spring:
       pem:
         server:
           keystore:
-            certificate: "/var/vcap/jobs/scheduler/config/certs/server.crt"
-            private-key: "/var/vcap/jobs/scheduler/config/certs/server.key"
+            certificate: "file:/var/vcap/jobs/scheduler/config/certs/server.crt"
+            private-key: "file:/var/vcap/jobs/scheduler/config/certs/server.key"
           truststore:
-            certificate: "/var/vcap/jobs/scheduler/config/certs/ca.crt"
+            certificate: "file:/var/vcap/jobs/scheduler/config/certs/ca.crt"
         <% if_p("autoscaler.scheduler.health.ca_cert", "autoscaler.scheduler.health.server_cert", "autoscaler.scheduler.health.server_key") do %>
         healthendpoint:
           keystore:
-            certificate: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/server.crt"
-            private-key: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/server.key"
+            certificate: "file:/var/vcap/jobs/scheduler/config/certs/healthendpoint/server.crt"
+            private-key: "file:/var/vcap/jobs/scheduler/config/certs/healthendpoint/server.key"
           truststore:
-            certificate: "/var/vcap/jobs/scheduler/config/certs/healthendpoint/ca.crt"
+            certificate: "file:/var/vcap/jobs/scheduler/config/certs/healthendpoint/ca.crt"
         <% end %>
         scalingengine:
           keystore:
-            certificate: "/var/vcap/jobs/scheduler/config/certs/scalingengine/client.crt"
-            private-key: "/var/vcap/jobs/scheduler/config/certs/scalingengine/client.key"
+            certificate: "file:/var/vcap/jobs/scheduler/config/certs/scalingengine/client.crt"
+            private-key: "file:/var/vcap/jobs/scheduler/config/certs/scalingengine/client.key"
           truststore:
-            certificate: "/var/vcap/jobs/scheduler/config/certs/scalingengine/ca.crt"
+            certificate: "file:/var/vcap/jobs/scheduler/config/certs/scalingengine/ca.crt"
 
 
 ############################################################
