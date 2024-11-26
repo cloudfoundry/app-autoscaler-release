@@ -20,14 +20,14 @@ paths:
       in: path
       required: true
       description: |
-        The GUID identifying the application for which the scaling history is fetched.
+        The GUID identifying the application for which the scaling policy is fetched.
 
         It can be found in the `application_id` property of the JSON object stored in the
         `VCAP_APPLICATION` environment variable.
       schema:
         $ref: "./shared_definitions.yaml#/schemas/GUID"
     put:
-      summary: Retrieves the Policy
+      summary: Create the Policy
       description: This API is used to create the policy
       tags:
         - Create Policy API V1
@@ -78,8 +78,11 @@ paths:
 components:
   schemas:
     Policy:
-      description: Object containing Policy
+      description: Object containing policy and optional configuration
       type: object
+      required:
+        - instance_min_count
+        - instance_max_count
       properties:
         instance_min_count:
           type: integer
@@ -95,6 +98,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ScalingRule'
+        configuration:
+          type: object
+          properties:
+            custom_metrics:
+              type: object
+              properties:
+                metric_submission_strategy:
+                  type: object
+                  properties:
+                    allow_from:
+                      type: string
+                      enum:
+                        - bound_app
+                  required:
+                    - allow_from
+              required:
+                - metric_submission_strategy
     ScalingRule:
       type: object
       required:

@@ -112,15 +112,16 @@ var _ = Describe("AutoScaler Public API", func() {
 			Expect(string(response)).Should(ContainSubstring(`[{"context":"(root).instance_min_count","description":"Must be greater than or equal to 1"}]`))
 		})
 
-		// custom metrics strategy - FIXME This test can be removed as it is covered by "should fail with 404 when retrieve policy"
-		It("should fail with 404 when trying to create custom metrics submission without policy", func() {
-			_, status := getPolicy()
-			Expect(status).To(Equal(404))
-		})
-
 		It("should fail to create an invalid custom metrics submission", func() {
+			By("creating custom metrics submission with invalid string")
 			response, status := createPolicy(GenerateBindingsWithScalingPolicy("invalid-value", 1, 2, "memoryused", 30, 100))
-			Expect(string(response)).Should(ContainSubstring(`configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\", \"same_app\""}`))
+			Expect(string(response)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\""}]`))
+			Expect(status).To(Equal(400))
+
+			By("creating custom metrics submission with empty value ' '")
+			policy := GenerateBindingsWithScalingPolicy("", 1, 2, "memoryused", 30, 100)
+			newPolicy, status := createPolicy(policy)
+			Expect(string(newPolicy)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\""}]`))
 			Expect(status).To(Equal(400))
 		})
 
@@ -130,73 +131,11 @@ var _ = Describe("AutoScaler Public API", func() {
 			response, status := createPolicy(policy)
 			Expect(string(response)).Should(MatchJSON(policy))
 			Expect(status).To(Or(Equal(200), Equal(201)))
-			/**
-			STEP: PUT 'https://autoscaler-3317.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org/v1/apps/17ae5290-c63a-4836-81a6-42d9635c293a/policy' - /Users/I545443/SAPDevelop/asalan316/app-autoscaler-release/src/acceptance/api/api_test.go:308 @ 11/18/24 13:53:22.373
-			  [FAILED] Expected
-			      <string>: {
-			        "instance_min_count": 1,
-			        "instance_max_count": 2,
-			        "scaling_rules": [
-			          {
-			            "metric_type": "memoryused",
-			            "breach_duration_secs": 60,
-			            "threshold": 100,
-			            "operator": "\u003e=",
-			            "cool_down_secs": 60,
-			            "adjustment": "+1"
-			          },
-			          {
-			            "metric_type": "memoryused",
-			            "breach_duration_secs": 60,
-			            "threshold": 30,
-			            "operator": "\u003c",
-			            "cool_down_secs": 60,
-			            "adjustment": "-1"
-			          }
-			        ]
-			      }
-			  to match JSON of
-			      <string>: {
-			        "configuration": {
-			          "custom_metrics": {
-			            "metric_submission_strategy": {
-			              "allow_from": ""
-			            }
-			          }
-			        },
-			        "instance_min_count": 1,
-			        "instance_max_count": 2,
-			        "scaling_rules": [
-			          {
-			            "metric_type": "memoryused",
-			            "breach_duration_secs": 60,
-			            "threshold": 100,
-			            "operator": ">=",
-			            "cool_down_secs": 60,
-			            "adjustment": "+1"
-			          },
-			          {
-			            "metric_type": "memoryused",
-			            "breach_duration_secs": 60,
-			            "threshold": 30,
-			            "operator": "<",
-			            "cool_down_secs": 60,
-			            "adjustment": "-1"
-			          }
-			        ]
-			      }
-
-
-			By("creating custom metrics submission with empty value ' '")
-			policy = GenerateBindingsWithScalingPolicy("", 1, 2, "memoryused", 30, 100)
-			response, status = createPolicy(policy)
-			Expect(string(response)).Should(MatchJSON(policy))
-			Expect(status).To(Or(Equal(200), Equal(201)))*/
 		})
 
 	})
 
-	When("a scaling policy is set", func() {
+	When("a scaling policy is set without custom metric strategy", func() {
 		memThreshold := int64(10)
 		var policy string
 
@@ -300,47 +239,48 @@ var _ = Describe("AutoScaler Public API", func() {
 				Expect(status).To(Equal(http.StatusForbidden))
 			})
 		})
+	})
 
-		Context("and a custom metrics strategy is already set", func() {
-			var status int
-			var expectedPolicy string
-			var actualPolicy []byte
-			BeforeEach(func() {
-				expectedPolicy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "memoryused", 30, 100)
+	When("a scaling policy is set with custom metric strategy", func() {
+		var status int
+		var expectedPolicy string
+		var actualPolicy []byte
+		BeforeEach(func() {
+			expectedPolicy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "memoryused", 30, 100)
+			actualPolicy, status = createPolicy(expectedPolicy)
+			Expect(status).To(Equal(200))
+		})
+		It("should succeed to delete a custom metrics strategy", func() {
+			_, status = deletePolicy()
+			Expect(status).To(Equal(200))
+		})
+		It("should succeed to get a custom metrics strategy", func() {
+			actualPolicy, status = getPolicy()
+			Expect(string(actualPolicy)).Should(MatchJSON(expectedPolicy))
+			Expect(status).To(Equal(200))
+		})
+		It("should fail to update an invalid custom metrics strategy", func() {
+			expectedPolicy = GenerateBindingsWithScalingPolicy("invalid-update", 1, 2, "memoryused", 30, 100)
+			actualPolicy, status = createPolicy(expectedPolicy)
+			Expect(string(actualPolicy)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\""}]`))
+			Expect(status).To(Equal(400))
+		})
+		It("should succeed to update a valid custom metrics strategy", func() {
+
+			Expect(string(actualPolicy)).Should(MatchJSON(expectedPolicy))
+			Expect(status).To(Equal(200))
+		})
+
+		When("custom metrics strategy is removed from the existing policy", func() {
+			It("should removed the custom metrics strategy and displays policy only", func() {
+				Expect(string(actualPolicy)).Should(MatchJSON(expectedPolicy), "policy and custom metrics strategy should be present")
+				Expect(status).To(Equal(200))
+
+				By("updating policy without custom metrics strategy")
+				expectedPolicy = GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
 				actualPolicy, status = createPolicy(expectedPolicy)
+				Expect(string(actualPolicy)).Should(MatchJSON(expectedPolicy), "policy should be present only")
 				Expect(status).To(Equal(200))
-			})
-			It("should succeed to delete a custom metrics strategy", func() {
-				_, status = deletePolicy()
-				Expect(status).To(Equal(200))
-			})
-			It("should succeed to get a custom metrics strategy", func() {
-				actualPolicy, status = getPolicy()
-				Expect(string(actualPolicy)).Should(MatchJSON(expectedPolicy))
-				Expect(status).To(Equal(200))
-			})
-			It("should fail to update an invalid custom metrics strategy", func() {
-				expectedPolicy = GenerateBindingsWithScalingPolicy("invalid-update", 1, 2, "memoryused", 30, 100)
-				actualPolicy, status = createPolicy(expectedPolicy)
-				Expect(string(actualPolicy)).Should(ContainSubstring(`configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\", \"same_app\""}`))
-				Expect(status).To(Equal(400))
-			})
-			It("should succeed to update a valid custom metrics strategy", func() {
-
-				Expect(string(actualPolicy)).Should(MatchJSON(expectedPolicy))
-				Expect(status).To(Equal(200))
-			})
-
-			When("custom metrics strategy is removed from the existing policy", func() {
-				It("should removed the custom metrics strategy and displays policy only", func() {
-					Expect(string(actualPolicy)).Should(MatchJSON(expectedPolicy), "policy and custom metrics strategy should be present")
-
-					By("updating policy without custom metrics strategy")
-					expectedPolicy = GenerateDynamicScaleOutPolicy(1, 2, "memoryused", 30)
-					actualPolicy, status = createPolicy(expectedPolicy)
-					Expect(string(actualPolicy)).Should(MatchJSON(expectedPolicy), "policy should be present only")
-					Expect(status).To(Equal(200))
-				})
 			})
 		})
 	})

@@ -41,10 +41,13 @@ function deploy(){
   fi
 
   # `create-org/space` is idempotent and will simply keep the potentially already existing org/space as is
-  cf create-org "${org}"
-  cf target -o "${org}"
-  cf create-space "${space}"
+  cf create-org "${org}" || true
+  cf target -o "${org}" || true
+  cf create-space "${space}" || true
   cf target -s "${space}"
+
+  echo "current org ${org}"
+  echo "current space ${space}"
 
   local app_name app_domain service_name memory_mb service_broker service_plan
   app_name="test_app"

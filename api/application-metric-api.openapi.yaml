@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Application Metric API
   description: |
-    List aggregated metrics of an application. AutoScaler collects the instances' metrics of an
+    List aggregated metrics of an application. AutoScaler collects the instances metrics of an
     application, and aggregate the raw data into an accumulated value for evaluation.
 
     This API is used to return the aggregated metric result of an application.
@@ -22,7 +22,7 @@ paths:
       in: path
       required: true
       description: |
-        The GUID identifying the application for which the scaling history is fetched.
+        The GUID identifying the application for which the aggregated metric histories is fetched.
 
         It can be found in the `application_id` property of the JSON object stored in the
         `VCAP_APPLICATION` environment variable.
