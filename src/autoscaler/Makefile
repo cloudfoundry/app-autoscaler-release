@@ -4,7 +4,7 @@ MAKEFLAGS := -s
 aes_terminal_font_yellow := \e[38;2;255;255;0m
 aes_terminal_reset := \e[0m
 VERSION ?= 0.0.0-rc.1
-DEST ?= build
+DEST ?= /tmp/build
 MTAR_FILENAME ?= app-autoscaler-release-v$(VERSION).mtar
 
 GO_VERSION = $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
