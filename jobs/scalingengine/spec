@@ -169,6 +169,17 @@ properties:
   autoscaler.scalingengine.server_key:
     description: "PEM-encoded server key"
 
+  autoscaler.cf_server.port:
+    description: "the listening port of cf xfcc endpoint"
+    default: 8080
+
+  autoscaler.cf_server.xfcc.valid_org_guid:
+    description: allowed org guid for xfcc endpoint
+    default: ''
+
+  autoscaler.cf_server.xfcc.valid_space_guid:
+    description: allowed space guid for xfcc endpoint
+    default: ''
 
   autoscaler.scalingengine.health.port:
     description: "the listening port of health endpoint"
