@@ -186,6 +186,7 @@ jobs:
       BBL_ENV_NAME: autoscaler
       BBL_GCP_SERVICE_ACCOUNT_KEY: ((autoscaler_app_runtime_interfaces_key))
       BBL_GCP_PROJECT_ID: app-runtime-interfaces-wg
+      TF_VAR_parent_dns_zone: app-runtime-interfaces
     input_mapping:
       bbl-state: bbl-state
     ensure:
