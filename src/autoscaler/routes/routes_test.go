@@ -218,7 +218,7 @@ var _ = Describe("Routes", func() {
 		Context("GetAggregatedMetricHistoriesRouteName", func() {
 			Context("when provide correct route variable", func() {
 				It("should return the correct path", func() {
-					path, err := router.Get(routes.GetAggregatedMetricHistoriesRouteName).URLPath("appId", testAppId, "metrictype", testMetricType)
+					path, err := router.Get(routes.GetAggregatedMetricHistoriesRouteName).URLPath("appid", testAppId, "metrictype", testMetricType)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(path.Path).To(Equal("/v1/apps/" + testAppId + "/aggregated_metric_histories/" + testMetricType))
 				})
