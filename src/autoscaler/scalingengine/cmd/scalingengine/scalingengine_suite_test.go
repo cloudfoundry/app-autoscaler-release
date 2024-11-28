@@ -215,8 +215,8 @@ func (se *ScalingEngineRunner) Interrupt() {
 	}
 }
 
-func (engine *ScalingEngineRunner) KillWithFire() {
-	if engine.Session != nil {
-		engine.Session.Kill().Wait(5 * time.Second)
+func (se *ScalingEngineRunner) KillWithFire() {
+	if se.Session != nil {
+		se.Session.Kill().Wait(5 * time.Second)
 	}
 }
