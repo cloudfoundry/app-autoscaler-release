@@ -97,7 +97,7 @@ jobs:
   deployment_cleanup:
     needs: [ deploy_autoscaler, acceptance_tests ]
     if: "!contains(github.event.pull_request.labels.*.name, 'skip-cleanup')"
-    name: "Result"
+    name: Cleanup
     runs-on: ubuntu-latest
     container:
       image: "${{ inputs.self_hosted_image }}"
@@ -114,3 +114,17 @@ jobs:
       - name: Perform deployment cleanup
         run: |
           make --directory="${AUTOSCALER_DIR}" deploy-cleanup
+
+  # This job will run and fail if any of the jobs it depends on fail or are cancelled.
+  # It is an "ugly workaround" for an issue on GitHub Actions side, where
+  # skipped jobs are considered successful.
+  # See https://github.com/actions/runner/issues/2566#issuecomment-1523814835
+  result:
+      needs: acceptance_tests
+      if: ${{ cancelled() || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'failure') }}
+      name: Result
+      runs-on: ubuntu-latest
+      steps:
+        - run: |
+            echo "Some required workflows have failed!"
+            exit 1
