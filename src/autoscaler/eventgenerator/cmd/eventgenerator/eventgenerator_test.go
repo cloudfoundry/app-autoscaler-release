@@ -248,12 +248,8 @@ var _ = Describe("Eventgenerator", func() {
 	})
 
 	When("running CF server", func() {
-		JustBeforeEach(func() {
-			//Eventually(runner.Session.Buffer, 3).Should(gbytes.Say("eventgenerator.started"))
-		})
-
-		When("running outside cf", func() {
-			It("/v1/liveness should return 200", func() {
+		Context("Get /v1/liveness", func() {
+			It("should return 200", func() {
 				cfServerURL.Path = "/v1/liveness"
 
 				req, err := http.NewRequest(http.MethodGet, cfServerURL.String(), nil)
@@ -266,7 +262,6 @@ var _ = Describe("Eventgenerator", func() {
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-
 			})
 		})
 	})
