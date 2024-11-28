@@ -100,19 +100,19 @@ func (s *Server) createHealthRouter() error {
 }
 
 func (s *Server) CreateCFServer(am auth.XFCCAuthMiddleware) (ifrit.Runner, error) {
-	eventgenerator, err := s.createEventGeneratorRouter()
+	eventGeneratorRouter, err := s.createEventGeneratorRouter()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create event generator router: %w", err)
 	}
 
-	eventgenerator.Use(am.XFCCAuthenticationMiddleware)
+	eventGeneratorRouter.Use(am.XFCCAuthenticationMiddleware)
 	if err := s.createHealthRouter(); err != nil {
 		return nil, fmt.Errorf("failed to create health router: %w", err)
 	}
 
-	eventgenerator.PathPrefix("/health").Handler(s.healthRouter)
+	eventGeneratorRouter.PathPrefix("/health").Handler(s.healthRouter)
 
-	return helpers.NewHTTPServer(s.logger, s.conf.CFServer, eventgenerator)
+	return helpers.NewHTTPServer(s.logger, s.conf.CFServer, eventGeneratorRouter)
 }
 
 func (s *Server) CreateMtlsServer() (ifrit.Runner, error) {
