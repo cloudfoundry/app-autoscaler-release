@@ -21,10 +21,6 @@ import (
 	"github.com/tedsuo/ifrit"
 )
 
-type EventgeneratorServer interface {
-	CreateMtlsServer() (ifrit.Runner, error)
-}
-
 type VarsFunc func(w http.ResponseWriter, r *http.Request, vars map[string]string)
 
 func (vh VarsFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
