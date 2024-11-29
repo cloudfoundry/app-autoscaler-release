@@ -1,7 +1,6 @@
 package publicapiserver
 
 import (
-	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -17,6 +16,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/handlers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
@@ -264,8 +264,11 @@ func (h *PublicApiHandler) proxyRequest(logger lager.Logger, appId string, metri
 	aUrl := h.conf.EventGenerator.EventGeneratorUrl + path.RequestURI() + "?" + parameters.Encode()
 	req, err = http.NewRequest("GET", aUrl, nil)
 
+	fmt.Println("SHA256: BANANA2", h.conf.CfInstanceCert)
+
 	if h.conf.CfInstanceCert != "" {
-		h.setXForwardedClientCertHeader(req)
+		cert := auth.NewCert(h.conf.CfInstanceCert)
+		req.Header.Set("X-Forwarded-Client-Cert", cert.GetXFCCHeader())
 	}
 
 	resp, err := h.eventGeneratorClient.Do(req)
@@ -296,14 +299,6 @@ func (h *PublicApiHandler) proxyRequest(logger lager.Logger, appId string, metri
 	}
 
 	handlers.WriteJSONResponse(w, resp.StatusCode, paginatedResponse)
-}
-
-func (h *PublicApiHandler) setXForwardedClientCertHeader(req *http.Request) {
-	certPEM := []byte(h.conf.CfInstanceCert)
-	hash := sha256.Sum256(certPEM)
-	encodedCert := url.QueryEscape(string(certPEM))
-	xfccHeader := fmt.Sprintf("Hash=%x;Cert=\"%s\"", hash, encodedCert)
-	req.Header.Set("X-Forwarded-Client-Cert", xfccHeader)
 }
 
 func (h *PublicApiHandler) GetAggregatedMetricsHistories(w http.ResponseWriter, req *http.Request, vars map[string]string) {

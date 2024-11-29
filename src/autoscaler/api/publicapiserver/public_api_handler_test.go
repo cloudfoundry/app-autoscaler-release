@@ -14,6 +14,7 @@ import (
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/publicapiserver"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
@@ -452,12 +453,15 @@ var _ = Describe("PublicApiHandler", func() {
 
 		When("conf.CfInstanceCert is set", func() {
 			BeforeEach(func() {
-				certBytes, err := testhelpers.GenerateClientCert("org-guid", "space-guid")
-				cert := string(certBytes)
+				fullCert, err := testhelpers.GenerateClientCert("org-guid", "space-guid")
 				Expect(err).NotTo(HaveOccurred())
-				conf.CfInstanceCert = cert
+
+				cert := auth.NewCert(string(fullCert))
+				conf.CfInstanceCert = cert.FullChainPem
+				xfccHeaderExpectedValue := cert.GetXFCCHeader()
+
 				eventGeneratorHandler = ghttp.CombineHandlers(
-					ghttp.VerifyHeader(http.Header{"X-Forwarded-Client-Cert": []string{cert}}),
+					ghttp.VerifyHeader(http.Header{"X-Forwarded-Client-Cert": []string{xfccHeaderExpectedValue}}),
 					ghttp.RespondWithJSONEncodedPtr(&eventGeneratorStatus, &eventGeneratorResponse),
 				)
 			})
