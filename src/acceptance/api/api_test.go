@@ -246,6 +246,7 @@ var _ = Describe("AutoScaler Public API", func() {
 		var expectedPolicy string
 		var actualPolicy []byte
 		BeforeEach(func() {
+			BindServiceToApp(cfg, appName, instanceName)
 			expectedPolicy = GenerateBindingsWithScalingPolicy("bound_app", 1, 2, "memoryused", 30, 100)
 			actualPolicy, status = createPolicy(expectedPolicy)
 			Expect(status).To(Equal(200))

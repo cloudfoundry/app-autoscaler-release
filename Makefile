@@ -358,7 +358,7 @@ mta-release: mta-build
 	@echo " - building mtar release '${VERSION}' to dir: '${DEST}' "
 
 .PHONY: acceptance-release
-acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
+acceptance-release: generate-fakes  generate-openapi-generated-clients-and-servers clean-acceptance go-mod-tidy go-mod-vendor build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	${AUTOSCALER_DIR}/scripts/compile-acceptance-tests.sh
