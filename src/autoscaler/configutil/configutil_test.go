@@ -52,7 +52,7 @@ var _ = Describe("Configutil", func() {
 				It("returns the value of CF_INSTANCE_CERT", func() {
 					cert, err := vcapConfiguration.GetCfInstanceCert()
 					Expect(err).NotTo(HaveOccurred())
-					Expect(cert).To(Equal([]byte("some-cert")))
+					Expect(cert).To(Equal("some-cert"))
 				})
 			})
 
