@@ -67,6 +67,7 @@ jobs:
     name: Acceptance Tests
     needs: [ deploy_autoscaler ]
     strategy:
+      fail-fast: false
       matrix:
         suite: "${{ fromJSON(inputs.suites) }}"
     runs-on: ubuntu-latest
