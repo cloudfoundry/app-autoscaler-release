@@ -5,18 +5,17 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"math/big"
 	"net/http"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 )
 
 // generateClientCert generates a client certificate with the specified spaceGUID and orgGUID
 // included in the organizational unit string.
 func GenerateClientCert(orgGUID, spaceGUID string) ([]byte, error) {
-	// Generate a random serial number for the certificate
-	//
 	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
 	if err != nil {
 		return nil, err
@@ -27,7 +26,6 @@ func GenerateClientCert(orgGUID, spaceGUID string) ([]byte, error) {
 		return nil, err
 	}
 
-	// Create a new X.509 certificate template
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
@@ -35,13 +33,12 @@ func GenerateClientCert(orgGUID, spaceGUID string) ([]byte, error) {
 			OrganizationalUnit: []string{fmt.Sprintf("space:%s org:%s", spaceGUID, orgGUID)},
 		},
 	}
-	// Generate the certificate
+
 	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
 	if err != nil {
 		return nil, err
 	}
 
-	// Encode the certificate to PEM format
 	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
 
 	return certPEM, nil
@@ -53,8 +50,8 @@ func SetXFCCCertHeader(req *http.Request, orgGuid, spaceGuid string) error {
 		return err
 	}
 
-	block, _ := pem.Decode(xfccClientCert)
+	cert := auth.NewCert(string(xfccClientCert))
 
-	req.Header.Add("X-Forwarded-Client-Cert", base64.StdEncoding.EncodeToString(block.Bytes))
+	req.Header.Add("X-Forwarded-Client-Cert", cert.GetXFCCHeader())
 	return nil
 }
