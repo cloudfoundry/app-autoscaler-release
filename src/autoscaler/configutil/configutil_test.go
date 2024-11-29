@@ -44,6 +44,30 @@ var _ = Describe("Configutil", func() {
 			})
 		})
 
+		Describe("GetCfInstanceCert", func() {
+			When("CF_INSTANCE_CERT is set", func() {
+				BeforeEach(func() {
+					os.Setenv("CF_INSTANCE_CERT", "some-cert")
+				})
+				It("returns the value of CF_INSTANCE_CERT", func() {
+					cert, err := vcapConfiguration.GetCfInstanceCert()
+					Expect(err).NotTo(HaveOccurred())
+					Expect(cert).To(Equal("some-cert"))
+				})
+			})
+
+			When("CF_INSTANCE_CERT is not set", func() {
+				BeforeEach(func() {
+					os.Unsetenv("CF_INSTANCE_CERT")
+				})
+				It("returns an error", func() {
+					_, err := vcapConfiguration.GetCfInstanceCert()
+					Expect(err).To(HaveOccurred())
+				})
+
+			})
+		})
+
 		Describe("MaterializeTLSConfigFromService", func() {
 			BeforeEach(func() {
 				vcapApplicationJson = `{}`
