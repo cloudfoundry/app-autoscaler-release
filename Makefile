@@ -441,7 +441,6 @@ alerts-silence:
 .PHONY: docker-login docker docker-image
 docker-login: target/docker-login
 target/docker-login:
-	gcloud auth login
 	docker login ghcr.io
 	@touch $@
 docker-image: docker-login

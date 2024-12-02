@@ -38,7 +38,6 @@
     "yq-go":                             "4.44.5",
     "act":                               "0.2.68",
     "cloudfoundry-cli":                  "8.8.1",
-    "google-cloud-sdk":                  "latest",
     "ginkgo":                            "2.20.2",
     "golangci-lint":                     "1.62.0",
     "temurin-bin-21":                    "latest",
