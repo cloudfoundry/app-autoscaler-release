@@ -112,17 +112,6 @@
         "\\.tool-versions$"
       ],
       "matchStrings": [
-        "(^|\\n)gcloud (?<currentValue>.+?)\\n"
-      ],
-      "depNameTemplate": "google/cloud-sdk",
-      "datasourceTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "\\.tool-versions$"
-      ],
-      "matchStrings": [
         "(^|\\n)ginkgo (?<currentValue>.+?)\\n"
       ],
       "depNameTemplate": "onsi/ginkgo",

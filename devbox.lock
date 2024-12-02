@@ -949,54 +949,6 @@
         }
       }
     },
-    "google-cloud-sdk@latest": {
-      "last_modified": "2024-11-22T01:27:12Z",
-      "resolved": "github:NixOS/nixpkgs/8edf06bea5bcbee082df1b7369ff973b91618b8d#google-cloud-sdk",
-      "source": "devbox-search",
-      "version": "501.0.0",
-      "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/8wq5wd1qkis3q44gvl91kdrbvmcx5rjc-google-cloud-sdk-501.0.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/8wq5wd1qkis3q44gvl91kdrbvmcx5rjc-google-cloud-sdk-501.0.0"
-        },
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/bpdjikf06vw6q6pva89gfrnak4i9qbkd-google-cloud-sdk-501.0.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/bpdjikf06vw6q6pva89gfrnak4i9qbkd-google-cloud-sdk-501.0.0"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/jimm2rhh182spr2vz60k6wiqq9jwf7cr-google-cloud-sdk-501.0.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/jimm2rhh182spr2vz60k6wiqq9jwf7cr-google-cloud-sdk-501.0.0"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/qary2z3z06wf56aqhirxq39scz8rw0kh-google-cloud-sdk-501.0.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/qary2z3z06wf56aqhirxq39scz8rw0kh-google-cloud-sdk-501.0.0"
-        }
-      }
-    },
     "gopls@latest": {
       "last_modified": "2024-08-31T10:12:23Z",
       "resolved": "github:NixOS/nixpkgs/5629520edecb69630a3f4d17d3d33fc96c13f6fe#gopls",
