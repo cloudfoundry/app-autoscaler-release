@@ -39,7 +39,7 @@
     "act":                               "0.2.68",
     "cloudfoundry-cli":                  "8.8.1",
     "ginkgo":                            "2.20.2",
-    "golangci-lint":                     "1.62.0",
+    "golangci-lint":                     "1.62.2",
     "temurin-bin-21":                    "latest",
     "ruby":                              "3.3.5"
   },
