@@ -219,7 +219,6 @@ func prepareFakeCCNOAAUAA() {
 func prepareFakeCCNOAAUAAWithUnauthorized() {
 	fakeCCNOAAUAA.Reset()
 	fakeCCNOAAUAA.AllowUnhandledRequests = true
-	fakeCCNOAAUAA.Add().Info(fakeCCNOAAUAA.URL()).CheckToken(testUserScope).UserInfo(http.StatusUnauthorized, "ERR")
 }
 
 func bindServiceInstance(t *testMetrics) {

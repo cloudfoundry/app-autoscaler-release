@@ -208,7 +208,6 @@ func (h *PublicApiHandler) handleDefaultPolicy(w http.ResponseWriter, r *http.Re
 		logger.Error("Failed to find service instance for app", err)
 		writeErrorResponse(w, http.StatusInternalServerError, "Error retrieving service instance")
 		return errors.New("error retrieving service instance")
-
 	}
 
 	if serviceInstance.DefaultPolicy != "" {
@@ -262,9 +261,7 @@ func (h *PublicApiHandler) proxyRequest(logger lager.Logger, appId string, metri
 	}
 
 	aUrl := h.conf.EventGenerator.EventGeneratorUrl + path.RequestURI() + "?" + parameters.Encode()
-	req, err = http.NewRequest("GET", aUrl, nil)
-
-	fmt.Println("SHA256: BANANA2", h.conf.CfInstanceCert)
+	req, _ = http.NewRequest("GET", aUrl, nil)
 
 	if h.conf.CfInstanceCert != "" {
 		cert := auth.NewCert(h.conf.CfInstanceCert)
