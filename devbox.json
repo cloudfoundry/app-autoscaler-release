@@ -1,10 +1,10 @@
 {
   "packages": {
-    "path:.#bosh-bootloader":            "",
-    "path:.#app-autoscaler-cli-plugin":  "",
-    "path:.#log-cache-cli-plugin":       "",
-    "path:.#cloud-mta-build-tool":       "",
-    "path:.#uaac":                       "",
+    "path:./nix#bosh-bootloader":            "",
+    "path:./nix#app-autoscaler-cli-plugin":  "",
+    "path:./nix#log-cache-cli-plugin":       "",
+    "path:./nix#cloud-mta-build-tool":       "",
+    "path:./nix#uaac":                       "",
     "bosh-cli":                          "7.3.1",
     "bundix":                            "latest",
     "coreutils":                         "latest",
