@@ -15,9 +15,7 @@ import (
 	"github.com/onsi/gomega/gbytes"
 
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -280,11 +278,3 @@ var _ = Describe("Main", func() {
 		})
 	})
 })
-
-func setXFCCCertHeader(req *http.Request, orgGuid, spaceGuid string) {
-	xfccClientCert, err := GenerateClientCert(orgGuid, spaceGuid)
-	block, _ := pem.Decode(xfccClientCert)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(block).ShouldNot(BeNil())
-	req.Header.Add("X-Forwarded-Client-Cert", base64.StdEncoding.EncodeToString(block.Bytes))
-}

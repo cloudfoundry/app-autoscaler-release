@@ -46,9 +46,8 @@ func (c *Cert) GetXFCCHeader() string {
 }
 
 type xfccAuthMiddleware struct {
-	logger    lager.Logger
-	spaceGuid string
-	orgGuid   string
+	logger   lager.Logger
+	xfccAuth *models.XFCCAuth
 }
 
 func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
@@ -57,7 +56,13 @@ func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
 		return ErrXFCCHeaderNotFound
 	}
 
-	data, err := base64.StdEncoding.DecodeString(removeQuotes(xfccHeader))
+	attrs := make(map[string]string)
+	for _, v := range strings.Split(xfccHeader, ";") {
+		attr := strings.SplitN(v, "=", 2)
+		attrs[attr[0]] = attr[1]
+	}
+
+	data, err := base64.StdEncoding.DecodeString(attrs["Cert"])
 	if err != nil {
 		return fmt.Errorf("base64 parsing failed: %w", err)
 	}
@@ -67,11 +72,11 @@ func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
 		return fmt.Errorf("failed to parse certificate: %w", err)
 	}
 
-	if getSpaceGuid(cert) != m.spaceGuid {
+	if getSpaceGuid(cert) != m.xfccAuth.ValidSpaceGuid {
 		return ErrorWrongSpace
 	}
 
-	if getOrgGuid(cert) != m.orgGuid {
+	if getOrgGuid(cert) != m.xfccAuth.ValidOrgGuid {
 		return ErrorWrongOrg
 	}
 
@@ -94,9 +99,8 @@ func (m *xfccAuthMiddleware) XFCCAuthenticationMiddleware(next http.Handler) htt
 
 func NewXfccAuthMiddleware(logger lager.Logger, xfccAuth models.XFCCAuth) XFCCAuthMiddleware {
 	return &xfccAuthMiddleware{
-		logger:    logger,
-		orgGuid:   xfccAuth.ValidOrgGuid,
-		spaceGuid: xfccAuth.ValidSpaceGuid,
+		logger:   logger,
+		xfccAuth: &xfccAuth,
 	}
 }
 
@@ -115,7 +119,7 @@ func getSpaceGuid(cert *x509.Certificate) string {
 func mapFrom(input string) map[string]string {
 	result := make(map[string]string)
 
-	r := regexp.MustCompile(`(\w+):(\w+-\w+)`)
+	r := regexp.MustCompile(`(\w+):(\w+)`)
 	matches := r.FindAllStringSubmatch(input, -1)
 
 	for _, match := range matches {
@@ -135,11 +139,4 @@ func getOrgGuid(cert *x509.Certificate) string {
 		}
 	}
 	return certOrgGuid
-}
-
-func removeQuotes(xfccHeader string) string {
-	if xfccHeader[0] == '"' {
-		xfccHeader = xfccHeader[1 : len(xfccHeader)-1]
-	}
-	return xfccHeader
 }
