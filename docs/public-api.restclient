@@ -4,7 +4,8 @@
 #  This endpoints works with vs code rest client extension
 ########
 
-@baseUrl = https://autoscaler.cf.stagingaws.hanavlab.ondemand.com
+@system_domain = app-runtime-interfaces.ci.cloudfoundry.org
+@baseUrl = https://autoscaler.{{system_domain}}
 @auth_token = bearer <cf oauth-token>
 
 ### app guid
