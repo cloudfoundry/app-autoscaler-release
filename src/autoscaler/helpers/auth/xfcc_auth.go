@@ -72,11 +72,11 @@ func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
 		return fmt.Errorf("failed to parse certificate: %w", err)
 	}
 
-	if getSpaceGuid(cert) != m.xfccAuth.ValidSpaceGuid {
+	if m.getSpaceGuid(cert) != m.xfccAuth.ValidSpaceGuid {
 		return ErrorWrongSpace
 	}
 
-	if getOrgGuid(cert) != m.xfccAuth.ValidOrgGuid {
+	if m.getOrgGuid(cert) != m.xfccAuth.ValidOrgGuid {
 		return ErrorWrongOrg
 	}
 
@@ -104,11 +104,11 @@ func NewXfccAuthMiddleware(logger lager.Logger, xfccAuth models.XFCCAuth) XFCCAu
 	}
 }
 
-func getSpaceGuid(cert *x509.Certificate) string {
+func (m *xfccAuthMiddleware) getSpaceGuid(cert *x509.Certificate) string {
 	var certSpaceGuid string
 	for _, ou := range cert.Subject.OrganizationalUnit {
 		if strings.Contains(ou, "space:") {
-			kv := mapFrom(ou)
+			kv := m.mapFrom(ou)
 			certSpaceGuid = kv["space"]
 			break
 		}
@@ -116,24 +116,25 @@ func getSpaceGuid(cert *x509.Certificate) string {
 	return certSpaceGuid
 }
 
-func mapFrom(input string) map[string]string {
+func (m *xfccAuthMiddleware) mapFrom(input string) map[string]string {
 	result := make(map[string]string)
 
-	r := regexp.MustCompile(`(\w+):(\w+)`)
+	r := regexp.MustCompile(`(\w+):((\w+-)*\w+)`)
 	matches := r.FindAllStringSubmatch(input, -1)
 
 	for _, match := range matches {
 		result[match[1]] = match[2]
 	}
+
+	m.logger.Debug("parseCertOrganizationalUnit", lager.Data{"input": input, "result": result})
 	return result
 }
 
-func getOrgGuid(cert *x509.Certificate) string {
+func (m *xfccAuthMiddleware) getOrgGuid(cert *x509.Certificate) string {
 	var certOrgGuid string
 	for _, ou := range cert.Subject.OrganizationalUnit {
-		// capture from string k:v with regex
 		if strings.Contains(ou, "org:") {
-			kv := mapFrom(ou)
+			kv := m.mapFrom(ou)
 			certOrgGuid = kv["org"]
 			break
 		}
