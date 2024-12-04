@@ -188,7 +188,6 @@ func checkAggregatedMetricResult(apiServerPort int, pathVariables []string, para
 	var actual AppAggregatedMetricResult
 	resp, err := getAppAggregatedMetrics(apiServerPort, pathVariables, parameters)
 	body := MustReadAll(resp.Body)
-	fmt.Println("BANANA body: ", body)
 
 	FailOnError(fmt.Sprintf("getAppAggregatedMetrics failed: %d-%s", resp.StatusCode, body), err)
 	defer func() { _ = resp.Body.Close() }()
