@@ -224,7 +224,6 @@ func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Re
 		if err := h.handleDefaultPolicy(w, r, logger, appId); err != nil {
 			return
 		}
-
 	}
 	if err := h.bindingdb.SetOrUpdateCustomMetricStrategy(r.Context(), appId, "", "delete"); err != nil {
 		actionName := "failed to delete custom metric submission strategy in the database"
