@@ -38,21 +38,24 @@ type BindingConfig struct {
 	Configuration Configuration `json:"configuration"`
 	ScalingPolicy
 }
-
 type Configuration struct {
 	CustomMetrics CustomMetricsConfig `json:"custom_metrics"`
 }
 
 type CustomMetricsConfig struct {
-	Auth                     Auth                      `json:"auth,omitempty"`
 	MetricSubmissionStrategy MetricsSubmissionStrategy `json:"metric_submission_strategy"`
 }
 
-type Auth struct {
-	CredentialType string `json:"credential_type"`
-}
 type MetricsSubmissionStrategy struct {
 	AllowFrom string `json:"allow_from"`
+}
+
+func (b *BindingConfig) GetCustomMetricsStrategy() string {
+	return b.Configuration.CustomMetrics.MetricSubmissionStrategy.AllowFrom
+}
+
+func (b *BindingConfig) SetCustomMetricsStrategy(allowFrom string) {
+	b.Configuration.CustomMetrics.MetricSubmissionStrategy.AllowFrom = allowFrom
 }
 
 type ScalingPolicy struct {
@@ -184,7 +187,7 @@ func ServicePlansUrl(cfg *config.Config, spaceGuid string) string {
 }
 
 func GenerateBindingsWithScalingPolicy(allowFrom string, instanceMin, instanceMax int, metricName string, scaleInThreshold, scaleOutThreshold int64) string {
-	bindingConfig := BindingConfig{
+	bindingConfig := &BindingConfig{
 		Configuration: Configuration{CustomMetrics: CustomMetricsConfig{
 			MetricSubmissionStrategy: MetricsSubmissionStrategy{AllowFrom: allowFrom},
 		}},
