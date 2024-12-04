@@ -45,7 +45,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: app-autoscaler-release
       - name: Setup environment for deployment
@@ -75,7 +75,7 @@ jobs:
       image: "${{ inputs.self_hosted_image }}"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: app-autoscaler-release
       - name: Setup environment for acceptance tests
@@ -105,7 +105,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           path: app-autoscaler-release
       - name: Setup environment for deployment cleanup
