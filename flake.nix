@@ -65,8 +65,6 @@
               gopls # See: <https://github.com/golang/vscode-go/blob/master/docs/tools.md>
               jq
               maven
-              nodejs
-              nodePackages.yaml-language-server
               # # We use the binary-buildpack and nix-build-results have set the wrong ELF-Interpreter.
               # # For more background, see:
               # # <https://blog.thalheim.io/2022/12/31/nix-ld-a-clean-solution-for-issues-with-pre-compiled-executables-on-nixos>
