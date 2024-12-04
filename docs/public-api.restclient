@@ -1,0 +1,88 @@
+######
+#  Collection of rest endpoints offered by Application Autoscaler public api server
+#  These endpoints allows CRUD operations for the policy object
+#  This endpoints works with vs code rest client extension
+########
+
+@system_domain = app-runtime-interfaces.ci.cloudfoundry.org
+@baseUrl = https://autoscaler.{{system_domain}}
+@auth_token = bearer <cf oauth-token>
+
+### app guid
+@go_app_guid = 3e4d6cd4-08a3-4289-b09e-16333e1895c1
+
+### check server health
+GET  {{baseUrl}}/health
+
+
+### show current app policy
+GET {{baseUrl}}/v1/apps/{{go_app_guid}}/policy
+Authorization: {{auth_token}}
+
+### create a policy of a given app with configuration object
+PUT {{baseUrl}}/v1/apps/{{consumer_guid}}/policy
+content-type: application/json
+Authorization: {{auth_token}}
+
+{
+  "configuration": {
+    "custom_metrics": {
+      "metric_submission_strategy": {
+        "allow_from": "bound_app"
+      }
+    }
+  },
+  "instance_min_count": 1,
+  "instance_max_count": 4,
+  "scaling_rules": [
+    {
+      "metric_type": "test_metric",
+      "breach_duration_secs": 60,
+      "threshold": 200,
+      "operator": ">=",
+      "cool_down_secs": 60,
+      "adjustment": "+1"
+    },
+    {
+      "metric_type": "test_metric",
+      "breach_duration_secs": 60,
+      "threshold": 100,
+      "operator": "<=",
+      "cool_down_secs": 60,
+      "adjustment": "-1"
+    }
+  ]
+}
+
+### update a policy of a given app - wihout configuration
+PUT {{baseUrl}}/v1/apps/{{go_app_guid}}/policy
+content-type: application/json
+Authorization: {{auth_token}}
+
+{
+  "instance_min_count": 1,
+  "instance_max_count": 4,
+  "scaling_rules": [
+    {
+      "metric_type": "test_metric",
+      "breach_duration_secs": 60,
+      "threshold": 200,
+      "operator": ">=",
+      "cool_down_secs": 60,
+      "adjustment": "+1"
+    },
+    {
+      "metric_type": "test_metric",
+      "breach_duration_secs": 60,
+      "threshold": 100,
+      "operator": "<=",
+      "cool_down_secs": 60,
+      "adjustment": "-1"
+    }
+  ]
+}
+
+### Delete a policy of an app
+DELETE  {{baseUrl}}/v1/apps/{{go_app_guid}}/policy
+Authorization: {{auth_token}}
+

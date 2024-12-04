@@ -12,10 +12,10 @@ jobs:
     name: Bosh Templates Test
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:b0b8601a28a802b6e5fe683147786db536580baf261a0834912ef1dfd0cb7ba1
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
