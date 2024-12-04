@@ -12,11 +12,11 @@ jobs:
     name: ensure gosub specs are up to date
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:b0b8601a28a802b6e5fe683147786db536580baf261a0834912ef1dfd0cb7ba1
     steps:
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: sync-package-specs
         shell: bash
         run: |
@@ -39,12 +39,12 @@ jobs:
     name: Create Bosh Release
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:b0b8601a28a802b6e5fe683147786db536580baf261a0834912ef1dfd0cb7ba1
     steps:
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Run Update
         shell: bash
         run: |
@@ -59,7 +59,7 @@ jobs:
 
       - name: Build Dev Release
         id: build
-        uses: orange-cloudfoundry/bosh-release-action@v2.1.0
+        uses: orange-cloudfoundry/bosh-release-action@a124f0c7eda59d3070c66507bcda21196d7e0a90 # v2.1.0
 
       - name: Compile Dev Release
         uses: cloudfoundry/bosh-compile-action@main
