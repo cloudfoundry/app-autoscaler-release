@@ -225,37 +225,8 @@ func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		if serviceInstance != nil && serviceInstance.DefaultPolicy != "" {
-			policyStr := serviceInstance.DefaultPolicy
-			policyGuidStr := serviceInstance.DefaultPolicyGuid
-			logger.Info("saving default policy json for app", lager.Data{"policy": policyStr})
-			var policy *models.ScalingPolicy
-			err := json.Unmarshal([]byte(policyStr), &policy)
-			if err != nil {
-				h.logger.Error("default policy invalid", err, lager.Data{"appId": appId, "policy": policyStr})
-				writeErrorResponse(w, http.StatusInternalServerError, "Default policy not valid")
-				return
-			}
-
-			err = h.policydb.SaveAppPolicy(r.Context(), appId, policy, policyGuidStr)
-			if err != nil {
-				logger.Error("failed to save policy", err, lager.Data{"policy": policyStr})
-				writeErrorResponse(w, http.StatusInternalServerError, "Error attaching the default policy")
-				return
-			}
-
-			logger.Info("creating/updating schedules", lager.Data{"policy": policyStr})
-			err = h.schedulerUtil.CreateOrUpdateSchedule(r.Context(), appId, policy, policyGuidStr)
-			//while there is synchronization between policy and schedule, so creating schedule error does not break
-			//the whole creating binding process
-			if err != nil {
-				logger.Error("failed to create/update schedules", err, lager.Data{"policy": policyStr})
-				writeErrorResponse(w, http.StatusInternalServerError, fmt.Sprintf("Failed to update schedule:%s", err))
-			}
-		}
 	}
-	err = h.bindingdb.SetOrUpdateCustomMetricStrategy(r.Context(), appId, "", "delete")
-	if err != nil {
+	if err := h.bindingdb.SetOrUpdateCustomMetricStrategy(r.Context(), appId, "", "delete"); err != nil {
 		actionName := "failed to delete custom metric submission strategy in the database"
 		logger.Error(actionName, err)
 		writeErrorResponse(w, http.StatusInternalServerError, actionName)
@@ -281,7 +252,7 @@ func (h *PublicApiHandler) handleDefaultPolicy(w http.ResponseWriter, r *http.Re
 		return errors.New("error retrieving service instance")
 	}
 
-	if serviceInstance.DefaultPolicy != "" {
+	if serviceInstance != nil && serviceInstance.DefaultPolicy != "" {
 		return h.saveDefaultPolicy(w, r, logger, appId, serviceInstance)
 	}
 
@@ -306,6 +277,8 @@ func (h *PublicApiHandler) saveDefaultPolicy(w http.ResponseWriter, r *http.Requ
 		return errors.New("error attaching the default policy")
 	}
 
+	//while there is synchronization between policy and schedule, so creating schedule error does not break
+	//the whole creating binding process
 	logger.Info("creating/updating schedules", lager.Data{"policy": policyStr})
 	if err := h.schedulerUtil.CreateOrUpdateSchedule(r.Context(), appId, policy, policyGuidStr); err != nil {
 		logger.Error("failed to create/update schedules", err, lager.Data{"policy": policyStr})
