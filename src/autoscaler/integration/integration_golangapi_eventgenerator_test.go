@@ -35,7 +35,7 @@ func (t *testMetrics) InitializeIdentifiers() {
 	t.PathVariables = []string{t.AppId, metricType}
 }
 
-var _ = FDescribe("Integration_GolangApi_EventGenerator", func() {
+var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 	var t *testMetrics
 	var eventGeneratorConfPath string
 	var golangApiServerConfPath string
@@ -60,7 +60,7 @@ var _ = FDescribe("Integration_GolangApi_EventGenerator", func() {
 		})
 		BeforeEach(func() {
 			eventGeneratorConfPath = prepareEventGeneratorConfig()
-			golangApiServerConfPath = prepareGolangCFApiServerConfig()
+			golangApiServerConfPath = prepareGolangApiServerConfig()
 		})
 
 		Context("Get aggregated metrics", func() {
@@ -71,7 +71,7 @@ var _ = FDescribe("Integration_GolangApi_EventGenerator", func() {
 				insertTestMetrics(t, timestamps...)
 			})
 
-			FIt("should get the metrics", func() {
+			It("should get the metrics", func() {
 				expectedResources := generateResources(t, timestamps...)
 
 				verifyAggregatedMetrics(t, "111111", "999999", "asc", "1", "2", 5, 3, 1, 2, expectedResources[0:2])
@@ -122,7 +122,7 @@ var _ = FDescribe("Integration_GolangApi_EventGenerator", func() {
 					prepareFakeCCNOAAUAAWithUnauthorized()
 				})
 
-				It("should return status code 401", func() {
+				XIt("should return status code 401", func() {
 					verifyErrorResponse(t, http.StatusUnauthorized, "You are not authorized to perform the requested action")
 				})
 			})
@@ -222,6 +222,7 @@ func prepareFakeCCNOAAUAAWithUnauthorized() {
 }
 
 func bindServiceInstance(t *testMetrics) {
+	GinkgoHelper()
 	provisionAndBind(t.ServiceInstanceId, t.OrgId, t.SpaceId, t.BindingId, t.AppId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
 }
 
@@ -351,19 +352,6 @@ func prepareEventGeneratorConfig() string {
 		fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
 		aggregatorExecuteInterval, policyPollerInterval,
 		saveInterval, evaluationManagerInterval, defaultHttpClientTimeout,
-		tmpDir)
-}
-
-func prepareGolangCFApiServerConfig() string {
-	return components.PrepareGolangApiServerConfig(
-		dbUrl,
-		components.Ports[GolangAPIServer],
-		components.Ports[GolangServiceBroker],
-		fakeCCNOAAUAA.URL(),
-		fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
-		fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
-		fmt.Sprintf("http://127.0.0.1:%d", components.Ports[CfEventGenerator]),
-		"https://127.0.0.1:8888",
 		tmpDir)
 }
 
