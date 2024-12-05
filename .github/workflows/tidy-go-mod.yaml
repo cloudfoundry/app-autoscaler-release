@@ -11,7 +11,7 @@ jobs:
     name: ensure that go mod tidy has run
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:131616bf21483c9a519d32dfea14b8424b092ff6b93060f7928eaac3cfa01fff
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:edd58762b4e2447676f1ccd30ba9d03f358548b2e047f277ff693d19f6fefb90
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
