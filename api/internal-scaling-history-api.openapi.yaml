@@ -10,6 +10,9 @@ info:
 tags:
 - name: Scaling History API V1
   description: List the scaling history of an Application
+security:
+- APIKey: []
+- Bearer: []
 paths:
   /v1/apps/{guid}/scaling_histories:
     parameters:
@@ -208,6 +211,13 @@ components:
       type: object
       properties: {} # No extra fields needed in this variant.
   securitySchemes:
+    XFCCAuth:
+      type: apiKey
+      in: header
+      name: X-Forwarded-Client-Cert
+      description: >
+        Custom header for client certificate authentication. The value should
+        contain the client certificate forwarded by the proxy.
     basicAuth:
       type: http
       scheme: basic

@@ -493,6 +493,23 @@ var _ = Describe("PublicApiServer", func() {
 			serverProcess = ginkgomon_v2.Invoke(httpServer)
 		})
 
+		Describe("With valid authorization token", func() {
+			BeforeEach(func() {
+				fakeCFClient.IsTokenAuthorizedReturns(true, nil)
+				fakeCFClient.IsUserSpaceDeveloperReturns(true, nil)
+			})
+			Context("when calling scaling_histories endpoint", func() {
+				BeforeEach(func() {
+					scalingEngineStatus = http.StatusOK
+				})
+				It("should succeed", func() {
+					verifyResponse(httpClient, cfServerUrl, "/v1/apps/"+TEST_APP_ID+"/scaling_histories",
+
+						map[string]string{"Authorization": TEST_USER_TOKEN, "X-Autoscaler-Token": TEST_CLIENT_TOKEN}, http.MethodGet, "", http.StatusOK)
+				})
+			})
+		})
+
 		Context("when calling info endpoint", func() {
 			It("should succeed", func() {
 				verifyResponse(httpClient, cfServerUrl, "/v1/info", nil, http.MethodGet, "", http.StatusOK)
