@@ -30,7 +30,7 @@ var _ = Describe("LoadConfig", func() {
 		})
 
 		It("terminates suite", func() {
-			loadConfigExpectSuiteTerminationWith("open this/path/does/not/exist/config.json: no such file or directory")
+			loadConfigExpectSuiteTerminationWith("open this/path/does/not/exist/config.json: no suchs file or directory")
 		})
 	})
 
