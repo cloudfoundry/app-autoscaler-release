@@ -10,6 +10,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 	"code.cloudfoundry.org/lager/v3"
 )
 
@@ -48,6 +49,12 @@ func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*Scalin
 		conf:   conf,
 	}
 
+	if conf.CfInstanceCert != "" {
+		seClient.Transport = &TransportWithXFCC{
+			Cert: auth.NewCert(conf.CfInstanceCert),
+		}
+	}
+
 	if client, err := internalscalingenginehistory.NewClient(conf.ScalingEngine.ScalingEngineUrl, internalscalingenginehistory.WithClient(seClient)); err != nil {
 		return nil, fmt.Errorf("error creating ogen scaling history client: %w", err)
 	} else {
@@ -55,6 +62,23 @@ func NewScalingHistoryHandler(logger lager.Logger, conf *config.Config) (*Scalin
 	}
 
 	return newHandler, nil
+}
+
+type TransportWithXFCC struct {
+	Cert *auth.Cert
+	Base http.RoundTripper
+}
+
+func (t *TransportWithXFCC) base() http.RoundTripper {
+	if t.Base != nil {
+		return t.Base
+	}
+	return http.DefaultTransport
+}
+
+func (t *TransportWithXFCC) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("X-Forwarded-Client-Cert", t.Cert.GetXFCCHeader())
+	return t.base().RoundTrip(req)
 }
 
 func (h *ScalingHistoryHandler) NewError(_ context.Context, _ error) *scalinghistory.ErrorStatusCode {
