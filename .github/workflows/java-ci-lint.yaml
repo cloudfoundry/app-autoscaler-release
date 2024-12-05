@@ -17,7 +17,7 @@ jobs:
   code-style:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:b0b8601a28a802b6e5fe683147786db536580baf261a0834912ef1dfd0cb7ba1
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:131616bf21483c9a519d32dfea14b8424b092ff6b93060f7928eaac3cfa01fff
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
