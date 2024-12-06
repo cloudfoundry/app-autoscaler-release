@@ -41,6 +41,28 @@ var _ = Describe("Config", func() {
 				conf, err = LoadConfig("", mockVCAPConfigurationReader)
 			})
 
+			When("vcap CF_INSTANCE_CERT is set", func() {
+				BeforeEach(func() {
+					mockVCAPConfigurationReader.GetCfInstanceCertReturns("cert", nil)
+				})
+
+				It("sets env variable over config file", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.CfInstanceCert).To(Equal("cert"))
+				})
+			})
+
+			When("vcap CF_INSTANCE_CERT is not set", func() {
+				BeforeEach(func() {
+					mockVCAPConfigurationReader.GetCfInstanceCertReturns("", fmt.Errorf("failed to get required credential from service"))
+				})
+
+				It("sets env variable over config file", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.CfInstanceCert).To(Equal(""))
+				})
+			})
+
 			When("vcap PORT is set to a number", func() {
 				BeforeEach(func() {
 					mockVCAPConfigurationReader.GetPortReturns(3333)
