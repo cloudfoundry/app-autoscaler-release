@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"reflect"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/policyvalidator"
@@ -220,11 +219,10 @@ func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if h.bindingdb != nil && !reflect.ValueOf(h.bindingdb).IsNil() {
-		if err := h.handleDefaultPolicy(w, r, logger, appId); err != nil {
-			return
-		}
+	if err := h.resetDefaultPolicy(w, r, logger, appId); err != nil {
+		return
 	}
+
 	if err := h.bindingdb.SetOrUpdateCustomMetricStrategy(r.Context(), appId, "", "delete"); err != nil {
 		actionName := "failed to delete custom metric submission strategy in the database"
 		logger.Error(actionName, err)
@@ -241,9 +239,9 @@ func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Re
 	}
 }
 
-// TODO this is a copy of part of the attach ... this should use a common function.
-// brokered offering: check if there's a default policy that could apply
-func (h *PublicApiHandler) handleDefaultPolicy(w http.ResponseWriter, r *http.Request, logger lager.Logger, appId string) error {
+func (h *PublicApiHandler) resetDefaultPolicy(w http.ResponseWriter, r *http.Request, logger lager.Logger, appId string) error {
+	// TODO this is a copy of part of the attach ... this should use a common function.
+	// brokered offering: check if there's a default policy that could apply
 	serviceInstance, err := h.bindingdb.GetServiceInstanceByAppId(appId)
 	if err != nil {
 		logger.Error("Failed to find service instance for app", err)
