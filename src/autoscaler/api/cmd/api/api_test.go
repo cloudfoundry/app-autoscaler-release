@@ -14,8 +14,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -47,9 +45,9 @@ var _ = Describe("Api", func() {
 
 		vcapPort = 8080 + GinkgoParallelProcess()
 
-		brokerHttpClient = NewServiceBrokerClient()
+		brokerHttpClient = testhelpers.NewServiceBrokerClient()
 		healthHttpClient = &http.Client{}
-		apiHttpClient = NewPublicApiClient()
+		apiHttpClient = testhelpers.NewPublicApiClient()
 		cfServerHttpClient = &http.Client{}
 
 		serverURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.Server.Port))
@@ -169,7 +167,7 @@ var _ = Describe("Api", func() {
 
 				bodyBytes, err := io.ReadAll(rsp.Body)
 
-				FailOnError("Read failed", err)
+				testhelpers.FailOnError("Read failed", err)
 				if len(bodyBytes) == 0 {
 					Fail("body empty")
 				}
