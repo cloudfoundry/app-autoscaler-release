@@ -1,7 +1,11 @@
 package config_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
@@ -42,24 +46,39 @@ var _ = Describe("Config", func() {
 			})
 
 			When("vcap CF_INSTANCE_CERT is set", func() {
+				var cfInstanceCert []byte
+				var cfInstanceKey []byte
+
 				BeforeEach(func() {
-					mockVCAPConfigurationReader.GetCfInstanceCertReturns("cert", nil)
-				})
-
-				It("sets env variable over config file", func() {
+					rsaPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.CfInstanceCert).To(Equal("cert"))
-				})
-			})
 
-			When("vcap CF_INSTANCE_CERT is not set", func() {
-				BeforeEach(func() {
-					mockVCAPConfigurationReader.GetCfInstanceCertReturns("", fmt.Errorf("failed to get required credential from service"))
-				})
-
-				It("sets env variable over config file", func() {
+					cfInstanceCert, err = testhelpers.GenerateClientCertWithPrivateKey("org-guid", "space-guid", rsaPrivateKey)
 					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.CfInstanceCert).To(Equal(""))
+
+					cfInstanceKey = testhelpers.GenerateClientKeyWithPrivateKey(rsaPrivateKey)
+					os.Setenv("CF_INSTANCE_KEY", string(cfInstanceKey))
+					os.Setenv("CF_INSTANCE_CERT", string(cfInstanceCert))
+				})
+
+				AfterEach(func() {
+					os.Unsetenv("CF_INSTANCE_KEY")
+					os.Unsetenv("CF_INSTANCE_CERT")
+				})
+
+				It("sets EventGenerator TlSClientCert", func() {
+					actualKeyContent, err := ioutil.ReadFile(conf.EventGenerator.TLSClientCerts.KeyFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualCertContent, err := ioutil.ReadFile(conf.EventGenerator.TLSClientCerts.CertFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualCACertContent, err := ioutil.ReadFile(conf.EventGenerator.TLSClientCerts.CACertFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(actualKeyContent).To(Equal(cfInstanceKey))
+					Expect(actualCertContent).To(Equal(cfInstanceCert))
+					Expect(actualCACertContent).To(Equal(cfInstanceCert))
 				})
 			})
 

@@ -14,9 +14,7 @@ import (
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/publicapiserver"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/lager/v3/lagertest"
 	. "github.com/onsi/ginkgo/v2"
@@ -449,58 +447,6 @@ var _ = Describe("PublicApiHandler", func() {
 				},
 			}
 			handler.GetAggregatedMetricsHistories(resp, req, pathVariables)
-		})
-
-		When("conf.CfInstanceCert is set", func() {
-			BeforeEach(func() {
-				fullCert, err := testhelpers.GenerateClientCert("org-guid", "space-guid")
-				Expect(err).NotTo(HaveOccurred())
-
-				cert := auth.NewCert(string(fullCert))
-				conf.CfInstanceCert = cert.FullChainPem
-				xfccHeaderExpectedValue := cert.GetXFCCHeader()
-
-				eventGeneratorHandler = ghttp.CombineHandlers(
-					ghttp.VerifyHeader(http.Header{"X-Forwarded-Client-Cert": []string{xfccHeaderExpectedValue}}),
-					ghttp.RespondWithJSONEncodedPtr(&eventGeneratorStatus, &eventGeneratorResponse),
-				)
-			})
-
-			When("getting 1st page", func() {
-				BeforeEach(func() {
-					eventGeneratorStatus = http.StatusOK
-					pathVariables["appId"] = TEST_APP_ID
-					pathVariables["metricType"] = TEST_METRIC_TYPE
-
-					params := url.Values{}
-					params.Add("start-time", "100")
-					params.Add("end-time", "300")
-					params.Add("page", "1")
-					params.Add("order-direction", "desc")
-					params.Add("results-per-page", "2")
-
-					req = httptest.NewRequest(http.MethodGet, "/v1/apps/"+TEST_APP_ID+"/aggregated_metric_histories/"+TEST_METRIC_TYPE+"?"+params.Encode(), nil)
-				})
-				It("should get full page", func() {
-					Expect(resp.Code).To(Equal(http.StatusOK))
-					var result models.AppMetricResponse
-					err := json.Unmarshal(resp.Body.Bytes(), &result)
-					Expect(err).NotTo(HaveOccurred())
-					Expect(result).To(Equal(
-						models.AppMetricResponse{
-							PublicApiResponseBase: models.PublicApiResponseBase{
-								TotalResults: 5,
-								TotalPages:   3,
-								Page:         1,
-								PrevUrl:      "",
-								NextUrl:      "/v1/apps/" + TEST_APP_ID + "/aggregated_metric_histories/test_metric?end-time=300\u0026order-direction=desc\u0026page=2\u0026results-per-page=2\u0026start-time=100",
-							},
-							Resources: eventGeneratorResponse[0:2],
-						},
-					))
-
-				})
-			})
 		})
 
 		When("CF_INSTANCE_CERT is not set", func() {
