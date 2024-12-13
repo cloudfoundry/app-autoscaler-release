@@ -15,7 +15,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/handlers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/routes"
@@ -303,11 +302,6 @@ func (h *PublicApiHandler) proxyRequest(logger lager.Logger, appId string, metri
 
 	aUrl := h.conf.EventGenerator.EventGeneratorUrl + path.RequestURI() + "?" + parameters.Encode()
 	req, _ = http.NewRequest("GET", aUrl, nil)
-
-	if h.conf.CfInstanceCert != "" {
-		cert := auth.NewCert(h.conf.CfInstanceCert)
-		req.Header.Set("X-Forwarded-Client-Cert", cert.GetXFCCHeader())
-	}
 
 	resp, err := h.eventGeneratorClient.Do(req)
 	if err != nil {

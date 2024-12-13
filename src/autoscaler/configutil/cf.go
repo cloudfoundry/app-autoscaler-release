@@ -133,7 +133,7 @@ func (vc *VCAPConfiguration) createCertFile(service *cfenv.Service, credentialKe
 		return fmt.Errorf("%w: %s", ErrMissingCredential, credentialKey)
 	}
 	fileName := fmt.Sprintf("%s.%s", credentialKey, fileSuffix)
-	createdFile, err := materializeServiceProperty(serviceTag, fileName, content)
+	createdFile, err := MaterializeContentInFile(serviceTag, fileName, content)
 	if err != nil {
 		return err
 	}
@@ -206,25 +206,11 @@ func (vc *VCAPConfiguration) addConnectionParam(service *cfenv.Service, dbName, 
 	content, ok := service.CredentialString(bindingKey)
 	if ok {
 		fileName := fmt.Sprintf("%s.%s", bindingKey, connectionParam)
-		createdFile, err := materializeServiceProperty(dbName, fileName, content)
+		createdFile, err := MaterializeContentInFile(dbName, fileName, content)
 		if err != nil {
 			return err
 		}
 		parameters.Set(connectionParam, createdFile)
 	}
 	return nil
-}
-
-func materializeServiceProperty(serviceTag, fileName, content string) (string, error) {
-	dirPath := fmt.Sprintf("/tmp/%s", serviceTag)
-	if err := os.MkdirAll(dirPath, 0700); err != nil {
-		return "", err
-	}
-
-	filePath := fmt.Sprintf("%s/%s", dirPath, fileName)
-	if err := os.WriteFile(filePath, []byte(content), 0600); err != nil {
-		return "", err
-	}
-
-	return filePath, nil
 }

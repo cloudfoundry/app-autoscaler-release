@@ -108,7 +108,6 @@ type Config struct {
 	PlanCheck                          *PlanCheckConfig              `yaml:"plan_check"`
 	CatalogPath                        string                        `yaml:"catalog_path"`
 	CatalogSchemaPath                  string                        `yaml:"catalog_schema_path"`
-	CfInstanceCert                     string                        `yaml:"cf_instance_cert"`
 	DashboardRedirectURI               string                        `yaml:"dashboard_redirect_uri"`
 	PolicySchemaPath                   string                        `yaml:"policy_schema_path"`
 	Scheduler                          SchedulerConfig               `yaml:"scheduler"`
@@ -211,15 +210,35 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	configureCfInstanceCert(conf, vcapReader)
+	if err := configureEventGenerator(conf, vcapReader); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func configureCfInstanceCert(conf *Config, vcapReader configutil.VCAPConfigurationReader) {
-	if cert, err := vcapReader.GetCfInstanceCert(); err == nil {
-		conf.CfInstanceCert = cert
+func configureEventGenerator(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	cfInstanceKey := os.Getenv("CF_INSTANCE_KEY")
+	cfInstanceCert := os.Getenv("CF_INSTANCE_CERT")
+
+	//caCertBytes := []byte(cfInstanceCert)
+	//caCertPool := x509.NewCertPool()
+	//caCertPool.AppendCertsFromPEM(caCertBytes)
+
+	if keyFile, err := configutil.MaterializeContentInFile("eventgenerator", "eventgenerator.key", cfInstanceKey); err != nil {
+		return err
+	} else {
+		conf.EventGenerator.TLSClientCerts.KeyFile = keyFile
 	}
+
+	if certFile, err := configutil.MaterializeContentInFile("eventgenerator", "eventgenerator.crt", cfInstanceCert); err != nil {
+		return err
+	} else {
+		conf.EventGenerator.TLSClientCerts.CertFile = certFile
+		conf.EventGenerator.TLSClientCerts.CACertFile = certFile
+	}
+
+	return nil
 }
 
 func configurePolicyDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
