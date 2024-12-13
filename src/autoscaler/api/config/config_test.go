@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -67,13 +66,13 @@ var _ = Describe("Config", func() {
 				})
 
 				It("sets EventGenerator TlSClientCert", func() {
-					actualKeyContent, err := ioutil.ReadFile(conf.EventGenerator.TLSClientCerts.KeyFile)
+					actualKeyContent, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.KeyFile)
 					Expect(err).NotTo(HaveOccurred())
 
-					actualCertContent, err := ioutil.ReadFile(conf.EventGenerator.TLSClientCerts.CertFile)
+					actualCertContent, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.CertFile)
 					Expect(err).NotTo(HaveOccurred())
 
-					actualCACertContent, err := ioutil.ReadFile(conf.EventGenerator.TLSClientCerts.CACertFile)
+					actualCACertContent, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.CACertFile)
 					Expect(err).NotTo(HaveOccurred())
 
 					Expect(actualKeyContent).To(Equal(cfInstanceKey))
