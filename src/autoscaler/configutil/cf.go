@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"github.com/cloud-gov/go-cfenv"
@@ -21,7 +20,6 @@ type VCAPConfigurationReader interface {
 	MaterializeTLSConfigFromService(serviceTag string) (models.TLSCerts, error)
 	GetServiceCredentialContent(serviceTag string, credentialKey string) ([]byte, error)
 	GetPort() int
-	GetCfInstanceCert() (string, error)
 	IsRunningOnCF() bool
 }
 
@@ -39,15 +37,6 @@ func NewVCAPConfigurationReader() (*VCAPConfiguration, error) {
 
 func (vc *VCAPConfiguration) GetPort() int {
 	return vc.appEnv.Port
-}
-
-func (vc *VCAPConfiguration) GetCfInstanceCert() (string, error) {
-	cert := os.Getenv("CF_INSTANCE_CERT")
-	if cert == "" {
-		return "", fmt.Errorf("%w: CF_INSTANCE_CERT", ErrMissingCredential)
-	}
-
-	return cert, nil
 }
 
 func (vc *VCAPConfiguration) IsRunningOnCF() bool {
