@@ -79,6 +79,22 @@ var _ = Describe("Config", func() {
 					Expect(actualCertContent).To(Equal(cfInstanceCert))
 					Expect(actualCACertContent).To(Equal(cfInstanceCert))
 				})
+
+				It("sets ScalingEngine TlSClientCert", func() {
+					actualKeyContent, err := os.ReadFile(conf.ScalingEngine.TLSClientCerts.KeyFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualCertContent, err := os.ReadFile(conf.ScalingEngine.TLSClientCerts.CertFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualCACertContent, err := os.ReadFile(conf.ScalingEngine.TLSClientCerts.CACertFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(actualKeyContent).To(Equal(cfInstanceKey))
+					Expect(actualCertContent).To(Equal(cfInstanceCert))
+					Expect(actualCACertContent).To(Equal(cfInstanceCert))
+				})
+
 			})
 
 			When("vcap PORT is set to a number", func() {
