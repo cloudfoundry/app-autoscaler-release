@@ -221,10 +221,6 @@ func configureEventGenerator(conf *Config, vcapReader configutil.VCAPConfigurati
 	cfInstanceKey := os.Getenv("CF_INSTANCE_KEY")
 	cfInstanceCert := os.Getenv("CF_INSTANCE_CERT")
 
-	//caCertBytes := []byte(cfInstanceCert)
-	//caCertPool := x509.NewCertPool()
-	//caCertPool.AppendCertsFromPEM(caCertBytes)
-
 	if keyFile, err := configutil.MaterializeContentInFile("eventgenerator", "eventgenerator.key", cfInstanceKey); err != nil {
 		return err
 	} else {
