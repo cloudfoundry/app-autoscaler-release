@@ -237,8 +237,6 @@ func (h *PublicApiHandler) DetachScalingPolicy(w http.ResponseWriter, r *http.Re
 }
 
 func (h *PublicApiHandler) resetDefaultPolicy(w http.ResponseWriter, r *http.Request, logger lager.Logger, appId string) error {
-	// TODO this is a copy of part of the attach ... this should use a common function.
-	// brokered offering: check if there's a default policy that could apply
 	serviceInstance, err := h.bindingdb.GetServiceInstanceByAppId(appId)
 	if err != nil {
 		logger.Error("Failed to find service instance for app", err)
