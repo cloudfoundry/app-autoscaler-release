@@ -242,7 +242,6 @@ func configureScalingEngine(conf *Config, vcapReader configutil.VCAPConfiguratio
 }
 
 func configureEventGenerator(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-
 	cfInstanceKey := os.Getenv("CF_INSTANCE_KEY")
 	cfInstanceCert := os.Getenv("CF_INSTANCE_CERT")
 
