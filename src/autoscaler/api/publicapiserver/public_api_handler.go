@@ -159,8 +159,6 @@ func (h *PublicApiHandler) AttachScalingPolicy(w http.ResponseWriter, r *http.Re
 
 	h.logger.Info("creating/updating schedules", lager.Data{"policy": policy})
 
-	//while there is synchronization between policy and schedule, so creating schedule error does not break
-	//the whole creating binding process
 	if err := h.schedulerUtil.CreateOrUpdateSchedule(r.Context(), appId, policy, policyGuid); err != nil {
 		logger.Error("Failed to create/update schedule", err)
 		writeErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -273,8 +271,6 @@ func (h *PublicApiHandler) saveDefaultPolicy(w http.ResponseWriter, r *http.Requ
 		return errors.New("error attaching the default policy")
 	}
 
-	//while there is synchronization between policy and schedule, so creating schedule error does not break
-	//the whole creating binding process
 	logger.Info("creating/updating schedules", lager.Data{"policy": policyStr})
 	if err := h.schedulerUtil.CreateOrUpdateSchedule(r.Context(), appId, policy, policyGuidStr); err != nil {
 		logger.Error("failed to create/update schedules", err, lager.Data{"policy": policyStr})
