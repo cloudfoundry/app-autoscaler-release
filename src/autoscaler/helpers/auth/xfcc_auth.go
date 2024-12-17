@@ -22,9 +22,8 @@ type XFCCAuthMiddleware interface {
 }
 
 type xfccAuthMiddleware struct {
-	logger    lager.Logger
-	spaceGuid string
-	orgGuid   string
+	logger   lager.Logger
+	xfccAuth *models.XFCCAuth
 }
 
 func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
@@ -33,7 +32,13 @@ func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
 		return ErrXFCCHeaderNotFound
 	}
 
-	data, err := base64.StdEncoding.DecodeString(removeQuotes(xfccHeader))
+	attrs := make(map[string]string)
+	for _, v := range strings.Split(xfccHeader, ";") {
+		attr := strings.SplitN(v, "=", 2)
+		attrs[attr[0]] = attr[1]
+	}
+
+	data, err := base64.StdEncoding.DecodeString(attrs["Cert"])
 	if err != nil {
 		return fmt.Errorf("base64 parsing failed: %w", err)
 	}
@@ -43,11 +48,11 @@ func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
 		return fmt.Errorf("failed to parse certificate: %w", err)
 	}
 
-	if getSpaceGuid(cert) != m.spaceGuid {
+	if m.getSpaceGuid(cert) != m.xfccAuth.ValidSpaceGuid {
 		return ErrorWrongSpace
 	}
 
-	if getOrgGuid(cert) != m.orgGuid {
+	if m.getOrgGuid(cert) != m.xfccAuth.ValidOrgGuid {
 		return ErrorWrongOrg
 	}
 
@@ -70,17 +75,16 @@ func (m *xfccAuthMiddleware) XFCCAuthenticationMiddleware(next http.Handler) htt
 
 func NewXfccAuthMiddleware(logger lager.Logger, xfccAuth models.XFCCAuth) XFCCAuthMiddleware {
 	return &xfccAuthMiddleware{
-		logger:    logger,
-		orgGuid:   xfccAuth.ValidOrgGuid,
-		spaceGuid: xfccAuth.ValidSpaceGuid,
+		logger:   logger,
+		xfccAuth: &xfccAuth,
 	}
 }
 
-func getSpaceGuid(cert *x509.Certificate) string {
+func (m *xfccAuthMiddleware) getSpaceGuid(cert *x509.Certificate) string {
 	var certSpaceGuid string
 	for _, ou := range cert.Subject.OrganizationalUnit {
 		if strings.Contains(ou, "space:") {
-			kv := mapFrom(ou)
+			kv := m.mapFrom(ou)
 			certSpaceGuid = kv["space"]
 			break
 		}
@@ -88,34 +92,28 @@ func getSpaceGuid(cert *x509.Certificate) string {
 	return certSpaceGuid
 }
 
-func mapFrom(input string) map[string]string {
+func (m *xfccAuthMiddleware) mapFrom(input string) map[string]string {
 	result := make(map[string]string)
 
-	r := regexp.MustCompile(`(\w+):(\w+-\w+)`)
+	r := regexp.MustCompile(`(\w+):((\w+-)*\w+)`)
 	matches := r.FindAllStringSubmatch(input, -1)
 
 	for _, match := range matches {
 		result[match[1]] = match[2]
 	}
+
+	m.logger.Debug("parseCertOrganizationalUnit", lager.Data{"input": input, "result": result})
 	return result
 }
 
-func getOrgGuid(cert *x509.Certificate) string {
+func (m *xfccAuthMiddleware) getOrgGuid(cert *x509.Certificate) string {
 	var certOrgGuid string
 	for _, ou := range cert.Subject.OrganizationalUnit {
-		// capture from string k:v with regex
 		if strings.Contains(ou, "org:") {
-			kv := mapFrom(ou)
+			kv := m.mapFrom(ou)
 			certOrgGuid = kv["org"]
 			break
 		}
 	}
 	return certOrgGuid
-}
-
-func removeQuotes(xfccHeader string) string {
-	if xfccHeader[0] == '"' {
-		xfccHeader = xfccHeader[1 : len(xfccHeader)-1]
-	}
-	return xfccHeader
 }
