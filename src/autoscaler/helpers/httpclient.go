@@ -1,37 +1,53 @@
 package helpers
 
 import (
-	"encoding/base64"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"net/http"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/lager/v3"
+	"github.com/hashicorp/go-retryablehttp"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
 	"code.cloudfoundry.org/cfhttp/v2"
 )
 
-type TransportWithBasicAuth struct {
-	Username string
-	Password string
+type TLSReloadTransport struct {
 	Base     http.RoundTripper
+	logger   lager.Logger
+	tlsCerts *models.TLSCerts
 }
 
-func (t *TransportWithBasicAuth) base() http.RoundTripper {
-	if t.Base != nil {
-		return t.Base
+func (t *TLSReloadTransport) tlsClientConfig() *tls.Config {
+	return t.Base.(*retryablehttp.RoundTripper).Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig
+}
+
+func (t *TLSReloadTransport) setTLSClientConfig(tlsConfig *tls.Config) {
+	t.Base.(*retryablehttp.RoundTripper).Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = tlsConfig
+}
+
+func (t *TLSReloadTransport) certificateExpiringWithin(dur time.Duration) bool {
+	x509Cert, err := x509.ParseCertificate(t.tlsClientConfig().Certificates[0].Certificate[0])
+	if err != nil {
+		return false
 	}
-	return http.DefaultTransport
-}
 
-func (t *TransportWithBasicAuth) RoundTrip(req *http.Request) (*http.Response, error) {
-	credentials := t.Username + ":" + t.Password
-	basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(credentials))
-	req.Header.Add("Authorization", basicAuth)
-	return t.base().RoundTrip(req)
+	return x509Cert.NotAfter.Sub(time.Now()) < dur
+}
+func (t *TLSReloadTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.certificateExpiringWithin(time.Hour) {
+		t.logger.Info("reloading-cert", lager.Data{"request": req})
+		tlsConfig, _ := t.tlsCerts.CreateClientConfig()
+		t.setTLSClientConfig(tlsConfig)
+	} else {
+		t.logger.Info("cert-not-expiring", lager.Data{"request": req})
+	}
+
+	return t.Base.RoundTrip(req)
 }
 
 func DefaultClientConfig() cf.ClientConfig {
@@ -39,22 +55,6 @@ func DefaultClientConfig() cf.ClientConfig {
 		MaxIdleConnsPerHost:     200,
 		IdleConnectionTimeoutMs: 5 * 1000,
 	}
-}
-
-func CreateHTTPClient(ba *models.BasicAuth, config cf.ClientConfig, logger lager.Logger) (*http.Client, error) {
-	client := cfhttp.NewClient(
-		cfhttp.WithDialTimeout(30*time.Second),
-		cfhttp.WithIdleConnTimeout(time.Duration(config.IdleConnectionTimeoutMs)*time.Millisecond),
-		cfhttp.WithMaxIdleConnsPerHost(config.MaxIdleConnsPerHost),
-	)
-
-	client = cf.RetryClient(config, client, logger)
-	client.Transport = &TransportWithBasicAuth{
-		Username: ba.Username,
-		Password: ba.Password,
-	}
-
-	return client, nil
 }
 
 func CreateHTTPSClient(tlsCerts *models.TLSCerts, config cf.ClientConfig, logger lager.Logger) (*http.Client, error) {
@@ -70,5 +70,13 @@ func CreateHTTPSClient(tlsCerts *models.TLSCerts, config cf.ClientConfig, logger
 		cfhttp.WithMaxIdleConnsPerHost(config.MaxIdleConnsPerHost),
 	)
 
-	return cf.RetryClient(config, client, logger), nil
+	retryClient := cf.RetryClient(config, client, logger)
+
+	retryClient.Transport = &TLSReloadTransport{
+		Base:     retryClient.Transport,
+		logger:   logger,
+		tlsCerts: tlsCerts,
+	}
+
+	return retryClient, nil
 }
