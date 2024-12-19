@@ -46,7 +46,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 
 # install golang
 # renovate: datasource=golang-version depName=golang
-ARG GO_VERSION=1.23.3
+ARG GO_VERSION=1.23.4
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
@@ -63,14 +63,14 @@ RUN apt-get update && \
 
 # Install bosh_cli
 # renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
-ARG BOSH_VERSION=7.8.2
+ARG BOSH_VERSION=7.8.4
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
-ARG BBL_VERSION=v9.0.27
+ARG BBL_VERSION=v9.0.28
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_amd64 && \
   mv bbl-* /usr/local/bin/bbl &&\
   chmod +x /usr/local/bin/bbl &&\
@@ -78,7 +78,7 @@ RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${
 
 # Install credhub
 # renovate: datasource=github-releases depName=credhub-cli lookupName=cloudfoundry/credhub-cli
-ARG CREDHUB_VERSION=2.9.39
+ARG CREDHUB_VERSION=2.9.40
 RUN wget -q https://github.com/cloudfoundry/credhub-cli/releases/download/${CREDHUB_VERSION}/credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   tar xvfz credhub-linux-amd64-${CREDHUB_VERSION}.tgz && \
   mv credhub /usr/local/bin/credhub &&\

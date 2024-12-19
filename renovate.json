@@ -50,11 +50,13 @@
       ]
     },
     {
-      "description": "Group OpenTelemetry updates together",
+      "description": "Disable OpenTelemetry-relevant updates",
       "groupName": "opentelemetry",
       "matchPackageNames": [
-        "/opentelemetry/"
-      ]
+        "/opentelemetry/",
+        "/ogen-go/ogen/"
+      ],
+      "enabled": false
     },
     {
       "description": "Group Cloud Foundry Logging and Metrics updates together",

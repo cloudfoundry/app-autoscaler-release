@@ -172,6 +172,8 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/balancer/base/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/grpclb/state/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/pickfirst/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/balancer/pickfirst/internal/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/balancer/pickfirst/pickfirstleaf/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/roundrobin/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/binarylog/grpc_binarylog_v1/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/channelz/* # gosub
@@ -242,6 +244,7 @@ files:
 - autoscaler/vendor/google.golang.org/protobuf/internal/impl/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/order/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/pragma/* # gosub
+- autoscaler/vendor/google.golang.org/protobuf/internal/protolazy/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/set/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/strs/* # gosub
 - autoscaler/vendor/google.golang.org/protobuf/internal/version/* # gosub

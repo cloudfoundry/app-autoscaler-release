@@ -21,7 +21,7 @@ jobs:
       DB_PASSWORD: root
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:b0b8601a28a802b6e5fe683147786db536580baf261a0834912ef1dfd0cb7ba1
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:b89f25eeea092104fb75e8e7eaf76b0dbd3156bec51ea234670ff0bdd1fc6e8b
     continue-on-error: true
     name: Build suite=${{ matrix.suite }}, mysql=${{ matrix.mysql }}
     services:
