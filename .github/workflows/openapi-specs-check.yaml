@@ -5,7 +5,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:b89f25eeea092104fb75e8e7eaf76b0dbd3156bec51ea234670ff0bdd1fc6e8b
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:45a63d9bf65358d33fafae13feb568facb255d330af059dd16d4cbaab0a4fca3
     steps:
     - name: Get Repository content
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
