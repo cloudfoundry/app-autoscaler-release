@@ -79,6 +79,19 @@ var _ = Describe("HTTPClient", func() {
 			os.Remove(cfInstanceKeyFile)
 		})
 
+		When("No cert is provided", func() {
+			BeforeEach(func() {
+				notAfter = time.Now().Add(7 * time.Minute)
+			})
+
+			It("should process request ok", func() {
+				client.Transport.(*helpers.TLSReloadTransport).Base.(*retryablehttp.RoundTripper).Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = nil
+				resp, err := client.Get(fakeServer.URL())
+				Expect(err).ToNot(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
+			})
+		})
+
 		When("Cert cert is not within 5m of expiration", func() {
 			BeforeEach(func() {
 				notAfter = time.Now().Add(7 * time.Minute)

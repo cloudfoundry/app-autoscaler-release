@@ -35,7 +35,6 @@ func (t *TLSReloadTransport) GetCertExpiration() time.Time {
 
 func (t *TLSReloadTransport) tlsClientConfig() *tls.Config {
 	return t.HTTPClient.Transport.(*http.Transport).TLSClientConfig
-
 }
 
 func (t *TLSReloadTransport) setTLSClientConfig(tlsConfig *tls.Config) {
@@ -54,6 +53,11 @@ func (t *TLSReloadTransport) certificateExpiringWithin(dur time.Duration) bool {
 }
 
 func (t *TLSReloadTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// skips if no tls config to reload
+	if t.tlsClientConfig() == nil {
+		return t.Base.RoundTrip(req)
+	}
+
 	// Checks for cert validity within 5m timeframe. See https://docs.cloudfoundry.org/devguide/deploy-apps/instance-identity.html
 	if t.certificateExpiringWithin(5 * time.Minute) {
 		t.logger.Debug("reloading-cert", lager.Data{"request": req})
@@ -61,6 +65,7 @@ func (t *TLSReloadTransport) RoundTrip(req *http.Request) (*http.Response, error
 	} else {
 		t.logger.Debug("cert-not-expiring", lager.Data{"request": req})
 	}
+
 	return t.Base.RoundTrip(req)
 }
 
