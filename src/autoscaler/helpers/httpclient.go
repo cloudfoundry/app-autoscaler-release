@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-
 	"code.cloudfoundry.org/cfhttp/v2"
 )
 
@@ -21,14 +20,9 @@ type TLSReloadTransport struct {
 	logger         lager.Logger
 	tlsCerts       *models.TLSCerts
 	certExpiration *time.Time
-}
 
-func NewTLSReloadTransport(base http.RoundTripper, logger lager.Logger, tlsCerts *models.TLSCerts) *TLSReloadTransport {
-	return &TLSReloadTransport{
-		Base:     base,
-		logger:   logger,
-		tlsCerts: tlsCerts,
-	}
+	HTTPClient *http.Client // Internal HTTP client.
+
 }
 
 func (t *TLSReloadTransport) GetCertExpiration() *time.Time {
@@ -36,16 +30,16 @@ func (t *TLSReloadTransport) GetCertExpiration() *time.Time {
 		x509Cert, _ := x509.ParseCertificate(t.tlsClientConfig().Certificates[0].Certificate[0])
 		t.certExpiration = &x509Cert.NotAfter
 	}
-
 	return t.certExpiration
 }
 
 func (t *TLSReloadTransport) tlsClientConfig() *tls.Config {
-	return t.Base.(*retryablehttp.RoundTripper).Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig
+	return t.HTTPClient.Transport.(*http.Transport).TLSClientConfig
+
 }
 
 func (t *TLSReloadTransport) setTLSClientConfig(tlsConfig *tls.Config) {
-	t.Base.(*retryablehttp.RoundTripper).Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = tlsConfig
+	t.HTTPClient.Transport.(*http.Transport).TLSClientConfig = tlsConfig
 }
 
 func (t *TLSReloadTransport) reloadCert() {
@@ -67,7 +61,6 @@ func (t *TLSReloadTransport) RoundTrip(req *http.Request) (*http.Response, error
 	} else {
 		t.logger.Debug("cert-not-expiring", lager.Data{"request": req})
 	}
-
 	return t.Base.RoundTrip(req)
 }
 
@@ -97,7 +90,9 @@ func CreateHTTPSClient(tlsCerts *models.TLSCerts, config cf.ClientConfig, logger
 		Base:     retryClient.Transport,
 		logger:   logger,
 		tlsCerts: tlsCerts,
-		// TODO: try sending reference to tls config of the client
+		// Send wrapped HTTPClient referente to access tls configuration inside RoundTrip
+		// and to abract the TLSReloadTransport from the retryablehttp
+		HTTPClient: retryClient.Transport.(*retryablehttp.RoundTripper).Client.HTTPClient,
 	}
 
 	return retryClient, nil
