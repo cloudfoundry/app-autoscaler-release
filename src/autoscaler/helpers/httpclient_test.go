@@ -99,7 +99,9 @@ var _ = Describe("HTTPClient", func() {
 
 			It("should reload the cert", func() {
 				Expect(client).ToNot(BeNil())
-				client.Get(fakeServer.URL())
+				resp, err := client.Get(fakeServer.URL())
+				Expect(err).ToNot(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 				Expect(logger).To(gbytes.Say("cert-not-expiring"))
 			})
 		})
@@ -122,7 +124,9 @@ var _ = Describe("HTTPClient", func() {
 				oldCertExpiration := getCertExpirationFromClient(client)
 				fmt.Println(oldCertExpiration)
 				Expect(getCertFromClient(client)).To(Equal(string(cfInstanceCertContent)))
-				client.Get(fakeServer.URL())
+				resp, err := client.Get(fakeServer.URL())
+				Expect(err).ToNot(HaveOccurred())
+				Expect(resp.StatusCode).To(Equal(http.StatusOK))
 				Expect(logger).To(gbytes.Say("reloading-cert"))
 				newCertExpiration := getCertExpirationFromClient(client)
 				Expect(newCertExpiration).To(BeTemporally(">", oldCertExpiration))
