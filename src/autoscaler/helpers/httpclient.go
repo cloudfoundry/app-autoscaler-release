@@ -17,9 +17,27 @@ import (
 )
 
 type TLSReloadTransport struct {
-	Base     http.RoundTripper
-	logger   lager.Logger
-	tlsCerts *models.TLSCerts
+	Base           http.RoundTripper
+	logger         lager.Logger
+	tlsCerts       *models.TLSCerts
+	certExpiration *time.Time
+}
+
+func NewTLSReloadTransport(base http.RoundTripper, logger lager.Logger, tlsCerts *models.TLSCerts) *TLSReloadTransport {
+	return &TLSReloadTransport{
+		Base:     base,
+		logger:   logger,
+		tlsCerts: tlsCerts,
+	}
+}
+
+func (t *TLSReloadTransport) GetCertExpiration() *time.Time {
+	if t.certExpiration == nil {
+		x509Cert, _ := x509.ParseCertificate(t.tlsClientConfig().Certificates[0].Certificate[0])
+		t.certExpiration = &x509Cert.NotAfter
+	}
+
+	return t.certExpiration
 }
 
 func (t *TLSReloadTransport) tlsClientConfig() *tls.Config {
@@ -30,21 +48,24 @@ func (t *TLSReloadTransport) setTLSClientConfig(tlsConfig *tls.Config) {
 	t.Base.(*retryablehttp.RoundTripper).Client.HTTPClient.Transport.(*http.Transport).TLSClientConfig = tlsConfig
 }
 
-func (t *TLSReloadTransport) certificateExpiringWithin(dur time.Duration) bool {
-	x509Cert, err := x509.ParseCertificate(t.tlsClientConfig().Certificates[0].Certificate[0])
-	if err != nil {
-		return false
-	}
-
-	return x509Cert.NotAfter.Sub(time.Now()) < dur
+func (t *TLSReloadTransport) reloadCert() {
+	tlsConfig, _ := t.tlsCerts.CreateClientConfig()
+	t.setTLSClientConfig(tlsConfig)
+	x509Cert, _ := x509.ParseCertificate(t.tlsClientConfig().Certificates[0].Certificate[0])
+	t.certExpiration = &x509Cert.NotAfter
 }
+
+func (t *TLSReloadTransport) certificateExpiringWithin(dur time.Duration) bool {
+	return t.GetCertExpiration().Sub(time.Now()) < dur
+}
+
 func (t *TLSReloadTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	if t.certificateExpiringWithin(time.Hour) {
-		t.logger.Info("reloading-cert", lager.Data{"request": req})
-		tlsConfig, _ := t.tlsCerts.CreateClientConfig()
-		t.setTLSClientConfig(tlsConfig)
+	// Checks for cert validity within 5m timeframe. See https://docs.cloudfoundry.org/devguide/deploy-apps/instance-identity.html
+	if t.certificateExpiringWithin(5 * time.Minute) {
+		t.logger.Debug("reloading-cert", lager.Data{"request": req})
+		t.reloadCert()
 	} else {
-		t.logger.Info("cert-not-expiring", lager.Data{"request": req})
+		t.logger.Debug("cert-not-expiring", lager.Data{"request": req})
 	}
 
 	return t.Base.RoundTrip(req)
@@ -76,6 +97,7 @@ func CreateHTTPSClient(tlsCerts *models.TLSCerts, config cf.ClientConfig, logger
 		Base:     retryClient.Transport,
 		logger:   logger,
 		tlsCerts: tlsCerts,
+		// TODO: try sending reference to tls config of the client
 	}
 
 	return retryClient, nil

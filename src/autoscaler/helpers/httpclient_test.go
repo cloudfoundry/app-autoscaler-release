@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -78,9 +79,9 @@ var _ = Describe("HTTPClient", func() {
 			os.Remove(cfInstanceKeyFile)
 		})
 
-		When("Cert cert is not within 1 hour of expiration", func() {
+		When("Cert cert is not within 5m of expiration", func() {
 			BeforeEach(func() {
-				notAfter = time.Now().Add(63 * time.Minute)
+				notAfter = time.Now().Add(7 * time.Minute)
 			})
 
 			It("should reload the cert", func() {
@@ -90,11 +91,11 @@ var _ = Describe("HTTPClient", func() {
 			})
 		})
 
-		When("Cert cert is within 1 hour of expiration", func() {
+		When("Cert cert is within 5m of expiration", func() {
 			var cfInstanceCertFileToRotateContent []byte
 
 			BeforeEach(func() {
-				notAfter = time.Now().Add(59 * time.Minute)
+				notAfter = time.Now().Add(3 * time.Minute)
 			})
 
 			It("should reload the cert", func() {
@@ -105,15 +106,23 @@ var _ = Describe("HTTPClient", func() {
 				_, err = configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.crt", string(cfInstanceCertFileToRotateContent))
 				Expect(err).NotTo(HaveOccurred())
 
+				oldCertExpiration := getCertExpirationFromClient(client)
+				fmt.Println(oldCertExpiration)
 				Expect(getCertFromClient(client)).To(Equal(string(cfInstanceCertContent)))
 				client.Get(fakeServer.URL())
 				Expect(logger).To(gbytes.Say("reloading-cert"))
-
+				newCertExpiration := getCertExpirationFromClient(client)
+				Expect(newCertExpiration).To(BeTemporally(">", oldCertExpiration))
 				Expect(getCertFromClient(client)).To(Equal(string(cfInstanceCertFileToRotateContent)))
 			})
 		})
 	})
 })
+
+func getCertExpirationFromClient(client *http.Client) time.Time {
+	GinkgoHelper()
+	return *client.Transport.(*helpers.TLSReloadTransport).GetCertExpiration()
+}
 
 func getCertFromClient(client *http.Client) string {
 	GinkgoHelper()
