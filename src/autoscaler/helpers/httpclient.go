@@ -19,16 +19,16 @@ type TLSReloadTransport struct {
 	Base           http.RoundTripper
 	logger         lager.Logger
 	tlsCerts       *models.TLSCerts
-	certExpiration *time.Time
+	certExpiration time.Time
 
 	HTTPClient *http.Client // Internal HTTP client.
 
 }
 
-func (t *TLSReloadTransport) GetCertExpiration() *time.Time {
-	if t.certExpiration == nil {
+func (t *TLSReloadTransport) GetCertExpiration() time.Time {
+	if t.certExpiration.IsZero() {
 		x509Cert, _ := x509.ParseCertificate(t.tlsClientConfig().Certificates[0].Certificate[0])
-		t.certExpiration = &x509Cert.NotAfter
+		t.certExpiration = x509Cert.NotAfter
 	}
 	return t.certExpiration
 }
@@ -46,11 +46,11 @@ func (t *TLSReloadTransport) reloadCert() {
 	tlsConfig, _ := t.tlsCerts.CreateClientConfig()
 	t.setTLSClientConfig(tlsConfig)
 	x509Cert, _ := x509.ParseCertificate(t.tlsClientConfig().Certificates[0].Certificate[0])
-	t.certExpiration = &x509Cert.NotAfter
+	t.certExpiration = x509Cert.NotAfter
 }
 
 func (t *TLSReloadTransport) certificateExpiringWithin(dur time.Duration) bool {
-	return t.GetCertExpiration().Sub(time.Now()) < dur
+	return time.Until(t.GetCertExpiration()) < dur
 }
 
 func (t *TLSReloadTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -90,6 +90,7 @@ func CreateHTTPSClient(tlsCerts *models.TLSCerts, config cf.ClientConfig, logger
 		Base:     retryClient.Transport,
 		logger:   logger,
 		tlsCerts: tlsCerts,
+
 		// Send wrapped HTTPClient referente to access tls configuration inside RoundTrip
 		// and to abract the TLSReloadTransport from the retryablehttp
 		HTTPClient: retryClient.Transport.(*retryablehttp.RoundTripper).Client.HTTPClient,

@@ -121,7 +121,7 @@ var _ = Describe("HTTPClient", func() {
 
 func getCertExpirationFromClient(client *http.Client) time.Time {
 	GinkgoHelper()
-	return *client.Transport.(*helpers.TLSReloadTransport).GetCertExpiration()
+	return client.Transport.(*helpers.TLSReloadTransport).GetCertExpiration()
 }
 
 func getCertFromClient(client *http.Client) string {
