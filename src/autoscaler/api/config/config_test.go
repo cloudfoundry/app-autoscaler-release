@@ -1,13 +1,10 @@
 package config_test
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
 	"fmt"
 	"os"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
@@ -46,51 +43,21 @@ var _ = Describe("Config", func() {
 			})
 
 			When("vcap CF_INSTANCE_CERT is set", func() {
-				var (
-					cfInstanceCertFile string
-					cfInstanceKeyFile  string
-
-					cfInstanceCertContent []byte
-					cfInstanceKeyContent  []byte
-				)
-
 				BeforeEach(func() {
-					rsaPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-					Expect(err).NotTo(HaveOccurred())
-
-					cfInstanceCertContent, err = testhelpers.GenerateClientCertWithPrivateKey("org-guid", "space-guid", rsaPrivateKey)
-					Expect(err).NotTo(HaveOccurred())
-
-					cfInstanceKeyContent = testhelpers.GenerateClientKeyWithPrivateKey(rsaPrivateKey)
-
-					tmpdir := os.TempDir()
-					cfInstanceCertFile, err = configutil.MaterializeContentInFile(tmpdir, "eventgenerator.crt", string(cfInstanceCertContent))
-					Expect(err).NotTo(HaveOccurred())
-
-					cfInstanceKeyFile, err = configutil.MaterializeContentInFile(tmpdir, "eventgenerator.key", string(cfInstanceKeyContent))
-					Expect(err).NotTo(HaveOccurred())
-
-					os.Setenv("CF_INSTANCE_KEY", cfInstanceKeyFile)
-					os.Setenv("CF_INSTANCE_CERT", cfInstanceCertFile)
+					os.Setenv("CF_INSTANCE_KEY", "some/path/in/container/eventgenerator.key")
+					os.Setenv("CF_INSTANCE_CERT", "some/path/in/container/eventgenerator.crt")
 				})
 
 				AfterEach(func() {
 					os.Unsetenv("CF_INSTANCE_KEY")
 					os.Unsetenv("CF_INSTANCE_CERT")
 
-					os.Remove(cfInstanceCertFile)
-					os.Remove(cfInstanceKeyFile)
 				})
 
 				It("sets EventGenerator TlSClientCert", func() {
-					actualKeyContent, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.KeyFile)
-					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.EventGenerator.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/eventgenerator.key"))
+					Expect(conf.EventGenerator.TLSClientCerts.CertFile).To(Equal("some/path/in/container/eventgenerator.crt"))
 
-					actualCertContent, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.CertFile)
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(actualKeyContent).To(Equal(cfInstanceKeyContent))
-					Expect(actualCertContent).To(Equal(cfInstanceCertContent))
 				})
 			})
 
