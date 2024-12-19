@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Tests that are skipped by default and why:
 # mtls - this requires changes to gorouter/haproxy to allow mtls operations
