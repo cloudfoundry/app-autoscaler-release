@@ -27,12 +27,17 @@ var _ = Describe("AutoScaler custom metrics", func() {
 
 	Describe("custom metrics policy for same app", func() {
 		BeforeEach(func() {
-			policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+			credentialType := "binding-secret"
+			policy = GeneratePolicyWithCredentialType(
+				1, 2, "test_metric", 500, 500,
+				&credentialType)
 			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
 			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 		})
-		// This test will fail if credential-type is set to X509 in autoscaler broker.
-		// Therefore, only mtls connection will be supported for custom metrics in future
+		/*
+			Going forward, custom metrics submission should be possible via mTLS route only.This test can be removed in future if credential-type is set to X509.
+			Added test for rollback cases where custom metrics are still sent via basic auth route.
+		*/
 		Context("when scaling by custom metrics", func() {
 			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 				By("Scale out to 2 instances")

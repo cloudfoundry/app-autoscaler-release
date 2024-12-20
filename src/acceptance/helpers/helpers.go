@@ -59,16 +59,18 @@ func (b *BindingConfig) SetCustomMetricsStrategy(allowFrom string) {
 }
 
 type ScalingPolicy struct {
-	InstanceMin  int               `json:"instance_min_count"`
-	InstanceMax  int               `json:"instance_max_count"`
-	ScalingRules []*ScalingRule    `json:"scaling_rules,omitempty"`
-	Schedules    *ScalingSchedules `json:"schedules,omitempty"`
+	InstanceMin    int               `json:"instance_min_count"`
+	InstanceMax    int               `json:"instance_max_count"`
+	ScalingRules   []*ScalingRule    `json:"scaling_rules,omitempty"`
+	Schedules      *ScalingSchedules `json:"schedules,omitempty"`
+	CredentialType *string           `json:"credential-type,omitempty"`
 }
 
 type ScalingPolicyWithExtraFields struct {
-	IsAdmin      bool                           `json:"is_admin"`
-	IsSSO        bool                           `json:"is_sso"`
-	Role         string                         `json:"role"`
+	IsAdmin bool   `json:"is_admin"`
+	IsSSO   bool   `json:"is_sso"`
+	Role    string `json:"role"`
+	//CredentialType *string                        `json:"credential-type,omitempty"`
 	InstanceMin  int                            `json:"instance_min_count"`
 	InstanceMax  int                            `json:"instance_max_count"`
 	ScalingRules []*ScalingRulesWithExtraFields `json:"scaling_rules,omitempty"`
@@ -267,6 +269,47 @@ func GenerateDynamicScaleOutPolicyWithExtraFields(instanceMin, instanceMax int, 
 func GenerateDynamicScaleOutAndInPolicy(instanceMin, instanceMax int, metricName string, scaleInWhenBelowThreshold int64, scaleOutWhenGreaterOrEqualThreshold int64) string {
 	policy := buildScaleOutScaleInPolicy(instanceMin, instanceMax, metricName, scaleInWhenBelowThreshold, scaleOutWhenGreaterOrEqualThreshold)
 	marshaled, err := MarshalWithoutHTMLEscape(policy)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(marshaled)
+}
+
+func GeneratePolicyWithCredentialType(instanceMin, instanceMax int, metricName string, scaleInWhenBelowThreshold int64, scaleOutWhenGreaterOrEqualThreshold int64, credentialType *string) string {
+	policyWithCredentialType := buildScaleOutScaleInPolicy(instanceMin, instanceMax, metricName, scaleInWhenBelowThreshold, scaleOutWhenGreaterOrEqualThreshold)
+	policyWithCredentialType.CredentialType = credentialType
+	marshaled, err := MarshalWithoutHTMLEscape(policyWithCredentialType)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(marshaled)
+}
+
+func GeneratePolicyWithExtraFields(instanceMin, instanceMax int, metricName string, scaleInWhenBelowThreshold int64, scaleOutWhenGreaterOrEqualThreshold int64, credentialType *string) string {
+	scalingOutRule := ScalingRule{
+		MetricType:            metricName,
+		BreachDurationSeconds: TestBreachDurationSeconds,
+		Threshold:             scaleOutWhenGreaterOrEqualThreshold,
+		Operator:              ">=",
+		CoolDownSeconds:       TestCoolDownSeconds,
+		Adjustment:            "+1",
+	}
+	scalingInRule := ScalingRule{
+		MetricType:            metricName,
+		BreachDurationSeconds: TestBreachDurationSeconds,
+		Threshold:             scaleInWhenBelowThreshold,
+		Operator:              "<",
+		CoolDownSeconds:       TestCoolDownSeconds,
+		Adjustment:            "-1",
+	}
+	policyWithExtraFields := ScalingPolicyWithExtraFields{
+		IsAdmin: false,
+		IsSSO:   false,
+		Role:    "",
+		//CredentialType: credentialType,
+		InstanceMin:  instanceMin,
+		InstanceMax:  instanceMax,
+		ScalingRules: []*ScalingRulesWithExtraFields{{StatsWindowSeconds: 0, ScalingRule: scalingOutRule}, {StatsWindowSeconds: 0, ScalingRule: scalingInRule}},
+	}
+	marshaled, err := MarshalWithoutHTMLEscape(policyWithExtraFields)
 	Expect(err).NotTo(HaveOccurred())
 
 	return string(marshaled)
