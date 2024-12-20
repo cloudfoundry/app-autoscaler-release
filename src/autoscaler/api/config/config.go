@@ -209,6 +209,55 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	if err := configureBindingDb(conf, vcapReader); err != nil {
 		return err
 	}
+
+	if err := configureEventGenerator(conf, vcapReader); err != nil {
+		return err
+	}
+
+	if err := configureScalingEngine(conf, vcapReader); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func configureScalingEngine(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	cfInstanceKey := os.Getenv("CF_INSTANCE_KEY")
+	cfInstanceCert := os.Getenv("CF_INSTANCE_CERT")
+
+	if keyFile, err := configutil.MaterializeContentInFile("scalingengine", "scalingengine.key", cfInstanceKey); err != nil {
+		return err
+	} else {
+		conf.ScalingEngine.TLSClientCerts.KeyFile = keyFile
+	}
+
+	if certFile, err := configutil.MaterializeContentInFile("scalingengine", "scalingengine.crt", cfInstanceCert); err != nil {
+		return err
+	} else {
+		conf.ScalingEngine.TLSClientCerts.CertFile = certFile
+		conf.ScalingEngine.TLSClientCerts.CACertFile = certFile
+	}
+
+	return nil
+}
+
+func configureEventGenerator(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	cfInstanceKey := os.Getenv("CF_INSTANCE_KEY")
+	cfInstanceCert := os.Getenv("CF_INSTANCE_CERT")
+
+	if keyFile, err := configutil.MaterializeContentInFile("eventgenerator", "eventgenerator.key", cfInstanceKey); err != nil {
+		return err
+	} else {
+		conf.EventGenerator.TLSClientCerts.KeyFile = keyFile
+	}
+
+	if certFile, err := configutil.MaterializeContentInFile("eventgenerator", "eventgenerator.crt", cfInstanceCert); err != nil {
+		return err
+	} else {
+		conf.EventGenerator.TLSClientCerts.CertFile = certFile
+		conf.EventGenerator.TLSClientCerts.CACertFile = certFile
+	}
+
 	return nil
 }
 

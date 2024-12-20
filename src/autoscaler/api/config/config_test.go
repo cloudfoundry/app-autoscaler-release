@@ -1,7 +1,10 @@
 package config_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
+	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
@@ -39,6 +42,59 @@ var _ = Describe("Config", func() {
 				mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
 				mockVCAPConfigurationReader.MaterializeDBFromServiceReturns(expectedDbUrl, nil)
 				conf, err = LoadConfig("", mockVCAPConfigurationReader)
+			})
+
+			When("vcap CF_INSTANCE_CERT is set", func() {
+				var cfInstanceCert []byte
+				var cfInstanceKey []byte
+
+				BeforeEach(func() {
+					rsaPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+					Expect(err).NotTo(HaveOccurred())
+
+					cfInstanceCert, err = testhelpers.GenerateClientCertWithPrivateKey("org-guid", "space-guid", rsaPrivateKey)
+					Expect(err).NotTo(HaveOccurred())
+
+					cfInstanceKey = testhelpers.GenerateClientKeyWithPrivateKey(rsaPrivateKey)
+					os.Setenv("CF_INSTANCE_KEY", string(cfInstanceKey))
+					os.Setenv("CF_INSTANCE_CERT", string(cfInstanceCert))
+				})
+
+				AfterEach(func() {
+					os.Unsetenv("CF_INSTANCE_KEY")
+					os.Unsetenv("CF_INSTANCE_CERT")
+				})
+
+				It("sets EventGenerator TlSClientCert", func() {
+					actualKeyContent, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.KeyFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualCertContent, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.CertFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualCACertContent, err := os.ReadFile(conf.EventGenerator.TLSClientCerts.CACertFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(actualKeyContent).To(Equal(cfInstanceKey))
+					Expect(actualCertContent).To(Equal(cfInstanceCert))
+					Expect(actualCACertContent).To(Equal(cfInstanceCert))
+				})
+
+				It("sets ScalingEngine TlSClientCert", func() {
+					actualKeyContent, err := os.ReadFile(conf.ScalingEngine.TLSClientCerts.KeyFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualCertContent, err := os.ReadFile(conf.ScalingEngine.TLSClientCerts.CertFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					actualCACertContent, err := os.ReadFile(conf.ScalingEngine.TLSClientCerts.CACertFile)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(actualKeyContent).To(Equal(cfInstanceKey))
+					Expect(actualCertContent).To(Equal(cfInstanceCert))
+					Expect(actualCACertContent).To(Equal(cfInstanceCert))
+				})
+
 			})
 
 			When("vcap PORT is set to a number", func() {
