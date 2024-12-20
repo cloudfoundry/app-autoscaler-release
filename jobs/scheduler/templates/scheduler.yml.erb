@@ -170,5 +170,12 @@ server:
     bundle: "server"
     client-auth: NEED
 
+cf_server:
+  port: <%=p('autoscaler.cf_server.port') %>
+  xfcc:
+    valid_org_guid: <%= p("autoscaler.cf_server.xfcc.valid_org_guid") %>
+    valid_space_guid: <%= p("autoscaler.cf_server.xfcc.valid_space_guid") %>
+
+
 #User added properties
 <%=p('autoscaler.scheduler.application.props')%>

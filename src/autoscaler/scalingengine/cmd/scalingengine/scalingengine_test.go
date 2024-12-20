@@ -3,6 +3,7 @@ package main_test
 import (
 	"io"
 	"strconv"
+	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -15,7 +16,9 @@ import (
 	"github.com/onsi/gomega/gbytes"
 
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -51,6 +54,52 @@ var _ = Describe("Main", func() {
 
 	AfterEach(func() {
 		runner.KillWithFire()
+	})
+
+	Describe("with a correct config", func() {
+		When("starting 1 scaling engine instance", func() {
+			It("scaling engine should start", func() {
+				Eventually(runner.Session.Buffer, 2*time.Second).Should(gbytes.Say(runner.startCheck))
+				Consistently(runner.Session).ShouldNot(Exit())
+			})
+
+			It("http server starts directly", func() {
+				Eventually(runner.Session.Buffer, 2*time.Second).Should(gbytes.Say("scalingengine.http-server.new-http-server"))
+			})
+		})
+
+		When("starting multiple scaling engine instances", func() {
+			var (
+				secondRunner *ScalingEngineRunner
+			)
+
+			JustBeforeEach(func() {
+				secondRunner = NewScalingEngineRunner()
+				secondConf := conf
+
+				secondConf.Server.Port += 500
+				secondConf.Health.ServerConfig.Port += 500
+				secondConf.CFServer.Port += 500
+				secondRunner.configPath = writeConfig(&secondConf).Name()
+				secondRunner.Start()
+			})
+
+			AfterEach(func() {
+				secondRunner.KillWithFire()
+			})
+
+			It("2 http server instances start", func() {
+				Eventually(runner.Session.Buffer, 2*time.Second).Should(gbytes.Say("scalingengine.http-server.new-http-server"))
+				Eventually(secondRunner.Session.Buffer, 2*time.Second).Should(gbytes.Say("scalingengine.http-server.new-http-server"))
+				Eventually(runner.Session.Buffer, 2*time.Second).Should(gbytes.Say("scalingengine.started"))
+				Eventually(secondRunner.Session.Buffer, 2*time.Second).Should(gbytes.Say("scalingengine.started"))
+
+				Consistently(runner.Session).ShouldNot(Exit())
+				Consistently(secondRunner.Session).ShouldNot(Exit())
+			})
+
+		})
+
 	})
 
 	Describe("With incorrect config", func() {
@@ -115,6 +164,11 @@ var _ = Describe("Main", func() {
 	})
 
 	Describe("when http server is ready to serve RESTful API", func() {
+
+		JustBeforeEach(func() {
+			Eventually(runner.Session.Buffer, 2).Should(gbytes.Say("scalingengine.started"))
+		})
+
 		When("a request to trigger scaling comes", func() {
 			It("returns with a 200", func() {
 				body, err := json.Marshal(models.Trigger{Adjustment: "+1"})
@@ -174,6 +228,10 @@ var _ = Describe("Main", func() {
 			runner.configPath = writeConfig(&basicAuthConfig).Name()
 		})
 
+		JustBeforeEach(func() {
+			Eventually(runner.Session.Buffer, 2).Should(gbytes.Say("scalingengine.started"))
+		})
+
 		When("a request to query health comes", func() {
 			It("returns with a 200", func() {
 				rsp, err := httpClient.Get(healthURL.String())
@@ -196,6 +254,10 @@ var _ = Describe("Main", func() {
 	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
 		BeforeEach(func() {
 			healthURL.Path = "/health"
+		})
+
+		JustBeforeEach(func() {
+			Eventually(runner.Session.Buffer, 2).Should(gbytes.Say("scalingengine.started"))
 		})
 
 		When("username and password are incorrect for basic authentication during health check", func() {
@@ -229,6 +291,10 @@ var _ = Describe("Main", func() {
 	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
 		BeforeEach(func() {
 			healthURL.Path = "/health"
+		})
+
+		JustBeforeEach(func() {
+			Eventually(runner.Session.Buffer, 2).Should(gbytes.Say("scalingengine.started"))
 		})
 
 		When("username and password are incorrect for basic authentication during health check", func() {
@@ -260,6 +326,10 @@ var _ = Describe("Main", func() {
 		})
 	})
 	When("running CF server", func() {
+
+		JustBeforeEach(func() {
+			Eventually(runner.Session.Buffer, 2).Should(gbytes.Say("scalingengine.started"))
+		})
 		When("running outside cf", func() {
 			It("/v1/liveness should return 200", func() {
 				cfServerURL.Path = "/v1/liveness"
@@ -267,14 +337,22 @@ var _ = Describe("Main", func() {
 				req, err := http.NewRequest(http.MethodGet, cfServerURL.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				err = SetXFCCCertHeader(req, conf.CFServer.XFCC.ValidOrgGuid, conf.CFServer.XFCC.ValidSpaceGuid)
-				Expect(err).NotTo(HaveOccurred())
+				setXFCCCertHeader(req, conf.CFServer.XFCC.ValidOrgGuid, conf.CFServer.XFCC.ValidSpaceGuid)
 
 				rsp, err := healthHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+
 			})
 		})
 	})
 })
+
+func setXFCCCertHeader(req *http.Request, orgGuid, spaceGuid string) {
+	xfccClientCert, err := GenerateClientCert(orgGuid, spaceGuid)
+	block, _ := pem.Decode(xfccClientCert)
+	Expect(err).NotTo(HaveOccurred())
+	Expect(block).ShouldNot(BeNil())
+	req.Header.Add("X-Forwarded-Client-Cert", base64.StdEncoding.EncodeToString(block.Bytes))
+}

@@ -102,9 +102,14 @@ func (s *PublicApiServer) CreateCFServer() (ifrit.Runner, error) {
 		return nil, err
 	}
 
+	mainRouter := mux.NewRouter()
 	r := s.autoscalerRouter.GetRouter()
+	mainRouter.PathPrefix("/v2").Handler(r)
+	mainRouter.PathPrefix("/v1").Handler(r)
+	mainRouter.PathPrefix("/health").Handler(r)
+	mainRouter.PathPrefix("/").Handler(s.healthRouter)
 
-	return helpers.NewHTTPServer(s.logger, s.conf.VCAPServer, r)
+	return helpers.NewHTTPServer(s.logger, s.conf.VCAPServer, mainRouter)
 }
 
 func (s *PublicApiServer) CreateMtlsServer() (ifrit.Runner, error) {
