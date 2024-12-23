@@ -137,6 +137,5 @@ server:
 
 cf_server:
   port: 8082
-  xfcc:
-    valid_org_guid: "some-org-guid"
-    valid_space_guid: "some-space-guid"
+  validOrgGuid: "some-org-guid"
+  validSpaceGuid: "some-space-guid"
