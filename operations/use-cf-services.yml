@@ -20,8 +20,8 @@
           client_secret: ((routing_api_client_secret))
           client_private_key: ((!routing_api_tls_client_private_key))
           server_ca_cert: ((!routing_api_server_ca_cert))
-          api_url: "https://api.((system_domain)):443"
-          oauth_url: "https://uaa.((system_domain)):443"
+          api_url: https://api.((system_domain)):443
+          oauth_url: https://uaa.((system_domain)):443
         routes:
           - name: ((deployment_name))_postgres
             registration_interval: 5s
