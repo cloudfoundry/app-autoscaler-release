@@ -22,9 +22,6 @@ public class CFServerConfiguration{
     if (this.port <= 0) {
       throw new IllegalStateException("CF Server Port is not set");
     }
-    if (this.validOrgGuid == null || this.validOrgGuid.isEmpty()) {
-      throw new IllegalStateException("CF Server validOrgGuid is not set");
-    }
   }
 
   public long getSocketTimeout() {
