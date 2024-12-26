@@ -14,18 +14,18 @@ describe "scheduler" do
 
   context "cf server" do
     it "includes default port for cf server" do
-      expect(rendered_template["cf_server"]["port"]).to eq(8080)
+      expect(rendered_template["cfServer"]["port"]).to eq(8080)
     end
 
     it "defaults xfcc valid org and space " do
-      properties["autoscaler"]["cf_server"] = {}
-      properties["autoscaler"]["cf_server"]["xfcc"] = {
-        "valid_org_guid" => "some-valid-org-guid",
-        "valid_space_guid" => "some-valid-space-guid"
+      properties["autoscaler"]["cfServer"] = {}
+      properties["autoscaler"]["cfServer"]["xfcc"] = {
+        "validOrgGuid" => "some-valid-org-guid",
+        "validSpaceGuid" => "some-valid-space-guid"
       }
 
-      expect(rendered_template["cf_server"]["xfcc"]["valid_org_guid"]).to eq(properties["autoscaler"]["cf_server"]["xfcc"]["valid_org_guid"])
-      expect(rendered_template["cf_server"]["xfcc"]["valid_space_guid"]).to eq(properties["autoscaler"]["cf_server"]["xfcc"]["valid_space_guid"])
+      expect(rendered_template["cfServer"]["validOrgGuid"]).to eq(properties["autoscaler"]["cfServer"]["validOrgGuid"])
+      expect(rendered_template["cfServer"]["validSpaceGuid"]).to eq(properties["autoscaler"]["cfServer"]["validSpaceGuid"])
     end
   end
 
