@@ -15,7 +15,6 @@ import org.apache.http.entity.StringEntity;
 public class CFServerConfig {
   private Logger logger = Logger.getLogger(this.getClass().getName());
 
-  @Bean(destroyMethod = "close")
   HttpServer cfServer(CFServerConfiguration config) throws IOException {
     // Define a simple request handler (example only)
     HttpRequestHandler requestHandler =
