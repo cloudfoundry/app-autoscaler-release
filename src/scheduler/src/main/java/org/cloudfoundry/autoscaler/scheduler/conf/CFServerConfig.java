@@ -15,6 +15,7 @@ import org.apache.http.entity.StringEntity;
 public class CFServerConfig {
   private Logger logger = Logger.getLogger(this.getClass().getName());
 
+  @Bean
   HttpServer cfServer(CFServerConfiguration config) throws IOException {
     // Define a simple request handler (example only)
     HttpRequestHandler requestHandler =
@@ -23,14 +24,14 @@ public class CFServerConfig {
           response.setEntity(new StringEntity("Hello from CFServer!"));
         };
 
-        // Build the HTTP server
-        HttpServer server = ServerBootstrap.bootstrap()
-                .setListenerPort(config.getPort())
-                .registerHandler("*", requestHandler) // Register a default handler
-                .create();
+    // Build the HTTP server
+    HttpServer server = ServerBootstrap.bootstrap()
+            .setListenerPort(config.getPort())
+            .registerHandler("*", requestHandler) // Register a default handler
+            .create();
 
-        logger.info("Configured HttpServer on port: " + config.getPort());
-        return server;
+    logger.info("Configured HttpServer on port: " + config.getPort());
+    return server;
   }
 
     @Bean
