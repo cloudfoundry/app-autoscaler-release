@@ -170,11 +170,10 @@ server:
     bundle: "server"
     client-auth: NEED
 
-cf_server:
+cfServer:
   port: <%=p('autoscaler.cf_server.port') %>
-  xfcc:
-    valid_org_guid: <%= p("autoscaler.cf_server.xfcc.valid_org_guid") %>
-    valid_space_guid: <%= p("autoscaler.cf_server.xfcc.valid_space_guid") %>
+  validOrgGuid: <%= p("autoscaler.cf_server.xfcc.valid_org_guid") %>
+  validSpaceGuid: <%= p("autoscaler.cf_server.xfcc.valid_space_guid") %>
 
 
 #User added properties
