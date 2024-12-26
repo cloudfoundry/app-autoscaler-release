@@ -135,7 +135,7 @@ server:
 #    Unified cf Server - XFCC
 ############################################################
 
-cfServer:
+cf-server:
   port: 8082
-  validOrgGuid: "some-org-guid"
-  validSpaceGuid: "some-space-guid"
+  valid-org-guid: "some-org-guid"
+  valid-space-guid: "some-space-guid"

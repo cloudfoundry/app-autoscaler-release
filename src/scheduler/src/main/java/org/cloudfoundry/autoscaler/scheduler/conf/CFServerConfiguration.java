@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "cfServer")
+@ConfigurationProperties(prefix = "cf-server")
 @Data
 @Component
 @AllArgsConstructor
