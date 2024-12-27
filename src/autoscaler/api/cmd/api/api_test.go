@@ -1,6 +1,8 @@
 package main_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,9 +11,9 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -44,9 +46,9 @@ var _ = Describe("Api", func() {
 
 		vcapPort = 8080 + GinkgoParallelProcess()
 
-		brokerHttpClient = NewServiceBrokerClient()
+		brokerHttpClient = testhelpers.NewServiceBrokerClient()
 		healthHttpClient = &http.Client{}
-		apiHttpClient = NewPublicApiClient()
+		apiHttpClient = testhelpers.NewPublicApiClient()
 		cfServerHttpClient = &http.Client{}
 
 		serverURL, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", cfg.Server.Port))
@@ -166,7 +168,7 @@ var _ = Describe("Api", func() {
 
 				bodyBytes, err := io.ReadAll(rsp.Body)
 
-				FailOnError("Read failed", err)
+				testhelpers.FailOnError("Read failed", err)
 				if len(bodyBytes) == 0 {
 					Fail("body empty")
 				}
@@ -297,50 +299,72 @@ var _ = Describe("Api", func() {
 	})
 
 	When("running CF server", func() {
-		XWhen("running in outside cf", func() {})
-		When("running in CF", func() {
+		var (
+			cfInstanceKeyFile  string
+			cfInstanceCertFile string
+		)
 
-			BeforeEach(func() {
-				os.Setenv("VCAP_APPLICATION", "{}")
-				os.Setenv("VCAP_SERVICES", getVcapServices())
-				os.Setenv("PORT", fmt.Sprintf("%d", vcapPort))
-				runner.Start()
-			})
-			AfterEach(func() {
-				runner.Interrupt()
-				Eventually(runner.Session, 5).Should(Exit(0))
-				os.Unsetenv("VCAP_APPLICATION")
-				os.Unsetenv("VCAP_SERVICES")
-				os.Unsetenv("PORT")
-			})
+		BeforeEach(func() {
+			rsaPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+			Expect(err).NotTo(HaveOccurred())
 
-			It("should start a cf server", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", cfServerURL), nil)
-				Expect(err).NotTo(HaveOccurred())
+			cfInstanceCert, err := testhelpers.GenerateClientCertWithPrivateKey("org-guid", "space-guid", rsaPrivateKey)
+			Expect(err).NotTo(HaveOccurred())
 
-				rsp, err = cfServerHttpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
+			certTmpDir := os.TempDir()
 
-				bodyBytes, err := io.ReadAll(rsp.Body)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(bodyBytes).To(ContainSubstring("Automatically increase or decrease the number of application instances based on a policy you define."))
+			cfInstanceCertFile, err := configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.crt", string(cfInstanceCert))
+			Expect(err).NotTo(HaveOccurred())
+			os.Setenv("CF_INSTANCE_CERT", string(cfInstanceCertFile))
 
-				req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/catalog", cfServerURL), nil)
-				Expect(err).NotTo(HaveOccurred())
-				req.SetBasicAuth(username, password)
+			cfInstanceKey := testhelpers.GenerateClientKeyWithPrivateKey(rsaPrivateKey)
+			cfInstanceKeyFile, err = configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.key", string(cfInstanceKey))
+			Expect(err).NotTo(HaveOccurred())
+			os.Setenv("CF_INSTANCE_KEY", string(cfInstanceKeyFile))
 
-				rsp, err = cfServerHttpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+			os.Setenv("VCAP_APPLICATION", "{}")
+			os.Setenv("VCAP_SERVICES", getVcapServices())
+			os.Setenv("PORT", fmt.Sprintf("%d", vcapPort))
+			runner.Start()
+		})
+		AfterEach(func() {
+			runner.Interrupt()
+			Eventually(runner.Session, 5).Should(Exit(0))
 
-				bodyBytes, err = io.ReadAll(rsp.Body)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(bodyBytes).To(ContainSubstring("autoscaler-free-plan-id"))
-			})
+			os.Remove(cfInstanceKeyFile)
+			os.Remove(cfInstanceCertFile)
 
+			os.Unsetenv("CF_INSTANCE_KEY")
+			os.Unsetenv("CF_INSTANCE_CERT")
+			os.Unsetenv("VCAP_APPLICATION")
+			os.Unsetenv("VCAP_SERVICES")
+			os.Unsetenv("PORT")
+		})
+
+		It("should start a cf server", func() {
+			req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v1/info", cfServerURL), nil)
+			Expect(err).NotTo(HaveOccurred())
+
+			rsp, err = cfServerHttpClient.Do(req)
+			Expect(err).ToNot(HaveOccurred())
+
+			bodyBytes, err := io.ReadAll(rsp.Body)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(bodyBytes).To(ContainSubstring("Automatically increase or decrease the number of application instances based on a policy you define."))
+
+			req, err = http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/catalog", cfServerURL), nil)
+			Expect(err).NotTo(HaveOccurred())
+			req.SetBasicAuth(username, password)
+
+			rsp, err = cfServerHttpClient.Do(req)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+
+			bodyBytes, err = io.ReadAll(rsp.Body)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(bodyBytes).To(ContainSubstring("autoscaler-free-plan-id"))
 		})
 	})
-
 })
 
 func getVcapServices() (result string) {
