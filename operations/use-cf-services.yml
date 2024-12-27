@@ -20,8 +20,8 @@
           client_secret: ((routing_api_client_secret))
           client_private_key: ((!routing_api_tls_client_private_key))
           server_ca_cert: ((!routing_api_server_ca_cert))
-          api_url: https://api.((system_domain)):443
-          oauth_url: https://uaa.((system_domain)):443
+          api_url: "https://api.((system_domain)):443"
+          oauth_url: "https://uaa.((system_domain)):443"
         routes:
           - name: ((deployment_name))_postgres
             registration_interval: 5s
@@ -77,3 +77,28 @@
     uris:
       - ((deployment_name))-cf-scalingengine.((system_domain))
 
+## EVENTGENERATOR - Enable cf Server to receive calls from api running on cf --
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/cf_server?/xfcc?/valid_org_guid?
+  value: ((autoscaler_cf_server_xfcc_valid_org_guid))
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/cf_server?/xfcc?/valid_space_guid?
+  value: ((autoscaler_cf_server_xfcc_valid_space_guid))
+
+
+- type: replace
+  path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/cf_server?/port?
+  value: &EventGeneratorCfPort 6205
+
+- type: replace
+  path: /instance_groups/name=postgres/jobs/name=route_registrar/properties/route_registrar/routes/-
+  value:
+    name: ((deployment_name))-cf-eventgenerator
+    registration_interval: 20s
+    port: *EventGeneratorCfPort
+    tags:
+      component: autoscaler_cf_eventgenerator
+    uris:
+      - ((deployment_name))-cf-eventgenerator.((system_domain))

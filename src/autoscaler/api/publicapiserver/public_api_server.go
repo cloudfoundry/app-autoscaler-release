@@ -75,7 +75,7 @@ func (s *PublicApiServer) CreateHealthServer() (ifrit.Runner, error) {
 		return nil, err
 	}
 
-	return helpers.NewHTTPServer(s.logger, s.conf.Health.ServerConfig, s.healthRouter)
+	return helpers.NewHTTPServer(s.logger.Session("HealthServer"), s.conf.Health.ServerConfig, s.healthRouter)
 }
 
 func (s *PublicApiServer) setupBrokerRouter() error {
@@ -102,14 +102,9 @@ func (s *PublicApiServer) CreateCFServer() (ifrit.Runner, error) {
 		return nil, err
 	}
 
-	mainRouter := mux.NewRouter()
 	r := s.autoscalerRouter.GetRouter()
-	mainRouter.PathPrefix("/v2").Handler(r)
-	mainRouter.PathPrefix("/v1").Handler(r)
-	mainRouter.PathPrefix("/health").Handler(r)
-	mainRouter.PathPrefix("/").Handler(s.healthRouter)
 
-	return helpers.NewHTTPServer(s.logger, s.conf.VCAPServer, mainRouter)
+	return helpers.NewHTTPServer(s.logger.Session("CfServer"), s.conf.VCAPServer, r)
 }
 
 func (s *PublicApiServer) CreateMtlsServer() (ifrit.Runner, error) {
@@ -117,7 +112,7 @@ func (s *PublicApiServer) CreateMtlsServer() (ifrit.Runner, error) {
 		return nil, err
 	}
 
-	return helpers.NewHTTPServer(s.logger, s.conf.Server, s.autoscalerRouter.GetRouter())
+	return helpers.NewHTTPServer(s.logger.Session("MtlsServer"), s.conf.Server, s.autoscalerRouter.GetRouter())
 }
 
 func (s *PublicApiServer) setupApiProtectedRoutes(pah *PublicApiHandler, scalingHistoryHandler http.Handler) {
