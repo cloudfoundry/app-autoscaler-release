@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
@@ -299,11 +298,6 @@ var _ = Describe("Api", func() {
 	})
 
 	When("running CF server", func() {
-		var (
-			cfInstanceKeyFile  string
-			cfInstanceCertFile string
-		)
-
 		BeforeEach(func() {
 			rsaPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 			Expect(err).NotTo(HaveOccurred())
@@ -311,17 +305,10 @@ var _ = Describe("Api", func() {
 			cfInstanceCert, err := testhelpers.GenerateClientCertWithPrivateKey("org-guid", "space-guid", rsaPrivateKey)
 			Expect(err).NotTo(HaveOccurred())
 
-			certTmpDir := os.TempDir()
-
-			cfInstanceCertFile, err := configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.crt", string(cfInstanceCert))
-			Expect(err).NotTo(HaveOccurred())
-			os.Setenv("CF_INSTANCE_CERT", string(cfInstanceCertFile))
-
 			cfInstanceKey := testhelpers.GenerateClientKeyWithPrivateKey(rsaPrivateKey)
-			cfInstanceKeyFile, err = configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.key", string(cfInstanceKey))
-			Expect(err).NotTo(HaveOccurred())
-			os.Setenv("CF_INSTANCE_KEY", string(cfInstanceKeyFile))
 
+			os.Setenv("CF_INSTANCE_KEY", string(cfInstanceKey))
+			os.Setenv("CF_INSTANCE_CERT", string(cfInstanceCert))
 			os.Setenv("VCAP_APPLICATION", "{}")
 			os.Setenv("VCAP_SERVICES", getVcapServices())
 			os.Setenv("PORT", fmt.Sprintf("%d", vcapPort))
@@ -330,10 +317,6 @@ var _ = Describe("Api", func() {
 		AfterEach(func() {
 			runner.Interrupt()
 			Eventually(runner.Session, 5).Should(Exit(0))
-
-			os.Remove(cfInstanceKeyFile)
-			os.Remove(cfInstanceCertFile)
-
 			os.Unsetenv("CF_INSTANCE_KEY")
 			os.Unsetenv("CF_INSTANCE_CERT")
 			os.Unsetenv("VCAP_APPLICATION")

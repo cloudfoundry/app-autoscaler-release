@@ -14,7 +14,9 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 )
 
-func GenerateClientCertWithPrivateKeyExpiring(orgGUID, spaceGUID string, privateKey *rsa.PrivateKey, notAfter time.Time) ([]byte, error) {
+// generateClientCert generates a client certificate with the specified spaceGUID and orgGUID
+// included in the organizational unit string.
+func GenerateClientCertWithPrivateKey(orgGUID, spaceGUID string, privateKey *rsa.PrivateKey) ([]byte, error) {
 	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
 	if err != nil {
 		return nil, err
@@ -23,15 +25,11 @@ func GenerateClientCertWithPrivateKeyExpiring(orgGUID, spaceGUID string, private
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		NotBefore:    time.Now(),
-		NotAfter:     notAfter,
+		NotAfter:     time.Now().AddDate(1, 0, 0),
 		Subject: pkix.Name{
 			Organization:       []string{"My Organization"},
 			OrganizationalUnit: []string{fmt.Sprintf("space:%s org:%s", spaceGUID, orgGUID)},
 		},
-	}
-
-	if privateKey == nil {
-		return nil, fmt.Errorf("private key is nil")
 	}
 
 	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
@@ -42,11 +40,6 @@ func GenerateClientCertWithPrivateKeyExpiring(orgGUID, spaceGUID string, private
 	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
 
 	return certPEM, nil
-}
-
-func GenerateClientCertWithPrivateKey(orgGUID, spaceGUID string, privateKey *rsa.PrivateKey) ([]byte, error) {
-	notAfter := time.Now().AddDate(1, 0, 0)
-	return GenerateClientCertWithPrivateKeyExpiring(orgGUID, spaceGUID, privateKey, notAfter)
 }
 
 func GenerateClientCert(orgGUID, spaceGUID string) ([]byte, error) {
