@@ -138,6 +138,6 @@ server:
 #    Unified cf Server - XFCC
 ############################################################
 
-cf-server:
+cfserver:
   validOrgGuid: "some-org-guid"
   validSpaceGuid: "some-space-guid"

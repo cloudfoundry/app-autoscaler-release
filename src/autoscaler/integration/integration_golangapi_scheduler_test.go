@@ -1,11 +1,15 @@
 package integration_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
@@ -51,7 +55,7 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 		stopScheduler()
 	})
 
-	Describe("When offered as a service", func() {
+	When("offered as a service", func() {
 
 		BeforeEach(func() {
 			golangApiServerConfPath := components.PrepareGolangApiServerConfig(
@@ -481,6 +485,91 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 				})
 			})
 
+		})
+	})
+
+	When("scheduler responding on cf server via http", func() {
+		BeforeEach(func() {
+
+			golangApiServerConfPath := components.PrepareGolangApiServerConfig(
+				dbUrl,
+				components.Ports[GolangAPIServer],
+				components.Ports[GolangServiceBroker],
+				fakeCCNOAAUAA.URL(),
+				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
+				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
+				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator]),
+				"https://127.0.0.1:8888",
+				tmpDir)
+
+			startGolangApiServer(golangApiServerConfPath)
+			startGoRouterProxyTo(components.Ports[Scheduler])
+
+		})
+		When("binding to it", func() {
+			var (
+				defaultPolicy []byte
+				err           error
+				resp          *http.Response
+			)
+
+			BeforeEach(func() {
+				defaultPolicy = setPolicyRecurringDate(readPolicyFromFile("fakePolicyWithSchedule.json"))
+
+			})
+
+			JustBeforeEach(func() {
+				resp, err = bindService(bindingId, appId, serviceInstanceId, nil, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				Expect(err).NotTo(HaveOccurred(), "Error: %s", err)
+				Expect(resp.StatusCode).To(Equal(http.StatusCreated), ResponseMessage(resp))
+				defer func() { _ = resp.Body.Close() }()
+
+			})
+
+			AfterEach(func() {
+				os.Unsetenv("CF_INSTANCE_KEY")
+				os.Unsetenv("CF_INSTANCE_CERT")
+
+				unbindAndDeProvision(bindingId, appId, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+			})
+
+			When("instance certs are available", func() {
+				BeforeEach(func() {
+					certTmpDir := os.TempDir()
+					privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+					Expect(err).ToNot(HaveOccurred())
+
+					cfInstanceKeyContent := testhelpers.GenerateClientKeyWithPrivateKey(privateKey)
+
+					cfInstanceCertFileToRotateContent, err := testhelpers.GenerateClientCertWithPrivateKey("org", "space", privateKey)
+					Expect(err).ToNot(HaveOccurred())
+
+					certFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.crt", string(cfInstanceCertFileToRotateContent))
+					Expect(err).NotTo(HaveOccurred())
+
+					keyFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.key", string(cfInstanceKeyContent))
+					Expect(err).NotTo(HaveOccurred())
+
+					os.Setenv("CF_INSTANCE_KEY", keyFile)
+					os.Setenv("CF_INSTANCE_CERT", certFile)
+				})
+
+				FIt("creates a policy and associated schedules", func() {
+					By("setting the default policy on apps without an explicit one")
+					checkApiServerContent(appId, defaultPolicy, http.StatusOK, components.Ports[GolangAPIServer], httpClientForPublicApi)
+					assertScheduleContents(appId, http.StatusOK, map[string]int{"recurring_schedule": 4, "specific_date": 2})
+				})
+			})
+
+			When("instance certs are not available", func() {
+				BeforeEach(func() {
+					os.Unsetenv("CF_INSTANCE_KEY")
+					os.Unsetenv("CF_INSTANCE_CERT")
+				})
+
+				XIt("returns an unauthorize", func() {
+				})
+			})
 		})
 	})
 })

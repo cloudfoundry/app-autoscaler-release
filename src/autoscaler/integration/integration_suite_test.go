@@ -166,6 +166,12 @@ func startGolangApiServer(golangApiServerConfPath string) {
 	}))
 }
 
+func startGoRouterProxyTo(portToForward int) {
+	processMap[GoRouterProxy] = ginkgomon_v2.Invoke(grouper.NewOrdered(os.Interrupt, grouper.Members{
+		{"gorouter-proxy", components.GoRouterProxy(portToForward)},
+	}))
+}
+
 func startScheduler() {
 	processMap[Scheduler] = ginkgomon_v2.Invoke(grouper.NewOrdered(os.Interrupt, grouper.Members{
 		{Scheduler, components.Scheduler(schedulerConfPath)},
