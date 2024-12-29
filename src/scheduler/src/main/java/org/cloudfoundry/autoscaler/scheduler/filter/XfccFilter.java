@@ -16,18 +16,24 @@ import java.util.Base64;
 
 @Component
 public class XfccFilter extends OncePerRequestFilter {
-
-    @Value("${approved.space.guid}")
+    @Value("${cfserver.validSpaceGuid}")
     private String validSpaceGuid;
 
-    @Value("${approved.org.guid}")
+    @Value("${cfserver.validOrgGuid}")
     private String validOrgGuid;
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
         HttpServletResponse response, FilterChain filterChain)
         throws jakarta.servlet.ServletException, IOException {
+
+
+        // Skip filter if the request is HTTPS
+        if (request.isSecure()) {
+          filterChain.doFilter(request, response);
+          return;
+        }
+
         // Get the XFCC header
         String xfccHeader = request.getHeader("X-Forwarded-Client-Cert");
         if (xfccHeader == null || xfccHeader.isEmpty()) {

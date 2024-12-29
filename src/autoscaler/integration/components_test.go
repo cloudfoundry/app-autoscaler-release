@@ -29,6 +29,7 @@ import (
 
 const (
 	GolangAPIServer     = "golangApiServer"
+	GoRouterProxy       = "gorouterProxy"
 	GolangServiceBroker = "golangServiceBroker"
 	Scheduler           = "scheduler"
 	MetricsCollector    = "metricsCollector"
@@ -85,6 +86,20 @@ type ServiceBrokerClient struct {
 	TLS models.TLSCerts `json:"tls"`
 }
 
+func (components *Components) GoRouterProxy(portToForward) *ginkgomon_v2.Runner {
+	return ginkgomon_v2.New(ginkgomon_v2.Config{
+		Name:              GoRouterProxy,
+		AnsiColorCode:     "32m",
+		StartCheck:        "gorouter-proxy.started",
+		StartCheckTimeout: 20 * time.Second,
+		Command: exec.Command(
+			components.Executables[GoRouterProxy],
+			append([]string{
+				"-p", portToForward,
+			}, argv...)...,
+		),
+	})
+}
 func (components *Components) GolangAPIServer(confPath string, argv ...string) *ginkgomon_v2.Runner {
 	return ginkgomon_v2.New(ginkgomon_v2.Config{
 		Name:              GolangAPIServer,
