@@ -12,6 +12,23 @@ describe "scheduler" do
   let(:properties) { YAML.safe_load(fixture("scheduler.yml").read) }
   let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
+  context "cf server" do
+    it "includes default port for cf server" do
+      expect(rendered_template["cfServer"]["port"]).to eq(8080)
+    end
+
+    it "defaults xfcc valid org and space " do
+      properties["autoscaler"]["cfServer"] = {}
+      properties["autoscaler"]["cfServer"]["xfcc"] = {
+        "validOrgGuid" => "some-valid-org-guid",
+        "validSpaceGuid" => "some-valid-space-guid"
+      }
+
+      expect(rendered_template["cfServer"]["validOrgGuid"]).to eq(properties["autoscaler"]["cfServer"]["validOrgGuid"])
+      expect(rendered_template["cfServer"]["validSpaceGuid"]).to eq(properties["autoscaler"]["cfServer"]["validSpaceGuid"])
+    end
+  end
+
   context "Health Configuration" do
     it "does set neither username nor password if not configured" do
       properties["autoscaler"]["scheduler"] = {
