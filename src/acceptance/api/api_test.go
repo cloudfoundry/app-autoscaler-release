@@ -200,6 +200,20 @@ var _ = Describe("AutoScaler Public API", func() {
 			})
 		})
 
+		When("an admin user tries to access the api", func() {
+			BeforeEach(func() {
+				workflowhelpers.AsUser(setup.AdminUserContext(), cfg.DefaultTimeoutDuration(), func() {
+					oauthToken = OauthToken(cfg)
+				})
+			})
+
+			It("should succeed to get a policy", func() {
+				gotPolicy, status := getPolicy()
+				Expect(status).To(Equal(200))
+				Expect(string(gotPolicy)).Should(MatchJSON(policy))
+			})
+		})
+
 		When("a scale out is triggered ", func() {
 			BeforeEach(func() {
 				totalTime := time.Duration(cfg.AggregateInterval*2)*time.Second + 3*time.Minute
