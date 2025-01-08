@@ -26,19 +26,18 @@ var _ = Describe("AutoScaler custom metrics", func() {
 	AfterEach(AppAfterEach)
 
 	Describe("custom metrics policy for same app", func() {
-		BeforeEach(func() {
-			credentialType := "binding-secret"
-			policy = GeneratePolicyWithCredentialType(
-				1, 2, "test_metric", 500, 500,
-				&credentialType)
-			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
-			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
-		})
 		/*
-			Going forward, custom metrics submission should be possible via mTLS route only.This test can be removed in future if credential-type is set to X509.
+			Going forward, custom metrics submission should be possible via mTLS route only.This test can be removed in future if credential-type is set to X509 permanently.
 			Added test for rollback cases where custom metrics are still sent via basic auth route.
 		*/
 		Context("when scaling by custom metrics", func() {
+			BeforeEach(func() {
+				credentialType := "binding-secret"
+				policy = GeneratePolicyWithCredentialType(
+					1, 2, "test_metric", 500, 500, &credentialType)
+				instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+				StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+			})
 			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 				By("Scale out to 2 instances")
 				scaleOut := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 550, false)
@@ -53,11 +52,15 @@ var _ = Describe("AutoScaler custom metrics", func() {
 					WithTimeout(5 * time.Minute).
 					WithPolling(15 * time.Second).
 					Should(Equal(1))
-
 			})
 		})
 
 		Context("when scaling by custom metrics via mtls", func() {
+			BeforeEach(func() {
+				policy := GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
+				instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+				StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+			})
 			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 				By("Scale out to 2 instances")
 				scaleOut := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 550, true)

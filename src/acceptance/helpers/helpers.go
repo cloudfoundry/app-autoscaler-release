@@ -67,10 +67,9 @@ type ScalingPolicy struct {
 }
 
 type ScalingPolicyWithExtraFields struct {
-	IsAdmin bool   `json:"is_admin"`
-	IsSSO   bool   `json:"is_sso"`
-	Role    string `json:"role"`
-	//CredentialType *string                        `json:"credential-type,omitempty"`
+	IsAdmin      bool                           `json:"is_admin"`
+	IsSSO        bool                           `json:"is_sso"`
+	Role         string                         `json:"role"`
 	InstanceMin  int                            `json:"instance_min_count"`
 	InstanceMax  int                            `json:"instance_max_count"`
 	ScalingRules []*ScalingRulesWithExtraFields `json:"scaling_rules,omitempty"`
@@ -278,38 +277,6 @@ func GeneratePolicyWithCredentialType(instanceMin, instanceMax int, metricName s
 	policyWithCredentialType := buildScaleOutScaleInPolicy(instanceMin, instanceMax, metricName, scaleInWhenBelowThreshold, scaleOutWhenGreaterOrEqualThreshold)
 	policyWithCredentialType.CredentialType = credentialType
 	marshaled, err := MarshalWithoutHTMLEscape(policyWithCredentialType)
-	Expect(err).NotTo(HaveOccurred())
-
-	return string(marshaled)
-}
-
-func GeneratePolicyWithExtraFields(instanceMin, instanceMax int, metricName string, scaleInWhenBelowThreshold int64, scaleOutWhenGreaterOrEqualThreshold int64, credentialType *string) string {
-	scalingOutRule := ScalingRule{
-		MetricType:            metricName,
-		BreachDurationSeconds: TestBreachDurationSeconds,
-		Threshold:             scaleOutWhenGreaterOrEqualThreshold,
-		Operator:              ">=",
-		CoolDownSeconds:       TestCoolDownSeconds,
-		Adjustment:            "+1",
-	}
-	scalingInRule := ScalingRule{
-		MetricType:            metricName,
-		BreachDurationSeconds: TestBreachDurationSeconds,
-		Threshold:             scaleInWhenBelowThreshold,
-		Operator:              "<",
-		CoolDownSeconds:       TestCoolDownSeconds,
-		Adjustment:            "-1",
-	}
-	policyWithExtraFields := ScalingPolicyWithExtraFields{
-		IsAdmin: false,
-		IsSSO:   false,
-		Role:    "",
-		//CredentialType: credentialType,
-		InstanceMin:  instanceMin,
-		InstanceMax:  instanceMax,
-		ScalingRules: []*ScalingRulesWithExtraFields{{StatsWindowSeconds: 0, ScalingRule: scalingOutRule}, {StatsWindowSeconds: 0, ScalingRule: scalingInRule}},
-	}
-	marshaled, err := MarshalWithoutHTMLEscape(policyWithExtraFields)
 	Expect(err).NotTo(HaveOccurred())
 
 	return string(marshaled)
