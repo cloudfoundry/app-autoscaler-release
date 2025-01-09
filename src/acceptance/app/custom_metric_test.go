@@ -30,13 +30,15 @@ var _ = Describe("AutoScaler custom metrics", func() {
 			Going forward, custom metrics submission should be possible via mTLS route only.This test can be removed in future if credential-type is set to X509 permanently.
 			Added test for rollback cases where custom metrics are still sent via basic auth route.
 		*/
+		JustBeforeEach(func() {
+			instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
+			StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+		})
 		Context("when scaling by custom metrics", func() {
 			BeforeEach(func() {
 				credentialType := "binding-secret"
 				policy = GeneratePolicyWithCredentialType(
 					1, 2, "test_metric", 500, 500, &credentialType)
-				instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
-				StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
 			})
 			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 				By("Scale out to 2 instances")
@@ -57,9 +59,7 @@ var _ = Describe("AutoScaler custom metrics", func() {
 
 		Context("when scaling by custom metrics via mtls", func() {
 			BeforeEach(func() {
-				policy := GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
-				instanceName = CreatePolicy(cfg, appToScaleName, appToScaleGUID, policy)
-				StartApp(appToScaleName, cfg.CfPushTimeoutDuration())
+				policy = GenerateDynamicScaleOutAndInPolicy(1, 2, "test_metric", 500, 500)
 			})
 			It("should scale out and scale in", Label(acceptance.LabelSmokeTests), func() {
 				By("Scale out to 2 instances")
