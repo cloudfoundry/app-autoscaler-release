@@ -3,6 +3,7 @@
 set -eu -o pipefail
 script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
+source "${script_dir}/acceptance-tests-config.source.sh"
 
 skip_teardown="${SKIP_TEARDOWN:-false}"
 suites="${SUITES:-"api app broker"}"
@@ -15,6 +16,10 @@ then
 	echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
 	exit 1;
 fi
+
+write_test_config \
+	"${autoscaler_acceptance_dir}/acceptance_config.json" \
+	"${USE_EXISTING_ORGANIZATION:-false}" "${USE_EXISTING_SPACE:-false}" "${EXISTING_ORGANIZATION:-}" "${EXISTING_SPACE:-}"
 
 if [[ ! -f "${autoscaler_dir}/src/acceptance/acceptance_config.json" ]]
 then
@@ -40,4 +45,5 @@ if [ "${suites_to_run}" != "" ]; then
 	SKIP_TEARDOWN="${skip_teardown}" CONFIG="${PWD}/acceptance_config.json" DEBUG='true' ./bin/test -race -nodes="${nodes}" -trace $ginkgo_opts ${suites_to_run}
 else
 	log 'Nothing to run!'
+	exit 1
 fi
