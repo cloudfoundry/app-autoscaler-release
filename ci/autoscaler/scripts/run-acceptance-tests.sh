@@ -22,6 +22,9 @@ then
 	exit 1
 fi
 
+## debug
+cat "${autoscaler_dir}/src/acceptance/acceptance_config.json"
+##
 suites_to_run=""
 for suite in $suites; do
 	log "checking suite ${suite}"
@@ -40,4 +43,5 @@ if [ "${suites_to_run}" != "" ]; then
 	SKIP_TEARDOWN="${skip_teardown}" CONFIG="${PWD}/acceptance_config.json" DEBUG='true' ./bin/test -race -nodes="${nodes}" -trace $ginkgo_opts ${suites_to_run}
 else
 	log 'Nothing to run!'
+	exit 1
 fi
