@@ -3,7 +3,6 @@
 set -eu -o pipefail
 script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
-source "${script_dir}/acceptance-tests-config.source.sh"
 
 skip_teardown="${SKIP_TEARDOWN:-false}"
 suites="${SUITES:-"api app broker"}"
@@ -17,11 +16,7 @@ then
 	exit 1;
 fi
 
-write_test_config \
-	"${autoscaler_acceptance_dir}/acceptance_config.json" \
-	"${USE_EXISTING_ORGANIZATION:-false}" "${USE_EXISTING_SPACE:-false}" "${EXISTING_ORGANIZATION:-}" "${EXISTING_SPACE:-}"
-
-if [[ ! -f "${autoscaler_dir}/src/acceptance/acceptance_config.json" ]]
+if [[ ! -f "${autoscaler_acceptance_dir}/acceptance_config.json" ]]
 then
 	echo 'FAILED: Did not find file acceptance_config.json.'
 	exit 1

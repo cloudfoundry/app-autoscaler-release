@@ -381,7 +381,7 @@ build-acceptance-tests:
 	@make --directory='./src/acceptance' build_tests
 
 .PHONY: acceptance-tests
-acceptance-tests: build-test-app ## Run acceptance tests against OSS dev environment (requires a previous deployment of the autoscaler)
+acceptance-tests: build-test-app acceptance-tests-config ## Run acceptance tests against OSS dev environment (requrires a previous deployment of the autoscaler)
 	@make --directory='./src/acceptance' run-acceptance-tests
 .PHONY: acceptance-cleanup
 acceptance-cleanup:
@@ -403,6 +403,7 @@ setup-performance: build-test-app
 	export NODES=1;\
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
+	make acceptance-tests-config;\
 	make --directory='./src/acceptance' run-acceptance-tests
 
 .PHONY: run-performance
@@ -410,7 +411,9 @@ run-performance:
 	export NODES=1;\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
-	make --directory='./src/acceptance' run-acceptance-tests
+	make acceptance-tests-config;\
+    make --directory='./src/acceptance' run-acceptance-tests
+
 
 .PHONY: run-act
 run-act:
