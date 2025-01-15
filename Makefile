@@ -399,18 +399,21 @@ cf-login: ## Login to OSS CF dev environment
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
 
 .PHONY: setup-performance
-setup-performance: build-test-app acceptance-tests-config
+setup-performance: build-test-app
 	export NODES=1;\
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
-	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
+	make acceptance-tests-config;\
+	make --directory='./src/acceptance' run-acceptance-tests
 
 .PHONY: run-performance
 run-performance:
 	export NODES=1;\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
-	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;\
+	make acceptance-tests-config;\
+    make --directory='./src/acceptance' run-acceptance-tests
+
 
 .PHONY: run-act
 run-act:

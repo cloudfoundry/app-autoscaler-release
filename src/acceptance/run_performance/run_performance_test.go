@@ -325,7 +325,7 @@ func scaleOutApp(appName string, appGUID string, scaleOutApps *sync.Map,
 			// Q. why sending post request to autoscaler after every pollTime.
 			// A. It is observed that sometime cf does not pick the cf scale event. Therefore,
 			// sending the metric again(and again) is the way to go at the moment
-			cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 550, 5*time.Minute)
+			cmdOutput := helpers.SendMetricMTLS(cfg, appGUID, appName, 550, 5*time.Minute)
 			GinkgoWriter.Printf("worker %d - scale-out %s with App %s %s\n",
 				workerIndex, cmdOutput, appName, appGUID)
 			instances, err := helpers.RunningInstances(appGUID, 10*time.Minute)
@@ -354,7 +354,7 @@ func scaleInApp(appName string, appGUID string, scaleInApps *sync.Map, pendingSc
 	scaledInAppsCount *atomic.Int32, actualAppsToScaleCount int, workerIndex int, wg *sync.WaitGroup) func() {
 	return func() {
 		scaleIn := func() (int, error) {
-			cmdOutput := helpers.SendMetricWithTimeout(cfg, appName, 100, 5*time.Minute)
+			cmdOutput := helpers.SendMetricMTLS(cfg, appGUID, appName, 100, 5*time.Minute)
 			GinkgoWriter.Printf("worker %d - scale-in %s with App %s %s\n",
 				workerIndex, cmdOutput, appName, appGUID)
 			instances, err := helpers.RunningInstances(appGUID, 10*time.Minute)

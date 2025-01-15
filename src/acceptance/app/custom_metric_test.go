@@ -133,7 +133,7 @@ var _ = Describe("AutoScaler custom metrics", func() {
 func sendMetricToAutoscaler(config *config.Config, appToScaleGUID string, metricProducerAppName string, metricThreshold int, mtls bool) func() (int, error) {
 	return func() (int, error) {
 		if mtls {
-			SendMetricMTLS(config, appToScaleGUID, metricProducerAppName, metricThreshold)
+			SendMetricMTLS(config, appToScaleGUID, metricProducerAppName, metricThreshold, 0)
 		} else {
 			SendMetric(config, metricProducerAppName, metricThreshold)
 		}

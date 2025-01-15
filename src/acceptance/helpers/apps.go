@@ -82,9 +82,13 @@ func SendMetric(cfg *config.Config, appName string, metric int) {
 	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/test_metric/%d", metric), "-f")
 }
 
-func SendMetricMTLS(cfg *config.Config, appGuid string, appName string, metric int) {
+func SendMetricMTLS(cfg *config.Config, appGuid string, appName string, metric int, timeOut time.Duration) string {
 	GinkgoHelper()
-	cfh.CurlApp(cfg, appName, fmt.Sprintf("/custom-metrics/mtls/test_metric/%d?appToScaleGuid=%s", metric, appGuid), "-f")
+	if timeOut == 0 {
+		timeOut = cfh.CURL_TIMEOUT
+	}
+	return cfh.CurlAppWithTimeout(cfg, appName, fmt.Sprintf("/custom-metrics/mtls/test_metric/%d?appToScaleGuid=%s",
+		metric, appGuid), timeOut, "-f")
 }
 
 func StartAppWithErr(appName string, timeout time.Duration) error {
