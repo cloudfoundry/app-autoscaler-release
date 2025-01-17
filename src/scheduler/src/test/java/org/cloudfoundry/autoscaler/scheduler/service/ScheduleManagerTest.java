@@ -58,10 +58,10 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -75,15 +75,15 @@ public class ScheduleManagerTest {
 
   @Autowired private ScheduleManager scheduleManager;
 
-  @MockBean private PolicyJsonDao policyJsonDao;
+  @MockitoBean private PolicyJsonDao policyJsonDao;
 
-  @MockBean private SpecificDateScheduleDao specificDateScheduleDao;
+  @MockitoBean private SpecificDateScheduleDao specificDateScheduleDao;
 
-  @MockBean private RecurringScheduleDao recurringScheduleDao;
+  @MockitoBean private RecurringScheduleDao recurringScheduleDao;
 
-  @MockBean private ActiveScheduleDao activeScheduleDao;
+  @MockitoBean private ActiveScheduleDao activeScheduleDao;
 
-  @MockBean private ScheduleJobManager scheduleJobManager;
+  @MockitoBean private ScheduleJobManager scheduleJobManager;
 
   @Autowired private MessageBundleResourceHelper messageBundleResourceHelper;
 
@@ -91,7 +91,7 @@ public class ScheduleManagerTest {
 
   @Autowired private TestDataDbUtil testDataDbUtil;
 
-  @SpyBean private RestOperations restOperations;
+  @MockitoSpyBean private RestOperations restOperations;
 
   @Value("${autoscaler.scalingengine.url}")
   private String scalingEngineUrl;

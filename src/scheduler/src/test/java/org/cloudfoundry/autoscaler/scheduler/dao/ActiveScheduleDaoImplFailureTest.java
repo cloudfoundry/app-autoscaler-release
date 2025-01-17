@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -24,7 +24,7 @@ public class ActiveScheduleDaoImplFailureTest {
 
   @Autowired private ActiveScheduleDao activeScheduleDao;
 
-  @SpyBean private DataSource dataSource;
+  @MockitoSpyBean private DataSource dataSource;
 
   @Autowired TestDataDbUtil testDataDbUtil;
 
