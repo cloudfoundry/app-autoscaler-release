@@ -22,8 +22,9 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Check Code Formatting
+        shell: bash
         run: |
-          sh ./style-guide/google-format-ci-v0.1.sh
+          ./style-guide/google-format-ci-v0.1.sh
         env:
           GOOGLE_JAR_VERSION: 1.22.0
           GOOGLE_JAR_NAME: google-java-format-1.22.0-all-deps.jar
