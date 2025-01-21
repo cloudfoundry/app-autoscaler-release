@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
+	"net"
 	"net/http"
 	"time"
 
@@ -27,7 +28,10 @@ func GenerateClientCertWithPrivateKeyExpiring(orgGUID, spaceGUID string, private
 		Subject: pkix.Name{
 			Organization:       []string{"My Organization"},
 			OrganizationalUnit: []string{fmt.Sprintf("space:%s org:%s", spaceGUID, orgGUID)},
+			CommonName:         "localhost",
 		},
+		DNSNames:    []string{"localhost"},
+		IPAddresses: []net.IP{net.ParseIP("127.0.0.1")},
 	}
 
 	if privateKey == nil {

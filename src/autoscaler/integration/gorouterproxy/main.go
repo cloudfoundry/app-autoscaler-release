@@ -1,7 +1,12 @@
 package main
 
 import (
+	"crypto/tls"
+	"encoding/pem"
+	"io"
+	"log"
 	"net/http"
+	"os"
 
 	"flag"
 	"fmt"
@@ -9,36 +14,90 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 )
 
-// redirects any request to the HTTP version of the URL on a different port, all in localhost.
-
-var port = flag.String("port", "8888", "Port for xfcc proxy")
-var forwardTo = flag.String("forwardTo", "", "Port to forward to")
+var (
+	port      = flag.String("port", "8888", "Port for xfcc proxy")
+	forwardTo = flag.String("forwardTo", "", "Port to forward to")
+	logger    = log.New(os.Stdout, "gorouter-proxy", log.LstdFlags)
+)
 
 func main() {
 	flag.Parse()
+	startServer()
+}
 
-	fmt.Printf("gorouter-proxy.started - port: %s - forwardTo: %s", *port, *forwardTo)
-
+func startServer() {
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", *port),
 		Handler: http.HandlerFunc(forwardHandler),
+		TLSConfig: &tls.Config{
+			ClientAuth: tls.RequireAnyClientCert,
+		},
 	}
 
-	server.ListenAndServe()
+	certFile, keyFile := getCertFiles()
+	logger.Printf("starting gorouter-proxy on port %s, forwarding to %s", *port, *forwardTo)
+	if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
+		logger.Printf("Error starting server: %v", err)
+	}
+}
+
+func getCertFiles() (string, string) {
+	testCertDir := "../../../../test-certs"
+	return testCertDir + "/gorouter.crt", testCertDir + "/gorouter.key"
 }
 
 func forwardHandler(w http.ResponseWriter, inRequest *http.Request) {
 	tls := inRequest.TLS
-	cert := auth.NewCert(string(tls.PeerCertificates[0].Raw))
+	if !isClientCertValid(tls) {
+		http.Error(w, "No client certificate", http.StatusForbidden)
+		return
+	}
 
-	client := &http.Client{}
-	outRequest, err := http.NewRequest("GET", *forwardTo, nil)
+	cert := createCert(tls)
+	if cert == nil {
+		http.Error(w, "Failed to parse client certificate", http.StatusInternalServerError)
+		return
+	}
 
-	outRequest.Header.Add("X-Forwarded-Client-Cert", cert.GetXFCCHeader())
-	client.Do(outRequest)
-
+	resp, err := forwardRequest(cert)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer resp.Body.Close()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(resp.StatusCode)
+	if body, err := io.ReadAll(resp.Body); err == nil {
+		w.Write(body)
+	}
+}
+
+func isClientCertValid(tls *tls.ConnectionState) bool {
+	if tls == nil || len(tls.PeerCertificates) == 0 {
+		logger.Printf("No client certificate")
+		return false
+	}
+	logger.Print("received tls: ", tls.PeerCertificates)
+	return true
+}
+
+func createCert(tls *tls.ConnectionState) *auth.Cert {
+	pemData := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: tls.PeerCertificates[0].Raw,
+	})
+	return auth.NewCert(string(pemData))
+}
+
+func forwardRequest(cert *auth.Cert) (*http.Response, error) {
+	client := &http.Client{}
+	url := fmt.Sprintf("http://localhost:%s", *forwardTo)
+	outRequest, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	outRequest.Header.Add("X-Forwarded-Client-Cert", cert.GetXFCCHeader())
+	return client.Do(outRequest)
 }
