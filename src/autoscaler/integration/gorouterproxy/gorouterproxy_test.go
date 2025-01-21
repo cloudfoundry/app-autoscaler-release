@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -22,13 +23,31 @@ import (
 )
 
 var _ = Describe("Gorouterproxy", func() {
-	var session *gexec.Session
-	var testserver *httptest.Server
-	var proxyPort string
+	var (
+		session    *gexec.Session
+		testserver *httptest.Server
+		proxyPort  string
+		orgGUID    string
+		spaceGUID  string
+	)
 
 	BeforeEach(func() {
+		orgGUID = "valid-org"
+		spaceGUID = "valid-space"
 		proxyPort = fmt.Sprintf("%d", 8888+GinkgoParallelProcess())
 		testserver = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.Header.Get("X-Forwarded-Client-Cert") == "" {
+				http.Error(w, "No xfcc header", http.StatusForbidden)
+				return
+			}
+
+			err := auth.CheckAuth(r, orgGUID, spaceGUID)
+			if err != nil {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
 			fmt.Fprintln(w, "Hello, client")
 		}))
 
@@ -53,7 +72,7 @@ var _ = Describe("Gorouterproxy", func() {
 
 		key := testhelpers.GenerateClientKeyWithPrivateKey(privateKey)
 
-		cert, err := testhelpers.GenerateClientCertWithPrivateKey("org", "space", privateKey)
+		cert, err := testhelpers.GenerateClientCertWithPrivateKey(orgGUID, spaceGUID, privateKey)
 		Expect(err).ToNot(HaveOccurred())
 
 		testCertDir := "../../../../test-certs"
@@ -89,6 +108,5 @@ var _ = Describe("Gorouterproxy", func() {
 
 		Expect(string(body)).To(ContainSubstring("Hello, client"))
 		Expect(resp.StatusCode).To(Equal(http.StatusOK))
-
 	})
 })

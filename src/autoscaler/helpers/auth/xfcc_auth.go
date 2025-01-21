@@ -70,13 +70,13 @@ func (m *xfccAuthMiddleware) XFCCAuthenticationMiddleware(next http.Handler) htt
 	})
 }
 
-func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
+func CheckAuth(r *http.Request, org, space string) error {
 	xfccHeader := r.Header.Get("X-Forwarded-Client-Cert")
 	if xfccHeader == "" {
 		return ErrXFCCHeaderNotFound
 	}
 
-	attrs := m.parseXFCCHeader(xfccHeader)
+	attrs := parseXFCCHeader(xfccHeader)
 
 	data, err := base64.StdEncoding.DecodeString(attrs["Cert"])
 	if err != nil {
@@ -88,18 +88,23 @@ func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
 		return fmt.Errorf("failed to parse certificate: %w", err)
 	}
 
-	if m.getSpaceGuid(cert) != m.xfccAuth.ValidSpaceGuid {
+	if getSpaceGuid(cert) != space {
+
 		return ErrorWrongSpace
 	}
 
-	if m.getOrgGuid(cert) != m.xfccAuth.ValidOrgGuid {
+	if getOrgGuid(cert) != org {
 		return ErrorWrongOrg
 	}
 
 	return nil
 }
 
-func (m *xfccAuthMiddleware) parseXFCCHeader(xfccHeader string) map[string]string {
+func (m *xfccAuthMiddleware) checkAuth(r *http.Request) error {
+	return CheckAuth(r, m.xfccAuth.ValidOrgGuid, m.xfccAuth.ValidSpaceGuid)
+}
+
+func parseXFCCHeader(xfccHeader string) map[string]string {
 	attrs := make(map[string]string)
 	for _, v := range strings.Split(xfccHeader, ";") {
 		attr := strings.SplitN(v, "=", 2)
@@ -110,25 +115,25 @@ func (m *xfccAuthMiddleware) parseXFCCHeader(xfccHeader string) map[string]strin
 	return attrs
 }
 
-func (m *xfccAuthMiddleware) getSpaceGuid(cert *x509.Certificate) string {
-	return m.getGuidFromCert(cert, "space:")
+func getSpaceGuid(cert *x509.Certificate) string {
+	return getGuidFromCert(cert, "space:")
 }
 
-func (m *xfccAuthMiddleware) getOrgGuid(cert *x509.Certificate) string {
-	return m.getGuidFromCert(cert, "org:")
+func getOrgGuid(cert *x509.Certificate) string {
+	return getGuidFromCert(cert, "org:")
 }
 
-func (m *xfccAuthMiddleware) getGuidFromCert(cert *x509.Certificate, prefix string) string {
+func getGuidFromCert(cert *x509.Certificate, prefix string) string {
 	for _, ou := range cert.Subject.OrganizationalUnit {
 		if strings.Contains(ou, prefix) {
-			kv := m.mapFrom(ou)
+			kv := mapFrom(ou)
 			return kv[strings.TrimSuffix(prefix, ":")]
 		}
 	}
 	return ""
 }
 
-func (m *xfccAuthMiddleware) mapFrom(input string) map[string]string {
+func mapFrom(input string) map[string]string {
 	result := make(map[string]string)
 	r := regexp.MustCompile(`(\w+):((\w+-)*\w+)`)
 	matches := r.FindAllStringSubmatch(input, -1)
@@ -137,6 +142,5 @@ func (m *xfccAuthMiddleware) mapFrom(input string) map[string]string {
 		result[match[1]] = match[2]
 	}
 
-	m.logger.Debug("parseCertOrganizationalUnit", lager.Data{"input": input, "result": result})
 	return result
 }
