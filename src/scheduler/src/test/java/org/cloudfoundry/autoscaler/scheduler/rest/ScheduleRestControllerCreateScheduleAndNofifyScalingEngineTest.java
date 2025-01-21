@@ -133,10 +133,8 @@ public class ScheduleRestControllerCreateScheduleAndNofifyScalingEngineTest {
         mockMvc.perform(
             delete(TestDataSetupHelper.getSchedulerPath(appId)).accept(MediaType.APPLICATION_JSON));
 
-
-    // ⏳ Waiting time to ensure, the db had enough time to delete the job.
-    java.util.concurrent.TimeUnit.SECONDS.sleep(5);
-
+    java.util.concurrent.TimeUnit.SECONDS.sleep(5); // ⏳ Waiting time to ensure, the db had …
+    // … enough time to delete the job.
     resultActions.andExpect(MockMvcResultMatchers.content().string(""));
     resultActions.andExpect(status().isNoContent());
 
