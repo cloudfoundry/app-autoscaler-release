@@ -47,10 +47,10 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
@@ -62,9 +62,9 @@ public class AppScalingScheduleJobTest {
   private static EmbeddedTomcatUtil embeddedTomcatUtil;
   @Autowired private MessageBundleResourceHelper messageBundleResourceHelper;
   private Scheduler memScheduler;
-  @MockBean private Scheduler scheduler;
-  @MockBean private ActiveScheduleDao activeScheduleDao;
-  @SpyBean private RestOperations restOperations;
+  @MockitoBean private Scheduler scheduler;
+  @MockitoBean private ActiveScheduleDao activeScheduleDao;
+  @MockitoSpyBean private RestOperations restOperations;
   @Autowired private TestDataDbUtil testDataDbUtil;
   @Autowired private ApplicationContext applicationContext;
 
