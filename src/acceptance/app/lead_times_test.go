@@ -29,8 +29,8 @@ var _ = Describe("Autoscaler lead times for scaling", func() {
 			coolDown := TestCoolDownSeconds * time.Second
 			scalingTimewindow := 130 * time.Second // be friendly and allow some time for "internal autoscaler processes" (metric polling interval etc.) to take place before actual scaling happens
 
-			sendMetricForScaleOutAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 510, false)
-			sendMetricForScaleInAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 490, false)
+			sendMetricForScaleOutAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 510, true)
+			sendMetricForScaleInAndReturnNumInstancesFunc := sendMetricToAutoscaler(cfg, appToScaleGUID, appToScaleName, 490, true)
 
 			By("checking that no scaling out happens before breach_duration_secs have passed")
 			Consistently(sendMetricForScaleOutAndReturnNumInstancesFunc).

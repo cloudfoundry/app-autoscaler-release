@@ -16,7 +16,7 @@ then
 	exit 1;
 fi
 
-if [[ ! -f "${autoscaler_dir}/src/acceptance/acceptance_config.json" ]]
+if [[ ! -f "${autoscaler_acceptance_dir}/acceptance_config.json" ]]
 then
 	echo 'FAILED: Did not find file acceptance_config.json.'
 	exit 1
@@ -40,4 +40,5 @@ if [ "${suites_to_run}" != "" ]; then
 	SKIP_TEARDOWN="${skip_teardown}" CONFIG="${PWD}/acceptance_config.json" DEBUG='true' ./bin/test -race -nodes="${nodes}" -trace $ginkgo_opts ${suites_to_run}
 else
 	log 'Nothing to run!'
+	exit 1
 fi

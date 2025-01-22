@@ -252,8 +252,8 @@ describe "golangapiserver" do
     end
 
     context "default_credential_type for custom metrics" do
-      it "has a value of binding-secret by default" do
-        expect(rendered_template).to include({"default_credential_type" => "binding-secret"})
+      it "has a value of x509 by default" do
+        expect(rendered_template).to include({"default_credential_type" => "x509"})
       end
     end
   end
