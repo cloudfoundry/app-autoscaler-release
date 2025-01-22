@@ -57,10 +57,6 @@ properties:
     default: 3
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
 
-  autoscaler.cf_server.port:
-    description: "the listening port of cf xfcc endpoint"
-    default: 8080
-
   autoscaler.cf_server.xfcc.valid_org_guid:
     description: approve org guid for xfcc endpoint
     default: ''
