@@ -9,7 +9,6 @@
     "bundix":                               "latest",
     "coreutils":                            "latest",
     "delve":                                "latest",
-    "fly":                                  "7.12.0",
     "gh":                                   "latest",
     "gnumake":                              "4.4",
     "gnutar":                               "latest",
@@ -34,11 +33,12 @@
     "actionlint":                           "1.7.4",
     "yq-go":                                "4.44.5",
     "golangci-lint":                        "1.62.2",
-    "act":                                  "0.2.68",
+    "act":                                  "0.2.71",
     "cloudfoundry-cli":                     "8.8.1",
-    "ginkgo":                               "2.20.2",
+    "fly":                                  "7.10.0",
+    "ginkgo":                               "2.22.0",
     "temurin-bin-21":                       "latest",
-    "ruby":                                 "3.3.5"
+    "ruby":                                 "3.3.6"
   },
   "shell": {
     "init_hook": [
