@@ -21,7 +21,7 @@ EXTENSION_FILE := $(shell mktemp)
 export GOWORK=off
 BUILDFLAGS := -ldflags '-linkmode=external'
 
-binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq | grep -v vendor)
+binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq | grep -Ev "vendor|integration")
 test_dirs=$(shell find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 export GO111MODULE=on
 
