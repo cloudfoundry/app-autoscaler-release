@@ -29,7 +29,7 @@ jobs:
         with:
           reporter: github-pr-review
       - name: actionlint
-        uses: reviewdog/action-actionlint@f3dcc52bc6039e5d736486952379dce3e869e8a2 # v1
+        uses: reviewdog/action-actionlint@abd537417cf4991e1ba8e21a67b1119f4f53b8e0 # v1
         with:
           reporter: github-pr-review
       - name: Run Ruby linter
