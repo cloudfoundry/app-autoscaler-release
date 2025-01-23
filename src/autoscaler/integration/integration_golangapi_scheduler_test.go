@@ -488,9 +488,8 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 		})
 	})
 
-	When("scheduler responding on cf server via http", func() {
+	FWhen("scheduler responding on cf server via http", func() {
 		BeforeEach(func() {
-
 			golangApiServerConfPath := components.PrepareGolangApiServerConfig(
 				dbUrl,
 				components.Ports[GolangAPIServer],

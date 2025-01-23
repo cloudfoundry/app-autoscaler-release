@@ -86,7 +86,7 @@ type ServiceBrokerClient struct {
 	TLS models.TLSCerts `json:"tls"`
 }
 
-func (components *Components) GoRouterProxy(portToForward) *ginkgomon_v2.Runner {
+func (components *Components) GoRouterProxy(portToForward int) *ginkgomon_v2.Runner {
 	return ginkgomon_v2.New(ginkgomon_v2.Config{
 		Name:              GoRouterProxy,
 		AnsiColorCode:     "32m",
@@ -95,8 +95,9 @@ func (components *Components) GoRouterProxy(portToForward) *ginkgomon_v2.Runner 
 		Command: exec.Command(
 			components.Executables[GoRouterProxy],
 			append([]string{
-				"-p", portToForward,
-			}, argv...)...,
+				"--port", fmt.Sprint(components.Ports[GoRouterProxy]),
+				"--forwardTo", fmt.Sprint(portToForward),
+			})...,
 		),
 	})
 }

@@ -157,6 +157,7 @@ func PreparePorts() Ports {
 		EventGenerator:      17000 + GinkgoParallelProcess(),
 		CfEventGenerator:    17500 + GinkgoParallelProcess(),
 		ScalingEngine:       18000 + GinkgoParallelProcess(),
+		GoRouterProxy:       19000 + GinkgoParallelProcess(),
 	}
 }
 
