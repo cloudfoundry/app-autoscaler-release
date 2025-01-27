@@ -40,6 +40,7 @@
     "redocly":                              "latest",
     "google-java-format":                   "latest",
     "cloudfoundry-cli":                     "8.8.1",
+    "go":                                   "1.23.0",
     "temurin-bin-21":                       "latest"
   },
   "shell": {
