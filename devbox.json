@@ -29,7 +29,6 @@
     "credhub-cli":                          "2.9.29",
     "markdownlint-cli2":                    "latest",
     "bundler":                              "latest",
-    "go":                                   "1.22.5",
     "direnv":                               "2.35.0",
     "actionlint":                           "1.7.4",
     "yq-go":                                "4.44.5",
@@ -39,6 +38,7 @@
     "ginkgo":                               "2.22.0",
     "ruby":                                 "3.3.6",
     "cloudfoundry-cli":                     "8.8.1",
+    "go":                                   "1.23.0",
     "temurin-bin-21":                       "latest"
   },
   "shell": {
