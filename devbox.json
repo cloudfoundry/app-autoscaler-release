@@ -34,11 +34,11 @@
     "yq-go":                                "4.44.5",
     "golangci-lint":                        "1.62.2",
     "act":                                  "0.2.71",
-    "cloudfoundry-cli":                     "8.8.1",
     "fly":                                  "7.10.0",
     "ginkgo":                               "2.22.0",
-    "temurin-bin-21":                       "latest",
-    "ruby":                                 "3.3.6"
+    "ruby":                                 "3.3.6",
+    "cloudfoundry-cli":                     "8.8.1",
+    "temurin-bin-21":                       "latest"
   },
   "shell": {
     "init_hook": [
