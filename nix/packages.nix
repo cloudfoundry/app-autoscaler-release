@@ -75,5 +75,20 @@
     ldflags = ["-s" "-w" "-X main.version=${version}"];
   };
 
+  cf-deploy-plugin = buildGoModule rec {
+    pname = "CF Deploy Plugin";
+    version = "3.5.0";
+
+    src = fetchFromGitHub {
+      owner = "cloudfoundry";
+      repo = "multiapps-cli-plugin";
+      rev = "v${version}";
+      hash = "sha256-SVPVPJJWOk08ivZWu9UwD9sIISajIukQpcFpc0tU1zg=";
+    };
+    vendorHash = "sha256-S066sNHhKxL4anH5qSSBngtOcAswopiYBXgKAvHyfAM=";
+    CGO_ENABLED = 0;
+    ldflags = [ "-w -X main.Version=${version}" ];
+  };
+
   uaac = callPackage ./packages/uaac {};
 }
