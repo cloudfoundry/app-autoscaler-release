@@ -29,6 +29,7 @@ import (
 
 const (
 	GolangAPIServer     = "golangApiServer"
+	GolangAPICFServer   = "golangApiCFServer"
 	GoRouterProxy       = "gorouterProxy"
 	GolangServiceBroker = "golangServiceBroker"
 	Scheduler           = "scheduler"
@@ -97,6 +98,8 @@ func (components *Components) GoRouterProxy(portToForward int) *ginkgomon_v2.Run
 			append([]string{
 				"--port", fmt.Sprint(components.Ports[GoRouterProxy]),
 				"--forwardTo", fmt.Sprint(portToForward),
+				"--certFile", filepath.Join(testCertDir, "gorouter.crt"),
+				"--keyFile", filepath.Join(testCertDir, "gorouter.key"),
 			})...,
 		),
 	})
@@ -215,6 +218,9 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
 			},
 		},
+		VCAPServer: helpers.ServerConfig{
+			Port: components.Ports[GolangAPICFServer],
+		},
 		Db: map[string]db.DatabaseConfig{
 			"policy_db": {
 				URL: dbURI,
@@ -253,6 +259,7 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 			},
 		},
 		CF: cf.Config{
+
 			API:      cfApi,
 			ClientID: "admin",
 			Secret:   "admin",

@@ -17,6 +17,8 @@ import (
 var (
 	port      = flag.String("port", "8888", "Port for xfcc proxy")
 	forwardTo = flag.String("forwardTo", "", "Port to forward to")
+	keyFile   = flag.String("keyFile", "", "Path to key file")
+	certFile  = flag.String("certFile", "", "Path to cert file")
 	logger    = log.New(os.Stdout, "gorouter-proxy", log.LstdFlags)
 )
 
@@ -35,13 +37,18 @@ func startServer() {
 	}
 
 	certFile, keyFile := getCertFiles()
-	logger.Printf("starting gorouter-proxy on port %s, forwarding to %s", *port, *forwardTo)
+
+	logger.Printf("gorouter-proxy.started - port %s, forwardTo %s", *port, *forwardTo)
 	if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
 		logger.Printf("Error starting server: %v", err)
 	}
 }
 
 func getCertFiles() (string, string) {
+	if *keyFile != "" && *certFile != "" {
+		return *certFile, *keyFile
+	}
+
 	testCertDir := "../../../../test-certs"
 	return testCertDir + "/gorouter.crt", testCertDir + "/gorouter.key"
 }

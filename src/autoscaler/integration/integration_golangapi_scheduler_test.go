@@ -258,7 +258,6 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 					})
 				})
 			})
-
 		})
 
 		Describe("creating and binding a service instance without a default policy", func() {
@@ -504,6 +503,11 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 			startGolangApiServer(golangApiServerConfPath)
 			startGoRouterProxyTo(components.Ports[Scheduler])
 
+		})
+
+		AfterEach(func() {
+			stopGolangApiServer()
+			stopGoRouterProxy()
 		})
 		When("binding to it", func() {
 			var (

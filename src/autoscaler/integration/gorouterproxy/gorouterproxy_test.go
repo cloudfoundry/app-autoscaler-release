@@ -66,10 +66,9 @@ var _ = Describe("Gorouterproxy", func() {
 	})
 
 	It("proxy request to test server and turns tls creds into xfcc header", func() {
-		Eventually(session.Out, 20*time.Second).Should(gbytes.Say("starting"))
+		Eventually(session.Out, 20*time.Second).Should(gbytes.Say("gorouter-proxy.started"))
 
 		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-
 		key := testhelpers.GenerateClientKeyWithPrivateKey(privateKey)
 
 		cert, err := testhelpers.GenerateClientCertWithPrivateKey(orgGUID, spaceGUID, privateKey)

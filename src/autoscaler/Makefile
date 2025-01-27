@@ -126,9 +126,15 @@ test: generate-fakes
 	@echo "Running tests"
 	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} ${TEST} --skip-package='integration'
 
-testsuite:
+.PHONY: testsuite
+testsuite: build-gorouterproxy
 	@echo " - using DBURL=${DBURL} TEST=${TEST}"
 	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} ${TEST}
+
+.PHONY: build-gorouterproxy
+build-gorouterproxy:
+	@echo " - building gorouterproxy"
+	@CGO_ENABLED=1 go build $(BUILDTAGS) $(BUILDFLAGS) -o build/gorouterproxy integration/gorouterproxy/main.go
 
 .PHONY: integration
 integration: generate-fakes

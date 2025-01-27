@@ -144,6 +144,7 @@ func CompileTestedExecutables() Executables {
 	builtExecutables[ScalingEngine] = path.Join(rootDir, "src", "autoscaler", "build", "scalingengine")
 	builtExecutables[Operator] = path.Join(rootDir, "src", "autoscaler", "build", "operator")
 	builtExecutables[GolangAPIServer] = path.Join(rootDir, "src", "autoscaler", "build", "api")
+	builtExecutables[GoRouterProxy] = path.Join(rootDir, "src", "autoscaler", "build", "gorouterproxy")
 
 	return builtExecutables
 }
@@ -151,6 +152,7 @@ func CompileTestedExecutables() Executables {
 func PreparePorts() Ports {
 	return Ports{
 		GolangAPIServer:     22000 + GinkgoParallelProcess(),
+		GolangAPICFServer:   22500 + GinkgoParallelProcess(),
 		GolangServiceBroker: 23000 + GinkgoParallelProcess(),
 		Scheduler:           15000 + GinkgoParallelProcess(),
 		MetricsCollector:    16000 + GinkgoParallelProcess(),
@@ -214,15 +216,23 @@ func startMockLogCache() {
 func stopGolangApiServer() {
 	ginkgomon_v2.Kill(processMap[GolangAPIServer], 5*time.Second)
 }
+
+func stopGoRouterProxy() {
+	ginkgomon_v2.Kill(processMap[GoRouterProxy], 5*time.Second)
+}
+
 func stopScheduler() {
 	ginkgomon_v2.Kill(processMap[Scheduler], 5*time.Second)
 }
+
 func stopScalingEngine() {
 	ginkgomon_v2.Kill(processMap[ScalingEngine], 5*time.Second)
 }
+
 func stopEventGenerator() {
 	ginkgomon_v2.Kill(processMap[EventGenerator], 5*time.Second)
 }
+
 func stopOperator() {
 	ginkgomon_v2.Kill(processMap[Operator], 5*time.Second)
 }
