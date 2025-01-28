@@ -164,8 +164,8 @@ target/start-db-postgres_CI_false:
 			--health-interval 1s \
 			--health-timeout 2s \
 			--health-retries 10 \
-			-d \
-			postgres:${POSTGRES_TAG} >/dev/null;\
+			postgres:${POSTGRES_TAG} \
+			-c max_connections=1000 >/dev/null;\
 	else echo " - $@ already up'"; fi;
 	@touch $@
 target/start-db-postgres_CI_true:
