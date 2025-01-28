@@ -132,7 +132,7 @@ test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
 	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
 test-autoscaler-suite: check-db_type init-db test-certs
-	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}'
+	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
@@ -164,8 +164,9 @@ target/start-db-postgres_CI_false:
 			--health-interval 1s \
 			--health-timeout 2s \
 			--health-retries 10 \
+			-d \
 			postgres:${POSTGRES_TAG} \
-			-c max_connections=1000 >/dev/null;\
+			-c 'max_connections=1000' >/dev/null;\
 	else echo " - $@ already up'"; fi;
 	@touch $@
 target/start-db-postgres_CI_true:
