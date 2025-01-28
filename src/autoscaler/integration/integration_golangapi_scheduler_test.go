@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
@@ -29,9 +30,16 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 		binding3Id        string
 		orgId             string
 		spaceId           string
+		tmpDir            string
+
+		err       error
+		brokerUrl *url.URL
 	)
 
 	BeforeEach(func() {
+		tmpDir, err = os.MkdirTemp("", "autoscaler")
+		Expect(err).NotTo(HaveOccurred())
+
 		startFakeCCNOAAUAA(initInstanceCount)
 		httpClient = testhelpers.NewApiClient()
 		httpClientForPublicApi = testhelpers.NewPublicApiClient()
@@ -49,14 +57,17 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 		app2Id = uuid.NewString()
 		app3Id = uuid.NewString()
 		brokerAuth = base64.StdEncoding.EncodeToString([]byte("broker_username:broker_password"))
+
+		brokerUrl, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", components.Ports[GolangServiceBroker]))
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	AfterEach(func() {
+		os.RemoveAll(tmpDir)
 		stopScheduler()
 	})
 
 	When("offered as a service", func() {
-
 		BeforeEach(func() {
 			golangApiServerConfPath := components.PrepareGolangApiServerConfig(
 				dbUrl,
@@ -190,7 +201,7 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 				stopScheduler()
 			})
 			BeforeEach(func() {
-				provisionAndBind(serviceInstanceId, orgId, spaceId, bindingId, appId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				provisionAndBind(brokerUrl, serviceInstanceId, orgId, spaceId, bindingId, appId, httpClientForPublicApi)
 			})
 
 			Context("Create policy", func() {
@@ -223,11 +234,12 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 
 		Describe("Create policy", func() {
 			BeforeEach(func() {
-				provisionAndBind(serviceInstanceId, orgId, spaceId, bindingId, appId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				provisionAndBind(brokerUrl, serviceInstanceId, orgId, spaceId, bindingId, appId, httpClientForPublicApi)
 			})
 			AfterEach(func() {
-				unbindAndDeProvision(bindingId, appId, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				unbindAndDeProvision(brokerUrl, bindingId, appId, serviceInstanceId, httpClientForPublicApi)
 			})
+
 			Context("public api", func() {
 				Context("Policies with schedules", func() {
 					It("creates a policy and associated schedules", func() {
@@ -262,11 +274,13 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 
 		Describe("creating and binding a service instance without a default policy", func() {
 			BeforeEach(func() {
-				provisionAndBind(serviceInstanceId, orgId, spaceId, bindingId, appId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				provisionAndBind(brokerUrl, serviceInstanceId, orgId, spaceId, bindingId, appId, httpClientForPublicApi)
 			})
+
 			AfterEach(func() {
-				unbindAndDeProvision(bindingId, appId, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				unbindAndDeProvision(brokerUrl, bindingId, appId, serviceInstanceId, httpClientForPublicApi)
 			})
+
 			Context("and then setting a default policy", func() {
 				var (
 					newDefaultPolicy []byte
@@ -297,7 +311,7 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 				resp          *http.Response
 			)
 			JustBeforeEach(func() {
-				resp, err = provisionServiceInstance(serviceInstanceId, orgId, spaceId, defaultPolicy, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				resp, err = provisionServiceInstance(brokerUrl, serviceInstanceId, orgId, spaceId, defaultPolicy, httpClientForPublicApi)
 				Expect(err).NotTo(HaveOccurred())
 			})
 			AfterEach(func() { _ = resp.Body.Close() })
@@ -338,16 +352,16 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 				})
 
 				AfterEach(func() {
-					resp, err = unbindService(binding2Id, app2Id, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+					resp, err = unbindService(brokerUrl, binding2Id, app2Id, serviceInstanceId, httpClientForPublicApi)
 					Expect(err).NotTo(HaveOccurred(), "Error: %s", err)
 					defer func() { _ = resp.Body.Close() }()
 					Expect(resp.StatusCode).To(Equal(http.StatusOK), ResponseMessage(resp))
 
-					resp, err = unbindService(binding3Id, app3Id, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+					resp, err = unbindService(brokerUrl, binding3Id, app3Id, serviceInstanceId, httpClientForPublicApi)
 					Expect(err).NotTo(HaveOccurred(), "Error: %s", err)
 					defer func() { _ = resp.Body.Close() }()
 					Expect(resp.StatusCode).To(Equal(http.StatusOK), ResponseMessage(resp))
-					unbindAndDeProvision(bindingId, appId, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+					unbindAndDeProvision(brokerUrl, bindingId, appId, serviceInstanceId, httpClientForPublicApi)
 				})
 
 				It("creates a policy and associated schedules", func() {
@@ -427,11 +441,13 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 
 		Describe("Update policy", func() {
 			BeforeEach(func() {
-				provisionAndBind(serviceInstanceId, orgId, spaceId, bindingId, appId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				provisionAndBind(brokerUrl, serviceInstanceId, orgId, spaceId, bindingId, appId, httpClientForPublicApi)
 			})
+
 			AfterEach(func() {
-				unbindAndDeProvision(bindingId, appId, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				unbindAndDeProvision(brokerUrl, bindingId, appId, serviceInstanceId, httpClientForPublicApi)
 			})
+
 			Context("public api", func() {
 				Context("Update policies with schedules", func() {
 					BeforeEach(func() {
@@ -456,10 +472,10 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 
 		Describe("Delete Policies", func() {
 			BeforeEach(func() {
-				provisionAndBind(serviceInstanceId, orgId, spaceId, bindingId, appId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				provisionAndBind(brokerUrl, serviceInstanceId, orgId, spaceId, bindingId, appId, httpClientForPublicApi)
 			})
 			AfterEach(func() {
-				unbindAndDeProvision(bindingId, appId, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				unbindAndDeProvision(brokerUrl, bindingId, appId, serviceInstanceId, httpClientForPublicApi)
 			})
 
 			Context("public api", func() {
@@ -487,8 +503,9 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 		})
 	})
 
-	FWhen("scheduler responding on cf server via http", func() {
+	When("connection to scheduler through the gorouter", func() {
 		BeforeEach(func() {
+
 			golangApiServerConfPath := components.PrepareGolangApiServerConfig(
 				dbUrl,
 				components.Ports[GolangAPIServer],
@@ -501,76 +518,57 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 				tmpDir)
 
 			startGolangApiServer(golangApiServerConfPath)
-			startGoRouterProxyTo(components.Ports[Scheduler])
+			startGoRouterProxyTo(components.Ports[SchedulerCFServer])
 
+			certTmpDir := os.TempDir()
+			privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+			Expect(err).ToNot(HaveOccurred())
+
+			cfInstanceKeyContent := testhelpers.GenerateClientKeyWithPrivateKey(privateKey)
+
+			cfInstanceCertFileToRotateContent, err := testhelpers.GenerateClientCertWithPrivateKey("org", "space", privateKey)
+			Expect(err).ToNot(HaveOccurred())
+
+			certFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.crt", string(cfInstanceCertFileToRotateContent))
+			Expect(err).NotTo(HaveOccurred())
+
+			keyFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.key", string(cfInstanceKeyContent))
+			Expect(err).NotTo(HaveOccurred())
+
+			os.Setenv("CF_INSTANCE_KEY", keyFile)
+			os.Setenv("CF_INSTANCE_CERT", certFile)
 		})
 
 		AfterEach(func() {
 			stopGolangApiServer()
 			stopGoRouterProxy()
+			os.Unsetenv("CF_INSTANCE_KEY")
+			os.Unsetenv("CF_INSTANCE_CERT")
 		})
-		When("binding to it", func() {
-			var (
-				defaultPolicy []byte
-				err           error
-				resp          *http.Response
-			)
 
+		Describe("Create policy", func() {
 			BeforeEach(func() {
-				defaultPolicy = setPolicyRecurringDate(readPolicyFromFile("fakePolicyWithSchedule.json"))
-
+				provisionAndBind(brokerUrl, serviceInstanceId, orgId, spaceId, bindingId, appId, httpClientForPublicApi)
 			})
-
-			JustBeforeEach(func() {
-				resp, err = bindService(bindingId, appId, serviceInstanceId, nil, components.Ports[GolangServiceBroker], httpClientForPublicApi)
-				Expect(err).NotTo(HaveOccurred(), "Error: %s", err)
-				Expect(resp.StatusCode).To(Equal(http.StatusCreated), ResponseMessage(resp))
-				defer func() { _ = resp.Body.Close() }()
-
-			})
-
 			AfterEach(func() {
-				os.Unsetenv("CF_INSTANCE_KEY")
-				os.Unsetenv("CF_INSTANCE_CERT")
-
-				unbindAndDeProvision(bindingId, appId, serviceInstanceId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+				unbindAndDeProvision(brokerUrl, bindingId, appId, serviceInstanceId, httpClientForPublicApi)
 			})
 
-			When("instance certs are available", func() {
-				BeforeEach(func() {
-					certTmpDir := os.TempDir()
-					privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-					Expect(err).ToNot(HaveOccurred())
+			When("Policies with schedules", func() {
+				It("creates a policy and associated schedules", func() {
+					policyStr = setPolicyRecurringDate(readPolicyFromFile("fakePolicyWithSchedule.json"))
 
-					cfInstanceKeyContent := testhelpers.GenerateClientKeyWithPrivateKey(privateKey)
-
-					cfInstanceCertFileToRotateContent, err := testhelpers.GenerateClientCertWithPrivateKey("org", "space", privateKey)
-					Expect(err).ToNot(HaveOccurred())
-
-					certFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.crt", string(cfInstanceCertFileToRotateContent))
-					Expect(err).NotTo(HaveOccurred())
-
-					keyFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.key", string(cfInstanceKeyContent))
-					Expect(err).NotTo(HaveOccurred())
-
-					os.Setenv("CF_INSTANCE_KEY", keyFile)
-					os.Setenv("CF_INSTANCE_CERT", certFile)
-				})
-
-				FIt("creates a policy and associated schedules", func() {
-					By("setting the default policy on apps without an explicit one")
-					checkApiServerContent(appId, defaultPolicy, http.StatusOK, components.Ports[GolangAPIServer], httpClientForPublicApi)
+					doAttachPolicy(appId, policyStr, http.StatusOK, components.Ports[GolangAPIServer], httpClientForPublicApi)
+					checkApiServerContent(appId, policyStr, http.StatusOK, components.Ports[GolangAPIServer], httpClientForPublicApi)
 					assertScheduleContents(appId, http.StatusOK, map[string]int{"recurring_schedule": 4, "specific_date": 2})
 				})
-			})
 
-			When("instance certs are not available", func() {
-				BeforeEach(func() {
-					os.Unsetenv("CF_INSTANCE_KEY")
-					os.Unsetenv("CF_INSTANCE_CERT")
-				})
+				XIt("fails with an invalid policy", func() {
+					policyStr = readPolicyFromFile("fakeInvalidPolicy.json")
 
-				XIt("returns an unauthorize", func() {
+					doAttachPolicy(appId, policyStr, http.StatusBadRequest, components.Ports[GolangAPIServer], httpClientForPublicApi)
+					checkApiServerStatus(appId, http.StatusNotFound, components.Ports[GolangAPIServer], httpClientForPublicApi)
+					checkSchedulerStatus(appId, http.StatusNotFound)
 				})
 			})
 		})

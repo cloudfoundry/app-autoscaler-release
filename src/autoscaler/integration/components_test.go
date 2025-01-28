@@ -33,6 +33,7 @@ const (
 	GoRouterProxy       = "gorouterProxy"
 	GolangServiceBroker = "golangServiceBroker"
 	Scheduler           = "scheduler"
+	SchedulerCFServer   = "schedulerCFServer"
 	MetricsCollector    = "metricsCollector"
 	EventGenerator      = "eventGenerator"
 	CfEventGenerator    = "cfEventGenerator"
@@ -310,22 +311,22 @@ func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngine
 		driverClassName = "com.mysql.cj.jdbc.Driver"
 	}
 
-	type TemplateParameters struct {
+	templateParameters := struct {
 		ScalingEngineUri  string
 		HttpClientTimeout int
 		TestCertDir       string
 		Port              int
+		HttpPort          int
 		DriverClassName   string
 		DBUser            string
 		DBPassword        string
 		JDBCURI           string
-	}
-
-	templateParameters := TemplateParameters{
+	}{
 		ScalingEngineUri:  scalingEngineUri,
 		HttpClientTimeout: int(httpClientTimeout / time.Second),
 		TestCertDir:       testCertDir,
 		Port:              components.Ports[Scheduler],
+		HttpPort:          components.Ports[SchedulerCFServer],
 		DriverClassName:   driverClassName,
 		DBUser:            userName,
 		DBPassword:        password,

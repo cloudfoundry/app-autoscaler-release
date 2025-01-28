@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
 	"strconv"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
@@ -36,11 +38,22 @@ func (t *testMetrics) InitializeIdentifiers() {
 }
 
 var _ = Describe("Integration_GolangApi_EventGenerator", func() {
-	var t *testMetrics
-	var eventGeneratorConfPath string
-	var golangApiServerConfPath string
+	var (
+		t                       *testMetrics
+		eventGeneratorConfPath  string
+		golangApiServerConfPath string
+		brokerUrl               *url.URL
+		tmpDir                  string
+		err                     error
+	)
 
 	BeforeEach(func() {
+		tmpDir, err = os.MkdirTemp("", "autoscaler")
+		Expect(err).NotTo(HaveOccurred())
+
+		brokerUrl, err = url.Parse(fmt.Sprintf("https://127.0.0.1:%d", components.Ports[GolangServiceBroker]))
+		Expect(err).NotTo(HaveOccurred())
+
 		t = &testMetrics{}
 		setupTestEnvironment(t)
 	})
@@ -56,11 +69,12 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 
 	When("using eventgenerator unified CF Server", func() {
 		JustBeforeEach(func() {
-			bindServiceInstance(t)
+			bindServiceInstance(brokerUrl, t)
 		})
+
 		BeforeEach(func() {
-			eventGeneratorConfPath = prepareEventGeneratorConfig()
-			golangApiServerConfPath = prepareGolangApiServerConfig()
+			eventGeneratorConfPath = prepareEventGeneratorConfig(tmpDir)
+			golangApiServerConfPath = prepareGolangApiServerConfig(tmpDir)
 		})
 
 		Context("Get aggregated metrics", func() {
@@ -93,8 +107,8 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 
 	When("the using eventgenerator legacy Server", func() {
 		BeforeEach(func() {
-			eventGeneratorConfPath = prepareEventGeneratorConfig()
-			golangApiServerConfPath = prepareGolangApiServerConfig()
+			eventGeneratorConfPath = prepareEventGeneratorConfig(tmpDir)
+			golangApiServerConfPath = prepareGolangApiServerConfig(tmpDir)
 		})
 
 		Describe("Get App Metrics", func() {
@@ -138,7 +152,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 
 			When("the app is bound to the service instance", func() {
 				JustBeforeEach(func() {
-					bindServiceInstance(t)
+					bindServiceInstance(brokerUrl, t)
 				})
 
 				Context("EventGenerator is down", func() {
@@ -220,9 +234,9 @@ func prepareFakeCCNOAAUAAWithUnauthorized() {
 	fakeCCNOAAUAA.AllowUnhandledRequests = true
 }
 
-func bindServiceInstance(t *testMetrics) {
+func bindServiceInstance(brokerUrl *url.URL, t *testMetrics) {
 	GinkgoHelper()
-	provisionAndBind(t.ServiceInstanceId, t.OrgId, t.SpaceId, t.BindingId, t.AppId, components.Ports[GolangServiceBroker], httpClientForPublicApi)
+	provisionAndBind(brokerUrl, t.ServiceInstanceId, t.OrgId, t.SpaceId, t.BindingId, t.AppId, httpClientForPublicApi)
 }
 
 func insertTestMetrics(t *testMetrics, timestamps ...int64) {
@@ -344,7 +358,7 @@ func generateResources(t *testMetrics, timestamps ...int64) []models.AppMetric {
 	return resources
 }
 
-func prepareEventGeneratorConfig() string {
+func prepareEventGeneratorConfig(tmpDir string) string {
 	return components.PrepareEventGeneratorConfig(dbUrl,
 		components.Ports[EventGenerator],
 		fmt.Sprintf("https://127.0.0.1:%d", components.Ports[MetricsCollector]),
@@ -354,7 +368,7 @@ func prepareEventGeneratorConfig() string {
 		tmpDir)
 }
 
-func prepareGolangApiServerConfig() string {
+func prepareGolangApiServerConfig(tmpDir string) string {
 	golangApiServerConfPath := components.PrepareGolangApiServerConfig(
 		dbUrl,
 		components.Ports[GolangAPIServer],

@@ -41,7 +41,6 @@ const (
 
 var (
 	components            Components
-	tmpDir                string
 	schedulerConfPath     string
 	scalingEngineConfPath string
 	operatorConfPath      string
@@ -101,9 +100,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	Expect(err).NotTo(HaveOccurred())
 	components.Ports = PreparePorts()
 
-	tmpDir, err = os.MkdirTemp("", "autoscaler")
-	Expect(err).NotTo(HaveOccurred())
-
 	dbUrl = GetDbUrl()
 	database, err := db.GetConnection(dbUrl)
 	Expect(err).NotTo(HaveOccurred())
@@ -117,13 +113,13 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	}
 })
 
-var _ = SynchronizedAfterSuite(func() {
-	if len(tmpDir) > 0 {
-		_ = os.RemoveAll(tmpDir)
-	}
-}, func() {
-
-})
+//var _ = SynchronizedAfterSuite(func() {
+//	if len(tmpDir) > 0 {
+//		_ = os.RemoveAll(tmpDir)
+//	}
+//}, func() {
+//
+//})
 
 var _ = BeforeEach(func() {
 	httpClient = NewApiClient()
@@ -155,6 +151,7 @@ func PreparePorts() Ports {
 		GolangAPICFServer:   22500 + GinkgoParallelProcess(),
 		GolangServiceBroker: 23000 + GinkgoParallelProcess(),
 		Scheduler:           15000 + GinkgoParallelProcess(),
+		SchedulerCFServer:   15500 + GinkgoParallelProcess(),
 		MetricsCollector:    16000 + GinkgoParallelProcess(),
 		EventGenerator:      17000 + GinkgoParallelProcess(),
 		CfEventGenerator:    17500 + GinkgoParallelProcess(),
@@ -272,7 +269,7 @@ func testFileFragment(filename string) string {
 	return base
 }
 
-func provisionServiceInstance(serviceInstanceId string, orgId string, spaceId string, defaultPolicy []byte, brokerPort int, httpClient *http.Client) (*http.Response, error) {
+func provisionServiceInstance(brokerUrl *url.URL, serviceInstanceId string, orgId string, spaceId string, defaultPolicy []byte, httpClient *http.Client) (*http.Response, error) {
 	By("provisionServiceInstance")
 	var bindBody map[string]interface{}
 	if defaultPolicy != nil {
@@ -298,7 +295,7 @@ func provisionServiceInstance(serviceInstanceId string, orgId string, spaceId st
 
 	body, err := json.Marshal(bindBody)
 	Expect(err).NotTo(HaveOccurred())
-	req, err := http.NewRequest("PUT", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s", brokerPort, serviceInstanceId), bytes.NewReader(body))
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/v2/service_instances/%s", brokerUrl.String(), serviceInstanceId), bytes.NewReader(body))
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
@@ -330,9 +327,9 @@ func updateServiceInstance(serviceInstanceId string, defaultPolicy []byte, broke
 	return httpClient.Do(req)
 }
 
-func deProvisionServiceInstance(serviceInstanceId string, brokerPort int, httpClient *http.Client) (*http.Response, error) {
+func deProvisionServiceInstance(brokerUrl *url.URL, serviceInstanceId string, httpClient *http.Client) (*http.Response, error) {
 	By("deProvisionServiceInstance")
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s?service_id=%s&plan_id=%s", brokerPort, serviceInstanceId, serviceId, planId), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/service_instances/%s?service_id=%s&plan_id=%s", brokerUrl.String(), serviceInstanceId, serviceId, planId), nil)
 	ExpectWithOffset(2, err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
@@ -367,17 +364,19 @@ func bindService(bindingId string, appId string, serviceInstanceId string, polic
 	return httpClient.Do(req)
 }
 
-func unbindService(bindingId string, appId string, serviceInstanceId string, brokerPort int, httpClient *http.Client) (*http.Response, error) {
+func unbindService(brokerUrl *url.URL, bindingId string, appId string, serviceInstanceId string, httpClient *http.Client) (*http.Response, error) {
 	By("unbindService")
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("https://127.0.0.1:%d/v2/service_instances/%s/service_bindings/%s?service_id=%s&plan_id=%s", brokerPort, serviceInstanceId, bindingId, serviceId, planId), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/service_instances/%s/service_bindings/%s?service_id=%s&plan_id=%s", brokerUrl.String(), serviceInstanceId, bindingId, serviceId, planId), nil)
 	Expect(err).NotTo(HaveOccurred())
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Basic "+brokerAuth)
 	return httpClient.Do(req)
 }
 
-func provisionAndBind(serviceInstanceId string, orgId string, spaceId string, bindingId string, appId string, brokerPort int, httpClient *http.Client) {
-	resp, err := provisionServiceInstance(serviceInstanceId, orgId, spaceId, nil, brokerPort, httpClient)
+// It is used to provision and bind a service instance to an app
+func provisionAndBind(brokerUrl *url.URL, serviceInstanceId string, orgId string, spaceId string, bindingId string, appId string, httpClient *http.Client) {
+	brokerPort := components.Ports[GolangServiceBroker]
+	resp, err := provisionServiceInstance(brokerUrl, serviceInstanceId, orgId, spaceId, nil, httpClient)
 	Expect(err).WithOffset(1).NotTo(HaveOccurred())
 	Expect(resp.StatusCode).WithOffset(1).To(Equal(http.StatusCreated), fmt.Sprintf("response was '%s'", MustReadAll(resp.Body)))
 	_ = resp.Body.Close()
@@ -388,13 +387,13 @@ func provisionAndBind(serviceInstanceId string, orgId string, spaceId string, bi
 	_ = resp.Body.Close()
 }
 
-func unbindAndDeProvision(bindingId string, appId string, serviceInstanceId string, brokerPort int, httpClient *http.Client) {
-	resp, err := unbindService(bindingId, appId, serviceInstanceId, brokerPort, httpClient)
+func unbindAndDeProvision(brokerUrl *url.URL, bindingId string, appId string, serviceInstanceId string, httpClient *http.Client) {
+	resp, err := unbindService(brokerUrl, bindingId, appId, serviceInstanceId, httpClient)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(http.StatusOK))
 	_ = resp.Body.Close()
 
-	resp, err = deProvisionServiceInstance(serviceInstanceId, brokerPort, httpClient)
+	resp, err = deProvisionServiceInstance(brokerUrl, serviceInstanceId, httpClient)
 	ExpectWithOffset(1, err).NotTo(HaveOccurred())
 	ExpectWithOffset(1, resp.StatusCode).To(Equal(http.StatusOK))
 	_ = resp.Body.Close()
