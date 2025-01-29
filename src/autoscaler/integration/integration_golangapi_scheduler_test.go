@@ -71,14 +71,12 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 		BeforeEach(func() {
 			golangApiServerConfPath := components.PrepareGolangApiServerConfig(
 				dbUrl,
-				components.Ports[GolangAPIServer],
-				components.Ports[GolangServiceBroker],
 				fakeCCNOAAUAA.URL(),
 				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
 				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
 				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator]),
-				"https://127.0.0.1:8888",
 				tmpDir)
+
 			startGolangApiServer(golangApiServerConfPath)
 
 			resp, err := detachPolicy(appId, components.Ports[GolangAPIServer], httpClientForPublicApi)
@@ -505,19 +503,17 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 
 	When("connection to scheduler through the gorouter", func() {
 		BeforeEach(func() {
+			golangConf := DefaultGolangAPITestConfig(dbUrl)
 
-			golangApiServerConfPath := components.PrepareGolangApiServerConfig(
-				dbUrl,
-				components.Ports[GolangAPIServer],
-				components.Ports[GolangServiceBroker],
-				fakeCCNOAAUAA.URL(),
-				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
-				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
-				fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator]),
-				"https://127.0.0.1:8888",
-				tmpDir)
+			golangConf.Scheduler.SchedulerURL = fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler])
+			golangConf.EventGenerator.EventGeneratorUrl = fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator])
+			golangConf.ScalingEngine.ScalingEngineUrl = fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine])
+			golangConf.CF.API = fakeCCNOAAUAA.URL()
+
+			golangApiServerConfPath := WriteYmlConfig(tmpDir, GolangAPIServer, &golangConf)
 
 			startGolangApiServer(golangApiServerConfPath)
+
 			startGoRouterProxyTo(components.Ports[SchedulerCFServer])
 
 			certTmpDir := os.TempDir()

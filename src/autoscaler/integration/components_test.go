@@ -178,12 +178,13 @@ func (components *Components) Operator(confPath string, argv ...string) *ginkgom
 	})
 }
 
-func defaultGolangAPITestConfig() apiConfig.Config {
+func DefaultGolangAPITestConfig(dbURI string) apiConfig.Config {
 	return apiConfig.Config{
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
 		Server: helpers.ServerConfig{
+			Port: components.Ports[GolangAPIServer],
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "api.key"),
 				CertFile:   filepath.Join(testCertDir, "api.crt"),
@@ -191,6 +192,7 @@ func defaultGolangAPITestConfig() apiConfig.Config {
 			},
 		},
 		BrokerServer: helpers.ServerConfig{
+			Port: components.Ports[GolangServiceBroker],
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "servicebroker.key"),
 				CertFile:   filepath.Join(testCertDir, "servicebroker.crt"),
@@ -244,8 +246,14 @@ func defaultGolangAPITestConfig() apiConfig.Config {
 			ClientID: "admin",
 			Secret:   "admin",
 		},
-		DB:               map[string]db.DatabaseConfig{},
-		MetricsForwarder: apiConfig.MetricsForwarderConfig{},
+		Db: map[string]db.DatabaseConfig{
+			"policy_db":  db.DatabaseConfig{URL: dbURI},
+			"binding_db": db.DatabaseConfig{URL: dbURI},
+		},
+
+		MetricsForwarder: apiConfig.MetricsForwarderConfig{
+			MetricsForwarderUrl: "https://127.0.0.1:8888",
+		},
 		RateLimit: models.RateLimitConfig{
 			MaxAmount:     10,
 			ValidDuration: 1 * time.Second,
@@ -256,20 +264,15 @@ func defaultGolangAPITestConfig() apiConfig.Config {
 
 }
 
-func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicApiPort int, brokerPort int, cfApi string, schedulerUri string, scalingEngineUri string, eventGeneratorUri string, metricsForwarderUri string, tmpDir string) string {
-	cfg := defaultGolangAPITestConfig()
-	cfg.Server.Port = publicApiPort
-	cfg.BrokerServer.Port = brokerPort
-	cfg.VCAPServer.Port = components.Ports[GolangAPICFServer]
+func (components *Components) PrepareGolangApiServerConfig(dbURI string, cfApi string, schedulerUri string, scalingEngineUri string, eventGeneratorUri string, tmpDir string) string {
+	cfg := DefaultGolangAPITestConfig(dbURI)
+
 	cfg.Scheduler.SchedulerURL = schedulerUri
 	cfg.ScalingEngine.ScalingEngineUrl = scalingEngineUri
 	cfg.EventGenerator.EventGeneratorUrl = eventGeneratorUri
-	cfg.MetricsForwarder.MetricsForwarderUrl = metricsForwarderUri
 	cfg.CF.API = cfApi
-	cfg.Db["policy_db"] = db.DatabaseConfig{URL: dbURI}
-	cfg.Db["binding_db"] = db.DatabaseConfig{URL: dbURI}
 
-	return writeYmlConfig(tmpDir, GolangAPIServer, &cfg)
+	return WriteYmlConfig(tmpDir, GolangAPIServer, &cfg)
 }
 
 func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngineUri string, tmpDir string, httpClientTimeout time.Duration) string {
@@ -400,7 +403,7 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 		DefaultStatWindowSecs:     60,
 		HttpClientTimeout:         httpClientTimeout,
 	}
-	return writeYmlConfig(tmpDir, EventGenerator, &conf)
+	return WriteYmlConfig(tmpDir, EventGenerator, &conf)
 }
 
 func (components *Components) PrepareScalingEngineConfig(dbURI string, port int, ccUAAURL string, httpClientTimeout time.Duration, tmpDir string) string {
@@ -437,7 +440,7 @@ func (components *Components) PrepareScalingEngineConfig(dbURI string, port int,
 		HttpClientTimeout:   httpClientTimeout,
 	}
 
-	return writeYmlConfig(tmpDir, ScalingEngine, &conf)
+	return WriteYmlConfig(tmpDir, ScalingEngine, &conf)
 }
 
 func (components *Components) PrepareOperatorConfig(dbURI string, ccUAAURL string, scalingEngineURL string, schedulerURL string, syncInterval time.Duration, cutoffDuration time.Duration, httpClientTimeout time.Duration, tmpDir string) string {
@@ -498,10 +501,10 @@ func (components *Components) PrepareOperatorConfig(dbURI string, ccUAAURL strin
 		HttpClientTimeout: httpClientTimeout,
 	}
 
-	return writeYmlConfig(tmpDir, Operator, &conf)
+	return WriteYmlConfig(tmpDir, Operator, &conf)
 }
 
-func writeYmlConfig(dir string, componentName string, c interface{}) string {
+func WriteYmlConfig(dir string, componentName string, c interface{}) string {
 	cfgFile, err := os.CreateTemp(dir, componentName)
 	Expect(err).NotTo(HaveOccurred())
 	defer cfgFile.Close()

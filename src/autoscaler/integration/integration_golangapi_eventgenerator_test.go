@@ -371,13 +371,10 @@ func prepareEventGeneratorConfig(tmpDir string) string {
 func prepareGolangApiServerConfig(tmpDir string) string {
 	golangApiServerConfPath := components.PrepareGolangApiServerConfig(
 		dbUrl,
-		components.Ports[GolangAPIServer],
-		components.Ports[GolangServiceBroker],
 		fakeCCNOAAUAA.URL(),
 		fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler]),
 		fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine]),
 		fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator]),
-		"https://127.0.0.1:8888",
 		tmpDir)
 
 	brokerAuth = base64.StdEncoding.EncodeToString([]byte("broker_username:broker_password"))
