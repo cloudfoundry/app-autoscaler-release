@@ -41,11 +41,6 @@ const (
 	Operator            = "operator"
 )
 
-var golangAPIInfoFilePath = "../api/exampleconfig/catalog-example.json"
-var golangSchemaValidationPath = "../api/schemas/catalog.schema.json"
-var golangApiServerPolicySchemaPath = "../api/policyvalidator/policy_json.schema.json"
-var golangServiceCatalogPath = "../servicebroker/config/catalog.json"
-
 //go:embed scheduler_application.template.yml
 var schedulerApplicationConfigTemplate string
 
@@ -183,28 +178,12 @@ func (components *Components) Operator(confPath string, argv ...string) *ginkgom
 	})
 }
 
-func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicApiPort int, brokerPort int, cfApi string, schedulerUri string, scalingEngineUri string, eventGeneratorUri string, metricsForwarderUri string, tmpDir string) string {
-	brokerCred1 := apiConfig.BrokerCredentialsConfig{
-		BrokerUsername: "broker_username",
-		//BrokerUsernameHash: []byte("$2a$10$WNO1cPko4iDAT6MkhaDojeJMU8ZdNH6gt.SapsFOsC0OF4cQ9qQwu"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_username")'
-		BrokerPassword: "broker_password",
-		//BrokerPasswordHash: []byte("$2a$10$evLviRLcIPKnWQqlBl3DJOvBZir9vJ4gdEeyoGgvnK/CGBnxIAFRu"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_password")'
-	}
-	brokerCred2 := apiConfig.BrokerCredentialsConfig{
-		BrokerUsername: "broker_username2",
-		//	BrokerUsernameHash: []byte("$2a$10$NK76ms9n/oeD1.IumovhIu2fiiQ/4FIVc81o4rdNS8beJMxYvhTqG"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_username2")'
-		BrokerPassword: "broker_password2",
-		//	BrokerPasswordHash: []byte("$2a$10$HZOfLweDfjNfe2h3KItdg.26BxNU6TVKMDwhJMNPPIWpj7T2HCVbW"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_password2")'
-	}
-	var brokerCreds []apiConfig.BrokerCredentialsConfig
-	brokerCreds = append(brokerCreds, brokerCred1, brokerCred2)
-
-	cfg := apiConfig.Config{
+func defaultGolangAPITestConfig() apiConfig.Config {
+	return apiConfig.Config{
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
 		Server: helpers.ServerConfig{
-			Port: publicApiPort,
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "api.key"),
 				CertFile:   filepath.Join(testCertDir, "api.crt"),
@@ -212,7 +191,6 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 			},
 		},
 		BrokerServer: helpers.ServerConfig{
-			Port: brokerPort,
 			TLS: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "servicebroker.key"),
 				CertFile:   filepath.Join(testCertDir, "servicebroker.crt"),
@@ -222,21 +200,26 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		VCAPServer: helpers.ServerConfig{
 			Port: components.Ports[GolangAPICFServer],
 		},
-		Db: map[string]db.DatabaseConfig{
-			"policy_db": {
-				URL: dbURI,
+		BrokerCredentials: []apiConfig.BrokerCredentialsConfig{
+			apiConfig.BrokerCredentialsConfig{
+				BrokerUsername: "broker_username",
+				//BrokerUsernameHash: []byte("$2a$10$WNO1cPko4iDAT6MkhaDojeJMU8ZdNH6gt.SapsFOsC0OF4cQ9qQwu"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_username")'
+				BrokerPassword: "broker_password",
+				//BrokerPasswordHash: []byte("$2a$10$evLviRLcIPKnWQqlBl3DJOvBZir9vJ4gdEeyoGgvnK/CGBnxIAFRu"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_password")'
 			},
-			"binding_db": {
-				URL: dbURI,
+			apiConfig.BrokerCredentialsConfig{
+				BrokerUsername: "broker_username2",
+				//	BrokerUsernameHash: []byte("$2a$10$NK76ms9n/oeD1.IumovhIu2fiiQ/4FIVc81o4rdNS8beJMxYvhTqG"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_username2")'
+				BrokerPassword: "broker_password2",
+				//	BrokerPasswordHash: []byte("$2a$10$HZOfLweDfjNfe2h3KItdg.26BxNU6TVKMDwhJMNPPIWpj7T2HCVbW"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_password2")'
 			},
 		},
-		BrokerCredentials:    brokerCreds,
-		CatalogPath:          golangServiceCatalogPath,
-		CatalogSchemaPath:    golangSchemaValidationPath,
+		CatalogPath:          "../servicebroker/config/catalog.json",
+		CatalogSchemaPath:    "../api/schemas/catalog.schema.json",
+		PolicySchemaPath:     "../api/policyvalidator/policy_json.schema.json",
+		InfoFilePath:         "../api/exampleconfig/catalog-example.json",
 		DashboardRedirectURI: "",
-		PolicySchemaPath:     golangApiServerPolicySchemaPath,
 		Scheduler: apiConfig.SchedulerConfig{
-			SchedulerURL: schedulerUri,
 			TLSClientCerts: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "scheduler.key"),
 				CertFile:   filepath.Join(testCertDir, "scheduler.crt"),
@@ -244,7 +227,6 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 			},
 		},
 		ScalingEngine: apiConfig.ScalingEngineConfig{
-			ScalingEngineUrl: scalingEngineUri,
 			TLSClientCerts: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
 				CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
@@ -252,7 +234,6 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 			},
 		},
 		EventGenerator: apiConfig.EventGeneratorConfig{
-			EventGeneratorUrl: eventGeneratorUri,
 			TLSClientCerts: models.TLSCerts{
 				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
 				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
@@ -260,15 +241,11 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 			},
 		},
 		CF: cf.Config{
-
-			API:      cfApi,
 			ClientID: "admin",
 			Secret:   "admin",
 		},
-		InfoFilePath: golangAPIInfoFilePath,
-		MetricsForwarder: apiConfig.MetricsForwarderConfig{
-			MetricsForwarderUrl: metricsForwarderUri,
-		},
+		DB:               map[string]db.DatabaseConfig{},
+		MetricsForwarder: apiConfig.MetricsForwarderConfig{},
 		RateLimit: models.RateLimitConfig{
 			MaxAmount:     10,
 			ValidDuration: 1 * time.Second,
@@ -276,6 +253,21 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicA
 		CredHelperImpl:                     "default",
 		DefaultCustomMetricsCredentialType: "binding-secret",
 	}
+
+}
+
+func (components *Components) PrepareGolangApiServerConfig(dbURI string, publicApiPort int, brokerPort int, cfApi string, schedulerUri string, scalingEngineUri string, eventGeneratorUri string, metricsForwarderUri string, tmpDir string) string {
+	cfg := defaultGolangAPITestConfig()
+	cfg.Server.Port = publicApiPort
+	cfg.BrokerServer.Port = brokerPort
+	cfg.VCAPServer.Port = components.Ports[GolangAPICFServer]
+	cfg.Scheduler.SchedulerURL = schedulerUri
+	cfg.ScalingEngine.ScalingEngineUrl = scalingEngineUri
+	cfg.EventGenerator.EventGeneratorUrl = eventGeneratorUri
+	cfg.MetricsForwarder.MetricsForwarderUrl = metricsForwarderUri
+	cfg.CF.API = cfApi
+	cfg.Db["policy_db"] = db.DatabaseConfig{URL: dbURI}
+	cfg.Db["binding_db"] = db.DatabaseConfig{URL: dbURI}
 
 	return writeYmlConfig(tmpDir, GolangAPIServer, &cfg)
 }
@@ -505,6 +497,7 @@ func (components *Components) PrepareOperatorConfig(dbURI string, ccUAAURL strin
 		},
 		HttpClientTimeout: httpClientTimeout,
 	}
+
 	return writeYmlConfig(tmpDir, Operator, &conf)
 }
 
