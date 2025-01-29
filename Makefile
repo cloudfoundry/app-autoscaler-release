@@ -97,7 +97,7 @@ clean-acceptance:
 build: $(all_modules)
 build-tests: build-test
 build-test: $(addprefix test_,$(go_modules))
-build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app ## Build all modules and tests
+build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app build-gorouterproxy
 db: target/db
 target/db:
 	@echo "# building $@"
@@ -372,6 +372,9 @@ mta-build:
 .PHONY: build-test-app
 build-test-app:
 	@make --directory='./src/acceptance/assets/app/go_app' build
+
+build-gorouterproxy:
+	@make --directory='./src/autoscaler' build-gorouterproxy
 
 .PHONY: deploy-test-app
 deploy-test-app:
