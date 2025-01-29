@@ -84,7 +84,7 @@
               #
               # jdwpkgs.rubyPackages.cf-uaac
               shellcheck
-              swagger-cli
+              redocly
               temurin-bin
               uutils-coreutils-noprefix
               yq-go

@@ -1487,6 +1487,54 @@
         }
       }
     },
+    "redocly@latest": {
+      "last_modified": "2025-01-25T23:17:58Z",
+      "resolved": "github:NixOS/nixpkgs/b582bb5b0d7af253b05d58314b85ab8ec46b8d19#redocly",
+      "source": "devbox-search",
+      "version": "1.26.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/km1z31a88xqf6yzd10g2g20r68lmnpaz-redocly-1.26.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/km1z31a88xqf6yzd10g2g20r68lmnpaz-redocly-1.26.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/81vbqb3nxr8ca7zycsxcri872hgap27q-redocly-1.26.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/81vbqb3nxr8ca7zycsxcri872hgap27q-redocly-1.26.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mzq47b40sbvajy9v17h691j3r3ib3l6f-redocly-1.26.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mzq47b40sbvajy9v17h691j3r3ib3l6f-redocly-1.26.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/znsd0yp7rfjhf49am3y5n6v4swlzr8wx-redocly-1.26.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/znsd0yp7rfjhf49am3y5n6v4swlzr8wx-redocly-1.26.0"
+        }
+      }
+    },
     "rubocop@latest": {
       "last_modified": "2024-08-31T19:22:30Z",
       "resolved": "github:NixOS/nixpkgs/282e35e0762d64800d78e33ff225704baf9e5216#rubocop",
@@ -1749,54 +1797,6 @@
             }
           ],
           "store_path": "/nix/store/6k8wlg7702w31r892b6wxzbzk8hqr4kb-shellcheck-0.10.0-bin"
-        }
-      }
-    },
-    "swagger-cli@latest": {
-      "last_modified": "2024-08-31T10:12:23Z",
-      "resolved": "github:NixOS/nixpkgs/5629520edecb69630a3f4d17d3d33fc96c13f6fe#swagger-cli",
-      "source": "devbox-search",
-      "version": "4.0.4",
-      "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/l97bajrw465kq0ylnkhwkf22myx5wqi2-swagger-cli-4.0.4",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/l97bajrw465kq0ylnkhwkf22myx5wqi2-swagger-cli-4.0.4"
-        },
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/4m3kq0l9xfj8qxh8qfwijf5a95jx0jgw-swagger-cli-4.0.4",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/4m3kq0l9xfj8qxh8qfwijf5a95jx0jgw-swagger-cli-4.0.4"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/ff5wx2b7dswhhsqqkza6xv5npzh927x4-swagger-cli-4.0.4",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/ff5wx2b7dswhhsqqkza6xv5npzh927x4-swagger-cli-4.0.4"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/db6z4kinn17pj73gybhxjq25lm7mhmsy-swagger-cli-4.0.4",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/db6z4kinn17pj73gybhxjq25lm7mhmsy-swagger-cli-4.0.4"
         }
       }
     },

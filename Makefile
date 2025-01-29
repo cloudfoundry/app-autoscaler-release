@@ -447,7 +447,7 @@ docker-image: docker-login
 	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
 validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
 	for file in $^ ; do \
-		swagger-cli validate "$${file}" ; \
+		redocly lint --extends=minimal --format=$(if $(GITHUB_ACTIONS),github-actions,codeframe) "$${file}" ; \
 	done
 
 .PHONY: go-get-u
