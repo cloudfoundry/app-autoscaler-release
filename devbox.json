@@ -24,7 +24,6 @@
     "rubocop":                              "latest",
     "rubyPackages.solargraph":              "latest",
     "shellcheck":                           "0.10.0",
-    "swagger-cli":                          "latest",
     "which":                                "latest",
     "credhub-cli":                          "2.9.29",
     "markdownlint-cli2":                    "latest",
@@ -39,7 +38,8 @@
     "ruby":                                 "3.3.6",
     "cloudfoundry-cli":                     "8.8.1",
     "go":                                   "1.23.0",
-    "temurin-bin-21":                       "latest"
+    "temurin-bin-21":                       "latest",
+    "redocly":                              "latest"
   },
   "shell": {
     "init_hook": [
