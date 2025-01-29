@@ -41,7 +41,8 @@
     "google-java-format":                   "latest",
     "cloudfoundry-cli":                     "8.8.1",
     "go":                                   "1.23.0",
-    "temurin-bin-21":                       "latest"
+    "temurin-bin-21":                       "latest",
+    "redocly":                              "latest"
   },
   "shell": {
     "init_hook": [
