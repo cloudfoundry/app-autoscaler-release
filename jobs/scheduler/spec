@@ -36,7 +36,7 @@ packages:
 
 properties:
   autoscaler.scheduler.port:
-    description: "Scheduler's port"
+    description: "Scheduler's https port"
     default: 6102
   autoscaler.scheduler.http.port:
     description: "Scheduler's http port"
