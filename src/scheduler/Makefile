@@ -12,5 +12,4 @@ format:
 # Check if files need formatting without modifying them
 check-format:
 	@echo "Checking Java file formatting..."
-	echo "$(JAVA_FILES)"
 	@$(FORMATTER) --skip-javadoc-formatting --dry-run $(JAVA_FILES)
