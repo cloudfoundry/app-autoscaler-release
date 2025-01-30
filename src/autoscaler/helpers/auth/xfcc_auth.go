@@ -89,7 +89,6 @@ func CheckAuth(r *http.Request, org, space string) error {
 	}
 
 	if getSpaceGuid(cert) != space {
-
 		return ErrorWrongSpace
 	}
 

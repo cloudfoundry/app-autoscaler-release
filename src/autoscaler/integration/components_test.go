@@ -203,13 +203,13 @@ func DefaultGolangAPITestConfig(dbURI string) apiConfig.Config {
 			Port: components.Ports[GolangAPICFServer],
 		},
 		BrokerCredentials: []apiConfig.BrokerCredentialsConfig{
-			apiConfig.BrokerCredentialsConfig{
+			{
 				BrokerUsername: "broker_username",
 				//BrokerUsernameHash: []byte("$2a$10$WNO1cPko4iDAT6MkhaDojeJMU8ZdNH6gt.SapsFOsC0OF4cQ9qQwu"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_username")'
 				BrokerPassword: "broker_password",
 				//BrokerPasswordHash: []byte("$2a$10$evLviRLcIPKnWQqlBl3DJOvBZir9vJ4gdEeyoGgvnK/CGBnxIAFRu"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_password")'
 			},
-			apiConfig.BrokerCredentialsConfig{
+			{
 				BrokerUsername: "broker_username2",
 				//	BrokerUsernameHash: []byte("$2a$10$NK76ms9n/oeD1.IumovhIu2fiiQ/4FIVc81o4rdNS8beJMxYvhTqG"), // ruby -r bcrypt -e 'puts BCrypt::Password.create("broker_username2")'
 				BrokerPassword: "broker_password2",
@@ -247,8 +247,8 @@ func DefaultGolangAPITestConfig(dbURI string) apiConfig.Config {
 			Secret:   "admin",
 		},
 		Db: map[string]db.DatabaseConfig{
-			"policy_db":  db.DatabaseConfig{URL: dbURI},
-			"binding_db": db.DatabaseConfig{URL: dbURI},
+			"policy_db":  {URL: dbURI},
+			"binding_db": {URL: dbURI},
 		},
 
 		MetricsForwarder: apiConfig.MetricsForwarderConfig{
@@ -261,7 +261,6 @@ func DefaultGolangAPITestConfig(dbURI string) apiConfig.Config {
 		CredHelperImpl:                     "default",
 		DefaultCustomMetricsCredentialType: "binding-secret",
 	}
-
 }
 
 func (components *Components) PrepareGolangApiServerConfig(dbURI string, cfApi string, schedulerUri string, scalingEngineUri string, eventGeneratorUri string, tmpDir string) string {
