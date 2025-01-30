@@ -252,6 +252,10 @@ $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS} --timeout 5m
 
+lint-gorouterproxy:
+	@echo " - linting: gorouterproxy"
+	@pushd src/autoscaler/integration/gorouterproxy >/dev/null && golangci-lint run --config ${lint_config} $(OPTS) --timeout 5m
+
 .PHONY: spec-test
 spec-test:
 	bundle install

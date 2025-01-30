@@ -7,10 +7,10 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"os/exec"
 	"time"
 
@@ -69,6 +69,7 @@ var _ = Describe("Gorouterproxy", func() {
 		Eventually(session.Out, 20*time.Second).Should(gbytes.Say("gorouter-proxy.started"))
 
 		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+		Expect(err).ToNot(HaveOccurred())
 		key := testhelpers.GenerateClientKeyWithPrivateKey(privateKey)
 
 		cert, err := testhelpers.GenerateClientCertWithPrivateKey(orgGUID, spaceGUID, privateKey)
@@ -81,7 +82,7 @@ var _ = Describe("Gorouterproxy", func() {
 		tlsCert, err := tls.X509KeyPair(cert, key)
 		Expect(err).ToNot(HaveOccurred())
 
-		caCert, err := ioutil.ReadFile(rootCertFile)
+		caCert, err := os.ReadFile(rootCertFile)
 		if err != nil {
 			panic(fmt.Sprintf("Failed to load CA certificate: %v", err))
 		}
@@ -91,8 +92,9 @@ var _ = Describe("Gorouterproxy", func() {
 		c := &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
-					Certificates:       []tls.Certificate{tlsCert},
-					RootCAs:            caCertPool,
+					Certificates: []tls.Certificate{tlsCert},
+					RootCAs:      caCertPool,
+					//nolint:gosec // #nosec G402 -- due to https://github.com/securego/gosec/issues/1105
 					InsecureSkipVerify: true,
 				},
 			},

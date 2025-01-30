@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"flag"
 	"fmt"
@@ -33,7 +34,9 @@ func startServer() {
 		Handler: http.HandlerFunc(forwardHandler),
 		TLSConfig: &tls.Config{
 			ClientAuth: tls.RequireAnyClientCert,
+			MinVersion: tls.VersionTLS12,
 		},
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	certFile, keyFile := getCertFiles()
@@ -54,6 +57,9 @@ func getCertFiles() (string, string) {
 }
 
 func forwardHandler(w http.ResponseWriter, inRequest *http.Request) {
+	var body []byte
+	var err error
+
 	tls := inRequest.TLS
 	if !isClientCertValid(tls) {
 		http.Error(w, "No client certificate", http.StatusForbidden)
@@ -75,8 +81,14 @@ func forwardHandler(w http.ResponseWriter, inRequest *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(resp.StatusCode)
-	if body, err := io.ReadAll(resp.Body); err == nil {
-		w.Write(body)
+
+	if body, err = io.ReadAll(resp.Body); err != nil {
+		logger.Printf("Error reading response: %v", err)
+		return
+	}
+
+	if _, err := w.Write(body); err != nil {
+		logger.Printf("Error writing response: %v", err)
 	}
 }
 
