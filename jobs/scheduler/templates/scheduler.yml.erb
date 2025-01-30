@@ -165,7 +165,7 @@ scheduler:
 server:
   port: <%=p('autoscaler.scheduler.port') %>
   http:
-    port: <%=p('autoscaler.cf_server.port') %>
+    port: <%=p('autoscaler.scheduler.http.port') %>
   ssl:
     ciphers: TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
     enabled-protocols: TLSv1.3

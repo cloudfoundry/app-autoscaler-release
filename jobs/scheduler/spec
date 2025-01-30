@@ -38,6 +38,9 @@ properties:
   autoscaler.scheduler.port:
     description: "Scheduler's port"
     default: 6102
+  autoscaler.scheduler.http.port:
+    description: "Scheduler's http port"
+    default: 6103
   autoscaler.scheduler.http_client_timeout:
     description: "Http client imeout for scheduler to communicate with other autoscaler components, in seconds"
     default: 60

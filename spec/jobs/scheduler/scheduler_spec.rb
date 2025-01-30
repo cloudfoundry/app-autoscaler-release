@@ -13,8 +13,8 @@ describe "scheduler" do
   let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
   context "cf server" do
-    it "includes default port for cf server" do
-      expect(rendered_template["cfServer"]["port"]).to eq(8080)
+    it "includes default http port" do
+      expect(rendered_template["server"]["http"]["port"]).to eq(6103)
     end
 
     it "defaults xfcc valid org and space " do
@@ -24,8 +24,8 @@ describe "scheduler" do
         "validSpaceGuid" => "some-valid-space-guid"
       }
 
-      expect(rendered_template["cfServer"]["validOrgGuid"]).to eq(properties["autoscaler"]["cfServer"]["validOrgGuid"])
-      expect(rendered_template["cfServer"]["validSpaceGuid"]).to eq(properties["autoscaler"]["cfServer"]["validSpaceGuid"])
+      expect(rendered_template["cf-server"]["validOrgGuid"]).to eq(properties["autoscaler"]["cfServer"]["validOrgGuid"])
+      expect(rendered_template["cf-server"]["validSpaceGuid"]).to eq(properties["autoscaler"]["cfServer"]["validSpaceGuid"])
     end
   end
 
