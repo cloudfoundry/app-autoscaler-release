@@ -36,11 +36,11 @@
     "fly":                                  "7.10.0",
     "ginkgo":                               "2.22.0",
     "ruby":                                 "3.3.6",
-    "cloudfoundry-cli":                     "8.8.1",
     "go":                                   "1.23.0",
-    "temurin-bin-21":                       "latest",
     "redocly":                              "latest",
-    "google-java-format":                   "latest"
+    "google-java-format":                   "latest",
+    "cloudfoundry-cli":                     "8.8.1",
+    "temurin-bin-21":                       "latest"
   },
   "shell": {
     "init_hook": [
