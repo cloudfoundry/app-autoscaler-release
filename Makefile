@@ -133,9 +133,11 @@ test-autoscaler: check-db_type init-db test-certs
 	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
 test-autoscaler-suite: check-db_type init-db test-certs
 	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
+
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
-	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
+	make --directory='./src/scheduler' test DBURL="${DBURL}" db_type="${db_type}"
+
 test-changelog:
 	@make --directory='./src/changelog' test
 test-changeloglockcleaner: init-db test-certs
@@ -466,6 +468,10 @@ go-get-u: $(addsuffix .go-get-u,$(go_modules))
 	@echo " - go get -u" $<
 	cd src/$< && \
 	go get -u ./...
+
+
+start-scheduler:
+	make --directory='./src/scheduler' start DBURL="${DBURL}"
 
 
 deploy-apps:

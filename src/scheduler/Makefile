@@ -13,3 +13,13 @@ format:
 check-format:
 	@echo "Checking Java file formatting..."
 	@$(FORMATTER) --skip-javadoc-formatting --dry-run $(JAVA_FILES)
+
+start:
+	@echo "Starting the application..."
+	@export DB_HOST=${DB_HOST}; \
+	mvn spring-boot:run -Dspring.config.location=src/main/resources/application.yml
+
+test:
+	@echo "Running tests..."
+	@export DB_HOST=${DB_HOST}; \
+	mvn test --no-transfer-progress -Dspring.profiles.include=${db_type}
