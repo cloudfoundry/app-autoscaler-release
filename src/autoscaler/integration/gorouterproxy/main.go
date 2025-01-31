@@ -111,7 +111,8 @@ func createCert(tls *tls.ConnectionState) *auth.Cert {
 
 func forwardRequest(cert *auth.Cert) (*http.Response, error) {
 	client := &http.Client{}
-	url := fmt.Sprintf("http://localhost:%s", *forwardTo)
+	logger.Printf("Forwarding request to %s", *forwardTo)
+	url := fmt.Sprintf("http://127.0.0.1:%s", *forwardTo)
 	outRequest, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
