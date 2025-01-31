@@ -91,12 +91,12 @@ func (components *Components) GoRouterProxy(portToForward int) *ginkgomon_v2.Run
 		StartCheckTimeout: 20 * time.Second,
 		Command: exec.Command(
 			components.Executables[GoRouterProxy],
-			append([]string{
+			[]string{
 				"--port", fmt.Sprint(components.Ports[GoRouterProxy]),
 				"--forwardTo", fmt.Sprint(portToForward),
 				"--certFile", filepath.Join(testCertDir, "gorouter.crt"),
 				"--keyFile", filepath.Join(testCertDir, "gorouter.key"),
-			})...,
+			}...,
 		),
 	})
 }
