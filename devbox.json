@@ -29,7 +29,6 @@
     "markdownlint-cli2":                    "latest",
     "bundler":                              "latest",
     "direnv":                               "2.35.0",
-    "actionlint":                           "1.7.4",
     "yq-go":                                "4.44.5",
     "golangci-lint":                        "1.62.2",
     "fly":                                  "7.10.0",
@@ -39,6 +38,7 @@
     "redocly":                              "latest",
     "google-java-format":                   "latest",
     "act":                                  "0.2.71",
+    "actionlint":                           "1.7.7",
     "cloudfoundry-cli":                     "8.8.1",
     "temurin-bin-21":                       "latest"
   },
