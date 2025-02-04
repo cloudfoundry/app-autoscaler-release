@@ -37,9 +37,9 @@
     "redocly":                              "latest",
     "google-java-format":                   "latest",
     "actionlint":                           "1.7.7",
+    "ginkgo":                               "2.22.2",
     "act":                                  "0.2.71",
     "cloudfoundry-cli":                     "8.8.1",
-    "ginkgo":                               "2.22.2",
     "temurin-bin-21":                       "latest"
   },
   "shell": {
