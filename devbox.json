@@ -32,14 +32,14 @@
     "yq-go":                                "4.44.5",
     "golangci-lint":                        "1.62.2",
     "fly":                                  "7.10.0",
-    "ginkgo":                               "2.22.0",
     "ruby":                                 "3.3.6",
     "go":                                   "1.23.0",
     "redocly":                              "latest",
     "google-java-format":                   "latest",
-    "act":                                  "0.2.71",
     "actionlint":                           "1.7.7",
+    "act":                                  "0.2.71",
     "cloudfoundry-cli":                     "8.8.1",
+    "ginkgo":                               "2.22.2",
     "temurin-bin-21":                       "latest"
   },
   "shell": {
