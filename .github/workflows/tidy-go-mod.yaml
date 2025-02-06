@@ -30,7 +30,7 @@ jobs:
 
       - name: Check if there is any change
         id: get_changes
-        run: echo "changed=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
+        run: echo "changed=$(git status --porcelain | wc -l)" >> "$GITHUB_OUTPUT"
 
       - name: Process changes
         if: steps.get_changes.outputs.changed != 0

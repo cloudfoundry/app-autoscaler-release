@@ -35,7 +35,8 @@ jobs:
 
           make go-get-u package-specs
 
-          declare -i -r num_changed_files="$(git status --porcelain | wc --lines)"
+          declare -i num_changed_files
+          num_changed_files="$(git status --porcelain | wc --lines)"
           if ((num_changed_files > 0))
           then
             echo 'Changes to some files were necessary!'
