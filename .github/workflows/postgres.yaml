@@ -21,7 +21,7 @@ jobs:
       DB_PASSWORD: postgres
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:eb573688c715cbc9bf37365842d6272d6c16f0ed386ebacf7063166ca2772b99
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:01209e44024cd83445d3f1c7aa7a1692f06ad92b94fb67ca1cd62b7b5ab51c43
     continue-on-error: true
     name: Build suite=${{ matrix.suite }}, postgres=${{ matrix.postgres }}
     services:

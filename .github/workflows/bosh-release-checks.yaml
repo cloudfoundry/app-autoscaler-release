@@ -12,7 +12,7 @@ jobs:
     name: ensure gosub specs are up to date
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:eb573688c715cbc9bf37365842d6272d6c16f0ed386ebacf7063166ca2772b99
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:01209e44024cd83445d3f1c7aa7a1692f06ad92b94fb67ca1cd62b7b5ab51c43
     steps:
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
@@ -39,7 +39,7 @@ jobs:
     name: Create Bosh Release
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:eb573688c715cbc9bf37365842d6272d6c16f0ed386ebacf7063166ca2772b99
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:01209e44024cd83445d3f1c7aa7a1692f06ad92b94fb67ca1cd62b7b5ab51c43
     steps:
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
