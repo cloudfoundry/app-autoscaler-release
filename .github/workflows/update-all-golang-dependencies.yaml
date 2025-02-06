@@ -9,7 +9,7 @@ jobs:
     name: "go get -u"
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:eb573688c715cbc9bf37365842d6272d6c16f0ed386ebacf7063166ca2772b99
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:01209e44024cd83445d3f1c7aa7a1692f06ad92b94fb67ca1cd62b7b5ab51c43
     permissions:
       pull-requests: write
       contents: write
@@ -35,7 +35,8 @@ jobs:
 
           make go-get-u package-specs
 
-          declare -i -r num_changed_files="$(git status --porcelain | wc --lines)"
+          declare -i num_changed_files
+          num_changed_files="$(git status --porcelain | wc --lines)"
           if ((num_changed_files > 0))
           then
             echo 'Changes to some files were necessary!'
