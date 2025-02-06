@@ -9,13 +9,13 @@
     pname = "app-autoscaler-cli-plugin";
 
     major = "4";
-    minor = "0";
-    patch = "1";
+    minor = "1";
+    patch = "0";
     version = "${major}.${minor}.${patch}";
     src = fetchgit {
       url = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
       rev = "v${version}";
-      hash = "sha256-si0tj8xPpkp7VbPDreEkqcudohWS7rlSPAr8GUtveUk=";
+      hash = "sha256-wWZ89Y2PGfndQERrXC3oLiQbNpbKNm63CbfK28o+mbU=";
       fetchSubmodules = true;
     };
     doCheck = false;
