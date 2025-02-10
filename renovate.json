@@ -36,6 +36,16 @@
       "enabled": false
     },
     {
+      "description": "Disable devbox Go version updates, as they are taken care by our bosh-package-golang-release-based automation",
+      "matchManagers": [
+        "devbox"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "enabled": false
+    },
+    {
       "description": "Strip of v prefix from version number in certain github releases",
       "matchPackageNames": [
         "bosh-cli"
