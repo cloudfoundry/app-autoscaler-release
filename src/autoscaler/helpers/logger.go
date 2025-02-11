@@ -21,7 +21,7 @@ func InitLoggerFromConfig(conf *LoggingConfig, name string) lager.Logger {
 
 	logger := lager.NewLogger(name)
 
-	vcapConfig, _ := configutil.NewVCAPConfigurationReader()
+	vcapConfig := configutil.NewVCAPConfigurationReader()
 
 	if vcapConfig.IsRunningOnCF() {
 		plaintextFormatSink := createPlaintextSink()

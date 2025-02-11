@@ -34,11 +34,8 @@ func main() {
 	flag.StringVar(&path, "c", "", "config file")
 	flag.Parse()
 
-	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
-		os.Exit(1)
-	}
+	vcapConfiguration := configutil.NewVCAPConfigurationReader()
+
 	conf, err = config.LoadConfig(path, vcapConfiguration)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stdout, "failed to load config : %s\n", err.Error())

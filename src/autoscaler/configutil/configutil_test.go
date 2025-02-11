@@ -23,8 +23,7 @@ var _ = Describe("Configutil", func() {
 		JustBeforeEach(func() {
 			os.Setenv("VCAP_APPLICATION", vcapApplicationJson)
 			os.Setenv("VCAP_SERVICES", vcapServicesJson)
-			vcapConfiguration, err = NewVCAPConfigurationReader()
-			Expect(err).NotTo(HaveOccurred())
+			vcapConfiguration = NewVCAPConfigurationReader()
 		})
 
 		AfterEach(func() {
