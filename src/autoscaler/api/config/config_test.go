@@ -57,7 +57,11 @@ var _ = Describe("Config", func() {
 				It("sets EventGenerator TlSClientCert", func() {
 					Expect(conf.EventGenerator.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/eventgenerator.key"))
 					Expect(conf.EventGenerator.TLSClientCerts.CertFile).To(Equal("some/path/in/container/eventgenerator.crt"))
+				})
 
+				It("sets Scheduler TlSClientCert", func() {
+					Expect(conf.Scheduler.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/eventgenerator.key"))
+					Expect(conf.Scheduler.TLSClientCerts.CertFile).To(Equal("some/path/in/container/eventgenerator.crt"))
 				})
 			})
 
