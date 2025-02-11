@@ -80,6 +80,7 @@ clean-autoscaler:
 clean-scheduler:
 	@echo " - cleaning scheduler test resources"
 	@rm -rf src/scheduler/src/test/resources/certs
+	@rm -rf src/scheduler/target
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f test-certs/*
