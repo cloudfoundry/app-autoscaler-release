@@ -29,7 +29,6 @@ export GO111MODULE=on
 #GINKGO_OPTS=-r --race --require-suite -p --randomize-all --cover
 
 GINKGO_OPTS = -r --race --require-suite --randomize-all --cover ${OPTS}
-GINKGO_VERSION = v$(shell cat ../../.tool-versions | grep ginkgo  | cut --delimiter=' ' --fields='2')
 
 
 
@@ -124,12 +123,12 @@ check: fmt lint build test
 .PHONY: generate-fakes
 test: generate-fakes
 	@echo "Running tests"
-	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} ${TEST} --skip-package='integration'
+	APP_AUTOSCALER_TEST_RUN='true' ginkgo -p ${GINKGO_OPTS} ${TEST} --skip-package='integration'
 
 .PHONY: testsuite
 testsuite: build-gorouterproxy
 	@echo " - using DBURL=${DBURL} TEST=${TEST}"
-	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' -p ${GINKGO_OPTS} ${TEST}
+	APP_AUTOSCALER_TEST_RUN='true' ginkgo -p ${GINKGO_OPTS} ${TEST}
 
 .PHONY: build-gorouterproxy
 build-gorouterproxy:
@@ -139,7 +138,7 @@ build-gorouterproxy:
 .PHONY: integration
 integration: generate-fakes
 	@echo "# Running integration tests"
-	APP_AUTOSCALER_TEST_RUN='true' go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' ${GINKGO_OPTS} integration
+	APP_AUTOSCALER_TEST_RUN='true' ginkgo ${GINKGO_OPTS} integration
 
 importfmt:
 	@echo "# Formatting the imports"
