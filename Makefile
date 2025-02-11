@@ -225,7 +225,8 @@ stop-db: check-db_type
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
 .PHONY: integration
-integration: generate-openapi-generated-clients-and-servers build init-db test-certs ## Run all integration tests
+integration: generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
+
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='./src/autoscaler' integration DBURL="${DBURL}"
 

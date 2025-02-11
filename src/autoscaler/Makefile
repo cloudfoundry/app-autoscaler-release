@@ -132,7 +132,7 @@ testsuite: build-gorouterproxy
 
 .PHONY: build-gorouterproxy
 build-gorouterproxy:
-	@echo " - building gorouterproxy"
+	@echo "# building gorouterproxy"
 	@CGO_ENABLED=1 go build $(BUILDTAGS) $(BUILDFLAGS) -o build/gorouterproxy integration/gorouterproxy/main.go
 
 .PHONY: integration
