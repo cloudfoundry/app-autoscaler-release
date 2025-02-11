@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -181,7 +182,7 @@ func loadYamlFile(filepath string, conf *Config) error {
 	return nil
 }
 func loadPublicApiServerConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	data, err := vcapReader.GetServiceCredentialContent("publicapiserver-config", "publicapiserver")
+	data, err := vcapReader.GetServiceCredentialContent("publicapiserver-config", "publicapiserver-config")
 	if err != nil {
 		return fmt.Errorf("%w: %v", ErrPublicApiServerConfigNotFound, err)
 	}
@@ -267,6 +268,10 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 	return &conf, nil
 }
 
+func (c *Config) ToJSON() string {
+	b, _ := json.Marshal(c)
+	return string(b)
+}
 func (c *Config) Validate() error {
 	err := c.CF.Validate()
 	if err != nil {
