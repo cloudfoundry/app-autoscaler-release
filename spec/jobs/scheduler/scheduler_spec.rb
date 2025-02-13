@@ -24,8 +24,8 @@ describe "scheduler" do
         "validSpaceGuid" => "some-valid-space-guid"
       }
 
-      expect(rendered_template["cf-server"]["validOrgGuid"]).to eq(properties["autoscaler"]["cfServer"]["validOrgGuid"])
-      expect(rendered_template["cf-server"]["validSpaceGuid"]).to eq(properties["autoscaler"]["cfServer"]["validSpaceGuid"])
+      expect(rendered_template["cfserver"]["validOrgGuid"]).to eq(properties["autoscaler"]["cfServer"]["validOrgGuid"])
+      expect(rendered_template["cfserver"]["validSpaceGuid"]).to eq(properties["autoscaler"]["cfServer"]["validSpaceGuid"])
     end
   end
 
