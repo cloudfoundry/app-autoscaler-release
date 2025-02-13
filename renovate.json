@@ -4,8 +4,7 @@
     "config:best-practices",
     "customManagers:dockerfileVersions",
     ":label(dependencies)",
-    ":automergeAll",
-    "schedule:nonOfficeHours"
+    ":automergeAll"
   ],
   "postUpdateOptions": [
     "gomodTidy",
