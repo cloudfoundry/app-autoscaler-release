@@ -10,7 +10,7 @@ import (
 )
 
 type LoggingConfig struct {
-	Level string `yaml:"level"`
+	Level string `yaml:"level" json:"level"`
 }
 
 func InitLoggerFromConfig(conf *LoggingConfig, name string) lager.Logger {

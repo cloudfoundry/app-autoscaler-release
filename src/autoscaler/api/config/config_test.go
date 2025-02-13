@@ -31,6 +31,23 @@ var _ = Describe("Config", func() {
 		mockVCAPConfigurationReader = &fakes.FakeVCAPConfigurationReader{}
 	})
 
+	Describe("ToJSON and FromJSON", func() {
+		JustBeforeEach(func() {
+			configFile = testhelpers.BytesToFile(configBytes)
+			conf, err = LoadConfig(configFile, mockVCAPConfigurationReader)
+		})
+
+		It("should return the config in json format", func() {
+			Expect(err).NotTo(HaveOccurred())
+			json, err := conf.ToJSON()
+
+			unmarshalConfig, err := FromJSON([]byte(json))
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(unmarshalConfig).To(Equal(conf))
+		})
+	})
+
 	Describe("Load Config", func() {
 
 		When("config is read from env", func() {
