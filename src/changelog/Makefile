@@ -14,12 +14,6 @@ CGO_ENABLED := 0
 export GOWORK := off
 BUILDTAGS :=
 
-GINKGO_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='ginkgo' \
-										| cut --delimiter=' ' --fields='2')
-GOLANGCI_LINT_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='golangci-lint' \
-													 | cut --delimiter=' ' --fields='2' )
-
-
 .PHONY: go-mod-tidy go-mod-vendor
 go-mod-tidy:
 	go mod tidy
@@ -48,7 +42,7 @@ build_test-%:
 check: fmt lint build test
 
 test:
-	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} -r --race --randomize-all --keep-going
+	ginkgo -r --race --randomize-all --keep-going
 
 get-fmt-deps: ## Install goimports
 	$(GO_NOMOD) get golang.org/x/tools/cmd/goimports
@@ -62,7 +56,7 @@ fmt: importfmt
 	@([[ ! -z "$(FORMATTED)" ]] && printf "Fixed unformatted files:\n$(FORMATTED)") || true
 
 lint:
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run
+	@golangci-lint run
 
 lint-fix:
-	go run github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION} run --fix
+	golangci-lint run --fix
