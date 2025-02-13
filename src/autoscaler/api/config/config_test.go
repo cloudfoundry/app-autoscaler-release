@@ -39,7 +39,9 @@ var _ = Describe("Config", func() {
 
 		It("should return the config in json format", func() {
 			Expect(err).NotTo(HaveOccurred())
+
 			json, err := conf.ToJSON()
+			Expect(err).NotTo(HaveOccurred())
 
 			unmarshalConfig, err := FromJSON([]byte(json))
 			Expect(err).NotTo(HaveOccurred())
