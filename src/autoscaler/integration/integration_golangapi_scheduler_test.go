@@ -1,14 +1,13 @@
 package integration_test
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -503,41 +502,44 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 
 	When("connection to scheduler through the gorouter", func() {
 		BeforeEach(func() {
-			golangConf := DefaultGolangAPITestConfig(dbUrl)
+			golangConf := DefaultGolangAPITestConfig()
 
-			golangConf.Scheduler.SchedulerURL = fmt.Sprintf("https://127.0.0.1:%d", components.Ports[Scheduler])
+			golangConf.Scheduler.SchedulerURL = fmt.Sprintf("https://127.0.0.1:%d", components.Ports[GoRouterProxy])
 			golangConf.EventGenerator.EventGeneratorUrl = fmt.Sprintf("https://127.0.0.1:%d", components.Ports[EventGenerator])
 			golangConf.ScalingEngine.ScalingEngineUrl = fmt.Sprintf("https://127.0.0.1:%d", components.Ports[ScalingEngine])
 			golangConf.CF.API = fakeCCNOAAUAA.URL()
 
-			golangApiServerConfPath := WriteYmlConfig(tmpDir, GolangAPIServer, &golangConf)
-
-			startGolangApiServer(golangApiServerConfPath)
-
-			startGoRouterProxyTo(components.Ports[SchedulerCFServer])
-
 			certTmpDir := os.TempDir()
-			privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+
+			cfInstanceCertFileContent, cfInstanceKeyContent, err := testhelpers.GenerateClientCertWithCA("some-org-guid", "some-space-guid", "../../../test-certs/gorouter-ca.crt", "../../../test-certs/gorouter-ca.key")
 			Expect(err).ToNot(HaveOccurred())
 
-			cfInstanceKeyContent := testhelpers.GenerateClientKeyWithPrivateKey(privateKey)
-
-			cfInstanceCertFileToRotateContent, err := testhelpers.GenerateClientCertWithPrivateKey("org", "space", privateKey)
-			Expect(err).ToNot(HaveOccurred())
-
-			certFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.crt", string(cfInstanceCertFileToRotateContent))
+			certFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.crt", string(cfInstanceCertFileContent))
 			Expect(err).NotTo(HaveOccurred())
+			os.Setenv("CF_INSTANCE_CERT", certFile)
 
 			keyFile, err := configutil.MaterializeContentInFile(certTmpDir, "cf.key", string(cfInstanceKeyContent))
 			Expect(err).NotTo(HaveOccurred())
-
 			os.Setenv("CF_INSTANCE_KEY", keyFile)
-			os.Setenv("CF_INSTANCE_CERT", certFile)
+
+			os.Setenv("VCAP_APPLICATION", `{}`)
+
+			golangConfJson, err := golangConf.ToJSON()
+			Expect(err).NotTo(HaveOccurred())
+
+			vcapServicesJson := testhelpers.GetVcapServices("publicapiserver-config", golangConfJson)
+			os.Setenv("VCAP_SERVICES", vcapServicesJson)
+
+			os.Setenv("PORT", strconv.Itoa(components.Ports[GolangAPICFServer]))
+
+			startGolangApiCFServer()
+			startGoRouterProxyTo(components.Ports[SchedulerCFServer])
 		})
 
 		AfterEach(func() {
 			stopGolangApiServer()
 			stopGoRouterProxy()
+			os.Unsetenv("VCAP_APPLICATION")
 			os.Unsetenv("CF_INSTANCE_KEY")
 			os.Unsetenv("CF_INSTANCE_CERT")
 		})
@@ -554,12 +556,14 @@ var _ = Describe("Integration_GolangApi_Scheduler", func() {
 				It("creates a policy and associated schedules", func() {
 					policyStr = setPolicyRecurringDate(readPolicyFromFile("fakePolicyWithSchedule.json"))
 
+					// change to golangCFAPIServer ?
 					doAttachPolicy(appId, policyStr, http.StatusOK, components.Ports[GolangAPIServer], httpClientForPublicApi)
+
 					checkApiServerContent(appId, policyStr, http.StatusOK, components.Ports[GolangAPIServer], httpClientForPublicApi)
 					assertScheduleContents(appId, http.StatusOK, map[string]int{"recurring_schedule": 4, "specific_date": 2})
 				})
 
-				XIt("fails with an invalid policy", func() {
+				It("fails with an invalid policy", func() {
 					policyStr = readPolicyFromFile("fakeInvalidPolicy.json")
 
 					doAttachPolicy(appId, policyStr, http.StatusBadRequest, components.Ports[GolangAPIServer], httpClientForPublicApi)

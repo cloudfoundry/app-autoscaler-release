@@ -25,6 +25,7 @@ scheduler:
     healthserver:
         port: 0
 server:
+    forward-headers-strategy: framework
     port: {{ .Port }}
     http:
         port: {{ .HttpPort }}
@@ -34,8 +35,8 @@ server:
         bundle: "server"
         client-auth: NEED
 cfserver:
-  validOrgGuid: "some-org-guid"
-  validSpaceGuid: "some-space-guid"
+  validOrgGuid: some-org-guid
+  validSpaceGuid: some-space-guid
 spring:
     aop:
         auto: false

@@ -124,6 +124,7 @@ scheduler:
 ############################################################
 
 server:
+    forward-headers-strategy: framework
     port: 8083
     http:
         port: 8082

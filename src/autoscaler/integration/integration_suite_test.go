@@ -161,8 +161,16 @@ func PreparePorts() Ports {
 }
 
 func startGolangApiServer(golangApiServerConfPath string) {
+	GinkgoHelper()
 	processMap[GolangAPIServer] = ginkgomon_v2.Invoke(grouper.NewOrdered(os.Interrupt, grouper.Members{
 		{GolangAPIServer, components.GolangAPIServer(golangApiServerConfPath)},
+	}))
+}
+
+func startGolangApiCFServer() {
+	GinkgoHelper()
+	processMap[GolangAPIServer] = ginkgomon_v2.Invoke(grouper.NewOrdered(os.Interrupt, grouper.Members{
+		{GolangAPIServer, components.GolangAPICFServer()},
 	}))
 }
 

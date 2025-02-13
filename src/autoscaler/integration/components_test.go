@@ -104,7 +104,7 @@ func (components *Components) GolangAPIServer(confPath string, argv ...string) *
 	return ginkgomon_v2.New(ginkgomon_v2.Config{
 		Name:              GolangAPIServer,
 		AnsiColorCode:     "33m",
-		StartCheck:        `"api.started"`,
+		StartCheck:        "api.started",
 		StartCheckTimeout: 20 * time.Second,
 		// #nosec G204
 		Command: exec.Command(
@@ -115,6 +115,18 @@ func (components *Components) GolangAPIServer(confPath string, argv ...string) *
 		),
 	})
 }
+
+func (components *Components) GolangAPICFServer(argv ...string) *ginkgomon_v2.Runner {
+	return ginkgomon_v2.New(ginkgomon_v2.Config{
+		Name:              GolangAPIServer,
+		AnsiColorCode:     "33m",
+		StartCheck:        "api.started",
+		StartCheckTimeout: 120 * time.Second,
+		// #nosec G204
+		Command: exec.Command(components.Executables[GolangAPIServer], argv...),
+	})
+}
+
 func (components *Components) Scheduler(confPath string, argv ...string) *ginkgomon_v2.Runner {
 	return ginkgomon_v2.New(ginkgomon_v2.Config{
 		Name:              Scheduler,
@@ -178,7 +190,7 @@ func (components *Components) Operator(confPath string, argv ...string) *ginkgom
 	})
 }
 
-func DefaultGolangAPITestConfig(dbURI string) apiConfig.Config {
+func DefaultGolangAPITestConfig() apiConfig.Config {
 	return apiConfig.Config{
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
@@ -221,42 +233,13 @@ func DefaultGolangAPITestConfig(dbURI string) apiConfig.Config {
 		PolicySchemaPath:     "../api/policyvalidator/policy_json.schema.json",
 		InfoFilePath:         "../api/exampleconfig/catalog-example.json",
 		DashboardRedirectURI: "",
-		Scheduler: apiConfig.SchedulerConfig{
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "scheduler.key"),
-				CertFile:   filepath.Join(testCertDir, "scheduler.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-			},
-		},
-		ScalingEngine: apiConfig.ScalingEngineConfig{
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
-				CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-			},
-		},
-		EventGenerator: apiConfig.EventGeneratorConfig{
-			TLSClientCerts: models.TLSCerts{
-				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-			},
-		},
 		CF: cf.Config{
 			ClientID: "admin",
 			Secret:   "admin",
 		},
-		Db: map[string]db.DatabaseConfig{
-			"policy_db":  {URL: dbURI},
-			"binding_db": {URL: dbURI},
-		},
 
 		MetricsForwarder: apiConfig.MetricsForwarderConfig{
 			MetricsForwarderUrl: "https://127.0.0.1:8888",
-		},
-		RateLimit: models.RateLimitConfig{
-			MaxAmount:     10,
-			ValidDuration: 1 * time.Second,
 		},
 		CredHelperImpl:                     "default",
 		DefaultCustomMetricsCredentialType: "binding-secret",
@@ -264,9 +247,43 @@ func DefaultGolangAPITestConfig(dbURI string) apiConfig.Config {
 }
 
 func (components *Components) PrepareGolangApiServerConfig(dbURI string, cfApi string, schedulerUri string, scalingEngineUri string, eventGeneratorUri string, tmpDir string) string {
-	cfg := DefaultGolangAPITestConfig(dbURI)
+	cfg := DefaultGolangAPITestConfig()
 
-	cfg.Scheduler.SchedulerURL = schedulerUri
+	cfg.RateLimit = models.RateLimitConfig{
+		MaxAmount:     10,
+		ValidDuration: 1 * time.Second,
+	}
+
+	cfg.Scheduler = apiConfig.SchedulerConfig{
+		SchedulerURL: schedulerUri,
+		TLSClientCerts: models.TLSCerts{
+			KeyFile:    filepath.Join(testCertDir, "scheduler.key"),
+			CertFile:   filepath.Join(testCertDir, "scheduler.crt"),
+			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+		},
+	}
+
+	cfg.ScalingEngine = apiConfig.ScalingEngineConfig{
+		ScalingEngineUrl: scalingEngineUri,
+		TLSClientCerts: models.TLSCerts{
+			KeyFile:    filepath.Join(testCertDir, "scalingengine.key"),
+			CertFile:   filepath.Join(testCertDir, "scalingengine.crt"),
+			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+		},
+	}
+
+	cfg.EventGenerator = apiConfig.EventGeneratorConfig{
+		TLSClientCerts: models.TLSCerts{
+			KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
+			CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
+			CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
+		},
+	}
+
+	cfg.Db = map[string]db.DatabaseConfig{
+		"policy_db":  {URL: dbURI},
+		"binding_db": {URL: dbURI},
+	}
 	cfg.ScalingEngine.ScalingEngineUrl = scalingEngineUri
 	cfg.EventGenerator.EventGeneratorUrl = eventGeneratorUri
 	cfg.CF.API = cfApi
