@@ -1,6 +1,9 @@
 package testhelpers
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"os"
+)
 
 func GetDbVcapServices(creds map[string]string, serviceName string, dbType string) (string, error) {
 	credentials, err := json.Marshal(creds)
@@ -20,6 +23,8 @@ func GetDbVcapServices(creds map[string]string, serviceName string, dbType strin
 }
 
 func GetVcapServices(userProvidedServiceName string, configJson string) string {
+	dbURL := os.Getenv("DBURL")
+
 	return `{
 		"user-provided": [ {
 			"tags": [ "` + userProvidedServiceName + `" ],
@@ -32,7 +37,7 @@ func GetVcapServices(userProvidedServiceName string, configJson string) string {
 		"autoscaler": [ {
 			"name": "some-service",
 			"credentials": {
-				"uri": "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable"
+				"uri": "` + dbURL + `"
 				},
 			"syslog_drain_url": "",
 			"tags": [ "policy_db","binding_db", "postgres" ]
