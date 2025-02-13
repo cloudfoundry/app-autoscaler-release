@@ -113,14 +113,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 	}
 })
 
-//var _ = SynchronizedAfterSuite(func() {
-//	if len(tmpDir) > 0 {
-//		_ = os.RemoveAll(tmpDir)
-//	}
-//}, func() {
-//
-//})
-
 var _ = BeforeEach(func() {
 	httpClient = NewApiClient()
 	httpClientForPublicApi = NewPublicApiClient()
