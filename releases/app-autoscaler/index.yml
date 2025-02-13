@@ -69,6 +69,8 @@ builds:
     version: 12.2.1
   62348a7c-a2b7-4c93-4bcf-4ddde190d64d:
     version: 3.6.1
+  644529f0-52b9-49ff-7ba6-7f3636440505:
+    version: 15.0.2
   64de5671-176d-4234-5ab8-fa8147588253:
     version: 5.0.4
   64e09373-fd4b-45ce-4fba-a43b1aeeb9b6:

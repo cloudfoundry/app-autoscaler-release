@@ -1,11 +1,11 @@
-act 0.2.71
-actionlint 1.7.4
+act 0.2.74
+actionlint 1.7.7
 bosh 7.3.1
 credhub 2.9.29
 cf 8.8.3
 concourse 7.10.0
 direnv 2.35.0
-ginkgo 2.22.0
+ginkgo 2.22.2
 golang 1.23.0
 golangci-lint 1.62.2
 java temurin-21.0.5+11.0.LTS

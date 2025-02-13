@@ -4,8 +4,7 @@
     "config:best-practices",
     "customManagers:dockerfileVersions",
     ":label(dependencies)",
-    ":automergeAll",
-    "schedule:nonOfficeHours"
+    ":automergeAll"
   ],
   "postUpdateOptions": [
     "gomodTidy",
@@ -32,6 +31,16 @@
       ],
       "matchDepNames": [
         "golang"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Disable devbox Go version updates, as they are taken care by our bosh-package-golang-release-based automation",
+      "matchManagers": [
+        "devbox"
+      ],
+      "matchDepNames": [
+        "go"
       ],
       "enabled": false
     },
