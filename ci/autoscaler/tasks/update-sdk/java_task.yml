@@ -4,8 +4,8 @@ platform: linux
 image_resource:
   type: registry-image
   source:
-    repository: jetpackio/devbox-root-user
-    tag: main
+    repository: jetpackio/devbox-root-user # As concourse mounts inputs owned by root, we need to use a root user image
+    tag: latest
 
 inputs:
 - name: app-autoscaler-release
