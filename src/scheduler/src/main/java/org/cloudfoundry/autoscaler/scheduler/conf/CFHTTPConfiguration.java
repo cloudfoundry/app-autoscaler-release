@@ -1,9 +1,6 @@
 package org.cloudfoundry.autoscaler.scheduler.conf;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.catalina.valves.RemoteIpValve;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -29,6 +26,4 @@ public class CFHTTPConfiguration {
       factory.addAdditionalTomcatConnectors(connector);
     };
   }
-
-
 }

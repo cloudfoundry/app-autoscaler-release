@@ -89,6 +89,7 @@ func (components *Components) GoRouterProxy(portToForward int) *ginkgomon_v2.Run
 		AnsiColorCode:     "32m",
 		StartCheck:        "gorouter-proxy.started",
 		StartCheckTimeout: 20 * time.Second,
+		// #nosec G204
 		Command: exec.Command(
 			components.Executables[GoRouterProxy],
 			[]string{
