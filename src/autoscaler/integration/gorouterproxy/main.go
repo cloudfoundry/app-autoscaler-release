@@ -72,8 +72,9 @@ func forwardHandler(w http.ResponseWriter, inRequest *http.Request) {
 		return
 	}
 
-	resp, err := forwardRequest(cert)
+	resp, err := forwardRequest(inRequest, cert)
 	if err != nil {
+		logger.Printf("Error forwarding request: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -97,7 +98,6 @@ func isClientCertValid(tls *tls.ConnectionState) bool {
 		logger.Printf("No client certificate")
 		return false
 	}
-	logger.Print("received tls: ", tls.PeerCertificates)
 	return true
 }
 
@@ -109,15 +109,31 @@ func createCert(tls *tls.ConnectionState) *auth.Cert {
 	return auth.NewCert(string(pemData))
 }
 
-func forwardRequest(cert *auth.Cert) (*http.Response, error) {
+func forwardRequest(inRequest *http.Request, cert *auth.Cert) (*http.Response, error) {
 	client := &http.Client{}
 	logger.Printf("Forwarding request to %s", *forwardTo)
-	url := fmt.Sprintf("http://127.0.0.1:%s", *forwardTo)
-	outRequest, err := http.NewRequest("GET", url, nil)
+
+	// Always forward to HTTP as any component on the other side of the router running
+	// on a CF container will be using HTTP
+	url := inRequest.URL
+	url.Scheme = "http"
+	url.Host = fmt.Sprintf("127.0.0.1:%s", *forwardTo)
+
+	outRequest, err := http.NewRequest(inRequest.Method, url.String(), inRequest.Body)
+	outRequest.Header = inRequest.Header
 	if err != nil {
+		logger.Printf("Error creating request: %v", err)
 		return nil, err
 	}
 
-	outRequest.Header.Add("X-Forwarded-Client-Cert", cert.GetXFCCHeader())
-	return client.Do(outRequest)
+	if cert.GetXFCCHeader() == "" {
+		log.Printf("XFCC header is empty")
+		return nil, fmt.Errorf("XFCC header is empty")
+	} else {
+		log.Printf("Adding XFCC header before forwarding request")
+
+		outRequest.Header.Add("X-Forwarded-Client-Cert", cert.GetXFCCHeader())
+		resp, err := client.Do(outRequest)
+		return resp, err
+	}
 }

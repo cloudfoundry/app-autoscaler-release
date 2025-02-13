@@ -35,7 +35,13 @@ var _ = Describe("Gorouterproxy", func() {
 		orgGUID = "valid-org"
 		spaceGUID = "valid-space"
 		proxyPort = fmt.Sprintf("%d", 8888+GinkgoParallelProcess())
+
 		testserver = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/valid-path" {
+				http.NotFound(w, r)
+				return
+			}
+
 			if r.Header.Get("X-Forwarded-Client-Cert") == "" {
 				http.Error(w, "No xfcc header", http.StatusForbidden)
 				return
@@ -101,8 +107,10 @@ var _ = Describe("Gorouterproxy", func() {
 		}
 
 		Expect(proxyPort).ToNot(BeEmpty())
-		resp, err := c.Get(fmt.Sprintf("https://127.0.0.1:%s", proxyPort))
+		resp, err := c.Get(fmt.Sprintf("https://127.0.0.1:%s/valid-path", proxyPort))
 		Expect(err).ShouldNot(HaveOccurred())
+
+		Expect(resp.StatusCode).To(Equal(http.StatusOK))
 
 		body, err := io.ReadAll(resp.Body)
 		Expect(err).ShouldNot(HaveOccurred())
