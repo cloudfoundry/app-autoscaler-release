@@ -11,20 +11,18 @@ jobs:
   templates:
     name: Bosh Templates Test
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:5277733db60d4e659404ad330e7c0da790cb65c18b41cf0b2ca6e424294c5dd9
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        env:
-          # Needed for self-hosted runner
-          ImageOS: "ubuntu22"
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 # v0.12.0
         with:
-          # runs 'bundle install' and caches installed gems automatically
-          bundler-cache: true
+          enable-cache: 'true'
+      - name: Make devbox shellenv available
+        run: |
+          eval "$(devbox shellenv)"
+          printenv >> $GITHUB_ENV
 
       - name: Run Tests
         run: |
