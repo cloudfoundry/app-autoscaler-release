@@ -32,7 +32,6 @@
     "yq-go":                                "4.44.5",
     "golangci-lint":                        "1.62.2",
     "ruby":                                 "3.3.6",
-    "go":                                   "1.23.0",
     "redocly":                              "latest",
     "google-java-format":                   "latest",
     "actionlint":                           "1.7.7",
@@ -40,7 +39,8 @@
     "act":                                  "0.2.72",
     "cloudfoundry-cli":                     "8.8.1",
     "temurin-bin-21":                       "latest",
-    "fly":                                  "7.12.0"
+    "fly":                                  "7.12.0",
+    "go":                                   "1.23.1"
   },
   "shell": {
     "init_hook": [
