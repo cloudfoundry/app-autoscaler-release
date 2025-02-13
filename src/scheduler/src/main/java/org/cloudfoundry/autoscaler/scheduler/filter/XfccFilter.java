@@ -96,7 +96,6 @@ public class XfccFilter extends OncePerRequestFilter {
     }
 
     // Proceed with the request
-    logger.info("BANANA - Request is authorized");
     filterChain.doFilter(request, response);
   }
 
