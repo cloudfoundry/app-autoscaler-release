@@ -22,11 +22,6 @@ test_dirs = $(shell find . -name "*_test.go" -exec dirname {} \; \
 GINKGO_OPTS := -r --race --require-suite --randomize-all --cover ${OPTS}
 export CONFIG ?= ../../../../acceptance_config.json
 
-GINKGO_VERSION = v$(shell cat ../../../../../.tool-versions | grep --regexp='ginkgo' | cut --delimiter=' ' --fields='2')
-GOLANGCI_LINT_VERSION = v$(shell cat ../../../../../.tool-versions | grep --regexp='golangci-lint' | cut --delimiter=' ' --fields='2')
-
-
-
 openapi-spec-path := ../../../../../api
 openapi-specs-list = $(wildcard ${openapi-spec-path}/*.openapi.yaml)
 
@@ -94,13 +89,13 @@ check: lint build test
 
 test: generate-fakes
 	@echo 'Running tests'
-	go run 'github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION}' run ${GINKGO_OPTS} './...'
+	ginkgo run ${GINKGO_OPTS} './...'
 
 lint: generate-fakes
-	@go run 'github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}' run
+	golangci-lint run
 
 lint-fix: generate-fakes
-	go run 'github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}' run --fix
+	golangci-lint run --fix
 
 
 

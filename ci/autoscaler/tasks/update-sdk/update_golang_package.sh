@@ -15,8 +15,8 @@ golang_version=$(cat "${golang_dir}/packages/golang-1-linux/version")
 step "updating go.mod files with golang version ${golang_version}"
 find "${autoscaler_dir}" -name go.mod -type f -exec go mod edit -go "${golang_version}" "{}" \;
 
-step "updating .tool-versions file with golang version ${golang_version}"
-sed -i "s/golang 1.*/golang ${golang_version}/g" "${autoscaler_dir}/.tool-versions"
+step "updating devbox with golang version ${golang_version}"
+devbox add --config "${autoscaler_dir}" "go@${golang_version}"
 
 echo -n "${golang_version}" > "${autoscaler_dir}/version"
 vendor-package "${golang_dir}" golang-1-linux "${golang_version}"

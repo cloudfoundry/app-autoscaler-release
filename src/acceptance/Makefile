@@ -16,13 +16,6 @@ CI_DIR ?= ${AUTOSCALER_DIR}/ci
 CGO_ENABLED := 0
 export GOWORK := off
 
-GINKGO_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='ginkgo' \
-										| cut --delimiter=' ' --fields='2')
-GOLANGCI_LINT_VERSION = v$(shell cat '../../.tool-versions' | grep --regexp='golangci-lint' \
-													 | cut --delimiter=' ' --fields='2' )
-
-
-
 .PHONY: clean
 clean:
 	rm --recursive --force './vendor'
@@ -63,7 +56,7 @@ build_test-%:
 check: lint build_tests
 
 test-unit:
-	go run github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} --race run helpers config
+	ginkgo --race run helpers config
 
 test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
