@@ -64,6 +64,7 @@ var _ = Describe("Integration_GolangApi_EventGenerator", func() {
 	})
 
 	AfterEach(func() {
+		os.RemoveAll(tmpDir)
 		tearDownTestEnvironment()
 	})
 

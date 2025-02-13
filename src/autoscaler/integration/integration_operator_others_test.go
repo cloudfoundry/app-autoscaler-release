@@ -84,6 +84,7 @@ var _ = Describe("Integration_Operator_Others", func() {
 		stopScalingEngine()
 		stopOperator()
 		stopGolangApiServer()
+		os.RemoveAll(tmpDir)
 	})
 
 	Describe("Synchronizer", func() {
