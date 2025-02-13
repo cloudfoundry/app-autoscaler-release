@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "server.http")
-public class CFHTTPConfiguration {
+public class CfHttpConfiguration {
 
   private int port;
 
