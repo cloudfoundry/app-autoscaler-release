@@ -32,6 +32,10 @@ var _ = Describe("Config", func() {
 	})
 
 	Describe("ToJSON and FromJSON", func() {
+		BeforeEach(func() {
+			configBytes = []byte(testhelpers.LoadFile("valid_config.yml"))
+		})
+
 		JustBeforeEach(func() {
 			configFile = testhelpers.BytesToFile(configBytes)
 			conf, err = LoadConfig(configFile, mockVCAPConfigurationReader)
