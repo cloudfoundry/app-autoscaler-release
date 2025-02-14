@@ -26,16 +26,6 @@ public class XfccFilter extends OncePerRequestFilter {
   private String validSpaceGuid;
   private String validOrgGuid;
 
-  @PostConstruct
-  public void init() {
-    if (this.validSpaceGuid == null
-        || this.validOrgGuid == null
-        || this.validSpaceGuid.isEmpty()
-        || this.validOrgGuid.isEmpty()) {
-      throw new IllegalStateException("Valid Space or Org Guid is not set");
-    }
-  }
-
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
