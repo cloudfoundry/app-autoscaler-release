@@ -86,7 +86,7 @@ var _ = Describe("AutoScaler Public API", func() {
 			Expect(status).To(Or(Equal(200), Equal(404)), fmt.Sprintf("failed to delete policy, received response: %s", string(response)))
 		})
 
-		FIt("should fail with 404 when retrieve policy", func() {
+		It("should fail with 404 when retrieve policy", func() {
 			response, status := getPolicy()
 			Expect(status).To(Equal(404), fmt.Sprintf("failed to get policy, received response: %s", string(response)))
 		})
