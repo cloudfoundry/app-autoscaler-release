@@ -25,7 +25,7 @@
     "rubyPackages.solargraph":              "latest",
     "shellcheck":                           "0.10.0",
     "which":                                "latest",
-    "credhub-cli":                          "2.9.29",
+    "credhub-cli":                          "2.9.42",
     "markdownlint-cli2":                    "latest",
     "bundler":                              "latest",
     "direnv":                               "2.35.0",
@@ -40,7 +40,7 @@
     "cloudfoundry-cli":                     "8.8.1",
     "redocly":                              "latest",
     "google-java-format":                   "latest",
-    "temurin-bin-21":                       "latest",
+    "temurin-bin-21":                       "21.0.3",
     "go":                                   "1.23.1",
     "fly":                                  "7.12.1"
   },
