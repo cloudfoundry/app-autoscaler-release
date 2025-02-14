@@ -13,8 +13,8 @@ describe "scheduler" do
   let(:rendered_template) { YAML.safe_load(template.render(properties)) }
 
   context "cf server" do
-    it "includes default http port" do
-      expect(rendered_template["server"]["http"]["port"]).to eq(6103)
+    it "default http port set to 0 - disabled" do
+      expect(rendered_template["server"]["http"]["port"]).to eq(0)
     end
 
     it "defaults xfcc valid org and space " do
