@@ -361,51 +361,51 @@
         }
       }
     },
-    "credhub-cli@2.9.29": {
-      "last_modified": "2024-05-29T10:04:41Z",
-      "resolved": "github:NixOS/nixpkgs/ac82a513e55582291805d6f09d35b6d8b60637a1#credhub-cli",
+    "credhub-cli@2.9.42": {
+      "last_modified": "2025-02-01T23:23:45Z",
+      "resolved": "github:NixOS/nixpkgs/6c4e0724e0a785a20679b1bca3a46bfce60f05b6#credhub-cli",
       "source": "devbox-search",
-      "version": "2.9.29",
+      "version": "2.9.42",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/20xi78w44q6wn4847jrrlmxddyjycbrn-credhub-cli-2.9.29",
+              "path": "/nix/store/246b18f9f65as1gkf4zzzcrszmkgjza8-credhub-cli-2.9.42",
               "default": true
             }
           ],
-          "store_path": "/nix/store/20xi78w44q6wn4847jrrlmxddyjycbrn-credhub-cli-2.9.29"
+          "store_path": "/nix/store/246b18f9f65as1gkf4zzzcrszmkgjza8-credhub-cli-2.9.42"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/5hv8vj4dhy521m49sc4wwmaz2q319z9a-credhub-cli-2.9.29",
+              "path": "/nix/store/59prjsqn57m5a9fi3a9061s2s3y1vpgw-credhub-cli-2.9.42",
               "default": true
             }
           ],
-          "store_path": "/nix/store/5hv8vj4dhy521m49sc4wwmaz2q319z9a-credhub-cli-2.9.29"
+          "store_path": "/nix/store/59prjsqn57m5a9fi3a9061s2s3y1vpgw-credhub-cli-2.9.42"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/c5d2ggn5c819spywi74pzksbzds9ryym-credhub-cli-2.9.29",
+              "path": "/nix/store/3rvibdp921bmi8287n4qy55j080jw0cl-credhub-cli-2.9.42",
               "default": true
             }
           ],
-          "store_path": "/nix/store/c5d2ggn5c819spywi74pzksbzds9ryym-credhub-cli-2.9.29"
+          "store_path": "/nix/store/3rvibdp921bmi8287n4qy55j080jw0cl-credhub-cli-2.9.42"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3y6r6lgrbaq8521hk3zbalf3gz3albcg-credhub-cli-2.9.29",
+              "path": "/nix/store/515jd0q0p3zx8790ks6b5bi0jpbsgnk4-credhub-cli-2.9.42",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3y6r6lgrbaq8521hk3zbalf3gz3albcg-credhub-cli-2.9.29"
+          "store_path": "/nix/store/515jd0q0p3zx8790ks6b5bi0jpbsgnk4-credhub-cli-2.9.42"
         }
       }
     },
@@ -1848,7 +1848,7 @@
         }
       }
     },
-    "temurin-bin-21@latest": {
+    "temurin-bin-21@21.0.3": {
       "last_modified": "2024-10-13T23:44:06Z",
       "resolved": "github:NixOS/nixpkgs/d4f247e89f6e10120f911e2e2d2254a050d0f732#temurin-bin-21",
       "source": "devbox-search",
