@@ -24,7 +24,7 @@ var _ = BeforeSuite(func() {
 
 	// Remove execute permissions
 	cmdPath = fmt.Sprintf("%s/gorouterproxy", gorouterproxyPath)
-	err = os.Chmod(cmdPath, 0777)
+	err = os.Chmod(cmdPath, 0770)
 	Expect(err).NotTo(HaveOccurred())
 
 	DeferCleanup(gexec.CleanupBuildArtifacts)
