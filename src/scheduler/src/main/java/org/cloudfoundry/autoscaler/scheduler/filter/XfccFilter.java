@@ -31,15 +31,16 @@ public class XfccFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws jakarta.servlet.ServletException, IOException {
 
-    String path = request.getRequestURI();
-    String method = request.getMethod();
-
-    logger.info("Received " + method + " Request to " + path);
     // Skip filter if the request is HTTPS
     if (request.isSecure()) {
       filterChain.doFilter(request, response);
       return;
     }
+
+    String path = request.getRequestURI();
+    String method = request.getMethod();
+
+    logger.info("Received " + method + " Request to " + path);
 
     String xfccHeader = request.getHeader("X-Forwarded-Client-Cert");
     if (xfccHeader == null || xfccHeader.isEmpty()) {
