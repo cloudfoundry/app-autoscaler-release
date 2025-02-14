@@ -3,13 +3,13 @@
     "path:./nix#bosh-bootloader":           "",
     "path:./nix#app-autoscaler-cli-plugin": "",
     "path:./nix#log-cache-cli-plugin":      "",
+    "path:./nix#cf-deploy-plugin":          "",
     "path:./nix#cloud-mta-build-tool":      "",
     "path:./nix#uaac":                      "",
     "bosh-cli":                             "7.3.1",
-    "bundix":                               "latest",
+    "bundix":                               "2.5.2",
     "coreutils":                            "latest",
     "delve":                                "latest",
-    "fly":                                  "7.12.0",
     "gh":                                   "latest",
     "gnumake":                              "4.4",
     "gnutar":                               "latest",
@@ -24,21 +24,23 @@
     "rubocop":                              "latest",
     "rubyPackages.solargraph":              "latest",
     "shellcheck":                           "0.10.0",
-    "swagger-cli":                          "latest",
     "which":                                "latest",
-    "credhub-cli":                          "2.9.29",
+    "credhub-cli":                          "2.9.42",
     "markdownlint-cli2":                    "latest",
     "bundler":                              "latest",
-    "go":                                   "1.22.5",
     "direnv":                               "2.35.0",
-    "actionlint":                           "1.7.4",
     "yq-go":                                "4.44.5",
     "golangci-lint":                        "1.62.2",
-    "act":                                  "0.2.68",
+    "ruby":                                 "3.3.6",
+    "redocly":                              "latest",
+    "google-java-format":                   "latest",
+    "actionlint":                           "1.7.7",
+    "ginkgo":                               "2.22.2",
+    "act":                                  "0.2.72",
     "cloudfoundry-cli":                     "8.8.1",
-    "ginkgo":                               "2.20.2",
-    "temurin-bin-21":                       "latest",
-    "ruby":                                 "3.3.5"
+    "temurin-bin-21":                       "21.0.3",
+    "go":                                   "1.23.1",
+    "fly":                                  "7.12.1"
   },
   "shell": {
     "init_hook": [
@@ -47,7 +49,8 @@
       "  cf plugins --checksum | grep --quiet ${sum} || cf install-plugin -f $(which $1)",
       "}",
       "install_plugin_if_needed 'app-autoscaler-cli-plugin'",
-      "install_plugin_if_needed 'log-cache-cli'"
+      "install_plugin_if_needed 'log-cache-cli'",
+      "install_plugin_if_needed multiapps-cli-plugin"
     ]
   }
 }

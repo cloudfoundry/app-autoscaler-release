@@ -5,12 +5,10 @@ on:
     paths:
       - 'ci/dockerfiles/**'
       - '.github/workflows/image.yml'
-      - '.tool-versions'
   pull_request:
     paths:
       - 'ci/dockerfiles/**'
       - '.github/workflows/image.yml'
-      - '.tool-versions'
   workflow_dispatch:
 
 env:
@@ -20,6 +18,7 @@ env:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
+    container: jetpackio/devbox:latest@sha256:3e9b26747056d019dcedf295604a9b42dfe5a3b326fcc76de712b54a674314bd
     permissions:
       contents: read
       packages: write
@@ -50,20 +49,20 @@ jobs:
       - name: Get ginkgo version from autoscaler-release
         id: ginkgo
         run: |
-          version=$(grep "ginkgo " .tool-versions|  cut -f 2 -d " ")
-          echo "GINKGO version from .tool-versions: \'${version}\'"
+          version=$(devbox info ginkgo | head --lines=1 | cut --field=2 --delimiter=" ")
+          echo "GINKGO version from devbox: '${version}'"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - id: get-golang-version
         shell: bash
         run: |
-          version=$(grep "golang " .tool-versions|  cut -f 2 -d " ")
-          echo "Go version from .tool-versions: \'${version}\'"
+          version=$(devbox info go | head --lines=1 | cut --field=2 --delimiter=" ")
+          echo "Go version from devbox: '${version}'"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         id: build-and-push
-        uses: docker/build-push-action@67a2d409c0a876cbe6b11854e3e25193efe4e62d # v6
+        uses: docker/build-push-action@ca877d9245402d1537745e0e356eab47c3520991 # v6
         with:
           context: ci/dockerfiles/autoscaler-${{ matrix.image_suffix }}
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

@@ -12,6 +12,7 @@ blobs
 *.swp
 src/changeloglockcleaner/vendor
 **/coverprofile.out
+**/ginkgo.report
 **/coverprofile.out.*
 **/pom.xml.versionsBackup
 bosh-lite/deployments/*

@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1733015953,
-        "narHash": "sha256-t4BBVpwG9B4hLgc6GUBuj3cjU7lP/PJfpTHuSqE+crk=",
+        "lastModified": 1738680400,
+        "narHash": "sha256-ooLh+XW8jfa+91F1nhf9OF7qhuA/y1ChLx6lXDNeY5U=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ac35b104800bff9028425fec3b6e8a41de2bbfff",
+        "rev": "799ba5bffed04ced7067a91798353d360788b30d",
         "type": "github"
       },
       "original": {
@@ -16,26 +16,9 @@
         "type": "github"
       }
     },
-    "nixpkgs-bosh-cli-v7-3-1": {
-      "locked": {
-        "lastModified": 1689621684,
-        "narHash": "sha256-a7nGZZezo5s3STRCHl5e73eNTmU/Zg/QcrtzyrfZ5Qg=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "1179c6c3705509ba25bd35196fca507d2a227bd0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "1179c6c3705509ba25bd35196fca507d2a227bd0",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs",
-        "nixpkgs-bosh-cli-v7-3-1": "nixpkgs-bosh-cli-v7-3-1"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

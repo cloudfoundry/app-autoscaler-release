@@ -1,7 +1,7 @@
 name: Acceptance Tests - BOSH release
 on:
   pull_request:
-    types: [ opened, labeled, synchronize ]
+    types: [ opened, synchronize ]
 
 concurrency:
   group: "${{ github.workflow }}/${{ github.ref }}"

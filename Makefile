@@ -29,9 +29,6 @@ CI ?= false
 VERSION ?= 0.0.testing
 DEST ?= build
 
-GOLANGCI_LINT_VERSION = v$(shell cat .tool-versions | grep golangci-lint  \
-													| cut --delimiter=' ' --fields='2')
-
 export DEBUG ?= false
 export ACCEPTANCE_TESTS_FILE ?= ${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
 export GOWORK = off
@@ -447,7 +444,7 @@ docker-image: docker-login
 	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
 validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
 	for file in $^ ; do \
-		swagger-cli validate "$${file}" ; \
+		redocly lint --extends=minimal --format=$(if $(GITHUB_ACTIONS),github-actions,codeframe) "$${file}" ; \
 	done
 
 .PHONY: go-get-u
