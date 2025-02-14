@@ -31,8 +31,6 @@ export GO111MODULE=on
 
 GINKGO_OPTS = -r --race --require-suite --randomize-all --cover ${OPTS}
 
-
-
 # ogen generated OpenAPI clients and servers
 openapi-generated-clients-and-servers-api-dir := ./api/apis/scalinghistory
 openapi-generated-clients-and-servers-scalingengine-dir := ./scalingengine/apis/scalinghistory

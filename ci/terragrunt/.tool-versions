@@ -1,6 +1,0 @@
-gcloud 502.0.0
-helm 3.16.3
-python 3.13.0
-terraform 1.10.0
-terraform-lsp
-terragrunt 0.69.13
