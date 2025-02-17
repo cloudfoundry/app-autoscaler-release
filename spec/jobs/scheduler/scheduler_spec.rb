@@ -17,15 +17,16 @@ describe "scheduler" do
       expect(rendered_template["server"]["http"]["port"]).to eq(0)
     end
 
-    it "defaults xfcc valid org and space " do
-      properties["autoscaler"]["cfServer"] = {}
-      properties["autoscaler"]["cfServer"]["xfcc"] = {
-        "validOrgGuid" => "some-valid-org-guid",
-        "validSpaceGuid" => "some-valid-space-guid"
+    it "defaults xfcc valid org and space" do
+      properties["autoscaler"]["scheduler"] = {}
+      properties["autoscaler"]["scheduler"]["cf_server"] = {}
+      properties["autoscaler"]["scheduler"]["cf_server"]["xfcc"] = {
+        "valid_org_guid" => "some-valid-org-guid",
+        "valid_space_guid" => "some-valid-space-guid"
       }
 
-      expect(rendered_template["cfserver"]["validOrgGuid"]).to eq(properties["autoscaler"]["cfServer"]["validOrgGuid"])
-      expect(rendered_template["cfserver"]["validSpaceGuid"]).to eq(properties["autoscaler"]["cfServer"]["validSpaceGuid"])
+      expect(rendered_template["cfserver"]["validOrgGuid"]).to eq(properties["autoscaler"]["scheduler"]["cf_server"]["xfcc"]["valid_org_guid"])
+      expect(rendered_template["cfserver"]["validSpaceGuid"]).to eq(properties["autoscaler"]["scheduler"]["cf_server"]["xfcc"]["valid_space_guid"])
     end
   end
 
@@ -107,7 +108,6 @@ describe "scheduler" do
     it "verify database username and password have string types" do
       rendered_template = YAML.safe_load(template.render(properties))
 
-      print rendered_template
       expect(rendered_template["spring"]["datasource"]["username"]).to be_kind_of(String)
       expect(rendered_template["spring"]["datasource"]["username"]).not_to be_kind_of(Float)
       expect(rendered_template["spring"]["datasource"]["username"]).not_to eq(2222e123)

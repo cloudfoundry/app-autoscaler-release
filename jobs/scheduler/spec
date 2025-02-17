@@ -60,11 +60,11 @@ properties:
     default: 3
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
 
-  autoscaler.cf_server.xfcc.valid_org_guid:
+  autoscaler.scheduler.cf_server.xfcc.valid_org_guid:
     description: approve org guid for xfcc endpoint
     default: ''
 
-  autoscaler.cf_server.xfcc.valid_space_guid:
+  autoscaler.scheduler.cf_server.xfcc.valid_space_guid:
     description: approve space guid for xfcc endpoint
     default: ''
 
