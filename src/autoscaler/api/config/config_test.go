@@ -71,8 +71,8 @@ var _ = Describe("Config", func() {
 
 			When("vcap CF_INSTANCE_CERT is set", func() {
 				BeforeEach(func() {
-					os.Setenv("CF_INSTANCE_KEY", "some/path/in/container/eventgenerator.key")
-					os.Setenv("CF_INSTANCE_CERT", "some/path/in/container/eventgenerator.crt")
+					os.Setenv("CF_INSTANCE_KEY", "some/path/in/container/cfcert.key")
+					os.Setenv("CF_INSTANCE_CERT", "some/path/in/container/cfcert.crt")
 				})
 
 				AfterEach(func() {
@@ -82,14 +82,23 @@ var _ = Describe("Config", func() {
 				})
 
 				It("sets EventGenerator TlSClientCert", func() {
-					Expect(conf.EventGenerator.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/eventgenerator.key"))
-					Expect(conf.EventGenerator.TLSClientCerts.CertFile).To(Equal("some/path/in/container/eventgenerator.crt"))
+					Expect(conf.EventGenerator.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
+					Expect(conf.EventGenerator.TLSClientCerts.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
+					Expect(conf.EventGenerator.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
 				})
 
 				It("sets Scheduler TlSClientCert", func() {
-					Expect(conf.Scheduler.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/eventgenerator.key"))
-					Expect(conf.Scheduler.TLSClientCerts.CertFile).To(Equal("some/path/in/container/eventgenerator.crt"))
+					Expect(conf.Scheduler.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
+					Expect(conf.Scheduler.TLSClientCerts.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
+					Expect(conf.Scheduler.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
 				})
+
+				It("sets ScalingEngine TlSClientCert", func() {
+					Expect(conf.ScalingEngine.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
+					Expect(conf.ScalingEngine.TLSClientCerts.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
+					Expect(conf.ScalingEngine.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
+				})
+
 			})
 
 			When("vcap PORT is set to a number", func() {
