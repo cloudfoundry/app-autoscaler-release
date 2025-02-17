@@ -27,7 +27,7 @@
     "which":                                "latest",
     "credhub-cli":                          "2.9.42",
     "markdownlint-cli2":                    "latest",
-    "bundler":                              "latest",
+    "bundler":                              "2.5.22",
     "direnv":                               "2.35.0",
     "yq-go":                                "4.44.5",
     "golangci-lint":                        "1.62.2",
