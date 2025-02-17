@@ -3,11 +3,7 @@ package org.cloudfoundry.autoscaler.scheduler.filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
-import lombok.Data;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,11 +11,17 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
+
 @Component
 @Order(0)
-@Data
 @ConfigurationProperties(prefix = "cfserver")
-public class XfccFilter extends OncePerRequestFilter {
+@Setter
+public class HttpAuthFilter extends OncePerRequestFilter {
   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   private String validSpaceGuid;
@@ -27,32 +29,27 @@ public class XfccFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws jakarta.servlet.ServletException, IOException {
+    HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    throws jakarta.servlet.ServletException, IOException {
+
+    logger.info("Received request with request " + request.getRequestURI() + " method" + request.getMethod());
 
     // Skip filter if the request is HTTPS
     if (request.isSecure()) {
       filterChain.doFilter(request, response);
       return;
     }
-
-    String path = request.getRequestURI();
-    String method = request.getMethod();
-
-    logger.info("Received " + method + " Request to " + path);
-
     String xfccHeader = request.getHeader("X-Forwarded-Client-Cert");
     if (xfccHeader == null || xfccHeader.isEmpty()) {
       logger.warn("Missing X-Forwarded-Client-Cert header");
       response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST, "Missing X-Forwarded-Client-Cert header");
+        HttpServletResponse.SC_BAD_REQUEST, "Missing X-Forwarded-Client-Cert header in the request");
       return;
-    } else {
-      logger.info(
-          "X-Forwarded-Client-Cert header received ... checking authorized org and space in OU");
     }
+    logger.info(
+      "X-Forwarded-Client-Cert header received ... checking authorized org and space in OU");
 
-    // xfccHeader in semicolom separted Cert=some-cert;Hash=some-has with regular expresion
+    // xfccHeader in semicolom separated Cert=some-cert;Hash=some-hash with regular expression
     String[] parts = xfccHeader.split(";");
     String certValue = "";
 
@@ -63,13 +60,8 @@ public class XfccFilter extends OncePerRequestFilter {
         break;
       }
     }
-
     try {
-      // Decode and parse the certificate
-      X509Certificate certificate = parseCertificate(certValue);
-
-      // Extract the OrganizationalUnit
-      String organizationalUnit = certificate.getSubjectX500Principal().getName();
+       String organizationalUnit = extractOrganizationalUnit(certValue);
 
       // Validate both key-value pairs in OrganizationalUnit
       if (!isValidOrganizationalUnit(organizationalUnit)) {
@@ -77,31 +69,34 @@ public class XfccFilter extends OncePerRequestFilter {
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Unauthorized OrganizationalUnit");
         return;
       }
-
     } catch (Exception e) {
       logger.warn("Invalid certificate: " + e.getMessage());
       response.sendError(
-          HttpServletResponse.SC_BAD_REQUEST, "Invalid certificate: " + e.getMessage());
+        HttpServletResponse.SC_BAD_REQUEST, "Invalid certificate: " + e.getMessage());
       return;
     }
-
     // Proceed with the request
     filterChain.doFilter(request, response);
   }
 
-  private X509Certificate parseCertificate(String xfccHeader) throws Exception {
+  private String extractOrganizationalUnit(String certValue) throws Exception {
+    X509Certificate certificate = parseCertificate(certValue);
+    return certificate.getSubjectX500Principal().getName();
+  }
+
+  private X509Certificate parseCertificate(String certValue) throws Exception {
     // Extract the base64-encoded certificate from the XFCC header
     String base64Cert =
-        xfccHeader
-            .replace("-----BEGIN CERTIFICATE-----", "")
-            .replace("-----END CERTIFICATE-----", "")
-            .replaceAll("\\s+", "");
+      certValue
+        .replace("-----BEGIN CERTIFICATE-----", "")
+        .replace("-----END CERTIFICATE-----", "")
+        .replaceAll("\\s+", "");
 
     byte[] decodedCert = Base64.getDecoder().decode(base64Cert);
 
     CertificateFactory factory = CertificateFactory.getInstance("X.509");
     return (X509Certificate)
-        factory.generateCertificate(new java.io.ByteArrayInputStream(decodedCert));
+      factory.generateCertificate(new ByteArrayInputStream(decodedCert));
   }
 
   private boolean isValidOrganizationalUnit(String organizationalUnit) {
