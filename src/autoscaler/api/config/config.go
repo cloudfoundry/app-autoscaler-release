@@ -54,8 +54,9 @@ var defaultLoggingConfig = helpers.LoggingConfig{
 
 type SchedulerConfig struct {
 	SchedulerURL   string          `yaml:"scheduler_url" json:"scheduler_url"`
-	TLSClientCerts models.TLSCerts `yaml:"tls" json:"tls`
+	TLSClientCerts models.TLSCerts `yaml:"tls" json:"tls"`
 }
+
 type ScalingEngineConfig struct {
 	ScalingEngineUrl string          `yaml:"scaling_engine_url" json:"scaling_engine_url"`
 	TLSClientCerts   models.TLSCerts `yaml:"tls" json:"tls`
@@ -193,6 +194,9 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}
+
+	// enable plain text logging. See src/autoscaler/helpers/logger.go
+	conf.Logging.PlainTextSink = true
 
 	conf.VCAPServer.Port = vcapReader.GetPort()
 	if err := loadPublicApiServerConfig(conf, vcapReader); err != nil {

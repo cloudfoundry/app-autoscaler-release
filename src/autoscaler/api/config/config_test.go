@@ -55,14 +55,18 @@ var _ = Describe("Config", func() {
 	})
 
 	Describe("Load Config", func() {
-
-		When("config is read from env", func() {
+		When("runnning in a cf container", func() {
 			var expectedDbUrl string
 
 			JustBeforeEach(func() {
 				mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
 				mockVCAPConfigurationReader.MaterializeDBFromServiceReturns(expectedDbUrl, nil)
 				conf, err = LoadConfig("", mockVCAPConfigurationReader)
+			})
+
+			It("should set logging to plain sink", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.Logging.PlainTextSink).To(BeTrue())
 			})
 
 			When("vcap CF_INSTANCE_CERT is set", func() {
@@ -350,6 +354,11 @@ rate_limit:
 			})
 			JustBeforeEach(func() {
 				err = conf.Validate()
+			})
+
+			It("should set logging to redacted by default", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.Logging.PlainTextSink).To(BeFalse())
 			})
 
 			Context("When all the configs are valid", func() {
