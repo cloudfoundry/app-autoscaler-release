@@ -38,8 +38,6 @@
     "ginkgo":                               "2.22.2",
     "act":                                  "0.2.72",
     "cloudfoundry-cli":                     "8.8.1",
-    "redocly":                              "latest",
-    "google-java-format":                   "latest",
     "temurin-bin-21":                       "21.0.3",
     "go":                                   "1.23.1",
     "fly":                                  "7.12.1"
