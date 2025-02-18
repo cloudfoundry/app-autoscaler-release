@@ -1,6 +1,7 @@
 package org.cloudfoundry.autoscaler.scheduler.filter;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Setter;
@@ -30,12 +31,14 @@ public class HttpAuthFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(
     HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-    throws jakarta.servlet.ServletException, IOException {
+    throws ServletException, IOException {
 
     logger.info("Received request with request " + request.getRequestURI() + " method" + request.getMethod());
 
     // Skip filter if the request is HTTPS
-    if (request.isSecure()) {
+    if (request.getScheme().equals("https")) {
+      // Do we need to the know the original request sent by the client.
+      // If Yes, checking the X-Forwarded-Proto header sent by the load balancer or proxy make sennse
       filterChain.doFilter(request, response);
       return;
     }
@@ -49,19 +52,9 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     logger.info(
       "X-Forwarded-Client-Cert header received ... checking authorized org and space in OU");
 
-    // xfccHeader in semicolom separated Cert=some-cert;Hash=some-hash with regular expression
-    String[] parts = xfccHeader.split(";");
-    String certValue = "";
-
-    // Loop through the parts to find the one that starts with "Cert="
-    for (String part : parts) {
-      if (part.startsWith("Cert=")) {
-        certValue = part.substring("Cert=".length());
-        break;
-      }
-    }
+    String certValue = extractCertValue(xfccHeader);
     try {
-       String organizationalUnit = extractOrganizationalUnit(certValue);
+      String organizationalUnit = extractOrganizationalUnit(certValue);
 
       // Validate both key-value pairs in OrganizationalUnit
       if (!isValidOrganizationalUnit(organizationalUnit)) {
@@ -77,6 +70,21 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     }
     // Proceed with the request
     filterChain.doFilter(request, response);
+  }
+
+  // xfccHeader format: Cert=some-cert;Hash=some-hash
+  private static String extractCertValue(String xfccHeader) {
+    String[] parts = xfccHeader.split(";");
+    String certValue = "";
+
+    // Loop through the parts to find the one that starts with "Cert="
+    for (String part : parts) {
+      if (part.startsWith("Cert=")) {
+        certValue = part.substring("Cert=".length());
+        break;
+      }
+    }
+    return certValue;
   }
 
   private String extractOrganizationalUnit(String certValue) throws Exception {
