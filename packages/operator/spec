@@ -9,7 +9,6 @@ files:
 - autoscaler/vendor/*
 - autoscaler/operator/db/*
 - autoscaler/cf/* # gosub
-- autoscaler/configutil/* # gosub
 - autoscaler/db/* # gosub
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
@@ -30,7 +29,6 @@ files:
 - autoscaler/vendor/filippo.io/edwards25519/field/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
-- autoscaler/vendor/github.com/cloud-gov/go-cfenv/* # gosub
 - autoscaler/vendor/github.com/go-logr/logr/* # gosub
 - autoscaler/vendor/github.com/go-logr/logr/funcr/* # gosub
 - autoscaler/vendor/github.com/go-logr/stdr/* # gosub
@@ -64,7 +62,6 @@ files:
 - autoscaler/vendor/github.com/klauspost/compress/internal/snapref/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zstd/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
-- autoscaler/vendor/github.com/mitchellh/mapstructure/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/idgenerator/* # gosub
 - autoscaler/vendor/github.com/openzipkin/zipkin-go/model/* # gosub
