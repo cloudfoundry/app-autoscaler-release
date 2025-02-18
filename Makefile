@@ -95,7 +95,7 @@ clean-acceptance:
 build: $(all_modules)
 build-tests: build-test
 build-test: $(addprefix test_,$(go_modules))
-build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app build-gorouterproxy
+build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app
 db: target/db
 target/db:
 	@echo "# building $@"
