@@ -9,7 +9,7 @@
     "bosh-cli":                             "7.3.1",
     "bundix":                               "2.5.2",
     "coreutils":                            "latest",
-    "delve":                                "latest",
+    "delve":                                "1.24.0",
     "gh":                                   "latest",
     "gnumake":                              "4.4",
     "gnutar":                               "latest",
