@@ -4,6 +4,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +16,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.Base64;
 
 @Component
 @Order(0)
@@ -30,15 +29,20 @@ public class HttpAuthFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(
-    HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-    throws ServletException, IOException {
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
 
-    logger.info("Received request with request " + request.getRequestURI() + " method" + request.getMethod());
+    logger.info(
+        "Received request with request "
+            + request.getRequestURI()
+            + " method"
+            + request.getMethod());
 
     // Skip filter if the request is HTTPS
     if (request.getScheme().equals("https")) {
       // Do we need to the know the original request sent by the client.
-      // If Yes, checking the X-Forwarded-Proto header sent by the load balancer or proxy make sennse
+      // If Yes, checking the X-Forwarded-Proto header sent by the load balancer or proxy make
+      // sennse
       filterChain.doFilter(request, response);
       return;
     }
@@ -46,11 +50,12 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     if (xfccHeader == null || xfccHeader.isEmpty()) {
       logger.warn("Missing X-Forwarded-Client-Cert header");
       response.sendError(
-        HttpServletResponse.SC_BAD_REQUEST, "Missing X-Forwarded-Client-Cert header in the request");
+          HttpServletResponse.SC_BAD_REQUEST,
+          "Missing X-Forwarded-Client-Cert header in the request");
       return;
     }
     logger.info(
-      "X-Forwarded-Client-Cert header received ... checking authorized org and space in OU");
+        "X-Forwarded-Client-Cert header received ... checking authorized org and space in OU");
 
     String certValue = extractCertValue(xfccHeader);
     try {
@@ -65,7 +70,7 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     } catch (Exception e) {
       logger.warn("Invalid certificate: " + e.getMessage());
       response.sendError(
-        HttpServletResponse.SC_BAD_REQUEST, "Invalid certificate: " + e.getMessage());
+          HttpServletResponse.SC_BAD_REQUEST, "Invalid certificate: " + e.getMessage());
       return;
     }
     // Proceed with the request
@@ -95,16 +100,15 @@ public class HttpAuthFilter extends OncePerRequestFilter {
   private X509Certificate parseCertificate(String certValue) throws Exception {
     // Extract the base64-encoded certificate from the XFCC header
     String base64Cert =
-      certValue
-        .replace("-----BEGIN CERTIFICATE-----", "")
-        .replace("-----END CERTIFICATE-----", "")
-        .replaceAll("\\s+", "");
+        certValue
+            .replace("-----BEGIN CERTIFICATE-----", "")
+            .replace("-----END CERTIFICATE-----", "")
+            .replaceAll("\\s+", "");
 
     byte[] decodedCert = Base64.getDecoder().decode(base64Cert);
 
     CertificateFactory factory = CertificateFactory.getInstance("X.509");
-    return (X509Certificate)
-      factory.generateCertificate(new ByteArrayInputStream(decodedCert));
+    return (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(decodedCert));
   }
 
   private boolean isValidOrganizationalUnit(String organizationalUnit) {

@@ -18,8 +18,7 @@ public class CfHttpConfiguration {
   @Bean
   public WebServerFactoryCustomizer<TomcatServletWebServerFactory> httpConnectorCustomizer() {
     if (port == 0) {
-      return factory -> {
-      };
+      return factory -> {};
     }
     return factory -> {
       Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
