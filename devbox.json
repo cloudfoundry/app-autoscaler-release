@@ -10,7 +10,7 @@
     "bundix":                               "2.5.2",
     "coreutils":                            "latest",
     "delve":                                "1.24.0",
-    "gh":                                   "latest",
+    "gh":                                   "1.14.0",
     "gnumake":                              "4.4",
     "gnutar":                               "latest",
     "go-tools":                             "latest",
