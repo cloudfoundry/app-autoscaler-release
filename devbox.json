@@ -13,7 +13,7 @@
     "gh":                                   "2.67.0",
     "gnumake":                              "4.4",
     "gnutar":                               "latest",
-    "go-tools":                             "latest",
+    "go-tools":                             "2020.2.4",
     "gopls":                                "latest",
     "gum":                                  "0.13.0",
     "jq":                                   "latest",
