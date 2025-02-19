@@ -86,6 +86,8 @@ files:
 - autoscaler/vendor/github.com/tedsuo/ifrit/sigmon/* # gosub
 - autoscaler/vendor/github.com/uptrace/opentelemetry-go-extra/otelsql/* # gosub
 - autoscaler/vendor/github.com/uptrace/opentelemetry-go-extra/otelsqlx/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/auto/sdk/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/auto/sdk/internal/telemetry/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/attribute/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/baggage/* # gosub
