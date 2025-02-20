@@ -328,7 +328,7 @@ update-uaac-nix-package:
 	make --directory='./nix/packages/uaac' gemset.nix
 
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf ## Deploy autoscaler to OSS dev environment
+deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh

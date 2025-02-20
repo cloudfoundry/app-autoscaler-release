@@ -836,11 +836,53 @@
         }
       }
     },
-    "go-tools@2020.2.4": {
-      "last_modified": "2021-05-17T21:30:44Z",
-      "resolved": "github:NixOS/nixpkgs/3528c4151ee7c124f5a5cb1d01cb8d6a2dd8d62d#go-tools",
+    "go-tools@2024.1.1": {
+      "last_modified": "2025-02-07T11:26:36Z",
+      "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#go-tools",
       "source": "devbox-search",
-      "version": "2020.2.4"
+      "version": "2024.1.1",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qgngj4pjxsccfl4khmb9k5q40lz0ycd3-go-tools-2024.1.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/qgngj4pjxsccfl4khmb9k5q40lz0ycd3-go-tools-2024.1.1"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mk1f506f5h76is1kmaapi43h06lq361h-go-tools-2024.1.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/mk1f506f5h76is1kmaapi43h06lq361h-go-tools-2024.1.1"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4xzq1bm53srq8mkjap4433v66v5y7bg2-go-tools-2024.1.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/4xzq1bm53srq8mkjap4433v66v5y7bg2-go-tools-2024.1.1"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8k5xfpbxmfgkwv0bksw15mdybjp6q4pa-go-tools-2024.1.1",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/8k5xfpbxmfgkwv0bksw15mdybjp6q4pa-go-tools-2024.1.1"
+        }
+      }
     },
     "go@1.23.1": {
       "last_modified": "2024-09-10T15:01:03Z",

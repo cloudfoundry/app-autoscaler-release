@@ -38,14 +38,14 @@ function delete_org(){
 
     services=$(cf services | grep "${SERVICE_PREFIX}" |  awk '{ print $1}')
     for service in $services; do
-      step "purging service instance ${service}"
+      echo "purging service instance ${service}"
       cf purge-service-instance "$service" -f || echo "ERROR: purge-service-instance '$service' failed"
     done
 
     if ! cf delete-org -f "$ORG"; then
       offerings=$(cf cf service-brokers | grep "${SERVICE_PREFIX}" |  awk '{ print $1}')
       for offering in $offerings; do
-       step "purging service offering ${offering}"
+       echo "# purging service offering ${offering}"
        cf purge-service-offering "$offering" -f || echo "ERROR: purge-service-offering '$offering' failed"
       done
       cf delete-org -f "$ORG" || echo "ERROR: delete-org '$ORG' failed"
@@ -85,7 +85,7 @@ else
   echo "# deleting orgs: '${ORGS}'"
   for ORG in $ORGS; do
     # shellcheck disable=SC2181
-    delete_org "$ORG" &
+    delete_org "$ORG"
   done
 fi
 
@@ -95,7 +95,7 @@ if [ "${DELETE_USER}" = "true" ]; then
     for user in $(cf curl /v3/users | jq -r '.resources[].username' | grep "${name_prefix}-" )
     do
       echo " - deleting left over user '${user}'"
-      cf delete-user -f "$user" &
+      cf delete-user -f "$user"
     done
   fi
 fi
