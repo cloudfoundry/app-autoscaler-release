@@ -12,6 +12,46 @@ build-parameters:
       - make clean vendor
 
 modules:
+  # - name: db-lock-cleaner-hook # uses src/changeloglockcleaner
+  - name: db # uses src/db
+    type: java
+    build-parameters:
+      builder: custom
+      commands:
+      - make clean package
+    path: ../db
+    hooks:
+      - name: db-apply-changelog-hook
+        type: task
+        phases:
+        - blue-green.application.before-start.idle
+        parameters:
+          name: foo-task
+          command: "ls -1"
+          #retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+          #--driver=org.postgresql.Driver --changeLogFile=api.db.changelog.yml update
+          #
+          #retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
+          #--driver=org.postgresql.Driver --changeLogFile=servicebroker.db.changelog.yaml update
+
+  - name: publicapiserver
+    type: go # and java
+    path: .
+    properties:
+      DT_RELEASE_BUILD_VERSION: ${mta-version}
+      GO_INSTALL_PACKAGE_SPEC: code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api
+      GOTOOLCHAIN: local
+      GOVERSION: go1.GO_MINOR_VERSION
+    requires:
+    - name: publicapiserver-config
+    - name: database
+    - name: app-autoscaler-application-logs
+    parameters:
+      memory: 1G
+      disk-quota: 1G
+      instances: 2
+      stack: cflinuxfs4
+      routes:
   - name: metricsforwarder
     type: go
     path: .
@@ -26,24 +66,6 @@ modules:
     - name: syslog-client
     - name: app-autoscaler-application-logs
     - name: app-autoscaler-dynatrace
-    parameters:
-      memory: 1G
-      disk-quota: 1G
-      instances: 2
-      stack: cflinuxfs4
-      routes:
-  - name: publicapiserver
-    type: go
-    path: .
-    properties:
-      DT_RELEASE_BUILD_VERSION: ${mta-version}
-      GO_INSTALL_PACKAGE_SPEC: code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api
-      GOTOOLCHAIN: local
-      GOVERSION: go1.GO_MINOR_VERSION
-    requires:
-    - name: publicapiserver-config
-    - name: database
-    - name: app-autoscaler-application-logs
     parameters:
       memory: 1G
       disk-quota: 1G
