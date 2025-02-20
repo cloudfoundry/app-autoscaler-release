@@ -36,8 +36,11 @@ packages:
 
 properties:
   autoscaler.scheduler.port:
-    description: "Scheduler's port"
+    description: "Scheduler's https port"
     default: 6102
+  autoscaler.scheduler.http.port:
+    description: "Scheduler's http port"
+    default: 0
   autoscaler.scheduler.http_client_timeout:
     description: "Http client imeout for scheduler to communicate with other autoscaler components, in seconds"
     default: 60
@@ -56,6 +59,14 @@ properties:
   autoscaler.scheduler.notification_reschedule_maxcount:
     default: 3
     description: "Maximum number of notification sent to scaling engine for job re-schedule"
+
+  autoscaler.scheduler.cf_server.xfcc.valid_org_guid:
+    description: approve org guid for xfcc endpoint
+    default: ''
+
+  autoscaler.scheduler.cf_server.xfcc.valid_space_guid:
+    description: approve space guid for xfcc endpoint
+    default: ''
 
   autoscaler.scheduler.scaling_engine.host:
     description: "URL where Scaling-engine is running"

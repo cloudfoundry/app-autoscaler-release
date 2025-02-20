@@ -164,11 +164,18 @@ scheduler:
 ############################################################
 server:
   port: <%=p('autoscaler.scheduler.port') %>
+  http:
+    port: <%=p('autoscaler.scheduler.http.port') %>
   ssl:
     ciphers: TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
     enabled-protocols: TLSv1.3
     bundle: "server"
     client-auth: NEED
+
+cfserver:
+  validOrgGuid: <%= p("autoscaler.scheduler.cf_server.xfcc.valid_org_guid") %>
+  validSpaceGuid: <%= p("autoscaler.scheduler.cf_server.xfcc.valid_space_guid") %>
+
 
 #User added properties
 <%=p('autoscaler.scheduler.application.props')%>

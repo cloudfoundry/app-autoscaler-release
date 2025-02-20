@@ -64,6 +64,8 @@ keys/
 # <https://code.visualstudio.com/docs/editor/extension-marketplace#_workspace-recommended-extensions>
 !.vscode/extensions.json
 
+.trunk
+
 
 # ==================== 📦 Devbox ====================
 .devbox
@@ -75,3 +77,7 @@ keys/
 /result-*
 
 .direnv
+
+# # macOS system file that stores folder metadata (safe to ignore)
+.DS_Store
+

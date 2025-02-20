@@ -77,6 +77,7 @@ clean-autoscaler:
 clean-scheduler:
 	@echo " - cleaning scheduler test resources"
 	@rm -rf src/scheduler/src/test/resources/certs
+	@rm -rf src/scheduler/target
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f test-certs/*
@@ -94,7 +95,7 @@ clean-acceptance:
 build: $(all_modules)
 build-tests: build-test
 build-test: $(addprefix test_,$(go_modules))
-build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app ## Build all modules and tests
+build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app
 db: target/db
 target/db:
 	@echo "# building $@"
@@ -129,10 +130,12 @@ test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
 	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
 test-autoscaler-suite: check-db_type init-db test-certs
-	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}'
+	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
+
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
-	cd src && mvn test --no-transfer-progress -Dspring.profiles.include=${db_type} && cd ..
+	make --directory='./src/scheduler' test DBURL="${DBURL}" db_type="${db_type}"
+
 test-changelog:
 	@make --directory='./src/changelog' test
 test-changeloglockcleaner: init-db test-certs
@@ -162,7 +165,8 @@ target/start-db-postgres_CI_false:
 			--health-timeout 2s \
 			--health-retries 10 \
 			-d \
-			postgres:${POSTGRES_TAG} >/dev/null;\
+			postgres:${POSTGRES_TAG} \
+			-c 'max_connections=1000' >/dev/null;\
 	else echo " - $@ already up'"; fi;
 	@touch $@
 target/start-db-postgres_CI_true:
@@ -218,7 +222,8 @@ stop-db: check-db_type
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
 .PHONY: integration
-integration: generate-openapi-generated-clients-and-servers build init-db test-certs ## Run all integration tests
+integration: generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
+
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='./src/autoscaler' integration DBURL="${DBURL}"
 
@@ -247,6 +252,10 @@ lint-actions:
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS} --timeout 5m
+
+lint-gorouterproxy:
+	@echo " - linting: gorouterproxy"
+	@pushd src/autoscaler/integration/gorouterproxy >/dev/null && golangci-lint run --config ${lint_config} $(OPTS) --timeout 5m
 
 .PHONY: spec-test
 spec-test:
@@ -369,6 +378,9 @@ mta-build:
 build-test-app:
 	@make --directory='./src/acceptance/assets/app/go_app' build
 
+build-gorouterproxy:
+	@make --directory='./src/autoscaler' build-gorouterproxy
+
 .PHONY: deploy-test-app
 deploy-test-app:
 	@make --directory='./src/acceptance/assets/app/go_app' deploy
@@ -455,6 +467,10 @@ go-get-u: $(addsuffix .go-get-u,$(go_modules))
 	@echo " - go get -u" $<
 	cd src/$< && \
 	go get -u ./...
+
+
+start-scheduler:
+	make --directory='./src/scheduler' start DBURL="${DBURL}"
 
 
 deploy-apps:

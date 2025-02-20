@@ -21,6 +21,11 @@ ${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name log
 mv -f "${depot_path}"/loggregatorCA.crt "${depot_path}"/loggregator-ca.crt
 mv -f "${depot_path}"/loggregatorCA.key "${depot_path}"/loggregator-ca.key
 
+# CA to distribute to dummy gorouter ca certs
+${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name gorouterCA --years "20"
+mv -f "${depot_path}"/gorouterCA.crt "${depot_path}"/gorouter-ca.crt
+mv -f "${depot_path}"/gorouterCA.key "${depot_path}"/gorouter-ca.key
+
 # CA to distribute to dummy syslog emitter certs
 ${CERTSTRAP} --depot-path "${depot_path}" init --passphrase '' --common-name LogCacheSyslogServerCA --years "20"
 mv -f "${depot_path}"/LogCacheSyslogServerCA.crt "${depot_path}"/log-cache-syslog-server-ca.crt
@@ -95,6 +100,10 @@ ${CERTSTRAP} --depot-path "${depot_path}" sign log-cache --CA autoscaler-ca --ye
 # database certificate
 ${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain postgres,mysql --ip 127.0.0.1
 ${CERTSTRAP} --depot-path "${depot_path}" sign postgres --CA autoscaler-ca --years "20"
+
+# gorouter client certificate
+${CERTSTRAP} --depot-path "${depot_path}" request-cert --passphrase '' --domain gorouter --ip 127.0.0.1
+${CERTSTRAP} --depot-path "${depot_path}" sign gorouter --CA gorouter-ca --years "20"
 
 # mTLS client certificate for local testing
 ## certstrap with multiple OU not working at the moment. Pull request is created in the upstream. Therefore, using openssl at the moment
