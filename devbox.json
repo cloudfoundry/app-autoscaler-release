@@ -13,7 +13,7 @@
     "gh":                                   "2.67.0",
     "gnumake":                              "4.4",
     "gnutar":                               "latest",
-    "gopls":                                "latest",
+    "gopls":                                "0.17.1",
     "gum":                                  "0.13.0",
     "jq":                                   "latest",
     "maven":                                "3.8.6",

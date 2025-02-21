@@ -218,8 +218,15 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	// TODO: write to fule and set to c.CatalogSchemaPath  and c.CatalogPath if catalog json is found in mtar
 	configureEventGenerator(conf)
 	configureScheduler(conf)
+	configureScalingEngine(conf)
 
 	return nil
+}
+
+func configureScalingEngine(conf *Config) {
+	conf.ScalingEngine.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CERT")
+	conf.ScalingEngine.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
+	conf.ScalingEngine.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
 }
 
 func configureEventGenerator(conf *Config) {
