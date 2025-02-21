@@ -9,7 +9,6 @@ files:
 - autoscaler/vendor/*
 - autoscaler/scalingengine/db/*
 - autoscaler/cf/* # gosub
-- autoscaler/configutil/* # gosub
 - autoscaler/db/* # gosub
 - autoscaler/db/sqldb/* # gosub
 - autoscaler/healthendpoint/* # gosub
@@ -36,7 +35,6 @@ files:
 - autoscaler/vendor/filippo.io/edwards25519/field/* # gosub
 - autoscaler/vendor/github.com/beorn7/perks/quantile/* # gosub
 - autoscaler/vendor/github.com/cespare/xxhash/v2/* # gosub
-- autoscaler/vendor/github.com/cloud-gov/go-cfenv/* # gosub
 - autoscaler/vendor/github.com/dlclark/regexp2/* # gosub
 - autoscaler/vendor/github.com/dlclark/regexp2/syntax/* # gosub
 - autoscaler/vendor/github.com/fatih/color/* # gosub
@@ -81,7 +79,6 @@ files:
 - autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
 - autoscaler/vendor/github.com/mattn/go-colorable/* # gosub
 - autoscaler/vendor/github.com/mattn/go-isatty/* # gosub
-- autoscaler/vendor/github.com/mitchellh/mapstructure/* # gosub
 - autoscaler/vendor/github.com/munnerz/goautoneg/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/conv/* # gosub
 - autoscaler/vendor/github.com/ogen-go/ogen/http/* # gosub
@@ -127,6 +124,8 @@ files:
 - autoscaler/vendor/github.com/tedsuo/ifrit/sigmon/* # gosub
 - autoscaler/vendor/github.com/uptrace/opentelemetry-go-extra/otelsql/* # gosub
 - autoscaler/vendor/github.com/uptrace/opentelemetry-go-extra/otelsqlx/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/auto/sdk/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/auto/sdk/internal/telemetry/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/internal/semconvutil/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/* # gosub
