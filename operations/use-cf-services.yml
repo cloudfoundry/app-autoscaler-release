@@ -66,7 +66,7 @@
   value: &SchedulerCfPort 6105
 
 - type: replace
-  path: /instance_groups/name=postgres/jobs/name=route_registrar/properties/route_registrar/routes/-
+  path: /instance_groups/name=scheduler/jobs/name=route_registrar/properties/route_registrar/routes/-
   value:
     name: ((deployment_name))-cf-scheduler
     registration_interval: 20s
