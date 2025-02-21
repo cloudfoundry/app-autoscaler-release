@@ -403,6 +403,10 @@ acceptance-tests-config:
 cleanup-concourse:
 	@${CI_DIR}/autoscaler/scripts/cleanup-concourse.sh
 
+.PHONY: cleanup-autoscaler-deployments
+cleanup-autoscaler-deployments:
+	@${CI_DIR}/autoscaler/scripts/cleanup-autoscaler-deployments.sh
+
 .PHONY: cf-login
 cf-login: ## Login to OSS CF dev environment
 	@${CI_DIR}/autoscaler/scripts/cf-login.sh
