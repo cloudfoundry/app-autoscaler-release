@@ -26,7 +26,7 @@
     "shellcheck":                           "0.10.0",
     "which":                                "latest",
     "credhub-cli":                          "2.9.42",
-    "markdownlint-cli2":                    "latest",
+    "markdownlint-cli2":                    "0.17.2",
     "bundler":                              "2.5.22",
     "direnv":                               "2.35.0",
     "yq-go":                                "4.44.5",
