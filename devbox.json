@@ -14,7 +14,7 @@
     "gnumake":                              "4.4",
     "gnutar":                               "latest",
     "go-tools":                             "2020.2.4",
-    "gopls":                                "0.17.1",
+    "gopls":                                "0.18.0",
     "gum":                                  "0.15.2",
     "jq":                                   "latest",
     "maven":                                "3.9.9",
