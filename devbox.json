@@ -30,7 +30,7 @@
     "bundler":                              "2.5.22",
     "direnv":                               "2.35.0",
     "yq-go":                                "4.44.5",
-    "golangci-lint":                        "1.62.2",
+    "golangci-lint":                        "1.64.4",
     "ruby":                                 "3.3.6",
     "redocly":                              "latest",
     "google-java-format":                   "1.25.2",
