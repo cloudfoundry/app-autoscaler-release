@@ -19,7 +19,7 @@ jobs:
       - name: Make devbox shellenv available
         run: |
           eval "$(devbox shellenv)"
-          printenv >> $GITHUB_ENV
+          printenv >> "$GITHUB_ENV"
 
       - name: Run Go linter
         run: |
