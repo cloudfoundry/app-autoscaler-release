@@ -18,7 +18,7 @@
     "gum":                                  "0.15.2",
     "jq":                                   "latest",
     "maven":                                "3.9.9",
-    "oha":                                  "latest",
+    "oha":                                  "0.6.5",
     "postgresql":                           "latest",
     "python":                               "latest",
     "rubocop":                              "latest",
