@@ -29,7 +29,7 @@
     "bundler":                              "2.5.22",
     "direnv":                               "2.35.0",
     "yq-go":                                "4.44.5",
-    "ruby":                                 "3.3.6",
+    "ruby":                                 "3.4.1",
     "redocly":                              "1.28.0",
     "google-java-format":                   "1.25.2",
     "actionlint":                           "1.7.7",
