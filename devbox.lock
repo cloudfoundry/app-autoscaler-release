@@ -1566,54 +1566,6 @@
         }
       }
     },
-    "rubocop@latest": {
-      "last_modified": "2024-08-31T19:22:30Z",
-      "resolved": "github:NixOS/nixpkgs/282e35e0762d64800d78e33ff225704baf9e5216#rubocop",
-      "source": "devbox-search",
-      "version": "1.65.1",
-      "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/f7mjcpgy4kac87ygnwrc8zss4ps67x1w-ruby3.3-rubocop-1.65.1",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/f7mjcpgy4kac87ygnwrc8zss4ps67x1w-ruby3.3-rubocop-1.65.1"
-        },
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/ls69blqq10hqadgn99v02qhdzfs99jkk-ruby3.3-rubocop-1.65.1",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/ls69blqq10hqadgn99v02qhdzfs99jkk-ruby3.3-rubocop-1.65.1"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/xri9m3wj2zq4bwsszc9bkcn38664nl66-ruby3.3-rubocop-1.65.1",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/xri9m3wj2zq4bwsszc9bkcn38664nl66-ruby3.3-rubocop-1.65.1"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/358ycw2rdmyr26rxsxsszhsyfmxps29b-ruby3.3-rubocop-1.65.1",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/358ycw2rdmyr26rxsxsszhsyfmxps29b-ruby3.3-rubocop-1.65.1"
-        }
-      }
-    },
     "ruby@3.4.1": {
       "last_modified": "2025-02-07T11:26:36Z",
       "plugin_version": "0.0.2",
@@ -1676,54 +1628,6 @@
             }
           ],
           "store_path": "/nix/store/862xda5vqq8hydsk12daf8dwl7gk8a5p-ruby-3.4.1"
-        }
-      }
-    },
-    "rubyPackages.solargraph@0.50.0": {
-      "last_modified": "2025-02-07T11:26:36Z",
-      "resolved": "github:NixOS/nixpkgs/d98abf5cf5914e5e4e9d57205e3af55ca90ffc1d#rubyPackages.solargraph",
-      "source": "devbox-search",
-      "version": "0.50.0",
-      "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/z6b0h4jy1c9p40b7i2plpiqlxb3vpkj4-ruby3.3-solargraph-0.50.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/z6b0h4jy1c9p40b7i2plpiqlxb3vpkj4-ruby3.3-solargraph-0.50.0"
-        },
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/l2k82q024jfji0rs9y15gks06wx08i5d-ruby3.3-solargraph-0.50.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/l2k82q024jfji0rs9y15gks06wx08i5d-ruby3.3-solargraph-0.50.0"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/wcxbxc5mp39xqjnj7yj5f2l21122gdd0-ruby3.3-solargraph-0.50.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/wcxbxc5mp39xqjnj7yj5f2l21122gdd0-ruby3.3-solargraph-0.50.0"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/wyq4x91ijk1b3zd4falqjxdwwkl5j3ad-ruby3.3-solargraph-0.50.0",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/wyq4x91ijk1b3zd4falqjxdwwkl5j3ad-ruby3.3-solargraph-0.50.0"
         }
       }
     },
