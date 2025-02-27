@@ -21,7 +21,7 @@
     "postgresql":                           "latest",
     "python":                               "latest",
     "rubocop":                              "latest",
-    "rubyPackages.solargraph":              "latest",
+    "rubyPackages.solargraph":              "0.50.0",
     "shellcheck":                           "0.10.0",
     "which":                                "latest",
     "credhub-cli":                          "2.9.42",
