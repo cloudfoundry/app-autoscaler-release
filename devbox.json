@@ -20,7 +20,7 @@
     "oha":                                  "0.6.5",
     "postgresql":                           "latest",
     "python":                               "latest",
-    "rubocop":                              "latest",
+    "rubocop":                              "0.93.1",
     "rubyPackages.solargraph":              "latest",
     "shellcheck":                           "0.10.0",
     "which":                                "latest",
