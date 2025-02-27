@@ -28,7 +28,7 @@ func GenerateClientCertWithPrivateKeyExpiring(orgGUID, spaceGUID string, private
 		NotAfter:     notAfter,
 		Subject: pkix.Name{
 			Organization:       []string{"My Organization"},
-			OrganizationalUnit: []string{fmt.Sprintf("space:%s org:%s", spaceGUID, orgGUID)},
+			OrganizationalUnit: []string{fmt.Sprintf("OU=space:%s+OU=organization:%s", spaceGUID, orgGUID)},
 			CommonName:         "localhost",
 		},
 		DNSNames:    []string{"localhost"},

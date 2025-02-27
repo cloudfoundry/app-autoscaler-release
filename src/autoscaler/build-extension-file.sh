@@ -110,14 +110,14 @@ resources:
           client_id: autoscaler_client_id
           secret: autoscaler_client_secret
         scheduler:
-          scheduler_url: ${SCHEDULER_HOST}.\${default-domain}
+          scheduler_url: https://${SCHEDULER_HOST}.\${default-domain}
         metrics_forwarder:
-          metrics_forwarder_url: ${METRICSFORWARDER_HOST}.\${default-domain}
-          metrics_forwarder_mtls_url: ${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
+          metrics_forwarder_url: https://${METRICSFORWARDER_HOST}.\${default-domain}
+          metrics_forwarder_mtls_url: https://${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
         scaling_engine:
-          scaling_engine_url: ${SCALINGENGINE_HOST}.\${default-domain}
+          scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
         event_generator:
-          event_generator_url: ${EVENTGENERATOR_HOST}.\${default-domain}
+          event_generator_url: https://${EVENTGENERATOR_HOST}.\${default-domain}
         broker_credentials:
           - broker_username: 'autoscaler-broker-user'
             broker_password: $SERVICE_BROKER_PASSWORD

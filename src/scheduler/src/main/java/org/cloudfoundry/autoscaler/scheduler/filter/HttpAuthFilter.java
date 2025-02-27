@@ -56,10 +56,10 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     }
     logger.info(
         "X-Forwarded-Client-Cert header received ... checking authorized org and space in OU");
+    logger.info("X-Forwarded-Client-Cert header: " + xfccHeader);
 
-    String certValue = extractCertValue(xfccHeader);
     try {
-      String organizationalUnit = extractOrganizationalUnit(certValue);
+      String organizationalUnit = extractOrganizationalUnit(xfccHeader);
 
       // Validate both key-value pairs in OrganizationalUnit
       if (!isValidOrganizationalUnit(organizationalUnit)) {
@@ -77,24 +77,10 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     filterChain.doFilter(request, response);
   }
 
-  // xfccHeader format: Cert=some-cert;Hash=some-hash
-  private static String extractCertValue(String xfccHeader) {
-    String[] parts = xfccHeader.split(";");
-    String certValue = "";
-
-    // Loop through the parts to find the one that starts with "Cert="
-    for (String part : parts) {
-      if (part.startsWith("Cert=")) {
-        certValue = part.substring("Cert=".length());
-        break;
-      }
-    }
-    return certValue;
-  }
-
   private String extractOrganizationalUnit(String certValue) throws Exception {
     X509Certificate certificate = parseCertificate(certValue);
     return certificate.getSubjectX500Principal().getName();
+    // CN=77a05917-8951-4f86-67f4-e240,OU=app:dc599f12-a672-4b18-88e6-f6e0c1f6b8f4+OU=space:a5103d12-7e71-464b-9497-24d59f8bb3c8+OU=organization:432af340-9b79-41b1-bf72-bede6b867457
   }
 
   private X509Certificate parseCertificate(String certValue) throws Exception {
@@ -113,7 +99,7 @@ public class HttpAuthFilter extends OncePerRequestFilter {
 
   private boolean isValidOrganizationalUnit(String organizationalUnit) {
     boolean isSpaceValid = organizationalUnit.contains("space:" + validSpaceGuid);
-    boolean isOrgValid = organizationalUnit.contains("org:" + validOrgGuid);
+    boolean isOrgValid = organizationalUnit.contains("organization:" + validOrgGuid);
     return isSpaceValid && isOrgValid;
   }
 }

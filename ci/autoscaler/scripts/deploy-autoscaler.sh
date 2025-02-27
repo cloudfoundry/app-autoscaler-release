@@ -169,6 +169,7 @@ function pre_deploy() {
 		cf_login
 
 		local autoscaler_cf_server_xfcc_valid_org_guid=$(cf org ${AUTOSCALER_ORG} --guid)
+		cf target -o ${AUTOSCALER_ORG}
 		local autoscaler_cf_server_xfcc_valid_space_guid=$(cf space ${AUTOSCALER_SPACE} --guid)
 
 		add_variable "autoscaler_cf_server_xfcc_valid_org_guid" "${autoscaler_cf_server_xfcc_valid_org_guid}"
