@@ -107,7 +107,7 @@ func GenerateClientCertWithCA(orgGUID, spaceGUID string, caCertPath, caKeyPath s
 		NotAfter:     time.Now().AddDate(1, 0, 0),
 		Subject: pkix.Name{
 			Organization:       []string{"My Organization"},
-			OrganizationalUnit: []string{fmt.Sprintf("space:%s org:%s", spaceGUID, orgGUID)},
+			OrganizationalUnit: []string{fmt.Sprintf("OU=space:%s+OU=organization:%s", spaceGUID, orgGUID)},
 			CommonName:         "localhost",
 		},
 		DNSNames:    []string{"localhost"},
