@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2155
 
 CERTS_DIR="/tmp/db_certs"
 mkdir -p "$CERTS_DIR"
