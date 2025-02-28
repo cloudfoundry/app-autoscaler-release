@@ -80,7 +80,6 @@ public class HttpAuthFilter extends OncePerRequestFilter {
   private String extractOrganizationalUnit(String certValue) throws Exception {
     X509Certificate certificate = parseCertificate(certValue);
     return certificate.getSubjectX500Principal().getName();
-    // CN=77a05917-8951-4f86-67f4-e240,OU=app:dc599f12-a672-4b18-88e6-f6e0c1f6b8f4+OU=space:a5103d12-7e71-464b-9497-24d59f8bb3c8+OU=organization:432af340-9b79-41b1-bf72-bede6b867457
   }
 
   private X509Certificate parseCertificate(String certValue) throws Exception {

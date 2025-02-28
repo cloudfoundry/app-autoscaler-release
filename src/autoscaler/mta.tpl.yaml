@@ -13,7 +13,6 @@ build-parameters:
 
 
 modules:
-  # - name: dbtasks namespace by app
   - name: dbtasks
     type: java
     path: dbtasks/target/db-1.0-SNAPSHOT.jar
