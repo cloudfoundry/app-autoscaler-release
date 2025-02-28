@@ -25,12 +25,6 @@ ${autoscaler_dir}/operations/enable-scheduler-logging.yml
 EOF
 )}
 
-case "${cpu_upper_threshold}" in
-  "100") ;;
-  "200") ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_200.yml" ;;
-  "400") ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_400.yml" ;;
-  *) echo "No Ops file for cpu_upper_threshold of ${cpu_upper_threshold}"; exit 1 ;;
-esac
 
 CURRENT_COMMIT_HASH=$(cd "${autoscaler_dir}"; git log -1 --pretty=format:"%H")
 bosh_release_version=${RELEASE_VERSION:-${CURRENT_COMMIT_HASH}-${deployment_name}}
@@ -174,7 +168,15 @@ function pre_deploy() {
 
 		add_variable "autoscaler_cf_server_xfcc_valid_org_guid" "${autoscaler_cf_server_xfcc_valid_org_guid}"
 		add_variable "autoscaler_cf_server_xfcc_valid_space_guid" "${autoscaler_cf_server_xfcc_valid_space_guid}"
+	else
+		case "${cpu_upper_threshold}" in
+			"100") ;;
+			"200") ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_200.yml" ;;
+			"400") ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_400.yml" ;;
+			*) echo "No Ops file for cpu_upper_threshold of ${cpu_upper_threshold}"; exit 1 ;;
+		esac
 	fi
+
 }
 
 log "Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}'"

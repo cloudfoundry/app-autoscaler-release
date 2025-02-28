@@ -26,6 +26,8 @@ export SCHEDULER_HOST="${SCHEDULER_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
 export PUBLICAPISERVER_HOST="${PUBLICAPISERVER_HOST:-"${DEPLOYMENT_NAME}"}"
 export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
 
+export CPU_LOWER_THRESHOLD="${CPU_LOWER_THRESHOLD:-"100"}"
+
 cat << EOF > /tmp/extension-file-secrets.yml.tpl
 postgres_ip: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_ip))
 metricsforwarder_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_metricsforwarder_health_password))
@@ -104,6 +106,9 @@ resources:
   parameters:
     config:
       publicapiserver-config:
+        scaling_rules:
+          cpu:
+            upper_threshold: $CPU_LOWER_THRESHOLD
         cf:
           api: https://api.$SYSTEM_DOMAIN
           grant_type: client_credentials
