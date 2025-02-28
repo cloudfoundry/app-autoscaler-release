@@ -60,6 +60,7 @@ jobs:
         shell: bash
         env:
           OPS_FILES: ${{ inputs.ops_files }}
+          ENABLE_MTAR: ${{ inputs.deploy_apps }}
         run: make --directory="${AUTOSCALER_DIR}" deploy-autoscaler
 
       - name: Deploy Apps
