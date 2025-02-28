@@ -27,25 +27,11 @@ modules:
     - name: database
     parameters:
       no-route: true
-      # no-start: true
+      no-start: true
       tasks:
       - name: apply-api-changelog
         command: " chmod +x ./BOOT-INF/classes/bin/apply-api-changelog.sh ; /home/vcap/app/BOOT-INF/classes/bin/apply-api-changelog.sh"
 
-      # command: apply-api-changelog.sh
-      # hooks:
-      #   - name: db-apply-changelog-hook
-      #     type: task
-      #     phases:
-      #     - deploy.application.before-start
-      #     parameters:
-      #       command: "ls -1"
-      #
-      #retry java -cp "$DB_DIR/target/lib/*:$API_DIR" liquibase.integration.commandline.Main --url "$JDBCDBURL" --username=$USER --password=$PASSWORD \
-      #--driver=org.postgresql.Driver --changeLogFile=servicebroker.db.changelog.yaml update
-
-
-      ## TODO: Depend on apiserver-dbtask
   - name: publicapiserver
     type: go
     path: .
