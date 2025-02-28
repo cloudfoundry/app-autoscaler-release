@@ -26,10 +26,6 @@ type Client struct {
 func New(conf *config.Config, logger lager.Logger) *Client {
 	logger = logger.Session("schedulerclient")
 
-	logger.Info("BANANA: CA CERT", lager.Data{"": conf.Scheduler.TLSClientCerts.CACertFile})
-	logger.Info("BANANA: CLIENT CERT", lager.Data{"": conf.Scheduler.TLSClientCerts.CertFile})
-	logger.Info("BANANA: CLIENT KEY", lager.Data{"": conf.Scheduler.TLSClientCerts.KeyFile})
-
 	client, err := helpers.CreateHTTPSClient(&conf.Scheduler.TLSClientCerts, helpers.DefaultClientConfig(), logger)
 	if err != nil {
 		logger.Error("Failed to create http client for Scheduler", err, lager.Data{"scheduler": conf.Scheduler.TLSClientCerts})
