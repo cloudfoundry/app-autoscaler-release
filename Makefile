@@ -237,7 +237,7 @@ lint-go: build-all $(addprefix lint_,$(go_modules))
 lint-ruby:
 	@echo " - ruby scripts"
 	@bundle install
-	@bundle exec rubocop ${RUBOCOP_OPTS} ./spec ./packages
+	@bundle exec standardrb ${RUBOCOP_OPTS} ./spec ./packages
 
 .PHONY: lint-markdown
 lint-markdown:

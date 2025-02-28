@@ -66,10 +66,10 @@ server:
   node_index: <%= nodeIndex %>
 
 cf_server:
-  port: <%= p("autoscaler.cf_server.port") %>
+  port: <%= p("autoscaler.eventgenerator.cf_server.port") %>
   xfcc:
-    valid_org_guid: <%= p("autoscaler.cf_server.xfcc.valid_org_guid") %>
-    valid_space_guid: <%= p("autoscaler.cf_server.xfcc.valid_space_guid") %>
+    valid_org_guid: <%= p("autoscaler.eventgenerator.cf_server.xfcc.valid_org_guid") %>
+    valid_space_guid: <%= p("autoscaler.eventgenerator.cf_server.xfcc.valid_space_guid") %>
 
 logging:
   level: <%= p("autoscaler.eventgenerator.logging.level") %>

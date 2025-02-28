@@ -115,10 +115,10 @@
 
 - type: replace
   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/cf_server?/port?
-  value: &EventGeneratorCfPort 6205
+  value: &EventGeneratorCfPort 8080
 
 - type: replace
-  path: /instance_groups/name=postgres/jobs/name=route_registrar/properties/route_registrar/routes/-
+  path: /instance_groups/name=eventgenerator/jobs/name=route_registrar/properties/route_registrar/routes/-
   value:
     name: ((deployment_name))-cf-eventgenerator
     registration_interval: 20s

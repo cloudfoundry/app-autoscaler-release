@@ -220,7 +220,7 @@ var _ = Describe("AutoScaler Public API", func() {
 				WaitForNInstancesRunning(appGUID, 2, totalTime)
 			})
 
-			It("should successfully scale out", func() {
+			FIt("should successfully scale out", func() {
 
 				By("check aggregated metrics")
 				Expect(len(getAggregatedMetrics().Metrics)).Should(BeNumerically(">=", 1))

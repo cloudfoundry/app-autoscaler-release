@@ -106,7 +106,7 @@ func getSpaceGuid(cert *x509.Certificate) string {
 }
 
 func getOrgGuid(cert *x509.Certificate) string {
-	return getGuidFromCert(cert, "org:")
+	return getGuidFromCert(cert, "organization:")
 }
 
 func getGuidFromCert(cert *x509.Certificate, prefix string) string {
