@@ -85,14 +85,16 @@ describe "eventgenerator" do
       end
 
       it "defaults xfcc valid org and space " do
-        properties["autoscaler"]["cf_server"] = {}
-        properties["autoscaler"]["cf_server"]["xfcc"] = {
+        properties["autoscaler"]["eventgenerator"] = {}
+        properties["autoscaler"]["eventgenerator"]["cf_server"] = {}
+        properties["autoscaler"]["eventgenerator"]["cf_server"] = {}
+        properties["autoscaler"]["eventgenerator"]["cf_server"]["xfcc"] = {
           "valid_org_guid" => "some-valid-org-guid",
           "valid_space_guid" => "some-valid-space-guid"
         }
 
-        expect(rendered_template["cf_server"]["xfcc"]["valid_org_guid"]).to eq(properties["autoscaler"]["cf_server"]["xfcc"]["valid_org_guid"])
-        expect(rendered_template["cf_server"]["xfcc"]["valid_space_guid"]).to eq(properties["autoscaler"]["cf_server"]["xfcc"]["valid_space_guid"])
+        expect(rendered_template["cf_server"]["xfcc"]["valid_org_guid"]).to eq(properties["autoscaler"]["eventgenerator"]["cf_server"]["xfcc"]["valid_org_guid"])
+        expect(rendered_template["cf_server"]["xfcc"]["valid_space_guid"]).to eq(properties["autoscaler"]["eventgenerator"]["cf_server"]["xfcc"]["valid_space_guid"])
       end
     end
 
