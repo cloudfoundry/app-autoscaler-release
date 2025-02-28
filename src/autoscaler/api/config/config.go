@@ -215,7 +215,10 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	// TODO: write to fule and set to c.CatalogSchemaPath  and c.CatalogPath if catalog json is found in mtar
+	// TODO: Implement support for catalog via user provided service.
+	// write to file and set to c.CatalogSchemaPath  and c.CatalogPath
+	// if catalog json is found in container
+
 	configureEventGenerator(conf)
 	configureScheduler(conf)
 	configureScalingEngine(conf)
