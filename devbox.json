@@ -17,7 +17,7 @@
     "gum":                                  "0.15.2",
     "jq":                                   "latest",
     "maven":                                "3.9.9",
-    "oha":                                  "0.6.5",
+    "oha":                                  "1.8.0",
     "postgresql":                           "latest",
     "python":                               "latest",
     "shellcheck":                           "0.10.0",
