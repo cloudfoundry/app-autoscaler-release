@@ -5,6 +5,8 @@ on:
       - ".github/workflows/dependency-updates-post-processing.yaml"
       - "src/**/go.mod"
       - "src/**/go.sum"
+      - "devbox.json"
+      - "nix/packages/uaac/Gemfile*"
   workflow_dispatch: {}
 jobs:
   dependency-updates-post-processing:
