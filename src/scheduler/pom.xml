@@ -179,7 +179,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>10.21.3</version>
+                        <version>10.21.4</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -187,7 +187,7 @@
             <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.9.1.0</version>
+                <version>4.9.2.0</version>
                 <configuration>
                     <effort>Max</effort>
                     <threshold>medium</threshold>
