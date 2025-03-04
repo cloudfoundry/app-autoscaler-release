@@ -227,19 +227,21 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 }
 
 func configureScalingEngine(conf *Config) {
-	// conf.ScalingEngine.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CERT")
+	// TODO: uncomment after adding integration test with gorouterproxy between golangapi and scalingengine
+	// conf.ScalingEngine.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
 	conf.ScalingEngine.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
 	conf.ScalingEngine.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
 }
 
 func configureEventGenerator(conf *Config) {
-	// conf.EventGenerator.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CERT")
+	// TODO: uncomment after adding integration test with gorouterproxy between golangapi and eventgenerator
+	// conf.EventGenerator.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
 	conf.EventGenerator.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
 	conf.EventGenerator.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
 }
 
 func configureScheduler(conf *Config) {
-	// conf.Scheduler.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CERT")
+	conf.Scheduler.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
 	conf.Scheduler.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
 	conf.Scheduler.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
 }
@@ -287,7 +289,6 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 	}
 
 	conf.Logging.Level = strings.ToLower(conf.Logging.Level)
-
 	return &conf, nil
 }
 
