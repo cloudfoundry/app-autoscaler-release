@@ -46,7 +46,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 
 # install golang
 # renovate: datasource=golang-version depName=golang
-ARG GO_VERSION=1.24.0
+ARG GO_VERSION=1.24.1
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
