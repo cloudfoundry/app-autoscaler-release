@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/brokerapi/v13 v13.0.0
 	code.cloudfoundry.org/cfhttp/v2 v2.36.0
 	code.cloudfoundry.org/clock v1.29.0
-	code.cloudfoundry.org/go-log-cache/v3 v3.0.3
+	code.cloudfoundry.org/go-log-cache/v3 v3.1.0
 	code.cloudfoundry.org/go-loggregator/v10 v10.1.0
 	code.cloudfoundry.org/lager/v3 v3.28.0
 	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20250304195834-cd0efca1a35f
