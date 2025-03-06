@@ -175,6 +175,7 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/backoff/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/base/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/balancer/endpointsharding/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/grpclb/state/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/pickfirst/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/balancer/pickfirst/internal/* # gosub
@@ -206,7 +207,9 @@ files:
 - autoscaler/vendor/google.golang.org/grpc/internal/idle/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/metadata/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/pretty/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/internal/proxyattributes/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/* # gosub
+- autoscaler/vendor/google.golang.org/grpc/internal/resolver/delegatingresolver/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/dns/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/dns/internal/* # gosub
 - autoscaler/vendor/google.golang.org/grpc/internal/resolver/passthrough/* # gosub
