@@ -150,14 +150,14 @@ fmt: importfmt
 lint:
 	@cd ../../; make lint_autoscaler OPTS=${OPTS}
 
-.PHONY: clean-dbtasks package-dbtasks vendor-dbtasks
+.PHONY: clean-dbtasks package-dbtasks vendor-changelogs
 clean-dbtasks:
 	pushd dbtasks; mvn clean; popd
 
 package-dbtasks:
 	pushd dbtasks; mvn package -Dmaven.test.skip=true ; popd
 
-vendor-dbtasks:
+vendor-changelogs:
 	cp $(MAKEFILE_DIR)/api/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
 
 .PHONY: clean

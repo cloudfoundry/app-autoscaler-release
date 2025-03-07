@@ -9,7 +9,7 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
-      - make clean vendor vendor-dbtasks clean-dbtasks package-dbtasks
+      - make clean vendor vendor-changelogs clean-dbtasks package-dbtasks
 
 
 modules:
