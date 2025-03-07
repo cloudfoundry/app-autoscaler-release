@@ -155,7 +155,7 @@ clean-dbtasks:
 	pushd dbtasks; mvn clean; popd
 
 package-dbtasks:
-	pushd dbtasks; mvn package -Dmaven.test.skip=true ; popd
+	pushd dbtasks; mvn package ; popd
 
 vendor-changelogs:
 	cp $(MAKEFILE_DIR)/api/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
