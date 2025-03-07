@@ -56,10 +56,10 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     }
     logger.info(
         "X-Forwarded-Client-Cert header received ... checking authorized org and space in OU");
+    logger.info("X-Forwarded-Client-Cert header: " + xfccHeader);
 
-    String certValue = extractCertValue(xfccHeader);
     try {
-      String organizationalUnit = extractOrganizationalUnit(certValue);
+      String organizationalUnit = extractOrganizationalUnit(xfccHeader);
 
       // Validate both key-value pairs in OrganizationalUnit
       if (!isValidOrganizationalUnit(organizationalUnit)) {
@@ -75,21 +75,6 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     }
     // Proceed with the request
     filterChain.doFilter(request, response);
-  }
-
-  // xfccHeader format: Cert=some-cert;Hash=some-hash
-  private static String extractCertValue(String xfccHeader) {
-    String[] parts = xfccHeader.split(";");
-    String certValue = "";
-
-    // Loop through the parts to find the one that starts with "Cert="
-    for (String part : parts) {
-      if (part.startsWith("Cert=")) {
-        certValue = part.substring("Cert=".length());
-        break;
-      }
-    }
-    return certValue;
   }
 
   private String extractOrganizationalUnit(String certValue) throws Exception {
@@ -113,7 +98,7 @@ public class HttpAuthFilter extends OncePerRequestFilter {
 
   private boolean isValidOrganizationalUnit(String organizationalUnit) {
     boolean isSpaceValid = organizationalUnit.contains("space:" + validSpaceGuid);
-    boolean isOrgValid = organizationalUnit.contains("org:" + validOrgGuid);
+    boolean isOrgValid = organizationalUnit.contains("organization:" + validOrgGuid);
     return isSpaceValid && isOrgValid;
   }
 }

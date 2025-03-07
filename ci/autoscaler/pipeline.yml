@@ -32,6 +32,7 @@ anchors:
       operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
       operations/use-cf-services.yml
+      operations/configure-cf-services.yml
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |

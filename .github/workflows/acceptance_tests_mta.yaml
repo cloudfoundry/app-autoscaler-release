@@ -23,6 +23,5 @@ jobs:
         operations/set-release-version.yml
         operations/enable-metricsforwarder-via-syslog-agent.yml
         operations/enable-scheduler-logging.yml
-        operations/use-cf-services.yml
     secrets:
       bbl_ssh_key: "${{ secrets.BBL_SSH_KEY }}"

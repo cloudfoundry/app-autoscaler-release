@@ -298,7 +298,6 @@ test-app.go-mod-tidy:
 	make --directory='${go-test-app-dir}' go-mod-tidy
 
 
-
 .PHONY: mod-download
 mod-download:
 	@for folder in $$(find . -maxdepth 3 -name "go.mod" -exec dirname {} \;);\
@@ -328,7 +327,7 @@ update-uaac-nix-package:
 	make --directory='./nix/packages/uaac' gemset.nix
 
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh deploy-register-cf ## Deploy autoscaler to OSS dev environment
+deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh
@@ -402,6 +401,10 @@ acceptance-tests-config:
 .PHONY: cleanup-concourse
 cleanup-concourse:
 	@${CI_DIR}/autoscaler/scripts/cleanup-concourse.sh
+
+.PHONY: cleanup-autoscaler-deployments
+cleanup-autoscaler-deployments:
+	@${CI_DIR}/autoscaler/scripts/cleanup-autoscaler-deployments.sh
 
 .PHONY: cf-login
 cf-login: ## Login to OSS CF dev environment
@@ -477,5 +480,8 @@ deploy-apps:
 	echo " - deploying apps"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-apps.sh
 
+undeploy-apps:
+	echo " - undeploying apps"
+	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/undeploy-apps.sh
 help: ## Show this help
 	@grep --extended-regexp --no-filename '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
