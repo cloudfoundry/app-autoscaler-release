@@ -39,7 +39,7 @@ persist_cert() {
 
 build_jdbc_url() {
   local host="$1" port="$2" dbname="$3" client_cert="$4" client_key="$5" server_ca="$6"
-	local url_params="" sslmode=""
+	local url_params=""
 	local client_pk8_key="$CERTS_DIR/client-key.pk8"
 
 	if [ -s "$client_cert" ]; then
@@ -52,8 +52,7 @@ build_jdbc_url() {
 
 	if [ -s "$client_key" ]; then
 		convert_to_pk8 "$client_key" "$client_pk8_key"
-    sslmode="verify-ca"
-		url_params="$url_params&sslkey=$client_pk8_key"
+		url_params="$url_params&sslkey=$client_pk8_key&sslmode=verify-ca"
 	fi
 
 	echo "jdbc:postgresql://$host:$port/$dbname?$url_params"
@@ -109,7 +108,6 @@ function main() {
 
   PASSWORD=$(parse_uri "$uri" "password")
   USER=$(parse_uri "$uri" "user")
-
 
   run_liquibase "$JDBCDBURL" "$USER" "$PASSWORD" "BOOT-INF/classes/api.db.changelog.yml"
 	run_liquibase "$JDBCDBURL" "$USER" "$PASSWORD" "BOOT-INF/classes/servicebroker.db.changelog.yaml"
