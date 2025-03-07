@@ -227,15 +227,13 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 }
 
 func configureScalingEngine(conf *Config) {
-	// TODO: uncomment after adding integration test with gorouterproxy between golangapi and scalingengine
-	// conf.ScalingEngine.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
+	conf.ScalingEngine.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
 	conf.ScalingEngine.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
 	conf.ScalingEngine.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
 }
 
 func configureEventGenerator(conf *Config) {
-	// TODO: uncomment after adding integration test with gorouterproxy between golangapi and eventgenerator
-	// conf.EventGenerator.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
+	conf.EventGenerator.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
 	conf.EventGenerator.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
 	conf.EventGenerator.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
 }

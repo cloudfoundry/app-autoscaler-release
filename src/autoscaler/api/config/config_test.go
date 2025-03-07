@@ -73,29 +73,31 @@ var _ = Describe("Config", func() {
 				BeforeEach(func() {
 					os.Setenv("CF_INSTANCE_KEY", "some/path/in/container/cfcert.key")
 					os.Setenv("CF_INSTANCE_CERT", "some/path/in/container/cfcert.crt")
+					os.Setenv("CF_INSTANCE_CA_CERT", "some/path/in/container/cfcert.crt")
 				})
 
 				AfterEach(func() {
 					os.Unsetenv("CF_INSTANCE_KEY")
 					os.Unsetenv("CF_INSTANCE_CERT")
+					os.Unsetenv("CF_INSTANCE_CA_CERT")
 				})
 
 				It("sets EventGenerator TlSClientCert", func() {
 					Expect(conf.EventGenerator.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
 					Expect(conf.EventGenerator.TLSClientCerts.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
-					//					Expect(conf.EventGenerator.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
+					Expect(conf.EventGenerator.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
 				})
 
 				It("sets Scheduler TlSClientCert", func() {
 					Expect(conf.Scheduler.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
 					Expect(conf.Scheduler.TLSClientCerts.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
-					//					Expect(conf.Scheduler.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
+					Expect(conf.Scheduler.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
 				})
 
 				It("sets ScalingEngine TlSClientCert", func() {
 					Expect(conf.ScalingEngine.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
 					Expect(conf.ScalingEngine.TLSClientCerts.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
-					//					Expect(conf.ScalingEngine.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
+					Expect(conf.ScalingEngine.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
 				})
 
 				When("vcap PORT is set to a number", func() {
