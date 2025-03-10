@@ -22,6 +22,7 @@ anchors:
       operations/enable-scheduler-logging.yml
 
   app-autoscaler-ops-files-log-cache-syslog-cf: &app-autoscaler-ops-files-log-cache-syslog-cf
+    ENABLE_MTAR: true
     OPS_FILES: |
       operations/add-releases.yml
       operations/instance-identity-cert-from-cf.yml
@@ -31,8 +32,6 @@ anchors:
       operations/set-release-version.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
-      operations/use-cf-services.yml
-      operations/configure-cf-services.yml
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
