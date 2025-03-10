@@ -41,6 +41,7 @@ modules:
       GOVERSION: go1.GO_MINOR_VERSION
     requires:
     - name: publicapiserver-config
+    - name: broker-catalog
     - name: database
     - name: app-autoscaler-application-logs
     parameters:
