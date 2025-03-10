@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -150,6 +151,26 @@ var _ = Describe("Config", func() {
 					Expect(conf.Db[db.BindingDb].URL).To(Equal(expectedDbUrl))
 					actualDbName := mockVCAPConfigurationReader.MaterializeDBFromServiceArgsForCall(1)
 					Expect(actualDbName).To(Equal(db.BindingDb))
+				})
+			})
+
+			When("VCAP_SERVICES has catalog", func() {
+				var expectedCatalogContent string
+
+				BeforeEach(func() {
+					expectedCatalogContent = `{"services":[{"id":"1","name":"autoscaler","description":"Autoscaler service","bindable":true,"plans":[{"id":"1","name":"standard","description":"Standard plan"}]}]}` // #nosec G101
+					expectedPublicapiConfigContent := `{ "cred_helper_impl": "default" }`
+
+					mockVCAPConfigurationReader.GetServiceCredentialContentReturnsOnCall(0, []byte(expectedPublicapiConfigContent), nil) // #nosec G101
+					mockVCAPConfigurationReader.GetServiceCredentialContentReturnsOnCall(1, []byte(expectedCatalogContent), nil)         // #nosec G101
+				})
+
+				It("loads the db config from VCAP_SERVICES successfully", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.CatalogPath).To(Equal("/tmp/publicapi/catalog.json"))
+					actualCatalogContent, err := ioutil.ReadFile(conf.CatalogPath)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(string(actualCatalogContent)).To(Equal(expectedCatalogContent))
 				})
 			})
 		})

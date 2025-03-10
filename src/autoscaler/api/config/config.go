@@ -218,12 +218,31 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	// TODO: Implement support for catalog via user provided service.
 	// write to file and set to c.CatalogSchemaPath  and c.CatalogPath
 	// if catalog json is found in container
+	if err := configureCatalog(conf, vcapReader); err != nil {
+		return err
+	}
 
 	configureEventGenerator(conf)
 	configureScheduler(conf)
 	configureScalingEngine(conf)
 
 	return nil
+}
+
+func configureCatalog(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	catalog, err := vcapReader.GetServiceCredentialContent("publicapi-catalog", "publicapi-catalog")
+	if err != nil {
+		return err
+	}
+
+	catalogPath, err := configutil.MaterializeContentInFile("publicapi", "catalog.json", string(catalog))
+	if err != nil {
+		return err
+	}
+
+	conf.CatalogPath = catalogPath
+
+	return err
 }
 
 func configureScalingEngine(conf *Config) {
