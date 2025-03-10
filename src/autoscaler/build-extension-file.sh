@@ -143,23 +143,25 @@ resources:
       client_key: "${SYSLOG_CLIENT_KEY//$'\n'/\\n}"
       server_ca: "${SYSLOG_CLIENT_CA//$'\n'/\\n}"
 - name: broker-catalog
-  config:
-    services:
-      - bindable: true
-        bindings_retrievable: true
-        description: Automatically increase or decrease the number of application instances based on a policy you define.
-        id: autoscaler-guid
-        instances_retrievable: true
-        name: ${DEPLOYMENT_NAME}
-        plans:
-          - description: This is the free service plan for the Auto-Scaling service.
-            id: autoscaler-free-plan-id
-            name: autoscaler-free-plan
-            plan_updateable: true
-          - description: This is the standard service plan for the Auto-Scaling service.
-            id: acceptance-standard
-            name: acceptance-standard
-            plan_updateable: false
-        tags:
-          - app-autoscaler
+  parameters:
+    config:
+      broker-catalog:
+        services:
+          - bindable: true
+            bindings_retrievable: true
+            description: Automatically increase or decrease the number of application instances based on a policy you define.
+            id: autoscaler-guid
+            instances_retrievable: true
+            name: ${DEPLOYMENT_NAME}
+            plans:
+              - description: This is the free service plan for the Auto-Scaling service.
+                id: autoscaler-free-plan-id
+                name: autoscaler-free-plan
+                plan_updateable: true
+              - description: This is the standard service plan for the Auto-Scaling service.
+                id: acceptance-standard
+                name: acceptance-standard
+                plan_updateable: false
+            tags:
+              - app-autoscaler
 EOF
