@@ -43,6 +43,10 @@
   path: /variables/name=postgres_client/options/alternative_names/-
   value: ((deployment_name))-postgres.tcp.((system_domain))
 
+###################################################
+## Removal of VMs as CF apps are enabled by default
+## #################################################
+
 ## APISERVER - remove publicapiserver
 - type: remove
   path: /instance_groups/name=apiserver
