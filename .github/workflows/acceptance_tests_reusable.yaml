@@ -60,12 +60,17 @@ jobs:
         shell: bash
         env:
           OPS_FILES: ${{ inputs.ops_files }}
+          ENABLE_MTAR: ${{ inputs.deploy_apps }}
         run: make --directory="${AUTOSCALER_DIR}" deploy-autoscaler
 
       - name: Deploy Apps
         shell: bash
         run: make --directory="${AUTOSCALER_DIR}" deploy-apps
         if: ${{ inputs.deploy_apps }}
+
+      - name: Register autoscaler
+        shell: bash
+        run: make --directory="${AUTOSCALER_DIR}" deploy-register-cf
 
   acceptance_tests:
     name: Acceptance Tests
