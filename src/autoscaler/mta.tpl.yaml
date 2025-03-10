@@ -84,11 +84,11 @@ resources:
     service-tags:
     - publicapiserver-config
     path: api/default_config.json
-- name: publicapi-catalog
+- name: broker-catalog
   type: org.cloudfoundry.user-provided-service
   parameters:
     service-tags:
-    - publicapiserver-catalog
+    - broker-catalog
 - name: database
   type: org.cloudfoundry.user-provided-service
   parameters:

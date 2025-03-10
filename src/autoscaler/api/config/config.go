@@ -230,7 +230,7 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 }
 
 func configureCatalog(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	catalog, err := vcapReader.GetServiceCredentialContent("publicapi-catalog", "publicapi-catalog")
+	catalog, err := vcapReader.GetServiceCredentialContent("broker-catalog", "broker-catalog")
 	if err != nil {
 		return err
 	}

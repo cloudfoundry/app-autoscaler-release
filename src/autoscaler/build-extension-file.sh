@@ -142,7 +142,7 @@ resources:
       client_cert: "${SYSLOG_CLIENT_CERT//$'\n'/\\n}"
       client_key: "${SYSLOG_CLIENT_KEY//$'\n'/\\n}"
       server_ca: "${SYSLOG_CLIENT_CA//$'\n'/\\n}"
-- name: publicapi-catalog
+- name: broker-catalog
   config:
     services:
       - bindable: true
