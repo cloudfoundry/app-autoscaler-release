@@ -215,9 +215,6 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	// TODO: Implement support for catalog via user provided service.
-	// write to file and set to c.CatalogSchemaPath  and c.CatalogPath
-	// if catalog json is found in container
 	if err := configureCatalog(conf, vcapReader); err != nil {
 		return err
 	}
