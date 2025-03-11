@@ -2,7 +2,6 @@ package config_test
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -168,7 +167,7 @@ var _ = Describe("Config", func() {
 				It("loads the db config from VCAP_SERVICES successfully", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(conf.CatalogPath).To(Equal("/tmp/publicapi/catalog.json"))
-					actualCatalogContent, err := ioutil.ReadFile(conf.CatalogPath)
+					actualCatalogContent, err := os.ReadFile(conf.CatalogPath)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(string(actualCatalogContent)).To(Equal(expectedCatalogContent))
 				})
