@@ -232,7 +232,7 @@ func configureCatalog(conf *Config, vcapReader configutil.VCAPConfigurationReade
 		return err
 	}
 
-	catalogPath, err := configutil.MaterializeContentInFile("publicapi", "catalog.json", string(catalog))
+	catalogPath, err := configutil.MaterializeContentInTmpFile("publicapi", "catalog.json", string(catalog))
 	if err != nil {
 		return err
 	}
