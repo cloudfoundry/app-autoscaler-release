@@ -316,12 +316,12 @@ var _ = Describe("Api", func() {
 
 			cfInstanceCertFile, err := configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.crt", string(cfInstanceCert))
 			Expect(err).NotTo(HaveOccurred())
-			os.Setenv("CF_INSTANCE_CERT", string(cfInstanceCertFile))
+			os.Setenv("CF_INSTANCE_CERT", cfInstanceCertFile)
 
 			cfInstanceKey := testhelpers.GenerateClientKeyWithPrivateKey(rsaPrivateKey)
 			cfInstanceKeyFile, err = configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.key", string(cfInstanceKey))
 			Expect(err).NotTo(HaveOccurred())
-			os.Setenv("CF_INSTANCE_KEY", string(cfInstanceKeyFile))
+			os.Setenv("CF_INSTANCE_KEY", cfInstanceKeyFile)
 
 			os.Setenv("VCAP_APPLICATION", "{}")
 			os.Setenv("VCAP_SERVICES", getVcapServices())
