@@ -142,10 +142,10 @@
     platforms = [];
     source = {
       remotes = ["https://rubygems.org"];
-      sha256 = "1p4l5ycdxfsr8b51gnvlvhq6s21vmx9z4x617003zbqv3bcqmj6x";
+      sha256 = "01lbdaizhkxmrw4y8j3wpvsryvnvzmg0pfs56c52laq2jgdfmq1l";
       type = "gem";
     };
-    version = "2.10.1";
+    version = "2.10.2";
   };
   launchy = {
     dependencies = ["addressable" "childprocess" "logger"];
@@ -193,10 +193,10 @@
     platforms = [];
     source = {
       remotes = ["https://rubygems.org"];
-      sha256 = "1xz82qz7f1vc4yhvacrlnh19q3wcwa5kmznfpkkmf3c9ajki249b";
+      sha256 = "0h65a1f9gsqx2ryisdy4lrd9a9l8gdv65dcscw9ynwwjr1ak1n00";
       type = "gem";
     };
-    version = "3.1.11";
+    version = "3.1.12";
   };
   reline = {
     dependencies = ["io-console"];
