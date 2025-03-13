@@ -33,18 +33,33 @@ func GetVcapServices(userProvidedServiceName string, configJson string) string {
 	catalogBytes, err := os.ReadFile("../api/exampleconfig/catalog-example.json")
 	Expect(err).NotTo(HaveOccurred())
 
-	return `{
-		"user-provided": [
-		    { "name": "` + userProvidedServiceName + `", "tags": [ "` + userProvidedServiceName + `" ],  "credentials": { "` + userProvidedServiceName + `": ` + configJson + ` }},
-			{ "name": "broker-catalog", "tags": ["broker-catalog"], "credentials": { "broker-catalog": ` + string(catalogBytes) + ` }}
-		],
-		"autoscaler": [ {
-			"name": "some-service",
-			"credentials": {
-				"uri": "` + dbURL + `"
+	vcapServices := map[string]interface{}{
+		"user-provided": []map[string]interface{}{
+			{
+				"name":        userProvidedServiceName,
+				"tags":        []string{userProvidedServiceName},
+				"credentials": map[string]interface{}{userProvidedServiceName: json.RawMessage(configJson)},
+			},
+			{
+				"name":        "broker-catalog",
+				"tags":        []string{"broker-catalog"},
+				"credentials": map[string]interface{}{"broker-catalog": json.RawMessage(catalogBytes)},
+			},
+		},
+		"autoscaler": []map[string]interface{}{
+			{
+				"name": "some-service",
+				"credentials": map[string]interface{}{
+					"uri": dbURL,
 				},
-			"syslog_drain_url": "",
-			"tags": [ "policy_db","binding_db", "postgres" ]
+				"syslog_drain_url": "",
+				"tags":             []string{"policy_db", "binding_db", "postgres"},
+			},
+		},
+	}
 
-	   }]}`
+	vcapServicesJson, err := json.Marshal(vcapServices)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(vcapServicesJson)
 }
