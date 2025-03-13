@@ -121,11 +121,12 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		conf.Db = make(map[string]db.DatabaseConfig)
 	}
 
-	if err := configureDb(db.PolicyDb, conf, vcapReader); err != nil {
+	if err := configureDb(db.PolicyDb, &conf.Db, vcapReader); err != nil {
+
 		return err
 	}
 
-	if err := configureDb(db.BindingDb, conf, vcapReader); err != nil {
+	if err := configureDb(db.BindingDb, &conf.Db, vcapReader); err != nil {
 		return err
 	}
 
@@ -150,10 +151,10 @@ func loadMetricsforwarderConfig(conf *Config, vcapReader configutil.VCAPConfigur
 	return yaml.Unmarshal(data, conf)
 }
 
-func configureDb(dbName string, conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	currentDb, ok := conf.Db[dbName]
+func configureDb(dbName string, confDb *map[string]db.DatabaseConfig, vcapReader configutil.VCAPConfigurationReader) error {
+	currentDb, ok := (*confDb)[dbName]
 	if !ok {
-		conf.Db[dbName] = db.DatabaseConfig{}
+		(*confDb)[dbName] = db.DatabaseConfig{}
 	}
 
 	dbURL, err := vcapReader.MaterializeDBFromService(dbName)
@@ -161,12 +162,13 @@ func configureDb(dbName string, conf *Config, vcapReader configutil.VCAPConfigur
 	if err != nil {
 		return err
 	}
-	conf.Db[dbName] = currentDb
+	(*confDb)[dbName] = currentDb
+
 	return nil
 }
 
 func configureStoredProcedureDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	if err := configureDb(db.StoredProcedureDb, conf, vcapReader); err != nil {
+	if err := configureDb(db.StoredProcedureDb, &conf.Db, vcapReader); err != nil {
 		return err
 	}
 
