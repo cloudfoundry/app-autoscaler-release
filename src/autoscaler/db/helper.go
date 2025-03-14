@@ -13,10 +13,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
 
-type vcapConfigurationReader interface {
-	MaterializeDBFromService(dbName string) (string, error)
-}
-
 type Database struct {
 	DriverName     string
 	DataSourceName string

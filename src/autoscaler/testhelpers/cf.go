@@ -41,10 +41,10 @@ func getDbVcapServices(creds, serviceName, dbType, credHelperImpl string) (strin
 		},
 		"autoscaler": []map[string]interface{}{
 			{
-				"name": "some-service",
-				"credentials": json.RawMessage(creds),
+				"name":             "some-service",
+				"credentials":      json.RawMessage(creds),
 				"syslog_drain_url": "",
-				"tags": []string{serviceName, dbType},
+				"tags":             []string{serviceName, dbType},
 			},
 		},
 	}
