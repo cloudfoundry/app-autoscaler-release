@@ -3,9 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
@@ -121,17 +119,17 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		conf.Db = make(map[string]db.DatabaseConfig)
 	}
 
-	if err := configureDb(db.PolicyDb, &conf.Db, vcapReader); err != nil {
+	if err := db.ConfigureDb(db.PolicyDb, &conf.Db, vcapReader); err != nil {
 
 		return err
 	}
 
-	if err := configureDb(db.BindingDb, &conf.Db, vcapReader); err != nil {
+	if err := db.ConfigureDb(db.BindingDb, &conf.Db, vcapReader); err != nil {
 		return err
 	}
 
 	if conf.CredHelperImpl == "stored_procedure" {
-		if err := configureStoredProcedureDb(conf, vcapReader); err != nil {
+		if err := db.ConfigureStoredProcedureDb(&conf.Db, conf.StoredProcedureConfig, vcapReader); err != nil {
 			return err
 		}
 	}
@@ -149,47 +147,6 @@ func loadMetricsforwarderConfig(conf *Config, vcapReader configutil.VCAPConfigur
 		return fmt.Errorf("%w: %v", ErrMetricsforwarderConfigNotFound, err)
 	}
 	return yaml.Unmarshal(data, conf)
-}
-
-func configureDb(dbName string, confDb *map[string]db.DatabaseConfig, vcapReader configutil.VCAPConfigurationReader) error {
-	currentDb, ok := (*confDb)[dbName]
-	if !ok {
-		(*confDb)[dbName] = db.DatabaseConfig{}
-	}
-
-	dbURL, err := vcapReader.MaterializeDBFromService(dbName)
-	currentDb.URL = dbURL
-	if err != nil {
-		return err
-	}
-	(*confDb)[dbName] = currentDb
-
-	return nil
-}
-
-func configureStoredProcedureDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	if err := configureDb(db.StoredProcedureDb, &conf.Db, vcapReader); err != nil {
-		return err
-	}
-
-	currentStoredProcedureDb := conf.Db[db.StoredProcedureDb]
-	parsedUrl, err := url.Parse(currentStoredProcedureDb.URL)
-	if err != nil {
-		return err
-	}
-
-	if conf.StoredProcedureConfig != nil {
-		if conf.StoredProcedureConfig.Username != "" {
-			currentStoredProcedureDb.URL = strings.Replace(currentStoredProcedureDb.URL, parsedUrl.User.Username(), conf.StoredProcedureConfig.Username, 1)
-		}
-		if conf.StoredProcedureConfig.Password != "" {
-			bindingPassword, _ := parsedUrl.User.Password()
-			currentStoredProcedureDb.URL = strings.Replace(currentStoredProcedureDb.URL, bindingPassword, conf.StoredProcedureConfig.Password, 1)
-		}
-	}
-	conf.Db[db.StoredProcedureDb] = currentStoredProcedureDb
-
-	return nil
 }
 
 func configureSyslogTLS(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {

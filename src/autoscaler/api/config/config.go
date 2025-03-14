@@ -207,11 +207,11 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		conf.Db = make(map[string]db.DatabaseConfig)
 	}
 
-	if err := configurePolicyDb(conf, vcapReader); err != nil {
+	if err := db.ConfigureDb(db.PolicyDb, &conf.Db, vcapReader); err != nil {
 		return err
 	}
 
-	if err := configureBindingDb(conf, vcapReader); err != nil {
+	if err := db.ConfigureDb(db.BindingDb, &conf.Db, vcapReader); err != nil {
 		return err
 	}
 
@@ -258,37 +258,6 @@ func configureScheduler(conf *Config) {
 	conf.Scheduler.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
 	conf.Scheduler.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
 	conf.Scheduler.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
-}
-
-func configurePolicyDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	currentPolicyDb, ok := conf.Db[db.PolicyDb]
-	if !ok {
-		conf.Db[db.PolicyDb] = db.DatabaseConfig{}
-	}
-
-	dbURL, err := vcapReader.MaterializeDBFromService(db.PolicyDb)
-	currentPolicyDb.URL = dbURL
-	if err != nil {
-		return err
-	}
-	conf.Db[db.PolicyDb] = currentPolicyDb
-	return nil
-}
-
-func configureBindingDb(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	currentBindingDb, ok := conf.Db[db.BindingDb]
-	if !ok {
-		conf.Db[db.BindingDb] = db.DatabaseConfig{}
-	}
-
-	dbURL, err := vcapReader.MaterializeDBFromService(db.BindingDb)
-	currentBindingDb.URL = dbURL
-	if err != nil {
-		return err
-	}
-	conf.Db[db.BindingDb] = currentBindingDb
-
-	return nil
 }
 
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
