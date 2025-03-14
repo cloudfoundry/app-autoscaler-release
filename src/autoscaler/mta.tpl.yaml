@@ -35,18 +35,38 @@ modules:
     type: go
     path: .
     properties:
-      DT_RELEASE_BUILD_VERSION: ${mta-version}
-      GO_INSTALL_PACKAGE_SPEC: code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api
-      GOTOOLCHAIN: local
-      GOVERSION: go1.GO_MINOR_VERSION
+      dt_release_build_version: ${mta-version}
+      go_install_package_spec: code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api
+      gotoolchain: local
+      goversion: go1.go_minor_version
     requires:
     - name: publicapiserver-config
     - name: broker-catalog
     - name: database
     - name: app-autoscaler-application-logs
     parameters:
-      memory: 1G
-      disk-quota: 1G
+      memory: 1g
+      disk-quota: 1g
+      instances: 0
+      stack: cflinuxfs4
+      routes:
+
+  - name: eventgenerator
+    type: go
+    path: .
+    properties:
+      dt_release_build_version: ${mta-version}
+      go_install_package_spec: code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/cmd/eventgenerator
+      gotoolchain: local
+      goversion: go1.go_minor_version
+    requires:
+    - name: eventgenerator-config
+    - name: broker-catalog
+    - name: database
+    - name: app-autoscaler-application-logs
+    parameters:
+      memory: 1g
+      disk-quota: 1g
       instances: 0
       stack: cflinuxfs4
       routes:
@@ -68,7 +88,7 @@ modules:
     parameters:
       memory: 1G
       disk-quota: 1G
-      instances: 2
+      instances: 0
       stack: cflinuxfs4
       routes:
 
@@ -79,6 +99,12 @@ resources:
     service-tags:
     - metricsforwarder-config
     path: metricsforwarder/default_config.json
+- name: eventgenerator-config
+  type: org.cloudfoundry.user-provided-service
+  parameters:
+    service-tags:
+    - eventgenerator-config
+    path: eventgenerator/default_config.json
 - name: publicapiserver-config
   type: org.cloudfoundry.user-provided-service
   parameters:
