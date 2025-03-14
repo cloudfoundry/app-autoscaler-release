@@ -8,12 +8,14 @@ import (
 	"os"
 	"strings"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"github.com/go-sql-driver/mysql"
 	"go.opentelemetry.io/otel/attribute"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
+
+type vcapConfigurationReader interface {
+	MaterializeDBFromService(dbName string) (string, error)
+}
 
 type Database struct {
 	DriverName     string
@@ -156,45 +158,4 @@ func parseMySQLURL(dbUrl string) (*MySQLConfig, error) {
 		config: config,
 		cert:   caCert,
 	}, nil
-}
-
-func ConfigureStoredProcedureDb(confDb *map[string]DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, vcapReader configutil.VCAPConfigurationReader) error {
-	if err := ConfigureDb(StoredProcedureDb, confDb, vcapReader); err != nil {
-		return err
-	}
-
-	currentStoredProcedureDb := (*confDb)[StoredProcedureDb]
-	parsedUrl, err := url.Parse(currentStoredProcedureDb.URL)
-	if err != nil {
-		return err
-	}
-
-	if storedProcedureConfig != nil {
-		if storedProcedureConfig.Username != "" {
-			currentStoredProcedureDb.URL = strings.Replace(currentStoredProcedureDb.URL, parsedUrl.User.Username(), storedProcedureConfig.Username, 1)
-		}
-		if storedProcedureConfig.Password != "" {
-			bindingPassword, _ := parsedUrl.User.Password()
-			currentStoredProcedureDb.URL = strings.Replace(currentStoredProcedureDb.URL, bindingPassword, storedProcedureConfig.Password, 1)
-		}
-	}
-	(*confDb)[StoredProcedureDb] = currentStoredProcedureDb
-
-	return nil
-}
-
-func ConfigureDb(dbName string, confDb *map[string]DatabaseConfig, vcapReader configutil.VCAPConfigurationReader) error {
-	currentDb, ok := (*confDb)[dbName]
-	if !ok {
-		(*confDb)[dbName] = DatabaseConfig{}
-	}
-
-	dbURL, err := vcapReader.MaterializeDBFromService(dbName)
-	currentDb.URL = dbURL
-	if err != nil {
-		return err
-	}
-	(*confDb)[dbName] = currentDb
-
-	return nil
 }

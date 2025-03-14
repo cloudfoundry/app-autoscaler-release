@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strings"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"github.com/cloud-gov/go-cfenv"
 )
@@ -21,6 +23,9 @@ type VCAPConfigurationReader interface {
 	GetServiceCredentialContent(serviceTag string, credentialKey string) ([]byte, error)
 	GetPort() int
 	IsRunningOnCF() bool
+
+	ConfigureDb(dbName string, confDb *map[string]db.DatabaseConfig) error
+	ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error
 }
 
 type VCAPConfiguration struct {
@@ -34,6 +39,8 @@ func NewVCAPConfigurationReader() (result *VCAPConfiguration, err error) {
 	if cfenv.IsRunningOnCF() {
 		appEnv, err = cfenv.Current()
 		result.appEnv = appEnv
+	} else {
+		fmt.Println("VCAPConfigurationReader: Not running on CF")
 	}
 
 	return result, err
@@ -95,6 +102,7 @@ func (vc *VCAPConfiguration) MaterializeDBFromService(dbName string) (string, er
 }
 
 func (vc *VCAPConfiguration) getServiceByTag(serviceTag string) (*cfenv.Service, error) {
+	fmt.Println("vc.appEnv.Services: ", vc.appEnv)
 	services, err := vc.appEnv.Services.WithTag(serviceTag)
 	if err != nil || len(services) == 0 {
 		return nil, fmt.Errorf("%w: %s", ErrDbServiceNotFound, serviceTag)
@@ -205,5 +213,46 @@ func (vc *VCAPConfiguration) addConnectionParam(service *cfenv.Service, dbName, 
 		}
 		parameters.Set(connectionParam, createdFile)
 	}
+	return nil
+}
+
+func (vc *VCAPConfiguration) ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error {
+	if err := vc.ConfigureDb(dbName, confDb); err != nil {
+		return err
+	}
+
+	currentStoredProcedureDb := (*confDb)[dbName]
+	parsedUrl, err := url.Parse(currentStoredProcedureDb.URL)
+	if err != nil {
+		return err
+	}
+
+	if storedProcedureConfig != nil {
+		if storedProcedureConfig.Username != "" {
+			currentStoredProcedureDb.URL = strings.Replace(currentStoredProcedureDb.URL, parsedUrl.User.Username(), storedProcedureConfig.Username, 1)
+		}
+		if storedProcedureConfig.Password != "" {
+			bindingPassword, _ := parsedUrl.User.Password()
+			currentStoredProcedureDb.URL = strings.Replace(currentStoredProcedureDb.URL, bindingPassword, storedProcedureConfig.Password, 1)
+		}
+	}
+	(*confDb)[dbName] = currentStoredProcedureDb
+
+	return nil
+}
+
+func (vc *VCAPConfiguration) ConfigureDb(dbName string, confDb *map[string]db.DatabaseConfig) error {
+	currentDb, ok := (*confDb)[dbName]
+	if !ok {
+		(*confDb)[dbName] = db.DatabaseConfig{}
+	}
+
+	dbURL, err := vc.MaterializeDBFromService(dbName)
+	currentDb.URL = dbURL
+	if err != nil {
+		return err
+	}
+	(*confDb)[dbName] = currentDb
+
 	return nil
 }

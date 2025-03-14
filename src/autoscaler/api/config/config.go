@@ -207,11 +207,11 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		conf.Db = make(map[string]db.DatabaseConfig)
 	}
 
-	if err := db.ConfigureDb(db.PolicyDb, &conf.Db, vcapReader); err != nil {
+	if err := vcapReader.ConfigureDb(db.PolicyDb, &conf.Db); err != nil {
 		return err
 	}
 
-	if err := db.ConfigureDb(db.BindingDb, &conf.Db, vcapReader); err != nil {
+	if err := vcapReader.ConfigureDb(db.BindingDb, &conf.Db); err != nil {
 		return err
 	}
 

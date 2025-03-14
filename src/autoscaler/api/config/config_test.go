@@ -113,6 +113,46 @@ var _ = Describe("Config", func() {
 
 			})
 
+			When("handling available databases", func() {
+				It("calls configureDb with for policyDB", func() {
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
+					Expect(db.PolicyDb).To(Equal(receivedDbName))
+					Expect(receivedDbConfig).To(Equal(&conf.Db))
+				})
+
+				It("calls configureDb with for bindingDB", func() {
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
+					Expect(db.BindingDb).To(Equal(receivedDbName))
+					Expect(receivedDbConfig).To(Equal(&conf.Db))
+				})
+			})
+
+			When("handling available storeprocedure database", func() {
+				XWhen("storedProcedure_db service is provided and cred_helper_impl is default", func() {
+					BeforeEach(func() {
+						mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(
+							`{ "cred_helper_impl": "stored_procedure" }`), nil) // #nosec G101
+					})
+
+					It("calls configureStoredProcedureDb", func() {
+						Expect(err).NotTo(HaveOccurred())
+						Expect(mockVCAPConfigurationReader.ConfigureStoredProcedureDbCallCount()).To(Equal(1))
+					})
+				})
+
+				When("storedProcedure_db service is provided and cred_helper_impl is default", func() {
+					BeforeEach(func() {
+						mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(
+							`{ "cred_helper_impl": "default" }`), nil) // #nosec G101
+					})
+
+					It("calls configureStoredProcedureDb", func() {
+						Expect(err).NotTo(HaveOccurred())
+						Expect(mockVCAPConfigurationReader.ConfigureStoredProcedureDbCallCount()).To(Equal(0))
+					})
+				})
+			})
+
 			When("service is empty", func() {
 				var expectedErr error
 				BeforeEach(func() {
@@ -122,34 +162,6 @@ var _ = Describe("Config", func() {
 
 				It("should error with config service not found", func() {
 					Expect(err).To(MatchError(MatchRegexp("publicapiserver config service not found")))
-				})
-			})
-
-			When("VCAP_SERVICES has relational db service bind to app for policy db", func() {
-				BeforeEach(func() {
-					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(`{ "cred_helper_impl": "default" }`), nil)                                                                           // #nosec G101
-					expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
-				})
-
-				It("loads the db config from VCAP_SERVICES successfully", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.Db[db.PolicyDb].URL).To(Equal(expectedDbUrl))
-					actualDbName := mockVCAPConfigurationReader.MaterializeDBFromServiceArgsForCall(0)
-					Expect(actualDbName).To(Equal(db.PolicyDb))
-				})
-			})
-
-			When("VCAP_SERVICES has relational db service bind to app for binding db", func() {
-				BeforeEach(func() {
-					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(`{ "cred_helper_impl": "default" }`), nil)                                                                            // #nosec G101
-					expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/binding_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
-				})
-
-				It("loads the db config from VCAP_SERVICES successfully", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.Db[db.BindingDb].URL).To(Equal(expectedDbUrl))
-					actualDbName := mockVCAPConfigurationReader.MaterializeDBFromServiceArgsForCall(1)
-					Expect(actualDbName).To(Equal(db.BindingDb))
 				})
 			})
 

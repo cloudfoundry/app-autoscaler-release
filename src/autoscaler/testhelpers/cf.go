@@ -9,17 +9,30 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+func GetStoredProcedureDbVcapServices(creds map[string]string, serviceName string, dbType string) (string, error) {
+	credentials, err := json.Marshal(creds)
+	if err != nil {
+		return "", err
+	}
+
+	return getDbVcapServices(string(credentials), serviceName, dbType, "stored_procedure")
+}
+
 func GetDbVcapServices(creds map[string]string, serviceName string, dbType string) (string, error) {
 	credentials, err := json.Marshal(creds)
 	if err != nil {
 		return "", err
 	}
 
+	return getDbVcapServices(string(credentials), serviceName, dbType, "default")
+}
+
+func getDbVcapServices(creds, serviceName, dbType, credHelperImpl string) (string, error) {
 	return `{
-		"user-provided": [ { "name": "config", "credentials": { "metricsforwarder": { } }}],
+		"user-provided": [ { "name": "config", "credentials": { "metricsforwarder": {  "cred_helper_impl": "` + credHelperImpl + `" } }}],
 		"autoscaler": [ {
 			"name": "some-service",
-			"credentials": ` + string(credentials) + `,
+			"credentials": ` + creds + `,
 			"syslog_drain_url": "",
 			"tags": ["` + serviceName + `", "` + dbType + `"]
 			}
