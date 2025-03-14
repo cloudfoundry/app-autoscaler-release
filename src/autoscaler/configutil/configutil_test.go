@@ -113,7 +113,7 @@ var _ = Describe("Configutil", func() {
 
 				})
 
-				It("reads the store procedure service from vcap", func() {
+				It("reads the store procedure service from config and overrides the one in the service", func() {
 					expectedDbs = &map[string]db.DatabaseConfig{
 						dbName: {
 							URL: "postgres://storedProcedureUsername:storedProcedurePassword@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fstoredprocedure_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fstoredprocedure_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fstoredprocedure_db%2Fserver_ca.sslrootcert", // #nosec G101
@@ -123,7 +123,6 @@ var _ = Describe("Configutil", func() {
 						Username: storedProcedureUsername,
 						Password: storedProcedurePassword,
 					}
-					// TODO: remove storedProcedureConfig and read it from the vcapServicesJson
 					err := vcapConfiguration.ConfigureStoredProcedureDb(dbName, actualDbs, storedProcedureConfig)
 					Expect(err).NotTo(HaveOccurred())
 
