@@ -120,7 +120,7 @@ var _ = Describe("Config", func() {
 					Expect(receivedDbConfig).To(Equal(&conf.Db))
 				})
 
-				It("calls configureDb with for bindingDB", func() {
+				It("calls configureDb with bindingDB", func() {
 					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
 					Expect(db.BindingDb).To(Equal(receivedDbName))
 					Expect(receivedDbConfig).To(Equal(&conf.Db))
@@ -128,7 +128,7 @@ var _ = Describe("Config", func() {
 			})
 
 			When("handling available storeprocedure database", func() {
-				When("storedProcedure_db service is provided and cred_helper_impl is default", func() {
+				When("storedProcedure_db service is provided and cred_helper_impl is stored_procedure", func() {
 					BeforeEach(func() {
 						mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(
 							`{ "cred_helper_impl": "stored_procedure" }`), nil) // #nosec G101
