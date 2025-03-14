@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 
@@ -33,6 +34,14 @@ const (
 var ErrAlreadyExists = fmt.Errorf("already exists")
 var ErrDoesNotExist = fmt.Errorf("doesn't exist")
 var ErrConflict = fmt.Errorf("conflicting entry exists")
+
+type DatabaseConfig struct {
+	URL                   string        `yaml:"url" json:"url"`
+	MaxOpenConnections    int32         `yaml:"max_open_connections" json:"max_open_connections,omitempty`
+	MaxIdleConnections    int32         `yaml:"max_idle_connections" json:"max_idle_connections,omitempty`
+	ConnectionMaxLifetime time.Duration `yaml:"connection_max_lifetime" json:"connection_max_lifetime,omitempty`
+	ConnectionMaxIdleTime time.Duration `yaml:"connection_max_idletime" json:"connection_max_idletime,omitempty"`
+}
 
 type PolicyDB interface {
 	healthendpoint.DatabaseStatus
