@@ -77,16 +77,22 @@ _schema-version: 3.3.0
 modules:
   - name: publicapiserver
     parameters:
-      instances: 1
+      instances: 2
       routes:
       - route: ${PUBLICAPISERVER_HOST}.\${default-domain}
       - route: ${SERVICEBROKER_HOST}.\${default-domain}
+  - name: eventgenerator
+    parameters:
+      instances: 2
+      routes:
+      - route: ${EVENTGENERATOR_HOST}.\${default-domain}
   - name: metricsforwarder
     requires:
     - name: metricsforwarder-config
     - name: database
     - name: syslog-client
     parameters:
+      instances: 2
       routes:
       - route: ${METRICSFORWARDER_HOST}.\${default-domain}
       - route: ${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
