@@ -1,7 +1,6 @@
 package configutil_test
 
 import (
-	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -25,7 +24,6 @@ var _ = Describe("Configutil", func() {
 		JustBeforeEach(func() {
 			os.Setenv("VCAP_APPLICATION", vcapApplicationJson)
 			os.Setenv("VCAP_SERVICES", vcapServicesJson)
-			fmt.Println("BANANA vcapServicesJson: ", vcapServicesJson)
 			vcapConfiguration, err = NewVCAPConfigurationReader()
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -86,7 +84,7 @@ var _ = Describe("Configutil", func() {
 			})
 		})
 
-		FDescribe("ConfigureStoredProcedureDb", func() {
+		Describe("ConfigureStoredProcedureDb", func() {
 			var dbName string
 			var expectedClientCertContent = "client-cert-content"
 			var expectedClientKeyContent = "client-key-content"
@@ -100,6 +98,7 @@ var _ = Describe("Configutil", func() {
 
 			When("storedProcedure_db service is provided and cred_helper_impl is stored_procedure", func() {
 				BeforeEach(func() {
+					actualDbs = &map[string]db.DatabaseConfig{}
 					vcapApplicationJson = `{}`
 					dbName = db.StoredProcedureDb
 					vcapServicesJson, err = testhelpers.GetStoredProcedureDbVcapServices(map[string]string{
@@ -117,7 +116,7 @@ var _ = Describe("Configutil", func() {
 				It("reads the store procedure service from vcap", func() {
 					expectedDbs = &map[string]db.DatabaseConfig{
 						dbName: {
-							URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fpolicy_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fpolicy_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fpolicy_db%2Fserver_ca.sslrootcert", // #nosec G101
+							URL: "postgres://storedProcedureUsername:storedProcedurePassword@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fstoredprocedure_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fstoredprocedure_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fstoredprocedure_db%2Fserver_ca.sslrootcert", // #nosec G101
 						},
 					}
 					storedProcedureConfig := &models.StoredProcedureConfig{

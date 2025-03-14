@@ -102,7 +102,6 @@ func (vc *VCAPConfiguration) MaterializeDBFromService(dbName string) (string, er
 }
 
 func (vc *VCAPConfiguration) getServiceByTag(serviceTag string) (*cfenv.Service, error) {
-	fmt.Println("vc.appEnv.Services: ", vc.appEnv)
 	services, err := vc.appEnv.Services.WithTag(serviceTag)
 	if err != nil || len(services) == 0 {
 		return nil, fmt.Errorf("%w: %s", ErrDbServiceNotFound, serviceTag)
