@@ -128,7 +128,7 @@ var _ = Describe("Config", func() {
 			})
 
 			When("handling available storeprocedure database", func() {
-				XWhen("storedProcedure_db service is provided and cred_helper_impl is default", func() {
+				When("storedProcedure_db service is provided and cred_helper_impl is default", func() {
 					BeforeEach(func() {
 						mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(
 							`{ "cred_helper_impl": "stored_procedure" }`), nil) // #nosec G101

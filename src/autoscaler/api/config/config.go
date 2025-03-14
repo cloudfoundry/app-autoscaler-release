@@ -215,6 +215,12 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
+	if conf.CredHelperImpl == "stored_procedure" {
+		if err := vcapReader.ConfigureStoredProcedureDb(db.StoredProcedureDb, &conf.Db, conf.StoredProcedureConfig); err != nil {
+			return err
+		}
+	}
+
 	if err := configureCatalog(conf, vcapReader); err != nil {
 		return err
 	}
