@@ -28,15 +28,33 @@ func GetDbVcapServices(creds map[string]string, serviceName string, dbType strin
 }
 
 func getDbVcapServices(creds, serviceName, dbType, credHelperImpl string) (string, error) {
-	return `{
-		"user-provided": [ { "name": "config", "credentials": { "metricsforwarder": {  "cred_helper_impl": "` + credHelperImpl + `" } }}],
-		"autoscaler": [ {
-			"name": "some-service",
-			"credentials": ` + creds + `,
-			"syslog_drain_url": "",
-			"tags": ["` + serviceName + `", "` + dbType + `"]
-			}
-		]}`, nil // #nosec G101
+	vcapServices := map[string]interface{}{
+		"user-provided": []map[string]interface{}{
+			{
+				"name": "config",
+				"credentials": map[string]interface{}{
+					"metricsforwarder": map[string]interface{}{
+						"cred_helper_impl": credHelperImpl,
+					},
+				},
+			},
+		},
+		"autoscaler": []map[string]interface{}{
+			{
+				"name": "some-service",
+				"credentials": json.RawMessage(creds),
+				"syslog_drain_url": "",
+				"tags": []string{serviceName, dbType},
+			},
+		},
+	}
+
+	vcapServicesJson, err := json.Marshal(vcapServices)
+	if err != nil {
+		return "", err
+	}
+
+	return string(vcapServicesJson), nil
 }
 
 func GetVcapServices(userProvidedServiceName string, configJson string) string {
