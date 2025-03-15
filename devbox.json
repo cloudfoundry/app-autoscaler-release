@@ -37,7 +37,7 @@
     "go":                                   "1.23.1",
     "fly":                                  "7.12.1",
     "go-tools":                             "2025.1",
-    "golangci-lint":                        "1.64.5"
+    "golangci-lint":                        "1.64.6"
   },
   "shell": {
     "init_hook": [
