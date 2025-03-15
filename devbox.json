@@ -22,7 +22,7 @@
     "python":                               "3.13.2",
     "shellcheck":                           "0.10.0",
     "which":                                "latest",
-    "credhub-cli":                          "2.9.42",
+    "credhub-cli":                          "2.9.43",
     "markdownlint-cli2":                    "0.17.2",
     "direnv":                               "2.35.0",
     "yq-go":                                "4.45.1",
