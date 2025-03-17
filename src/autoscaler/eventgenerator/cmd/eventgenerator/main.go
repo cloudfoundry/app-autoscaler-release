@@ -45,14 +45,14 @@ func main() {
 	logger := helpers.InitLoggerFromConfig(&conf.Logging, "eventgenerator")
 	egClock := clock.NewClock()
 
-	appMetricDB, err := sqldb.NewAppMetricSQLDB(conf.DB.AppMetricDB, logger.Session("appMetric-db"))
+	appMetricDB, err := sqldb.NewAppMetricSQLDB(*conf.Db.AppMetricDb, logger.Session("appMetric-db"))
 	if err != nil {
-		logger.Error("failed to connect app-metric database", err, lager.Data{"dbConfig": conf.DB.AppMetricDB})
+		logger.Error("failed to connect app-metric database", err, lager.Data{"dbConfig": conf.Db.AppMetricDb})
 		os.Exit(1)
 	}
 	defer func() { _ = appMetricDB.Close() }()
 
-	policyDb := sqldb.CreatePolicyDb(conf.DB.PolicyDB, logger)
+	policyDb := sqldb.CreatePolicyDb(*conf.Db.PolicyDb, logger)
 	defer func() { _ = policyDb.Close() }()
 
 	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "eventgenerator")

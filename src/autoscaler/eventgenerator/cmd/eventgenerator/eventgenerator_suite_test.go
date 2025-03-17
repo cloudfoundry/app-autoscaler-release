@@ -258,14 +258,14 @@ func initConfig() {
 			EvaluatorCount:            1,
 			TriggerArrayChannelSize:   1,
 		},
-		DB: config.DBConfig{
-			PolicyDB: db.DatabaseConfig{
+		Db: config.DbConfig{
+			PolicyDb: &db.DatabaseConfig{
 				URL:                   dbUrl,
 				MaxOpenConnections:    10,
 				MaxIdleConnections:    5,
 				ConnectionMaxLifetime: 10 * time.Second,
 			},
-			AppMetricDB: db.DatabaseConfig{
+			AppMetricDb: &db.DatabaseConfig{
 				URL:                   dbUrl,
 				MaxOpenConnections:    10,
 				MaxIdleConnections:    5,
