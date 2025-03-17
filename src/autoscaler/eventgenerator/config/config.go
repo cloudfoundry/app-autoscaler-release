@@ -1,16 +1,24 @@
 package config
 
 import (
-	"bytes"
+	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
 	"gopkg.in/yaml.v3"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+)
+
+var (
+	ErrReadYaml                     = errors.New("failed to read config file")
+	ErrReadJson                     = errors.New("failed to read vcap_services json")
+	ErrEventgeneratorConfigNotFound = errors.New("eventgenerator config service not found")
 )
 
 const (
@@ -97,19 +105,79 @@ type Config struct {
 	HttpClientTimeout         time.Duration         `yaml:"http_client_timeout"`
 }
 
-func LoadConfig(config []byte) (*Config, error) {
+func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	conf := defaultConfig()
-	dec := yaml.NewDecoder(bytes.NewBuffer(config))
-	dec.KnownFields(true)
-	if err := dec.Decode(conf); err != nil {
+
+	if err := loadYamlFile(filepath, &conf); err != nil {
 		return nil, err
 	}
-	setDefaults(conf)
-	return conf, nil
+
+	if err := loadVcapConfig(&conf, vcapReader); err != nil {
+		return nil, err
+	}
+
+	setDefaults(&conf)
+
+	return &conf, nil
 }
 
-func defaultConfig() *Config {
-	return &Config{
+func loadEventgeneratorConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	data, err := vcapReader.GetServiceCredentialContent("eventgenerator-config", "eventgenerator-config")
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrEventgeneratorConfigNotFound, err)
+	}
+	return yaml.Unmarshal(data, conf)
+}
+
+func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	if !vcapReader.IsRunningOnCF() {
+		return nil
+	}
+
+	conf.Server.Port = vcapReader.GetPort()
+	if err := loadEventgeneratorConfig(conf, vcapReader); err != nil {
+		return err
+	}
+	//
+	//	if conf.Db == nil {
+	//		conf.Db = make(map[string]db.DatabaseConfig)
+	//	}
+	//
+	//	if err := vcapReader.ConfigureDb(db.PolicyDb, &conf.Db); err != nil {
+	//		return err
+	//	}
+	//
+	//
+	//	if err := vcapReader.ConfigureDb(db.AppMetricsDb, &conf.Db); err != nil {
+	//		return err
+	//	}
+	//
+
+	return nil
+}
+
+func loadYamlFile(filepath string, conf *Config) error {
+	if filepath == "" {
+		return nil
+	}
+	file, err := os.Open(filepath)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "failed to open config file '%s': %s\n", filepath, err)
+		return ErrReadYaml
+	}
+	defer file.Close()
+
+	dec := yaml.NewDecoder(file)
+	dec.KnownFields(true)
+	if err := dec.Decode(conf); err != nil {
+		return fmt.Errorf("%w: %v", ErrReadYaml, err)
+	}
+
+	return nil
+}
+
+func defaultConfig() Config {
+	return Config{
 		Logging: helpers.LoggingConfig{
 			Level: DefaultLoggingLevel,
 		},

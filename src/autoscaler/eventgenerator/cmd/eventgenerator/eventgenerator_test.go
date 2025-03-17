@@ -93,7 +93,7 @@ var _ = Describe("Eventgenerator", func() {
 
 		It("fails with an error", func() {
 			Eventually(runner.Session).Should(Exit(1))
-			Expect(runner.Session.Buffer()).To(Say("failed to parse config file"))
+			Expect(runner.Session.Buffer()).To(Say("failed to read config file"))
 		})
 	})
 

@@ -1,12 +1,14 @@
 package config_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -50,14 +52,12 @@ var _ = Describe("Config", func() {
 			})
 
 			When("service is empty", func() {
-				var expectedErr error
 				BeforeEach(func() {
-					expectedErr = fmt.Errorf("metricsforwarder config service not found")
-					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(""), expectedErr)
+					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(""), fmt.Errorf("not found"))
 				})
 
 				It("should error with config service not found", func() {
-					Expect(err).To(MatchError(MatchRegexp("metricsforwarder config service not found")))
+					Expect(errors.Is(err, config.ErrMetricsforwarderConfigNotFound)).To(BeTrue())
 				})
 			})
 

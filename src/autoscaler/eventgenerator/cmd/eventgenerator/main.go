@@ -1,8 +1,7 @@
 package main
 
 import (
-	"io"
-
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
@@ -166,21 +165,15 @@ func runFunc(appManager *aggregator.AppManager, evaluators []*generator.Evaluato
 	}
 }
 func loadConfig(path string) (*config.Config, error) {
-	configFile, err := os.Open(path)
+	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
 	if err != nil {
-		return nil, fmt.Errorf("failed to open config file %q: %w", path, err)
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
 	}
 
-	configFileBytes, err := io.ReadAll(configFile)
-	defer func() { _ = configFile.Close() }()
-
+	conf, err := config.LoadConfig(path, vcapConfiguration)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read data from config file %q: %w", path, err)
-	}
-
-	conf, err := config.LoadConfig(configFileBytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse config file %q: %w", path, err)
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
+		os.Exit(1)
 	}
 
 	err = conf.Validate()
