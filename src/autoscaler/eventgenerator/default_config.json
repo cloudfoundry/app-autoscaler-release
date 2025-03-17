@@ -1,0 +1,69 @@
+{
+  "eventgenerator-config": {
+    "cf_server": {
+      "port": 8080,
+      "xfcc": {
+        "valid_org_guid": null,
+        "valid_space_guid": null
+      }
+    },
+    "http_client_timeout": "60s",
+    "health": {
+      "basic_auth": {
+        "username": "eventgenerator",
+        "password": "HsX9oCzmJS0pxsPEvWbO3w16oSiFad"
+      }
+    },
+    "db": {
+      "policy_db": {
+        "url": "postgres://postgres:9EdfQkLk1eM8707QOOf8JCOZC49ja5@autoscaler-mta-3637.autoscalerpostgres.service.cf.internal:5432/autoscaler?application_name=eventgenerator&sslmode=verify-full&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/policy_db/ca.crt&sslcert=/var/vcap/jobs/eventgenerator/config/certs/policy_db/crt&sslkey=/var/vcap/jobs/eventgenerator/config/certs/policy_db/key",
+        "max_open_connections": 100,
+        "max_idle_connections": 10,
+        "connection_max_lifetime": "60s"
+      },
+      "app_metrics_db": {
+        "url": "postgres://postgres:9EdfQkLk1eM8707QOOf8JCOZC49ja5@autoscaler-mta-3637.autoscalerpostgres.service.cf.internal:5432/autoscaler?application_name=eventgenerator&sslmode=verify-full&sslrootcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/ca.crt&sslcert=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/crt&sslkey=/var/vcap/jobs/eventgenerator/config/certs/appmetrics_db/key",
+        "max_open_connections": 100,
+        "max_idle_connections": 10,
+        "connection_max_lifetime": "60s"
+      }
+    },
+    "aggregator": {
+      "aggregator_execute_interval": "40s",
+      "policy_poller_interval": "60s",
+      "metric_poller_count": 20,
+      "app_monitor_channel_size": 200,
+      "save_interval": "5s",
+      "app_metric_channel_size": 1000,
+      "metric_cache_size_per_app": 300
+    },
+    "evaluator": {
+      "evaluation_manager_execute_interval": "60s",
+      "evaluator_count": 20,
+      "trigger_array_channel_size": 200
+    },
+    "scalingEngine": {
+      "scaling_engine_url": "https://autoscaler-mta-3637.scalingengine.service.cf.internal:6104",
+      "tls": {
+        "key_file": "/var/vcap/jobs/eventgenerator/config/certs/scalingengine/client.key",
+        "cert_file": "/var/vcap/jobs/eventgenerator/config/certs/scalingengine/client.crt",
+        "ca_file": "/var/vcap/jobs/eventgenerator/config/certs/scalingengine/ca.crt"
+      }
+    },
+    "metricCollector": {
+      "metric_collector_url": "logcache:8080",
+      "tls": {
+        "key_file": "/var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.key",
+        "cert_file": "/var/vcap/jobs/eventgenerator/config/certs/metricscollector/client.crt",
+        "ca_file": "/var/vcap/jobs/eventgenerator/config/certs/metricscollector/ca.crt"
+      }
+    },
+    "defaultStatWindowSecs": 120,
+    "defaultBreachDurationSecs": 120,
+    "circuitBreaker": {
+      "back_off_initial_interval": "5m",
+      "back_off_max_interval": "120m",
+      "consecutive_failure_count": 3
+    }
+  }
+}

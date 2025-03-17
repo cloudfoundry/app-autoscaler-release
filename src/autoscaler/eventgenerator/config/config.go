@@ -51,9 +51,9 @@ type ServerConfig struct {
 	NodeIndex            int      `yaml:"node_index"`
 }
 
-type DBConfig struct {
-	PolicyDB    db.DatabaseConfig `yaml:"policy_db"`
-	AppMetricDB db.DatabaseConfig `yaml:"app_metrics_db"`
+type DbConfig struct {
+	PolicyDb    *db.DatabaseConfig `yaml:"policy_db"`
+	AppMetricDb *db.DatabaseConfig `yaml:"app_metrics_db"`
 }
 
 type AggregatorConfig struct {
@@ -94,7 +94,7 @@ type Config struct {
 	Server                    ServerConfig          `yaml:"server"`
 	CFServer                  helpers.ServerConfig  `yaml:"cf_server"`
 	Health                    helpers.HealthConfig  `yaml:"health"`
-	DB                        DBConfig              `yaml:"db"`
+	Db                        DbConfig              `yaml:"db"`
 	Aggregator                AggregatorConfig      `yaml:"aggregator"`
 	Evaluator                 EvaluatorConfig       `yaml:"evaluator"`
 	ScalingEngine             ScalingEngineConfig   `yaml:"scalingEngine"`
@@ -143,12 +143,14 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	//		conf.Db = make(map[string]db.DatabaseConfig)
 	//	}
 	//
-	//	if err := vcapReader.ConfigureDbInMap(db.PolicyDb, &conf.Db); err != nil {
+	//
+	//	if err := vcapReader.ConfigureDb(db.PolicyDb, conf.Db.PolicyDb); err != nil {
+	//
 	//		return err
 	//	}
 	//
 	//
-	//	if err := vcapReader.ConfigureDbInMap(db.AppMetricsDb, &conf.Db); err != nil {
+	//	if err := vcapReader.ConfigureDbInMap(db.AppMetricsDb, conf.DbConfig.PolicyDb); err != nil {
 	//		return err
 	//	}
 	//
@@ -224,7 +226,7 @@ func setDefaults(conf *Config) {
 }
 
 func (c *Config) Validate() error {
-	if err := c.validateDB(); err != nil {
+	if err := c.validateDb(); err != nil {
 		return err
 	}
 	if err := c.validateScalingEngine(); err != nil {
@@ -251,11 +253,11 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-func (c *Config) validateDB() error {
-	if c.DB.PolicyDB.URL == "" {
+func (c *Config) validateDb() error {
+	if c.Db.PolicyDb.URL == "" {
 		return fmt.Errorf("Configuration error: db.policy_db.url is empty")
 	}
-	if c.DB.AppMetricDB.URL == "" {
+	if c.Db.AppMetricDb.URL == "" {
 		return fmt.Errorf("Configuration error: db.app_metrics_db.url is empty")
 	}
 	return nil
