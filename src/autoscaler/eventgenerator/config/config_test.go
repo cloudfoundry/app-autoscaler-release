@@ -63,14 +63,14 @@ var _ = Describe("Config", func() {
 
 			When("handling available databases", func() {
 				It("calls configureDb with for policyDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(0)
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
 					Expect(db.PolicyDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(&conf.Db))
+					Expect(receivedDbConfig).To(Equal(conf.Db.PolicyDb))
 				})
 				It("calls configureDb with for appMetricsDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(1)
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
 					Expect(db.AppMetricsDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(&conf.Db))
+					Expect(receivedDbConfig).To(Equal(conf.Db.AppMetricDb))
 				})
 			})
 		})
@@ -169,14 +169,14 @@ circuitBreaker:
 								Port: 9999,
 							},
 						},
-						DB: DBConfig{
-							PolicyDB: db.DatabaseConfig{
+						Db: DbConfig{
+							PolicyDb: &db.DatabaseConfig{
 								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
 								MaxOpenConnections:    10,
 								MaxIdleConnections:    5,
 								ConnectionMaxLifetime: 60 * time.Second,
 							},
-							AppMetricDB: db.DatabaseConfig{
+							AppMetricDb: &db.DatabaseConfig{
 								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
 								MaxOpenConnections:    10,
 								MaxIdleConnections:    5,
@@ -304,14 +304,14 @@ defaultBreachDurationSecs: 600
 								Port: 8081,
 							},
 						},
-						DB: DBConfig{
-							PolicyDB: db.DatabaseConfig{
+						Db: DbConfig{
+							PolicyDb: &db.DatabaseConfig{
 								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
 								MaxOpenConnections:    0,
 								MaxIdleConnections:    0,
 								ConnectionMaxLifetime: 0 * time.Second,
 							},
-							AppMetricDB: db.DatabaseConfig{
+							AppMetricDb: &db.DatabaseConfig{
 								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
 								MaxOpenConnections:    0,
 								MaxIdleConnections:    0,
@@ -1147,14 +1147,14 @@ health:
 						NodeAddrs: []string{"address1", "address2"},
 						NodeIndex: 0,
 					},
-					DB: DBConfig{
-						PolicyDB: db.DatabaseConfig{
+					Db: DbConfig{
+						PolicyDb: &db.DatabaseConfig{
 							URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
 							MaxOpenConnections:    10,
 							MaxIdleConnections:    5,
 							ConnectionMaxLifetime: 60 * time.Second,
 						},
-						AppMetricDB: db.DatabaseConfig{
+						AppMetricDb: &db.DatabaseConfig{
 							URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
 							MaxOpenConnections:    10,
 							MaxIdleConnections:    5,
@@ -1192,7 +1192,7 @@ health:
 			Context("when policy db url is not set", func() {
 
 				BeforeEach(func() {
-					conf.DB.PolicyDB.URL = ""
+					conf.Db.PolicyDb.URL = ""
 				})
 
 				It("should error", func() {
@@ -1203,7 +1203,7 @@ health:
 			Context("when appmetric db url is not set", func() {
 
 				BeforeEach(func() {
-					conf.DB.AppMetricDB.URL = ""
+					conf.Db.AppMetricDb.URL = ""
 				})
 
 				It("should error", func() {

@@ -24,6 +24,7 @@ type VCAPConfigurationReader interface {
 	GetPort() int
 	IsRunningOnCF() bool
 
+	ConfigureDb(dbName string, database *db.DatabaseConfig) error
 	ConfigureDbInMap(dbName string, confDb *map[string]db.DatabaseConfig) error
 	ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error
 }
@@ -240,17 +241,23 @@ func (vc *VCAPConfiguration) ConfigureStoredProcedureDb(dbName string, confDb *m
 	return nil
 }
 
+func (vc *VCAPConfiguration) ConfigureDb(dbName string, database *db.DatabaseConfig) error {
+	dbURL, err := vc.MaterializeDBFromService(dbName)
+	database.URL = dbURL
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (vc *VCAPConfiguration) ConfigureDbInMap(dbName string, confDb *map[string]db.DatabaseConfig) error {
 	currentDb, ok := (*confDb)[dbName]
 	if !ok {
 		(*confDb)[dbName] = db.DatabaseConfig{}
 	}
 
-	dbURL, err := vc.MaterializeDBFromService(dbName)
-	currentDb.URL = dbURL
-	if err != nil {
-		return err
-	}
+	vc.ConfigureDb(dbName, &currentDb)
 	(*confDb)[dbName] = currentDb
 
 	return nil

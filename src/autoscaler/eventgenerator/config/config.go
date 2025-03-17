@@ -139,6 +139,14 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
+	if err := vcapReader.ConfigureDb(db.PolicyDb, conf.Db.PolicyDb); err != nil {
+		return err
+	}
+
+	if err := vcapReader.ConfigureDb(db.AppMetricsDb, conf.Db.AppMetricDb); err != nil {
+		return err
+	}
+
 	return nil
 }
 
