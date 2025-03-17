@@ -205,6 +205,12 @@ func defaultConfig() Config {
 }
 
 func setDefaults(conf *Config) {
+	if conf.Db.PolicyDb == nil {
+		conf.Db.PolicyDb = &db.DatabaseConfig{}
+	}
+	if conf.Db.AppMetricDb == nil {
+		conf.Db.AppMetricDb = &db.DatabaseConfig{}
+	}
 	conf.Logging.Level = strings.ToLower(conf.Logging.Level)
 	if conf.CircuitBreaker.ConsecutiveFailureCount == 0 {
 		conf.CircuitBreaker.ConsecutiveFailureCount = DefaultBreakerConsecutiveFailureCount
