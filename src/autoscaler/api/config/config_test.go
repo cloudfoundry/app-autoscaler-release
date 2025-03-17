@@ -115,13 +115,13 @@ var _ = Describe("Config", func() {
 
 			When("handling available databases", func() {
 				It("calls configureDb with for policyDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(0)
 					Expect(db.PolicyDb).To(Equal(receivedDbName))
 					Expect(receivedDbConfig).To(Equal(&conf.Db))
 				})
 
 				It("calls configureDb with bindingDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(1)
 					Expect(db.BindingDb).To(Equal(receivedDbName))
 					Expect(receivedDbConfig).To(Equal(&conf.Db))
 				})
