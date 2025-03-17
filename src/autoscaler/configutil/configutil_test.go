@@ -133,7 +133,7 @@ var _ = Describe("Configutil", func() {
 
 		})
 
-		Describe("ConfigureDb", func() {
+		Describe("ConfigureDbInMap", func() {
 			var actualDbs *map[string]db.DatabaseConfig
 			var expectedDbs *map[string]db.DatabaseConfig
 			var dbName string
@@ -165,7 +165,7 @@ var _ = Describe("Configutil", func() {
 				})
 
 				It("loads the db config from VCAP_SERVICES successfully", func() {
-					err := vcapConfiguration.ConfigureDb(dbName, actualDbs)
+					err := vcapConfiguration.ConfigureDbInMap(dbName, actualDbs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(*actualDbs).To(Equal(*expectedDbs))
 

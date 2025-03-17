@@ -60,6 +60,19 @@ var _ = Describe("Config", func() {
 					Expect(errors.Is(err, config.ErrEventgeneratorConfigNotFound)).To(BeTrue())
 				})
 			})
+
+			When("handling available databases", func() {
+				It("calls configureDb with for policyDB", func() {
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(0)
+					Expect(db.PolicyDb).To(Equal(receivedDbName))
+					Expect(receivedDbConfig).To(Equal(&conf.Db))
+				})
+				It("calls configureDb with for appMetricsDB", func() {
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(1)
+					Expect(db.AppMetricsDb).To(Equal(receivedDbName))
+					Expect(receivedDbConfig).To(Equal(&conf.Db))
+				})
+			})
 		})
 
 		When("config is read from file", func() {

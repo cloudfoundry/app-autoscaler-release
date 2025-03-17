@@ -143,12 +143,12 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	//		conf.Db = make(map[string]db.DatabaseConfig)
 	//	}
 	//
-	//	if err := vcapReader.ConfigureDb(db.PolicyDb, &conf.Db); err != nil {
+	//	if err := vcapReader.ConfigureDbInMap(db.PolicyDb, &conf.Db); err != nil {
 	//		return err
 	//	}
 	//
 	//
-	//	if err := vcapReader.ConfigureDb(db.AppMetricsDb, &conf.Db); err != nil {
+	//	if err := vcapReader.ConfigureDbInMap(db.AppMetricsDb, &conf.Db); err != nil {
 	//		return err
 	//	}
 	//
