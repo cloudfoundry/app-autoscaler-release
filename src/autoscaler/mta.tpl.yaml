@@ -35,10 +35,10 @@ modules:
     type: go
     path: .
     properties:
-      dt_release_build_version: ${mta-version}
-      go_install_package_spec: code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api
-      gotoolchain: local
-      goversion: go1.go_minor_version
+      DT_RELEASE_BUILD_VERSION: ${mta-version}
+      GO_INSTALL_PACKAGE_SPEC: code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/cmd/api
+      GOTOOLCHAIN: local
+      GOVERSION: go1.GO_MINOR_VERSION
     requires:
     - name: publicapiserver-config
     - name: broker-catalog
