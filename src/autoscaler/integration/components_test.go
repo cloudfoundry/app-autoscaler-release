@@ -392,11 +392,11 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 			EvaluatorCount:            1,
 			TriggerArrayChannelSize:   1,
 		},
-		DB: egConfig.DBConfig{
-			PolicyDB: db.DatabaseConfig{
+		Db: egConfig.DbConfig{
+			PolicyDb: &db.DatabaseConfig{
 				URL: dbUri,
 			},
-			AppMetricDB: db.DatabaseConfig{
+			AppMetricDb: &db.DatabaseConfig{
 				URL: dbUri,
 			},
 		},

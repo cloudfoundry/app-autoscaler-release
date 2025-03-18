@@ -112,11 +112,11 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 		return nil, err
 	}
 
+	setDefaults(&conf)
+
 	if err := loadVcapConfig(&conf, vcapReader); err != nil {
 		return nil, err
 	}
-
-	setDefaults(&conf)
 
 	return &conf, nil
 }
