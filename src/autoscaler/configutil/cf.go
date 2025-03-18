@@ -256,8 +256,10 @@ func (vc *VCAPConfiguration) ConfigureDbInMap(dbName string, confDb *map[string]
 	if !ok {
 		(*confDb)[dbName] = db.DatabaseConfig{}
 	}
+	if err := vc.ConfigureDb(dbName, &currentDb); err != nil {
+		return err
+	}
 
-	vc.ConfigureDb(dbName, &currentDb)
 	(*confDb)[dbName] = currentDb
 
 	return nil

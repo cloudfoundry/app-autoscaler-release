@@ -8,7 +8,6 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/metricsforwarder/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -57,7 +56,7 @@ var _ = Describe("Config", func() {
 				})
 
 				It("should error with config service not found", func() {
-					Expect(errors.Is(err, config.ErrMetricsforwarderConfigNotFound)).To(BeTrue())
+					Expect(errors.Is(err, ErrMetricsforwarderConfigNotFound)).To(BeTrue())
 				})
 			})
 
