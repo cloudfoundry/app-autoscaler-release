@@ -60,6 +60,15 @@ var _ = Describe("Config", func() {
 				})
 			})
 
+			XWhen("VCAP_SERVICES has logcache", func() {
+
+				BeforeEach(func() {
+				})
+
+				It("loads the service in configs metrics_collector successfully", func() {
+				})
+			})
+
 			When("handling available databases", func() {
 				It("calls configureDb with for policyDB", func() {
 					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)

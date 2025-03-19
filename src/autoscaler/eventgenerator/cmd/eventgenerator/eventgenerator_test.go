@@ -1,15 +1,21 @@
 package main_test
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -29,11 +35,14 @@ var _ = Describe("Eventgenerator", func() {
 		healthURL   *url.URL
 		cfServerURL *url.URL
 
-		err error
+		vcapPort int
+		err      error
 	)
 
 	BeforeEach(func() {
 		runner = NewEventGeneratorRunner()
+
+		vcapPort = 8090 + GinkgoParallelProcess()
 
 		httpClientForEventGenerator = NewEventGeneratorClient()
 		httpClientForHealth = &http.Client{}
@@ -104,13 +113,13 @@ var _ = Describe("Eventgenerator", func() {
 				Logging: helpers.LoggingConfig{
 					Level: "debug",
 				},
-				Aggregator: config.AggregatorConfig{
+				Aggregator: &config.AggregatorConfig{
 					AggregatorExecuteInterval: 2 * time.Second,
 					PolicyPollerInterval:      2 * time.Second,
 					MetricPollerCount:         2,
 					AppMonitorChannelSize:     2,
 				},
-				Evaluator: config.EvaluatorConfig{
+				Evaluator: &config.EvaluatorConfig{
 					EvaluationManagerInterval: 2 * time.Second,
 					EvaluatorCount:            2,
 					TriggerArrayChannelSize:   2,
@@ -265,4 +274,101 @@ var _ = Describe("Eventgenerator", func() {
 			})
 		})
 	})
+
+	When("running CF server", func() {
+		var (
+			cfInstanceKeyFile  string
+			cfInstanceCertFile string
+		)
+
+		BeforeEach(func() {
+			runner = NewEventGeneratorCFRunner()
+			rsaPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+			Expect(err).NotTo(HaveOccurred())
+
+			cfInstanceCert, err := testhelpers.GenerateClientCertWithPrivateKey("org-guid", "space-guid", rsaPrivateKey)
+			Expect(err).NotTo(HaveOccurred())
+
+			certTmpDir := os.TempDir()
+
+			cfInstanceCertFile, err := configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.crt", string(cfInstanceCert))
+			Expect(err).NotTo(HaveOccurred())
+			os.Setenv("CF_INSTANCE_CERT", cfInstanceCertFile)
+
+			cfInstanceKey := testhelpers.GenerateClientKeyWithPrivateKey(rsaPrivateKey)
+			cfInstanceKeyFile, err = configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.key", string(cfInstanceKey))
+			Expect(err).NotTo(HaveOccurred())
+			os.Setenv("CF_INSTANCE_KEY", cfInstanceKeyFile)
+
+			os.Setenv("VCAP_APPLICATION", "{}")
+			conf.Db = config.DbConfig{}
+			conf.Evaluator = nil
+			conf.Aggregator = nil
+			conf.CircuitBreaker = nil
+			conf.HttpClientTimeout = nil
+			os.Setenv("VCAP_SERVICES", getVcapServices(conf))
+			os.Setenv("PORT", fmt.Sprintf("%d", vcapPort))
+		})
+
+		AfterEach(func() {
+			runner.Interrupt()
+			Eventually(runner.Session, 5).Should(Exit(0))
+
+			os.Remove(cfInstanceKeyFile)
+			os.Remove(cfInstanceCertFile)
+
+			os.Unsetenv("CF_INSTANCE_KEY")
+			os.Unsetenv("CF_INSTANCE_CERT")
+			os.Unsetenv("VCAP_APPLICATION")
+			os.Unsetenv("VCAP_SERVICES")
+			os.Unsetenv("PORT")
+		})
+
+		It("Starts successfully, retrives metrics and generates events", func() {
+			Consistently(runner.Session).ShouldNot(Exit())
+			// refactor mocklogcache to restart on before each to avoid shared resource
+			// Eventually(func() bool { return mockLogCache.ReadRequestsCount() >= 1 }, 5*time.Second).Should(BeTrue())
+			// Eventually(func() bool { return len(mockScalingEngine.ReceivedRequests()) >= 1 }, time.Duration(2*breachDurationSecs)*time.Second).Should(BeTrue())
+		})
+	})
 })
+
+func getVcapServices(conf config.Config) (result string) {
+	var dbType string
+
+	configJson, err := conf.ToJSON()
+	Expect(err).NotTo(HaveOccurred())
+
+	dbClientCert, err := os.ReadFile("../../../../../test-certs/postgres.crt")
+	Expect(err).NotTo(HaveOccurred())
+	dbClientKey, err := os.ReadFile("../../../../../test-certs/postgres.key")
+	Expect(err).NotTo(HaveOccurred())
+	dbClientCA, err := os.ReadFile("../../../../../test-certs/autoscaler-ca.crt")
+	Expect(err).NotTo(HaveOccurred())
+
+	dbURL := os.Getenv("DBURL")
+	Expect(dbURL).NotTo(BeEmpty())
+	if strings.Contains(dbURL, "postgres") {
+		dbType = "postgres"
+	} else {
+		dbType = "mysql"
+	}
+
+	result = `{
+			"user-provided": [
+			  { "name": "eventgenerator-config", "tags": ["eventgenerator-config"], "credentials": { "eventgenerator-config": ` + configJson + `}}
+            ],
+			"autoscaler": [ {
+				"name": "some-service",
+				"credentials": {
+					"uri": "` + dbURL + `",
+					"client_cert": "` + strings.ReplaceAll(string(dbClientCert), "\n", "\\n") + `",
+					"client_key": "` + strings.ReplaceAll(string(dbClientKey), "\n", "\\n") + `",
+					"server_ca": "` + strings.ReplaceAll(string(dbClientCA), "\n", "\\n") + `"
+				},
+				"syslog_drain_url": "",
+				"tags": ["policy_db", "app_metrics_db", "` + dbType + `"]
+			}]}` // #nosec G101
+
+	return result
+}

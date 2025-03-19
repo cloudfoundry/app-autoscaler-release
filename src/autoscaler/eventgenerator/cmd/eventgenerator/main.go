@@ -30,19 +30,28 @@ func main() {
 	var path string
 	flag.StringVar(&path, "c", "", "config file")
 	flag.Parse()
-	if path == "" {
-		_, _ = fmt.Fprintln(os.Stdout, "missing config file\nUsage:use '-c' option to specify the config file path")
+
+	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
+	}
+
+	conf, err := config.LoadConfig(path, vcapConfiguration)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
 		os.Exit(1)
 	}
-	conf, err := loadConfig(path)
+
+	err = conf.Validate()
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "%s\n", err.Error())
+		_, _ = fmt.Fprintf(os.Stdout, "failed to validate configuration : %s\n", err.Error())
 		os.Exit(1)
 	}
 
 	helpers.SetupOpenTelemetry()
 
 	logger := helpers.InitLoggerFromConfig(&conf.Logging, "eventgenerator")
+
 	egClock := clock.NewClock()
 
 	appMetricDB, err := sqldb.NewAppMetricSQLDB(*conf.Db.AppMetricDb, logger.Session("appMetric-db"))
@@ -67,7 +76,7 @@ func main() {
 
 	triggersChan := make(chan []*models.Trigger, conf.Evaluator.TriggerArrayChannelSize)
 
-	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, appManager.GetPolicies, conf.CircuitBreaker)
+	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, appManager.GetPolicies, *conf.CircuitBreaker)
 	if err != nil {
 		logger.Error("failed to create Evaluation Manager", err)
 		os.Exit(1)
@@ -163,24 +172,6 @@ func runFunc(appManager *aggregator.AppManager, evaluators []*generator.Evaluato
 
 		return nil
 	}
-}
-func loadConfig(path string) (*config.Config, error) {
-	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
-	}
-
-	conf, err := config.LoadConfig(path, vcapConfiguration)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
-		os.Exit(1)
-	}
-
-	err = conf.Validate()
-	if err != nil {
-		return nil, fmt.Errorf("failed to validate configuration: %w", err)
-	}
-	return conf, nil
 }
 
 func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan chan []*models.Trigger, queryMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) ([]*generator.Evaluator, error) {
