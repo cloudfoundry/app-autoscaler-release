@@ -5,6 +5,9 @@ provider: Cloud Foundry Foundation
 copyright: Apache License 2.0
 version: MTA_VERSION
 
+parameters:
+  enable-parallel-deployments: true
+
 build-parameters:
   before-all:
     - builder: custom
