@@ -149,6 +149,19 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
+	if err := configureMetricsCollectorTLS(conf, vcapReader); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func configureMetricsCollectorTLS(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	tls, err := vcapReader.MaterializeTLSConfigFromService("logcache-client")
+	if err != nil {
+		return err
+	}
+	conf.MetricCollector.TLSClientCerts = tls
 	return nil
 }
 

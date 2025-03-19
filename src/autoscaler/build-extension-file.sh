@@ -31,6 +31,7 @@ export CPU_LOWER_THRESHOLD="${CPU_LOWER_THRESHOLD:-"100"}"
 cat << EOF > /tmp/extension-file-secrets.yml.tpl
 postgres_ip: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_ip))
 metricsforwarder_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_metricsforwarder_health_password))
+eventgenerator_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_eventgenerator_health_password))
 policy_db_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/database_password))
 policy_db_server_ca: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_server.ca))
 policy_db_client_cert: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_server.certificate))
@@ -46,6 +47,8 @@ credhub interpolate -f "/tmp/extension-file-secrets.yml.tpl" > /tmp/mtar-secrets
 
 export METRICSFORWARDER_APPNAME="${METRICSFORWARDER_APPNAME:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
 export METRICSFORWARDER_HEALTH_PASSWORD="$(yq ".metricsforwarder_health_password" /tmp/mtar-secrets.yml)"
+
+export EVENTGENERATOR_HEALTH_PASSWORD="$(yq ".eventgenerator_health_password" /tmp/mtar-secrets.yml)"
 
 export POSTGRES_IP="$(yq ".postgres_ip" /tmp/mtar-secrets.yml)"
 
@@ -108,6 +111,16 @@ resources:
           basic_auth:
             password: "${METRICSFORWARDER_HEALTH_PASSWORD}"
 
+- name: eventgenerator-config
+  parameters:
+    config:
+      eventgenerator-config:
+        health:
+          basic_auth:
+            password: "${EVENTGENERATOR_HEALTH_PASSWORD}"
+			scalingEngine:
+        scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
+
 - name: publicapiserver-config
   parameters:
     config:
@@ -143,6 +156,12 @@ resources:
       client_key: "${POLICY_DB_CLIENT_KEY//$'\n'/\\n}"
       server_ca: "${POLICY_DB_SERVER_CA//$'\n'/\\n}"
 - name: syslog-client
+  parameters:
+    config:
+      client_cert: "${SYSLOG_CLIENT_CERT//$'\n'/\\n}"
+      client_key: "${SYSLOG_CLIENT_KEY//$'\n'/\\n}"
+      server_ca: "${SYSLOG_CLIENT_CA//$'\n'/\\n}"
+- name: logcache-client
   parameters:
     config:
       client_cert: "${SYSLOG_CLIENT_CERT//$'\n'/\\n}"

@@ -60,12 +60,22 @@ var _ = Describe("Config", func() {
 				})
 			})
 
-			XWhen("VCAP_SERVICES has logcache", func() {
+			When("VCAP_SERVICES has credentials for logcache", func() {
+				var expectedTLSConfig models.TLSCerts
 
 				BeforeEach(func() {
+					expectedTLSConfig = models.TLSCerts{
+						CertFile:   "/tmp/client_cert.sslcert",
+						KeyFile:    "/tmp/client_key.sslkey",
+						CACertFile: "/tmp/server_ca.sslrootcert",
+					}
+
+					mockVCAPConfigurationReader.MaterializeTLSConfigFromServiceReturns(expectedTLSConfig, nil)
 				})
 
-				It("loads the service in configs metrics_collector successfully", func() {
+				It("loads the syslog config from VCAP_SERVICES", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.MetricCollector.TLSClientCerts).To(Equal(expectedTLSConfig))
 				})
 			})
 
@@ -153,10 +163,11 @@ circuitBreaker:
 				})
 
 				It("returns the config", func() {
+					expectedTime := 10 * time.Second
 					Expect(err).NotTo(HaveOccurred())
 					Expect(conf).To(Equal(&Config{
 						Logging:           helpers.LoggingConfig{Level: "info"},
-						HttpClientTimeout: 10 * time.Second,
+						HttpClientTimeout: &expectedTime,
 						Server: ServerConfig{
 							ServerConfig: helpers.ServerConfig{
 								Port: 9080,
@@ -191,7 +202,7 @@ circuitBreaker:
 								ConnectionMaxLifetime: 60 * time.Second,
 							},
 						},
-						Aggregator: AggregatorConfig{
+						Aggregator: &AggregatorConfig{
 							AggregatorExecuteInterval: 30 * time.Second,
 							PolicyPollerInterval:      30 * time.Second,
 							SaveInterval:              30 * time.Second,
@@ -200,7 +211,7 @@ circuitBreaker:
 							AppMetricChannelSize:      100,
 							MetricCacheSizePerApp:     500,
 						},
-						Evaluator: EvaluatorConfig{
+						Evaluator: &EvaluatorConfig{
 							EvaluationManagerInterval: 30 * time.Second,
 							EvaluatorCount:            10,
 							TriggerArrayChannelSize:   100},
@@ -222,7 +233,7 @@ circuitBreaker:
 						},
 						DefaultBreachDurationSecs: 600,
 						DefaultStatWindowSecs:     300,
-						CircuitBreaker: CircuitBreakerConfig{
+						CircuitBreaker: &CircuitBreakerConfig{
 							BackOffInitialInterval:  10 * time.Second,
 							BackOffMaxInterval:      1 * time.Hour,
 							ConsecutiveFailureCount: 5,
@@ -295,9 +306,10 @@ defaultBreachDurationSecs: 600
 					Expect(conf.Server.Port).To(Equal(8080))
 					Expect(conf.Logging.Level).To(Equal("info"))
 
+					expectedTimeout := 10 * time.Second
 					Expect(*conf).To(Equal(Config{
 						Logging:           helpers.LoggingConfig{Level: "info"},
-						HttpClientTimeout: 5 * time.Second,
+						HttpClientTimeout: &expectedTimeout,
 						Server: ServerConfig{
 							ServerConfig: helpers.ServerConfig{
 								Port: 8080,
@@ -326,7 +338,7 @@ defaultBreachDurationSecs: 600
 								ConnectionMaxLifetime: 0 * time.Second,
 							},
 						},
-						Aggregator: AggregatorConfig{
+						Aggregator: &AggregatorConfig{
 							AggregatorExecuteInterval: DefaultAggregatorExecuteInterval,
 							PolicyPollerInterval:      DefaultPolicyPollerInterval,
 							MetricPollerCount:         DefaultMetricPollerCount,
@@ -335,7 +347,7 @@ defaultBreachDurationSecs: 600
 							SaveInterval:              DefaultSaveInterval,
 							MetricCacheSizePerApp:     DefaultMetricCacheSizePerApp,
 						},
-						Evaluator: EvaluatorConfig{
+						Evaluator: &EvaluatorConfig{
 							EvaluationManagerInterval: DefaultEvaluationExecuteInterval,
 							EvaluatorCount:            DefaultEvaluatorCount,
 							TriggerArrayChannelSize:   DefaultTriggerArrayChannelSize,
@@ -348,7 +360,7 @@ defaultBreachDurationSecs: 600
 						},
 						DefaultBreachDurationSecs: 600,
 						DefaultStatWindowSecs:     300,
-						CircuitBreaker: CircuitBreakerConfig{
+						CircuitBreaker: &CircuitBreakerConfig{
 							BackOffInitialInterval:  DefaultBackOffInitialInterval,
 							BackOffMaxInterval:      DefaultBackOffMaxInterval,
 							ConsecutiveFailureCount: DefaultBreakerConsecutiveFailureCount,
@@ -1149,6 +1161,7 @@ health:
 
 		Describe("Validate", func() {
 			BeforeEach(func() {
+				expectedTimeout := 10 * time.Second
 				conf = &Config{
 					Logging: helpers.LoggingConfig{Level: "info"},
 					Server: ServerConfig{
@@ -1169,7 +1182,7 @@ health:
 							ConnectionMaxLifetime: 60 * time.Second,
 						},
 					},
-					Aggregator: AggregatorConfig{
+					Aggregator: &AggregatorConfig{
 						AggregatorExecuteInterval: 30 * time.Second,
 						PolicyPollerInterval:      30 * time.Second,
 						SaveInterval:              30 * time.Second,
@@ -1178,7 +1191,7 @@ health:
 						AppMetricChannelSize:      100,
 						MetricCacheSizePerApp:     500,
 					},
-					Evaluator: EvaluatorConfig{
+					Evaluator: &EvaluatorConfig{
 						EvaluationManagerInterval: 30 * time.Second,
 						EvaluatorCount:            10,
 						TriggerArrayChannelSize:   100},
@@ -1189,7 +1202,7 @@ health:
 					},
 					DefaultBreachDurationSecs: 600,
 					DefaultStatWindowSecs:     300,
-					HttpClientTimeout:         10 * time.Second,
+					HttpClientTimeout:         &expectedTimeout,
 				}
 			})
 
@@ -1389,7 +1402,8 @@ health:
 
 			Context("when HttpClientTimeout is <= 0", func() {
 				BeforeEach(func() {
-					conf.HttpClientTimeout = 0
+					expectedTimeout := 0 * time.Second
+					conf.HttpClientTimeout = &expectedTimeout
 				})
 				It("should error", func() {
 					Expect(err).To(MatchError("Configuration error: http_client_timeout is less-equal than 0"))

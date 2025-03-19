@@ -61,7 +61,7 @@ modules:
       GOVERSION: go1.GO_MINOR_VERSION
     requires:
     - name: eventgenerator-config
-    - name: broker-catalog
+    - name: syslog-client
     - name: database
     - name: app-autoscaler-application-logs
     parameters:
@@ -128,6 +128,11 @@ resources:
   parameters:
     service-tags:
     - syslog-client
+- name: logcache-client
+  type: org.cloudfoundry.user-provided-service
+  parameters:
+    service-tags:
+    - logcache-client
 - name: app-autoscaler-application-logs
   active: false
   type: org.cloudfoundry.managed-service
