@@ -111,7 +111,7 @@ server:
     key_file: /var/vcap/jobs/autoscaler/config/certs/server.key
     cert_file: /var/vcap/jobs/autoscaler/config/certs/server.crt
     ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
-  node_addrs: [address1, address2]
+  node_count: 2
   node_index: 1
 cf_server:
   port: 9082
@@ -177,7 +177,7 @@ circuitBreaker:
 									CACertFile: "/var/vcap/jobs/autoscaler/config/certs/ca.crt",
 								},
 							},
-							NodeAddrs: []string{"address1", "address2"},
+							NodeCount: 2,
 							NodeIndex: 1,
 						},
 						CFServer: helpers.ServerConfig{
@@ -1165,7 +1165,7 @@ health:
 				conf = &Config{
 					Logging: helpers.LoggingConfig{Level: "info"},
 					Server: ServerConfig{
-						NodeAddrs: []string{"address1", "address2"},
+						NodeCount: 2,
 						NodeIndex: 0,
 					},
 					Db: DbConfig{
@@ -1391,7 +1391,7 @@ health:
 				Context("when node index is >= number of nodes", func() {
 					BeforeEach(func() {
 						conf.Server.NodeIndex = 2
-						conf.Server.NodeAddrs = []string{"address1", "address2"}
+						conf.Server.NodeCount = 2
 					})
 					It("should error", func() {
 						Expect(err).To(MatchError("Configuration error: server.node_index out of range"))

@@ -49,8 +49,8 @@ var defaultCFServerConfig = helpers.ServerConfig{
 
 type ServerConfig struct {
 	helpers.ServerConfig `yaml:",inline" json:",inline"`
-	NodeAddrs            []string `yaml:"node_addrs" json:"node_addrs"`
-	NodeIndex            int      `yaml:"node_index" json:"node_index"`
+	NodeCount            int `yaml:"node_count" json:"node_count"`
+	NodeIndex            int `yaml:"node_index" json:"node_index"`
 }
 
 type DbConfig struct {
@@ -345,7 +345,7 @@ func (c *Config) validateDefaults() error {
 }
 
 func (c *Config) validateServer() error {
-	if c.Server.NodeIndex < 0 || c.Server.NodeIndex >= len(c.Server.NodeAddrs) {
+	if c.Server.NodeIndex < 0 || c.Server.NodeIndex >= c.Server.NodeCount {
 		return fmt.Errorf("Configuration error: server.node_index out of range")
 	}
 	return nil

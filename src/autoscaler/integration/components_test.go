@@ -375,7 +375,7 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 					CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
 				},
 			},
-			NodeAddrs: []string{"localhost"},
+			NodeCount: 1,
 			NodeIndex: 0,
 		},
 		Aggregator: egConfig.AggregatorConfig{

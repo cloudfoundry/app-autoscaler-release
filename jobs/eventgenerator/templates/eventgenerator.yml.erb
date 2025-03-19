@@ -50,9 +50,6 @@ end
 
   sorted_instances=link("eventgenerator").instances.sort_by {|i|i.address}
   nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
-  addrs=sorted_instances.map{|i| "'#{i.address}:#{p('autoscaler.eventgenerator.server.port')}'"}
-  nodeAddrs="[" + addrs.join(",") +"]"
-
 %>
 
 
@@ -62,7 +59,7 @@ server:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.crt
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/ca.crt
-  node_addrs: <%= nodeAddrs %>
+  node_count: <%= sorted_instances.length %>
   node_index: <%= nodeIndex %>
 
 cf_server:

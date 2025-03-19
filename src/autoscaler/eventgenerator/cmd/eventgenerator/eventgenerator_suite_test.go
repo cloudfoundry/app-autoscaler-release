@@ -242,7 +242,7 @@ func initConfig() {
 	timeout := 10 * time.Second
 	conf = config.Config{
 		Server: config.ServerConfig{
-			NodeAddrs: []string{"localhost"},
+			NodeCount: 1,
 			NodeIndex: 0,
 		},
 		Aggregator: &config.AggregatorConfig{
