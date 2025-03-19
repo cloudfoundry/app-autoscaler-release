@@ -49,8 +49,8 @@ var defaultCFServerConfig = helpers.ServerConfig{
 
 type ServerConfig struct {
 	helpers.ServerConfig `yaml:",inline" json:",inline"`
-	NodeCount            int `yaml:"node_count" json:"node_count"`
-	NodeIndex            int `yaml:"node_index" json:"node_index"`
+	NodeCount            int `yaml:"node_count" json:"node_count"` // mtar eventgenerator instances
+	NodeIndex            int `yaml:"node_index" json:"node_index"` // CF_INSTANCE_INDEX
 }
 
 type DbConfig struct {
