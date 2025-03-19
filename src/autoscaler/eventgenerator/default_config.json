@@ -6,7 +6,7 @@
         "valid_space_guid": null
       }
     },
-    "http_client_timeout": "60s"
+    "http_client_timeout": "60s",
     "metricCollector": {
       "metric_collector_url": "https://log-cache.service.cf.internal:8080"
     },

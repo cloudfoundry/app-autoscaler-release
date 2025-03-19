@@ -118,8 +118,8 @@ resources:
         health:
           basic_auth:
             password: "${EVENTGENERATOR_HEALTH_PASSWORD}"
-			scalingEngine:
-        scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
+        scalingEngine:
+          scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
 
 - name: publicapiserver-config
   parameters:
