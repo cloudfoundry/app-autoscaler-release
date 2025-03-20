@@ -299,7 +299,7 @@ var _ = Describe("Eventgenerator", func() {
 			Expect(err).NotTo(HaveOccurred())
 			os.Setenv("CF_INSTANCE_KEY", cfInstanceKeyFile)
 
-			os.Setenv("VCAP_APPLICATION", "{}")
+			os.Setenv("VCAP_APPLICATION", `{ "space_id": "space-guid", "organization_id": "org-guid" }`)
 			conf.Db = config.DbConfig{}
 			conf.Evaluator = nil
 			conf.Aggregator = nil
@@ -345,6 +345,13 @@ func getVcapServices(conf config.Config) (result string) {
 	dbClientCA, err := os.ReadFile("../../../../../test-certs/autoscaler-ca.crt")
 	Expect(err).NotTo(HaveOccurred())
 
+	logCacheClientCert, err := os.ReadFile("../../../../../test-certs/log-cache.crt")
+	Expect(err).NotTo(HaveOccurred())
+	logCacheClientKey, err := os.ReadFile("../../../../../test-certs/log-cache.key")
+	Expect(err).NotTo(HaveOccurred())
+	logCacheClientCA, err := os.ReadFile("../../../../../test-certs/autoscaler-ca.crt")
+	Expect(err).NotTo(HaveOccurred())
+
 	dbURL := os.Getenv("DBURL")
 	Expect(dbURL).NotTo(BeEmpty())
 	if strings.Contains(dbURL, "postgres") {
@@ -355,8 +362,17 @@ func getVcapServices(conf config.Config) (result string) {
 
 	result = `{
 			"user-provided": [
-			  { "name": "eventgenerator-config", "tags": ["eventgenerator-config"], "credentials": { "eventgenerator-config": ` + configJson + `}}
-            ],
+			  { "name": "eventgenerator-config", "tags": ["eventgenerator-config"], "credentials": { "eventgenerator-config": ` + configJson + `}},
+			  { "name": "logcache-client",
+				"credentials": {
+				    "client_key": "` + strings.ReplaceAll(string(logCacheClientKey), "\n", "\\n") + `",
+				    "client_cert": "` + strings.ReplaceAll(string(logCacheClientCert), "\n", "\\n") + `",
+				    "server_ca": "` + strings.ReplaceAll(string(logCacheClientCA), "\n", "\\n") + `",
+					"uri": "` + mockLogCache.URL() + `"
+			     },
+			    "tags": ["logcache-client"]
+              }
+			],
 			"autoscaler": [ {
 				"name": "some-service",
 				"credentials": {

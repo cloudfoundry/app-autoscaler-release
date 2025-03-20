@@ -23,6 +23,7 @@ type VCAPConfigurationReader interface {
 	MaterializeDBFromService(dbName string) (string, error)
 	MaterializeTLSConfigFromService(serviceTag string) (models.TLSCerts, error)
 	GetServiceCredentialContent(serviceTag string, credentialKey string) ([]byte, error)
+
 	GetPort() int
 	GetSpaceGuid() string
 	GetOrgGuid() string
