@@ -1,9 +1,8 @@
 {
   "eventgenerator-config": {
-    "cf_server": {
-      "xfcc": {
-        "valid_org_guid": null,
-        "valid_space_guid": null
+    "health": {
+      "basic_auth": {
+        "username": "eventgenerator"
       }
     },
     "http_client_timeout": "60s",

@@ -115,6 +115,8 @@ resources:
   parameters:
     config:
       eventgenerator-config:
+        pool:
+          node_count: 2
         health:
           basic_auth:
             password: "${EVENTGENERATOR_HEALTH_PASSWORD}"

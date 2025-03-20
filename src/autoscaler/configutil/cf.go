@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
+	"strconv"
 	"strings"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -22,6 +24,9 @@ type VCAPConfigurationReader interface {
 	MaterializeTLSConfigFromService(serviceTag string) (models.TLSCerts, error)
 	GetServiceCredentialContent(serviceTag string, credentialKey string) ([]byte, error)
 	GetPort() int
+	GetSpaceGuid() string
+	GetOrgGuid() string
+	GetInstanceIndex() int
 	IsRunningOnCF() bool
 
 	ConfigureDb(dbName string, database *db.DatabaseConfig) error
@@ -51,8 +56,30 @@ func (vc *VCAPConfiguration) GetPort() int {
 	return vc.appEnv.Port
 }
 
+func (vc *VCAPConfiguration) GetInstanceIndex() int {
+	instanceIndex, err := strconv.Atoi(os.Getenv("CF_INSTANCE_INDEX"))
+	if err == nil {
+		return instanceIndex
+	}
+
+	return 0
+}
+
 func (vc *VCAPConfiguration) IsRunningOnCF() bool {
 	return cfenv.IsRunningOnCF()
+}
+
+func (vc *VCAPConfiguration) GetOrgGuid() string {
+	vcapApplicationJson := os.Getenv("VCAP_APPLICATION")
+	var vcapApplication map[string]interface{}
+	err := json.Unmarshal([]byte(vcapApplicationJson), &vcapApplication)
+	if err != nil {
+		return ""
+	}
+	return vcapApplication["organization_id"].(string)
+}
+func (vc *VCAPConfiguration) GetSpaceGuid() string {
+	return vc.appEnv.SpaceID
 }
 
 func (vc *VCAPConfiguration) GetServiceCredentialContent(serviceTag, credentialKey string) ([]byte, error) {

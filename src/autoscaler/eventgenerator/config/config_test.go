@@ -39,7 +39,7 @@ var _ = Describe("Config", func() {
 				conf, err = LoadConfig("", mockVCAPConfigurationReader)
 			})
 
-			When("vcap PORT is set to a number ", func() {
+			When("PORT is set", func() {
 				BeforeEach(func() {
 					mockVCAPConfigurationReader.GetPortReturns(3333)
 				})
@@ -47,6 +47,30 @@ var _ = Describe("Config", func() {
 				It("sets env variable over config file", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(conf.Server.Port).To(Equal(3333))
+				})
+			})
+
+			When("setting Pool.NodeIndex", func() {
+				BeforeEach(func() {
+					mockVCAPConfigurationReader.GetInstanceIndexReturns(3)
+				})
+
+				It("sets vcap instance index", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.Pool.NodeIndex).To(Equal(3))
+				})
+			})
+
+			When("VCAP_APPLICATION has org id and space id", func() {
+				BeforeEach(func() {
+					mockVCAPConfigurationReader.GetSpaceGuidReturns("some-space-id")
+					mockVCAPConfigurationReader.GetOrgGuidReturns("some-org-id")
+				})
+
+				It("sets xfcc", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.CFServer.XFCC.ValidOrgGuid).To(Equal("some-org-id"))
+					Expect(conf.CFServer.XFCC.ValidSpaceGuid).To(Equal("some-space-id"))
 				})
 			})
 
@@ -111,6 +135,7 @@ server:
     key_file: /var/vcap/jobs/autoscaler/config/certs/server.key
     cert_file: /var/vcap/jobs/autoscaler/config/certs/server.crt
     ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
+pool:
   node_count: 2
   node_index: 1
 cf_server:
@@ -168,17 +193,17 @@ circuitBreaker:
 					Expect(conf).To(Equal(&Config{
 						Logging:           helpers.LoggingConfig{Level: "info"},
 						HttpClientTimeout: &expectedTime,
-						Server: ServerConfig{
-							ServerConfig: helpers.ServerConfig{
-								Port: 9080,
-								TLS: models.TLSCerts{
-									KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/server.key",
-									CertFile:   "/var/vcap/jobs/autoscaler/config/certs/server.crt",
-									CACertFile: "/var/vcap/jobs/autoscaler/config/certs/ca.crt",
-								},
-							},
-							NodeCount: 2,
+						Pool: &PoolConfig{
 							NodeIndex: 1,
+							NodeCount: 2,
+						},
+						Server: helpers.ServerConfig{
+							Port: 9080,
+							TLS: models.TLSCerts{
+								KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/server.key",
+								CertFile:   "/var/vcap/jobs/autoscaler/config/certs/server.crt",
+								CACertFile: "/var/vcap/jobs/autoscaler/config/certs/ca.crt",
+							},
 						},
 						CFServer: helpers.ServerConfig{
 							Port: 9082,
@@ -310,12 +335,11 @@ defaultBreachDurationSecs: 600
 					Expect(*conf).To(Equal(Config{
 						Logging:           helpers.LoggingConfig{Level: "info"},
 						HttpClientTimeout: &expectedTimeout,
-						Server: ServerConfig{
-							ServerConfig: helpers.ServerConfig{
-								Port: 8080,
-								TLS:  models.TLSCerts{},
-							},
+						Server: helpers.ServerConfig{
+							Port: 8080,
+							TLS:  models.TLSCerts{},
 						},
+						Pool: &PoolConfig{},
 						CFServer: helpers.ServerConfig{
 							Port: 8082,
 						},
@@ -1164,7 +1188,7 @@ health:
 				expectedTimeout := 10 * time.Second
 				conf = &Config{
 					Logging: helpers.LoggingConfig{Level: "info"},
-					Server: ServerConfig{
+					Pool: &PoolConfig{
 						NodeCount: 2,
 						NodeIndex: 0,
 					},
@@ -1381,7 +1405,7 @@ health:
 			Context("when node index is out of range", func() {
 				Context("when node index is negative", func() {
 					BeforeEach(func() {
-						conf.Server.NodeIndex = -1
+						conf.Pool.NodeIndex = -1
 					})
 					It("should error", func() {
 						Expect(err).To(MatchError("Configuration error: server.node_index out of range"))
@@ -1390,8 +1414,8 @@ health:
 
 				Context("when node index is >= number of nodes", func() {
 					BeforeEach(func() {
-						conf.Server.NodeIndex = 2
-						conf.Server.NodeCount = 2
+						conf.Pool.NodeIndex = 2
+						conf.Pool.NodeCount = 2
 					})
 					It("should error", func() {
 						Expect(err).To(MatchError("Configuration error: server.node_index out of range"))
@@ -1411,5 +1435,4 @@ health:
 			})
 		})
 	})
-
 })

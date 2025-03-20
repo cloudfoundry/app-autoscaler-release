@@ -33,6 +33,37 @@ var _ = Describe("Configutil", func() {
 			os.Unsetenv("VCAP_APPLICATION")
 		})
 
+		Describe("GetOrgGuid", func() {
+			BeforeEach(func() {
+				vcapApplicationJson = `{"organization_id":"some-org-id"}`
+				vcapServicesJson = `{}`
+			})
+			It("returns the org guid", func() {
+				Expect(vcapConfiguration.GetOrgGuid()).To(Equal("some-org-id"))
+			})
+		})
+
+		Describe("GetSpaceGuid", func() {
+			BeforeEach(func() {
+				vcapApplicationJson = `{"space_id":"some-space-id"}`
+				vcapServicesJson = `{}`
+			})
+
+			It("returns the space guid", func() {
+				Expect(vcapConfiguration.GetSpaceGuid()).To(Equal("some-space-id"))
+			})
+
+		})
+
+		Describe("GetInstanceIndex", func() {
+			BeforeEach(func() {
+				os.Setenv("CF_INSTANCE_INDEX", "1")
+			})
+			It("returns the instance index", func() {
+				Expect(vcapConfiguration.GetInstanceIndex()).To(Equal(1))
+			})
+		})
+
 		Describe("IsRunningOnCF", func() {
 			When("VCAP_APPLICATION is not set", func() {
 				BeforeEach(func() {

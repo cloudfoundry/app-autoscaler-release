@@ -49,8 +49,11 @@ var defaultCFServerConfig = helpers.ServerConfig{
 
 type ServerConfig struct {
 	helpers.ServerConfig `yaml:",inline" json:",inline"`
-	NodeCount            int `yaml:"node_count" json:"node_count"` // mtar eventgenerator instances
-	NodeIndex            int `yaml:"node_index" json:"node_index"` // CF_INSTANCE_INDEX
+}
+
+type PoolConfig struct {
+	NodeCount int `yaml:"node_count" json:"node_count"`
+	NodeIndex int `yaml:"node_index" json:"node_index"`
 }
 
 type DbConfig struct {
@@ -93,8 +96,9 @@ type CircuitBreakerConfig struct {
 
 type Config struct {
 	Logging                   helpers.LoggingConfig `yaml:"logging" json:"logging"`
-	Server                    ServerConfig          `yaml:"server" json:"server"`
+	Server                    helpers.ServerConfig  `yaml:"server" json:"server"`
 	CFServer                  helpers.ServerConfig  `yaml:"cf_server" json:"cf_server"`
+	Pool                      *PoolConfig           `yaml:"pool" json:"pool"`
 	Health                    helpers.HealthConfig  `yaml:"health" json:"health"`
 	Db                        DbConfig              `yaml:"db" json:"db,omitempty"`
 	Aggregator                *AggregatorConfig     `yaml:"aggregator" json:"aggregator,omitempty"`
@@ -153,6 +157,24 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
+	if err := configureNodeIndex(conf, vcapReader); err != nil {
+		return err
+	}
+
+	if err := configureXfccSpaceAndOrg(conf, vcapReader); err != nil {
+		return err
+	}
+	return nil
+
+}
+func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
+	conf.CFServer.XFCC.ValidOrgGuid = vcapReader.GetOrgGuid()
+
+	return nil
+}
+func configureNodeIndex(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	conf.Pool.NodeIndex = vcapReader.GetInstanceIndex()
 	return nil
 }
 
@@ -190,10 +212,8 @@ func defaultConfig() Config {
 		Logging: helpers.LoggingConfig{
 			Level: DefaultLoggingLevel,
 		},
-		Server: ServerConfig{
-			ServerConfig: helpers.ServerConfig{
-				Port: DefaultServerPort,
-			},
+		Server: helpers.ServerConfig{
+			Port: DefaultServerPort,
 		},
 		CFServer: defaultCFServerConfig,
 		Health: helpers.HealthConfig{
@@ -220,6 +240,9 @@ func defaultConfig() Config {
 }
 
 func setDefaults(conf *Config) {
+	if conf.Pool == nil {
+		conf.Pool = &PoolConfig{}
+	}
 	if conf.Db.PolicyDb == nil {
 		conf.Db.PolicyDb = &db.DatabaseConfig{}
 	}
@@ -260,7 +283,7 @@ func (c *Config) Validate() error {
 	if err := c.validateDefaults(); err != nil {
 		return err
 	}
-	if err := c.validateServer(); err != nil {
+	if err := c.validatePool(); err != nil {
 		return err
 	}
 	if err := c.validateHealth(); err != nil {
@@ -344,8 +367,8 @@ func (c *Config) validateDefaults() error {
 	return nil
 }
 
-func (c *Config) validateServer() error {
-	if c.Server.NodeIndex < 0 || c.Server.NodeIndex >= c.Server.NodeCount {
+func (c *Config) validatePool() error {
+	if c.Pool.NodeIndex < 0 || c.Pool.NodeIndex >= c.Pool.NodeCount {
 		return fmt.Errorf("Configuration error: server.node_index out of range")
 	}
 	return nil

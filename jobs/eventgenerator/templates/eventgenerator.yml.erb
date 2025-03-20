@@ -59,6 +59,8 @@ server:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.crt
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/ca.crt
+
+pool:
   node_count: <%= sorted_instances.length %>
   node_index: <%= nodeIndex %>
 
