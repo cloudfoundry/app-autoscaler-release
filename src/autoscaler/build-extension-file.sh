@@ -115,7 +115,7 @@ resources:
   parameters:
     config:
       eventgenerator-config:
-        metricCollector:                                                                                                       │ns in address","session":"43"},"log_level":2,"log_time":"2025-03-20T15:31:44Z","message":"eventgenerator.MetricPoller.
+        metricCollector:
           metric_collector_url: logcache:8080
         pool:
           node_count: 2
