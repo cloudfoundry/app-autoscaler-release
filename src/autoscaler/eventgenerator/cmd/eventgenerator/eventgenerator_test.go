@@ -43,7 +43,7 @@ var _ = Describe("Eventgenerator", func() {
 
 		vcapPort = 8090 + GinkgoParallelProcess()
 
-		httpClientForEventGenerator = NewEventGeneratorClient()
+		httpClientForEventGenerator = testhelpers.NewEventGeneratorClient()
 		httpClientForHealth = &http.Client{}
 
 		serverURL, err = url.Parse("https://127.0.0.1:" + strconv.Itoa(conf.Server.Port))
@@ -263,7 +263,7 @@ var _ = Describe("Eventgenerator", func() {
 				req, err := http.NewRequest(http.MethodGet, cfServerURL.String(), nil)
 				Expect(err).NotTo(HaveOccurred())
 
-				err = SetXFCCCertHeader(req, conf.CFServer.XFCC.ValidOrgGuid, conf.CFServer.XFCC.ValidSpaceGuid)
+				err = testhelpers.SetXFCCCertHeader(req, conf.CFServer.XFCC.ValidOrgGuid, conf.CFServer.XFCC.ValidSpaceGuid)
 				Expect(err).NotTo(HaveOccurred())
 
 				rsp, err := healthHttpClient.Do(req)
