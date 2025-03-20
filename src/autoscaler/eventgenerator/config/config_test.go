@@ -1408,7 +1408,7 @@ health:
 						conf.Pool.NodeIndex = -1
 					})
 					It("should error", func() {
-						Expect(err).To(MatchError("Configuration error: server.pool.node_index out of range"))
+						Expect(err).To(MatchError("Configuration error: pool.node_index out of range"))
 					})
 				})
 
@@ -1418,7 +1418,7 @@ health:
 						conf.Pool.NodeCount = 2
 					})
 					It("should error", func() {
-						Expect(err).To(MatchError("Configuration error: server.pool.node_index out of range"))
+						Expect(err).To(MatchError("Configuration error: pool.node_index out of range"))
 					})
 				})
 

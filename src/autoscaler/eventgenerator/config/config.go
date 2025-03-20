@@ -368,7 +368,7 @@ func (c *Config) validateDefaults() error {
 
 func (c *Config) validatePool() error {
 	if c.Pool.NodeIndex < 0 || c.Pool.NodeIndex >= c.Pool.NodeCount {
-		return fmt.Errorf("Configuration error: server.node_index out of range")
+		return fmt.Errorf("Configuration error: pool.node_index out of range")
 	}
 	return nil
 }
