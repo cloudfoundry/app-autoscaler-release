@@ -40,10 +40,8 @@ var _ = Describe("Server", func() {
 
 	BeforeEach(func() {
 		conf = &config.Config{
-			Server: config.ServerConfig{
-				ServerConfig: helpers.ServerConfig{
-					Port: 1111 + GinkgoParallelProcess(),
-				},
+			Server: helpers.ServerConfig{
+				Port: 1111 + GinkgoParallelProcess(),
 			},
 			CFServer: helpers.ServerConfig{
 				Port: 3333 + GinkgoParallelProcess(),
@@ -73,7 +71,7 @@ var _ = Describe("Server", func() {
 				httpServer, err := server.CreateMtlsServer()
 				Expect(err).NotTo(HaveOccurred())
 
-				serverUrl, err = url.Parse("http://127.0.0.1:" + strconv.Itoa(conf.Server.ServerConfig.Port))
+				serverUrl, err = url.Parse("http://127.0.0.1:" + strconv.Itoa(conf.Server.Port))
 				Expect(err).ToNot(HaveOccurred())
 
 				serverProcess = ginkgomon_v2.Invoke(httpServer)

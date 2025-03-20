@@ -241,7 +241,7 @@ func initConfig() {
 	dbUrl := testhelpers.GetDbUrl()
 	timeout := 10 * time.Second
 	conf = config.Config{
-		Server: config.ServerConfig{
+		Pool: &config.PoolConfig{
 			NodeCount: 1,
 			NodeIndex: 0,
 		},

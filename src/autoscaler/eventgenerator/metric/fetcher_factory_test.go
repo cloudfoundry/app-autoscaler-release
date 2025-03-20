@@ -44,7 +44,7 @@ var _ = Describe("logCacheFetcherFactory", func() {
 			BeforeEach(func() {
 				conf = config.Config{
 
-					Aggregator: config.AggregatorConfig{
+					Aggregator: &config.AggregatorConfig{
 						AggregatorExecuteInterval: 40 * time.Second,
 					},
 					MetricCollector: config.MetricCollectorConfig{

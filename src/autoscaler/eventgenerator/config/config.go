@@ -165,7 +165,6 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 	return nil
-
 }
 func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
