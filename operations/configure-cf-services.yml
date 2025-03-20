@@ -46,29 +46,3 @@
     uris:
       - ((deployment_name))-cf-scalingengine.((system_domain))
 
-
-## EVENTGENERATOR - Enable cf Server to receive calls from api running on cf --
-
-      # - type: replace
-      #   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/cf_server?/xfcc?/valid_org_guid?
-      #   value: ((!autoscaler_cf_server_xfcc_valid_org_guid))
-      #
-      # - type: replace
-      #   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/cf_server?/xfcc?/valid_space_guid?
-      #   value: ((!autoscaler_cf_server_xfcc_valid_space_guid))
-      #
-      #
-      # - type: replace
-      #   path: /instance_groups/name=eventgenerator/jobs/name=eventgenerator/properties/autoscaler/eventgenerator/cf_server?/port?
-      #   value: 8080
-      #
-      # - type: replace
-      #   path: /instance_groups/name=eventgenerator/jobs/name=route_registrar/properties/route_registrar/routes/-
-      #   value:
-      #     name: ((deployment_name))-cf-eventgenerator
-      #     registration_interval: 20s
-      #     port: 8080
-      #     tags:
-      #       component: autoscaler_cf_eventgenerator
-      #     uris:
-      #       - ((deployment_name))-cf-eventgenerator.((system_domain))
