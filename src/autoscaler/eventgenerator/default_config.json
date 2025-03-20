@@ -7,7 +7,7 @@
     },
     "http_client_timeout": "60s",
     "metricCollector": {
-      "metric_collector_url": "https://log-cache.service.cf.internal:8080"
+      "metric_collector_url": "log-cache.service.cf.internal:8080"
     },
     "db": {
       "policy_db": {
