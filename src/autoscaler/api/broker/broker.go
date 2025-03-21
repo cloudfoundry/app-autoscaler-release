@@ -100,7 +100,9 @@ func (b *Broker) Services(_ context.Context) ([]domain.Service, error) {
 func (b *Broker) Provision(ctx context.Context, instanceID string, details domain.ProvisionDetails, _ bool) (domain.ProvisionedServiceSpec, error) {
 	result := domain.ProvisionedServiceSpec{}
 
-	logger := b.logger.Session("provision", lager.Data{"instanceID": instanceID, "provisionDetails": details})
+	logger := b.logger.Session("provision", lager.Data{"instanceID": instanceID, "ServiceID": details.ServiceID,
+		"PlanID": details.PlanID, "OrganizationGUID": details.OrganizationGUID, "SpaceGUID": details.SpaceGUID})
+	logger.Debug("provisionDetails", lager.Data{"details": details})
 	logger.Info("begin")
 	defer logger.Info("end")
 

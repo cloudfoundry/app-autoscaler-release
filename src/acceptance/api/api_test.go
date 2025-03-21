@@ -346,7 +346,8 @@ func deletePolicy() ([]byte, int) {
 }
 
 func deleteReq(url string) ([]byte, int) {
-	//delete policy here to make sure the condtion "no policy defined"
+	//delete policy here to make sure the condition "no policy defined"
+	By(fmt.Sprintf("DELETE '%s'", url))
 	req, err := http.NewRequest("DELETE", url, nil)
 	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
@@ -364,6 +365,7 @@ func getPolicy() ([]byte, int) {
 }
 
 func get(url string) ([]byte, int) {
+	By(fmt.Sprintf("GET '%s'", url))
 	req, err := http.NewRequest("GET", url, nil)
 	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
