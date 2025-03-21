@@ -360,30 +360,43 @@ func getVcapServices(conf config.Config) (result string) {
 		dbType = "mysql"
 	}
 
-	result = `{
-			"user-provided": [
-			  { "name": "eventgenerator-config", "tags": ["eventgenerator-config"], "credentials": { "eventgenerator-config": ` + configJson + `}},
-			  { "name": "logcache-client",
-				"credentials": {
-				    "client_key": "` + strings.ReplaceAll(string(logCacheClientKey), "\n", "\\n") + `",
-				    "client_cert": "` + strings.ReplaceAll(string(logCacheClientCert), "\n", "\\n") + `",
-				    "server_ca": "` + strings.ReplaceAll(string(logCacheClientCA), "\n", "\\n") + `",
-					"uri": "` + mockLogCache.URL() + `"
-			     },
-			    "tags": ["logcache-client"]
-              }
-			],
-			"autoscaler": [ {
+	vcapServices := map[string]interface{}{
+		"user-provided": []map[string]interface{}{
+			{
+				"name": "eventgenerator-config",
+				"tags": []string{"eventgenerator-config"},
+				"credentials": map[string]interface{}{
+					"eventgenerator-config": configJson,
+				},
+			},
+			{
+				"name": "logcache-client",
+				"credentials": map[string]interface{}{
+					"client_key":  strings.ReplaceAll(string(logCacheClientKey), "\n", "\\n"),
+					"client_cert": strings.ReplaceAll(string(logCacheClientCert), "\n", "\\n"),
+					"server_ca":   strings.ReplaceAll(string(logCacheClientCA), "\n", "\\n"),
+					"uri":         mockLogCache.URL(),
+				},
+				"tags": []string{"logcache-client"},
+			},
+		},
+		"autoscaler": []map[string]interface{}{
+			{
 				"name": "some-service",
-				"credentials": {
-					"uri": "` + dbURL + `",
-					"client_cert": "` + strings.ReplaceAll(string(dbClientCert), "\n", "\\n") + `",
-					"client_key": "` + strings.ReplaceAll(string(dbClientKey), "\n", "\\n") + `",
-					"server_ca": "` + strings.ReplaceAll(string(dbClientCA), "\n", "\\n") + `"
+				"credentials": map[string]interface{}{
+					"uri":         dbURL,
+					"client_cert": strings.ReplaceAll(string(dbClientCert), "\n", "\\n"),
+					"client_key":  strings.ReplaceAll(string(dbClientKey), "\n", "\\n"),
+					"server_ca":   strings.ReplaceAll(string(dbClientCA), "\n", "\\n"),
 				},
 				"syslog_drain_url": "",
-				"tags": ["policy_db", "app_metrics_db", "` + dbType + `"]
-			}]}` // #nosec G101
+				"tags": []string{"policy_db", "app_metrics_db", dbType},
+			},
+		},
+	}
 
-	return result
+	vcapServicesJson, err := json.Marshal(vcapServices)
+	Expect(err).NotTo(HaveOccurred())
+
+	return string(vcapServicesJson)
 }
