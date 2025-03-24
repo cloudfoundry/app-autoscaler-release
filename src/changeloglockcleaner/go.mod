@@ -3,7 +3,7 @@ module changeloglockcleaner
 go 1.23.1
 
 require (
-	github.com/go-sql-driver/mysql v1.9.0
+	github.com/go-sql-driver/mysql v1.9.1
 	github.com/jackc/pgx/v5 v5.7.3
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/onsi/ginkgo/v2 v2.23.0
