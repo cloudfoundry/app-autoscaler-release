@@ -15,7 +15,7 @@ require (
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.11.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/ogen-go/ogen v1.8.1
-	github.com/onsi/ginkgo/v2 v2.23.0
+	github.com/onsi/ginkgo/v2 v2.23.3
 	github.com/onsi/gomega v1.36.2
 	github.com/prometheus/procfs v0.15.1
 	github.com/steinfletcher/apitest v1.6.0
