@@ -32,7 +32,7 @@
     "actionlint":                           "1.7.7",
     "ginkgo":                               "2.23.0",
     "act":                                  "0.2.74",
-    "cloudfoundry-cli":                     "8.10.0",
+    "cloudfoundry-cli":                     "8.10.2",
     "temurin-bin-21":                       "21.0.3",
     "go":                                   "1.23.1",
     "fly":                                  "7.12.1",
