@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
+
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
@@ -24,7 +25,7 @@ if [[ -n "$existing_service_broker" ]]; then
   echo " - deleting broker"
   cf delete-service-broker -f "${existing_service_broker}"
 fi
-
+set -x
 echo "Creating service broker ${deployment_name} at 'https://${service_broker_name}.${system_domain}'"
 autoscaler_service_broker_password=$(credhub get  -n "/bosh-autoscaler/${deployment_name}/service_broker_password" -q)
 cf create-service-broker "${deployment_name}" autoscaler-broker-user "$autoscaler_service_broker_password" "https://${service_broker_name}.${system_domain}"
