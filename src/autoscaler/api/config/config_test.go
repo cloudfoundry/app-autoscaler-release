@@ -114,42 +114,13 @@ var _ = Describe("Config", func() {
 			})
 
 			When("handling available databases", func() {
-				It("calls configureDb with for policyDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
-					Expect(db.PolicyDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(&conf.Db))
-				})
-
-				It("calls configureDb with for bindingDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
-					Expect(db.BindingDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(&conf.Db))
-				})
-			})
-
-			When("handling available storeprocedure database", func() {
-				When("storedProcedure_db service is provided and cred_helper_impl is default", func() {
-					BeforeEach(func() {
-						mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(
-							`{ "cred_helper_impl": "stored_procedure" }`), nil) // #nosec G101
-					})
-
-					It("calls configureStoredProcedureDb", func() {
-						Expect(err).NotTo(HaveOccurred())
-						Expect(mockVCAPConfigurationReader.ConfigureStoredProcedureDbCallCount()).To(Equal(1))
-					})
-				})
-
-				When("storedProcedure_db service is provided and cred_helper_impl is default", func() {
-					BeforeEach(func() {
-						mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(
-							`{ "cred_helper_impl": "default" }`), nil) // #nosec G101
-					})
-
-					It("calls configureStoredProcedureDb", func() {
-						Expect(err).NotTo(HaveOccurred())
-						Expect(mockVCAPConfigurationReader.ConfigureStoredProcedureDbCallCount()).To(Equal(0))
-					})
+				It("calls vcapReader ConfigureDatabases with the right arguments", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(mockVCAPConfigurationReader.ConfigureDatabasesCallCount()).To(Equal(1))
+					receivedDbConfig, receivedStoredProcedureConfig, receivedCredHelperImpl := mockVCAPConfigurationReader.ConfigureDatabasesArgsForCall(0)
+					Expect(*receivedDbConfig).To(Equal(map[string]db.DatabaseConfig{}))
+					Expect(receivedStoredProcedureConfig).To(BeNil())
+					Expect(receivedCredHelperImpl).To(Equal(conf.CredHelperImpl))
 				})
 			})
 

@@ -139,6 +139,7 @@ func defaultConfig() Config {
 				SkipSSLValidation: false,
 			},
 		},
+		Db: make(map[string]db.DatabaseConfig),
 		RateLimit: models.RateLimitConfig{
 			MaxAmount:     DefaultMaxAmount,
 			ValidDuration: DefaultValidDuration,
@@ -184,22 +185,8 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	if conf.Db == nil {
-		conf.Db = make(map[string]db.DatabaseConfig)
-	}
-
-	if err := vcapReader.ConfigureDb(db.PolicyDb, &conf.Db); err != nil {
+	if err := vcapReader.ConfigureDatabases(&conf.Db, conf.StoredProcedureConfig, conf.CredHelperImpl); err != nil {
 		return err
-	}
-
-	if err := vcapReader.ConfigureDb(db.BindingDb, &conf.Db); err != nil {
-		return err
-	}
-
-	if conf.CredHelperImpl == "stored_procedure" {
-		if err := vcapReader.ConfigureStoredProcedureDb(db.StoredProcedureDb, &conf.Db, conf.StoredProcedureConfig); err != nil {
-			return err
-		}
 	}
 
 	if err := configureCatalog(conf, vcapReader); err != nil {

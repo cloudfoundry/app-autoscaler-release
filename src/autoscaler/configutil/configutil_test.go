@@ -60,7 +60,7 @@ var _ = Describe("Configutil", func() {
 						"client_cert": expectedClientCertContent,
 						"client_key":  expectedClientKeyContent,
 						"server_ca":   expectedServerCAContent,
-					}, "some-custom-tls-service", "postgres")
+					}, []string{"some-custom-tls-service"}, "postgres")
 					Expect(err).NotTo(HaveOccurred())
 				})
 
@@ -132,41 +132,90 @@ var _ = Describe("Configutil", func() {
 
 		})
 
-		Describe("ConfigureDb", func() {
+		Describe("ConfigureDatabases", func() {
 			var actualDbs *map[string]db.DatabaseConfig
 			var expectedDbs *map[string]db.DatabaseConfig
-			var dbName string
 			var expectedClientCertContent = "client-cert-content"
 			var expectedClientKeyContent = "client-key-content"
 			var expectedServerCAContent = "server-ca-content"
+			var databaseNames []string
 
 			BeforeEach(func() {
 				vcapApplicationJson = `{}`
-				dbName = db.PolicyDb
-				vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
-					"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
-					"client_cert": expectedClientCertContent,
-					"client_key":  expectedClientKeyContent,
-					"server_ca":   expectedServerCAContent,
-				}, dbName, "postgres")
-				Expect(err).NotTo(HaveOccurred())
 			})
 
-			When("VCAP_SERVICES has relational db service bind to app for policy db", func() {
-				BeforeEach(func() {
-					actualDbs = &map[string]db.DatabaseConfig{}
+			When("stored procedure implementation is set to stored_procedure", func() {
+				var actualProcedureConfig *models.StoredProcedureConfig
 
-					expectedDbs = &map[string]db.DatabaseConfig{
-						dbName: {
-							URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fpolicy_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fpolicy_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fpolicy_db%2Fserver_ca.sslrootcert", // #nosec G101
-						},
-					}
+				BeforeEach(func() {
+					databaseNames = []string{db.PolicyDb, db.BindingDb, db.StoredProcedureDb}
+					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
+						"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
+						"client_cert": expectedClientCertContent,
+						"client_key":  expectedClientKeyContent,
+						"server_ca":   expectedServerCAContent,
+					}, databaseNames, "postgres")
+					Expect(err).NotTo(HaveOccurred())
 				})
 
-				It("loads the db config from VCAP_SERVICES successfully", func() {
-					err := vcapConfiguration.ConfigureDb(dbName, actualDbs)
+				When("VCAP_SERVICES has relational db service bind to app for policy db", func() {
+					BeforeEach(func() {
+
+						actualDbs = &map[string]db.DatabaseConfig{}
+						actualProcedureConfig = &models.StoredProcedureConfig{}
+
+						expectedDbs = &map[string]db.DatabaseConfig{
+							db.PolicyDb: {
+								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fpolicy_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fpolicy_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fpolicy_db%2Fserver_ca.sslrootcert", // #nosec G101
+							},
+							db.BindingDb: {
+								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fbinding_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fbinding_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fbinding_db%2Fserver_ca.sslrootcert", // #nosec G101
+							},
+							db.StoredProcedureDb: {
+								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fstoredprocedure_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fstoredprocedure_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fstoredprocedure_db%2Fserver_ca.sslrootcert",
+							},
+						}
+					})
+
+					It("loads the db config from VCAP_SERVICES successfully", func() {
+						err := vcapConfiguration.ConfigureDatabases(actualDbs, actualProcedureConfig, "stored_procedure")
+						Expect(err).NotTo(HaveOccurred())
+						Expect(*actualDbs).To(Equal(*expectedDbs))
+					})
+				})
+			})
+
+			When("stored procedure implementation is set to default", func() {
+				BeforeEach(func() {
+					databaseNames = []string{db.PolicyDb, db.BindingDb}
+					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
+						"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
+						"client_cert": expectedClientCertContent,
+						"client_key":  expectedClientKeyContent,
+						"server_ca":   expectedServerCAContent,
+					}, databaseNames, "postgres")
 					Expect(err).NotTo(HaveOccurred())
-					Expect(*actualDbs).To(Equal(*expectedDbs))
+				})
+
+				When("VCAP_SERVICES has relational db service bind to app for policy db", func() {
+					BeforeEach(func() {
+						actualDbs = &map[string]db.DatabaseConfig{}
+
+						expectedDbs = &map[string]db.DatabaseConfig{
+							db.PolicyDb: {
+								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fpolicy_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fpolicy_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fpolicy_db%2Fserver_ca.sslrootcert", // #nosec G101
+							},
+							db.BindingDb: {
+								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fbinding_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fbinding_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fbinding_db%2Fserver_ca.sslrootcert", // #nosec G101
+							},
+						}
+					})
+
+					It("loads the db config from VCAP_SERVICES successfully", func() {
+						err := vcapConfiguration.ConfigureDatabases(actualDbs, nil, "default")
+						Expect(err).NotTo(HaveOccurred())
+						Expect(*actualDbs).To(Equal(*expectedDbs))
+					})
 				})
 			})
 		})
@@ -181,7 +230,7 @@ var _ = Describe("Configutil", func() {
 					BeforeEach(func() {
 						vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
 							"uri": "http://example.com/path\x00with/invalid/character",
-						}, "some-db", "postgres")
+						}, []string{"some-db"}, "postgres")
 						Expect(err).NotTo(HaveOccurred())
 					})
 
@@ -203,7 +252,7 @@ var _ = Describe("Configutil", func() {
 								"client_cert": expectedClientCertContent,
 								"client_key":  expectedClientKeyContent,
 								"server_ca":   expectedServerCAContent,
-							}, "some-db", "postgres")
+							}, []string{"some-db"}, "postgres")
 							Expect(err).NotTo(HaveOccurred())
 						})
 
@@ -237,7 +286,7 @@ var _ = Describe("Configutil", func() {
 								"client_cert": expectedClientCertContent,
 								"client_key":  expectedClientKeyContent,
 								"server_ca":   expectedServerCAContent,
-							}, "some-db", "mysql")
+							}, []string{"some-db"}, "mysql")
 							Expect(err).NotTo(HaveOccurred())
 						})
 
