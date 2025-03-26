@@ -5,7 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
+	"strconv"
+	"strings"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"github.com/cloud-gov/go-cfenv"
 )
@@ -19,8 +23,16 @@ type VCAPConfigurationReader interface {
 	MaterializeDBFromService(dbName string) (string, error)
 	MaterializeTLSConfigFromService(serviceTag string) (models.TLSCerts, error)
 	GetServiceCredentialContent(serviceTag string, credentialKey string) ([]byte, error)
+
 	GetPort() int
+	GetSpaceGuid() string
+	GetOrgGuid() string
+	GetInstanceIndex() int
 	IsRunningOnCF() bool
+
+	ConfigureDb(dbName string, database *db.DatabaseConfig) error
+	ConfigureDbInMap(dbName string, confDb *map[string]db.DatabaseConfig) error
+	ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error
 }
 
 type VCAPConfiguration struct {
@@ -34,6 +46,8 @@ func NewVCAPConfigurationReader() (result *VCAPConfiguration, err error) {
 	if cfenv.IsRunningOnCF() {
 		appEnv, err = cfenv.Current()
 		result.appEnv = appEnv
+	} else {
+		fmt.Println("VCAPConfigurationReader: Not running on CF")
 	}
 
 	return result, err
@@ -43,8 +57,30 @@ func (vc *VCAPConfiguration) GetPort() int {
 	return vc.appEnv.Port
 }
 
+func (vc *VCAPConfiguration) GetInstanceIndex() int {
+	instanceIndex, err := strconv.Atoi(os.Getenv("CF_INSTANCE_INDEX"))
+	if err == nil {
+		return instanceIndex
+	}
+
+	return 0
+}
+
 func (vc *VCAPConfiguration) IsRunningOnCF() bool {
 	return cfenv.IsRunningOnCF()
+}
+
+func (vc *VCAPConfiguration) GetOrgGuid() string {
+	vcapApplicationJson := os.Getenv("VCAP_APPLICATION")
+	var vcapApplication map[string]interface{}
+	err := json.Unmarshal([]byte(vcapApplicationJson), &vcapApplication)
+	if err != nil {
+		return ""
+	}
+	return vcapApplication["organization_id"].(string)
+}
+func (vc *VCAPConfiguration) GetSpaceGuid() string {
+	return vc.appEnv.SpaceID
 }
 
 func (vc *VCAPConfiguration) GetServiceCredentialContent(serviceTag, credentialKey string) ([]byte, error) {
@@ -205,5 +241,54 @@ func (vc *VCAPConfiguration) addConnectionParam(service *cfenv.Service, dbName, 
 		}
 		parameters.Set(connectionParam, createdFile)
 	}
+	return nil
+}
+
+func (vc *VCAPConfiguration) ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error {
+	if err := vc.ConfigureDbInMap(dbName, confDb); err != nil {
+		return err
+	}
+
+	currentStoredProcedureDb := (*confDb)[dbName]
+	parsedUrl, err := url.Parse(currentStoredProcedureDb.URL)
+	if err != nil {
+		return err
+	}
+
+	if storedProcedureConfig != nil {
+		if storedProcedureConfig.Username != "" {
+			currentStoredProcedureDb.URL = strings.Replace(currentStoredProcedureDb.URL, parsedUrl.User.Username(), storedProcedureConfig.Username, 1)
+		}
+		if storedProcedureConfig.Password != "" {
+			bindingPassword, _ := parsedUrl.User.Password()
+			currentStoredProcedureDb.URL = strings.Replace(currentStoredProcedureDb.URL, bindingPassword, storedProcedureConfig.Password, 1)
+		}
+	}
+	(*confDb)[dbName] = currentStoredProcedureDb
+
+	return nil
+}
+
+func (vc *VCAPConfiguration) ConfigureDb(dbName string, database *db.DatabaseConfig) error {
+	dbURL, err := vc.MaterializeDBFromService(dbName)
+	database.URL = dbURL
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (vc *VCAPConfiguration) ConfigureDbInMap(dbName string, confDb *map[string]db.DatabaseConfig) error {
+	currentDb, ok := (*confDb)[dbName]
+	if !ok {
+		(*confDb)[dbName] = db.DatabaseConfig{}
+	}
+	if err := vc.ConfigureDb(dbName, &currentDb); err != nil {
+		return err
+	}
+
+	(*confDb)[dbName] = currentDb
+
 	return nil
 }

@@ -5,6 +5,9 @@ provider: Cloud Foundry Foundation
 copyright: Apache License 2.0
 version: MTA_VERSION
 
+parameters:
+  enable-parallel-deployments: true
+
 build-parameters:
   before-all:
     - builder: custom
@@ -29,7 +32,20 @@ modules:
       no-start: true
       tasks:
       - name: apply-api-changelog
-        command: " chmod +x ./BOOT-INF/classes/bin/apply-api-changelog.sh ; /home/vcap/app/BOOT-INF/classes/bin/apply-api-changelog.sh"
+        command: |
+          chmod +x ./boot-inf/classes/bin/apply-changelog.sh
+          /home/vcap/app/boot-inf/classes/bin/apply-changelog.sh \
+            boot-inf/classes/api.db.changelog.yml \
+            boot-inf/classes/servicebroker.db.changelog.yaml
+      - name: apply-eventgenerator-changelog
+        command: |
+          chmod +x ./boot-inf/classes/bin/apply-changelog.sh
+          /home/vcap/app/boot-inf/classes/bin/apply-changelog.sh \
+            boot-inf/classes/dataaggregator.db.changelog.yml \
+            boot-inf/classes/metricscollector.db.changelog.yml
+
+
+
 
   - name: publicapiserver
     type: go
@@ -45,8 +61,28 @@ modules:
     - name: database
     - name: app-autoscaler-application-logs
     parameters:
-      memory: 1G
-      disk-quota: 1G
+      memory: 1g
+      disk-quota: 1g
+      instances: 0
+      stack: cflinuxfs4
+      routes:
+
+  - name: eventgenerator
+    type: go
+    path: .
+    properties:
+      DT_RELEASE_BUILD_VERSION: ${mta-version}
+      GO_INSTALL_PACKAGE_SPEC: code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/cmd/eventgenerator
+      GOTOOLCHAIN: local
+      GOVERSION: go1.GO_MINOR_VERSION
+    requires:
+    - name: eventgenerator-config
+    - name: logcache-client
+    - name: database
+    - name: app-autoscaler-application-logs
+    parameters:
+      memory: 1g
+      disk-quota: 1g
       instances: 0
       stack: cflinuxfs4
       routes:
@@ -68,7 +104,7 @@ modules:
     parameters:
       memory: 1G
       disk-quota: 1G
-      instances: 2
+      instances: 0
       stack: cflinuxfs4
       routes:
 
@@ -79,6 +115,12 @@ resources:
     service-tags:
     - metricsforwarder-config
     path: metricsforwarder/default_config.json
+- name: eventgenerator-config
+  type: org.cloudfoundry.user-provided-service
+  parameters:
+    service-tags:
+    - eventgenerator-config
+    path: eventgenerator/default_config.json
 - name: publicapiserver-config
   type: org.cloudfoundry.user-provided-service
   parameters:
@@ -96,12 +138,18 @@ resources:
     service-tags:
     - policy_db
     - binding_db
+    - app_metrics_db
     - relational
 - name: syslog-client
   type: org.cloudfoundry.user-provided-service
   parameters:
     service-tags:
     - syslog-client
+- name: logcache-client
+  type: org.cloudfoundry.user-provided-service
+  parameters:
+    service-tags:
+    - logcache-client
 - name: app-autoscaler-application-logs
   active: false
   type: org.cloudfoundry.managed-service
