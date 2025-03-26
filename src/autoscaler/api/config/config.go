@@ -36,7 +36,6 @@ const (
 )
 
 var (
-	ErrReadYaml                      = errors.New("failed to read config file")
 	ErrPublicApiServerConfigNotFound = errors.New("publicapiserver config service not found")
 )
 
@@ -164,24 +163,6 @@ func defaultConfig() Config {
 		},
 	}
 }
-func loadYamlFile(filepath string, conf *Config) error {
-	if filepath == "" {
-		return nil
-	}
-	file, err := os.Open(filepath)
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "failed to open config file '%s': %s\n", filepath, err)
-		return ErrReadYaml
-	}
-	defer file.Close()
-
-	dec := yaml.NewDecoder(file)
-	dec.KnownFields(true)
-	if err := dec.Decode(conf); err != nil {
-		return fmt.Errorf("%w: %v", ErrReadYaml, err)
-	}
-	return nil
-}
 func loadPublicApiServerConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	data, err := vcapReader.GetServiceCredentialContent("publicapiserver-config", "publicapiserver-config")
 	if err != nil {
@@ -269,7 +250,7 @@ func configureScheduler(conf *Config) {
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	conf := defaultConfig()
 
-	if err := loadYamlFile(filepath, &conf); err != nil {
+	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
 		return nil, err
 	}
 

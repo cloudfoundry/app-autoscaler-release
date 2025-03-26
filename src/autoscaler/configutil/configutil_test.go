@@ -123,7 +123,6 @@ var _ = Describe("Configutil", func() {
 						Username: storedProcedureUsername,
 						Password: storedProcedurePassword,
 					}
-					// TODO: remove storedProcedureConfig and read it from the vcapServicesJson
 					err := vcapConfiguration.ConfigureStoredProcedureDb(dbName, actualDbs, storedProcedureConfig)
 					Expect(err).NotTo(HaveOccurred())
 
@@ -168,10 +167,6 @@ var _ = Describe("Configutil", func() {
 					err := vcapConfiguration.ConfigureDb(dbName, actualDbs)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(*actualDbs).To(Equal(*expectedDbs))
-
-					//Expect(mockVCAPConfigurationReader.MaterializeDBFromServiceCallCount()).To(Equal(2))
-					//actualDbName := mockVCAPConfigurationReader.MaterializeDBFromServiceArgsForCall(0)
-					//Expect(actualDbName).To(Equal(db.PolicyDb))
 				})
 			})
 		})
