@@ -601,37 +601,6 @@
         }
       }
     },
-    "github:NixOS/nixpkgs/nixpkgs-unstable": {
-      "resolved": "github:NixOS/nixpkgs/573c650e8a14b2faa0041645ab18aed7e60f0c9a?lastModified=1741865919&narHash=sha256-4thdbnP6dlbdq%2BqZWTsm4ffAwoS8Tiq1YResB%2BRP6WE%3D"
-    },
-    "glibcLocales@latest": {
-      "last_modified": "2025-03-11T17:52:14Z",
-      "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#glibcLocales",
-      "source": "devbox-search",
-      "version": "2.40-66",
-      "systems": {
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/mrkflhzymcwx0y8wyk7ldf1h4d5mq5yy-glibc-locales-2.40-66",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/mrkflhzymcwx0y8wyk7ldf1h4d5mq5yy-glibc-locales-2.40-66"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/hgybbbzg778wasmw5g1hzm7a8n4wwd5h-glibc-locales-2.40-66",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/hgybbbzg778wasmw5g1hzm7a8n4wwd5h-glibc-locales-2.40-66"
-        }
-      }
-    },
     "gnumake@4.4": {
       "last_modified": "2025-03-11T15:50:42Z",
       "resolved": "github:NixOS/nixpkgs/b62d2a95c72fb068aecd374a7262b37ed92df82b#gnumake",
@@ -1463,7 +1432,7 @@
     },
     "python@3.13.2": {
       "last_modified": "2025-03-03T13:00:40Z",
-      "plugin_version": "0.0.4",
+      "plugin_version": "0.0.3",
       "resolved": "github:NixOS/nixpkgs/95eacfb6d1accf8d59a9e570d26d04ad693d2ec3#python313",
       "source": "devbox-search",
       "version": "3.13.2",
