@@ -193,51 +193,51 @@
         }
       }
     },
-    "cloudfoundry-cli@8.10.2": {
-      "last_modified": "2025-03-16T16:17:41Z",
-      "resolved": "github:NixOS/nixpkgs/8f76cf16b17c51ae0cc8e55488069593f6dab645#cloudfoundry-cli",
+    "cloudfoundry-cli@8.11.0": {
+      "last_modified": "2025-03-23T05:31:05Z",
+      "resolved": "github:NixOS/nixpkgs/dd613136ee91f67e5dba3f3f41ac99ae89c5406b#cloudfoundry-cli",
       "source": "devbox-search",
-      "version": "8.10.2",
+      "version": "8.11.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/32qq6grz9964lclvqk9ld84gb05hxw2l-cloudfoundry-cli-8.10.2",
+              "path": "/nix/store/vamgcw6czazil3g9s2knsp83iv6myy92-cloudfoundry-cli-8.11.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/32qq6grz9964lclvqk9ld84gb05hxw2l-cloudfoundry-cli-8.10.2"
+          "store_path": "/nix/store/vamgcw6czazil3g9s2knsp83iv6myy92-cloudfoundry-cli-8.11.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/6c0hwf6pmv9wmjaaqw4qk12lzqjs62i1-cloudfoundry-cli-8.10.2",
+              "path": "/nix/store/ziw8x4wvsy1q3in9ni0mh0vpkq301xxn-cloudfoundry-cli-8.11.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/6c0hwf6pmv9wmjaaqw4qk12lzqjs62i1-cloudfoundry-cli-8.10.2"
+          "store_path": "/nix/store/ziw8x4wvsy1q3in9ni0mh0vpkq301xxn-cloudfoundry-cli-8.11.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/hnpq3scmfg64ixxjbzd4pf9gvsmpqh6s-cloudfoundry-cli-8.10.2",
+              "path": "/nix/store/0a1v88q6q14k31rx9850jjyrnjwm25y4-cloudfoundry-cli-8.11.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/hnpq3scmfg64ixxjbzd4pf9gvsmpqh6s-cloudfoundry-cli-8.10.2"
+          "store_path": "/nix/store/0a1v88q6q14k31rx9850jjyrnjwm25y4-cloudfoundry-cli-8.11.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/wqlxshcyddwfid6ww47drpgsd5h7zmy4-cloudfoundry-cli-8.10.2",
+              "path": "/nix/store/hg5imkvfxprrc06f8wnyxy5cjf3ng3sy-cloudfoundry-cli-8.11.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/wqlxshcyddwfid6ww47drpgsd5h7zmy4-cloudfoundry-cli-8.10.2"
+          "store_path": "/nix/store/hg5imkvfxprrc06f8wnyxy5cjf3ng3sy-cloudfoundry-cli-8.11.0"
         }
       }
     },
