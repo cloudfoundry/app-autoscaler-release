@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strconv"
 	"time"
 
@@ -24,7 +25,7 @@ type Evaluator struct {
 	logger                    lager.Logger
 	httpClient                *http.Client
 	scalingEngineUrl          string
-	triggerChan               chan []*models.Trigger
+	triggerChan               chan *models.DynamicScalingRules
 	doneChan                  chan bool
 	defaultBreachDurationSecs int
 	queryAppMetrics           aggregator.QueryAppMetricsFunc
@@ -32,7 +33,7 @@ type Evaluator struct {
 	setCoolDownExpired        func(string, int64)
 }
 
-func NewEvaluator(logger lager.Logger, httpClient *http.Client, scalingEngineUrl string, triggerChan chan []*models.Trigger,
+func NewEvaluator(logger lager.Logger, httpClient *http.Client, scalingEngineUrl string, triggerChan chan *models.DynamicScalingRules,
 	defaultBreachDurationSecs int, queryAppMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) *Evaluator {
 	return &Evaluator{
 		logger:                    logger.Session("Evaluator"),
@@ -57,8 +58,8 @@ func (e *Evaluator) start() {
 		select {
 		case <-e.doneChan:
 			return
-		case triggerArray := <-e.triggerChan:
-			e.doEvaluate(triggerArray)
+		case dynamicScalingRules := <-e.triggerChan:
+			e.doEvaluate(dynamicScalingRules)
 		}
 	}
 }
@@ -69,9 +70,9 @@ func (e *Evaluator) Stop() {
 	e.logger.Info("stopped")
 }
 
-func (e *Evaluator) filterOutInvalidTriggers(triggers []*models.Trigger) []*models.Trigger {
-	result := make([]*models.Trigger, len(triggers))
-	for _, trigger := range triggers {
+func (e *Evaluator) filterOutInvalidTriggers(rules *models.DynamicScalingRules) {
+	validTriggers := rules.Triggers[:0]
+	for _, trigger := range rules.Triggers {
 		if trigger.BreachDurationSeconds <= 0 {
 			trigger.BreachDurationSeconds = e.defaultBreachDurationSecs
 		}
@@ -79,14 +80,35 @@ func (e *Evaluator) filterOutInvalidTriggers(triggers []*models.Trigger) []*mode
 			e.logger.Error("operator-is-invalid", nil, lager.Data{"trigger": trigger})
 			continue
 		}
-		result = append(result, trigger)
+		validTriggers = append(validTriggers, trigger)
 	}
-	return result
+	rules.Triggers = validTriggers
 }
 
-func (e *Evaluator) doEvaluate(triggerArray []*models.Trigger) {
-	triggers := e.filterOutInvalidTriggers(triggerArray)
-	for _, trigger := range triggers {
+func (e *Evaluator) doEvaluate(rules *models.DynamicScalingRules) {
+	e.filterOutInvalidTriggers(rules)
+	if rules.ScalingRuleEvaluation == models.BiasedToScaleOut {
+		slices.SortStableFunc(rules.Triggers, func(a, b *models.Trigger) int {
+			adj1, err1 := models.ParseAdjustment(a.Adjustment)
+			if err1 != nil {
+				e.logger.Error("do-evaluate", err1)
+			}
+
+			adj2, err2 := models.ParseAdjustment(b.Adjustment)
+			if err2 != nil {
+				e.logger.Error("do-evaluate", err2)
+			}
+
+			// sort in descending order, so that the biggest scale out adjustment is evaluated first
+			return -models.CompareAdjustments(adj1, adj2)
+		})
+	}
+
+	e.evaluateFirstMatching(rules)
+}
+
+func (e *Evaluator) evaluateFirstMatching(rules *models.DynamicScalingRules) {
+	for _, trigger := range rules.Triggers {
 		appMetricList, err := e.retrieveAppMetrics(trigger)
 		if err != nil {
 			continue

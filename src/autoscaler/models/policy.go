@@ -38,14 +38,22 @@ func (p *PolicyJson) GetAppPolicy() (*AppPolicy, error) {
 	return &AppPolicy{AppId: p.AppId, ScalingPolicy: &scalingPolicy}, nil
 }
 
+type ScalingRuleEvaluation string
+
+const (
+	FirstMatching    ScalingRuleEvaluation = "first_matching"
+	BiasedToScaleOut ScalingRuleEvaluation = "biased_to_scale_out"
+)
+
 // ScalingPolicy is a customer facing entity and represents the scaling policy for an application.
 // It can be created/deleted/retrieved by the user via the binding process and public api. If a change is required in the policy,
 // the corresponding endpoints should be also be updated in the public api server.
 type ScalingPolicy struct {
-	InstanceMin  int               `json:"instance_min_count"`
-	InstanceMax  int               `json:"instance_max_count"`
-	ScalingRules []*ScalingRule    `json:"scaling_rules,omitempty"`
-	Schedules    *ScalingSchedules `json:"schedules,omitempty"`
+	InstanceMin           int                   `json:"instance_min_count"`
+	InstanceMax           int                   `json:"instance_max_count"`
+	ScalingRules          []*ScalingRule        `json:"scaling_rules,omitempty"`
+	Schedules             *ScalingSchedules     `json:"schedules,omitempty"`
+	ScalingRuleEvaluation ScalingRuleEvaluation `json:"scaling_rule_evaluation,omitempty"`
 }
 
 func (s ScalingPolicy) String() string {
@@ -115,6 +123,11 @@ func (r *ScalingRule) CoolDown(defaultCoolDownSecs int) time.Duration {
 		return time.Duration(defaultCoolDownSecs) * time.Second
 	}
 	return time.Duration(r.CoolDownSeconds) * time.Second
+}
+
+type DynamicScalingRules struct {
+	Triggers              []*Trigger            `json:"triggers"`
+	ScalingRuleEvaluation ScalingRuleEvaluation `json:"scaling_rule_evaluation"`
 }
 
 type Trigger struct {
