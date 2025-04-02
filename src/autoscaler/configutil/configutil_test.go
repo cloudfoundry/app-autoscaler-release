@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 )
@@ -30,6 +31,37 @@ var _ = Describe("Configutil", func() {
 		AfterEach(func() {
 			os.Unsetenv("VCAP_SERVICES")
 			os.Unsetenv("VCAP_APPLICATION")
+		})
+
+		Describe("GetOrgGuid", func() {
+			BeforeEach(func() {
+				vcapApplicationJson = `{"organization_id":"some-org-id"}`
+				vcapServicesJson = `{}`
+			})
+			It("returns the org guid", func() {
+				Expect(vcapConfiguration.GetOrgGuid()).To(Equal("some-org-id"))
+			})
+		})
+
+		Describe("GetSpaceGuid", func() {
+			BeforeEach(func() {
+				vcapApplicationJson = `{"space_id":"some-space-id"}`
+				vcapServicesJson = `{}`
+			})
+
+			It("returns the space guid", func() {
+				Expect(vcapConfiguration.GetSpaceGuid()).To(Equal("some-space-id"))
+			})
+
+		})
+
+		Describe("GetInstanceIndex", func() {
+			BeforeEach(func() {
+				os.Setenv("CF_INSTANCE_INDEX", "1")
+			})
+			It("returns the instance index", func() {
+				Expect(vcapConfiguration.GetInstanceIndex()).To(Equal(1))
+			})
 		})
 
 		Describe("IsRunningOnCF", func() {
@@ -83,9 +115,99 @@ var _ = Describe("Configutil", func() {
 			})
 		})
 
+		Describe("ConfigureStoredProcedureDb", func() {
+			var dbName string
+			var expectedClientCertContent = "client-cert-content"
+			var expectedClientKeyContent = "client-key-content"
+			var expectedServerCAContent = "server-ca-content"
+
+			var actualDbs *map[string]db.DatabaseConfig
+			var expectedDbs *map[string]db.DatabaseConfig
+
+			var storedProcedureUsername string
+			var storedProcedurePassword string
+
+			When("storedProcedure_db service is provided and cred_helper_impl is stored_procedure", func() {
+				BeforeEach(func() {
+					actualDbs = &map[string]db.DatabaseConfig{}
+					vcapApplicationJson = `{}`
+					dbName = db.StoredProcedureDb
+					vcapServicesJson, err = testhelpers.GetStoredProcedureDbVcapServices(map[string]string{
+						"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
+						"client_cert": expectedClientCertContent,
+						"client_key":  expectedClientKeyContent,
+						"server_ca":   expectedServerCAContent,
+					}, dbName, "postgres")
+					Expect(err).NotTo(HaveOccurred())
+					storedProcedureUsername = "storedProcedureUsername"
+					storedProcedurePassword = "storedProcedurePassword"
+
+				})
+
+				It("reads the store procedure service from config and overrides the one in the service", func() {
+					expectedDbs = &map[string]db.DatabaseConfig{
+						dbName: {
+							URL: "postgres://storedProcedureUsername:storedProcedurePassword@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fstoredprocedure_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fstoredprocedure_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fstoredprocedure_db%2Fserver_ca.sslrootcert", // #nosec G101
+						},
+					}
+					storedProcedureConfig := &models.StoredProcedureConfig{
+						Username: storedProcedureUsername,
+						Password: storedProcedurePassword,
+					}
+					err := vcapConfiguration.ConfigureStoredProcedureDb(dbName, actualDbs, storedProcedureConfig)
+					Expect(err).NotTo(HaveOccurred())
+
+					Expect(*actualDbs).To(Equal(*expectedDbs))
+				})
+			})
+
+		})
+
+		Describe("ConfigureDbInMap", func() {
+			var actualDbs *map[string]db.DatabaseConfig
+			var expectedDbs *map[string]db.DatabaseConfig
+			var dbName string
+			var expectedClientCertContent = "client-cert-content"
+			var expectedClientKeyContent = "client-key-content"
+			var expectedServerCAContent = "server-ca-content"
+
+			BeforeEach(func() {
+				vcapApplicationJson = `{}`
+				dbName = db.PolicyDb
+				vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
+					"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
+					"client_cert": expectedClientCertContent,
+					"client_key":  expectedClientKeyContent,
+					"server_ca":   expectedServerCAContent,
+				}, dbName, "postgres")
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			When("VCAP_SERVICES has relational db service bind to app for policy db", func() {
+				BeforeEach(func() {
+					actualDbs = &map[string]db.DatabaseConfig{}
+
+					expectedDbs = &map[string]db.DatabaseConfig{
+						dbName: {
+							URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fpolicy_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fpolicy_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fpolicy_db%2Fserver_ca.sslrootcert", // #nosec G101
+						},
+					}
+				})
+
+				It("loads the db config from VCAP_SERVICES successfully", func() {
+					err := vcapConfiguration.ConfigureDbInMap(dbName, actualDbs)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(*actualDbs).To(Equal(*expectedDbs))
+
+					//Expect(mockVCAPConfigurationReader.MaterializeDBFromServiceCallCount()).To(Equal(2))
+					//actualDbName := mockVCAPConfigurationReader.MaterializeDBFromServiceArgsForCall(0)
+					//Expect(actualDbName).To(Equal(db.PolicyDb))
+				})
+			})
+		})
+
 		Describe("MaterializeDBFromService", func() {
 			BeforeEach(func() {
-				vcapApplicationJson = ""
 				vcapApplicationJson = `{}`
 			})
 

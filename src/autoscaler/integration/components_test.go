@@ -366,19 +366,19 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 		CFServer: helpers.ServerConfig{
 			Port: components.Ports[CfEventGenerator],
 		},
-		Server: egConfig.ServerConfig{
-			ServerConfig: helpers.ServerConfig{
-				Port: port,
-				TLS: models.TLSCerts{
-					KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
-					CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
-					CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
-				},
+		Server: helpers.ServerConfig{
+			Port: port,
+			TLS: models.TLSCerts{
+				KeyFile:    filepath.Join(testCertDir, "eventgenerator.key"),
+				CertFile:   filepath.Join(testCertDir, "eventgenerator.crt"),
+				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
 			},
-			NodeAddrs: []string{"localhost"},
+		},
+		Pool: &egConfig.PoolConfig{
+			NodeCount: 1,
 			NodeIndex: 0,
 		},
-		Aggregator: egConfig.AggregatorConfig{
+		Aggregator: &egConfig.AggregatorConfig{
 			AggregatorExecuteInterval: aggregatorExecuteInterval,
 			PolicyPollerInterval:      policyPollerInterval,
 			SaveInterval:              saveInterval,
@@ -387,16 +387,16 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 			AppMetricChannelSize:      1,
 			MetricCacheSizePerApp:     50,
 		},
-		Evaluator: egConfig.EvaluatorConfig{
+		Evaluator: &egConfig.EvaluatorConfig{
 			EvaluationManagerInterval: evaluationManagerInterval,
 			EvaluatorCount:            1,
 			TriggerArrayChannelSize:   1,
 		},
-		DB: egConfig.DBConfig{
-			PolicyDB: db.DatabaseConfig{
+		Db: egConfig.DbConfig{
+			PolicyDb: &db.DatabaseConfig{
 				URL: dbUri,
 			},
-			AppMetricDB: db.DatabaseConfig{
+			AppMetricDb: &db.DatabaseConfig{
 				URL: dbUri,
 			},
 		},
@@ -418,7 +418,7 @@ func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int
 		},
 		DefaultBreachDurationSecs: 600,
 		DefaultStatWindowSecs:     60,
-		HttpClientTimeout:         httpClientTimeout,
+		HttpClientTimeout:         &httpClientTimeout,
 	}
 	return WriteYmlConfig(tmpDir, EventGenerator, &conf)
 }

@@ -1,8 +1,7 @@
 package main
 
 import (
-	"io"
-
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
@@ -31,29 +30,38 @@ func main() {
 	var path string
 	flag.StringVar(&path, "c", "", "config file")
 	flag.Parse()
-	if path == "" {
-		_, _ = fmt.Fprintln(os.Stdout, "missing config file\nUsage:use '-c' option to specify the config file path")
+
+	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
+	}
+
+	conf, err := config.LoadConfig(path, vcapConfiguration)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
 		os.Exit(1)
 	}
-	conf, err := loadConfig(path)
+
+	err = conf.Validate()
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "%s\n", err.Error())
+		_, _ = fmt.Fprintf(os.Stdout, "failed to validate configuration : %s\n", err.Error())
 		os.Exit(1)
 	}
 
 	helpers.SetupOpenTelemetry()
 
 	logger := helpers.InitLoggerFromConfig(&conf.Logging, "eventgenerator")
+
 	egClock := clock.NewClock()
 
-	appMetricDB, err := sqldb.NewAppMetricSQLDB(conf.DB.AppMetricDB, logger.Session("appMetric-db"))
+	appMetricDB, err := sqldb.NewAppMetricSQLDB(*conf.Db.AppMetricDb, logger.Session("appMetric-db"))
 	if err != nil {
-		logger.Error("failed to connect app-metric database", err, lager.Data{"dbConfig": conf.DB.AppMetricDB})
+		logger.Error("failed to connect app-metric database", err, lager.Data{"dbConfig": conf.Db.AppMetricDb})
 		os.Exit(1)
 	}
 	defer func() { _ = appMetricDB.Close() }()
 
-	policyDb := sqldb.CreatePolicyDb(conf.DB.PolicyDB, logger)
+	policyDb := sqldb.CreatePolicyDb(*conf.Db.PolicyDb, logger)
 	defer func() { _ = policyDb.Close() }()
 
 	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "eventgenerator")
@@ -64,11 +72,11 @@ func main() {
 		httpStatusCollector,
 	}, true, logger.Session("eventgenerator-prometheus"))
 
-	appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, len(conf.Server.NodeAddrs), conf.Server.NodeIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
+	appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, conf.Pool.NodeCount, conf.Pool.NodeIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
 
 	triggersChan := make(chan []*models.Trigger, conf.Evaluator.TriggerArrayChannelSize)
 
-	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, appManager.GetPolicies, conf.CircuitBreaker)
+	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, appManager.GetPolicies, *conf.CircuitBreaker)
 	if err != nil {
 		logger.Error("failed to create Evaluation Manager", err)
 		os.Exit(1)
@@ -164,30 +172,6 @@ func runFunc(appManager *aggregator.AppManager, evaluators []*generator.Evaluato
 
 		return nil
 	}
-}
-func loadConfig(path string) (*config.Config, error) {
-	configFile, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open config file %q: %w", path, err)
-	}
-
-	configFileBytes, err := io.ReadAll(configFile)
-	defer func() { _ = configFile.Close() }()
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to read data from config file %q: %w", path, err)
-	}
-
-	conf, err := config.LoadConfig(configFileBytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse config file %q: %w", path, err)
-	}
-
-	err = conf.Validate()
-	if err != nil {
-		return nil, fmt.Errorf("failed to validate configuration: %w", err)
-	}
-	return conf, nil
 }
 
 func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan chan []*models.Trigger, queryMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) ([]*generator.Evaluator, error) {
