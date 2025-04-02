@@ -25,21 +25,21 @@ jobs:
         run: |
           make lint-go
       - name: shellcheck
-        uses: reviewdog/action-shellcheck@6e0e63d1750d02d761b3df0f2c5ba9f9ac4a9ed7 # v1
+        uses: reviewdog/action-shellcheck@5ebd09ddbe2ebb471646ce234c6c8dd18663ca7c # v1
         with:
           reporter: github-pr-review
       - name: actionlint
-        uses: reviewdog/action-actionlint@db58217885f9a6570da9c71be4e40ec33fe44a1f # v1
+        uses: reviewdog/action-actionlint@a5524e1c19e62881d79c1f1b9b6f09f16356e281 # v1
         with:
           reporter: github-pr-review
       - name: Run Ruby linter
         run: |
           make lint-ruby
       - name: alex
-        uses: reviewdog/action-alex@986cf7dd82e702f82b4173deaa793a849f5b719d # v1
+        uses: reviewdog/action-alex@6083b8ca333981fa617c6828c5d8fb21b13d916b # v1
         with:
           reporter: github-pr-review
       - name: markdownlint
-        uses: reviewdog/action-markdownlint@f901468edf9a3634dd39b35ba26cad0aad1a0bfd # v0
+        uses: reviewdog/action-markdownlint@3667398db9118d7e78f7a63d10e26ce454ba5f58 # v0
         with:
           reporter: github-pr-review
