@@ -224,9 +224,9 @@ stop-db: check-db_type
 	@rm target/start-db-${db_type} &> /dev/null || echo " - Seems the make target was deleted stopping anyway!"
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
+# 🚧 To-do: Minimize dependencies here, they should be handeled by the called Makefile!
 .PHONY: integration
-integration: generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
-
+integration: ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='./src/autoscaler' integration DBURL="${DBURL}"
 

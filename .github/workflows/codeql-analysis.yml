@@ -61,7 +61,9 @@ jobs:
 
     - name: Build
       run: |
-        make build-all
+        # make build-all # 🚧 To-do: Do we really require this here? Assuming that we just want to
+        # inspect code, generating the code should be enough.
+        make generate-openapi-generated-clients-and-servers
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@1b549b9259bda1cb5ddde3b41741a82a2d15a841 # v3
