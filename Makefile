@@ -8,6 +8,7 @@ go-changelog-dir := ./src/changelog
 go-changeloglockcleander-dir := ./src/changeloglockcleaner
 go-test-app-dir := ./src/acceptance/assets/app/go_app
 
+# 🚧 To-do: Remove me!
 go_modules := $(shell find . -maxdepth 6 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules := $(go_modules) db scheduler
 
@@ -38,6 +39,7 @@ $(shell mkdir -p build)
 
 .DEFAULT_GOAL := build-all
 
+# 🚧 To-do: Remove me!
 list-modules:
 	@echo ${go_modules}
 
@@ -91,10 +93,15 @@ clean-acceptance:
 	@rm src/acceptance/ginkgo* &> /dev/null || true
 	@rm -rf src/acceptance/results &> /dev/null || true
 
+# 🚧 To-do: Remove `$(all_modules)`!
 .PHONY: build build-test build-tests build-all $(all_modules)
+
+# 🚧 To-do: Remove me!
 build: $(all_modules)
 build-tests: build-test
 build-test: $(addprefix test_,$(go_modules))
+
+# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app
 db: target/db
 target/db:
@@ -110,6 +117,8 @@ changeloglockcleaner:
 	@make --directory='./src/changeloglockcleaner' build
 changelog:
 	@make --directory='./src/changelog' build
+
+# 🚧 To-do: Remove me!
 $(addprefix test_,$(go_modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
 	@make --directory='./src/$(patsubst test_%,%,$@)' build_tests
@@ -231,7 +240,10 @@ integration: generate-openapi-generated-clients-and-servers build build-gorouter
 .PHONY: lint
 lint: lint-go lint-ruby lint-actions lint-markdown ## Run all linters
 
+# 🚧 To-do: Remove all targets of the form `lint_$(go_modules)`!
 .PHONY:lint $(addprefix lint_,$(go_modules))
+
+# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 lint-go: build-all $(addprefix lint_,$(go_modules))
 
 lint-ruby:
@@ -249,6 +261,7 @@ lint-actions:
 	@echo " - linting GitHub actions"
 	actionlint
 
+# 🚧 To-do: Remove me!
 $(addprefix lint_,$(go_modules)): lint_%:
 	@echo " - linting: $(patsubst lint_%,%,$@)"
 	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS} --timeout 5m
@@ -424,7 +437,7 @@ run-performance:
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
 	make acceptance-tests-config;\
-    make --directory='./src/acceptance' run-acceptance-tests
+	make --directory='./src/acceptance' run-acceptance-tests
 
 
 .PHONY: run-act
@@ -462,9 +475,11 @@ validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
 		redocly lint --extends=minimal --format=$(if $(GITHUB_ACTIONS),github-actions,codeframe) "$${file}" ; \
 	done
 
+
+# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 .PHONY: go-get-u
 go-get-u: $(addsuffix .go-get-u,$(go_modules))
-
+# 🚧 s.o
 .PHONY: %.go-get-u
 %.go-get-u: % generate-fakes
 	@echo " - go get -u" $<
