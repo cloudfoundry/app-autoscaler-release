@@ -2,16 +2,17 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MAKEFLAGS = -s
 
-go-acceptance-dir := ./src/acceptance
-go-autoscaler-dir := ./src/autoscaler
-go-changelog-dir := ./src/changelog
-go-changeloglockcleander-dir := ./src/changeloglockcleaner
-go-test-app-dir := ./src/acceptance/assets/app/go_app
+acceptance-dir := ./src/acceptance
+autoscaler-dir := ./src/autoscaler
+changelog-dir := ./src/changelog
+changeloglockcleander-dir := ./src/changeloglockcleaner
+test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
 go_modules := $(shell find . -maxdepth 6 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules := $(go_modules) db scheduler
 
+# 🚧 To-do: Not use?!
 MVN_OPTS = "-Dmaven.test.skip=true"
 OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} || uname)
 db_type := postgres
@@ -72,7 +73,7 @@ clean-fakes:
 	@echo " - cleaning fakes"
 	@find . -depth -name "fakes" -type d -exec rm -rf {} \;
 clean-autoscaler:
-	@make --directory='./src/autoscaler' clean
+	@make --directory='${autoscaler-dir}' clean
 clean-scheduler:
 	@echo " - cleaning scheduler test resources"
 	@rm -rf src/scheduler/src/test/resources/certs
@@ -93,7 +94,7 @@ clean-acceptance:
 .PHONY: build build-test build-tests build-all
 
 # 🚧 To-do: Remove me!
-build: $(all_modules)
+build: $(all_modules) scheduler.build
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app
@@ -102,15 +103,16 @@ target/db:
 	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
 	@touch $@
-scheduler:
-	@echo "# building $@"
+# 🚧 To-do: Shouldn't this be in the dedicated Makefile of the scheduler?
+scheduler.build:
+
 	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
 autoscaler:
-	@make --directory='./src/autoscaler' build
+	@make --directory='${autoscaler-dir}' build
 changeloglockcleaner:
-	@make --directory='./src/changeloglockcleaner' build
+	@make --directory='${changeloglockcleander-dir}' build
 changelog:
-	@make --directory='./src/changelog' build
+	@make --directory='${changelog-dir}' build
 
 # 🚧 To-do: Substitute me by definitions that call the Makefile-targets of the other Makefiles!
 $(addprefix test_,$(go_modules)):
@@ -131,21 +133,21 @@ src/scheduler/src/test/resources/certs:
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit ## Run all unit tests
 test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
-	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
+	@make --directory='${autoscaler-dir}' test DBURL='${DBURL}' TEST='${TEST}'
 test-autoscaler-suite: check-db_type init-db test-certs
-	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
+	@make --directory='${autoscaler-dir}' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
 
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	make --directory='./src/scheduler' test DBURL="${DBURL}" db_type="${db_type}"
 
 test-changelog:
-	@make --directory='./src/changelog' test
+	@make --directory='${changelog-dir}' test
 test-changeloglockcleaner: init-db test-certs
-	@make --directory='./src/changeloglockcleaner' test DBURL="${DBURL}"
+	@make --directory='${changeloglockcleander-dir}' test DBURL="${DBURL}"
 test-acceptance-unit:
-	@make --directory='./src/acceptance' test-unit
-	@make --directory='./src/acceptance/assets/app/go_app' test
+	@make --directory='${acceptance-dir}' test-unit
+	@make --directory='${test-app-dir}' test
 
 
 .PHONY: start-db
@@ -228,7 +230,7 @@ stop-db: check-db_type
 .PHONY: integration
 integration: ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
 	@echo " - using DBURL=${DBURL}"
-	@make --directory='./src/autoscaler' integration DBURL="${DBURL}"
+	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
 
 .PHONY: lint
@@ -272,13 +274,13 @@ build/autoscaler-test.tgz:
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
 generate-fakes: autoscaler.generate-fakes test-app.generate-fakes
 autoscaler.generate-fakes:
-	make --directory='${go-autoscaler-dir}' generate-fakes
+	make --directory='${autoscaler-dir}' generate-fakes
 test-app.generate-fakes:
-	make --directory='${go-test-app-dir}' generate-fakes
+	make --directory='${test-app-dir}' generate-fakes
 
 .PHONY: generate-openapi-generated-clients-and-servers
 generate-openapi-generated-clients-and-servers:
-	make --directory='${go-autoscaler-dir}' generate-openapi-generated-clients-and-servers
+	make --directory='${autoscaler-dir}' generate-openapi-generated-clients-and-servers
 
 .PHONY: go-mod-tidy
 go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
@@ -287,15 +289,15 @@ go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy
 .PHONY: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
 				changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
 acceptance.go-mod-tidy:
-	make --directory='${go-acceptance-dir}' go-mod-tidy
+	make --directory='${acceptance-dir}' go-mod-tidy
 autoscaler.go-mod-tidy:
-	make --directory='${go-autoscaler-dir}' go-mod-tidy
+	make --directory='${autoscaler-dir}' go-mod-tidy
 changelog.go-mod-tidy:
-	make --directory='${go-changelog-dir}' go-mod-tidy
+	make --directory='${changelog-dir}' go-mod-tidy
 changeloglockcleander.go-mod-tidy:
-	make --directory='${go-changeloglockcleander-dir}' go-mod-tidy
+	make --directory='${changeloglockcleander-dir}' go-mod-tidy
 test-app.go-mod-tidy:
-	make --directory='${go-test-app-dir}' go-mod-tidy
+	make --directory='${test-app-dir}' go-mod-tidy
 
 
 .PHONY: mod-download
@@ -310,13 +312,13 @@ mod-download:
 go-mod-vendor: clean-vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 							 changeloglockcleander.go-mod-vendor
 acceptance.go-mod-vendor:
-	make --directory='${go-acceptance-dir}' go-mod-vendor
+	make --directory='${acceptance-dir}' go-mod-vendor
 autoscaler.go-mod-vendor:
-	make --directory='${go-autoscaler-dir}' go-mod-vendor
+	make --directory='${autoscaler-dir}' go-mod-vendor
 changelog.go-mod-vendor:
-	make --directory='${go-changelog-dir}' go-mod-vendor
+	make --directory='${changelog-dir}' go-mod-vendor
 changeloglockcleander.go-mod-vendor:
-	make --directory='${go-changeloglockcleander-dir}' go-mod-vendor
+	make --directory='${changeloglockcleander-dir}' go-mod-vendor
 
 .PHONY: uuac
 uaac:
@@ -371,32 +373,32 @@ acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
 .PHONY: mta-build
 mta-build:
 	@echo " - building mta"
-	@make --directory='./src/autoscaler' mta-build
+	@make --directory='${autoscaler-dir}' mta-build
 
 .PHONY: build-test-app
 build-test-app:
-	@make --directory='./src/acceptance/assets/app/go_app' build
+	@make --directory='${test-app-dir}' build
 
 build-gorouterproxy:
-	@make --directory='./src/autoscaler' build-gorouterproxy
+	@make --directory='${autoscaler-dir}' build-gorouterproxy
 
 .PHONY: deploy-test-app
 deploy-test-app:
-	@make --directory='./src/acceptance/assets/app/go_app' deploy
+	@make --directory='${test-app-dir}' deploy
 
 .PHONY: build-acceptance-tests
 build-acceptance-tests:
-	@make --directory='./src/acceptance' build_tests
+	@make --directory='${acceptance-dir}' build_tests
 
 .PHONY: acceptance-tests
 acceptance-tests: build-test-app acceptance-tests-config ## Run acceptance tests against OSS dev environment (requrires a previous deployment of the autoscaler)
-	@make --directory='./src/acceptance' run-acceptance-tests
+	@make --directory='${acceptance-dir}' run-acceptance-tests
 .PHONY: acceptance-cleanup
 acceptance-cleanup:
-	@make --directory='./src/acceptance' acceptance-tests-cleanup
+	@make --directory='${acceptance-dir}' acceptance-tests-cleanup
 .PHONY: acceptance-tests-config
 acceptance-tests-config:
-	make --directory='./src/acceptance' acceptance-tests-config
+	make --directory='${acceptance-dir}' acceptance-tests-config
 
 .PHONY: cleanup-concourse
 cleanup-concourse:
@@ -416,7 +418,7 @@ setup-performance: build-test-app
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	make acceptance-tests-config;\
-	make --directory='./src/acceptance' run-acceptance-tests
+	make --directory='${acceptance-dir}' run-acceptance-tests
 
 .PHONY: run-performance
 run-performance:
@@ -424,7 +426,7 @@ run-performance:
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
 	make acceptance-tests-config;\
-	make --directory='./src/acceptance' run-acceptance-tests
+	make --directory='${acceptance-dir}' run-acceptance-tests
 
 
 .PHONY: run-act

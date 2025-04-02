@@ -2,7 +2,11 @@
 FORMATTER = devbox run google-java-format
 JAVA_FILES = $(shell find . -name "*.java" -print | xargs realpath)
 
-.PHONY: format check-format install
+.PHONY: build format check-format install
+
+build:
+	@echo "# building $@"
+	@mvn --no-transfer-progress package '-Dmaven.test.skip=true'
 
 # Format all Java files in the src/ directory
 format:
