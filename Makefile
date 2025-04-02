@@ -39,10 +39,6 @@ $(shell mkdir -p build)
 
 .DEFAULT_GOAL := build-all
 
-# 🚧 To-do: Remove me!
-list-modules:
-	@echo ${go_modules}
-
 .PHONY: check-type
 check-db_type:
 	@case "${db_type}" in\
@@ -56,6 +52,7 @@ target/init-db-${db_type}:
 	@./scripts/initialise_db.sh ${db_type}
 	@touch $@
 
+# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 .PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
 clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance ## Clean all build and test artifacts
 	@make stop-db db_type=mysql
@@ -93,13 +90,10 @@ clean-acceptance:
 	@rm src/acceptance/ginkgo* &> /dev/null || true
 	@rm -rf src/acceptance/results &> /dev/null || true
 
-# 🚧 To-do: Remove `$(all_modules)`!
-.PHONY: build build-test build-tests build-all $(all_modules)
+.PHONY: build build-test build-tests build-all
 
 # 🚧 To-do: Remove me!
 build: $(all_modules)
-build-tests: build-test
-build-test: $(addprefix test_,$(go_modules))
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app
@@ -118,7 +112,7 @@ changeloglockcleaner:
 changelog:
 	@make --directory='./src/changelog' build
 
-# 🚧 To-do: Remove me!
+# 🚧 To-do: Substitute me by definitions that call the Makefile-targets of the other Makefiles!
 $(addprefix test_,$(go_modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
 	@make --directory='./src/$(patsubst test_%,%,$@)' build_tests
@@ -240,8 +234,6 @@ integration: generate-openapi-generated-clients-and-servers build build-gorouter
 .PHONY: lint
 lint: lint-go lint-ruby lint-actions lint-markdown ## Run all linters
 
-# 🚧 To-do: Remove all targets of the form `lint_$(go_modules)`!
-.PHONY:lint $(addprefix lint_,$(go_modules))
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 lint-go: build-all $(addprefix lint_,$(go_modules))
@@ -260,11 +252,6 @@ lint-markdown:
 lint-actions:
 	@echo " - linting GitHub actions"
 	actionlint
-
-# 🚧 To-do: Remove me!
-$(addprefix lint_,$(go_modules)): lint_%:
-	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS} --timeout 5m
 
 lint-gorouterproxy:
 	@echo " - linting: gorouterproxy"

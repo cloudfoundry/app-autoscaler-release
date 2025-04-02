@@ -49,7 +49,7 @@ jobs:
           POSTGRES_PORT: 5432
         run: |
           make generate-openapi-generated-clients-and-servers
-          make build
+          make build # 🚧 To-do: Is this really required?
 
       - name: make ${{ matrix.suite }}
         env:
