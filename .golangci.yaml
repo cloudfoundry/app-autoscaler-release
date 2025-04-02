@@ -1,5 +1,6 @@
-# golangci.com configuration
-# https://github.com/golangci/golangci/wiki/Configuration
+# Configuration for Golangci-lint, for further documentation, please see:
+#  + <https://golangci-lint.run/usage/configuration>
+#  + <https://golangci-lint.run/usage/linters>
 ---
 linters-settings:
   depguard:
@@ -81,6 +82,7 @@ linters-settings:
     #initialisms: ["ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "QPS", "RAM", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP", "TLS", "TTL", "UDP", "UI", "GID", "UID", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XMPP", "XSRF", "XSS"]
     # https://staticcheck.io/docs/options#http_status_code_whitelist
     #http-status-code-whitelist: ["200", "400", "404", "500"]
+
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
   # inverted configuration with `enable-all` and `disable` is not scalable during updates of golangci-lint

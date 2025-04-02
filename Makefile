@@ -91,13 +91,15 @@ clean-acceptance:
 	@rm src/acceptance/ginkgo* &> /dev/null || true
 	@rm -rf src/acceptance/results &> /dev/null || true
 
-.PHONY: build build-test build-tests build-all
-
+.PHONY: build build-all acceptance.build
 # 🚧 To-do: Remove me!
 build: $(all_modules) scheduler.build
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app
+acceptance.build:
+	@make --directory='${acceptance-dir}' build_tests
+
 db: target/db
 target/db:
 	@echo "# building $@"
@@ -228,15 +230,13 @@ stop-db: check-db_type
 
 # 🚧 To-do: Minimize dependencies here, they should be handeled by the called Makefile!
 .PHONY: integration
-integration: ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
+integration: init-db test-certs ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
 
-.PHONY: lint
-lint: lint-go lint-ruby lint-actions lint-markdown ## Run all linters
-
-
+.PHONY: lint lint-go
+lint: lint-go lint-ruby lint-actions lint-markdown
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 lint-go: build-all $(addprefix lint_,$(go_modules))
 
@@ -329,7 +329,7 @@ update-uaac-nix-package:
 	make --directory='./nix/packages/uaac' gemset.nix
 
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh
+deploy-autoscaler: go-mod-vendor uaac db scheduler.build deploy-autoscaler-bosh
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh
