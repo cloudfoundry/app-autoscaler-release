@@ -69,8 +69,7 @@ lint:
 	readonly GOVERSION='${GO_VERSION}' ;\
 	export GOVERSION ;\
 	echo "Linting with Golang $${GOVERSION}" ;\
-	golangci-lint run --config='./.golangci.yaml' ${OPTS}
-#	golangci-lint run --config='../../.golangci.yaml' ${OPTS}
+	golangci-lint run --config='../../.golangci.yaml' ${OPTS}
 
 
 ACCEPTANCE_CONFIG_PATH := ./acceptance_config.json

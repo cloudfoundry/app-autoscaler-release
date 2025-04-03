@@ -5,7 +5,7 @@ MAKEFLAGS = -s
 acceptance-dir := ./src/acceptance
 autoscaler-dir := ./src/autoscaler
 changelog-dir := ./src/changelog
-changeloglockcleander-dir := ./src/changeloglockcleaner
+changeloglockcleaner-dir := ./src/changeloglockcleaner
 test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
@@ -235,10 +235,25 @@ integration: init-db test-certs ## generate-openapi-generated-clients-and-server
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
 
-.PHONY: lint lint-go
-lint: lint-go lint-ruby lint-actions lint-markdown
-# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
-lint-go: build-all $(addprefix lint_,$(go_modules))
+.PHONY: lint lint-go acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
+lint: lint-go lint-ruby lint-actions lint-markdown lint-gorouterproxy
+lint-go: acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
+acceptance.lint:
+	@echo 'Linting acceptance-tests …'
+	make --directory='${acceptance-dir}' lint
+autoscaler.lint:
+	@echo 'Linting autoscaler …'
+	make --directory='${autoscaler-dir}' lint
+# ⚠️ Not existing: scheduler.lint:
+test-app.lint:
+	@echo 'Linting test-app …'
+	make --directory='${test-app-dir}' lint
+changelog.lint:
+	@echo 'Linting changelog …'
+	make --directory='${changelog-dir}' lint
+changeloglockcleaner.lint:
+	@echo 'Linting changeloglockcleaner …'
+	make --directory='${changeloglockcleaner-dir}' lint
 
 lint-ruby:
 	@echo " - ruby scripts"

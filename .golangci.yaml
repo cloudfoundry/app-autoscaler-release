@@ -68,12 +68,9 @@ linters-settings:
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: false # don't require nolint directives to be specific about which linter is being skipped
-  staticcheck:
-    checks: ["all"]
   stylecheck:
-    go: "1.20"
     # https://staticcheck.io/docs/options#checks
-    checks: ["all", "-ST1003", "-ST1005"]
+    checks: ["all", "-ST1001", "-ST1003", "-ST1005"]
     dot-import-whitelist:
       - github.com/onsi/ginkgo/v2
       - github.com/onsi/gomega
@@ -129,5 +126,8 @@ issues:
         - gomnd
         - typecheck
   max-same-issues: 0
+
 run:
-  go: '1.19'
+  # # 🚸 Keep that commented-out to use the version specified in the env-variable `GOVERSION`
+  # go: "1.23.1"
+  timeout: 5m
