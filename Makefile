@@ -6,6 +6,8 @@ acceptance-dir := ./src/acceptance
 autoscaler-dir := ./src/autoscaler
 changelog-dir := ./src/changelog
 changeloglockcleaner-dir := ./src/changeloglockcleaner
+db-dir := ./src/db
+scheduler-dir := ./src/scheduler
 test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
@@ -96,25 +98,22 @@ clean-acceptance:
 build: $(all_modules) scheduler.build
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
-build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app
+build-all: acceptance.build autoscaler.build scheduler.build build-test build-test-app
 acceptance.build:
 	@make --directory='${acceptance-dir}' build_tests
-
+autoscaler.build:
+	@make --directory='${autoscaler-dir}' build
+changelog.build:
+	@make --directory='${changelog-dir}' build
+changeloglockcleaner.build:
+	@make --directory='${changeloglockcleaner-dir}' build
 db: target/db
 target/db:
 	@echo "# building $@"
 	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
 	@touch $@
-# 🚧 To-do: Shouldn't this be in the dedicated Makefile of the scheduler?
 scheduler.build:
-
-	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
-autoscaler:
-	@make --directory='${autoscaler-dir}' build
-changeloglockcleaner:
-	@make --directory='${changeloglockcleander-dir}' build
-changelog:
-	@make --directory='${changelog-dir}' build
+	@make --directory='${scheduler-dir}' build
 
 # 🚧 To-do: Substitute me by definitions that call the Makefile-targets of the other Makefiles!
 $(addprefix test_,$(go_modules)):
@@ -333,7 +332,7 @@ autoscaler.go-mod-vendor:
 changelog.go-mod-vendor:
 	make --directory='${changelog-dir}' go-mod-vendor
 changeloglockcleander.go-mod-vendor:
-	make --directory='${changeloglockcleander-dir}' go-mod-vendor
+	make --directory='${changeloglockcleaner-dir}' go-mod-vendor
 
 .PHONY: uuac
 uaac:
