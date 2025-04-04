@@ -32,8 +32,9 @@ jobs:
       - name: Configure git
         id: configure_git
         shell: bash
-        env:
-          GIT_HEAD: "${{ github.head_ref }}"
+        # # 🚧 To-do: Remove me, if unnecessary
+        # env:
+        #   GIT_HEAD: "${{ github.head_ref }}"
         run: |
           #! /usr/bin/env bash
           set -eu -o pipefail
@@ -42,7 +43,8 @@ jobs:
 
           commit_author_name="$(git log -1 --pretty=format:'%an')"
           commit_author_email="$(git log -1 --pretty=format:'%ae')"
-          commit_subject="$(git log -1 "${GIT_HEAD}" --pretty=format:'%s')"
+          # commit_subject="$(git log -1 "${GIT_HEAD}" --pretty=format:'%s')"
+          commit_subject="$(git log -1 --pretty=format:'%s')"
           readonly commit_author_name commit_author_email commit_subject
 
           git config user.name "${commit_author_name}"
@@ -89,9 +91,13 @@ jobs:
           # requires go-modules to be tidied up. So we need to generate the files
           # before changing `go.mod` and `go.sum`.
           declare -r current_branch="${GIT_HEAD}"
+          # shellcheck disable=SC2016
+          echo "Generating clients, servers and fakes on `${current_branch}~1`"
           git checkout 'HEAD~1'
           make generate-fakes
           make generate-openapi-generated-clients-and-servers
+          # shellcheck disable=SC2016
+          echo "Successfully generated the code. Switching back to `${current_branch}`!"
           git checkout "${current_branch}"
 
           # ⚠️ For this workflow to be successful, the subsequent line must not

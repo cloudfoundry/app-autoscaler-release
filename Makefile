@@ -50,7 +50,7 @@ check-db_type:
 	 esac
 
 .PHONY: init-db
-init-db: check-db_type start-db db target/init-db-${db_type}
+init-db: check-db_type start-db db.java-libs target/init-db-${db_type}
 target/init-db-${db_type}:
 	@./scripts/initialise_db.sh ${db_type}
 	@touch $@
@@ -95,22 +95,55 @@ clean-acceptance:
 
 
 
-.PHONY: build-all
-# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
-build-all: acceptance.build autoscaler.build db scheduler.build build-test build-test-app
+.PHONY: build_all build_programs build_tests
+build_all: build_programs build_tests
+build_programs: acceptance.build autoscaler.build db.java-libs scheduler.build build-test-app
+build_tests:acceptance.build_tests autoscaler.build_tests changelog.build_tests changeloglockcleaner.build_tests
+
+.PHONY: acceptance.build
 acceptance.build:
+	@make --directory='${acceptance-dir}' build
+
+.PHONY: acceptance.build_tests
+acceptance.build_tests:
 	@make --directory='${acceptance-dir}' build_tests
+
+.PHONY: autoscaler.build
 autoscaler.build:
 	@make --directory='${autoscaler-dir}' build
+
+.PHONY: autoscaler.build_tests
+autoscaler.build_tests:
+	@make --directory='${autoscaler-dir}' build_tests
+
+.PHONY: changelog.build
 changelog.build:
 	@make --directory='${changelog-dir}' build
+
+.PHONY: changelog.build_tests
+changelog.build_tests:
+	@make --directory='${changelog-dir}' build_tests
+
+.PHONY: changeloglockcleaner.build
 changeloglockcleaner.build:
 	@make --directory='${changeloglockcleaner-dir}' build
-db: target/db
-target/db:
-	@echo "# building $@"
-	@pushd src &> /dev/null && mvn --no-transfer-progress package --projects='db' ${MVN_OPTS} && popd
-	@touch $@
+
+.PHONY: changeloglockcleaner.build_tests
+changeloglockcleaner.build_tests:
+	@make --directory='${changeloglockcleaner-dir}' build_tests
+
+db.java-lib-dir := src/db/target/lib
+db.java-lib-files = $(shell find '${db.java-lib-dir}' -type f -name '*.jar')
+.PHONY: db.java-libs
+db.java-libs: ${db.java-lib-dir} ${db.java-lib-files}
+${db.java-lib-dir} ${db.java-lib-files} &: src/db/pom.xml
+	@mkdir --parents '${db.java-lib-dir}'
+	@echo 'Fetching db.java-libs'
+	@pushd src &> /dev/null \
+		&& mvn --no-transfer-progress package --projects='db' ${MVN_OPTS} \
+	&& popd
+
+.PHONY:
 scheduler.build:
 	@make --directory='${scheduler-dir}' build
 
@@ -144,11 +177,10 @@ test-scheduler: check-db_type init-db test-certs
 test-changelog:
 	@make --directory='${changelog-dir}' test
 test-changeloglockcleaner: init-db test-certs
-	@make --directory='${changeloglockcleander-dir}' test DBURL="${DBURL}"
+	@make --directory='${changeloglockcleaner-dir}' test DBURL='${DBURL}'
 test-acceptance-unit:
 	@make --directory='${acceptance-dir}' test-unit
 	@make --directory='${test-app-dir}' test
-
 
 .PHONY: start-db
 start-db: check-db_type target/start-db-${db_type}_CI_${CI} waitfor_${db_type}_CI_${CI}
@@ -228,7 +260,7 @@ stop-db: check-db_type
 
 # 🚧 To-do: Minimize dependencies here, they should be handeled by the called Makefile!
 .PHONY: integration
-integration: init-db test-certs build-all ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
+integration: init-db test-certs build_all ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
@@ -297,18 +329,18 @@ generate-openapi-generated-clients-and-servers:
 
 .PHONY: go-mod-tidy
 go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
-						 changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
+						 changeloglockcleaner.go-mod-tidy test-app.go-mod-tidy
 
 .PHONY: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
-				changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
+				changeloglockcleaner.go-mod-tidy test-app.go-mod-tidy
 acceptance.go-mod-tidy:
 	make --directory='${acceptance-dir}' go-mod-tidy
 autoscaler.go-mod-tidy:
 	make --directory='${autoscaler-dir}' go-mod-tidy
 changelog.go-mod-tidy:
 	make --directory='${changelog-dir}' go-mod-tidy
-changeloglockcleander.go-mod-tidy:
-	make --directory='${changeloglockcleander-dir}' go-mod-tidy
+changeloglockcleaner.go-mod-tidy:
+	make --directory='${changeloglockcleaner-dir}' go-mod-tidy
 test-app.go-mod-tidy:
 	make --directory='${test-app-dir}' go-mod-tidy
 
@@ -321,16 +353,16 @@ mod-download:
 	done
 
 .PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
-				changeloglockcleander.go-mod-vendor
+				changeloglockcleaner.go-mod-vendor
 go-mod-vendor: clean-vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
-							 changeloglockcleander.go-mod-vendor
+							 changeloglockcleaner.go-mod-vendor
 acceptance.go-mod-vendor:
 	make --directory='${acceptance-dir}' go-mod-vendor
 autoscaler.go-mod-vendor:
 	make --directory='${autoscaler-dir}' go-mod-vendor
 changelog.go-mod-vendor:
 	make --directory='${changelog-dir}' go-mod-vendor
-changeloglockcleander.go-mod-vendor:
+changeloglockcleaner.go-mod-vendor:
 	make --directory='${changeloglockcleaner-dir}' go-mod-vendor
 
 .PHONY: uuac
@@ -341,8 +373,10 @@ uaac:
 update-uaac-nix-package:
 	make --directory='./nix/packages/uaac' gemset.nix
 
+# 🚧 To-do: Probably the db-libs are a precondition for some of the listed dependencies rather than
+# for `deploy-autoscaler` itself.
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac db scheduler.build deploy-autoscaler-bosh
+deploy-autoscaler: go-mod-vendor uaac db.java-libs scheduler.build deploy-autoscaler-bosh
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh
