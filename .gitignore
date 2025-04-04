@@ -24,7 +24,6 @@ bosh-lite/deployments/*
 target
 /app-autoscaler-release/
 test-certs
-src/scheduler/src/test/resources/certs/
 *.coverprofile
 src/autoscaler/build
 src/autoscaler/vendor
@@ -80,4 +79,3 @@ keys/
 
 # # macOS system file that stores folder metadata (safe to ignore)
 .DS_Store
-
