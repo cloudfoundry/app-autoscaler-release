@@ -90,15 +90,14 @@ jobs:
           # target `package-specs`. However the generation of them itself already
           # requires go-modules to be tidied up. So we need to generate the files
           # before changing `go.mod` and `go.sum`.
-          declare -r current_branch="${GIT_HEAD}"
-          # shellcheck disable=SC2016
-          echo "Generating clients, servers and fakes on `${current_branch}~1`"
+          current_branch_head="$(git rev-parse 'HEAD')"
+          readonly current_branch_head
+          echo "Generating clients, servers and fakes on \`${current_branch_head}~1\`"
           git checkout 'HEAD~1'
           make generate-fakes
           make generate-openapi-generated-clients-and-servers
-          # shellcheck disable=SC2016
-          echo "Successfully generated the code. Switching back to `${current_branch}`!"
-          git checkout "${current_branch}"
+          echo "Successfully generated the code. Switching back to \`${current_branch_head}\`!"
+          git checkout "${current_branch_head}"
 
           # ⚠️ For this workflow to be successful, the subsequent line must not
           # trigger again the creation of the generated files.

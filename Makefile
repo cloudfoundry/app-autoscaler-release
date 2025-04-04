@@ -97,12 +97,8 @@ clean-acceptance:
 
 .PHONY: build_all build_programs build_tests
 build_all: build_programs build_tests
-build_programs: acceptance.build autoscaler.build db.java-libs scheduler.build build-test-app
+build_programs: autoscaler.build db.java-libs scheduler.build build-test-app
 build_tests:acceptance.build_tests autoscaler.build_tests changelog.build_tests changeloglockcleaner.build_tests
-
-.PHONY: acceptance.build
-acceptance.build:
-	@make --directory='${acceptance-dir}' build
 
 .PHONY: acceptance.build_tests
 acceptance.build_tests:
@@ -260,7 +256,7 @@ stop-db: check-db_type
 
 # 🚧 To-do: Minimize dependencies here, they should be handeled by the called Makefile!
 .PHONY: integration
-integration: init-db test-certs build_all ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
+integration: init-db test-certs build_all build-gorouterproxy ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
