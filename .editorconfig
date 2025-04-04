@@ -24,5 +24,8 @@ indent_size = 4
 indent_style = tab
 
 [{*.bash,*.sh}]
+indent_style = space
 indent_size = 2
-indent_style = tab
+softtabstop = 2
+
+
