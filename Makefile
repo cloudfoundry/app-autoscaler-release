@@ -2,15 +2,19 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MAKEFLAGS = -s
 
-go-acceptance-dir := ./src/acceptance
-go-autoscaler-dir := ./src/autoscaler
-go-changelog-dir := ./src/changelog
-go-changeloglockcleander-dir := ./src/changeloglockcleaner
-go-test-app-dir := ./src/acceptance/assets/app/go_app
+acceptance-dir := ./src/acceptance
+autoscaler-dir := ./src/autoscaler
+changelog-dir := ./src/changelog
+changeloglockcleaner-dir := ./src/changeloglockcleaner
+db-dir := ./src/db
+scheduler-dir := ./src/scheduler
+test-app-dir := ${acceptance-dir}/assets/app/go_app
 
+# 🚧 To-do: Remove me!
 go_modules := $(shell find . -maxdepth 6 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
 all_modules := $(go_modules) db scheduler
 
+# 🚧 To-do: Not use?!
 MVN_OPTS = "-Dmaven.test.skip=true"
 OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} || uname)
 db_type := postgres
@@ -38,9 +42,6 @@ $(shell mkdir -p build)
 
 .DEFAULT_GOAL := build-all
 
-list-modules:
-	@echo ${go_modules}
-
 .PHONY: check-type
 check-db_type:
 	@case "${db_type}" in\
@@ -49,11 +50,12 @@ check-db_type:
 	 esac
 
 .PHONY: init-db
-init-db: check-db_type start-db db target/init-db-${db_type}
+init-db: check-db_type start-db db.java-libs target/init-db-${db_type}
 target/init-db-${db_type}:
 	@./scripts/initialise_db.sh ${db_type}
 	@touch $@
 
+# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 .PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
 clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance ## Clean all build and test artifacts
 	@make stop-db db_type=mysql
@@ -73,7 +75,7 @@ clean-fakes:
 	@echo " - cleaning fakes"
 	@find . -depth -name "fakes" -type d -exec rm -rf {} \;
 clean-autoscaler:
-	@make --directory='./src/autoscaler' clean
+	@make --directory='${autoscaler-dir}' clean
 clean-scheduler:
 	@echo " - cleaning scheduler test resources"
 	@rm -rf src/scheduler/src/test/resources/certs
@@ -91,25 +93,57 @@ clean-acceptance:
 	@rm src/acceptance/ginkgo* &> /dev/null || true
 	@rm -rf src/acceptance/results &> /dev/null || true
 
-.PHONY: build build-test build-tests build-all $(all_modules)
-build: $(all_modules)
-build-tests: build-test
-build-test: $(addprefix test_,$(go_modules))
-build-all: generate-openapi-generated-clients-and-servers build build-test build-test-app
-db: target/db
-target/db:
-	@echo "# building $@"
-	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
-	@touch $@
-scheduler:
-	@echo "# building $@"
-	@cd src && mvn --no-transfer-progress package -pl scheduler ${MVN_OPTS} && cd ..
-autoscaler:
-	@make --directory='./src/autoscaler' build
-changeloglockcleaner:
-	@make --directory='./src/changeloglockcleaner' build
-changelog:
-	@make --directory='./src/changelog' build
+
+
+.PHONY: build_all build_programs build_tests
+build_all: build_programs build_tests
+build_programs: autoscaler.build db.java-libs scheduler.build build-test-app
+build_tests:acceptance.build_tests autoscaler.build_tests changelog.build_tests changeloglockcleaner.build_tests
+
+.PHONY: acceptance.build_tests
+acceptance.build_tests:
+	@make --directory='${acceptance-dir}' build_tests
+
+.PHONY: autoscaler.build
+autoscaler.build:
+	@make --directory='${autoscaler-dir}' build
+
+.PHONY: autoscaler.build_tests
+autoscaler.build_tests:
+	@make --directory='${autoscaler-dir}' build_tests
+
+.PHONY: changelog.build
+changelog.build:
+	@make --directory='${changelog-dir}' build
+
+.PHONY: changelog.build_tests
+changelog.build_tests:
+	@make --directory='${changelog-dir}' build_tests
+
+.PHONY: changeloglockcleaner.build
+changeloglockcleaner.build:
+	@make --directory='${changeloglockcleaner-dir}' build
+
+.PHONY: changeloglockcleaner.build_tests
+changeloglockcleaner.build_tests:
+	@make --directory='${changeloglockcleaner-dir}' build_tests
+
+db.java-lib-dir := src/db/target/lib
+db.java-lib-files = $(shell find '${db.java-lib-dir}' -type f -name '*.jar')
+.PHONY: db.java-libs
+db.java-libs: ${db.java-lib-dir} ${db.java-lib-files}
+${db.java-lib-dir} ${db.java-lib-files} &: src/db/pom.xml
+	@mkdir --parents '${db.java-lib-dir}'
+	@echo 'Fetching db.java-libs'
+	@pushd src &> /dev/null \
+		&& mvn --no-transfer-progress package --projects='db' ${MVN_OPTS} \
+	&& popd
+
+.PHONY:
+scheduler.build:
+	@make --directory='${scheduler-dir}' build
+
+# 🚧 To-do: Substitute me by definitions that call the Makefile-targets of the other Makefiles!
 $(addprefix test_,$(go_modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
 	@make --directory='./src/$(patsubst test_%,%,$@)' build_tests
@@ -128,22 +162,21 @@ src/scheduler/src/test/resources/certs:
 test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit ## Run all unit tests
 test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
-	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
+	@make --directory='${autoscaler-dir}' test DBURL='${DBURL}' TEST='${TEST}'
 test-autoscaler-suite: check-db_type init-db test-certs
-	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
+	@make --directory='${autoscaler-dir}' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
 
 test-scheduler: check-db_type init-db test-certs
 	@export DB_HOST=${DB_HOST}; \
 	make --directory='./src/scheduler' test DBURL="${DBURL}" db_type="${db_type}"
 
 test-changelog:
-	@make --directory='./src/changelog' test
+	@make --directory='${changelog-dir}' test
 test-changeloglockcleaner: init-db test-certs
-	@make --directory='./src/changeloglockcleaner' test DBURL="${DBURL}"
+	@make --directory='${changeloglockcleaner-dir}' test DBURL='${DBURL}'
 test-acceptance-unit:
-	@make --directory='./src/acceptance' test-unit
-	@make --directory='./src/acceptance/assets/app/go_app' test
-
+	@make --directory='${acceptance-dir}' test-unit
+	@make --directory='${test-app-dir}' test
 
 .PHONY: start-db
 start-db: check-db_type target/start-db-${db_type}_CI_${CI} waitfor_${db_type}_CI_${CI}
@@ -221,18 +254,32 @@ stop-db: check-db_type
 	@rm target/start-db-${db_type} &> /dev/null || echo " - Seems the make target was deleted stopping anyway!"
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
+# 🚧 To-do: Minimize dependencies here, they should be handeled by the called Makefile!
 .PHONY: integration
-integration: generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
-
+integration: init-db test-certs build_all build-gorouterproxy ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
 	@echo " - using DBURL=${DBURL}"
-	@make --directory='./src/autoscaler' integration DBURL="${DBURL}"
+	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
 
-.PHONY: lint
-lint: lint-go lint-ruby lint-actions lint-markdown ## Run all linters
-
-.PHONY:lint $(addprefix lint_,$(go_modules))
-lint-go: build-all $(addprefix lint_,$(go_modules))
+.PHONY: lint lint-go acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
+lint: lint-go lint-ruby lint-actions lint-markdown lint-gorouterproxy
+lint-go: acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
+acceptance.lint:
+	@echo 'Linting acceptance-tests …'
+	make --directory='${acceptance-dir}' lint
+autoscaler.lint:
+	@echo 'Linting autoscaler …'
+	make --directory='${autoscaler-dir}' lint
+# ⚠️ Not existing: scheduler.lint:
+test-app.lint:
+	@echo 'Linting test-app …'
+	make --directory='${test-app-dir}' lint
+changelog.lint:
+	@echo 'Linting changelog …'
+	make --directory='${changelog-dir}' lint
+changeloglockcleaner.lint:
+	@echo 'Linting changeloglockcleaner …'
+	make --directory='${changeloglockcleaner-dir}' lint
 
 lint-ruby:
 	@echo " - ruby scripts"
@@ -248,10 +295,6 @@ lint-markdown:
 lint-actions:
 	@echo " - linting GitHub actions"
 	actionlint
-
-$(addprefix lint_,$(go_modules)): lint_%:
-	@echo " - linting: $(patsubst lint_%,%,$@)"
-	@pushd src/$(patsubst lint_%,%,$@) >/dev/null && golangci-lint run --config ${lint_config} ${OPTS} --timeout 5m
 
 lint-gorouterproxy:
 	@echo " - linting: gorouterproxy"
@@ -272,30 +315,30 @@ build/autoscaler-test.tgz:
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
 generate-fakes: autoscaler.generate-fakes test-app.generate-fakes
 autoscaler.generate-fakes:
-	make --directory='${go-autoscaler-dir}' generate-fakes
+	make --directory='${autoscaler-dir}' generate-fakes
 test-app.generate-fakes:
-	make --directory='${go-test-app-dir}' generate-fakes
+	make --directory='${test-app-dir}' generate-fakes
 
 .PHONY: generate-openapi-generated-clients-and-servers
 generate-openapi-generated-clients-and-servers:
-	make --directory='${go-autoscaler-dir}' generate-openapi-generated-clients-and-servers
+	make --directory='${autoscaler-dir}' generate-openapi-generated-clients-and-servers
 
 .PHONY: go-mod-tidy
 go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
-						 changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
+						 changeloglockcleaner.go-mod-tidy test-app.go-mod-tidy
 
 .PHONY: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
-				changeloglockcleander.go-mod-tidy test-app.go-mod-tidy
+				changeloglockcleaner.go-mod-tidy test-app.go-mod-tidy
 acceptance.go-mod-tidy:
-	make --directory='${go-acceptance-dir}' go-mod-tidy
+	make --directory='${acceptance-dir}' go-mod-tidy
 autoscaler.go-mod-tidy:
-	make --directory='${go-autoscaler-dir}' go-mod-tidy
+	make --directory='${autoscaler-dir}' go-mod-tidy
 changelog.go-mod-tidy:
-	make --directory='${go-changelog-dir}' go-mod-tidy
-changeloglockcleander.go-mod-tidy:
-	make --directory='${go-changeloglockcleander-dir}' go-mod-tidy
+	make --directory='${changelog-dir}' go-mod-tidy
+changeloglockcleaner.go-mod-tidy:
+	make --directory='${changeloglockcleaner-dir}' go-mod-tidy
 test-app.go-mod-tidy:
-	make --directory='${go-test-app-dir}' go-mod-tidy
+	make --directory='${test-app-dir}' go-mod-tidy
 
 
 .PHONY: mod-download
@@ -306,17 +349,17 @@ mod-download:
 	done
 
 .PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
-				changeloglockcleander.go-mod-vendor
+				changeloglockcleaner.go-mod-vendor
 go-mod-vendor: clean-vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
-							 changeloglockcleander.go-mod-vendor
+							 changeloglockcleaner.go-mod-vendor
 acceptance.go-mod-vendor:
-	make --directory='${go-acceptance-dir}' go-mod-vendor
+	make --directory='${acceptance-dir}' go-mod-vendor
 autoscaler.go-mod-vendor:
-	make --directory='${go-autoscaler-dir}' go-mod-vendor
+	make --directory='${autoscaler-dir}' go-mod-vendor
 changelog.go-mod-vendor:
-	make --directory='${go-changelog-dir}' go-mod-vendor
-changeloglockcleander.go-mod-vendor:
-	make --directory='${go-changeloglockcleander-dir}' go-mod-vendor
+	make --directory='${changelog-dir}' go-mod-vendor
+changeloglockcleaner.go-mod-vendor:
+	make --directory='${changeloglockcleaner-dir}' go-mod-vendor
 
 .PHONY: uuac
 uaac:
@@ -326,8 +369,10 @@ uaac:
 update-uaac-nix-package:
 	make --directory='./nix/packages/uaac' gemset.nix
 
+# 🚧 To-do: Probably the db-libs are a precondition for some of the listed dependencies rather than
+# for `deploy-autoscaler` itself.
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac db scheduler deploy-autoscaler-bosh
+deploy-autoscaler: go-mod-vendor uaac db.java-libs scheduler.build deploy-autoscaler-bosh
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh
@@ -371,32 +416,32 @@ acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
 .PHONY: mta-build
 mta-build:
 	@echo " - building mta"
-	@make --directory='./src/autoscaler' mta-build
+	@make --directory='${autoscaler-dir}' mta-build
 
 .PHONY: build-test-app
 build-test-app:
-	@make --directory='./src/acceptance/assets/app/go_app' build
+	@make --directory='${test-app-dir}' build
 
 build-gorouterproxy:
-	@make --directory='./src/autoscaler' build-gorouterproxy
+	@make --directory='${autoscaler-dir}' build-gorouterproxy
 
 .PHONY: deploy-test-app
 deploy-test-app:
-	@make --directory='./src/acceptance/assets/app/go_app' deploy
+	@make --directory='${test-app-dir}' deploy
 
 .PHONY: build-acceptance-tests
 build-acceptance-tests:
-	@make --directory='./src/acceptance' build_tests
+	@make --directory='${acceptance-dir}' build_tests
 
 .PHONY: acceptance-tests
 acceptance-tests: build-test-app acceptance-tests-config ## Run acceptance tests against OSS dev environment (requrires a previous deployment of the autoscaler)
-	@make --directory='./src/acceptance' run-acceptance-tests
+	@make --directory='${acceptance-dir}' run-acceptance-tests
 .PHONY: acceptance-cleanup
 acceptance-cleanup:
-	@make --directory='./src/acceptance' acceptance-tests-cleanup
+	@make --directory='${acceptance-dir}' acceptance-tests-cleanup
 .PHONY: acceptance-tests-config
 acceptance-tests-config:
-	make --directory='./src/acceptance' acceptance-tests-config
+	make --directory='${acceptance-dir}' acceptance-tests-config
 
 .PHONY: cleanup-concourse
 cleanup-concourse:
@@ -416,7 +461,7 @@ setup-performance: build-test-app
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	make acceptance-tests-config;\
-	make --directory='./src/acceptance' run-acceptance-tests
+	make --directory='${acceptance-dir}' run-acceptance-tests
 
 .PHONY: run-performance
 run-performance:
@@ -424,7 +469,7 @@ run-performance:
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
 	make acceptance-tests-config;\
-    make --directory='./src/acceptance' run-acceptance-tests
+	make --directory='${acceptance-dir}' run-acceptance-tests
 
 
 .PHONY: run-act
@@ -462,9 +507,11 @@ validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
 		redocly lint --extends=minimal --format=$(if $(GITHUB_ACTIONS),github-actions,codeframe) "$${file}" ; \
 	done
 
+
+# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 .PHONY: go-get-u
 go-get-u: $(addsuffix .go-get-u,$(go_modules))
-
+# 🚧 s.o
 .PHONY: %.go-get-u
 %.go-get-u: % generate-fakes
 	@echo " - go get -u" $<
