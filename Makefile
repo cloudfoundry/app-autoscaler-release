@@ -93,12 +93,11 @@ clean-acceptance:
 	@rm src/acceptance/ginkgo* &> /dev/null || true
 	@rm -rf src/acceptance/results &> /dev/null || true
 
-.PHONY: build build-all acceptance.build
-# 🚧 To-do: Remove me!
-build: $(all_modules) scheduler.build
 
+
+.PHONY: build-all
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
-build-all: acceptance.build autoscaler.build scheduler.build build-test build-test-app
+build-all: acceptance.build autoscaler.build db scheduler.build build-test build-test-app
 acceptance.build:
 	@make --directory='${acceptance-dir}' build_tests
 autoscaler.build:
@@ -110,7 +109,7 @@ changeloglockcleaner.build:
 db: target/db
 target/db:
 	@echo "# building $@"
-	@cd src && mvn --no-transfer-progress package -pl db ${MVN_OPTS} && cd ..
+	@pushd src &> /dev/null && mvn --no-transfer-progress package --projects='db' ${MVN_OPTS} && popd
 	@touch $@
 scheduler.build:
 	@make --directory='${scheduler-dir}' build
@@ -229,7 +228,7 @@ stop-db: check-db_type
 
 # 🚧 To-do: Minimize dependencies here, they should be handeled by the called Makefile!
 .PHONY: integration
-integration: init-db test-certs ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
+integration: init-db test-certs build-all ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
