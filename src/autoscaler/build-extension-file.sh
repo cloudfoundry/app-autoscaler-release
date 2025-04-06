@@ -77,7 +77,7 @@ _schema-version: 3.3.0
 modules:
   - name: publicapiserver
     parameters:
-      instances: 2
+      instances: 1
       routes:
       - route: ${PUBLICAPISERVER_HOST}.\${default-domain}
       - route: ${SERVICEBROKER_HOST}.\${default-domain}
