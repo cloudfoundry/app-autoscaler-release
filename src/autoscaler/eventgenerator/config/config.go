@@ -153,10 +153,6 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	if err := configureMetricsCollectorTLS(conf, vcapReader); err != nil {
-		return err
-	}
-
 	if err := configureNodeIndex(conf, vcapReader); err != nil {
 		return err
 	}
@@ -166,23 +162,16 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	}
 	return nil
 }
+
 func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
 	conf.CFServer.XFCC.ValidOrgGuid = vcapReader.GetOrgGuid()
 
 	return nil
 }
+
 func configureNodeIndex(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	conf.Pool.NodeIndex = vcapReader.GetInstanceIndex()
-	return nil
-}
-
-func configureMetricsCollectorTLS(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	tls, err := vcapReader.MaterializeTLSConfigFromService("logcache-client")
-	if err != nil {
-		return err
-	}
-	conf.MetricCollector.TLSClientCerts = tls
 	return nil
 }
 

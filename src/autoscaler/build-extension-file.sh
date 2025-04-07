@@ -105,7 +105,6 @@ modules:
     requires:
     - name: metricsforwarder-config
     - name: database
-    - name: syslog-client
     parameters:
       instances: 2
       routes:
@@ -176,12 +175,6 @@ resources:
       client_cert: "${POLICY_DB_CLIENT_CERT//$'\n'/\\n}"
       client_key: "${POLICY_DB_CLIENT_KEY//$'\n'/\\n}"
       server_ca: "${POLICY_DB_SERVER_CA//$'\n'/\\n}"
-- name: syslog-client
-  parameters:
-    config:
-      client_cert: "${SYSLOG_CLIENT_CERT//$'\n'/\\n}"
-      client_key: "${SYSLOG_CLIENT_KEY//$'\n'/\\n}"
-      server_ca: "${SYSLOG_CLIENT_CA//$'\n'/\\n}"
 - name: logcache-client
   parameters:
     config:

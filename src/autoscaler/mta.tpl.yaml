@@ -82,7 +82,6 @@ modules:
       GOVERSION: go1.GO_MINOR_VERSION
     requires:
     - name: eventgenerator-config
-    - name: logcache-client
     - name: database
     - name: app-autoscaler-application-logs
     parameters:
@@ -103,7 +102,6 @@ modules:
     requires:
     - name: metricsforwarder-config
     - name: database
-    - name: syslog-client
     - name: app-autoscaler-application-logs
     - name: app-autoscaler-dynatrace
     parameters:
@@ -145,16 +143,6 @@ resources:
     - binding_db
     - app_metrics_db
     - relational
-- name: syslog-client
-  type: org.cloudfoundry.user-provided-service
-  parameters:
-    service-tags:
-    - syslog-client
-- name: logcache-client
-  type: org.cloudfoundry.user-provided-service
-  parameters:
-    service-tags:
-    - logcache-client
 - name: app-autoscaler-application-logs
   active: false
   type: org.cloudfoundry.managed-service
