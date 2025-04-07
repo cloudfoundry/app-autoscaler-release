@@ -476,6 +476,10 @@ start-scheduler:
 	make --directory='./src/scheduler' start DBURL="${DBURL}"
 
 
+list-apps:
+	echo " - listing apps"
+	DEBUG="${DEBUG}" ${CI_DIR}/../scripts/list_apps.sh
+
 deploy-apps:
 	echo " - deploying apps"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-apps.sh
