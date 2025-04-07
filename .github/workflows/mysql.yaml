@@ -43,7 +43,6 @@ jobs:
       - name: make build
         run: |
           make generate-openapi-generated-clients-and-servers
-          # make build db_type=mysql # 🚧 To-do: Is this really required?
 
       - name: make ${{ matrix.suite }}
         env:

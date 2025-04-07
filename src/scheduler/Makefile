@@ -15,7 +15,7 @@ ${war_file_path}: $(java_files) ./pom.xml ./Makefile
 .PHONY: format
 format:
 	@echo "Formatting Java files..."
-	@$(FORMATTER) --skip-javadoc-formatting --replace $(java_files)
+	@google-java-format --skip-javadoc-formatting --replace $(java_files)
 
 # Check if files need formatting without modifying them
 .PHONY: check-format

@@ -61,15 +61,13 @@ test-unit:
 test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
-#	GOVERSION='v1.22' ;\
-
 GOLANGCI_CONF ?= ../../.golangci.yaml
 
 lint:
 	readonly GOVERSION='${GO_VERSION}' ;\
 	export GOVERSION ;\
 	echo "Linting with Golang $${GOVERSION}" ;\
-	golangci-lint run --config='../../.golangci.yaml' ${OPTS}
+	golangci-lint run --config='${GOLANGCI_CONF}' ${OPTS}
 
 
 ACCEPTANCE_CONFIG_PATH := ./acceptance_config.json

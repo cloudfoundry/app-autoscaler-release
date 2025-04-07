@@ -32,9 +32,6 @@ jobs:
       - name: Configure git
         id: configure_git
         shell: bash
-        # # 🚧 To-do: Remove me, if unnecessary
-        # env:
-        #   GIT_HEAD: "${{ github.head_ref }}"
         run: |
           #! /usr/bin/env bash
           set -eu -o pipefail
@@ -43,7 +40,6 @@ jobs:
 
           commit_author_name="$(git log -1 --pretty=format:'%an')"
           commit_author_email="$(git log -1 --pretty=format:'%ae')"
-          # commit_subject="$(git log -1 "${GIT_HEAD}" --pretty=format:'%s')"
           commit_subject="$(git log -1 --pretty=format:'%s')"
           readonly commit_author_name commit_author_email commit_subject
 
@@ -66,7 +62,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: "${{ secrets.APP_AUTOSCALER_CI_TOKEN }}"
-          GIT_HEAD: "${{ github.head_ref }}"
+          PR_BRANCH_REF: "${{ github.head_ref }}"
         run: |
           #! /usr/bin/env bash
           set -eu -o pipefail
@@ -90,8 +86,10 @@ jobs:
           # target `package-specs`. However the generation of them itself already
           # requires go-modules to be tidied up. So we need to generate the files
           # before changing `go.mod` and `go.sum`.
-          current_branch_head="$(git rev-parse 'HEAD')"
+          current_branch_head="${PR_BRANCH_REF}"
           readonly current_branch_head
+          echo "Working in branch \`${current_branch_head}\`" \
+               " on revision \`$(git rev-parse 'HEAD')\`."
 
           echo "Generating clients, servers and fakes on \`${current_branch_head}~1\`"
           # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
