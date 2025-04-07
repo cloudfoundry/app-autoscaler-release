@@ -89,11 +89,9 @@ var _ = Describe("Configutil", func() {
 
 		Describe("ConfigureStoredProcedureDb", func() {
 			var dbName string
-			var expectedServerCAContent = "server-ca-content"
 
 			var actualDbs *map[string]db.DatabaseConfig
 			var expectedDbs *map[string]db.DatabaseConfig
-
 			var storedProcedureUsername string
 			var storedProcedurePassword string
 
