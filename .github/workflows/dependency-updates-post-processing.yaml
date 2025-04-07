@@ -92,11 +92,20 @@ jobs:
           # before changing `go.mod` and `go.sum`.
           current_branch_head="$(git rev-parse 'HEAD')"
           readonly current_branch_head
+
           echo "Generating clients, servers and fakes on \`${current_branch_head}~1\`"
+          # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
+          # the derivation python.
+          git restore devbox.lock
           git checkout 'HEAD~1'
+
           make generate-fakes
           make generate-openapi-generated-clients-and-servers
+
           echo "Successfully generated the code. Switching back to \`${current_branch_head}\`!"
+          # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
+          # the derivation python.
+          git restore devbox.lock
           git checkout "${current_branch_head}"
 
           # ⚠️ For this workflow to be successful, the subsequent line must not

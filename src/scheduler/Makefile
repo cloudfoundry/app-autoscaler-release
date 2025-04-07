@@ -41,7 +41,7 @@ test: test-certificates
 	mvn test --no-transfer-progress '-Dspring.profiles.include=${db_type}'
 
 test-certs-dir := src/test/resources/certs
-test-certs = $(shell find './${test-certs-dir}' -type f )
+test-certs = $(shell find './${test-certs-dir}' -type f 2> /dev/null)
 .PHONY: test-certificates
 test-certificates: ${test-certs-dir}
 ${test-certs-dir} ${test-certs} &:

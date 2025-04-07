@@ -129,7 +129,7 @@ changeloglockcleaner.build_tests:
 	@make --directory='${changeloglockcleaner-dir}' build_tests
 
 db.java-lib-dir := src/db/target/lib
-db.java-lib-files = $(shell find '${db.java-lib-dir}' -type f -name '*.jar')
+db.java-lib-files = $(shell find '${db.java-lib-dir}' -type f -name '*.jar' 2> /dev/null)
 .PHONY: db.java-libs
 db.java-libs: ${db.java-lib-dir} ${db.java-lib-files}
 ${db.java-lib-dir} ${db.java-lib-files} &: src/db/pom.xml
@@ -254,9 +254,8 @@ stop-db: check-db_type
 	@rm target/start-db-${db_type} &> /dev/null || echo " - Seems the make target was deleted stopping anyway!"
 	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
 
-# 🚧 To-do: Minimize dependencies here, they should be handeled by the called Makefile!
 .PHONY: integration
-integration: init-db test-certs build_all build-gorouterproxy ## generate-openapi-generated-clients-and-servers build build-gorouterproxy init-db test-certs ## Run all integration tests
+integration: init-db test-certs build_all build-gorouterproxy
 	@echo " - using DBURL=${DBURL}"
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
