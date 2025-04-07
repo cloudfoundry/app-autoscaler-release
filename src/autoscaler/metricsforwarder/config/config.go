@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
@@ -15,8 +14,6 @@ import (
 )
 
 var (
-	ErrReadYaml                       = errors.New("failed to read config file")
-	ErrReadJson                       = errors.New("failed to read vcap_services json")
 	ErrMetricsforwarderConfigNotFound = errors.New("metricsforwarder config service not found")
 )
 
@@ -57,7 +54,7 @@ type Config struct {
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	conf := defaultConfig()
 
-	if err := loadYamlFile(filepath, &conf); err != nil {
+	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
 		return nil, err
 	}
 
@@ -77,6 +74,7 @@ func defaultConfig() Config {
 		},
 		Health:               helpers.HealthConfig{ServerConfig: helpers.ServerConfig{Port: 8081}},
 		CacheTTL:             DefaultCacheTTL,
+		Db:                   make(map[string]db.DatabaseConfig),
 		CacheCleanupInterval: DefaultCacheCleanupInterval,
 		PolicyPollerInterval: DefaultPolicyPollerInterval,
 		RateLimit: models.RateLimitConfig{
@@ -84,25 +82,6 @@ func defaultConfig() Config {
 			ValidDuration: DefaultValidDuration,
 		},
 	}
-}
-
-func loadYamlFile(filepath string, conf *Config) error {
-	if filepath == "" {
-		return nil
-	}
-	file, err := os.Open(filepath)
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "failed to open config file '%s': %s\n", filepath, err)
-		return ErrReadYaml
-	}
-	defer file.Close()
-
-	dec := yaml.NewDecoder(file)
-	dec.KnownFields(true)
-	if err := dec.Decode(conf); err != nil {
-		return fmt.Errorf("%w: %v", ErrReadYaml, err)
-	}
-	return nil
 }
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
@@ -115,22 +94,8 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	if conf.Db == nil {
-		conf.Db = make(map[string]db.DatabaseConfig)
-	}
-
-	if err := vcapReader.ConfigureDbInMap(db.PolicyDb, &conf.Db); err != nil {
+	if err := vcapReader.ConfigureDatabases(&conf.Db, conf.StoredProcedureConfig, conf.CredHelperImpl); err != nil {
 		return err
-	}
-
-	if err := vcapReader.ConfigureDbInMap(db.BindingDb, &conf.Db); err != nil {
-		return err
-	}
-
-	if conf.CredHelperImpl == "stored_procedure" {
-		if err := vcapReader.ConfigureStoredProcedureDb(db.StoredProcedureDb, &conf.Db, conf.StoredProcedureConfig); err != nil {
-			return err
-		}
 	}
 
 	if err := configureSyslogTLS(conf, vcapReader); err != nil {

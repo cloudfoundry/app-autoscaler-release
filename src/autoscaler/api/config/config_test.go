@@ -114,42 +114,9 @@ var _ = Describe("Config", func() {
 			})
 
 			When("handling available databases", func() {
-				It("calls configureDb with for policyDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(0)
-					Expect(db.PolicyDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(&conf.Db))
-				})
 
-				It("calls configureDb with bindingDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(1)
-					Expect(db.BindingDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(&conf.Db))
-				})
-			})
-
-			When("handling available storeprocedure database", func() {
-				When("storedProcedure_db service is provided and cred_helper_impl is stored_procedure", func() {
-					BeforeEach(func() {
-						mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(
-							`{ "cred_helper_impl": "stored_procedure" }`), nil) // #nosec G101
-					})
-
-					It("calls configureStoredProcedureDb", func() {
-						Expect(err).NotTo(HaveOccurred())
-						Expect(mockVCAPConfigurationReader.ConfigureStoredProcedureDbCallCount()).To(Equal(1))
-					})
-				})
-
-				When("storedProcedure_db service is provided and cred_helper_impl is default", func() {
-					BeforeEach(func() {
-						mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(
-							`{ "cred_helper_impl": "default" }`), nil) // #nosec G101
-					})
-
-					It("calls configureStoredProcedureDb", func() {
-						Expect(err).NotTo(HaveOccurred())
-						Expect(mockVCAPConfigurationReader.ConfigureStoredProcedureDbCallCount()).To(Equal(0))
-					})
+				It("calls vcapReader ConfigureDatabases with the right arguments", func() {
+					testhelpers.ExpectConfigureDatabasesCalledOnce(err, mockVCAPConfigurationReader, conf.CredHelperImpl)
 				})
 			})
 
@@ -160,8 +127,10 @@ var _ = Describe("Config", func() {
 					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(""), expectedErr)
 				})
 
-				It("should error with config service not found", func() {
-					Expect(err).To(MatchError(MatchRegexp("publicapiserver config service not found")))
+				It("calls configureDb with bindingDB", func() {
+					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(1)
+					Expect(db.BindingDb).To(Equal(receivedDbName))
+					Expect(receivedDbConfig).To(Equal(&conf.Db))
 				})
 			})
 

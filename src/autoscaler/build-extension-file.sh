@@ -169,7 +169,6 @@ resources:
             broker_password: $SERVICE_BROKER_PASSWORD
           - broker_username: 'autoscaler-broker-user-blue'
             broker_password: $SERVICE_BROKER_PASSWORD_BLUE
-
 - name: database
   parameters:
     config:

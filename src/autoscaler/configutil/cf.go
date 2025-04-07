@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
-	"strconv"
 	"strings"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -30,9 +28,8 @@ type VCAPConfigurationReader interface {
 	GetInstanceIndex() int
 	IsRunningOnCF() bool
 
-	ConfigureDb(dbName string, database *db.DatabaseConfig) error
-	ConfigureDbInMap(dbName string, confDb *map[string]db.DatabaseConfig) error
 	ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error
+	ConfigureDatabases(confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, credHelperImpl string) error
 }
 
 type VCAPConfiguration struct {
@@ -245,7 +242,7 @@ func (vc *VCAPConfiguration) addConnectionParam(service *cfenv.Service, dbName, 
 }
 
 func (vc *VCAPConfiguration) ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error {
-	if err := vc.ConfigureDbInMap(dbName, confDb); err != nil {
+	if err := vc.configureDb(dbName, confDb); err != nil {
 		return err
 	}
 
@@ -269,26 +266,37 @@ func (vc *VCAPConfiguration) ConfigureStoredProcedureDb(dbName string, confDb *m
 	return nil
 }
 
-func (vc *VCAPConfiguration) ConfigureDb(dbName string, database *db.DatabaseConfig) error {
-	dbURL, err := vc.MaterializeDBFromService(dbName)
-	database.URL = dbURL
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (vc *VCAPConfiguration) ConfigureDbInMap(dbName string, confDb *map[string]db.DatabaseConfig) error {
+func (vc *VCAPConfiguration) configureDb(dbName string, confDb *map[string]db.DatabaseConfig) error {
 	currentDb, ok := (*confDb)[dbName]
 	if !ok {
 		(*confDb)[dbName] = db.DatabaseConfig{}
 	}
-	if err := vc.ConfigureDb(dbName, &currentDb); err != nil {
+
+	dbURL, err := vc.MaterializeDBFromService(dbName)
+	currentDb.URL = dbURL
+	if err != nil {
+		return err
+	}
+	(*confDb)[dbName] = currentDb
+
+	return nil
+}
+
+func (vc *VCAPConfiguration) ConfigureDatabases(confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, credHelperImpl string) error {
+	if err := vc.configureDb(db.PolicyDb, confDb); err != nil {
 		return err
 	}
 
-	(*confDb)[dbName] = currentDb
+	if err := vc.configureDb(db.BindingDb, confDb); err != nil {
+		return err
+	}
+
+	if credHelperImpl == "stored_procedure" {
+		if err := vc.ConfigureStoredProcedureDb(db.StoredProcedureDb, confDb, storedProcedureConfig); err != nil {
+			return err
+		}
+	}
+
 
 	return nil
 }
