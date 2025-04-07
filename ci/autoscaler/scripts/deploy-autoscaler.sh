@@ -161,6 +161,7 @@ function pre_deploy() {
 	if [[ "${enable_mtar}" == "true" ]]; then
 		ops_files+=" ${autoscaler_dir}/operations/use-cf-services.yml"
 		ops_files+=" ${autoscaler_dir}/operations/configure-cf-services.yml"
+
 		cf_login
 
 		cf_target ${autoscaler_org} ${autoscaler_space}

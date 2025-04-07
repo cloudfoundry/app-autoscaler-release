@@ -30,8 +30,13 @@ export CPU_LOWER_THRESHOLD="${CPU_LOWER_THRESHOLD:-"100"}"
 
 cat << EOF > /tmp/extension-file-secrets.yml.tpl
 postgres_ip: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_ip))
+
 metricsforwarder_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_metricsforwarder_health_password))
+metricsforwarder_uaa_client_id: admin
+metricsforwarder_uaa_client_secret: ((/bosh-autoscaler/cf/uaa_admin_client_secret))
+
 eventgenerator_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_eventgenerator_health_password))
+
 policy_db_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/database_password))
 policy_db_server_ca: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_server.ca))
 policy_db_client_cert: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_server.certificate))
@@ -45,8 +50,12 @@ EOF
 
 credhub interpolate -f "/tmp/extension-file-secrets.yml.tpl" > /tmp/mtar-secrets.yml
 
+export METRICSFORWARDER_UAA_CLIENT_ID="$(yq ".metricsforwarder_uaa_client_id" /tmp/mtar-secrets.yml)"
+export METRICSFORWARDER_UAA_CLIENT_SECRET="$(yq ".metricsforwarder_uaa_client_secret" /tmp/mtar-secrets.yml)"
+export METRICSFORWARDER_UAA_SKIP_SSL_VALIDATION="$(yq ".metricsforwarder_uaa_skip_ssl_validation" /tmp/mtar-secrets.yml)"
 export METRICSFORWARDER_APPNAME="${METRICSFORWARDER_APPNAME:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
 export METRICSFORWARDER_HEALTH_PASSWORD="$(yq ".metricsforwarder_health_password" /tmp/mtar-secrets.yml)"
+
 
 export EVENTGENERATOR_HEALTH_PASSWORD="$(yq ".eventgenerator_health_password" /tmp/mtar-secrets.yml)"
 
@@ -85,6 +94,9 @@ modules:
       - route: ${PUBLICAPISERVER_HOST}.\${default-domain}
       - route: ${SERVICEBROKER_HOST}.\${default-domain}
   - name: eventgenerator
+    requires:
+    - name: eventgenerator-config
+    - name: database
     parameters:
       instances: 2
       routes:
@@ -116,7 +128,13 @@ resources:
     config:
       eventgenerator-config:
         metricCollector:
-          metric_collector_url: logcache:8080
+          metric_collector_url: https://log-cache.\${default-domain}
+          port: ''
+          uaa:
+            url: https://uaa.\${default-domain}
+            client_id: "${METRICSFORWARDER_UAA_CLIENT_ID}"
+            client_secret: "${METRICSFORWARDER_UAA_CLIENT_SECRET}"
+            skip_ssl_validation: true
         pool:
           node_count: 2
         health:

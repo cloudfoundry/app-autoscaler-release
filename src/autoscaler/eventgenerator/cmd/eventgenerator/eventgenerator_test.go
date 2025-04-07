@@ -3,6 +3,7 @@ package main_test
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"

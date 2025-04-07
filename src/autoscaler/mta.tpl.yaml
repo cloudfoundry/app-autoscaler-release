@@ -33,16 +33,16 @@ modules:
       tasks:
       - name: apply-api-changelog
         command: |
-          chmod +x ./boot-inf/classes/bin/apply-changelog.sh
-          /home/vcap/app/boot-inf/classes/bin/apply-changelog.sh \
-            boot-inf/classes/api.db.changelog.yml \
-            boot-inf/classes/servicebroker.db.changelog.yaml
+          chmod +x ./BOOT-INF/classes/bin/apply-changelog.sh ; \
+          /home/vcap/app/BOOT-INF/classes/bin/apply-changelog.sh \
+            BOOT-INF/classes/api.db.changelog.yml \
+            BOOT-INF/classes/servicebroker.db.changelog.yaml
       - name: apply-eventgenerator-changelog
         command: |
-          chmod +x ./boot-inf/classes/bin/apply-changelog.sh
-          /home/vcap/app/boot-inf/classes/bin/apply-changelog.sh \
-            boot-inf/classes/dataaggregator.db.changelog.yml \
-            boot-inf/classes/metricscollector.db.changelog.yml
+          chmod +x ./BOOT-INF/classes/bin/apply-changelog.sh ; \
+          /home/vcap/app/BOOT-INF/classes/bin/apply-changelog.sh \
+            BOOT-INF/classes/dataaggregator.db.changelog.yml \
+            BOOT-INF/classes/metricscollector.db.changelog.yml
 
 
 
