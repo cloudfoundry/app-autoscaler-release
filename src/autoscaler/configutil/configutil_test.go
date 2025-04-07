@@ -16,10 +16,16 @@ import (
 
 var _ = Describe("Configutil", func() {
 	Describe("VCAPConfiguration", func() {
-		var vcapConfiguration *VCAPConfiguration
-		var vcapApplicationJson string
-		var vcapServicesJson string
-		var err error
+		var (
+			vcapConfiguration         *VCAPConfiguration
+			vcapApplicationJson       string
+			vcapServicesJson          string
+			dbUri                     = "postgres://foo:bar@postgres.example.com:5432/some-db"
+			expectedClientKeyContent  = "client-key-content"
+			expectedServerCAContent   = "server-ca-content"
+			expectedClientCertContent = "client-cert-content"
+			err                       error
+		)
 
 		JustBeforeEach(func() {
 			os.Setenv("VCAP_APPLICATION", vcapApplicationJson)
@@ -51,9 +57,6 @@ var _ = Describe("Configutil", func() {
 			})
 
 			When("service has tls ca, cert and key credentials", func() {
-				var expectedClientCertContent = "client-cert-content"
-				var expectedClientKeyContent = "client-key-content"
-				var expectedServerCAContent = "server-ca-content"
 
 				BeforeEach(func() {
 					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
@@ -86,8 +89,6 @@ var _ = Describe("Configutil", func() {
 
 		Describe("ConfigureStoredProcedureDb", func() {
 			var dbName string
-			var expectedClientCertContent = "client-cert-content"
-			var expectedClientKeyContent = "client-key-content"
 			var expectedServerCAContent = "server-ca-content"
 
 			var actualDbs *map[string]db.DatabaseConfig
@@ -102,7 +103,7 @@ var _ = Describe("Configutil", func() {
 					vcapApplicationJson = `{}`
 					dbName = db.StoredProcedureDb
 					vcapServicesJson, err = testhelpers.GetStoredProcedureDbVcapServices(map[string]string{
-						"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
+						"uri":         dbUri,
 						"client_cert": expectedClientCertContent,
 						"client_key":  expectedClientKeyContent,
 						"server_ca":   expectedServerCAContent,
@@ -135,8 +136,6 @@ var _ = Describe("Configutil", func() {
 		Describe("ConfigureDatabases", func() {
 			var actualDbs *map[string]db.DatabaseConfig
 			var expectedDbs *map[string]db.DatabaseConfig
-			var expectedClientCertContent = "client-cert-content"
-			var expectedClientKeyContent = "client-key-content"
 			var expectedServerCAContent = "server-ca-content"
 			var databaseNames []string
 
@@ -150,7 +149,8 @@ var _ = Describe("Configutil", func() {
 				BeforeEach(func() {
 					databaseNames = []string{db.PolicyDb, db.BindingDb, db.StoredProcedureDb}
 					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
-						"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
+						"uri": dbUri,
+
 						"client_cert": expectedClientCertContent,
 						"client_key":  expectedClientKeyContent,
 						"server_ca":   expectedServerCAContent,
@@ -189,7 +189,7 @@ var _ = Describe("Configutil", func() {
 				BeforeEach(func() {
 					databaseNames = []string{db.PolicyDb, db.BindingDb}
 					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
-						"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
+						"uri":         dbUri,
 						"client_cert": expectedClientCertContent,
 						"client_key":  expectedClientKeyContent,
 						"server_ca":   expectedServerCAContent,
@@ -221,7 +221,9 @@ var _ = Describe("Configutil", func() {
 		})
 
 		Describe("MaterializeDBFromService", func() {
+			var dbName string
 			BeforeEach(func() {
+				dbName = "some-db"
 				vcapApplicationJson = `{}`
 			})
 
@@ -230,29 +232,26 @@ var _ = Describe("Configutil", func() {
 					BeforeEach(func() {
 						vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
 							"uri": "http://example.com/path\x00with/invalid/character",
-						}, []string{"some-db"}, "postgres")
+						}, []string{dbName}, "postgres")
 						Expect(err).NotTo(HaveOccurred())
 					})
 
 					It("errors", func() {
-						_, err = vcapConfiguration.MaterializeDBFromService("some-db")
+						_, err = vcapConfiguration.MaterializeDBFromService(dbName)
 						Expect(err).To(HaveOccurred())
 					})
 				})
 
 				When("service uri is present", func() {
-					var expectedClientCertContent = "client-cert-content"
-					var expectedClientKeyContent = "client-key-content"
-					var expectedServerCAContent = "server-ca-content"
 
 					When("postgresDB", func() {
 						BeforeEach(func() {
 							vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
-								"uri":         "postgres://foo:bar@postgres.example.com:5432/some-db",
+								"uri":         dbUri,
 								"client_cert": expectedClientCertContent,
 								"client_key":  expectedClientKeyContent,
 								"server_ca":   expectedServerCAContent,
-							}, []string{"some-db"}, "postgres")
+							}, []string{dbName}, "postgres")
 							Expect(err).NotTo(HaveOccurred())
 						})
 
@@ -286,14 +285,14 @@ var _ = Describe("Configutil", func() {
 								"client_cert": expectedClientCertContent,
 								"client_key":  expectedClientKeyContent,
 								"server_ca":   expectedServerCAContent,
-							}, []string{"some-db"}, "mysql")
+							}, []string{dbName}, "mysql")
 							Expect(err).NotTo(HaveOccurred())
 						})
 
 						XIt("loads the db config from VCAP_SERVICES for postgres db", func() {
 							expectedDbUrl := "mysql://foo:bar@mysql:3306/some-db?ssl-ca=%2Ftmp%2Fsome-db%2Fserver_ca.ssl-ca&ssl-cert=%2Ftmp%2Fsome-db%2Fclient_cert.ssl-cert&ssl-key=%2Ftmp%2Fsome-db%2Fclient_key.ssl-key" // #nosec G101
 
-							dbUrl, err := vcapConfiguration.MaterializeDBFromService("some-db")
+							dbUrl, err := vcapConfiguration.MaterializeDBFromService(dbName)
 							Expect(err).NotTo(HaveOccurred())
 							Expect(dbUrl).To(Equal(expectedDbUrl))
 
