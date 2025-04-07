@@ -20,7 +20,7 @@ var _ = Describe("Configutil", func() {
 			vcapConfiguration         *VCAPConfiguration
 			vcapApplicationJson       string
 			vcapServicesJson          string
-			dbUri                     = "postgres://foo:bar@postgres.example.com:5432/some-db"
+			dbUri                     = "postgres://foo:bar@postgres.example.com:5432/some-db" // #nosec G101
 			expectedClientKeyContent  = "client-key-content"
 			expectedServerCAContent   = "server-ca-content"
 			expectedClientCertContent = "client-cert-content"
