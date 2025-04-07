@@ -115,12 +115,7 @@ var _ = Describe("Config", func() {
 
 			When("handling available databases", func() {
 				It("calls vcapReader ConfigureDatabases with the right arguments", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(mockVCAPConfigurationReader.ConfigureDatabasesCallCount()).To(Equal(1))
-					receivedDbConfig, receivedStoredProcedureConfig, receivedCredHelperImpl := mockVCAPConfigurationReader.ConfigureDatabasesArgsForCall(0)
-					Expect(*receivedDbConfig).To(Equal(map[string]db.DatabaseConfig{}))
-					Expect(receivedStoredProcedureConfig).To(BeNil())
-					Expect(receivedCredHelperImpl).To(Equal(conf.CredHelperImpl))
+					testhelpers.ExpectConfigureDatabasesCalledOnce(err, mockVCAPConfigurationReader, conf.CredHelperImpl)
 				})
 			})
 
