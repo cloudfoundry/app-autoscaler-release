@@ -2,6 +2,7 @@ package main
 
 import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
@@ -54,14 +55,14 @@ func main() {
 
 	egClock := clock.NewClock()
 
-	appMetricDB, err := sqldb.NewAppMetricSQLDB(*conf.Db.AppMetricDb, logger.Session("appMetric-db"))
+	appMetricDB, err := sqldb.NewAppMetricSQLDB(conf.Db[db.AppMetricsDb], logger.Session("appMetric-db"))
 	if err != nil {
-		logger.Error("failed to connect app-metric database", err, lager.Data{"dbConfig": conf.Db.AppMetricDb})
+		logger.Error("failed to connect app-metric database", err, lager.Data{"dbConfig": conf.Db[db.AppMetricsDb]})
 		os.Exit(1)
 	}
 	defer func() { _ = appMetricDB.Close() }()
 
-	policyDb := sqldb.CreatePolicyDb(*conf.Db.PolicyDb, logger)
+	policyDb := sqldb.CreatePolicyDb(conf.Db[db.PolicyDb], logger)
 	defer func() { _ = policyDb.Close() }()
 
 	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "eventgenerator")

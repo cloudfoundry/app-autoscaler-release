@@ -175,7 +175,7 @@ resources:
       client_cert: "${POLICY_DB_CLIENT_CERT//$'\n'/\\n}"
       client_key: "${POLICY_DB_CLIENT_KEY//$'\n'/\\n}"
       server_ca: "${POLICY_DB_SERVER_CA//$'\n'/\\n}"
-- name: logcache-client
+- name: syslog-client
   parameters:
     config:
       client_cert: "${SYSLOG_CLIENT_CERT//$'\n'/\\n}"

@@ -56,11 +56,6 @@ type PoolConfig struct {
 	NodeIndex int `yaml:"node_index" json:"node_index"`
 }
 
-type DbConfig struct {
-	PolicyDb    *db.DatabaseConfig `yaml:"policy_db" json:"policy_db,omitempty"`
-	AppMetricDb *db.DatabaseConfig `yaml:"app_metrics_db" json:"app_metrics_db,omitempty"`
-}
-
 type AggregatorConfig struct {
 	MetricPollerCount         int           `yaml:"metric_poller_count" json:"metric_poller_count"`
 	AppMonitorChannelSize     int           `yaml:"app_monitor_channel_size" json:"app_monitor_channel_size"`
@@ -95,20 +90,20 @@ type CircuitBreakerConfig struct {
 }
 
 type Config struct {
-	Logging                   helpers.LoggingConfig `yaml:"logging" json:"logging"`
-	Server                    helpers.ServerConfig  `yaml:"server" json:"server"`
-	CFServer                  helpers.ServerConfig  `yaml:"cf_server" json:"cf_server"`
-	Pool                      *PoolConfig           `yaml:"pool" json:"pool"`
-	Health                    helpers.HealthConfig  `yaml:"health" json:"health"`
-	Db                        DbConfig              `yaml:"db" json:"db,omitempty"`
-	Aggregator                *AggregatorConfig     `yaml:"aggregator" json:"aggregator,omitempty"`
-	Evaluator                 *EvaluatorConfig      `yaml:"evaluator" json:"evaluator,omitempty"`
-	ScalingEngine             ScalingEngineConfig   `yaml:"scalingEngine" json:"scalingEngine"`
-	MetricCollector           MetricCollectorConfig `yaml:"metricCollector" json:"metricCollector"`
-	DefaultStatWindowSecs     int                   `yaml:"defaultStatWindowSecs" json:"defaultStatWindowSecs"`
-	DefaultBreachDurationSecs int                   `yaml:"defaultBreachDurationSecs" json:"defaultBreachDurationSecs"`
-	CircuitBreaker            *CircuitBreakerConfig `yaml:"circuitBreaker" json:"circuitBreaker,omitempty"`
-	HttpClientTimeout         *time.Duration        `yaml:"http_client_timeout" json:"http_client_timeout,omitempty"`
+	Logging                   helpers.LoggingConfig        `yaml:"logging" json:"logging"`
+	Server                    helpers.ServerConfig         `yaml:"server" json:"server"`
+	CFServer                  helpers.ServerConfig         `yaml:"cf_server" json:"cf_server"`
+	Pool                      *PoolConfig                  `yaml:"pool" json:"pool"`
+	Health                    helpers.HealthConfig         `yaml:"health" json:"health"`
+	Db                        map[string]db.DatabaseConfig `yaml:"db"`
+	Aggregator                *AggregatorConfig            `yaml:"aggregator" json:"aggregator,omitempty"`
+	Evaluator                 *EvaluatorConfig             `yaml:"evaluator" json:"evaluator,omitempty"`
+	ScalingEngine             ScalingEngineConfig          `yaml:"scalingEngine" json:"scalingEngine"`
+	MetricCollector           MetricCollectorConfig        `yaml:"metricCollector" json:"metricCollector"`
+	DefaultStatWindowSecs     int                          `yaml:"defaultStatWindowSecs" json:"defaultStatWindowSecs"`
+	DefaultBreachDurationSecs int                          `yaml:"defaultBreachDurationSecs" json:"defaultBreachDurationSecs"`
+	CircuitBreaker            *CircuitBreakerConfig        `yaml:"circuitBreaker" json:"circuitBreaker,omitempty"`
+	HttpClientTimeout         *time.Duration               `yaml:"http_client_timeout" json:"http_client_timeout,omitempty"`
 }
 
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
@@ -145,11 +140,11 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	if err := vcapReader.ConfigureDb(db.PolicyDb, conf.Db.PolicyDb); err != nil {
+	if err := vcapReader.ConfigureDb(db.PolicyDb, &conf.Db); err != nil {
 		return err
 	}
 
-	if err := vcapReader.ConfigureDb(db.AppMetricsDb, conf.Db.AppMetricDb); err != nil {
+	if err := vcapReader.ConfigureDb(db.AppMetricsDb, &conf.Db); err != nil {
 		return err
 	}
 
@@ -162,7 +157,6 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	}
 	return nil
 }
-
 func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
 	conf.CFServer.XFCC.ValidOrgGuid = vcapReader.GetOrgGuid()
@@ -231,12 +225,12 @@ func setDefaults(conf *Config) {
 	if conf.Pool == nil {
 		conf.Pool = &PoolConfig{}
 	}
-	if conf.Db.PolicyDb == nil {
-		conf.Db.PolicyDb = &db.DatabaseConfig{}
-	}
-	if conf.Db.AppMetricDb == nil {
-		conf.Db.AppMetricDb = &db.DatabaseConfig{}
-	}
+	// if conf.Db.PolicyDb == nil {
+	// 	conf.Db.PolicyDb = &db.DatabaseConfig{}
+	// }
+	// if conf.Db.AppMetricDb == nil {
+	// 	conf.Db.AppMetricDb = &db.DatabaseConfig{}
+	// }
 	conf.Logging.Level = strings.ToLower(conf.Logging.Level)
 	if conf.CircuitBreaker == nil {
 		conf.CircuitBreaker = &CircuitBreakerConfig{}
@@ -281,10 +275,10 @@ func (c *Config) Validate() error {
 }
 
 func (c *Config) validateDb() error {
-	if c.Db.PolicyDb.URL == "" {
+	if c.Db[db.PolicyDb].URL == "" {
 		return fmt.Errorf("Configuration error: db.policy_db.url is empty")
 	}
-	if c.Db.AppMetricDb.URL == "" {
+	if c.Db[db.AppMetricsDb].URL == "" {
 		return fmt.Errorf("Configuration error: db.app_metrics_db.url is empty")
 	}
 	return nil
