@@ -60,8 +60,7 @@ jobs:
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
     - name: Build
-      run: |
-        make generate-openapi-generated-clients-and-servers scheduler.build
+      run: make generate-openapi-generated-clients-and-servers scheduler.build
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@1b549b9259bda1cb5ddde3b41741a82a2d15a841 # v3

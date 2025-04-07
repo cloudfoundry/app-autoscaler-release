@@ -12,10 +12,8 @@ test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
 go_modules := $(shell find . -maxdepth 6 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
-all_modules := $(go_modules) db scheduler
 
-# 🚧 To-do: Not use?!
-MVN_OPTS = "-Dmaven.test.skip=true"
+
 OS := $(shell . /etc/lsb-release &>/dev/null && echo $${DISTRIB_ID} || uname)
 db_type := postgres
 DB_HOST := localhost
@@ -128,6 +126,7 @@ changeloglockcleaner.build:
 changeloglockcleaner.build_tests:
 	@make --directory='${changeloglockcleaner-dir}' build_tests
 
+MVN_OPTS ?= -Dmaven.test.skip=true
 db.java-lib-dir := src/db/target/lib
 db.java-lib-files = $(shell find '${db.java-lib-dir}' -type f -name '*.jar' 2> /dev/null)
 .PHONY: db.java-libs
@@ -159,16 +158,12 @@ src/scheduler/src/test/resources/certs:
 
 
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
-test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner test-acceptance-unit ## Run all unit tests
+test: test-autoscaler scheduler.test test-changelog test-changeloglockcleaner test-acceptance-unit ## Run all unit tests
 test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
 	@make --directory='${autoscaler-dir}' test DBURL='${DBURL}' TEST='${TEST}'
 test-autoscaler-suite: check-db_type init-db test-certs
 	@make --directory='${autoscaler-dir}' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
-
-test-scheduler: check-db_type init-db test-certs
-	@export DB_HOST=${DB_HOST}; \
-	make --directory='./src/scheduler' test DBURL="${DBURL}" db_type="${db_type}"
 
 test-changelog:
 	@make --directory='${changelog-dir}' test
@@ -297,7 +292,7 @@ lint-actions:
 
 lint-gorouterproxy:
 	@echo " - linting: gorouterproxy"
-	@pushd src/autoscaler/integration/gorouterproxy >/dev/null && golangci-lint run --config ${lint_config} $(OPTS) --timeout 5m
+	@pushd src/autoscaler/integration/gorouterproxy >/dev/null && golangci-lint run --config='${lint_config}' $(OPTS)
 
 .PHONY: spec-test
 spec-test:
@@ -360,22 +355,18 @@ changelog.go-mod-vendor:
 changeloglockcleaner.go-mod-vendor:
 	make --directory='${changeloglockcleaner-dir}' go-mod-vendor
 
-.PHONY: uuac
-uaac:
-	which uaac || gem install cf-uaac
 
 .PHONY: update-uaac-nix-package
 update-uaac-nix-package:
 	make --directory='./nix/packages/uaac' gemset.nix
 
-# 🚧 To-do: Probably the db-libs are a precondition for some of the listed dependencies rather than
-# for `deploy-autoscaler` itself.
 .PHONY: deploy-autoscaler deploy-register-cf deploy-autoscaler-bosh deploy-cleanup
-deploy-autoscaler: go-mod-vendor uaac db.java-libs scheduler.build deploy-autoscaler-bosh
+deploy-autoscaler: deploy-autoscaler-bosh
 deploy-register-cf:
 	echo " - registering broker with cf"
 	${CI_DIR}/autoscaler/scripts/register-broker.sh
-deploy-autoscaler-bosh:
+
+deploy-autoscaler-bosh: db.java-libs go-mod-vendor scheduler.build
 	echo " - deploying autoscaler"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 deploy-cleanup:
@@ -518,8 +509,31 @@ go-get-u: $(addsuffix .go-get-u,$(go_modules))
 	go get -u ./...
 
 
-start-scheduler:
-	make --directory='./src/scheduler' start DBURL="${DBURL}"
+# This target is defined here rather than directly in the component “scheduler” itself, because it depends on targets outside that component. In the future, it will be moved back to that component and reference a dependency to a Makefile on the same level – the one for the component it depends on.
+.PHONY: start-scheduler scheduler.start
+start-scheduler: scheduler.start
+scheduler.start: check-db_type init-db
+	pushd '${scheduler-dir}'; \
+		@echo "Starting the application in $(pwd) …"; \
+		@export DB_HOST='${DB_HOST}'; \
+		mvn spring-boot:run \
+			'-Dspring.config.location=./src/main/resources/application.yml'; \
+	popd
+
+# This target is defined here rather than directly in the component “scheduler” itself, because it depends on targets outside that component. In the future, it will be moved back to that component and reference a dependency to a Makefile on the same level – the one for the component it depends on.
+.PHONY: scheduler.test
+scheduler.test: check-db_type scheduler.test-certificates init-db
+	pushd '${scheduler-dir}'; \
+		@echo "Running tests in $(pwd) …"; \
+		@export DB_HOST='${DB_HOST}'; \
+		mvn test \
+			--no-transfer-progress '-Dspring.profiles.include=${db_type}'; \
+	popd
+
+.PHONY: scheduler.test-certificates
+scheduler.test-certificates:
+	make --directory='${scheduler-dir}' test-certificates
+
 
 
 deploy-apps:

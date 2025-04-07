@@ -25,20 +25,22 @@ check-format:
 
 
 
-.PHONY: start
-start:
-	@echo "Starting the application..."
-	@export DB_HOST=${DB_HOST}; \
-	mvn spring-boot:run '-Dspring.config.location=./src/main/resources/application.yml'
+# # 🚸 The following targets are commented out, because they have temporarily been
+# # moved to the top-level-Makefile. The reason is, they depend on targets outside this component. In the future, they will be moved back to this component and reference dependencies to Makefiles on the same level – the ones for the component they depend on.
+# .PHONY: start
+# start:
+#	@echo "Starting the application..."
+#	@export DB_HOST=${DB_HOST}; \
+#	mvn spring-boot:run '-Dspring.config.location=./src/main/resources/application.yml'
 
 
 
-.PHONY: test
-test: test-certificates
-	@echo 'Running tests …' \
-		'\n\t🚸 Please keep in mind that this requires '
-	@export DB_HOST='${DB_HOST}'; \
-	mvn test --no-transfer-progress '-Dspring.profiles.include=${db_type}'
+# .PHONY: test
+# test: test-certificates
+#	@echo 'Running tests …' \
+#		'\n\t🚸 Please keep in mind that this requires a running db!'
+#	@export DB_HOST='${DB_HOST}'; \
+#	mvn test --no-transfer-progress '-Dspring.profiles.include=${db_type}'
 
 test-certs-dir := src/test/resources/certs
 test-certs = $(shell find './${test-certs-dir}' -type f 2> /dev/null)
@@ -47,6 +49,7 @@ test-certificates: ${test-certs-dir}
 ${test-certs-dir} ${test-certs} &:
 	@mkdir --parents '${test-certs-dir}'
 	@./scripts/generate_unit_test_certs.sh
+
 
 clean:
 	rm --force --recursive \

@@ -40,7 +40,7 @@ jobs:
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: make build
+      - name: make generate-openapi-generated-clients-and-servers
         run: |
           make generate-openapi-generated-clients-and-servers
 
