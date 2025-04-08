@@ -18,7 +18,6 @@ func GetDbUrl() string {
 }
 
 func ExpectConfigureDatabasesCalledOnce(err error, fakeVcapReader *fakes.FakeVCAPConfigurationReader, expectedCredHelperImpl string) {
-
 	Expect(err).NotTo(HaveOccurred())
 	Expect(fakeVcapReader.ConfigureDatabasesCallCount()).To(Equal(1))
 	receivedDbConfig, receivedStoredProcedureConfig, receivedCredHelperImpl :=
