@@ -129,7 +129,7 @@ test: test-autoscaler test-scheduler test-changelog test-changeloglockcleaner te
 test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
 	@make --directory='./src/autoscaler' test DBURL='${DBURL}' TEST='${TEST}'
-test-autoscaler-suite: check-db_type init-db test-certs
+test-autoscaler-suite: generate-fakes check-db_type init-db test-certs
 	@make --directory='./src/autoscaler' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
 
 test-scheduler: check-db_type init-db test-certs
@@ -424,7 +424,7 @@ run-performance:
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
 	make acceptance-tests-config;\
-    make --directory='./src/acceptance' run-acceptance-tests
+	make --directory='./src/acceptance' run-acceptance-tests
 
 
 .PHONY: run-act
