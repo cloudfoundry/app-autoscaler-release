@@ -98,7 +98,7 @@ modules:
     - name: eventgenerator-config
     - name: database
     parameters:
-      instances: 2
+      instances: 1
       routes:
       - route: ${EVENTGENERATOR_HOST}.\${default-domain}
   - name: metricsforwarder
@@ -107,7 +107,7 @@ modules:
     - name: syslog-client
     - name: database
     parameters:
-      instances: 2
+      instances: 1
       routes:
       - route: ${METRICSFORWARDER_HOST}.\${default-domain}
       - route: ${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
