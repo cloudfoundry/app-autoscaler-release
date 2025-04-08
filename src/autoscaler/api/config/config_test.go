@@ -114,7 +114,6 @@ var _ = Describe("Config", func() {
 			})
 
 			When("handling available databases", func() {
-
 				It("calls vcapReader ConfigureDatabases with the right arguments", func() {
 					testhelpers.ExpectConfigureDatabasesCalledOnce(err, mockVCAPConfigurationReader, conf.CredHelperImpl)
 				})
@@ -127,10 +126,8 @@ var _ = Describe("Config", func() {
 					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(""), expectedErr)
 				})
 
-				It("calls configureDb with bindingDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbInMapArgsForCall(1)
-					Expect(db.BindingDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(&conf.Db))
+				It("should error with config service not found", func() {
+					Expect(err).To(MatchError(MatchRegexp("publicapiserver config service not found")))
 				})
 			})
 
