@@ -104,6 +104,7 @@ modules:
   - name: metricsforwarder
     requires:
     - name: metricsforwarder-config
+    - name: syslog-client
     - name: database
     parameters:
       instances: 2
