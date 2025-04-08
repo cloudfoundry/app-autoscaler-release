@@ -301,7 +301,6 @@ var _ = Describe("Eventgenerator", func() {
 			os.Setenv("CF_INSTANCE_KEY", cfInstanceKeyFile)
 
 			os.Setenv("VCAP_APPLICATION", `{ "space_id": "space-guid", "organization_id": "org-guid" }`)
-			conf.Db = config.DbConfig{}
 			conf.Evaluator = nil
 			conf.Aggregator = nil
 			conf.CircuitBreaker = nil
@@ -391,7 +390,7 @@ func getVcapServices(conf config.Config) (result string) {
 					"server_ca":   strings.ReplaceAll(string(dbClientCA), "\n", "\\n"),
 				},
 				"syslog_drain_url": "",
-				"tags": []string{"policy_db", "app_metrics_db", dbType},
+				"tags":             []string{"policy_db", "app_metrics_db", dbType},
 			},
 		},
 	}

@@ -126,7 +126,7 @@ var _ = Describe("Config", func() {
 							_, storeProcedureFound := conf.Db[db.StoredProcedureDb]
 							Expect(storeProcedureFound).To(BeTrue())
 							Expect(conf.Db[db.StoredProcedureDb].URL).To(ContainSubstring(fmt.Sprintf("%s:%s", storedProcedureUsername, storedProcedurePassword)))
-
+						})
 					})
 				})
 
@@ -143,6 +143,7 @@ var _ = Describe("Config", func() {
 						Expect(storeProcedureFound).To(BeFalse())
 					})
 				})
+			})
 
 			When("VCAP_SERVICES has metricsforwarder config", func() {
 				BeforeEach(func() {

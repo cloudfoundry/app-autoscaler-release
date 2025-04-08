@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -113,8 +112,6 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 		return nil, err
 	}
 
-	setDefaults(&conf)
-
 	if err := loadVcapConfig(&conf, vcapReader); err != nil {
 		return nil, err
 	}
@@ -197,6 +194,14 @@ func defaultConfig() Config {
 		Server: helpers.ServerConfig{
 			Port: DefaultServerPort,
 		},
+		Pool: &PoolConfig{},
+		Db:   make(map[string]db.DatabaseConfig),
+
+		CircuitBreaker: &CircuitBreakerConfig{
+			BackOffInitialInterval:  DefaultBackOffInitialInterval,
+			BackOffMaxInterval:      DefaultBackOffMaxInterval,
+			ConsecutiveFailureCount: DefaultBreakerConsecutiveFailureCount,
+		},
 		CFServer: defaultCFServerConfig,
 		Health: helpers.HealthConfig{
 			ServerConfig: helpers.ServerConfig{
@@ -218,31 +223,6 @@ func defaultConfig() Config {
 			TriggerArrayChannelSize:   DefaultTriggerArrayChannelSize,
 		},
 		HttpClientTimeout: &DefaultHttpClientTimeout,
-	}
-}
-
-func setDefaults(conf *Config) {
-	if conf.Pool == nil {
-		conf.Pool = &PoolConfig{}
-	}
-	// if conf.Db.PolicyDb == nil {
-	// 	conf.Db.PolicyDb = &db.DatabaseConfig{}
-	// }
-	// if conf.Db.AppMetricDb == nil {
-	// 	conf.Db.AppMetricDb = &db.DatabaseConfig{}
-	// }
-	conf.Logging.Level = strings.ToLower(conf.Logging.Level)
-	if conf.CircuitBreaker == nil {
-		conf.CircuitBreaker = &CircuitBreakerConfig{}
-	}
-	if conf.CircuitBreaker.ConsecutiveFailureCount == 0 {
-		conf.CircuitBreaker.ConsecutiveFailureCount = DefaultBreakerConsecutiveFailureCount
-	}
-	if conf.CircuitBreaker.BackOffInitialInterval == 0 {
-		conf.CircuitBreaker.BackOffInitialInterval = DefaultBackOffInitialInterval
-	}
-	if conf.CircuitBreaker.BackOffMaxInterval == 0 {
-		conf.CircuitBreaker.BackOffMaxInterval = DefaultBackOffMaxInterval
 	}
 }
 
