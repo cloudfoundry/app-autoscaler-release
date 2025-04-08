@@ -101,7 +101,7 @@ type Config struct {
 	MetricCollector           MetricCollectorConfig        `yaml:"metricCollector" json:"metricCollector"`
 	DefaultStatWindowSecs     int                          `yaml:"defaultStatWindowSecs" json:"defaultStatWindowSecs"`
 	DefaultBreachDurationSecs int                          `yaml:"defaultBreachDurationSecs" json:"defaultBreachDurationSecs"`
-	CircuitBreaker            *CircuitBreakerConfig        `yaml:"circuitBreaker" json:"circuitBreaker,omitempty"`
+	CircuitBreaker            *CircuitBreakerConfig        `yaml:"circuitBreaker,omitempty" json:"circuitBreaker,omitempty"`
 	HttpClientTimeout         *time.Duration               `yaml:"http_client_timeout" json:"http_client_timeout,omitempty"`
 }
 
@@ -196,7 +196,6 @@ func defaultConfig() Config {
 		},
 		Pool: &PoolConfig{},
 		Db:   make(map[string]db.DatabaseConfig),
-
 		CircuitBreaker: &CircuitBreakerConfig{
 			BackOffInitialInterval:  DefaultBackOffInitialInterval,
 			BackOffMaxInterval:      DefaultBackOffMaxInterval,
