@@ -275,7 +275,8 @@ var _ = Describe("Eventgenerator", func() {
 		})
 	})
 
-	When("running CF server", func() {
+	// fix logcache uaa client certs
+	XWhen("running CF server", func() {
 		var (
 			cfInstanceKeyFile  string
 			cfInstanceCertFile string
@@ -369,6 +370,7 @@ func getVcapServices(conf config.Config) (result string) {
 					"eventgenerator-config": configJson,
 				},
 			},
+			// TODO: Remove this as we are going to connect using log-cache uaa client
 			{
 				"name": "logcache-client",
 				"credentials": map[string]interface{}{
