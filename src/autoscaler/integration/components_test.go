@@ -292,15 +292,15 @@ func (components *Components) PrepareGolangApiServerConfig(dbURI string, cfApi s
 	return WriteYmlConfig(tmpDir, GolangAPIServer, &cfg)
 }
 
-func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngineUri string, tmpDir string, httpClientTimeout time.Duration) string {
+func (components *Components) PrepareSchedulerConfig(dbURI string, scalingEngineUri string, tmpDir string, httpClientTimeout time.Duration) string {
 	var (
 		driverClassName string
 		userName        string
 		password        string
 		jdbcDBUri       string
 	)
-	if strings.Contains(dbUri, "postgres") {
-		dbUrl, _ := url.Parse(dbUri)
+	if strings.Contains(dbURI, "postgres") {
+		dbUrl, _ := url.Parse(dbURI)
 		scheme := dbUrl.Scheme
 		host := dbUrl.Host
 		path := dbUrl.Path
@@ -313,7 +313,7 @@ func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngine
 		jdbcDBUri = fmt.Sprintf("jdbc:%s://%s%s", scheme, host, path)
 		driverClassName = "org.postgresql.Driver"
 	} else {
-		cfg, _ := mysql.ParseDSN(dbUri)
+		cfg, _ := mysql.ParseDSN(dbURI)
 		scheme := "mysql"
 		host := cfg.Addr
 		path := cfg.DBName
@@ -357,7 +357,7 @@ func (components *Components) PrepareSchedulerConfig(dbUri string, scalingEngine
 	return cfgFile.Name()
 }
 
-func (components *Components) PrepareEventGeneratorConfig(dbUri string, port int, metricsCollectorURL string, scalingEngineURL string, aggregatorExecuteInterval time.Duration,
+func (components *Components) PrepareEventGeneratorConfig(dbURI string, port int, metricsCollectorURL string, scalingEngineURL string, aggregatorExecuteInterval time.Duration,
 	policyPollerInterval time.Duration, saveInterval time.Duration, evaluationManagerInterval time.Duration, httpClientTimeout time.Duration, tmpDir string) string {
 	conf := &egConfig.Config{
 		Logging: helpers.LoggingConfig{
