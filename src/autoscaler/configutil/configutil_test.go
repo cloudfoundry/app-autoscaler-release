@@ -177,8 +177,7 @@ var _ = Describe("Configutil", func() {
 				BeforeEach(func() {
 					databaseNames = []string{db.PolicyDb, db.BindingDb, db.StoredProcedureDb}
 					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
-						"uri": dbUri,
-
+						"uri":         dbUri,
 						"client_cert": expectedClientCertContent,
 						"client_key":  expectedClientKeyContent,
 						"server_ca":   expectedServerCAContent,
