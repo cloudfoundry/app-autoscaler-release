@@ -21,7 +21,8 @@ export POSTGRES_EXTERNAL_PORT="${PR_NUMBER:-5432}"
 export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
 export METRICSFORWARDER_MTLS_HOST="${METRICSFORWARDER_MTLS_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder-mtls"}"
 export SCALINGENGINE_HOST="${SCALINGENGINE_HOST:-"${DEPLOYMENT_NAME}-cf-scalingengine"}"
-export EVENTGENERATOR_HOST="${EVENTGENERATOR_HOST:-"${DEPLOYMENT_NAME}-cf-eventgenerator"}"
+export EVENTGENERATOR_CF_HOST="${EVENTGENERATOR_CF_HOST:-"${DEPLOYMENT_NAME}-cf-eventgenerator"}"
+export EVENTGENERATOR_HOST="${EVENTGENERATOR_HOST:-"${DEPLOYMENT_NAME}-eventgenerator"}"
 export SCHEDULER_HOST="${SCHEDULER_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
 export PUBLICAPISERVER_HOST="${PUBLICAPISERVER_HOST:-"${DEPLOYMENT_NAME}"}"
 export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
@@ -100,6 +101,7 @@ modules:
     parameters:
       instances: 1
       routes:
+      - route: ${EVENTGENERATOR_CF_HOST}.\${default-domain}
       - route: ${EVENTGENERATOR_HOST}.\${default-domain}
   - name: metricsforwarder
     requires:
@@ -163,7 +165,7 @@ resources:
         scaling_engine:
           scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
         event_generator:
-          event_generator_url: https://${EVENTGENERATOR_HOST}.\${default-domain}
+          event_generator_url: https://${EVENTGENERATOR_CF_HOST}.\${default-domain}
         broker_credentials:
           - broker_username: 'autoscaler-broker-user'
             broker_password: $SERVICE_BROKER_PASSWORD
