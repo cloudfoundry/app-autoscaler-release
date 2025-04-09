@@ -32,7 +32,7 @@ const (
 	SyncActiveSchedulesPath      = "/v1/syncSchedules"
 	SyncActiveSchedulesRouteName = "SyncActiveSchedules"
 
-	BrokerHealthPath = "/health"
+	HealthPath = "/health"
 
 	EnvelopePath               = "/v1/envelopes"
 	EnvelopeReportRouteName    = "ReportEnvelope"
@@ -58,7 +58,6 @@ const (
 	PublicApiInfoPath      = "/v1/info"
 	PublicApiInfoRouteName = "GetPublicApiInfo"
 
-	PublicApiHealthPath      = "/health"
 	PublicApiHealthRouteName = "GetPublicApiHealth"
 )
 
@@ -111,7 +110,7 @@ func (r *Router) registerSchedulerRoutes() {
 func (r *Router) CreateApiPublicSubrouter() *mux.Router {
 	publicApiRoutes := r.router.PathPrefix("").Subrouter()
 	publicApiRoutes.Path(PublicApiInfoPath).Methods(http.MethodGet).Name(PublicApiInfoRouteName)
-	publicApiRoutes.Path(PublicApiHealthPath).Methods(http.MethodGet).Name(PublicApiHealthRouteName)
+	publicApiRoutes.Path(HealthPath).Methods(http.MethodGet).Name(PublicApiHealthRouteName)
 
 	return publicApiRoutes
 }
