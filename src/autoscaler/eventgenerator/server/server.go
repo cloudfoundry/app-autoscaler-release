@@ -70,13 +70,6 @@ func NewServer(logger lager.Logger, conf *config.Config, appMetricDB db.AppMetri
 	}
 }
 
-func serverConfigFrom(conf *config.Config) helpers.ServerConfig {
-	return helpers.ServerConfig{
-		TLS:  conf.Server.TLS,
-		Port: conf.Server.Port,
-	}
-}
-
 func (s *Server) CreateHealthServer() (ifrit.Runner, error) {
 	if err := s.setupHealthRouter(); err != nil {
 		return nil, err
@@ -110,7 +103,7 @@ func (s *Server) setupHealthRouter() error {
 func (s *Server) CreateMtlsServer() (ifrit.Runner, error) {
 	eventgenerator := s.createEventGeneratorRoutes()
 
-	return helpers.NewHTTPServer(s.logger, serverConfigFrom(s.conf), eventgenerator)
+	return helpers.NewHTTPServer(s.logger, s.conf.Server, eventgenerator)
 
 }
 
