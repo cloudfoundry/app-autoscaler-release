@@ -75,8 +75,9 @@ func (r *Router) RegisterRoutes() {
 	r.registerMetricsForwarderRoutes()
 	r.registerSchedulerRoutes()
 
-	r.CreateEventGeneratorRoutes()
 	r.CreateScalingEngineRoutes()
+
+	r.CreateEventGeneratorSubrouter()
 	r.CreateApiPublicSubrouter()
 	r.CreateApiSubrouter()
 	r.CreateApiPolicySubrouter()
@@ -105,6 +106,13 @@ func (r *Router) registerMetricsForwarderRoutes() {
 func (r *Router) registerSchedulerRoutes() {
 	r.router.Path(SchedulePath).Methods(http.MethodPut).Name(UpdateScheduleRouteName)
 	r.router.Path(SchedulePath).Methods(http.MethodDelete).Name(DeleteScheduleRouteName)
+}
+
+func (r *Router) CreateEventGeneratorSubrouter() *mux.Router {
+	eventgeneratorRoutes := r.router.PathPrefix("").Subrouter()
+	eventgeneratorRoutes.Path(AggregatedMetricHistoriesPath).Methods(http.MethodGet).Name(GetAggregatedMetricHistoriesRouteName)
+	eventgeneratorRoutes.Path(LivenessPath).Methods(http.MethodGet).Name(LivenessRouteName)
+	return eventgeneratorRoutes
 }
 
 func (r *Router) CreateApiPublicSubrouter() *mux.Router {
@@ -142,12 +150,6 @@ func init() {
 
 func MetricsCollectorRoutes() *mux.Router {
 	return autoScalerRouteInstance.GetRouter()
-}
-
-func (r *Router) CreateEventGeneratorRoutes() *mux.Router {
-	r.router.Path(AggregatedMetricHistoriesPath).Methods(http.MethodGet).Name(GetAggregatedMetricHistoriesRouteName)
-	r.router.Path(LivenessPath).Methods(http.MethodGet).Name(LivenessRouteName)
-	return r.router
 }
 
 func MetricsForwarderRoutes() *mux.Router {

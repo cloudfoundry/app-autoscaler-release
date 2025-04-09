@@ -111,13 +111,13 @@ var _ = Describe("Config", func() {
 				It("calls configureDb with for policyDB", func() {
 					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
 					Expect(db.PolicyDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(conf.Db[db.PolicyDb]))
+					Expect(*receivedDbConfig).To(Equal(conf.Db))
 				})
 
 				It("calls configureDb with for appMetricsDB", func() {
 					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
 					Expect(db.AppMetricsDb).To(Equal(receivedDbName))
-					Expect(receivedDbConfig).To(Equal(conf.Db[db.AppMetricsDb]))
+					Expect(*receivedDbConfig).To(Equal(conf.Db))
 				})
 			})
 		})
@@ -1243,8 +1243,7 @@ health:
 
 			Context("when policy db url is not set", func() {
 				BeforeEach(func() {
-					dbConfig := conf.Db[db.PolicyDb]
-					dbConfig.URL = ""
+					conf.Db[db.PolicyDb] = db.DatabaseConfig{}
 				})
 
 				It("should error", func() {
@@ -1254,8 +1253,7 @@ health:
 
 			Context("when appmetric db url is not set", func() {
 				BeforeEach(func() {
-					dbConfig := conf.Db[db.AppMetricsDb]
-					dbConfig.URL = ""
+					conf.Db[db.AppMetricsDb] = db.DatabaseConfig{}
 				})
 
 				It("should error", func() {

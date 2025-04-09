@@ -112,22 +112,24 @@ func main() {
 
 	eventGenerator := ifrit.RunFunc(runFunc(appManager, evaluators, evaluationManager, metricPollers, anAggregator))
 
-	httpServer := server.NewServer(logger.Session("http_server"), conf, appMetricDB, policyDb, appManager.QueryAppMetrics, httpStatusCollector)
+	eventgeneratorServer := server.NewServer(
+		logger.Session("http_server"), conf, appMetricDB,
+		policyDb, appManager.QueryAppMetrics, httpStatusCollector)
 
-	mtlsServer, err := httpServer.CreateMtlsServer()
+	mtlsServer, err := eventgeneratorServer.CreateMtlsServer()
 	if err != nil {
 		logger.Error("failed to create http server", err)
 		os.Exit(1)
 	}
 
-	healthServer, err := httpServer.CreateHealthServer()
+	healthServer, err := eventgeneratorServer.CreateHealthServer()
 	if err != nil {
 		logger.Error("failed to create health server", err)
 		os.Exit(1)
 	}
 
 	xm := auth.NewXfccAuthMiddleware(logger, conf.CFServer.XFCC)
-	cfServer, err := httpServer.CreateCFServer(xm)
+	cfServer, err := eventgeneratorServer.CreateCFServer(xm)
 	if err != nil {
 		logger.Error("failed to create cf server", err)
 		os.Exit(1)
