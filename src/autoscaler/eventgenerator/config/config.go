@@ -102,7 +102,7 @@ type Config struct {
 	DefaultStatWindowSecs     int                          `yaml:"defaultStatWindowSecs" json:"defaultStatWindowSecs"`
 	DefaultBreachDurationSecs int                          `yaml:"defaultBreachDurationSecs" json:"defaultBreachDurationSecs"`
 	CircuitBreaker            *CircuitBreakerConfig        `yaml:"circuitBreaker,omitempty" json:"circuitBreaker,omitempty"`
-	HttpClientTimeout         *time.Duration               `yaml:"http_client_timeout" json:"http_client_timeout,omitempty"`
+	HttpClientTimeout         *time.Duration               `yaml:"http_client_timeout,omitempty" json:"http_client_timeout,omitempty"`
 }
 
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {

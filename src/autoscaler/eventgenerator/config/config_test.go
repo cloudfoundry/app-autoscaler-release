@@ -336,7 +336,7 @@ defaultBreachDurationSecs: 600
 					Expect(conf.Server.Port).To(Equal(8080))
 					Expect(conf.Logging.Level).To(Equal("info"))
 
-					expectedTimeout := 10 * time.Second
+					expectedTimeout := 5 * time.Second
 					Expect(*conf).To(Equal(Config{
 						Logging:           helpers.LoggingConfig{Level: "info"},
 						HttpClientTimeout: &expectedTimeout,
