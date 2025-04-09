@@ -101,7 +101,7 @@ type Config struct {
 	BrokerServer helpers.ServerConfig  `yaml:"broker_server" json:"broker_server"`
 	Server       helpers.ServerConfig  `yaml:"public_api_server" json:"public_api_server"`
 
-	VCAPServer helpers.ServerConfig `yaml:"vcap_server" json:"vcap_server"`
+	CFServer helpers.ServerConfig `yaml:"cf_server" json:"cf_server"`
 
 	Db                                 map[string]db.DatabaseConfig  `yaml:"db" json:"db,omitempty"`
 	BrokerCredentials                  []BrokerCredentialsConfig     `yaml:"broker_credentials" json:"broker_credentials"`
@@ -180,7 +180,7 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	// enable plain text logging. See src/autoscaler/helpers/logger.go
 	conf.Logging.PlainTextSink = true
 
-	conf.VCAPServer.Port = vcapReader.GetPort()
+	conf.CFServer.Port = vcapReader.GetPort()
 	if err := loadPublicApiServerConfig(conf, vcapReader); err != nil {
 		return err
 	}

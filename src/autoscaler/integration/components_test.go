@@ -212,7 +212,7 @@ func DefaultGolangAPITestConfig() apiConfig.Config {
 				CACertFile: filepath.Join(testCertDir, "autoscaler-ca.crt"),
 			},
 		},
-		VCAPServer: helpers.ServerConfig{
+		CFServer: helpers.ServerConfig{
 			Port: components.Ports[GolangAPICFServer],
 		},
 		BrokerCredentials: []apiConfig.BrokerCredentialsConfig{
