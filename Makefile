@@ -50,7 +50,7 @@ check-db_type:
 .PHONY: init-db
 init-db: check-db_type start-db db.java-libs target/init-db-${db_type}
 target/init-db-${db_type}:
-	@./scripts/initialise_db.sh ${db_type}
+	@./scripts/initialise_db.sh '${db_type}'
 	@touch $@
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
@@ -516,8 +516,8 @@ go-get-u: $(addsuffix .go-get-u,$(go_modules))
 start-scheduler: scheduler.start
 scheduler.start: check-db_type init-db
 	pushd '${scheduler-dir}'; \
-		@echo "Starting the application in $(pwd) …"; \
-		@export DB_HOST='${DB_HOST}'; \
+		echo "Starting the application in $(pwd) …"; \
+		export DB_HOST='${DB_HOST}'; \
 		mvn spring-boot:run \
 			'-Dspring.config.location=./src/main/resources/application.yml'; \
 	popd
@@ -526,8 +526,8 @@ scheduler.start: check-db_type init-db
 .PHONY: scheduler.test
 scheduler.test: check-db_type scheduler.test-certificates init-db
 	pushd '${scheduler-dir}'; \
-		@echo "Running tests in $(pwd) …"; \
-		@export DB_HOST='${DB_HOST}'; \
+		echo "Running tests in $(pwd) …"; \
+		export DB_HOST='${DB_HOST}'; \
 		mvn test \
 			--no-transfer-progress '-Dspring.profiles.include=${db_type}'; \
 	popd
