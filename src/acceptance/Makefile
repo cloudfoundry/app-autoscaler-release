@@ -5,7 +5,7 @@ MAKEFLAGS := -s
 GO := GO111MODULE=on GO15VENDOREXPERIMENT=1 go
 GO_NOMOD := GO111MODULE=off go
 
-GO_VERSION = $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
+GO_VERSION = $(shell go version | sed --expression='s/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
 PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
 								 | grep --invert-match --regexp='e2e')
@@ -61,8 +61,13 @@ test-unit:
 test:
 	bin/test $(filter-out $@,$(MAKECMDGOALS))
 
+GOLANGCI_CONF ?= ../../.golangci.yaml
+
 lint:
-	make -C ../.. lint_acceptance OPTS=${OPTS}
+	readonly GOVERSION='${GO_VERSION}' ;\
+	export GOVERSION ;\
+	echo "Linting with Golang $${GOVERSION}" ;\
+	golangci-lint run --config='${GOLANGCI_CONF}' ${OPTS}
 
 
 ACCEPTANCE_CONFIG_PATH := ./acceptance_config.json
@@ -74,7 +79,7 @@ ${ACCEPTANCE_CONFIG_PATH}:
 
 .PHONY: run-acceptance-tests
 run-acceptance-tests:
-	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh;
+	${CI_DIR}/autoscaler/scripts/run-acceptance-tests.sh
 
 
 .PHONY: acceptance-tests-cleanup
