@@ -104,7 +104,6 @@ func (s *Server) CreateMtlsServer() (ifrit.Runner, error) {
 	eventgenerator := s.createEventGeneratorRoutes()
 
 	return helpers.NewHTTPServer(s.logger, s.conf.Server, eventgenerator)
-
 }
 
 func createPrometheusRegistry(appMetricDB db.AppMetricDB, policyDb db.PolicyDB, httpStatusCollector healthendpoint.HTTPStatusCollector, logger lager.Logger) *prometheus.Registry {
