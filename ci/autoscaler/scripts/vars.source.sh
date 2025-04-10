@@ -47,8 +47,18 @@ export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
 debug "PR_NUMBER: '${PR_NUMBER}'"
 user=${USER:-"test"}
 
-export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
-[ "${DEPLOYMENT_NAME}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
+export ENABLE_MTAR=${ENABLE_MTAR:-false}
+debug "ENABLE_MTAR: ${ENABLE_MTAR}"
+enable_mtar=${ENABLE_MTAR}
+
+if [ "${ENABLE_MTAR}" = "true" ]; then
+	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-mtar-${PR_NUMBER}"}"
+	[ "${DEPLOYMENT_NAME}" = "autoscaler-mtar" ] && DEPLOYMENT_NAME="${user}"
+else
+	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
+	[ "${DEPLOYMENT_NAME}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
+fi
+
 debug "DEPLOYMENT_NAME: ${DEPLOYMENT_NAME}"
 log "set up vars: DEPLOYMENT_NAME=${DEPLOYMENT_NAME}"
 deployment_name="${DEPLOYMENT_NAME}"
@@ -121,6 +131,3 @@ export CPU_UPPER_THRESHOLD=${CPU_UPPER_THRESHOLD:-100}
 debug "CPU_UPPER_THRESHOLD: ${CPU_UPPER_THRESHOLD}"
 cpu_upper_threshold=${CPU_UPPER_THRESHOLD}
 
-export ENABLE_MTAR=${ENABLE_MTAR:-false}
-debug "ENABLE_MTAR: ${ENABLE_MTAR}"
-enable_mtar=${ENABLE_MTAR}
