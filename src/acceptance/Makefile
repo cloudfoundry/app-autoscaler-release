@@ -67,7 +67,6 @@ lint:
 
 .PHONY: acceptance-tests-config
 acceptance-tests-config:
-${ACCEPTANCE_CONFIG_PATH}:
 	ACCEPTANCE_CONFIG_PATH='./acceptance_config.json' ${CI_DIR}/autoscaler/scripts/acceptance-tests-config.sh
 
 
