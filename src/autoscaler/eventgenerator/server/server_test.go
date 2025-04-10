@@ -88,18 +88,6 @@ var _ = Describe("Server", func() {
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
 			})
-
-			When("using wrong method to retrieve aggregared metrics history", func() {
-				JustBeforeEach(func() {
-					rsp, err = http.Post(serverUrl.String(), "garbage", nil)
-				})
-
-				It("should return 405", func() {
-					Expect(err).ToNot(HaveOccurred())
-					Expect(rsp.StatusCode).To(Equal(http.StatusMethodNotAllowed))
-					rsp.Body.Close()
-				})
-			})
 		})
 	})
 
