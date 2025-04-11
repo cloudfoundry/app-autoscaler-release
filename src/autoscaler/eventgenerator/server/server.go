@@ -42,7 +42,6 @@ func (s *Server) createEventGeneratorRoutes() *mux.Router {
 	r.Get(routes.LivenessRouteName).Handler(VarsFunc(Liveness))
 	r.Get(routes.GetAggregatedMetricHistoriesRouteName).Handler(VarsFunc(eh.GetAggregatedMetricHistories))
 
-	r.PathPrefix("/health").Handler(s.healthRouter)
 	return r
 }
 
@@ -85,7 +84,10 @@ func (s *Server) CreateCFServer(am auth.XFCCAuthMiddleware) (ifrit.Runner, error
 		return nil, err
 	}
 
-	return helpers.NewHTTPServer(s.logger.Session("CfServer"), s.conf.CFServer, eventgenerator)
+	s.autoscalerRouter.GetRouter().PathPrefix("/v1").Handler(eventgenerator)
+	s.autoscalerRouter.GetRouter().PathPrefix("/health").Handler(s.healthRouter)
+
+	return helpers.NewHTTPServer(s.logger.Session("CfServer"), s.conf.CFServer, s.autoscalerRouter.GetRouter())
 }
 
 func (s *Server) setupHealthRouter() error {
