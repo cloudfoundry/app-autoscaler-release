@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -50,14 +51,12 @@ var _ = Describe("Config", func() {
 			})
 
 			When("service is empty", func() {
-				var expectedErr error
 				BeforeEach(func() {
-					expectedErr = fmt.Errorf("metricsforwarder config service not found")
-					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(""), expectedErr)
+					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(""), fmt.Errorf("not found"))
 				})
 
 				It("should error with config service not found", func() {
-					Expect(err).To(MatchError(MatchRegexp("metricsforwarder config service not found")))
+					Expect(errors.Is(err, ErrMetricsforwarderConfigNotFound)).To(BeTrue())
 				})
 			})
 

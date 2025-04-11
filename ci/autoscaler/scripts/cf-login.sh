@@ -9,4 +9,4 @@ cf_login
 cf_target "${AUTOSCALER_ORG}" "${AUTOSCALER_SPACE}"
 
 
-cf autoscaling-api "https://autoscaler-${PR_NUMBER}.${SYSTEM_DOMAIN}"
+cf autoscaling-api "https://${DEPLOYMENT_NAME}.${SYSTEM_DOMAIN}"

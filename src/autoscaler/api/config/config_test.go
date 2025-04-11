@@ -107,7 +107,7 @@ var _ = Describe("Config", func() {
 
 					It("sets env variable over config file", func() {
 						Expect(err).NotTo(HaveOccurred())
-						Expect(conf.VCAPServer.Port).To(Equal(3333))
+						Expect(conf.CFServer.Port).To(Equal(3333))
 					})
 				})
 
