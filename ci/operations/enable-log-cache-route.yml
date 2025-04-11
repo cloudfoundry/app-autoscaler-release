@@ -1,0 +1,26 @@
+# adds route to enable log cache
+- type: replace
+  path: /instance_groups/name=log-cache/jobs/-
+  value:
+    name: route_registrar
+    release: routing
+    properties:
+      nats:
+        tls:
+          client_cert: ((nats_client_cert.certificate))
+          client_key: ((nats_client_cert.private_key))
+          enabled: true
+      route_registrar:
+        routes:
+        - name: log-cache-reverse-proxy
+          port: 8083
+          registration_interval: 20s
+          server_cert_domain_san: log-cache.((system_domain))
+          tls_port: 8083
+          uris:
+          - log-cache.((system_domain))
+          - '*.log-cache.((system_domain))'
+        routing_api:
+          client_cert: ((routing_api_tls_client.certificate))
+          client_private_key: ((routing_api_tls_client.private_key))
+          server_ca_cert: ((routing_api_tls_client.ca))
