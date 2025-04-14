@@ -19,7 +19,7 @@ jobs:
       DB_DATABASE: autoscaler
       DB_USER: root
       DB_PASSWORD: root
-    runs-on: ["linux", "x64"]
+    runs-on: "ubuntu-latest"
     container:
       image: "ubuntu:noble"
     continue-on-error: true
@@ -36,6 +36,13 @@ jobs:
 
 
     steps:
+      - name: Install devbox-prerequisites
+        shell: bash
+        run: |
+          set -eu -o pipefail
+          apt-get update
+          apt-get install --assume-yes gh git curl
+
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
