@@ -19,7 +19,9 @@ jobs:
       DB_DATABASE: autoscaler
       DB_USER: postgres
       DB_PASSWORD: postgres
-    runs-on: ubuntu-latest
+    runs-on: ["linux", "x64"]
+    container:
+      image: "ubuntu:noble"
     continue-on-error: true
     name: Build suite=${{ matrix.suite }}, postgres=${{ matrix.postgres }}
     services:
