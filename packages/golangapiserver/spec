@@ -89,14 +89,6 @@ files:
 - autoscaler/vendor/github.com/jackc/puddle/v2/internal/genstack/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/* # gosub
 - autoscaler/vendor/github.com/jmoiron/sqlx/reflectx/* # gosub
-- autoscaler/vendor/github.com/klauspost/compress/* # gosub
-- autoscaler/vendor/github.com/klauspost/compress/fse/* # gosub
-- autoscaler/vendor/github.com/klauspost/compress/huff0/* # gosub
-- autoscaler/vendor/github.com/klauspost/compress/internal/cpuinfo/* # gosub
-- autoscaler/vendor/github.com/klauspost/compress/internal/le/* # gosub
-- autoscaler/vendor/github.com/klauspost/compress/internal/snapref/* # gosub
-- autoscaler/vendor/github.com/klauspost/compress/zstd/* # gosub
-- autoscaler/vendor/github.com/klauspost/compress/zstd/internal/xxhash/* # gosub
 - autoscaler/vendor/github.com/mattn/go-colorable/* # gosub
 - autoscaler/vendor/github.com/mattn/go-isatty/* # gosub
 - autoscaler/vendor/github.com/mitchellh/mapstructure/* # gosub
@@ -127,6 +119,7 @@ files:
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/collectors/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/internal/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/promhttp/* # gosub
+- autoscaler/vendor/github.com/prometheus/client_golang/prometheus/promhttp/internal/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_model/go/* # gosub
 - autoscaler/vendor/github.com/prometheus/common/expfmt/* # gosub
 - autoscaler/vendor/github.com/prometheus/common/model/* # gosub
