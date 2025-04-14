@@ -132,7 +132,9 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return nil
 	}
 
-	conf.Server.Port = vcapReader.GetPort()
+	conf.CFServer.Port = vcapReader.GetPort()
+	conf.Server.Port = 0
+
 	if err := loadEventgeneratorConfig(conf, vcapReader); err != nil {
 		return err
 	}
