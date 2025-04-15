@@ -103,25 +103,6 @@ var _ = Describe("Config", func() {
 				})
 			})
 
-			When("VCAP_SERVICES has credentials for logcache", func() {
-				var expectedTLSConfig models.TLSCerts
-
-				BeforeEach(func() {
-					expectedTLSConfig = models.TLSCerts{
-						CertFile:   "/tmp/client_cert.sslcert",
-						KeyFile:    "/tmp/client_key.sslkey",
-						CACertFile: "/tmp/server_ca.sslrootcert",
-					}
-
-					mockVCAPConfigurationReader.MaterializeTLSConfigFromServiceReturns(expectedTLSConfig, nil)
-				})
-
-				XIt("loads the syslog config from VCAP_SERVICES", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.MetricCollector.TLSClientCerts).To(Equal(expectedTLSConfig))
-				})
-			})
-
 			When("handling available databases", func() {
 				BeforeEach(func() {
 					expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
