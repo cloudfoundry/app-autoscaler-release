@@ -71,14 +71,16 @@ func (vc *VCAPConfiguration) IsRunningOnCF() bool {
 }
 
 func (vc *VCAPConfiguration) GetOrgGuid() string {
-	vcapApplicationJson := os.Getenv("VCAP_APPLICATION")
-	var vcapApplication map[string]interface{}
-	err := json.Unmarshal([]byte(vcapApplicationJson), &vcapApplication)
-	if err != nil {
+	var vcap map[string]any
+	if err := json.Unmarshal([]byte(os.Getenv("VCAP_APPLICATION")), &vcap); err != nil {
 		return ""
 	}
-	return vcapApplication["organization_id"].(string)
+	if orgID, ok := vcap["organization_id"].(string); ok {
+		return orgID
+	}
+	return ""
 }
+
 func (vc *VCAPConfiguration) GetSpaceGuid() string {
 	return vc.appEnv.SpaceID
 }
