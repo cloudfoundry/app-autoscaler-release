@@ -1,4 +1,4 @@
-FROM ubuntu:noble@sha256:72297848456d5d37d1262630108ab308d3e9ec7ed1c3286a32fe09856619a782
+FROM ubuntu:noble@sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02
 MAINTAINER autoscaler-team
 
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/London"
@@ -70,7 +70,7 @@ RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_V
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
-ARG BBL_VERSION=v9.0.31
+ARG BBL_VERSION=v9.0.32
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_amd64 && \
   mv bbl-* /usr/local/bin/bbl &&\
   chmod +x /usr/local/bin/bbl &&\
@@ -130,7 +130,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
   gcloud version
 
 # renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
-ARG GINKGO_VERSION=v2.23.3
+ARG GINKGO_VERSION=v2.23.4
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} && \
     ginkgo version
 

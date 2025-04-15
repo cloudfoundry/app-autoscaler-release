@@ -95,6 +95,7 @@ files:
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/collectors/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/internal/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_golang/prometheus/promhttp/* # gosub
+- autoscaler/vendor/github.com/prometheus/client_golang/prometheus/promhttp/internal/* # gosub
 - autoscaler/vendor/github.com/prometheus/client_model/go/* # gosub
 - autoscaler/vendor/github.com/prometheus/common/expfmt/* # gosub
 - autoscaler/vendor/github.com/prometheus/common/model/* # gosub

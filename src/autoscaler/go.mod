@@ -7,10 +7,10 @@ require (
 	code.cloudfoundry.org/cfhttp/v2 v2.40.0
 	code.cloudfoundry.org/clock v1.33.0
 	code.cloudfoundry.org/go-log-cache/v3 v3.1.0
-	code.cloudfoundry.org/go-loggregator/v10 v10.1.0
+	code.cloudfoundry.org/go-loggregator/v10 v10.2.0
 	code.cloudfoundry.org/lager/v3 v3.33.0
-	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20250331083435-1867c33e0e7c
-	code.cloudfoundry.org/tlsconfig v0.22.0
+	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20250414083644-f058f4ab906a
+	code.cloudfoundry.org/tlsconfig v0.24.0
 	github.com/cenkalti/backoff/v5 v5.0.2
 	github.com/cloud-gov/go-cfenv v1.19.1
 	github.com/go-chi/chi/v5 v5.2.1
@@ -28,7 +28,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/prometheus/client_golang v1.21.1
+	github.com/prometheus/client_golang v1.22.0
 	github.com/rubyist/circuitbreaker v2.2.1+incompatible
 	github.com/steinfletcher/apitest v1.6.0
 	github.com/stretchr/testify v1.10.0
@@ -42,18 +42,18 @@ require (
 	go.opentelemetry.io/otel/sdk v1.35.0
 	go.opentelemetry.io/otel/trace v1.35.0
 	golang.org/x/crypto v0.37.0
-	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
+	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
 	golang.org/x/net v0.39.0
 	golang.org/x/time v0.11.0
 	google.golang.org/grpc v1.71.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20250407143221-ac9807e6c755
+replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20250414145226-207652e42e2e
 
 require (
-	code.cloudfoundry.org/go-diodes v0.0.0-20250324121313-75aea42a1fc3 // indirect
-	code.cloudfoundry.org/go-metric-registry v0.0.0-20250326210619-55aec564e1b0 // indirect
+	code.cloudfoundry.org/go-diodes v0.0.0-20250407090537-96fce8693346 // indirect
+	code.cloudfoundry.org/go-metric-registry v0.0.0-20250408103124-b19f887641df // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -85,12 +85,12 @@ require (
 	github.com/openzipkin/zipkin-go v0.4.3 // indirect
 	github.com/peterbourgon/g2s v0.0.0-20170223122336-d4e7ad98afea // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/prometheus/client_model v0.6.1 // indirect
+	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.63.0 // indirect
 	github.com/prometheus/procfs v0.16.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.59.0 // indirect
+	github.com/valyala/fasthttp v1.60.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
@@ -101,9 +101,9 @@ require (
 	golang.org/x/sync v0.13.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0 // indirect
-	golang.org/x/tools v0.31.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250404141209-ee84b53bf3d0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250404141209-ee84b53bf3d0 // indirect
+	golang.org/x/tools v0.32.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250409194420-de1ac958c67a // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250409194420-de1ac958c67a // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
