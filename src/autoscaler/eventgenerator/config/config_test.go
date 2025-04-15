@@ -3,6 +3,7 @@ package config_test
 import (
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -48,6 +49,26 @@ var _ = Describe("Config", func() {
 					Expect(err).NotTo(HaveOccurred())
 					Expect(conf.CFServer.Port).To(Equal(3333))
 					Expect(conf.Server.Port).To(Equal(0))
+				})
+			})
+
+			When("vcap CF_INSTANCE_CERT is set", func() {
+				BeforeEach(func() {
+					os.Setenv("CF_INSTANCE_KEY", "some/path/in/container/cfcert.key")
+					os.Setenv("CF_INSTANCE_CERT", "some/path/in/container/cfcert.crt")
+					os.Setenv("CF_INSTANCE_CA_CERT", "some/path/in/container/cfcert.crt")
+				})
+
+				AfterEach(func() {
+					os.Unsetenv("CF_INSTANCE_KEY")
+					os.Unsetenv("CF_INSTANCE_CERT")
+					os.Unsetenv("CF_INSTANCE_CA_CERT")
+				})
+
+				It("sets ScalingEngine TlSClientCert", func() {
+					Expect(conf.ScalingEngine.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
+					Expect(conf.ScalingEngine.TLSClientCerts.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
+					Expect(conf.ScalingEngine.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
 				})
 			})
 

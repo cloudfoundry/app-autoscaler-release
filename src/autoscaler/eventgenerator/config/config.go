@@ -154,8 +154,19 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	if err := configureXfccSpaceAndOrg(conf, vcapReader); err != nil {
 		return err
 	}
+
+	configureScalingEngine(conf)
+
 	return nil
+
 }
+
+func configureScalingEngine(conf *Config) {
+	conf.ScalingEngine.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
+	conf.ScalingEngine.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
+	conf.ScalingEngine.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
+}
+
 func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
 	conf.CFServer.XFCC.ValidOrgGuid = vcapReader.GetOrgGuid()
