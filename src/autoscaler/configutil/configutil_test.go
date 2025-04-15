@@ -39,6 +39,28 @@ var _ = Describe("Configutil", func() {
 			os.Unsetenv("VCAP_APPLICATION")
 		})
 
+		Describe("GetInstanceTLSCerts", func() {
+			BeforeEach(func() {
+				os.Setenv("CF_INSTANCE_KEY", "some/path/in/container/cfcert.key")
+				os.Setenv("CF_INSTANCE_CERT", "some/path/in/container/cfcert.crt")
+				os.Setenv("CF_INSTANCE_CA_CERT", "some/path/in/container/cfcert.crt")
+			})
+
+			AfterEach(func() {
+				os.Unsetenv("CF_INSTANCE_KEY")
+				os.Unsetenv("CF_INSTANCE_CERT")
+				os.Unsetenv("CF_INSTANCE_CA_CERT")
+			})
+
+			It("returns cf instance TlSClientCert", func() {
+				result := vcapConfiguration.GetInstanceTLSCerts()
+				Expect(result.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
+				Expect(result.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
+				Expect(result.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
+			})
+
+		})
+
 		Describe("GetOrgGuid", func() {
 			BeforeEach(func() {
 				vcapApplicationJson = `{"organization_id":"some-org-id"}`

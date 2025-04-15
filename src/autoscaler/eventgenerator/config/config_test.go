@@ -3,7 +3,6 @@ package config_test
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -52,23 +51,21 @@ var _ = Describe("Config", func() {
 				})
 			})
 
-			When("vcap CF_INSTANCE_CERT is set", func() {
+			When("setting scaling engine tls certs", func() {
+				var expectedTLSConfig models.TLSCerts
+
 				BeforeEach(func() {
-					os.Setenv("CF_INSTANCE_KEY", "some/path/in/container/cfcert.key")
-					os.Setenv("CF_INSTANCE_CERT", "some/path/in/container/cfcert.crt")
-					os.Setenv("CF_INSTANCE_CA_CERT", "some/path/in/container/cfcert.crt")
+					expectedTLSConfig = models.TLSCerts{
+						KeyFile:    "some/path/in/container/cfcert.key",
+						CertFile:   "some/path/in/container/cfcert.crt",
+						CACertFile: "some/path/in/container/cfcert.crt",
+					}
+					mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(expectedTLSConfig)
 				})
 
-				AfterEach(func() {
-					os.Unsetenv("CF_INSTANCE_KEY")
-					os.Unsetenv("CF_INSTANCE_CERT")
-					os.Unsetenv("CF_INSTANCE_CA_CERT")
-				})
-
-				It("sets ScalingEngine TlSClientCert", func() {
-					Expect(conf.ScalingEngine.TLSClientCerts.KeyFile).To(Equal("some/path/in/container/cfcert.key"))
-					Expect(conf.ScalingEngine.TLSClientCerts.CertFile).To(Equal("some/path/in/container/cfcert.crt"))
-					Expect(conf.ScalingEngine.TLSClientCerts.CACertFile).To(Equal("some/path/in/container/cfcert.crt"))
+				It("send certs to scalingengineScalingEngine TlSClientCert", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(conf.ScalingEngine.TLSClientCerts).To(Equal(expectedTLSConfig))
 				})
 			})
 

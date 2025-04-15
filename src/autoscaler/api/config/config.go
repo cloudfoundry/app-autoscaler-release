@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -193,9 +192,9 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	configureEventGenerator(conf)
-	configureScheduler(conf)
-	configureScalingEngine(conf)
+	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
+	conf.EventGenerator.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
+	conf.Scheduler.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 
 	return nil
 }
@@ -214,24 +213,6 @@ func configureCatalog(conf *Config, vcapReader configutil.VCAPConfigurationReade
 	conf.CatalogPath = catalogPath
 
 	return err
-}
-
-func configureScalingEngine(conf *Config) {
-	conf.ScalingEngine.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
-	conf.ScalingEngine.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
-	conf.ScalingEngine.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
-}
-
-func configureEventGenerator(conf *Config) {
-	conf.EventGenerator.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
-	conf.EventGenerator.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
-	conf.EventGenerator.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
-}
-
-func configureScheduler(conf *Config) {
-	conf.Scheduler.TLSClientCerts.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
-	conf.Scheduler.TLSClientCerts.CertFile = os.Getenv("CF_INSTANCE_CERT")
-	conf.Scheduler.TLSClientCerts.KeyFile = os.Getenv("CF_INSTANCE_KEY")
 }
 
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {

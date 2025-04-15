@@ -25,6 +25,8 @@ type VCAPConfigurationReader interface {
 	MaterializeTLSConfigFromService(serviceTag string) (models.TLSCerts, error)
 	GetServiceCredentialContent(serviceTag string, credentialKey string) ([]byte, error)
 
+	GetInstanceTLSCerts() models.TLSCerts
+
 	GetPort() int
 	GetSpaceGuid() string
 	GetOrgGuid() string
@@ -84,6 +86,15 @@ func (vc *VCAPConfiguration) GetOrgGuid() string {
 
 func (vc *VCAPConfiguration) GetSpaceGuid() string {
 	return vc.appEnv.SpaceID
+}
+
+func (vc *VCAPConfiguration) GetInstanceTLSCerts() models.TLSCerts {
+	result := models.TLSCerts{}
+	result.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
+	result.CertFile = os.Getenv("CF_INSTANCE_CERT")
+	result.KeyFile = os.Getenv("CF_INSTANCE_KEY")
+
+	return result
 }
 
 func (vc *VCAPConfiguration) GetServiceCredentialContent(serviceTag, credentialKey string) ([]byte, error) {

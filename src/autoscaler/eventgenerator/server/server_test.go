@@ -156,10 +156,10 @@ var _ = Describe("Server", func() {
 
 				client := &http.Client{}
 				rsp, err = client.Do(req)
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("should return 200", func() {
-				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				rsp.Body.Close()
 			})
@@ -171,7 +171,6 @@ var _ = Describe("Server", func() {
 				})
 
 				It("should return 401", func() {
-					Expect(err).ToNot(HaveOccurred())
 					Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
 				})
 			})
