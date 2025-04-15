@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -196,15 +197,6 @@ func (vc *VCAPConfiguration) buildDatabaseURL(service *cfenv.Service, dbName str
 	return dbURL, nil
 }
 
-func contains(elems []string, v string) bool {
-	for _, s := range elems {
-		if s == v {
-			return true
-		}
-	}
-	return false
-}
-
 func (vc *VCAPConfiguration) addPostgresConnectionParams(service *cfenv.Service, dbName string, parameters url.Values) error {
 	keys := []struct {
 		binding, connection string
@@ -224,7 +216,7 @@ func (vc *VCAPConfiguration) addPostgresConnectionParams(service *cfenv.Service,
 
 func (vc *VCAPConfiguration) addConnectionParams(service *cfenv.Service, dbName string, parameters url.Values) error {
 	// if service.Tags contains "postgres" then add the connection parameters
-	if contains(service.Tags, "mysql") {
+	if slices.Contains(service.Tags, "mysql") {
 		return nil
 		// TODO: add support for MySQL TLS enabled connections
 		// return vc.addMySQLConnectionParams(service, dbName, parameters)
