@@ -62,7 +62,7 @@ jobs:
           POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
         run: |
-          make generate-openapi-generated-clients-and-servers
+          devbox run make generate-openapi-generated-clients-and-servers
 
       - name: make ${{ matrix.suite }}
         env:
@@ -70,4 +70,4 @@ jobs:
           POSTGRES_PORT: 5432
           POSTGRES_DB: autoscaler
         run: |
-          make ${{ matrix.suite }} DB_HOST="${POSTGRES_HOST}"
+          devbox run make ${{ matrix.suite }} DB_HOST="${POSTGRES_HOST}"

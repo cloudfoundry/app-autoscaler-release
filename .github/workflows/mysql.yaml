@@ -56,10 +56,10 @@ jobs:
 
       - name: make generate-openapi-generated-clients-and-servers
         run: |
-          make generate-openapi-generated-clients-and-servers
+          devbox run make generate-openapi-generated-clients-and-servers
 
       - name: make ${{ matrix.suite }}
         env:
           DB_HOST: mysql
         run: |
-          make ${{ matrix.suite }} db_type=mysql DB_HOST="${DB_HOST}"
+          devbox run make ${{ matrix.suite }} db_type=mysql DB_HOST="${DB_HOST}"
