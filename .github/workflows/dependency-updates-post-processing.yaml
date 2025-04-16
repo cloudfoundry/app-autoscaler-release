@@ -38,15 +38,16 @@ jobs:
 
           git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
-          declare -r commit_author_name="$(git log -1 --pretty=format:'%an')"
-          declare -r commit_author_email="$(git log -1 --pretty=format:'%ae')"
-          declare -r commit_subject="$(git log -1 ${{ github.head_ref }} --pretty=format:'%s')"
+          commit_author_name="$(git log -1 --pretty=format:'%an')"
+          commit_author_email="$(git log -1 --pretty=format:'%ae')"
+          commit_subject="$(git log -1 --pretty=format:'%s')"
+          readonly commit_author_name commit_author_email commit_subject
 
           git config user.name "${commit_author_name}"
           git config user.email "${commit_author_email}"
 
-          echo "commit_author_name=${commit_author_name}" >> $GITHUB_OUTPUT
-          echo "commit_subject=${commit_subject}" >> $GITHUB_OUTPUT
+          echo "commit_author_name=${commit_author_name}" >> "${GITHUB_OUTPUT}"
+          echo "commit_subject=${commit_subject}" >> "${GITHUB_OUTPUT}"
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 # v0.12.0
@@ -55,12 +56,13 @@ jobs:
       - name: Make devbox shellenv available
         run: |
           eval "$(devbox shellenv)"
-          printenv >> $GITHUB_ENV
+          printenv >> "${GITHUB_ENV}"
 
       - name: go-mod-tidy and make package-specs
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.APP_AUTOSCALER_CI_TOKEN }}
+          GH_TOKEN: "${{ secrets.APP_AUTOSCALER_CI_TOKEN }}"
+          PR_BRANCH_REF: "${{ github.head_ref }}"
         run: |
           #! /usr/bin/env bash
           set -eu -o pipefail
@@ -71,12 +73,12 @@ jobs:
           # An alternative would be to use a tag for this. But this does affect the whole
           # PR instead of just the latest commit.
           declare -r tidy_message='🤖🦾🛠️ go mod tidy & make package-specs'
+          declare -r commit_message='${{steps.configure_git.outputs.commit_subject}}'
 
-          declare -r commit_author_name="${{steps.configure_git.outputs.commit_author_name}}"
-          declare -r commit_message="${{steps.configure_git.outputs.commit_subject}}"
-
-          if [[ "${commit_message}" == "${tidy_message}" ]]; then
-            echo 'This commit is already an automatic `go-mod-tidy and make package-specs`! Exiting ...'
+          if [[ "${commit_message}" == "${tidy_message}" ]]
+          then
+            # shellcheck disable=SC2016
+            echo 'This commit is already an automatic `go-mod-tidy and make package-specs`! Exiting …'
             exit 0
           fi
 
@@ -84,18 +86,35 @@ jobs:
           # target `package-specs`. However the generation of them itself already
           # requires go-modules to be tidied up. So we need to generate the files
           # before changing `go.mod` and `go.sum`.
-          declare -r current_branch="${{ github.head_ref }}"
+          current_branch_head="${PR_BRANCH_REF}"
+          readonly current_branch_head
+          echo "Working in branch \`${current_branch_head}\`" \
+               " on revision \`$(git rev-parse 'HEAD')\`."
+
+          echo "Generating clients, servers and fakes on \`${current_branch_head}~1\`"
+          # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
+          # the derivation python.
+          git restore devbox.lock
           git checkout 'HEAD~1'
+
           make generate-fakes
           make generate-openapi-generated-clients-and-servers
-          git checkout "${current_branch}"
+
+          echo "Successfully generated the code. Switching back to \`${current_branch_head}\`!"
+          # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
+          # the derivation python.
+          git restore devbox.lock
+          git checkout "${current_branch_head}"
 
           # ⚠️ For this workflow to be successful, the subsequent line must not
           # trigger again the creation of the generated files.
           make package-specs
           make update-uaac-nix-package
 
-          declare -i -r num_changed_files="$(git status --porcelain | wc --lines)"
+          declare -i num_changed_files
+          num_changed_files="$(git status --porcelain | wc --lines)"
+          readonly num_changed_files
+
           if ((num_changed_files > 0))
           then
             echo 'Changes to some files were necessary!'

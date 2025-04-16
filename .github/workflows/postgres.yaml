@@ -19,9 +19,9 @@ jobs:
       DB_DATABASE: autoscaler
       DB_USER: postgres
       DB_PASSWORD: postgres
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:5277733db60d4e659404ad330e7c0da790cb65c18b41cf0b2ca6e424294c5dd9
+      image: "ubuntu:noble"
     continue-on-error: true
     name: Build suite=${{ matrix.suite }}, postgres=${{ matrix.postgres }}
     services:
@@ -39,17 +39,30 @@ jobs:
         ports:
          - 5432:5432
     steps:
+      - name: Install devbox-prerequisites
+        shell: bash
+        run: |
+          set -eu -o pipefail
+          apt-get update
+          apt-get install --assume-yes gh git curl
+
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: make build
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 # v0.12.0
+        env:
+          ACT: true # This causes devbox to do a non-multiuser Nix-installation
+          DEVBOX_DEBUG: 1
+
+      - name: make generate-openapi-generated-clients-and-servers
         env:
           POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
         run: |
-          make generate-openapi-generated-clients-and-servers
-          make build
+          devbox run make generate-openapi-generated-clients-and-servers
 
       - name: make ${{ matrix.suite }}
         env:
@@ -57,4 +70,4 @@ jobs:
           POSTGRES_PORT: 5432
           POSTGRES_DB: autoscaler
         run: |
-          make ${{ matrix.suite }} DB_HOST="${POSTGRES_HOST}"
+          devbox run make ${{ matrix.suite }} DB_HOST="${POSTGRES_HOST}"
