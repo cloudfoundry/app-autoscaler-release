@@ -54,7 +54,7 @@ jobs:
       - name: Install devbox
         uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 # v0.12.0
         env:
-          ACT: true
+          ACT: true # This causes devbox to do a non-multiuser Nix-installation
           DEVBOX_DEBUG: 1
 
       - name: make generate-openapi-generated-clients-and-servers

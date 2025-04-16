@@ -232,7 +232,7 @@ waitfor_mysql_CI_false:
 	@until [[ ! -z `docker exec mysql mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null` ]]; do echo -n "."; sleep 1; done
 waitfor_mysql_CI_true:
 	@echo -n " - Waiting for table creation"
-	@which mysql >/dev/null &&\
+	@which mysql > /dev/null &&\
 	{\
 		T=0;\
 		until [[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\

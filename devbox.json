@@ -29,6 +29,7 @@
     "jq":                                   "latest",
     "markdownlint-cli2":                    "0.17.2",
     "maven":                                "3.9.9",
+    "mysql":                                "latest",
     "oha":                                  "1.8.0",
     "postgresql":                           "latest",
     "python":                               "3.13.2",
