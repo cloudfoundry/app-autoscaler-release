@@ -162,7 +162,7 @@ test: test-autoscaler scheduler.test test-changelog test-changeloglockcleaner te
 test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
 	@make --directory='${autoscaler-dir}' test DBURL='${DBURL}' TEST='${TEST}'
-test-autoscaler-suite: check-db_type init-db test-certs
+test-autoscaler-suite: check-db_type init-db test-certs # 🚧 To-do: requires “generate-fakes”?
 	@make --directory='${autoscaler-dir}' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
 
 test-changelog:
