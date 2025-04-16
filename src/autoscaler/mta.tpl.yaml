@@ -49,9 +49,6 @@ modules:
             BOOT-INF/classes/dataaggregator.db.changelog.yml \
             BOOT-INF/classes/metricscollector.db.changelog.yml
 
-
-
-
   - name: publicapiserver
     type: go
     path: .

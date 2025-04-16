@@ -57,9 +57,8 @@ export METRICSFORWARDER_UAA_SKIP_SSL_VALIDATION="$(yq ".metricsforwarder_uaa_ski
 export METRICSFORWARDER_APPNAME="${METRICSFORWARDER_APPNAME:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
 export METRICSFORWARDER_HEALTH_PASSWORD="$(yq ".metricsforwarder_health_password" /tmp/mtar-secrets.yml)"
 
-
+export EVENTGENERATOR_INSTANCES="${EVENTGENERATOR_INSTANCES:-1}"
 export EVENTGENERATOR_HEALTH_PASSWORD="$(yq ".eventgenerator_health_password" /tmp/mtar-secrets.yml)"
-
 export EVENTGENERATOR_LOG_CACHE_UAA_CLIENT_ID="$(yq ".eventgenerator_log_cache_uaa_client_id" /tmp/mtar-secrets.yml)"
 export EVENTGENERATOR_LOG_CACHE_UAA_CLIENT_SECRET="$(yq ".eventgenerator_log_cache_uaa_client_secret" /tmp/mtar-secrets.yml)"
 
@@ -102,7 +101,7 @@ modules:
     - name: eventgenerator-config
     - name: database
     parameters:
-      instances: 1
+      instances: ${EVENTGENERATOR_INSTANCES}
       routes:
       - route: ${EVENTGENERATOR_CF_HOST}.\${default-domain}
       - route: ${EVENTGENERATOR_HOST}.\${default-domain}
@@ -141,7 +140,7 @@ resources:
             url: https://uaa.\${default-domain}
             skip_ssl_validation: true
         pool:
-          node_count: 2
+          node_count: ${EVENTGENERATOR_INSTANCES}
         health:
           basic_auth:
             password: "${EVENTGENERATOR_HEALTH_PASSWORD}"
