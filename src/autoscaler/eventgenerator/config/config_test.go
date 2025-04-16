@@ -30,43 +30,33 @@ var _ = Describe("Config", func() {
 	})
 
 	Describe("LoadConfig", func() {
+
 		When("config is read from env", func() {
+			var expectedTLSConfig models.TLSCerts
 			var expectedDbUrl string
 
 			JustBeforeEach(func() {
+				mockVCAPConfigurationReader.GetPortReturns(3333)
+				expectedTLSConfig = models.TLSCerts{
+					KeyFile:    "some/path/in/container/cfcert.key",
+					CertFile:   "some/path/in/container/cfcert.crt",
+					CACertFile: "some/path/in/container/cfcert.crt",
+				}
+				mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(expectedTLSConfig)
 				mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
 				mockVCAPConfigurationReader.MaterializeDBFromServiceReturns(expectedDbUrl, nil)
 				conf, err = LoadConfig("", mockVCAPConfigurationReader)
 			})
 
-			When("PORT is set", func() {
-				BeforeEach(func() {
-					mockVCAPConfigurationReader.GetPortReturns(3333)
-				})
-
-				It("sets env variable over config file", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.CFServer.Port).To(Equal(3333))
-					Expect(conf.Server.Port).To(Equal(0))
-				})
+			It("sets env variable over config file", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.CFServer.Port).To(Equal(3333))
+				Expect(conf.Server.Port).To(Equal(0))
 			})
 
-			When("setting scaling engine tls certs", func() {
-				var expectedTLSConfig models.TLSCerts
-
-				BeforeEach(func() {
-					expectedTLSConfig = models.TLSCerts{
-						KeyFile:    "some/path/in/container/cfcert.key",
-						CertFile:   "some/path/in/container/cfcert.crt",
-						CACertFile: "some/path/in/container/cfcert.crt",
-					}
-					mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(expectedTLSConfig)
-				})
-
-				It("send certs to scalingengineScalingEngine TlSClientCert", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.ScalingEngine.TLSClientCerts).To(Equal(expectedTLSConfig))
-				})
+			It("send certs to scalingengineScalingEngine TlSClientCert", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.ScalingEngine.TLSClientCerts).To(Equal(expectedTLSConfig))
 			})
 
 			When("setting Pool.NodeIndex", func() {
