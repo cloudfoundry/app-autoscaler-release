@@ -81,17 +81,19 @@ function cleanup_credhub(){
 }
 
 function cleanup_apps(){
-	step "cleaning up apps"
+  step "cleaning up apps"
   local mtar_app
   local space_guid
 
   cf_target "${autoscaler_org}" "${autoscaler_space}"
 
-	space_guid="$(cf space --guid "${autoscaler_space}")"
+  space_guid="$(cf space --guid "${autoscaler_space}")"
   mtar_app="$(curl --header "Authorization: $(cf oauth-token)" "deploy-service.${system_domain}/api/v2/spaces/${space_guid}/mtas"  | jq ". | .[] | .metadata | .id" -r)"
 
   if [ -n "${mtar_app}" ]; then
-    cf undeploy "${mtar_app}" -f
+    set +e
+    cf undeploy "${mtar_app}" -f --delete-service-brokers --delete-service-keys --delete-services --do-not-fail-on-missing-permissions
+    set -e
   else
      echo "No app to undeploy"
   fi
