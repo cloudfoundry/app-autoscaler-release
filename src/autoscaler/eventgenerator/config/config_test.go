@@ -30,21 +30,25 @@ var _ = Describe("Config", func() {
 	})
 
 	Describe("LoadConfig", func() {
-
 		When("config is read from env", func() {
-			var expectedTLSConfig models.TLSCerts
-			var expectedDbUrl string
+			var expectedTLSConfig = models.TLSCerts{
+				KeyFile:    "some/path/in/container/cfcert.key",
+				CertFile:   "some/path/in/container/cfcert.crt",
+				CACertFile: "some/path/in/container/cfcert.crt",
+			}
+			var expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
+
+			BeforeEach(func() {
+				mockVCAPConfigurationReader.GetPortReturns(3333)
+				mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(expectedTLSConfig)
+				mockVCAPConfigurationReader.GetInstanceIndexReturns(3)
+				mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
+				mockVCAPConfigurationReader.GetSpaceGuidReturns("some-space-id")
+				mockVCAPConfigurationReader.GetOrgGuidReturns("some-org-id")
+				mockVCAPConfigurationReader.MaterializeDBFromServiceReturns(expectedDbUrl, nil)
+			})
 
 			JustBeforeEach(func() {
-				mockVCAPConfigurationReader.GetPortReturns(3333)
-				expectedTLSConfig = models.TLSCerts{
-					KeyFile:    "some/path/in/container/cfcert.key",
-					CertFile:   "some/path/in/container/cfcert.crt",
-					CACertFile: "some/path/in/container/cfcert.crt",
-				}
-				mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(expectedTLSConfig)
-				mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
-				mockVCAPConfigurationReader.MaterializeDBFromServiceReturns(expectedDbUrl, nil)
 				conf, err = LoadConfig("", mockVCAPConfigurationReader)
 			})
 
@@ -59,28 +63,27 @@ var _ = Describe("Config", func() {
 				Expect(conf.ScalingEngine.TLSClientCerts).To(Equal(expectedTLSConfig))
 			})
 
-			When("setting Pool.NodeIndex", func() {
-				BeforeEach(func() {
-					mockVCAPConfigurationReader.GetInstanceIndexReturns(3)
-				})
-
-				It("sets vcap instance index", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.Pool.NodeIndex).To(Equal(3))
-				})
+			It("sets Pool.NodeIndex with vcap instance index", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.Pool.NodeIndex).To(Equal(3))
 			})
 
-			When("VCAP_APPLICATION has org id and space id", func() {
-				BeforeEach(func() {
-					mockVCAPConfigurationReader.GetSpaceGuidReturns("some-space-id")
-					mockVCAPConfigurationReader.GetOrgGuidReturns("some-org-id")
-				})
+			It("sets xfcc space and org guid", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.CFServer.XFCC.ValidOrgGuid).To(Equal("some-org-id"))
+				Expect(conf.CFServer.XFCC.ValidSpaceGuid).To(Equal("some-space-id"))
+			})
 
-				It("sets xfcc", func() {
-					Expect(err).NotTo(HaveOccurred())
-					Expect(conf.CFServer.XFCC.ValidOrgGuid).To(Equal("some-org-id"))
-					Expect(conf.CFServer.XFCC.ValidSpaceGuid).To(Equal("some-space-id"))
-				})
+			It("calls configureDb with for policyDB", func() {
+				receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
+				Expect(db.PolicyDb).To(Equal(receivedDbName))
+				Expect(*receivedDbConfig).To(Equal(conf.Db))
+			})
+
+			It("calls configureDb with for appMetricsDB", func() {
+				receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
+				Expect(db.AppMetricsDb).To(Equal(receivedDbName))
+				Expect(*receivedDbConfig).To(Equal(conf.Db))
 			})
 
 			When("service is empty", func() {
@@ -90,24 +93,6 @@ var _ = Describe("Config", func() {
 
 				It("should error with config service not found", func() {
 					Expect(errors.Is(err, ErrEventgeneratorConfigNotFound)).To(BeTrue())
-				})
-			})
-
-			When("handling available databases", func() {
-				BeforeEach(func() {
-					expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
-				})
-
-				It("calls configureDb with for policyDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
-					Expect(db.PolicyDb).To(Equal(receivedDbName))
-					Expect(*receivedDbConfig).To(Equal(conf.Db))
-				})
-
-				It("calls configureDb with for appMetricsDB", func() {
-					receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
-					Expect(db.AppMetricsDb).To(Equal(receivedDbName))
-					Expect(*receivedDbConfig).To(Equal(conf.Db))
 				})
 			})
 		})
