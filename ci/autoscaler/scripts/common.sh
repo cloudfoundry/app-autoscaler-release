@@ -31,9 +31,17 @@ function bosh_login(){
 
 function cf_login(){
   step "login to cf"
+  cf logout
   cf api "https://api.${system_domain}" --skip-ssl-validation
   cf_admin_password="$(credhub get --quiet --name='/bosh-autoscaler/cf/cf_admin_password')"
   cf auth admin "$cf_admin_password"
+}
+
+function uaa_login(){
+  step "login to uaa"
+  uaa_client_secret="$(credhub get --quiet --name='/bosh-autoscaler/cf/uaa_admin_client_secret')"
+	uaac target "https://uaa.${system_domain}" --skip-ssl-validation
+	uaac token client get admin -s "${uaa_client_secret}"
 }
 
 function cleanup_acceptance_run(){
@@ -127,8 +135,8 @@ function find_or_create_org(){
   if ! cf orgs | grep --quiet --regexp="^${org_name}$"; then
     cf create-org "${org_name}"
   fi
-  echo "targeting org ${org_name}"
-  cf target -o "${org_name}"
+  echo "- targeting org ${org_name}"
+  cf target -o "${org_name}" > /dev/null
 }
 
 function find_or_create_space(){
@@ -137,8 +145,8 @@ function find_or_create_space(){
   if ! cf spaces | grep --quiet --regexp="^${space_name}$"; then
     cf create-space "${space_name}"
   fi
-  echo "targeting space ${space_name}"
-  cf target -s "${space_name}"
+  echo "- targeting space ${space_name}"
+  cf target -s "${space_name}" > /dev/null
 }
 
 function cf_target(){

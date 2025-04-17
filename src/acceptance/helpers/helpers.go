@@ -433,6 +433,7 @@ func GenerateDynamicAndRecurringSchedulePolicy(instanceMin, instanceMax int, thr
 }
 
 func RunningInstances(appGUID string, timeout time.Duration) (int, error) {
+	GinkgoHelper()
 	defer GinkgoRecover()
 	var cmd *Session
 	getAppProcesses := func() error {

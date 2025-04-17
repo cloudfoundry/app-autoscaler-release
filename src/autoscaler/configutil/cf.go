@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
+	"slices"
+	"strconv"
 	"strings"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -21,10 +24,16 @@ type VCAPConfigurationReader interface {
 	MaterializeDBFromService(dbName string) (string, error)
 	MaterializeTLSConfigFromService(serviceTag string) (models.TLSCerts, error)
 	GetServiceCredentialContent(serviceTag string, credentialKey string) ([]byte, error)
+
+	GetInstanceTLSCerts() models.TLSCerts
+
 	GetPort() int
+	GetSpaceGuid() string
+	GetOrgGuid() string
+	GetInstanceIndex() int
 	IsRunningOnCF() bool
 
-	ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error
+	ConfigureDb(dbName string, confDb *map[string]db.DatabaseConfig) error
 	ConfigureDatabases(confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, credHelperImpl string) error
 }
 
@@ -50,8 +59,41 @@ func (vc *VCAPConfiguration) GetPort() int {
 	return vc.appEnv.Port
 }
 
+func (vc *VCAPConfiguration) GetInstanceIndex() int {
+	instanceIndex, err := strconv.Atoi(os.Getenv("CF_INSTANCE_INDEX"))
+	if err == nil {
+		return instanceIndex
+	}
+
+	return 0
+}
+
 func (vc *VCAPConfiguration) IsRunningOnCF() bool {
 	return cfenv.IsRunningOnCF()
+}
+
+func (vc *VCAPConfiguration) GetOrgGuid() string {
+	var vcap map[string]any
+	if err := json.Unmarshal([]byte(os.Getenv("VCAP_APPLICATION")), &vcap); err != nil {
+		return ""
+	}
+	if orgID, ok := vcap["organization_id"].(string); ok {
+		return orgID
+	}
+	return ""
+}
+
+func (vc *VCAPConfiguration) GetSpaceGuid() string {
+	return vc.appEnv.SpaceID
+}
+
+func (vc *VCAPConfiguration) GetInstanceTLSCerts() models.TLSCerts {
+	result := models.TLSCerts{}
+	result.CACertFile = os.Getenv("CF_INSTANCE_CA_CERT")
+	result.CertFile = os.Getenv("CF_INSTANCE_CERT")
+	result.KeyFile = os.Getenv("CF_INSTANCE_KEY")
+
+	return result
 }
 
 func (vc *VCAPConfiguration) GetServiceCredentialContent(serviceTag, credentialKey string) ([]byte, error) {
@@ -165,15 +207,6 @@ func (vc *VCAPConfiguration) buildDatabaseURL(service *cfenv.Service, dbName str
 	return dbURL, nil
 }
 
-func contains(elems []string, v string) bool {
-	for _, s := range elems {
-		if s == v {
-			return true
-		}
-	}
-	return false
-}
-
 func (vc *VCAPConfiguration) addPostgresConnectionParams(service *cfenv.Service, dbName string, parameters url.Values) error {
 	keys := []struct {
 		binding, connection string
@@ -193,7 +226,7 @@ func (vc *VCAPConfiguration) addPostgresConnectionParams(service *cfenv.Service,
 
 func (vc *VCAPConfiguration) addConnectionParams(service *cfenv.Service, dbName string, parameters url.Values) error {
 	// if service.Tags contains "postgres" then add the connection parameters
-	if contains(service.Tags, "mysql") {
+	if slices.Contains(service.Tags, "mysql") {
 		return nil
 		// TODO: add support for MySQL TLS enabled connections
 		// return vc.addMySQLConnectionParams(service, dbName, parameters)
@@ -215,8 +248,8 @@ func (vc *VCAPConfiguration) addConnectionParam(service *cfenv.Service, dbName, 
 	return nil
 }
 
-func (vc *VCAPConfiguration) ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error {
-	if err := vc.configureDb(dbName, confDb); err != nil {
+func (vc *VCAPConfiguration) configureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error {
+	if err := vc.ConfigureDb(dbName, confDb); err != nil {
 		return err
 	}
 
@@ -240,7 +273,7 @@ func (vc *VCAPConfiguration) ConfigureStoredProcedureDb(dbName string, confDb *m
 	return nil
 }
 
-func (vc *VCAPConfiguration) configureDb(dbName string, confDb *map[string]db.DatabaseConfig) error {
+func (vc *VCAPConfiguration) ConfigureDb(dbName string, confDb *map[string]db.DatabaseConfig) error {
 	currentDb, ok := (*confDb)[dbName]
 	if !ok {
 		(*confDb)[dbName] = db.DatabaseConfig{}
@@ -257,16 +290,20 @@ func (vc *VCAPConfiguration) configureDb(dbName string, confDb *map[string]db.Da
 }
 
 func (vc *VCAPConfiguration) ConfigureDatabases(confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, credHelperImpl string) error {
-	if err := vc.configureDb(db.PolicyDb, confDb); err != nil {
+	if err := vc.ConfigureDb(db.PolicyDb, confDb); err != nil {
 		return err
 	}
 
-	if err := vc.configureDb(db.BindingDb, confDb); err != nil {
+	if err := vc.ConfigureDb(db.BindingDb, confDb); err != nil {
+		return err
+	}
+
+	if err := vc.ConfigureDb(db.BindingDb, confDb); err != nil {
 		return err
 	}
 
 	if credHelperImpl == "stored_procedure" {
-		if err := vc.ConfigureStoredProcedureDb(db.StoredProcedureDb, confDb, storedProcedureConfig); err != nil {
+		if err := vc.configureStoredProcedureDb(db.StoredProcedureDb, confDb, storedProcedureConfig); err != nil {
 			return err
 		}
 	}
