@@ -249,7 +249,7 @@ func (vc *VCAPConfiguration) addConnectionParam(service *cfenv.Service, dbName, 
 	return nil
 }
 
-func (vc *VCAPConfiguration) ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error {
+func (vc *VCAPConfiguration) configureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error {
 	if err := vc.ConfigureDb(dbName, confDb); err != nil {
 		return err
 	}
@@ -304,7 +304,7 @@ func (vc *VCAPConfiguration) ConfigureDatabases(confDb *map[string]db.DatabaseCo
 	}
 
 	if credHelperImpl == "stored_procedure" {
-		if err := vc.ConfigureStoredProcedureDb(db.StoredProcedureDb, confDb, storedProcedureConfig); err != nil {
+		if err := vc.configureStoredProcedureDb(db.StoredProcedureDb, confDb, storedProcedureConfig); err != nil {
 			return err
 		}
 	}

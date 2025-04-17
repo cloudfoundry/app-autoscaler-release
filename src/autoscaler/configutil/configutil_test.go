@@ -140,49 +140,6 @@ var _ = Describe("Configutil", func() {
 			})
 		})
 
-		Describe("ConfigureStoredProcedureDb", func() {
-			var dbName string
-			var actualDbs *map[string]db.DatabaseConfig
-			var expectedDbs *map[string]db.DatabaseConfig
-			var storedProcedureUsername string
-			var storedProcedurePassword string
-
-			When("storedProcedure_db service is provided and cred_helper_impl is stored_procedure", func() {
-				BeforeEach(func() {
-					actualDbs = &map[string]db.DatabaseConfig{}
-					vcapApplicationJson = `{}`
-					dbName = db.StoredProcedureDb
-					vcapServicesJson, err = testhelpers.GetStoredProcedureDbVcapServices(map[string]string{
-						"uri":         dbUri,
-						"client_cert": expectedClientCertContent,
-						"client_key":  expectedClientKeyContent,
-						"server_ca":   expectedServerCAContent,
-					}, dbName, "postgres")
-					Expect(err).NotTo(HaveOccurred())
-					storedProcedureUsername = "storedProcedureUsername"
-					storedProcedurePassword = "storedProcedurePassword"
-
-				})
-
-				It("reads the store procedure service from vcap", func() {
-					expectedDbs = &map[string]db.DatabaseConfig{
-						dbName: {
-							URL: "postgres://storedProcedureUsername:storedProcedurePassword@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fstoredprocedure_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fstoredprocedure_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fstoredprocedure_db%2Fserver_ca.sslrootcert", // #nosec G101
-						},
-					}
-					storedProcedureConfig := &models.StoredProcedureConfig{
-						Username: storedProcedureUsername,
-						Password: storedProcedurePassword,
-					}
-					err := vcapConfiguration.ConfigureStoredProcedureDb(dbName, actualDbs, storedProcedureConfig)
-					Expect(err).NotTo(HaveOccurred())
-
-					Expect(*actualDbs).To(Equal(*expectedDbs))
-				})
-			})
-
-		})
-
 		Describe("ConfigureDatabases", func() {
 			var actualDbs *map[string]db.DatabaseConfig
 			var expectedDbs *map[string]db.DatabaseConfig
@@ -192,7 +149,6 @@ var _ = Describe("Configutil", func() {
 			BeforeEach(func() {
 				vcapApplicationJson = `{}`
 			})
-
 			When("stored procedure implementation is set to stored_procedure", func() {
 				var actualProcedureConfig *models.StoredProcedureConfig
 
@@ -229,6 +185,34 @@ var _ = Describe("Configutil", func() {
 					It("loads the db config from VCAP_SERVICES successfully", func() {
 						err := vcapConfiguration.ConfigureDatabases(actualDbs, actualProcedureConfig, "stored_procedure")
 						Expect(err).NotTo(HaveOccurred())
+						Expect(*actualDbs).To(Equal(*expectedDbs))
+					})
+				})
+
+				When("stored procedure username and password are provided", func() {
+					BeforeEach(func() {
+						actualProcedureConfig = &models.StoredProcedureConfig{
+							Username: "storedProcedureUsername",
+							Password: "storedProcedurePassword",
+						}
+					})
+
+					It("overrides default url credentials with stored procedure config username and password", func() {
+						expectedDbs = &map[string]db.DatabaseConfig{
+							db.PolicyDb: {
+								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fpolicy_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fpolicy_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fpolicy_db%2Fserver_ca.sslrootcert", // #nosec G101
+							},
+							db.BindingDb: {
+								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fbinding_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fbinding_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fbinding_db%2Fserver_ca.sslrootcert", // #nosec G101
+							},
+							db.StoredProcedureDb: {
+								URL: "postgres://storedProcedureUsername:storedProcedurePassword@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fstoredprocedure_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fstoredprocedure_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fstoredprocedure_db%2Fserver_ca.sslrootcert", // #nosec G101
+							},
+						}
+
+						err := vcapConfiguration.ConfigureDatabases(actualDbs, actualProcedureConfig, "stored_procedure")
+						Expect(err).NotTo(HaveOccurred())
+
 						Expect(*actualDbs).To(Equal(*expectedDbs))
 					})
 				})
