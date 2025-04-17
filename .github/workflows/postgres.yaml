@@ -21,7 +21,7 @@ jobs:
       DB_PASSWORD: postgres
     runs-on: "ubuntu-latest"
     container:
-      image: "ubuntu:noble"
+      image: "ubuntu:noble@sha256:1e622c5f073b4f6bfad6632f2616c7f59ef256e96fe78bf6a595d1dc4376ac02"
     continue-on-error: true
     name: Build suite=${{ matrix.suite }}, postgres=${{ matrix.postgres }}
     services:
