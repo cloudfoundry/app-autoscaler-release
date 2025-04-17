@@ -9,11 +9,12 @@ import (
 /* The configuration object received as part of the binding parameters. Example config:
 {
   "configuration": {
-    "custom_metrics": {
-      "metric_submission_strategy": {
-        "allow_from": "bound_app"
-      }
-    }
+	"app-guid": "8d0cee08-23ad-4813-a779-ad8118ea0b91",
+	"custom_metrics": {
+	  "metric_submission_strategy": {
+		"allow_from": "bound_app"
+	  }
+	}
   }
 */
 
@@ -24,10 +25,8 @@ const (
 )
 
 type BindingConfig struct {
-	Configuration Configuration `json:"configuration"`
-}
-type Configuration struct {
-	CustomMetrics CustomMetricsConfig `json:"custom_metrics"`
+	AppGUID       GUID                `json:"app_guid,omitempty"` // Empty value represents null-value (i.e. not set).
+	CustomMetrics CustomMetricsConfig `json:"custom_metrics,omitempty"`
 }
 
 type CustomMetricsConfig struct {
@@ -39,11 +38,11 @@ type MetricsSubmissionStrategy struct {
 }
 
 func (b *BindingConfig) GetCustomMetricsStrategy() string {
-	return b.Configuration.CustomMetrics.MetricSubmissionStrategy.AllowFrom
+	return b.CustomMetrics.MetricSubmissionStrategy.AllowFrom
 }
 
 func (b *BindingConfig) SetCustomMetricsStrategy(allowFrom string) {
-	b.Configuration.CustomMetrics.MetricSubmissionStrategy.AllowFrom = allowFrom
+	b.CustomMetrics.MetricSubmissionStrategy.AllowFrom = allowFrom
 }
 
 /**
@@ -52,7 +51,7 @@ func (b *BindingConfig) SetCustomMetricsStrategy(allowFrom string) {
  * @param scalingPolicy the scaling policy
  * @param customMetricStrategy the custom metric strategy
  * @return the binding configuration and policy if both are present, the scaling policy if only the policy is present,
-* 			the binding configuration if only the configuration is present
+*			the binding configuration if only the configuration is present
  * @throws an error if no policy or custom metrics strategy is found
 */
 
