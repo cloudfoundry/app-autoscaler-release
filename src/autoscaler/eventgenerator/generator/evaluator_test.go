@@ -25,7 +25,7 @@ var _ = Describe("Evaluator", func() {
 	var (
 		logger             *lagertest.TestLogger
 		httpClient         *http.Client
-		triggerChan        chan []*models.Trigger
+		triggerChan        chan *models.DynamicScalingRules
 		scalingEngine      *ghttp.Server
 		evaluator          *Evaluator
 		testAppId          = "testAppId"
@@ -41,23 +41,23 @@ var _ = Describe("Evaluator", func() {
 		fakeTime           = time.Now()
 		lock               = &sync.Mutex{}
 		scalingResult      *models.AppScalingResult
-		triggerArrayGT     = []*models.Trigger{{
+		triggerArrayGT     = &models.DynamicScalingRules{Triggers: []*models.Trigger{{
 			AppId:           testAppId,
 			MetricType:      testMetricType,
 			CoolDownSeconds: 300,
 			Threshold:       500,
 			Operator:        ">",
 			Adjustment:      "+1",
-		}}
-		triggerArrayGE = []*models.Trigger{{
+		}}}
+		triggerArrayGE = &models.DynamicScalingRules{Triggers: []*models.Trigger{{
 			AppId:           testAppId,
 			MetricType:      testMetricType,
 			CoolDownSeconds: 300,
 			Threshold:       500,
 			Operator:        ">=",
 			Adjustment:      "+1",
-		}}
-		triggerArrayLT = []*models.Trigger{{
+		}}}
+		triggerArrayLT = &models.DynamicScalingRules{Triggers: []*models.Trigger{{
 			AppId:                 testAppId,
 			MetricType:            testMetricType,
 			BreachDurationSeconds: breachDurationSecs,
@@ -65,8 +65,8 @@ var _ = Describe("Evaluator", func() {
 			Threshold:             500,
 			Operator:              "<",
 			Adjustment:            "-1",
-		}}
-		triggerArrayLE = []*models.Trigger{{
+		}}}
+		triggerArrayLE = &models.DynamicScalingRules{Triggers: []*models.Trigger{{
 			AppId:                 testAppId,
 			MetricType:            testMetricType,
 			BreachDurationSeconds: breachDurationSecs,
@@ -74,9 +74,9 @@ var _ = Describe("Evaluator", func() {
 			Threshold:             500,
 			Operator:              "<=",
 			Adjustment:            "-1",
-		}}
+		}}}
 
-		firstTrigger = models.Trigger{
+		scaleOutWhenGTE = models.Trigger{
 			AppId:                 testAppId,
 			MetricType:            testMetricType,
 			MetricUnit:            testMetricUnit,
@@ -87,7 +87,7 @@ var _ = Describe("Evaluator", func() {
 			Adjustment:            "+1",
 		}
 
-		secondTrigger = models.Trigger{
+		scaleInWhenLTE = models.Trigger{
 			AppId:                 testAppId,
 			MetricType:            testMetricType,
 			MetricUnit:            testMetricUnit,
@@ -97,12 +97,16 @@ var _ = Describe("Evaluator", func() {
 			Operator:              "<=",
 			Adjustment:            "-1",
 		}
-		triggerArrayMultipleTriggers = []*models.Trigger{&firstTrigger, &secondTrigger}
+		multipleTriggers                 = &models.DynamicScalingRules{Triggers: []*models.Trigger{&scaleOutWhenGTE, &scaleInWhenLTE}}
+		multipleTriggersBiasedToScaleout = &models.DynamicScalingRules{
+			Triggers:              []*models.Trigger{&scaleInWhenLTE, &scaleOutWhenGTE},
+			ScalingRuleEvaluation: models.BiasedToScaleOut,
+		}
 	)
 	BeforeEach(func() {
 		logger = lagertest.NewTestLogger("Evaluator-test")
 		httpClient = cfhttp.NewClient()
-		triggerChan = make(chan []*models.Trigger, 1)
+		triggerChan = make(chan *models.DynamicScalingRules, 1)
 
 		r := routes.NewRouter()
 		path, err := r.CreateScalingEngineRoutes().Get(routes.ScaleRouteName).URLPath("appid", testAppId)
@@ -150,9 +154,9 @@ var _ = Describe("Evaluator", func() {
 			scalingEngine.Close()
 		})
 
-		Context("when evaluator is started", func() {
+		When("evaluator is started", func() {
 
-			Context("when the appMetrics are not enough", func() {
+			When("the appMetrics are not enough", func() {
 				BeforeEach(func() {
 					scalingEngine.RouteToHandler("POST", urlPath, ghttp.RespondWith(http.StatusOK, "successful"))
 					Expect(triggerChan).To(BeSent(triggerArrayGT))
@@ -174,7 +178,7 @@ var _ = Describe("Evaluator", func() {
 					BeforeEach(func() {
 						Expect(triggerChan).To(BeSent(triggerArrayGT))
 					})
-					Context("when the appMetrics breach the trigger", func() {
+					When("the appMetrics breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{600, 650, 620}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
@@ -201,7 +205,7 @@ var _ = Describe("Evaluator", func() {
 						})
 
 					})
-					Context("when the appMetrics do not breach the trigger", func() {
+					When("the appMetrics do not breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{200, 150, 600}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
@@ -214,7 +218,7 @@ var _ = Describe("Evaluator", func() {
 						})
 
 					})
-					Context("when appMetrics is empty", func() {
+					When("appMetrics is empty", func() {
 						BeforeEach(func() {
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
 								return []*models.AppMetric{}, nil
@@ -225,7 +229,7 @@ var _ = Describe("Evaluator", func() {
 							Consistently(scalingEngine.ReceivedRequests).Should(HaveLen(0))
 						})
 					})
-					Context("when the appMetrics contain empty value elements", func() {
+					When("the appMetrics contain empty value elements", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{600, 650, 620}, breachDurationSecs, true)
 							appMetrics = append(appMetrics, &models.AppMetric{AppId: testAppId,
@@ -248,7 +252,7 @@ var _ = Describe("Evaluator", func() {
 						Expect(triggerChan).To(BeSent(triggerArrayGE))
 					})
 
-					Context("when the appMetrics breach the trigger", func() {
+					When("the appMetrics breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{600, 500, 500}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
@@ -261,7 +265,7 @@ var _ = Describe("Evaluator", func() {
 						})
 
 					})
-					Context("when the appMetrics do not breach the trigger", func() {
+					When("the appMetrics do not breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{200, 150, 600}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
@@ -274,7 +278,7 @@ var _ = Describe("Evaluator", func() {
 						})
 
 					})
-					Context("when appMetrics is empty", func() {
+					When("appMetrics is empty", func() {
 						BeforeEach(func() {
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
 								return []*models.AppMetric{}, nil
@@ -286,7 +290,7 @@ var _ = Describe("Evaluator", func() {
 							Consistently(scalingEngine.ReceivedRequests).Should(HaveLen(0))
 						})
 					})
-					Context("when the appMetrics contain  empty value elements", func() {
+					When("the appMetrics contain  empty value elements", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{600, 500, 500}, breachDurationSecs, true)
 							appMetrics = append(appMetrics, &models.AppMetric{AppId: testAppId,
@@ -308,7 +312,7 @@ var _ = Describe("Evaluator", func() {
 					BeforeEach(func() {
 						Expect(triggerChan).To(BeSent(triggerArrayLT))
 					})
-					Context("when the appMetrics breach the trigger", func() {
+					When("the appMetrics breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{200, 300, 400}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
@@ -321,7 +325,7 @@ var _ = Describe("Evaluator", func() {
 						})
 
 					})
-					Context("when the appMetrics do not breach the trigger", func() {
+					When("the appMetrics do not breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{500, 550, 600}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
@@ -334,7 +338,7 @@ var _ = Describe("Evaluator", func() {
 						})
 
 					})
-					Context("when appMetrics is empty", func() {
+					When("appMetrics is empty", func() {
 						BeforeEach(func() {
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
 								return []*models.AppMetric{}, nil
@@ -346,7 +350,7 @@ var _ = Describe("Evaluator", func() {
 							Consistently(scalingEngine.ReceivedRequests).Should(HaveLen(0))
 						})
 					})
-					Context("when the appMetrics contain  empty value elements", func() {
+					When("the appMetrics contain  empty value elements", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{200, 300, 400}, breachDurationSecs, true)
 							appMetrics = append(appMetrics, &models.AppMetric{AppId: testAppId,
@@ -368,7 +372,7 @@ var _ = Describe("Evaluator", func() {
 					BeforeEach(func() {
 						Expect(triggerChan).To(BeSent(triggerArrayLE))
 					})
-					Context("when the appMetrics breach the trigger", func() {
+					When("the appMetrics breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{200, 500, 500}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
@@ -382,7 +386,7 @@ var _ = Describe("Evaluator", func() {
 						})
 
 					})
-					Context("when the appMetrics do not breach the trigger", func() {
+					When("the appMetrics do not breach the trigger", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{500, 550, 600}, breachDurationSecs, true)
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
@@ -395,7 +399,7 @@ var _ = Describe("Evaluator", func() {
 						})
 
 					})
-					Context("when appMetrics is empty", func() {
+					When("appMetrics is empty", func() {
 						BeforeEach(func() {
 							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
 								return []*models.AppMetric{}, nil
@@ -407,7 +411,7 @@ var _ = Describe("Evaluator", func() {
 							Consistently(scalingEngine.ReceivedRequests).Should(HaveLen(0))
 						})
 					})
-					Context("when the appMetrics contain  empty value elements", func() {
+					When("the appMetrics contain  empty value elements", func() {
 						BeforeEach(func() {
 							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{200, 500, 500}, breachDurationSecs, true)
 							appMetrics = append(appMetrics, &models.AppMetric{AppId: testAppId,
@@ -428,72 +432,146 @@ var _ = Describe("Evaluator", func() {
 			})
 
 			Context("multiple triggers", func() {
-				BeforeEach(func() {
-					Expect(triggerChan).To(BeSent(triggerArrayMultipleTriggers))
-				})
-				Context("when only the first trigger breaches", func() {
+				When("evaluating default first matching", func() {
 					BeforeEach(func() {
-						scalingEngine.AppendHandlers(
-							ghttp.CombineHandlers(
-								ghttp.VerifyRequest("POST", urlPath),
-								ghttp.VerifyJSONRepresenting(firstTrigger),
-								ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
-							),
-						)
-						appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{500, 550, 600}, breachDurationSecs, true)
-						queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
-							return appMetrics, nil
-						}
+						Expect(triggerChan).To(BeSent(multipleTriggers))
 					})
-					It("should send alarm of first trigger to scaling engine", func() {
-						Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
-						Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
-						Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
+					When("only the first trigger breaches", func() {
+						BeforeEach(func() {
+							scalingEngine.AppendHandlers(
+								ghttp.CombineHandlers(
+									ghttp.VerifyRequest("POST", urlPath),
+									ghttp.VerifyJSONRepresenting(scaleOutWhenGTE),
+									ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
+								),
+							)
+							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{500, 550, 600}, breachDurationSecs, true)
+							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
+								return appMetrics, nil
+							}
+						})
+						It("should send alarm of first trigger to scaling engine", func() {
+							Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
 
+						})
 					})
+
+					When("only second trigger breaches", func() {
+						BeforeEach(func() {
+							scalingEngine.AppendHandlers(
+								ghttp.CombineHandlers(
+									ghttp.VerifyRequest("POST", urlPath),
+									ghttp.VerifyJSONRepresenting(scaleInWhenLTE),
+									ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
+								),
+							)
+							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{300, 400, 500}, breachDurationSecs, true)
+							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
+								return appMetrics, nil
+							}
+						})
+						It("should send alarm  of second trigger to scaling engine", func() {
+							Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
+
+						})
+					})
+
+					When("both triggers breach", func() {
+						BeforeEach(func() {
+							scalingEngine.AppendHandlers(
+								ghttp.CombineHandlers(
+									ghttp.VerifyRequest("POST", urlPath),
+									ghttp.VerifyJSONRepresenting(scaleOutWhenGTE),
+									ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
+								),
+							)
+							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{500, 500, 500}, breachDurationSecs, true)
+							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
+								return appMetrics, nil
+							}
+						})
+						It("should send alarm of first trigger to scaling engine", func() {
+							Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
+						})
+					})
+
 				})
 
-				Context("when only second tigger breaches", func() {
+				When("evaluating biased to scaleout", func() {
 					BeforeEach(func() {
-						scalingEngine.AppendHandlers(
-							ghttp.CombineHandlers(
-								ghttp.VerifyRequest("POST", urlPath),
-								ghttp.VerifyJSONRepresenting(secondTrigger),
-								ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
-							),
-						)
-						appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{300, 400, 500}, breachDurationSecs, true)
-						queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
-							return appMetrics, nil
-						}
+						Expect(triggerChan).To(BeSent(multipleTriggersBiasedToScaleout))
 					})
-					It("should send alarm  of second trigger to scaling engine", func() {
-						Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
-						Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
-						Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
+					When("only the first trigger breaches", func() {
+						BeforeEach(func() {
+							scalingEngine.AppendHandlers(
+								ghttp.CombineHandlers(
+									ghttp.VerifyRequest("POST", urlPath),
+									ghttp.VerifyJSONRepresenting(scaleOutWhenGTE),
+									ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
+								),
+							)
+							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{500, 550, 600}, breachDurationSecs, true)
+							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
+								return appMetrics, nil
+							}
+						})
+						It("should send alarm of first trigger to scaling engine", func() {
+							Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
 
+						})
 					})
-				})
 
-				Context("when both tiggers breach", func() {
-					BeforeEach(func() {
-						scalingEngine.AppendHandlers(
-							ghttp.CombineHandlers(
-								ghttp.VerifyRequest("POST", urlPath),
-								ghttp.VerifyJSONRepresenting(firstTrigger),
-								ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
-							),
-						)
-						appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{500, 500, 500}, breachDurationSecs, true)
-						queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
-							return appMetrics, nil
-						}
+					When("only second trigger breaches", func() {
+						BeforeEach(func() {
+							scalingEngine.AppendHandlers(
+								ghttp.CombineHandlers(
+									ghttp.VerifyRequest("POST", urlPath),
+									ghttp.VerifyJSONRepresenting(scaleInWhenLTE),
+									ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
+								),
+							)
+							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{300, 400, 500}, breachDurationSecs, true)
+							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
+								return appMetrics, nil
+							}
+						})
+						It("should send alarm  of second trigger to scaling engine", func() {
+							Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
+
+						})
 					})
-					It("should send alarm of first trigger to scaling engine", func() {
-						Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
-						Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
-						Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
+
+					When("both triggers breach", func() {
+						BeforeEach(func() {
+							scalingEngine.AppendHandlers(
+								ghttp.CombineHandlers(
+									ghttp.VerifyRequest("POST", urlPath),
+									ghttp.VerifyJSONRepresenting(scaleOutWhenGTE),
+									ghttp.RespondWithJSONEncoded(http.StatusOK, &scalingResult),
+								),
+							)
+							appMetrics := generateTestAppMetrics(testAppId, testMetricType, testMetricUnit, []int64{500, 500, 500}, breachDurationSecs, true)
+							queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
+								return appMetrics, nil
+							}
+						})
+						It("should send alarm of scaleout trigger to scaling engine", func() {
+							Eventually(scalingEngine.ReceivedRequests).Should(HaveLen(1))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("send trigger alarm to scaling engine")))
+							Eventually(logger.LogMessages).Should(ContainElement(ContainSubstring("successfully-send-trigger-alarm with trigger")))
+						})
 					})
+
 				})
 
 			})
@@ -507,8 +585,8 @@ var _ = Describe("Evaluator", func() {
 					Expect(triggerChan).To(BeSent(triggerArrayGT))
 				})
 
-				Context("when the scaling engine returns 200 with different scalingResults", func() {
-					Context("when cooldownExpiredAt is set to a valid timestamp in scalingResult ", func() {
+				When("the scaling engine returns 200 with different scalingResults", func() {
+					When("cooldownExpiredAt is set to a valid timestamp in scalingResult ", func() {
 						BeforeEach(func() {
 							scalingEngine.AppendHandlers(
 								ghttp.CombineHandlers(
@@ -529,7 +607,7 @@ var _ = Describe("Evaluator", func() {
 						})
 					})
 
-					Context("when cooldownExpiredAt is 0 in scalingResult", func() {
+					When("cooldownExpiredAt is 0 in scalingResult", func() {
 						BeforeEach(func() {
 							scalingResult.CooldownExpiredAt = 0
 
@@ -551,7 +629,7 @@ var _ = Describe("Evaluator", func() {
 						})
 					})
 
-					Context("when cooldownExpiredAt is not set in scalingResult", func() {
+					When("cooldownExpiredAt is not set in scalingResult", func() {
 						BeforeEach(func() {
 							scalingEngine.AppendHandlers(
 								ghttp.CombineHandlers(
@@ -571,7 +649,7 @@ var _ = Describe("Evaluator", func() {
 						})
 					})
 
-					Context("when response is not a valid type scalingResult", func() {
+					When("response is not a valid type scalingResult", func() {
 						BeforeEach(func() {
 							scalingEngine.AppendHandlers(
 								ghttp.CombineHandlers(
@@ -592,7 +670,7 @@ var _ = Describe("Evaluator", func() {
 					})
 				})
 
-				Context("when the scaling engine returns error", func() {
+				When("the scaling engine returns error", func() {
 					BeforeEach(func() {
 						scalingEngine.RouteToHandler("POST", urlPath, ghttp.RespondWithJSONEncoded(http.StatusBadRequest, "error"))
 					})
@@ -603,7 +681,7 @@ var _ = Describe("Evaluator", func() {
 					})
 				})
 
-				PContext("when the scaling engine's response is too long", func() {
+				PWhen("the scaling engine's response is too long", func() {
 					BeforeEach(func() {
 						tmp := ""
 						errorStr := ""
@@ -712,7 +790,7 @@ var _ = Describe("Evaluator", func() {
 				})
 			})
 
-			Context("when retrieving appMetrics  failed", func() {
+			When("retrieving appMetrics  failed", func() {
 				BeforeEach(func() {
 					queryAppMetrics = func(appID string, metricType string, start int64, end int64, orderType db.OrderType) ([]*models.AppMetric, error) {
 						return nil, errors.New("an error")
@@ -724,9 +802,9 @@ var _ = Describe("Evaluator", func() {
 				})
 			})
 
-			Context("when there are invalid operators in trigger", func() {
+			When("there are invalid operators in trigger", func() {
 				BeforeEach(func() {
-					invalidTriggerArray := []*models.Trigger{{
+					invalidTriggerArray := &models.DynamicScalingRules{Triggers: []*models.Trigger{{
 						AppId:                 testAppId,
 						MetricType:            testMetricType,
 						BreachDurationSeconds: breachDurationSecs,
@@ -734,8 +812,8 @@ var _ = Describe("Evaluator", func() {
 						Threshold:             500,
 						Operator:              "invalid_operator",
 						Adjustment:            "1",
-					}}
-					triggerChan = make(chan []*models.Trigger, 1)
+					}}}
+					triggerChan = make(chan *models.DynamicScalingRules, 1)
 					Eventually(triggerChan).Should(BeSent(invalidTriggerArray))
 				})
 
