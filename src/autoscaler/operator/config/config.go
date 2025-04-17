@@ -1,17 +1,24 @@
 package config
 
 import (
+	"errors"
 	"fmt"
-	"io"
-	"strings"
+	"os"
 	"time"
 
+	"gopkg.in/yaml.v3"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+)
 
-	"gopkg.in/yaml.v3"
+var (
+	ErrReadYaml               = errors.New("failed to read config file")
+	ErrReadJson               = errors.New("failed to read vcap_services json")
+	ErrOperatorConfigNotFound = errors.New("operator config service not found")
 )
 
 const (
@@ -64,8 +71,15 @@ var defaultHealthConfig = helpers.HealthConfig{
 	},
 }
 
+// TODO: move this to a config.Db ?
+// app_metrics_db: db: url: <%= app_metrics_db_url %>
+// scaling_engine_db: db: url: <%= scaling_engine_db_url %>
+// app_syncer: db: url: <%= policy_db_url %>
+// db_lock: db: url: <%= lock_db_url %>
+
 type Config struct {
-	CF                cf.Config             `yaml:"cf"`
+	CF cf.Config `yaml:"cf"`
+	// Db                        map[string]db.DatabaseConfig `yaml:"db"`
 	Health            helpers.HealthConfig  `yaml:"health"`
 	Logging           helpers.LoggingConfig `yaml:"logging"`
 	AppMetricsDB      DbPrunerConfig        `yaml:"app_metrics_db"`
@@ -77,49 +91,71 @@ type Config struct {
 	HttpClientTimeout time.Duration         `yaml:"http_client_timeout"`
 }
 
-var defaultConfig = Config{
-	CF: cf.Config{
-		ClientConfig: cf.ClientConfig{SkipSSLValidation: false},
-	},
-	Health:  defaultHealthConfig,
-	Logging: helpers.LoggingConfig{Level: DefaultLoggingLevel},
-	AppMetricsDB: DbPrunerConfig{
-		RefreshInterval: DefaultRefreshInterval,
-		CutoffDuration:  DefaultCutoffDuration,
-	},
-	ScalingEngineDB: DbPrunerConfig{
-		RefreshInterval: DefaultRefreshInterval,
-		CutoffDuration:  DefaultCutoffDuration,
-	},
-	ScalingEngine: ScalingEngineConfig{
-		SyncInterval: DefaultSyncInterval,
-	},
-	Scheduler: SchedulerConfig{
-		SyncInterval: DefaultSyncInterval,
-	},
-	AppSyncer: AppSyncerConfig{
-		SyncInterval: DefaultSyncInterval,
-	},
-	DBLock:            defaultDBLockConfig,
-	HttpClientTimeout: DefaultHttpClientTimeout,
+func defaultConfig() Config {
+	return Config{
+		CF: cf.Config{
+			ClientConfig: cf.ClientConfig{SkipSSLValidation: false},
+		},
+		Health:  defaultHealthConfig,
+		Logging: helpers.LoggingConfig{Level: DefaultLoggingLevel},
+		AppMetricsDB: DbPrunerConfig{
+			RefreshInterval: DefaultRefreshInterval,
+			CutoffDuration:  DefaultCutoffDuration,
+		},
+		ScalingEngineDB: DbPrunerConfig{
+			RefreshInterval: DefaultRefreshInterval,
+			CutoffDuration:  DefaultCutoffDuration,
+		},
+		ScalingEngine: ScalingEngineConfig{
+			SyncInterval: DefaultSyncInterval,
+		},
+		Scheduler: SchedulerConfig{
+			SyncInterval: DefaultSyncInterval,
+		},
+		AppSyncer: AppSyncerConfig{
+			SyncInterval: DefaultSyncInterval,
+		},
+		DBLock:            defaultDBLockConfig,
+		HttpClientTimeout: DefaultHttpClientTimeout,
+	}
 }
 
-func LoadConfig(reader io.Reader) (*Config, error) {
-	conf := defaultConfig
-
-	dec := yaml.NewDecoder(reader)
-	dec.KnownFields(true)
-	err := dec.Decode(&conf)
-
-	if err != nil {
+func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
+	conf := defaultConfig()
+	if err := loadYamlFile(filepath, &conf); err != nil {
 		return nil, err
 	}
 
-	conf.Logging.Level = strings.ToLower(conf.Logging.Level)
+	if err := loadVcapConfig(&conf, vcapReader); err != nil {
+		return nil, err
+	}
 
 	return &conf, nil
 }
 
+func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	return nil
+}
+
+func loadYamlFile(filepath string, conf *Config) error {
+	if filepath == "" {
+		return nil
+	}
+	file, err := os.Open(filepath)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "failed to open config file '%s': %s\n", filepath, err)
+		return ErrReadYaml
+	}
+	defer file.Close()
+
+	dec := yaml.NewDecoder(file)
+	dec.KnownFields(true)
+	if err := dec.Decode(conf); err != nil {
+		return fmt.Errorf("%w: %v", ErrReadYaml, err)
+	}
+
+	return nil
+}
 func (c *Config) Validate() error {
 	if c.AppMetricsDB.DB.URL == "" {
 		return fmt.Errorf("Configuration error: app_metrics_db.db.url is empty")

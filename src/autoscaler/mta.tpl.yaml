@@ -111,6 +111,8 @@ modules:
       stack: cflinuxfs4
       routes:
 
+  # TODO: Add operator
+
 resources:
 - name: metricsforwarder-config
   type: org.cloudfoundry.user-provided-service

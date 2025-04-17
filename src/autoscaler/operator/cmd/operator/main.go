@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
@@ -33,23 +34,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	configFile, err := os.Open(path)
+	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "failed to open config file '%s' : %s\n", path, err.Error())
-		os.Exit(1)
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
 	}
 
-	var conf *config.Config
-	conf, err = config.LoadConfig(configFile)
+	conf, err := config.LoadConfig(path, vcapConfiguration)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
 		os.Exit(1)
 	}
-	configFile.Close()
 
 	err = conf.Validate()
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "failed to validate configuration : %s\n", err.Error())
+		_, _ = fmt.Fprintf(os.Stdout, "failed to validate configuration : %s\n", err.Error())
 		os.Exit(1)
 	}
 
