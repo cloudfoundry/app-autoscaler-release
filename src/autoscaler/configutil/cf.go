@@ -33,7 +33,6 @@ type VCAPConfigurationReader interface {
 	GetInstanceIndex() int
 	IsRunningOnCF() bool
 
-	ConfigureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error
 	ConfigureDb(dbName string, confDb *map[string]db.DatabaseConfig) error
 	ConfigureDatabases(confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, credHelperImpl string) error
 }
