@@ -46,10 +46,6 @@ var defaultCFServerConfig = helpers.ServerConfig{
 	Port: 8082,
 }
 
-type ServerConfig struct {
-	helpers.ServerConfig `yaml:",inline" json:",inline"`
-}
-
 type PoolConfig struct {
 	NodeCount int `yaml:"node_count" json:"node_count"`
 	NodeIndex int `yaml:"node_index" json:"node_index"`
