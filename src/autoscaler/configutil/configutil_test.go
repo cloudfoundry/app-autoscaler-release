@@ -148,6 +148,7 @@ var _ = Describe("Configutil", func() {
 
 			BeforeEach(func() {
 				vcapApplicationJson = `{}`
+				actualDbs = &map[string]db.DatabaseConfig{}
 			})
 			When("stored procedure implementation is set to stored_procedure", func() {
 				var actualProcedureConfig *models.StoredProcedureConfig
@@ -166,7 +167,6 @@ var _ = Describe("Configutil", func() {
 				When("VCAP_SERVICES has relational db service bind to app for policy db", func() {
 					BeforeEach(func() {
 
-						actualDbs = &map[string]db.DatabaseConfig{}
 						actualProcedureConfig = &models.StoredProcedureConfig{}
 
 						expectedDbs = &map[string]db.DatabaseConfig{
