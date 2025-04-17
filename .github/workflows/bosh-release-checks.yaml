@@ -55,7 +55,7 @@ jobs:
           make generate-openapi-generated-clients-and-servers
 
           export PATH="${PATH}:/usr/local/maven/bin"
-          make go-mod-tidy go-mod-vendor db scheduler
+          make go-mod-tidy go-mod-vendor db.java-libs scheduler.build
 
       - name: Build Dev Release
         id: build

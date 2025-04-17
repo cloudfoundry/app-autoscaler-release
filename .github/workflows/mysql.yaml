@@ -19,9 +19,9 @@ jobs:
       DB_DATABASE: autoscaler
       DB_USER: root
       DB_PASSWORD: root
-    runs-on: ubuntu-latest
+    runs-on: "ubuntu-latest"
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:5277733db60d4e659404ad330e7c0da790cb65c18b41cf0b2ca6e424294c5dd9
+      image: "ubuntu:noble"
     continue-on-error: true
     name: Build suite=${{ matrix.suite }}, mysql=${{ matrix.mysql }}
     services:
@@ -36,17 +36,30 @@ jobs:
 
 
     steps:
+      - name: Install devbox-prerequisites
+        shell: bash
+        run: |
+          set -eu -o pipefail
+          apt-get update
+          apt-get install --assume-yes gh git curl
+
       - name: Trust my checkout
         run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      - name: make build
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 # v0.12.0
+        env:
+          ACT: true # This causes devbox to do a non-multiuser Nix-installation
+          DEVBOX_DEBUG: 1
+
+      - name: make generate-openapi-generated-clients-and-servers
         run: |
-          make generate-openapi-generated-clients-and-servers
-          make build db_type=mysql
+          devbox run make generate-openapi-generated-clients-and-servers
 
       - name: make ${{ matrix.suite }}
         env:
           DB_HOST: mysql
         run: |
-          make ${{ matrix.suite }} db_type=mysql DB_HOST="${DB_HOST}"
+          devbox run make ${{ matrix.suite }} db_type=mysql DB_HOST="${DB_HOST}"
