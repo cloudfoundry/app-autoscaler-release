@@ -56,19 +56,21 @@ var _ = Describe("Config", func() {
 
 	Describe("Load Config", func() {
 		When("runnning in a cf container", func() {
-			var expectedDbUrl string
-			var expectedTLSConfig models.TLSCerts
+			var expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
+			var expectedTLSConfig = models.TLSCerts{
+				KeyFile:    "some/path/in/container/cfcert.key",
+				CertFile:   "some/path/in/container/cfcert.crt",
+				CACertFile: "some/path/in/container/cfcert.crt",
+			}
 
-			JustBeforeEach(func() {
+			BeforeEach(func() {
 				mockVCAPConfigurationReader.GetPortReturns(3333)
-				expectedTLSConfig = models.TLSCerts{
-					KeyFile:    "some/path/in/container/cfcert.key",
-					CertFile:   "some/path/in/container/cfcert.crt",
-					CACertFile: "some/path/in/container/cfcert.crt",
-				}
 				mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(expectedTLSConfig)
 				mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
 				mockVCAPConfigurationReader.MaterializeDBFromServiceReturns(expectedDbUrl, nil)
+			})
+
+			JustBeforeEach(func() {
 				conf, err = LoadConfig("", mockVCAPConfigurationReader)
 			})
 
@@ -94,6 +96,7 @@ var _ = Describe("Config", func() {
 			It("sets env variable over config file", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(conf.CFServer.Port).To(Equal(3333))
+				Expect(conf.Server.Port).To(Equal(0))
 			})
 
 			When("handling available databases", func() {

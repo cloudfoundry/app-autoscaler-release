@@ -131,6 +131,8 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}
+	// enable plain text logging. See src/autoscaler/helpers/logger.go
+	conf.Logging.PlainTextSink = true
 
 	conf.CFServer.Port = vcapReader.GetPort()
 	conf.Server.Port = 0

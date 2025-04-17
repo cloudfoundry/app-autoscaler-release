@@ -52,6 +52,11 @@ var _ = Describe("Config", func() {
 				conf, err = LoadConfig("", mockVCAPConfigurationReader)
 			})
 
+			It("should set logging to plain sink", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.Logging.PlainTextSink).To(BeTrue())
+			})
+
 			It("sets env variable over config file", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(conf.CFServer.Port).To(Equal(3333))

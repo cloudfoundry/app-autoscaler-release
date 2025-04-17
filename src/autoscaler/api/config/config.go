@@ -180,6 +180,8 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	conf.Logging.PlainTextSink = true
 
 	conf.CFServer.Port = vcapReader.GetPort()
+	conf.Server.Port = 0
+
 	if err := loadPublicApiServerConfig(conf, vcapReader); err != nil {
 		return err
 	}
