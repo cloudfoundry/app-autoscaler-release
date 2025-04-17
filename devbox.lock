@@ -409,51 +409,51 @@
         }
       }
     },
-    "direnv@2.35.0": {
-      "last_modified": "2025-03-11T17:52:14Z",
-      "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#direnv",
+    "direnv@2.36.0": {
+      "last_modified": "2025-04-12T07:19:22Z",
+      "resolved": "github:NixOS/nixpkgs/2349f9de17183971db12ae9e0123dab132023bd7#direnv",
       "source": "devbox-search",
-      "version": "2.35.0",
+      "version": "2.36.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/j2q2x2g7kvjymp3qjr0qfa8rmm2sjfvv-direnv-2.35.0",
+              "path": "/nix/store/6hyvif1ya643d3bifnis8728nz8gj1jp-direnv-2.36.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/j2q2x2g7kvjymp3qjr0qfa8rmm2sjfvv-direnv-2.35.0"
+          "store_path": "/nix/store/6hyvif1ya643d3bifnis8728nz8gj1jp-direnv-2.36.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/ynkdvriwzn6argqmr2abd5rkcgnwqyz0-direnv-2.35.0",
+              "path": "/nix/store/34w0ch8yxhbl7if4jrkxqyci58x22awk-direnv-2.36.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/ynkdvriwzn6argqmr2abd5rkcgnwqyz0-direnv-2.35.0"
+          "store_path": "/nix/store/34w0ch8yxhbl7if4jrkxqyci58x22awk-direnv-2.36.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/6iz7lp0drkdsvd0i09466lwcs5w1rm09-direnv-2.35.0",
+              "path": "/nix/store/9pqw407blhnxxnzjbf3lxwllvfhqyhzg-direnv-2.36.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/6iz7lp0drkdsvd0i09466lwcs5w1rm09-direnv-2.35.0"
+          "store_path": "/nix/store/9pqw407blhnxxnzjbf3lxwllvfhqyhzg-direnv-2.36.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/iy47slqbd810jhczw3sd9d192sngxsz4-direnv-2.35.0",
+              "path": "/nix/store/7hhiy9awcws07p6bi6hfdb3vln1ws118-direnv-2.36.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/iy47slqbd810jhczw3sd9d192sngxsz4-direnv-2.35.0"
+          "store_path": "/nix/store/7hhiy9awcws07p6bi6hfdb3vln1ws118-direnv-2.36.0"
         }
       }
     },
@@ -598,6 +598,34 @@
             }
           ],
           "store_path": "/nix/store/rkl11pk4dgrdf1j7r13qlmlhfmxv556l-ginkgo-2.23.4"
+        }
+      }
+    },
+    "glibcLocales@latest": {
+      "last_modified": "2025-03-11T17:52:14Z",
+      "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#glibcLocales",
+      "source": "devbox-search",
+      "version": "2.40-66",
+      "systems": {
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/iv7avlnmk2cx79xpi4mr8sk1kxvlvm9l-glibc-locales-2.40-66",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/iv7avlnmk2cx79xpi4mr8sk1kxvlvm9l-glibc-locales-2.40-66"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/hgybbbzg778wasmw5g1hzm7a8n4wwd5h-glibc-locales-2.40-66",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/hgybbbzg778wasmw5g1hzm7a8n4wwd5h-glibc-locales-2.40-66"
         }
       }
     },
@@ -1259,7 +1287,7 @@
     },
     "mysql@latest": {
       "last_modified": "2023-02-24T09:01:09Z",
-      "plugin_version": "0.0.3",
+      "plugin_version": "0.0.4",
       "resolved": "github:NixOS/nixpkgs/7d0ed7f2e5aea07ab22ccb338d27fbe347ed2f11#mysql",
       "source": "devbox-search",
       "version": "10.6.12"
@@ -1439,7 +1467,7 @@
     },
     "python@3.13.2": {
       "last_modified": "2025-03-03T13:00:40Z",
-      "plugin_version": "0.0.3",
+      "plugin_version": "0.0.4",
       "resolved": "github:NixOS/nixpkgs/95eacfb6d1accf8d59a9e570d26d04ad693d2ec3#python313",
       "source": "devbox-search",
       "version": "3.13.2",
