@@ -79,16 +79,10 @@ var _ = Describe("Config", func() {
 				Expect(conf.CFServer.XFCC.ValidSpaceGuid).To(Equal("some-space-id"))
 			})
 
-			It("calls configureDb with for policyDB", func() {
-				receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
-				Expect(db.PolicyDb).To(Equal(receivedDbName))
-				Expect(*receivedDbConfig).To(Equal(conf.Db))
-			})
-
-			It("calls configureDb with for appMetricsDB", func() {
-				receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
-				Expect(db.AppMetricsDb).To(Equal(receivedDbName))
-				Expect(*receivedDbConfig).To(Equal(conf.Db))
+			When("handling available databases", func() {
+				It("calls vcapReader ConfigureDatabases with the right arguments", func() {
+					testhelpers.ExpectConfigureDatabasesCalledOnce(err, mockVCAPConfigurationReader, "")
+				})
 			})
 
 			When("service is empty", func() {
