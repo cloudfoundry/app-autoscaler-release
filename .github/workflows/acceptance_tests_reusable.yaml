@@ -7,7 +7,7 @@ on:
         type: string
         default: "[ 'API', 'APP', 'Broker' ]"
       deploy_apps:
-        required: false
+        required: true
         type: boolean
       ops_files:
         required: false
@@ -23,7 +23,7 @@ defaults:
 env:
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
-  ENABLE_MTAR: "${{ inputs.deploy_apps }}"
+  ENABLE_MTAR: "${{ inputs.deploy_apps && 'true' || 'false' }}"
   GINKGO_OPTS: "--fail-fast"
   NODES: 4
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
@@ -66,7 +66,9 @@ jobs:
 
       - name: Register autoscaler
         shell: bash
-        run: make --directory="${AUTOSCALER_DIR}" deploy-register-cf
+        run: |
+          env
+          make --directory="${AUTOSCALER_DIR}" deploy-register-cf
 
   acceptance_tests:
     name: Acceptance Tests
