@@ -242,8 +242,8 @@ func initConfig() {
 	timeout := 10 * time.Second
 	conf = config.Config{
 		Pool: &config.PoolConfig{
-			NodeCount: 1,
-			NodeIndex: 0,
+			TotalInstances: 1,
+			InstanceIndex:  0,
 		},
 		Aggregator: &config.AggregatorConfig{
 			AggregatorExecuteInterval: 1 * time.Second,

@@ -49,7 +49,7 @@ end
   end
 
   sorted_instances=link("eventgenerator").instances.sort_by {|i|i.address}
-  nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
+  instance_index=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
 %>
 
 
@@ -61,8 +61,8 @@ server:
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/ca.crt
 
 pool:
-  node_count: <%= sorted_instances.length %>
-  node_index: <%= nodeIndex %>
+  total_instances: <%= sorted_instances.length %>
+  instance_index: <%= instance_index %>
 
 cf_server:
   port: <%= p("autoscaler.eventgenerator.cf_server.port") %>

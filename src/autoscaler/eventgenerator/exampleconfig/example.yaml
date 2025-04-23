@@ -1,8 +1,8 @@
 logging:
   level: "debug"
 server:
-  node_count: 2
-  node_index: 0
+  total_instances: 2
+  instance_index: 0
 health:
   port: 8081
 db:

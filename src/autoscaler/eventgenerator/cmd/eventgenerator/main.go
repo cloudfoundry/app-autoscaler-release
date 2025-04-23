@@ -73,7 +73,7 @@ func main() {
 		httpStatusCollector,
 	}, true, logger.Session("eventgenerator-prometheus"))
 
-	appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, conf.Pool.NodeCount, conf.Pool.NodeIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
+	appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, conf.Pool.TotalInstances, conf.Pool.InstanceIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
 
 	triggersChan := make(chan []*models.Trigger, conf.Evaluator.TriggerArrayChannelSize)
 

@@ -375,8 +375,8 @@ func (components *Components) PrepareEventGeneratorConfig(dbURI string, port int
 			},
 		},
 		Pool: &egConfig.PoolConfig{
-			NodeCount: 1,
-			NodeIndex: 0,
+			TotalInstances: 1,
+			InstanceIndex:  0,
 		},
 		Aggregator: &egConfig.AggregatorConfig{
 			AggregatorExecuteInterval: aggregatorExecuteInterval,
