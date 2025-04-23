@@ -63,14 +63,14 @@ RUN apt-get update && \
 
 # Install bosh_cli
 # renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
-ARG BOSH_VERSION=7.9.4
+ARG BOSH_VERSION=7.9.5
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
-ARG BBL_VERSION=v9.0.32
+ARG BBL_VERSION=v9.0.33
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_amd64 && \
   mv bbl-* /usr/local/bin/bbl &&\
   chmod +x /usr/local/bin/bbl &&\
