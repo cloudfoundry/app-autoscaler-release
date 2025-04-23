@@ -1,4 +1,4 @@
-#!/bin/bash
+#t!/bin/bash
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 set -euo pipefail
@@ -31,7 +31,6 @@ function bosh_login(){
 
 function cf_login(){
   step "login to cf"
-  cf logout
   cf api "https://api.${system_domain}" --skip-ssl-validation
   cf_admin_password="$(credhub get --quiet --name='/bosh-autoscaler/cf/cf_admin_password')"
   cf auth admin "$cf_admin_password"
