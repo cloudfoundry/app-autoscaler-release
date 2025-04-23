@@ -12,7 +12,6 @@ jobs:
     name: "${{ github.workflow }}"
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
     with:
-      deployment_name: "autoscaler-mta-${{ github.event.pull_request.number }}"
       deploy_apps: true
       ops_files: |
         operations/add-releases.yml

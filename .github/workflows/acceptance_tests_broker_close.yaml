@@ -4,7 +4,6 @@ on:
     types: [closed]
 env:
   PR_NUMBER: "${{ github.event.pull_request.number }}"
-  DEPLOYMENT_NAME: "autoscaler-${{ github.event.pull_request.number }}"
 
 jobs:
   deployment_cleanup:

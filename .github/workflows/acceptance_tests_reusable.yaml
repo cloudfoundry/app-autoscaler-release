@@ -6,9 +6,6 @@ on:
         required: false
         type: string
         default: "[ 'API', 'APP', 'Broker' ]"
-      deployment_name:
-        required: true
-        type: string
       deploy_apps:
         required: false
         type: boolean
@@ -25,7 +22,6 @@ defaults:
 
 env:
   PR_NUMBER: "${{ github.event.pull_request.number }}"
-  DEPLOYMENT_NAME: "${{ inputs.deployment_name }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
   GINKGO_OPTS: "--fail-fast"
   NODES: 4
