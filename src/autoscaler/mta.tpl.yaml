@@ -63,9 +63,8 @@ modules:
     - name: database
     - name: app-autoscaler-application-logs
     parameters:
-      memory: 1g
-      disk-quota: 1g
-      instances: 0
+      memory: 1G
+      disk-quota: 1G
       stack: cflinuxfs4
       routes:
 
@@ -82,9 +81,8 @@ modules:
     - name: database
     - name: app-autoscaler-application-logs
     parameters:
-      memory: 1g
-      disk-quota: 1g
-      instances: 0
+      memory: 1G
+      disk-quota: 1G
       stack: cflinuxfs4
       routes:
 
@@ -105,7 +103,6 @@ modules:
     parameters:
       memory: 1G
       disk-quota: 1G
-      instances: 0
       stack: cflinuxfs4
       routes:
 
