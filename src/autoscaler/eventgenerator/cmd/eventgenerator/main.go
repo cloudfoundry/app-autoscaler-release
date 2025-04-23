@@ -74,7 +74,7 @@ func main() {
 	}, true, logger.Session("eventgenerator-prometheus"))
 
 	//appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, conf.Pool.TotalInstances, conf.Pool.InstanceIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
-	appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator, conf.Pool, policyDb, appMetricDB)
+	appManager := aggregator.NewAppManager(logger, egClock, *conf.Aggregator, *conf.Pool, policyDb, appMetricDB)
 
 	triggersChan := make(chan []*models.Trigger, conf.Evaluator.TriggerArrayChannelSize)
 
@@ -137,10 +137,10 @@ func main() {
 	}
 
 	members := grouper.Members{
-		{"eventGenerator", eventGenerator},
-		{"https_server", mtlsServer},
-		{"health_server", healthServer},
-		{"cf_server", cfServer},
+		{Name: "eventGenerator", Runner: eventGenerator},
+		{Name: "https_server", Runner: mtlsServer},
+		{Name: "health_server", Runner: healthServer},
+		{Name: "cf_server", Runner: cfServer},
 	}
 
 	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))
@@ -188,7 +188,7 @@ func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan cha
 	}
 
 	evaluators := make([]*generator.Evaluator, count)
-	for i := 0; i < count; i++ {
+	for i := range evaluators {
 		evaluators[i] = generator.NewEvaluator(logger, seClient, conf.ScalingEngine.ScalingEngineURL, triggersChan,
 			conf.DefaultBreachDurationSecs, queryMetrics, getBreaker, setCoolDownExpired)
 	}
@@ -198,7 +198,7 @@ func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan cha
 
 func createMetricPollers(logger lager.Logger, conf *config.Config, appMonitorsChan chan *models.AppMonitor, appMetricChan chan *models.AppMetric, metricClient metric.Fetcher) ([]*aggregator.MetricPoller, error) {
 	pollers := make([]*aggregator.MetricPoller, conf.Aggregator.MetricPollerCount)
-	for i := 0; i < len(pollers); i++ {
+	for i := range pollers {
 		pollers[i] = aggregator.NewMetricPoller(logger, metricClient, appMonitorsChan, appMetricChan)
 	}
 	return pollers, nil
