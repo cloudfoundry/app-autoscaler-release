@@ -4,6 +4,7 @@ on:
     types: [closed]
 env:
   PR_NUMBER: "${{ github.event.pull_request.number }}"
+  ENABLE_MTAR: false
 
 jobs:
   deployment_cleanup:

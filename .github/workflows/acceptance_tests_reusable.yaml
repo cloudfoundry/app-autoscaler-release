@@ -23,6 +23,7 @@ defaults:
 env:
   PR_NUMBER: "${{ github.event.pull_request.number }}"
   BBL_STATE_PATH: "${{ github.workspace }}/bbl/bbl-state"
+  ENABLE_MTAR: "${{ inputs.deploy_apps }}"
   GINKGO_OPTS: "--fail-fast"
   NODES: 4
   AUTOSCALER_DIR: "${{ github.workspace }}/app-autoscaler-release"
@@ -56,7 +57,6 @@ jobs:
         shell: bash
         env:
           OPS_FILES: ${{ inputs.ops_files }}
-          ENABLE_MTAR: ${{ inputs.deploy_apps }}
         run: make --directory="${AUTOSCALER_DIR}" deploy-autoscaler
 
       - name: Deploy Apps
