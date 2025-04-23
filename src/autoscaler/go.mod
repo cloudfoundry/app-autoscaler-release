@@ -6,10 +6,10 @@ require (
 	code.cloudfoundry.org/brokerapi/v13 v13.0.4
 	code.cloudfoundry.org/cfhttp/v2 v2.40.0
 	code.cloudfoundry.org/clock v1.33.0
-	code.cloudfoundry.org/go-log-cache/v3 v3.1.0
+	code.cloudfoundry.org/go-log-cache/v3 v3.1.1
 	code.cloudfoundry.org/go-loggregator/v10 v10.2.0
 	code.cloudfoundry.org/lager/v3 v3.33.0
-	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20250414083644-f058f4ab906a
+	code.cloudfoundry.org/loggregator-agent-release/src ea7890a15063
 	code.cloudfoundry.org/tlsconfig v0.24.0
 	github.com/cenkalti/backoff/v5 v5.0.2
 	github.com/cloud-gov/go-cfenv v1.19.1
