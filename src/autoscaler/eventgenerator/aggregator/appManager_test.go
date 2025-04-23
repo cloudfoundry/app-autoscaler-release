@@ -6,6 +6,7 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 
@@ -17,13 +18,15 @@ import (
 
 var _ = Describe("AppManager", func() {
 	var (
-		policyDB    *fakes.FakePolicyDB
-		appMetricDB *fakes.FakeAppMetricDB
-		clock       *fakeclock.FakeClock
-		appManager  *AppManager
-		logger      lager.Logger
-		testAppId   = "testAppId"
-		policyStr   = `
+		policyDB       *fakes.FakePolicyDB
+		appMetricDB    *fakes.FakeAppMetricDB
+		clock          *fakeclock.FakeClock
+		appManager     *AppManager
+		logger         lager.Logger
+		testAppId      = "testAppId"
+		testPool       = config.PoolConfig{}
+		testAggregator = config.AggregatorConfig{}
+		policyStr      = `
 		{
 		   "instance_min_count":1,
 		   "instance_max_count":5,
@@ -38,23 +41,23 @@ var _ = Describe("AppManager", func() {
 		      }
 		   ]
 		}`
-		nodeNum         int
-		nodeIndex       int
-		cacheSizePerApp int
 	)
 
 	BeforeEach(func() {
 		policyDB = &fakes.FakePolicyDB{}
 		appMetricDB = &fakes.FakeAppMetricDB{}
+
+		testAggregator.PolicyPollerInterval = testPolicyPollerInterval
+
 		clock = fakeclock.NewFakeClock(time.Now())
 		logger = lager.NewLogger("AppManager-test")
-		nodeNum = 1
-		nodeIndex = 0
-		cacheSizePerApp = 5
+		testPool.TotalInstances = 1
+		testPool.InstanceIndex = 0
+		testAggregator.MetricCacheSizePerApp = 5
 	})
 	Context("Start", func() {
 		JustBeforeEach(func() {
-			appManager = NewAppManager(logger, clock, testPolicyPollerInterval, nodeNum, nodeIndex, cacheSizePerApp, policyDB, appMetricDB)
+			appManager = NewAppManager(logger, clock, testAggregator, testPool, policyDB, appMetricDB)
 			appManager.Start()
 
 		})
@@ -72,9 +75,9 @@ var _ = Describe("AppManager", func() {
 			})
 			It("should retrieve and get policies successfully for every interval", func() {
 				Eventually(policyDB.RetrievePoliciesCallCount).Should(Equal(1))
-				clock.Increment(1 * testPolicyPollerInterval)
+				clock.Increment(1 * testAggregator.PolicyPollerInterval)
 				Eventually(policyDB.RetrievePoliciesCallCount).Should(Equal(2))
-				clock.Increment(1 * testPolicyPollerInterval)
+				clock.Increment(1 * testAggregator.PolicyPollerInterval)
 				Eventually(policyDB.RetrievePoliciesCallCount).Should(Equal(3))
 				Eventually(appManager.GetPolicies).Should(Equal(map[string]*models.AppPolicy{
 					testAppId: {
@@ -95,7 +98,8 @@ var _ = Describe("AppManager", func() {
 
 			Context("when running with 3 nodes", func() {
 				BeforeEach(func() {
-					nodeNum = 3
+					testPool.TotalInstances = 3
+
 					var i int
 					policyDB.RetrievePoliciesStub = func() ([]*models.PolicyJson, error) {
 						i++
@@ -129,7 +133,7 @@ var _ = Describe("AppManager", func() {
 				})
 				Context("when current index is 0", func() {
 					BeforeEach(func() {
-						nodeIndex = 0
+						testPool.InstanceIndex = 0
 					})
 
 					It("retrieves app shard 0", func() {
@@ -140,14 +144,14 @@ var _ = Describe("AppManager", func() {
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-3"))
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-4"))
 
-						clock.Increment(1 * testPolicyPollerInterval)
+						clock.Increment(1 * testAggregator.PolicyPollerInterval)
 						Consistently(appManager.GetPolicies).Should(HaveLen(2))
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-3"))
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-4"))
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-5"))
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-6"))
 
-						clock.Increment(1 * testPolicyPollerInterval)
+						clock.Increment(1 * testAggregator.PolicyPollerInterval)
 						Eventually(appManager.GetPolicies).Should(HaveLen(1))
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-8"))
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-5"))
@@ -158,20 +162,20 @@ var _ = Describe("AppManager", func() {
 				})
 				Context("when current index is 1", func() {
 					BeforeEach(func() {
-						nodeIndex = 1
+						testPool.InstanceIndex = 1
 					})
 
 					It("retrieves app shard 1", func() {
 						Consistently(appManager.GetPolicies).Should(BeEmpty())
 
-						clock.Increment(1 * testPolicyPollerInterval)
+						clock.Increment(1 * testAggregator.PolicyPollerInterval)
 						Eventually(appManager.GetPolicies).Should(HaveLen(2))
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-3"))
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-4"))
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-5"))
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-6"))
 
-						clock.Increment(1 * testPolicyPollerInterval)
+						clock.Increment(1 * testAggregator.PolicyPollerInterval)
 						Consistently(appManager.GetPolicies).Should(HaveLen(2))
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-5"))
 						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-6"))
@@ -182,7 +186,7 @@ var _ = Describe("AppManager", func() {
 
 				Context("when current index is 2", func() {
 					BeforeEach(func() {
-						nodeIndex = 2
+						testPool.InstanceIndex = 2
 					})
 
 					It("retrieves app shard 2", func() {
@@ -192,10 +196,10 @@ var _ = Describe("AppManager", func() {
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-3"))
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-4"))
 
-						clock.Increment(1 * testPolicyPollerInterval)
+						clock.Increment(1 * testAggregator.PolicyPollerInterval)
 						Eventually(appManager.GetPolicies).Should(BeEmpty())
 
-						clock.Increment(1 * testPolicyPollerInterval)
+						clock.Increment(1 * testAggregator.PolicyPollerInterval)
 						Eventually(appManager.GetPolicies).Should(HaveLen(1))
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-5"))
 						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-6"))
@@ -213,7 +217,7 @@ var _ = Describe("AppManager", func() {
 					}
 				})
 				It("should not call the consumer as there is no trigger", func() {
-					clock.Increment(2 * testPolicyPollerInterval)
+					clock.Increment(2 * testAggregator.PolicyPollerInterval)
 					policyMap := appManager.GetPolicies()
 					Expect(len(policyMap)).To(Equal(0))
 				})
@@ -223,7 +227,7 @@ var _ = Describe("AppManager", func() {
 
 	Context("Save and query metrics", func() {
 		JustBeforeEach(func() {
-			appManager = NewAppManager(logger, clock, testPolicyPollerInterval, nodeNum, nodeIndex, cacheSizePerApp, policyDB, appMetricDB)
+			appManager = NewAppManager(logger, clock, testAggregator, testPool, policyDB, appMetricDB)
 			appManager.Start()
 
 		})
@@ -237,11 +241,11 @@ var _ = Describe("AppManager", func() {
 				policyDB.RetrievePoliciesStub = func() ([]*models.PolicyJson, error) {
 					return []*models.PolicyJson{{AppId: testAppId, PolicyStr: policyStr}}, nil
 				}
-				cacheSizePerApp = 3
+				testAggregator.MetricCacheSizePerApp = 3
 			})
 			It("should be able to save and query metrics", func() {
 				Eventually(policyDB.RetrievePoliciesCallCount).Should(Equal(1))
-				clock.Increment(1 * testPolicyPollerInterval)
+				clock.Increment(1 * testAggregator.PolicyPollerInterval)
 				Eventually(policyDB.RetrievePoliciesCallCount).Should(Equal(2))
 
 				appMetric1 := &models.AppMetric{
@@ -316,8 +320,8 @@ var _ = Describe("AppManager", func() {
 
 		Context("when running with 3 nodes and current node index is 0", func() {
 			BeforeEach(func() {
-				nodeNum = 3
-				nodeIndex = 0
+				testPool.TotalInstances = 3
+				testPool.InstanceIndex = 0
 				var i int
 				policyDB.RetrievePoliciesStub = func() ([]*models.PolicyJson, error) {
 					i++
@@ -377,7 +381,7 @@ var _ = Describe("AppManager", func() {
 				Expect(appManager.SaveMetricToCache(appMetric3)).To(BeTrue())
 				Expect(appManager.SaveMetricToCache(appMetric4)).To(BeFalse())
 
-				clock.Increment(1 * testPolicyPollerInterval)
+				clock.Increment(1 * testAggregator.PolicyPollerInterval)
 				Consistently(appManager.GetPolicies).Should(HaveLen(1))
 				Expect(appManager.SaveMetricToCache(appMetric1)).To(BeFalse())
 				Expect(appManager.SaveMetricToCache(appMetric2)).To(BeFalse())
@@ -390,7 +394,7 @@ var _ = Describe("AppManager", func() {
 
 	Context("Stop", func() {
 		BeforeEach(func() {
-			appManager = NewAppManager(logger, clock, testPolicyPollerInterval, nodeNum, nodeIndex, cacheSizePerApp, policyDB, appMetricDB)
+			appManager = NewAppManager(logger, clock, testAggregator, testPool, policyDB, appMetricDB)
 			appManager.Start()
 			Eventually(policyDB.RetrievePoliciesCallCount).Should(Equal(1))
 
@@ -398,7 +402,7 @@ var _ = Describe("AppManager", func() {
 		})
 
 		It("stops the polling", func() {
-			clock.Increment(5 * testPolicyPollerInterval)
+			clock.Increment(5 * testAggregator.PolicyPollerInterval)
 			Consistently(policyDB.RetrievePoliciesCallCount).Should(Or(Equal(1), Equal(2)))
 		})
 	})
