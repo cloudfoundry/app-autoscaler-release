@@ -4,7 +4,7 @@ on:
     types: [closed]
 env:
   PR_NUMBER: "${{ github.event.pull_request.number }}"
-  ENABLE_MTAR: true
+  DEPLOYMENT_NAME: "autoscaler-mta-${{ github.event.pull_request.number }}"
 
 jobs:
   deployment_cleanup:
