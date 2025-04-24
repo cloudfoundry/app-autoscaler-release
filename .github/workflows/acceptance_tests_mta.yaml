@@ -13,6 +13,8 @@ jobs:
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
     with:
       deploy_apps: true
+      # delete the following ? only thing is missing from default
+      # here is //connect to postgres with certs.
       ops_files: |
         operations/add-releases.yml
         operations/instance-identity-cert-from-cf.yml

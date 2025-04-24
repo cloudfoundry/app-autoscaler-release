@@ -11,7 +11,5 @@ jobs:
   acceptance_tests_reusable:
     name: "${{ github.workflow }}"
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
-    with:
-      deploy_apps: false
     secrets:
       bbl_ssh_key: "${{ secrets.BBL_SSH_KEY }}"
