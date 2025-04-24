@@ -140,7 +140,7 @@ resources:
             url: https://uaa.\${default-domain}
             skip_ssl_validation: true
         pool:
-          node_count: ${EVENTGENERATOR_INSTANCES}
+          total_instances: ${EVENTGENERATOR_INSTANCES}
         health:
           basic_auth:
             password: "${EVENTGENERATOR_HEALTH_PASSWORD}"

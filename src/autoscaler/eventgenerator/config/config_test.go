@@ -68,9 +68,9 @@ var _ = Describe("Config", func() {
 				Expect(conf.ScalingEngine.TLSClientCerts).To(Equal(expectedTLSConfig))
 			})
 
-			It("sets Pool.NodeIndex with vcap instance index", func() {
+			It("sets Pool.InstanceIndex with vcap instance index", func() {
 				Expect(err).NotTo(HaveOccurred())
-				Expect(conf.Pool.NodeIndex).To(Equal(3))
+				Expect(conf.Pool.InstanceIndex).To(Equal(3))
 			})
 
 			It("sets xfcc space and org guid", func() {
@@ -79,16 +79,10 @@ var _ = Describe("Config", func() {
 				Expect(conf.CFServer.XFCC.ValidSpaceGuid).To(Equal("some-space-id"))
 			})
 
-			It("calls configureDb with for policyDB", func() {
-				receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(0)
-				Expect(db.PolicyDb).To(Equal(receivedDbName))
-				Expect(*receivedDbConfig).To(Equal(conf.Db))
-			})
-
-			It("calls configureDb with for appMetricsDB", func() {
-				receivedDbName, receivedDbConfig := mockVCAPConfigurationReader.ConfigureDbArgsForCall(1)
-				Expect(db.AppMetricsDb).To(Equal(receivedDbName))
-				Expect(*receivedDbConfig).To(Equal(conf.Db))
+			When("handling available databases", func() {
+				It("calls vcapReader ConfigureDatabases with the right arguments", func() {
+					testhelpers.ExpectConfigureDatabasesCalledOnce(err, mockVCAPConfigurationReader, "")
+				})
 			})
 
 			When("service is empty", func() {
@@ -121,8 +115,8 @@ server:
     cert_file: /var/vcap/jobs/autoscaler/config/certs/server.crt
     ca_file: /var/vcap/jobs/autoscaler/config/certs/ca.crt
 pool:
-  node_count: 2
-  node_index: 1
+  total_instances: 2
+  instance_index: 1
 cf_server:
   port: 9082
 health:
@@ -179,8 +173,8 @@ circuitBreaker:
 						Logging:           helpers.LoggingConfig{Level: "info"},
 						HttpClientTimeout: &expectedTime,
 						Pool: &PoolConfig{
-							NodeIndex: 1,
-							NodeCount: 2,
+							InstanceIndex:  1,
+							TotalInstances: 2,
 						},
 						Server: helpers.ServerConfig{
 							Port: 9080,
@@ -1176,8 +1170,8 @@ health:
 				conf = &Config{
 					Logging: helpers.LoggingConfig{Level: "info"},
 					Pool: &PoolConfig{
-						NodeCount: 2,
-						NodeIndex: 0,
+						TotalInstances: 2,
+						InstanceIndex:  0,
 					},
 					Db: map[string]db.DatabaseConfig{
 						"policy_db": {
@@ -1391,20 +1385,20 @@ health:
 			Context("when node index is out of range", func() {
 				Context("when node index is negative", func() {
 					BeforeEach(func() {
-						conf.Pool.NodeIndex = -1
+						conf.Pool.InstanceIndex = -1
 					})
 					It("should error", func() {
-						Expect(err).To(MatchError("Configuration error: pool.node_index out of range"))
+						Expect(err).To(MatchError("Configuration error: pool.instance_index out of range"))
 					})
 				})
 
 				Context("when node index is >= number of nodes", func() {
 					BeforeEach(func() {
-						conf.Pool.NodeIndex = 2
-						conf.Pool.NodeCount = 2
+						conf.Pool.InstanceIndex = 2
+						conf.Pool.TotalInstances = 2
 					})
 					It("should error", func() {
-						Expect(err).To(MatchError("Configuration error: pool.node_index out of range"))
+						Expect(err).To(MatchError("Configuration error: pool.instance_index out of range"))
 					})
 				})
 

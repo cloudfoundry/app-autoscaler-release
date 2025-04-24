@@ -47,8 +47,8 @@ var defaultCFServerConfig = helpers.ServerConfig{
 }
 
 type PoolConfig struct {
-	NodeCount int `yaml:"node_count" json:"node_count"`
-	NodeIndex int `yaml:"node_index" json:"node_index"`
+	TotalInstances int `yaml:"total_instances" json:"total_instances"`
+	InstanceIndex  int `yaml:"instance_index" json:"instance_index"`
 }
 
 type AggregatorConfig struct {
@@ -130,6 +130,7 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	// enable plain text logging. See src/autoscaler/helpers/logger.go
 	conf.Logging.PlainTextSink = true
 
+	// Avoid port conflict: assign actual port to CF server, set BOSH server port to 0 (unused)
 	conf.CFServer.Port = vcapReader.GetPort()
 	conf.Server.Port = 0
 
@@ -137,15 +138,11 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	if err := vcapReader.ConfigureDb(db.PolicyDb, &conf.Db); err != nil {
+	if err := vcapReader.ConfigureDatabases(&conf.Db, nil, ""); err != nil {
 		return err
 	}
 
-	if err := vcapReader.ConfigureDb(db.AppMetricsDb, &conf.Db); err != nil {
-		return err
-	}
-
-	if err := configureNodeIndex(conf, vcapReader); err != nil {
+	if err := configureInstanceIndex(conf, vcapReader); err != nil {
 		return err
 	}
 
@@ -165,8 +162,8 @@ func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurat
 	return nil
 }
 
-func configureNodeIndex(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	conf.Pool.NodeIndex = vcapReader.GetInstanceIndex()
+func configureInstanceIndex(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	conf.Pool.InstanceIndex = vcapReader.GetInstanceIndex()
 	return nil
 }
 
@@ -333,8 +330,8 @@ func (c *Config) validateDefaults() error {
 }
 
 func (c *Config) validatePool() error {
-	if c.Pool.NodeIndex < 0 || c.Pool.NodeIndex >= c.Pool.NodeCount {
-		return fmt.Errorf("Configuration error: pool.node_index out of range")
+	if c.Pool.InstanceIndex < 0 || c.Pool.InstanceIndex >= c.Pool.TotalInstances {
+		return fmt.Errorf("Configuration error: pool.instance_index out of range")
 	}
 	return nil
 }

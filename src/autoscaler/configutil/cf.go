@@ -33,7 +33,6 @@ type VCAPConfigurationReader interface {
 	GetInstanceIndex() int
 	IsRunningOnCF() bool
 
-	ConfigureDb(dbName string, confDb *map[string]db.DatabaseConfig) error
 	ConfigureDatabases(confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, credHelperImpl string) error
 }
 
@@ -132,7 +131,7 @@ func (vc *VCAPConfiguration) MaterializeTLSConfigFromService(serviceTag string) 
 func (vc *VCAPConfiguration) MaterializeDBFromService(dbName string) (string, error) {
 	service, err := vc.getServiceByTag(dbName)
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
 	dbURL, err := vc.buildDatabaseURL(service, dbName)
@@ -249,7 +248,7 @@ func (vc *VCAPConfiguration) addConnectionParam(service *cfenv.Service, dbName, 
 }
 
 func (vc *VCAPConfiguration) configureStoredProcedureDb(dbName string, confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig) error {
-	if err := vc.ConfigureDb(dbName, confDb); err != nil {
+	if err := vc.configureDb(dbName, confDb); err != nil {
 		return err
 	}
 
@@ -273,7 +272,7 @@ func (vc *VCAPConfiguration) configureStoredProcedureDb(dbName string, confDb *m
 	return nil
 }
 
-func (vc *VCAPConfiguration) ConfigureDb(dbName string, confDb *map[string]db.DatabaseConfig) error {
+func (vc *VCAPConfiguration) configureDb(dbName string, confDb *map[string]db.DatabaseConfig) error {
 	currentDb, ok := (*confDb)[dbName]
 	if !ok {
 		(*confDb)[dbName] = db.DatabaseConfig{}
@@ -290,19 +289,23 @@ func (vc *VCAPConfiguration) ConfigureDb(dbName string, confDb *map[string]db.Da
 }
 
 func (vc *VCAPConfiguration) ConfigureDatabases(confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, credHelperImpl string) error {
-	if err := vc.ConfigureDb(db.PolicyDb, confDb); err != nil {
+	if err := vc.configureDb(db.PolicyDb, confDb); err != nil {
 		return err
 	}
 
-	if err := vc.ConfigureDb(db.BindingDb, confDb); err != nil {
+	if err := vc.configureDb(db.BindingDb, confDb); err != nil {
 		return err
 	}
 
-	if err := vc.ConfigureDb(db.BindingDb, confDb); err != nil {
+	if err := vc.configureDb(db.BindingDb, confDb); err != nil {
 		return err
 	}
 
-	if credHelperImpl == "stored_procedure" {
+	if err := vc.configureDb(db.AppMetricsDb, confDb); err != nil {
+		return err
+	}
+
+	if storedProcedureConfig != nil && credHelperImpl == "stored_procedure" {
 		if err := vc.configureStoredProcedureDb(db.StoredProcedureDb, confDb, storedProcedureConfig); err != nil {
 			return err
 		}
