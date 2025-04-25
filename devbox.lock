@@ -361,51 +361,51 @@
         }
       }
     },
-    "delve@1.24.1": {
-      "last_modified": "2025-03-16T16:17:41Z",
-      "resolved": "github:NixOS/nixpkgs/8f76cf16b17c51ae0cc8e55488069593f6dab645#delve",
+    "delve@1.24.2": {
+      "last_modified": "2025-04-12T07:19:22Z",
+      "resolved": "github:NixOS/nixpkgs/2349f9de17183971db12ae9e0123dab132023bd7#delve",
       "source": "devbox-search",
-      "version": "1.24.1",
+      "version": "1.24.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/fwkl0xwbplbks24sqyapddjkd5fsznbv-delve-1.24.1",
+              "path": "/nix/store/g8jvrazh2rp6a79yr9n7i38zgb826g0y-delve-1.24.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/fwkl0xwbplbks24sqyapddjkd5fsznbv-delve-1.24.1"
+          "store_path": "/nix/store/g8jvrazh2rp6a79yr9n7i38zgb826g0y-delve-1.24.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/zyfrxdw63xqfbn06zcfgfip9rpcnvizd-delve-1.24.1",
+              "path": "/nix/store/6kx7rz2n3p6vlznp3g3j80c4z7kijvdb-delve-1.24.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/zyfrxdw63xqfbn06zcfgfip9rpcnvizd-delve-1.24.1"
+          "store_path": "/nix/store/6kx7rz2n3p6vlznp3g3j80c4z7kijvdb-delve-1.24.2"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/5d7h4a0xyw2hbablaiyjr99k8wi9avpg-delve-1.24.1",
+              "path": "/nix/store/6rl9sxq8vz2m5dl939m4bcawgdm7ppac-delve-1.24.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/5d7h4a0xyw2hbablaiyjr99k8wi9avpg-delve-1.24.1"
+          "store_path": "/nix/store/6rl9sxq8vz2m5dl939m4bcawgdm7ppac-delve-1.24.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/154hrs4h5qgwrv4dhb0zl6w7cxyy6wxp-delve-1.24.1",
+              "path": "/nix/store/a28mgd5nnfnz9z781cxc0ph6hrn9qrpw-delve-1.24.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/154hrs4h5qgwrv4dhb0zl6w7cxyy6wxp-delve-1.24.1"
+          "store_path": "/nix/store/a28mgd5nnfnz9z781cxc0ph6hrn9qrpw-delve-1.24.2"
         }
       }
     },
@@ -457,51 +457,51 @@
         }
       }
     },
-    "fly@7.12.1": {
-      "last_modified": "2025-03-11T17:52:14Z",
-      "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#fly",
+    "fly@7.13.0": {
+      "last_modified": "2025-04-13T09:22:33Z",
+      "resolved": "github:NixOS/nixpkgs/18dd725c29603f582cf1900e0d25f9f1063dbf11#fly",
       "source": "devbox-search",
-      "version": "7.12.1",
+      "version": "7.13.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/vjjbrd0qvcy6sf1z8bfy7rsjkbgpmghm-fly-7.12.1",
+              "path": "/nix/store/xag669v1qd9jsxmplnxwm3zn5hz9kxrn-fly-7.13.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/vjjbrd0qvcy6sf1z8bfy7rsjkbgpmghm-fly-7.12.1"
+          "store_path": "/nix/store/xag669v1qd9jsxmplnxwm3zn5hz9kxrn-fly-7.13.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/cadfvbyvqp05dvw0av5g31vdnjhkirz1-fly-7.12.1",
+              "path": "/nix/store/z2gc8f7xxp0q55qgj4s8q0c7dbakwggj-fly-7.13.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/cadfvbyvqp05dvw0av5g31vdnjhkirz1-fly-7.12.1"
+          "store_path": "/nix/store/z2gc8f7xxp0q55qgj4s8q0c7dbakwggj-fly-7.13.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/s4mr34g8n4pfzz51zanvb5m9y3l96iny-fly-7.12.1",
+              "path": "/nix/store/5c8fhscc39q9cjj6bdh3qh50kabq3y0b-fly-7.13.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/s4mr34g8n4pfzz51zanvb5m9y3l96iny-fly-7.12.1"
+          "store_path": "/nix/store/5c8fhscc39q9cjj6bdh3qh50kabq3y0b-fly-7.13.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/cd4nvsqg2m5q516mxp3nfwc32ygrm8qg-fly-7.12.1",
+              "path": "/nix/store/z14jxic9f4jd0szznk5sh5wsb14lpc1v-fly-7.13.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/cd4nvsqg2m5q516mxp3nfwc32ygrm8qg-fly-7.12.1"
+          "store_path": "/nix/store/z14jxic9f4jd0szznk5sh5wsb14lpc1v-fly-7.13.0"
         }
       }
     },
@@ -901,51 +901,51 @@
         }
       }
     },
-    "google-java-format@1.25.2": {
-      "last_modified": "2025-02-23T09:42:26Z",
-      "resolved": "github:NixOS/nixpkgs/2d068ae5c6516b2d04562de50a58c682540de9bf#google-java-format",
+    "google-java-format@1.26.0": {
+      "last_modified": "2025-03-29T14:41:00Z",
+      "resolved": "github:NixOS/nixpkgs/eb0e0f21f15c559d2ac7633dc81d079d1caf5f5f#google-java-format",
       "source": "devbox-search",
-      "version": "1.25.2",
+      "version": "1.26.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/8hhl7mka0a5yja767awfm95qkbm1a69r-google-java-format-1.25.2",
+              "path": "/nix/store/6frjfyjxlnx9chq663xskkiv0jjm4hpw-google-java-format-1.26.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/8hhl7mka0a5yja767awfm95qkbm1a69r-google-java-format-1.25.2"
+          "store_path": "/nix/store/6frjfyjxlnx9chq663xskkiv0jjm4hpw-google-java-format-1.26.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/d7qga73lwxwdc5hw0i7pjsmma95c2ql5-google-java-format-1.25.2",
+              "path": "/nix/store/gnmggmmxr5dyjkl8b1822z72wdi4q2ly-google-java-format-1.26.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/d7qga73lwxwdc5hw0i7pjsmma95c2ql5-google-java-format-1.25.2"
+          "store_path": "/nix/store/gnmggmmxr5dyjkl8b1822z72wdi4q2ly-google-java-format-1.26.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/a0234b777x5f82n35bpbvvzmly6825vq-google-java-format-1.25.2",
+              "path": "/nix/store/20jv46d3k8wmw9pd07s391zr6dhmh22k-google-java-format-1.26.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/a0234b777x5f82n35bpbvvzmly6825vq-google-java-format-1.25.2"
+          "store_path": "/nix/store/20jv46d3k8wmw9pd07s391zr6dhmh22k-google-java-format-1.26.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/cz1lcxabjdm8wd64mblx5ww7ma35mnf5-google-java-format-1.25.2",
+              "path": "/nix/store/4c8np7bqn75xks3j76n73s8vwnbk79al-google-java-format-1.26.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/cz1lcxabjdm8wd64mblx5ww7ma35mnf5-google-java-format-1.25.2"
+          "store_path": "/nix/store/4c8np7bqn75xks3j76n73s8vwnbk79al-google-java-format-1.26.0"
         }
       }
     },
@@ -1257,7 +1257,7 @@
         }
       }
     },
-    "mysql@latest": {
+    "mysql@10.6.12": {
       "last_modified": "2023-02-24T09:01:09Z",
       "plugin_version": "0.0.3",
       "resolved": "github:NixOS/nixpkgs/7d0ed7f2e5aea07ab22ccb338d27fbe347ed2f11#mysql",
@@ -1494,51 +1494,51 @@
         }
       }
     },
-    "redocly@1.29.0": {
-      "last_modified": "2025-03-11T17:52:14Z",
-      "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#redocly",
+    "redocly@1.34.0": {
+      "last_modified": "2025-04-08T07:10:31Z",
+      "resolved": "github:NixOS/nixpkgs/b2b0718004cc9a5bca610326de0a82e6ea75920b#redocly",
       "source": "devbox-search",
-      "version": "1.29.0",
+      "version": "1.34.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/4fnpw6gk7xq7ym3bf1dxy0yyn84hr87c-redocly-1.29.0",
+              "path": "/nix/store/his7h191fwxmzv279rcs3cb8vz77dbpl-redocly-1.34.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/4fnpw6gk7xq7ym3bf1dxy0yyn84hr87c-redocly-1.29.0"
+          "store_path": "/nix/store/his7h191fwxmzv279rcs3cb8vz77dbpl-redocly-1.34.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3yjc6gw3gpjy0rag2ab9839d9lf0lpmx-redocly-1.29.0",
+              "path": "/nix/store/1py4fr824zk90041ci8h328q453lad2c-redocly-1.34.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3yjc6gw3gpjy0rag2ab9839d9lf0lpmx-redocly-1.29.0"
+          "store_path": "/nix/store/1py4fr824zk90041ci8h328q453lad2c-redocly-1.34.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/bfcw1kr9mj9fh9dlh6pm0wnw62bjc7pi-redocly-1.29.0",
+              "path": "/nix/store/57qgh22w6a71iiszaywzyc21rlhbg7yc-redocly-1.34.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/bfcw1kr9mj9fh9dlh6pm0wnw62bjc7pi-redocly-1.29.0"
+          "store_path": "/nix/store/57qgh22w6a71iiszaywzyc21rlhbg7yc-redocly-1.34.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/31bcz0llbrhvbf4smrvdvhqphnpjhx14-redocly-1.29.0",
+              "path": "/nix/store/6hx3pqmdac2xnpd68fcs5fba0pqdailn-redocly-1.34.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/31bcz0llbrhvbf4smrvdvhqphnpjhx14-redocly-1.29.0"
+          "store_path": "/nix/store/6hx3pqmdac2xnpd68fcs5fba0pqdailn-redocly-1.34.0"
         }
       }
     },
