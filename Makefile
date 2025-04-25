@@ -442,8 +442,11 @@ cleanup-autoscaler-deployments:
 	@${CI_DIR}/autoscaler/scripts/cleanup-autoscaler-deployments.sh
 
 .PHONY: cf-login
-cf-login: ## Login to OSS CF dev environment
-	@${CI_DIR}/autoscaler/scripts/cf-login.sh
+cf-login:
+	@echo '⚠️ Please note that this login only works for cf,' \
+		  'in spite of performing a login as well on bosh and credhub.' \
+		  'The necessary changes to the environment get lost when make exits its process.'
+	@${CI_DIR}/autoscaler/scripts/os-infrastructure-login.sh
 
 .PHONY: setup-performance
 setup-performance: build-test-app
