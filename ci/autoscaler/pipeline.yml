@@ -1,5 +1,18 @@
 ---
 anchors:
+  make-prerelease-task: &make-prerelease-task
+    task: "make-prerelease"
+    file: "ci/ci/autoscaler/tasks/make/make.yaml"
+    params:
+      TARGETS: "build_all"
+    timeout: "25m"
+
+  deploy-autoscaler-task: &deploy-autoscaler-task
+    task: "deploy-autoscaler"
+    file: "ci/ci/autoscaler/tasks/make/make.yaml"
+    params:
+      TARGETS: "deploy-autoscaler"
+
   app-autoscaler-ops-files-log-cache-metron: &app-autoscaler-ops-files-log-cache-metron
     OPS_FILES: |
       operations/add-releases.yml
@@ -242,17 +255,12 @@ jobs:
       passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
-  - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yaml
-    params:
-      TARGETS: build_all
-    timeout: 15m
-  - task: deploy-autoscaler
-    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+  - *make-prerelease-task
+  - <<: *deploy-autoscaler-task
     params:
       <<: *acceptance-log-cache-metron-params
       <<: *app-autoscaler-ops-files-log-cache-metron
-    timeout: 30m
+    timeout: "30m"
   - task: register-broker
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
@@ -294,14 +302,8 @@ jobs:
       passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
-  - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yaml
-    params:
-      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
-    timeout: 15m
-  - task: deploy-autoscaler
-    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+  - *make-prerelease-task
+  - <<: *deploy-autoscaler-task
     params:
       <<: *acceptance-log-cache-syslog-params
       <<: *app-autoscaler-ops-files-log-cache-syslog
@@ -351,11 +353,9 @@ jobs:
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
       TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor  db scheduler
     timeout: 15m
-  - task: deploy-autoscaler
-    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+  - <<: *deploy-autoscaler-task
     params:
       <<: *acceptance-log-cache-syslog-cf-params
       <<: *app-autoscaler-ops-files-log-cache-syslog-cf
@@ -407,14 +407,8 @@ jobs:
     - get: app-autoscaler-release
       passed: [unit-tests, integration-tests]
       trigger: true
-  - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yaml
-    params:
-      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
-    timeout: 15m
-  - task: deploy-autoscaler
-    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+  - *make-prerelease-task
+  - <<: *deploy-autoscaler-task
     params:
       <<: *performance-env
       <<: *app-autoscaler-ops-files-log-cache-syslog
@@ -454,7 +448,7 @@ jobs:
       - acceptance-log-cache-syslog-cf
       trigger: true
     - get: previous-stable-release
-  - task: deploy-previous-stable-release
+  - task: deploy-previous-stable-release # 🚧 To-do: Check if that still works!
     file: ci/ci/autoscaler/tasks/deploy-previous-autoscaler.yml
     params:
       <<: *upgrade-test-params
@@ -473,14 +467,8 @@ jobs:
         pre_upgrade
       NODES: 1
     timeout: 30m
-  - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yaml
-    params:
-      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
-    timeout: 15m
-  - task: deploy-autoscaler
-    file: ci/ci/autoscaler/tasks/deploy-autoscaler.yml
+  - *make-prerelease-task
+  - <<: *deploy-autoscaler-task
     params:
       <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
@@ -506,11 +494,7 @@ jobs:
     - get: app-autoscaler-release
       passed: [upgrade-test]
     - get: ci
-  - task: make-prerelease
-    file: ci/ci/autoscaler/tasks/make/make.yaml
-    params:
-      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+  - *make-prerelease-task
   - task: release-autoscaler
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
