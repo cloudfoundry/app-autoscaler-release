@@ -1,0 +1,13 @@
+# ==================== Ignore everything by default ====================
+*
+
+
+
+# ==================== What we actually need ====================
+!./nix
+!/flake.nix
+!/flake.lock
+
+!./.devbox/virtenv/mysql/flake
+!/devbox.json
+!/devbox.lock
