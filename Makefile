@@ -300,8 +300,11 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: bosh-release
-bosh-release: go-mod-tidy go-mod-vendor scheduler db build/autoscaler-test.tgz
-build/autoscaler-test.tgz:
+bosh-release: build/autoscaler-test.tgz
+# 🚸 In the next line, the order of the dependencies is important. Generated code needs to be
+# already there for `go-mod-tidy` to work. See additional comment for that target in
+# ./src/autoscaler/Makefile.
+build/autoscaler-test.tgz: build_all go-mod-tidy go-mod-vendor
 	@echo " - building bosh release into build/autoscaler-test.tgz"
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
