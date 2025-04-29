@@ -8,6 +8,6 @@
 !/flake.nix
 !/flake.lock
 
-!./.devbox/virtenv/mysql/flake
+!./.devbox
 !/devbox.json
 !/devbox.lock

@@ -2,12 +2,17 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
-repository-root := $(shell git rev-parse --show-toplevel)
+repository-root := $(shell realpath --relative-to $$(pwd) $$(git rev-parse --show-toplevel))
 
 # All files that together define the development-environment:
+#
+# 🚧 To-do: Check if each of the last two lines should be substituted by something like:
+# `$(wildcard ./.devbox/**/flake.{nix,lock})`
 development-environment-definition := \
-	${repository-root}/devbox.json ${repository-root}/devbox.lock \
-	${repository-root}/flake.nix ${repository-root}/flake.lock \
+	${repository-root}/nix/flake.nix \
+	${repository-root}/nix/flake.lock \
+	${repository-root}/devbox.json \
+	${repository-root}/devbox.lock \
 	${repository-root}/.devbox/virtenv/mysql/flake/flake.nix \
 	${repository-root}/.devbox/virtenv/mysql/flake/flake.lock
 # 🚸 Please be aware that devbox automatically creates
@@ -15,8 +20,11 @@ development-environment-definition := \
 
 # The generated Dockerfile just depends on the content of the used “devbox.json” and its lockfile.
 # It is marked secondary to not auto-clean it.
+#
+# ⚠️ As the Dockerfile that is auto-generated via its target “Dockerfile” is not of high quality and
+# may contain errors, its dependencies are commented out to prevent re-generation by gnu-make.
 .SECONDARY: Dockerfile
-Dockerfile: ./Makefile ${repository-root}/devbox.json ${repository-root}/devbox.lock
+Dockerfile: # ./Makefile ${repository-root}/devbox.json ${repository-root}/devbox.lock
 	devbox generate dockerfile --config='${repository-root}'
 	mv '${repository-root}/Dockerfile' .
 
@@ -35,14 +43,16 @@ docker-login:
 		echo 'Already logged in into ${DOCKER_REGISTRY}, skipping login.'
 	fi
 
-# 🚧 To-do: Come with appropriate Dockerignore!
+oci-image-location := ${repository-root}/build/app-autoscaler-release-tools.tar.zst
 .PHONY: docker-image
-docker-image: ./Makefile Dockerfile ${development-environment-definition}
-	docker build --file='./Dockerfile' '${repository-root}' \
-		--tag='${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}:latest'
+docker-image: ${oci-image-location}
 
-# 🚧 To-do: Include workflow to produce the image and push it from the CI/CD-pipeline, see:
-# <https://github.com/cloudfoundry/app-autoscaler-release/pull/2943/files#diff-b4df0a4f0d80f73138c476afbd7aefdac9df339642ddfba323d27c8cbabb92e2>
+${oci-image-location}: ./Makefile Dockerfile ${development-environment-definition}
+	@readonly image_tag='${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}:latest'
+	docker build --file='./Dockerfile' '${repository-root}' --tag="$${image_tag}"
+	docker image save "$${image_tag}" | zstd > '${oci-image-location}'
+
+.PHONY: docker-image-push
 docker-image-push: docker-login docker-image
 	@ARTIFACT='${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}:$*'
 	echo "Uploading image" "$${ARTIFACT}"

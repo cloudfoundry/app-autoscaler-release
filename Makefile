@@ -490,11 +490,6 @@ alerts-silence:
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill ;\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy ;
 
-.PHONY: docker-image
-docker-image: docker-login
-	docker build -t ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest  ci/dockerfiles/autoscaler-tools
-	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
-
 
 validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
 	for file in $^ ; do \
