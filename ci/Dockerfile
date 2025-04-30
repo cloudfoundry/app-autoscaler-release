@@ -35,5 +35,5 @@ ENV \
 
 # 🚧 To-do: Check if “ENTRYPOINT” is not the better alternative, see:
 # <https://www.bmc.com/blogs/docker-cmd-vs-entrypoint>
-ENTRYPOINT ["devbox", "shell"]
+ENTRYPOINT ["devbox", "run", "--"]
 # CMD ["devbox", "shell"]

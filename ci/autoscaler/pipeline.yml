@@ -2,6 +2,7 @@
 anchors:
   make-prerelease-task: &make-prerelease-task
     task: "make-prerelease"
+    image: "app-autoscaler-tools"
     file: "ci/ci/autoscaler/tasks/make/make.yaml"
     params:
       TARGETS: "build_all"
@@ -9,6 +10,7 @@ anchors:
 
   deploy-autoscaler-task: &deploy-autoscaler-task
     task: "deploy-autoscaler"
+    image: "app-autoscaler-tools"
     file: "ci/ci/autoscaler/tasks/make/make.yaml"
     params:
       TARGETS: "deploy-autoscaler"
@@ -99,6 +101,12 @@ resource_types:
     repository: frodenas/gcs-resource
 
 resources:
+- name: "app-autoscaler-tools"
+  type: "registry-image"
+  source:
+    repository: "ghcr.io/cloudfoundry/app-autoscaler-release-tools"
+    tag: "latest" # "main"
+
 - name: every-night
   type: time
   source:
@@ -217,10 +225,13 @@ jobs:
   serial: true
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
+      trigger: true
     - get: app-autoscaler-release
       trigger: true
     - get: ci
   - task: run-unit-tests
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/run-unit-tests.yml
     attempts: 3
     timeout: 45m
@@ -232,10 +243,13 @@ jobs:
   serial_groups: [integration]
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
+      trigger: true
     - get: app-autoscaler-release
       trigger: true
     - get: ci
   - task: run-integration-tests
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
     timeout: 45m
 
@@ -245,11 +259,13 @@ jobs:
   serial: true
   on_success:
     task: cleanup
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-metron-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_metron))
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [unit-tests, integration-tests]
@@ -262,24 +278,28 @@ jobs:
       <<: *app-autoscaler-ops-files-log-cache-metron
     timeout: "30m"
   - task: register-broker
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *acceptance-log-cache-metron-params
     timeout: 5m
   - in_parallel:
     - task: autoscaler-acceptance-api
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-metron-params
         SUITES: api
       timeout: 15m
     - task: autoscaler-acceptance-app
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-metron-params
         SUITES: app
       timeout: 45m
     - task: autoscaler-acceptance-broker
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-metron-params
@@ -292,11 +312,13 @@ jobs:
   serial: true
   on_success:
     task: cleanup
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-syslog-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_syslog))
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [unit-tests, integration-tests]
@@ -309,24 +331,28 @@ jobs:
       <<: *app-autoscaler-ops-files-log-cache-syslog
     timeout: 30m
   - task: register-broker
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *acceptance-log-cache-syslog-params
     timeout: 5m
   - in_parallel:
     - task: autoscaler-acceptance-api
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-params
         SUITES: api
       timeout: 15m
     - task: autoscaler-acceptance-app
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-params
         SUITES: app
       timeout: 45m
     - task: autoscaler-acceptance-broker
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-params
@@ -339,18 +365,21 @@ jobs:
   serial: true
   on_success:
     task: cleanup
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &acceptance-log-cache-syslog-cf-params
       DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_syslog_cf))
       PR_NUMBER: ((pr_number))
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - task: make-prerelease
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
       TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor  db scheduler
@@ -360,29 +389,34 @@ jobs:
       <<: *acceptance-log-cache-syslog-cf-params
       <<: *app-autoscaler-ops-files-log-cache-syslog-cf
   - task: deploy-apps
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/deploy-apps.yml
     params:
       <<: *acceptance-log-cache-syslog-cf-params
     timeout: 30m
   - task: register-broker
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *acceptance-log-cache-syslog-cf-params
     timeout: 5m
   - in_parallel:
     - task: autoscaler-acceptance-api
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-cf-params
         SUITES: api
       timeout: 15m
     - task: autoscaler-acceptance-app
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-cf-params
         SUITES: app
       timeout: 45m
     - task: autoscaler-acceptance-broker
+      image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-cf-params
@@ -394,6 +428,7 @@ jobs:
   build_logs_to_retain: 100
   on_failure:
     task: cleanup
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
     params: &performance-env
       DEPLOYMENT_NAME: "autoscaler-performance"
@@ -402,6 +437,7 @@ jobs:
       SERIAL: "false"
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: ci
     - get: bbl-state
     - get: app-autoscaler-release
@@ -414,16 +450,19 @@ jobs:
       <<: *app-autoscaler-ops-files-log-cache-syslog
     timeout: 30m
   - task: register-broker
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *performance-env
     timeout: 5m
   - task: setup-performance
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
      TARGETS: setup-performance
     timeout: 15m
   - task: run-performance
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
      TARGETS: run-performance
@@ -433,12 +472,14 @@ jobs:
   public: true
   build_logs_to_retain: 100
   on_success:
-      task: cleanup
-      file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-      params: &upgrade-test-params
-        DEPLOYMENT_NAME: "upgrade-test"
+    task: cleanup
+    image: "app-autoscaler-tools"
+    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
+    params: &upgrade-test-params
+      DEPLOYMENT_NAME: "upgrade-test"
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: ci
     - get: app-autoscaler-release
@@ -449,17 +490,20 @@ jobs:
       trigger: true
     - get: previous-stable-release
   - task: deploy-previous-stable-release # 🚧 To-do: Check if that still works!
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/deploy-previous-autoscaler.yml
     params:
       <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
     timeout: 30m
   - task: register-broker
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/register-broker.yml
     params:
       <<: *upgrade-test-params
     timeout: 5m
   - task: autoscaler-pre-upgrade
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
       <<: *upgrade-test-params
@@ -474,6 +518,7 @@ jobs:
       <<: *app-autoscaler-ops-files-upgrade
     timeout: 30m
   - task: autoscaler-post-upgrade
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
     params:
       <<: *upgrade-test-params
@@ -487,6 +532,7 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: release-bucket
     - get: acceptance-tests-bucket
     - get: gh-release
@@ -496,6 +542,7 @@ jobs:
     - get: ci
   - *make-prerelease-task
   - task: release-autoscaler
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
@@ -530,38 +577,44 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: ci
     - get: every-night
       trigger: true
   - task: cleanup-autoscaler-deployments
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
 
 - name: fetch-latest-stemcell
   public: true
   build_logs_to_retain: 100
   plan:
-    - in_parallel:
-        - get: bbl-state
-        - get: ci
-        - get: every-night
-          passed: [ cleanup-autoscaler-deployments ]
-          trigger: true
-        - get: gcp-jammy-stemcell
-    - task: fetch-latest-stemcell
-      file: ci/ci/autoscaler/tasks/fetch-latest-stemcell.yml
+  - in_parallel:
+    - get: "app-autoscaler-tools"
+    - get: bbl-state
+    - get: ci
+    - get: every-night
+      passed: [ cleanup-autoscaler-deployments ]
+      trigger: true
+    - get: gcp-jammy-stemcell
+  - task: fetch-latest-stemcell
+    image: "app-autoscaler-tools"
+    file: ci/ci/autoscaler/tasks/fetch-latest-stemcell.yml
 
 - name: draft
   public: true
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: ci
     - get: gh-release
     - get: app-autoscaler-release
       passed: [upgrade-test]
       trigger: true
   - task: dummy-release-autoscaler
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
@@ -573,11 +626,13 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: app-autoscaler-release
     - get: golang-release
       trigger: true
     - get: ci
   - task: update-golang-sdk
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/update-sdk/go_task.yml
     params:
       type: golang
@@ -587,11 +642,13 @@ jobs:
   build_logs_to_retain: 100
   plan:
   - in_parallel:
+    - get: "app-autoscaler-tools"
     - get: app-autoscaler-release
     - get: java-release
       trigger: true
     - get: ci
   - task: update-java-sdk
+    image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/update-sdk/java_task.yml
     params:
       type: java

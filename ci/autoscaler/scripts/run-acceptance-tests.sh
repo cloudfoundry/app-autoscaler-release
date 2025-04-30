@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
 
 set -eu -o pipefail
 script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -9,9 +9,9 @@ suites="${SUITES:-"api app broker"}"
 ginkgo_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
 
-if [[ ! -d "${bbl_state_path}" ]]
+if [[ ! -d "${BBL_STATE_PATH}" ]]
 then
-	echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
+	echo "FAILED: Did not find bbl-state folder at ${BBL_STATE_PATH}"
 	echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
 	exit 1;
 fi

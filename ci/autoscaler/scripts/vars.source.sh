@@ -1,5 +1,6 @@
-#!/usr/bin/env bash
-# NOTE: to turn on debug use DEBUG=true
+#! /usr/bin/env bash
+
+# 🪧 NOTE: to turn on debug use DEBUG=true
 # shellcheck disable=SC2155,SC2034
 #
 

@@ -44,7 +44,8 @@ docker-login:
 	fi
 
 oci-image-location := ${repository-root}/build/app-autoscaler-release-tools.tar.zst
-.PHONY: docker-image
+.PHONY: oci-image docker-image
+oci-image: ${oci-image-location}
 docker-image: ${oci-image-location}
 
 ${oci-image-location}: ./Makefile Dockerfile ${development-environment-definition}
@@ -52,8 +53,8 @@ ${oci-image-location}: ./Makefile Dockerfile ${development-environment-definitio
 	docker build --file='./Dockerfile' '${repository-root}' --tag="$${image_tag}"
 	docker image save "$${image_tag}" | zstd > '${oci-image-location}'
 
-.PHONY: docker-image-push
-docker-image-push: docker-login docker-image
+.PHONY: oci-release-%
+oci-release-%: docker-login docker-image
 	@ARTIFACT='${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}:$*'
 	echo "Uploading image" "$${ARTIFACT}"
 	docker push "$${ARTIFACT}"
