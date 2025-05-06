@@ -183,7 +183,7 @@ function ci_prepare_postgres_db() {
 	echo "pwd: $(pwd)" # 🚧 To-do: Debug-code
 	echo "ls -lah .: $(ls -lah .)" # 🚧 To-do: Debug-code
 	initdb
-	devbox services up postgresql --background	# pg_ctl will not work as it is not aware of where to
+	devbox services --config='/code' up postgresql --background	# pg_ctl will not work as it is not aware of where to
 																							# create the socket.
 	createuser tests-pg
 	createdb tests-pg # Needed to be done like this, because 'tests-pg' does not have the required#
