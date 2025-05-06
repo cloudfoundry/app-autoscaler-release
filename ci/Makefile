@@ -9,12 +9,9 @@ repository-root := $(shell realpath --relative-to $$(pwd) $$(git rev-parse --sho
 # 🚧 To-do: Check if each of the last two lines should be substituted by something like:
 # `$(wildcard ./.devbox/**/flake.{nix,lock})`
 development-environment-definition := \
-	${repository-root}/nix/flake.nix \
-	${repository-root}/nix/flake.lock \
+	$(wildcard ${repository-root}/nix/**/*) \
 	${repository-root}/devbox.json \
-	${repository-root}/devbox.lock \
-	${repository-root}/.devbox/virtenv/mysql/flake/flake.nix \
-	${repository-root}/.devbox/virtenv/mysql/flake/flake.lock
+	${repository-root}/devbox.lock
 # 🚸 Please be aware that devbox automatically creates
 # '${repository-root}/.devbox/virtenv/mysql/flake' when it loads the development-environment.
 
@@ -48,7 +45,7 @@ oci-image-location := ${repository-root}/build/app-autoscaler-release-tools.tar.
 oci-image: ${oci-image-location}
 docker-image: ${oci-image-location}
 
-${oci-image-location}: ./Makefile Dockerfile ${development-environment-definition}
+${oci-image-location}: ./Makefile Dockerfile Dockerfile.dockerignore ${development-environment-definition}
 	@readonly image_tag='${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}:latest'
 	docker build --file='./Dockerfile' '${repository-root}' --tag="$${image_tag}"
 	docker image save "$${image_tag}" | zstd > '${oci-image-location}'

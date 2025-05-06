@@ -4,10 +4,13 @@
 
 
 # ==================== What we actually need ====================
+# To react to changes on these files:
+!/ci/Dockerfile
+!/ci/Dockerfile.dockerignore
+
 !./nix
 !/flake.nix
 !/flake.lock
 
-!./.devbox
 !/devbox.json
 !/devbox.lock
