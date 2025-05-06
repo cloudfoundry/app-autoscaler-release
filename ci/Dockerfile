@@ -4,7 +4,6 @@ FROM jetpackio/devbox:latest
 WORKDIR /code
 USER root:root
 RUN <<-EODI
-	set -eu -o pipefail
 	mkdir --parents '/code'
 	chown "${DEVBOX_USER}:${DEVBOX_USER}" '/code'
 EODI
@@ -21,10 +20,7 @@ RUN \
 	# --mount=type=bind,source=./nix,target=/code/nix,readonly \
 	# --mount=type=bind,source=./devbox.json,target=/code/debox.json,readonly \
 	# --mount=type=bind,source=./devbox.lock,target=/code/devbox.lock,readonly \
-	<<-EODI
-		set -eu -o pipefail
-		devbox run -- echo "Installed Packages."
-EODI
+	devbox run -- echo "Installed Packages."
 
 # Make use of the installed devbox-environment:
 ENV \
@@ -32,4 +28,6 @@ ENV \
 	LD_LIBRARY_PATH="/code/.devbox/nix/profile/default/lib"
 
 ENTRYPOINT ["devbox", "run", "--"]
-CMD ["bash"]
+
+# Avoid the bash from debox.json and use Debian's bash for better pre-configuration.
+CMD ["/usr/bin/bash"]
