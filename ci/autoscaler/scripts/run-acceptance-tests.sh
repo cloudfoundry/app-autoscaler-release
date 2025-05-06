@@ -3,6 +3,7 @@
 set -eu -o pipefail
 script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
+source "${script_dir}/common.sh"
 
 skip_teardown="${SKIP_TEARDOWN:-false}"
 suites="${SUITES:-"api app broker"}"
@@ -23,7 +24,8 @@ then
 fi
 
 suites_to_run=""
-for suite in $suites; do
+for suite in $suites
+do
 	log "checking suite ${suite}"
 	if [[ -d "${suite}" ]]
 	then
@@ -35,7 +37,8 @@ done
 step "running ${suites_to_run}"
 
 #run suites
-if [ "${suites_to_run}" != "" ]; then
+if [ "${suites_to_run}" != "" ]
+then
 	# shellcheck disable=SC2086
 	SKIP_TEARDOWN="${skip_teardown}" CONFIG="${PWD}/acceptance_config.json" DEBUG='true' ./bin/test -race -nodes="${nodes}" -trace $ginkgo_opts ${suites_to_run}
 else
