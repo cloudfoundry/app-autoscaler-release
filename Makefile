@@ -373,7 +373,7 @@ deploy-autoscaler-bosh: db.java-libs go-mod-vendor scheduler.build
 	echo " - deploying autoscaler"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 deploy-cleanup:
-	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
+	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh
 
 bosh-release-path := ./target/bosh-releases
 prometheus-bosh-release-path := ${bosh-release-path}/prometheus

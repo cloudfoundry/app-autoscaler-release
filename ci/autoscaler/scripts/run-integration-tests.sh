@@ -4,7 +4,8 @@
 
 set -eu -o pipefail
 
-source './common.sh'
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+source "${script_dir}/common.sh"
 
 ci_prepare_postgres_db # It is assumed that this test runs in isolation. Consequently the database
 											 # to run the tests on is not already existing.
