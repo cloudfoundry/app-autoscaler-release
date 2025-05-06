@@ -118,7 +118,8 @@ function cleanup_apps(){
 		cf delete-space -f "${AUTOSCALER_SPACE}"
 	fi
 
-	if cf orgs | grep --quiet --regexp="^${AUTOSCALER_ORG}$"; then
+	if cf orgs | grep --quiet --regexp="^${AUTOSCALER_ORG}$"
+	then
 		cf delete-org -f "${AUTOSCALER_ORG}"
 	fi
 }
@@ -140,7 +141,8 @@ function unset_vars() {
 function find_or_create_org(){
 	step "finding or creating org"
 	local org_name="$1"
-	if ! cf orgs | grep --quiet --regexp="^${org_name}$"; then
+	if ! cf orgs | grep --quiet --regexp="^${org_name}$"
+	then
 		cf create-org "${org_name}"
 	fi
 	echo "targeting org ${org_name}"
@@ -150,7 +152,8 @@ function find_or_create_org(){
 function find_or_create_space(){
 	step "finding or creating space"
 	local space_name="$1"
-	if ! cf spaces | grep --quiet --regexp="^${space_name}$"; then
+	if ! cf spaces | grep --quiet --regexp="^${space_name}$"
+	then
 		cf create-space "${space_name}"
 	fi
 	echo "targeting space ${space_name}"
@@ -163,4 +166,23 @@ function cf_target(){
 
 	find_or_create_org "${org_name}"
 	find_or_create_space "${space_name}"
+}
+
+# 🚀 Initialise and start the PostgreSQL DBMS-server, create a user 'test-pg' and a database
+# 'test-pg'.
+#
+# ⚠️ This subprogram is meant to be only run in container derived from the image
+# 'app-autoscaler-release-tools'. It assumes a working devbox-installation and devbox being
+# responsible for PostgreSQL.
+#
+# 🚸 Add `trap 'devbox services stop postgresql' EXIT` to your script to shut it down when the
+# process finishes.
+function ci_prepare_postgres_db() {
+	# devbox makes sure that the environment-variables PGHOST and PGDATA are set appropriately.
+	initdb
+	devbox services up postgresql --background	# pg_ctl will not work as it is not aware of where to
+																							# create the socket.
+	createuser tests-pg
+	createdb tests-pg # Needed to be done like this, because 'tests-pg' does not have the required
+										# priviledges.
 }
