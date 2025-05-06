@@ -179,10 +179,14 @@ function cf_target(){
 # process finishes.
 function ci_prepare_postgres_db() {
 	# devbox makes sure that the environment-variables PGHOST and PGDATA are set appropriately.
+	set -x # 🚧 To-do: Debug-code
+	echo "pwd: $(pwd)" # 🚧 To-do: Debug-code
+	echo "ls -lah .: $(ls -lah .)" # 🚧 To-do: Debug-code
 	initdb
 	devbox services up postgresql --background	# pg_ctl will not work as it is not aware of where to
 																							# create the socket.
 	createuser tests-pg
-	createdb tests-pg # Needed to be done like this, because 'tests-pg' does not have the required
+	createdb tests-pg # Needed to be done like this, because 'tests-pg' does not have the required#
 										# priviledges.
+	set +x # 🚧 To-do: Debug-code
 }

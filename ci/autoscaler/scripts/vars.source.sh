@@ -72,6 +72,8 @@ debug "SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 system_domain="${SYSTEM_DOMAIN}"
 
 BBL_STATE_PATH="${BBL_STATE_PATH:-$( realpath -e "${root_dir}/../app-autoscaler-env-bbl-state/bbl-state" 2> /dev/null || echo "${root_dir}/../bbl-state/bbl-state" )}"
+# We want to print out the name of the variable literally and marked as shell-variable, therefore:
+# shellcheck disable=SC2016
 BBL_STATE_PATH="$(realpath --canonicalize-existing "${BBL_STATE_PATH}" \
 									|| echo 'ERR_invalid_state_path, please set ${BBL_STATE_PATH}' )"
 export BBL_STATE_PATH
