@@ -2,6 +2,7 @@ package db_test
 
 import (
 	"bytes"
+	"encoding/json"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	. "github.com/onsi/ginkgo/v2"
@@ -23,7 +24,22 @@ var _ = Describe("Config", func() {
 			dec := yaml.NewDecoder(bytes.NewBuffer(configBytes))
 			dec.KnownFields(true)
 			err = dec.Decode(&conf)
+		})
 
+		// this test demonstrates that JSON configuration parsing is broken at the moment
+		When("Configuration is provided as JSON", func() {
+			It("Should be parseable", func() {
+				var dbConfig db.DatabaseConfig
+				configBytes := []byte(`
+{
+  "max_open_connections": 1
+}
+`)
+				err := json.Unmarshal(configBytes, &dbConfig)
+
+				Expect(err).NotTo(HaveOccurred())
+				Expect(dbConfig.MaxOpenConnections).To(Equal(int32(1)))
+			})
 		})
 
 		Context("when the config is valid", func() {
