@@ -5,15 +5,10 @@ SHELL := /bin/bash
 repository-root := $(shell realpath --relative-to $$(pwd) $$(git rev-parse --show-toplevel))
 
 # All files that together define the development-environment:
-#
-# 🚧 To-do: Check if each of the last two lines should be substituted by something like:
-# `$(wildcard ./.devbox/**/flake.{nix,lock})`
 development-environment-definition := \
 	$(wildcard ${repository-root}/nix/**/*) \
 	${repository-root}/devbox.json \
 	${repository-root}/devbox.lock
-# 🚸 Please be aware that devbox automatically creates
-# '${repository-root}/.devbox/virtenv/mysql/flake' when it loads the development-environment.
 
 # The generated Dockerfile just depends on the content of the used “devbox.json” and its lockfile.
 # It is marked secondary to not auto-clean it.
@@ -26,18 +21,19 @@ Dockerfile: # ./Makefile ${repository-root}/devbox.json ${repository-root}/devbo
 	mv '${repository-root}/Dockerfile' .
 
 # 🚸 Overwrite the following parameters to work with a different repository on a different registry:
-DOCKER_REGISTRY ?= ghcr.io
-DOCKER_REPOSITORY ?= cloudfoundry/app-autoscaler-release-tools
+OCI_REGISTRY ?= ghcr.io
+OCI_REPOSITORY ?= cloudfoundry/app-autoscaler-release-tools
+OCI_TAG ?= latest
 
 .PHONY: docker-login
 docker-login:
-	@logged_in=$$(jq '.auths | has("${DOCKER_REGISTRY}")' ~/.docker/config.json)
+	@logged_in=$$(jq '.auths | has("${OCI_REGISTRY}")' ~/.docker/config.json)
 	readonly logged_in
 	if [[ "$${logged_in}" != 'true' ]]
 	then
-		docker login '${DOCKER_REGISTRY}'
+		docker login '${OCI_REGISTRY}'
 	else
-		echo 'Already logged in into ${DOCKER_REGISTRY}, skipping login.'
+		echo 'Already logged in into ${OCI_REGISTRY}, skipping login.'
 	fi
 
 oci-image-location := ${repository-root}/build/app-autoscaler-release-tools.tar.zst
@@ -46,13 +42,13 @@ oci-image: ${oci-image-location}
 docker-image: ${oci-image-location}
 
 ${oci-image-location}: ./Makefile Dockerfile Dockerfile.dockerignore ${development-environment-definition}
-	@readonly image_tag='${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}:latest'
+	@readonly image_tag='${OCI_REGISTRY}/${OCI_REPOSITORY}:${OCI_TAG}'
 	docker build --file='./Dockerfile' '${repository-root}' --tag="$${image_tag}"
 	docker image save "$${image_tag}" | zstd > '${oci-image-location}'
 
 .PHONY: oci-release-%
 oci-release-%: docker-login docker-image
-	@ARTIFACT='${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}:$*'
+	@ARTIFACT='${OCI_REGISTRY}/${OCI_REPOSITORY}:$*'
 	echo "Uploading image" "$${ARTIFACT}"
 	docker push "$${ARTIFACT}"
 
