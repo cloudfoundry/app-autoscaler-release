@@ -47,7 +47,7 @@ ${oci-image-location}: ./Makefile Dockerfile Dockerfile.dockerignore ${developme
 	docker image save "$${image_tag}" | zstd > '${oci-image-location}'
 
 .PHONY: oci-release-%
-oci-release-%: docker-login docker-image
+oci-release-%: docker-login oci-image
 	@ARTIFACT='${OCI_REGISTRY}/${OCI_REPOSITORY}:$*'
 	echo "Uploading image" "$${ARTIFACT}"
 	docker push "$${ARTIFACT}"
