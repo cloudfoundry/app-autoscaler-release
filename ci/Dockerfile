@@ -21,7 +21,7 @@ RUN \
 	# --mount=type=bind,source=./nix,target=/code/nix,readonly \
 	# --mount=type=bind,source=./devbox.json,target=/code/debox.json,readonly \
 	# --mount=type=bind,source=./devbox.lock,target=/code/devbox.lock,readonly \
-	devbox run -- echo "Installed Packages."
+	devbox run -- echo 'Installed Packages.'
 
 # Make use of the installed devbox-environment: This is required for the defined entry-point to
 # work.
