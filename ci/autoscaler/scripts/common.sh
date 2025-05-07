@@ -179,15 +179,23 @@ function cf_target(){
 # process finishes.
 function ci_prepare_postgres_db() {
 	# devbox makes sure that the environment-variables PGHOST and PGDATA are set appropriately.
-	set -x # 🚧 To-do: Debug-code
-	echo "pwd: $(pwd)" # 🚧 To-do: Debug-code
-	echo "ls -lah .: $(ls -lah .)" # 🚧 To-do: Debug-code
+	# set -x # 🚧 To-do: Debug-code
+	# echo "pwd: $(pwd)" # 🚧 To-do: Debug-code
+	# echo "ls -lah .: $(ls -lah .)" # 🚧 To-do: Debug-code
+	echo "1. ls -lah '/code/.devbox/virtenv/postgresql/': $(ls -lah '/code/.devbox/virtenv/postgresql/')" # 🚧 To-do: Debug-code
+	echo "1. ls -lah '/code/.devbox/virtenv/postgresql/data/': $(ls -lah '/code/.devbox/virtenv/postgresql/data/')" # 🚧 To-do: Debug-code
+
 	initdb
-	devbox services --config='/code' up postgresql --background # 🚧 To-do: Can we avoid the `--config`-parameter?
-	#devbox services  up postgresql --background	# pg_ctl will not work as it is not aware of where to
+	echo "2. ls -lah '/code/.devbox/virtenv/postgresql/': $(ls -lah '/code/.devbox/virtenv/postgresql/')" # 🚧 To-do: Debug-code
+	echo "2. ls -lah '/code/.devbox/virtenv/postgresql/data/': $(ls -lah '/code/.devbox/virtenv/postgresql/data/')" # 🚧 To-do: Debug-code
+
+	# devbox services --config='/code' up postgresql --background # 🚧 To-do: Can we avoid the `--config`-parameter?
+	devbox services up postgresql --background	# pg_ctl will not work as it is not aware of where to
 																							# create the socket.
+	echo "3. ls -lah '/code/.devbox/virtenv/postgresql/': $(ls -lah '/code/.devbox/virtenv/postgresql/')" # 🚧 To-do: Debug-code
+	echo "3. ls -lah '/code/.devbox/virtenv/postgresql/data/': $(ls -lah '/code/.devbox/virtenv/postgresql/data/')" # 🚧 To-do: Debug-code
 	createuser tests-pg
 	createdb tests-pg # Needed to be done like this, because 'tests-pg' does not have the required#
 										# priviledges.
-	set +x # 🚧 To-do: Debug-code
+	# set +x # 🚧 To-do: Debug-code
 }

@@ -9,8 +9,10 @@ echo "1. Name des Skripts (wie aufgerufen): $0"
 echo "2. Tatsächlicher Pfad des Skripts: $BASH_SOURCE"
 echo "3. Aufrufargumente: $@"
 echo "4. Anzahl der Argumente: $#"
-echo "5. Vollständiger Aufrufbefehl:"
-ps -o args= -p $$
+echo '5. Umgebung:'
+echo "$(env)"
+# echo "6. Vollständiger Aufrufbefehl:"
+# ps -o args= -p $$
 # ==================== 🚧 To-do: end debugging ====================
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"

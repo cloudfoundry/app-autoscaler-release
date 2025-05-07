@@ -34,3 +34,33 @@ ENTRYPOINT ["devbox", "run", "--config=/code", "--"]
 
 # Avoid the bash from debox.json and use Debian's bash for better pre-configuration.
 CMD ["/usr/bin/bash"]
+
+
+# ================================================================================
+# WORKDIR /
+# USER root:root
+
+# COPY devbox.json devbox.json
+# COPY devbox.lock devbox.lock
+# COPY nix nix
+
+# # 💡 In theory we could avoid the copies by mounting the content into the image during
+# # build-time. However devbox has issues with the read-only-mounts in the name of the user
+# # “root”.
+# RUN \
+#	# --mount=type=bind,source=./nix,target=/code/nix,readonly \
+#	# --mount=type=bind,source=./devbox.json,target=/code/debox.json,readonly \
+#	# --mount=type=bind,source=./devbox.lock,target=/code/devbox.lock,readonly \
+#	devbox run -- echo 'Installed Packages.'
+
+# # Make use of the installed devbox-environment: This is required for the defined entry-point to
+# # work.
+# ENV \
+#	PATH="/.devbox/nix/profile/default/bin:${PATH}" \
+#	LD_LIBRARY_PATH="/.devbox/nix/profile/default/lib"
+
+# # The image is meant to be run with the particular devbox-setup from the “code”-folder.
+# ENTRYPOINT ["devbox", "run", "--"]
+
+# # Avoid the bash from debox.json and use Debian's bash for better pre-configuration.
+# CMD ["/usr/bin/bash"]

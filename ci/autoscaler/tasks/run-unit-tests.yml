@@ -11,5 +11,4 @@ run:
   - "run"
   - "--config=/code"
   - "--"
-  - "pwd; ls; echo 'Alle verfügbaren Umgebungsvariablen:'; env;"
   - "${DEVBOX_WD}/app-autoscaler-release/ci/autoscaler/scripts/run-unit-tests.sh"
