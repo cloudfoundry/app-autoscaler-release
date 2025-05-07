@@ -75,12 +75,16 @@ version: 1.0.0
 _schema-version: 3.3.0
 
 modules:
-  - name: publicapiserver
+  - name: apiserver
     parameters:
       instances: 1
       routes:
       - route: ${PUBLICAPISERVER_HOST}.\${default-domain}
       - route: ${SERVICEBROKER_HOST}.\${default-domain}
+    requires:
+      - name: publicapiserver-config
+      - name: broker-catalog
+      - name: database
   - name: metricsforwarder
     requires:
     - name: metricsforwarder-config

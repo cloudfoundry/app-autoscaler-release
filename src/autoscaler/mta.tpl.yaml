@@ -36,7 +36,7 @@ modules:
       - name: apply-api-changelog
         command: " chmod +x ./BOOT-INF/classes/bin/apply-api-changelog.sh ; /home/vcap/app/BOOT-INF/classes/bin/apply-api-changelog.sh"
 
-  - name: publicapiserver
+  - name: apiserver
     type: go
     path: .
     properties:
@@ -49,6 +49,7 @@ modules:
     - name: broker-catalog
     - name: database
     - name: app-autoscaler-application-logs
+    - name: app-autoscaler-dynatrace
     parameters:
       memory: 1G
       disk-quota: 1G
