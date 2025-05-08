@@ -38,7 +38,7 @@ export GOWORK = off
 $(shell mkdir -p target)
 $(shell mkdir -p build)
 
-.DEFAULT_GOAL := build-all
+.DEFAULT_GOAL := build_all
 
 .PHONY: check-type
 check-db_type:

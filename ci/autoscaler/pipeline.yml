@@ -275,6 +275,7 @@ jobs:
   - *make-prerelease-task
   - <<: *deploy-autoscaler-task
     params:
+      TARGETS: "deploy-autoscaler"
       <<: *acceptance-log-cache-metron-params
       <<: *app-autoscaler-ops-files-log-cache-metron
     timeout: "30m"
@@ -329,6 +330,7 @@ jobs:
   - *make-prerelease-task
   - <<: *deploy-autoscaler-task
     params:
+      TARGETS: "deploy-autoscaler"
       <<: *acceptance-log-cache-syslog-params
       <<: *app-autoscaler-ops-files-log-cache-syslog
     timeout: 30m
@@ -390,6 +392,7 @@ jobs:
     timeout: 15m
   - <<: *deploy-autoscaler-task
     params:
+      TARGETS: "deploy-autoscaler"
       <<: *acceptance-log-cache-syslog-cf-params
       <<: *app-autoscaler-ops-files-log-cache-syslog-cf
   - task: deploy-apps
@@ -451,6 +454,7 @@ jobs:
   - *make-prerelease-task
   - <<: *deploy-autoscaler-task
     params:
+      TARGETS: "deploy-autoscaler"
       <<: *performance-env
       <<: *app-autoscaler-ops-files-log-cache-syslog
     timeout: 30m
@@ -520,6 +524,7 @@ jobs:
   - *make-prerelease-task
   - <<: *deploy-autoscaler-task
     params:
+      TARGETS: "deploy-autoscaler"
       <<: *upgrade-test-params
       <<: *app-autoscaler-ops-files-upgrade
     timeout: 30m
