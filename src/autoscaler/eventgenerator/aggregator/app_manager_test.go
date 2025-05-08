@@ -75,6 +75,7 @@ var _ = Describe("AppManager", func() {
 					}
 					testAggregator.MetricCacheSizePerApp = 3
 				})
+
 				It("should be able to save and query metrics", func() {
 					Eventually(policyDB.RetrievePoliciesCallCount).Should(Equal(1))
 					clock.Increment(1 * testAggregator.PolicyPollerInterval)
