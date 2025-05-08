@@ -4,12 +4,12 @@ go 1.23.4
 
 require (
 	code.cloudfoundry.org/brokerapi/v13 v13.0.4
-	code.cloudfoundry.org/cfhttp/v2 v2.43.0
-	code.cloudfoundry.org/clock v1.36.0
+	code.cloudfoundry.org/cfhttp/v2 v2.44.0
+	code.cloudfoundry.org/clock v1.37.0
 	code.cloudfoundry.org/go-log-cache/v3 v3.1.1
 	code.cloudfoundry.org/go-loggregator/v10 v10.2.0
 	code.cloudfoundry.org/lager/v3 v3.35.0
-	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20250428162659-f71516fe48ec
+	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20250429091036-6ff9c484ea0d
 	code.cloudfoundry.org/tlsconfig v0.25.0
 	github.com/cenkalti/backoff/v5 v5.0.2
 	github.com/cloud-gov/go-cfenv v1.19.1
@@ -49,7 +49,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20250425173222-7b384671a197
+replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20250428153025-10db94c68c34
 
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20250417050917-333c2580673b // indirect
