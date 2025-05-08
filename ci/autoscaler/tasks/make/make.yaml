@@ -1,19 +1,10 @@
 ---
 platform: linux
 
-# image_resource:
-#   type: registry-image
-#   source:
-#     repository: ghcr.io/cloudfoundry/app-autoscaler-release-tools
-#     tag: main
-
-# image: app-autoscaler-tools
-
 params:
   TARGETS:
 
 inputs:
-# - name: app-autoscaler-tools
 - name: app-autoscaler-release
 - name: ci
 - name: bbl-state

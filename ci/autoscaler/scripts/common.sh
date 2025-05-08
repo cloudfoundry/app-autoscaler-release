@@ -167,35 +167,3 @@ function cf_target(){
 	find_or_create_org "${org_name}"
 	find_or_create_space "${space_name}"
 }
-
-# 🚀 Initialise and start the PostgreSQL DBMS-server, create a user 'test-pg' and a database
-# 'test-pg'.
-#
-# ⚠️ This subprogram is meant to be only run in container derived from the image
-# 'app-autoscaler-release-tools'. It assumes a working devbox-installation and devbox being
-# responsible for PostgreSQL.
-#
-# 🚸 Add `trap 'devbox services stop postgresql' EXIT` to your script to shut it down when the
-# process finishes.
-function ci_prepare_postgres_db() {
-	# devbox makes sure that the environment-variables PGHOST and PGDATA are set appropriately.
-	# set -x # 🚧 To-do: Debug-code
-	# echo "pwd: $(pwd)" # 🚧 To-do: Debug-code
-	# echo "ls -lah .: $(ls -lah .)" # 🚧 To-do: Debug-code
-	echo "1. ls -lah '/code/.devbox/virtenv/postgresql/': $(ls -lah '/code/.devbox/virtenv/postgresql/')" # 🚧 To-do: Debug-code
-	echo "1. ls -lah '/code/.devbox/virtenv/postgresql/data/': $(ls -lah '/code/.devbox/virtenv/postgresql/data/')" # 🚧 To-do: Debug-code
-
-	initdb
-	echo "2. ls -lah '/code/.devbox/virtenv/postgresql/': $(ls -lah '/code/.devbox/virtenv/postgresql/')" # 🚧 To-do: Debug-code
-	echo "2. ls -lah '/code/.devbox/virtenv/postgresql/data/': $(ls -lah '/code/.devbox/virtenv/postgresql/data/')" # 🚧 To-do: Debug-code
-
-	# devbox services --config='/code' up postgresql --background # 🚧 To-do: Can we avoid the `--config`-parameter?
-	devbox services up postgresql --background	# pg_ctl will not work as it is not aware of where to
-																							# create the socket.
-	echo "3. ls -lah '/code/.devbox/virtenv/postgresql/': $(ls -lah '/code/.devbox/virtenv/postgresql/')" # 🚧 To-do: Debug-code
-	echo "3. ls -lah '/code/.devbox/virtenv/postgresql/data/': $(ls -lah '/code/.devbox/virtenv/postgresql/data/')" # 🚧 To-do: Debug-code
-	createuser tests-pg
-	createdb tests-pg # Needed to be done like this, because 'tests-pg' does not have the required#
-										# priviledges.
-	# set +x # 🚧 To-do: Debug-code
-}

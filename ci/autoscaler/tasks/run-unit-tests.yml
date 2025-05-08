@@ -5,10 +5,4 @@ inputs:
 - name: app-autoscaler-release
 
 run:
-#  path: app-autoscaler-release/ci/autoscaler/scripts/run-unit-tests.sh
-  path: "devbox"
-  args:
-  - "run"
-  - "--config=/code"
-  - "--"
-  - "${DEVBOX_WD}/app-autoscaler-release/ci/autoscaler/scripts/run-unit-tests.sh"
+  path: app-autoscaler-release/ci/autoscaler/scripts/run-unit-tests.sh

@@ -105,7 +105,7 @@ resources:
   type: "registry-image"
   source:
     repository: "ghcr.io/cloudfoundry/app-autoscaler-release-tools"
-    tag: "latest" # "main"
+    tag: "main"
 
 - name: every-night
   type: time
@@ -382,7 +382,8 @@ jobs:
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor  db scheduler
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
     timeout: 15m
   - <<: *deploy-autoscaler-task
     params:

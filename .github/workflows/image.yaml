@@ -3,39 +3,38 @@ on:
   push:
     branches: ['main']
     paths:
+      - 'ci/dockerfiles/**'
       - '.github/workflows/image.yml'
-      - 'ci/Dockerfile'
-      - 'ci/Dockerfile.dockerignore'
-      - 'nix/**/*'
-      - 'devbox.json'
-      - 'devbox.lock'
   pull_request:
     paths:
+      - 'ci/dockerfiles/**'
       - '.github/workflows/image.yml'
-      - 'ci/Dockerfile'
-      - 'ci/Dockerfile.dockerignore'
-      - 'nix/**/*'
-      - 'devbox.json'
-      - 'devbox.lock'
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  build-and-push-devbox-image:
+  build-and-push-image:
     runs-on: ubuntu-latest
+    container: jetpackio/devbox:latest@sha256:3d164648f5ca0fa66cd080ee7c895af54e0a3ec19e19b232a2fea21628e82cfb
     permissions:
       contents: read
       packages: write
-    name: Build and Push app-autoscaler-release-tools
-    env:
-      IMAGE_NAME: ${{ github.repository }}-tools
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+    strategy:
+      matrix:
+        image_suffix: ["tools"]
+    name: Build and Push app-autoscaler-release-${{ matrix.image_suffix }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -43,17 +42,33 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}
+
+      - name: Get ginkgo version from autoscaler-release
+        id: ginkgo
+        run: |
+          version=$(devbox info ginkgo | head --lines=1 | cut --field=2 --delimiter=" ")
+          echo "GINKGO version from devbox: '${version}'"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - id: get-golang-version
+        shell: bash
+        run: |
+          version=$(devbox info go | head --lines=1 | cut --field=2 --delimiter=" ")
+          echo "Go version from devbox: '${version}'"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         id: build-and-push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6
         with:
-          context: .
-          file: "ci/Dockerfile"
+          context: ci/dockerfiles/autoscaler-${{ matrix.image_suffix }}
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.image_suffix }}:main
+          build-args: |
+            GINKGO_VERSION=v${{ steps.ginkgo.outputs.version }}
+            GO_VERSION=${{ steps.get-golang-version.outputs.version }}
