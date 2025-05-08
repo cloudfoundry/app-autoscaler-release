@@ -39,7 +39,6 @@ function log(){
 
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir=$(realpath -e "${script_dir}/../../..")
-readonly script_dir root_dir
 
 # This environment-variable is used as the target-name for concourse that is used to communicate
 # with the concourse-instance that manages the os-pipelines of this repository under
