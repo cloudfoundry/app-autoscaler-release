@@ -16,6 +16,22 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+const testPolicyStr = `
+{
+   "instance_min_count":1,
+   "instance_max_count":5,
+   "scaling_rules":[
+      {
+         "metric_type":"test-metric-name",
+         "breach_duration_secs":300,
+         "threshold":30,
+         "operator":"<",
+         "cool_down_secs":300,
+         "adjustment":"-1"
+      }
+   ]
+}`
+
 var _ = Describe("AppManager", func() {
 	var (
 		policyDB       *fakes.FakePolicyDB
@@ -26,21 +42,6 @@ var _ = Describe("AppManager", func() {
 		testAppId      = "testAppId"
 		testPool       = config.PoolConfig{}
 		testAggregator = config.AggregatorConfig{}
-		policyStr      = `
-		{
-		   "instance_min_count":1,
-		   "instance_max_count":5,
-		   "scaling_rules":[
-		      {
-		         "metric_type":"test-metric-name",
-		         "breach_duration_secs":300,
-		         "threshold":30,
-		         "operator":"<",
-		         "cool_down_secs":300,
-		         "adjustment":"-1"
-		      }
-		   ]
-		}`
 	)
 
 	BeforeEach(func() {
@@ -69,7 +70,7 @@ var _ = Describe("AppManager", func() {
 		Context("when the AppManager is started", func() {
 			BeforeEach(func() {
 				policyDB.RetrievePoliciesStub = func() ([]*models.PolicyJson, error) {
-					return []*models.PolicyJson{{AppId: testAppId, PolicyStr: policyStr}}, nil
+					return []*models.PolicyJson{{AppId: testAppId, PolicyStr: testPolicyStr}}, nil
 				}
 
 			})
@@ -106,24 +107,24 @@ var _ = Describe("AppManager", func() {
 						switch i {
 						case 1:
 							return []*models.PolicyJson{
-								{AppId: "app-id-1", PolicyStr: policyStr},
-								{AppId: "app-id-2", PolicyStr: policyStr},
-								{AppId: "app-id-3", PolicyStr: policyStr},
-								{AppId: "app-id-4", PolicyStr: policyStr},
+								{AppId: "app-id-1", PolicyStr: testPolicyStr},
+								{AppId: "app-id-2", PolicyStr: testPolicyStr},
+								{AppId: "app-id-3", PolicyStr: testPolicyStr},
+								{AppId: "app-id-4", PolicyStr: testPolicyStr},
 							}, nil
 						case 2:
 							return []*models.PolicyJson{
-								{AppId: "app-id-3", PolicyStr: policyStr},
-								{AppId: "app-id-4", PolicyStr: policyStr},
-								{AppId: "app-id-5", PolicyStr: policyStr},
-								{AppId: "app-id-6", PolicyStr: policyStr},
+								{AppId: "app-id-3", PolicyStr: testPolicyStr},
+								{AppId: "app-id-4", PolicyStr: testPolicyStr},
+								{AppId: "app-id-5", PolicyStr: testPolicyStr},
+								{AppId: "app-id-6", PolicyStr: testPolicyStr},
 							}, nil
 						case 3:
 							return []*models.PolicyJson{
-								{AppId: "app-id-5", PolicyStr: policyStr},
-								{AppId: "app-id-6", PolicyStr: policyStr},
-								{AppId: "app-id-7", PolicyStr: policyStr},
-								{AppId: "app-id-8", PolicyStr: policyStr},
+								{AppId: "app-id-5", PolicyStr: testPolicyStr},
+								{AppId: "app-id-6", PolicyStr: testPolicyStr},
+								{AppId: "app-id-7", PolicyStr: testPolicyStr},
+								{AppId: "app-id-8", PolicyStr: testPolicyStr},
 							}, nil
 
 						}
@@ -239,7 +240,7 @@ var _ = Describe("AppManager", func() {
 		Context("running with 1 node", func() {
 			BeforeEach(func() {
 				policyDB.RetrievePoliciesStub = func() ([]*models.PolicyJson, error) {
-					return []*models.PolicyJson{{AppId: testAppId, PolicyStr: policyStr}}, nil
+					return []*models.PolicyJson{{AppId: testAppId, PolicyStr: testPolicyStr}}, nil
 				}
 				testAggregator.MetricCacheSizePerApp = 3
 			})
@@ -248,60 +249,23 @@ var _ = Describe("AppManager", func() {
 				clock.Increment(1 * testAggregator.PolicyPollerInterval)
 				Eventually(policyDB.RetrievePoliciesCallCount).Should(Equal(2))
 
-				appMetric1 := &models.AppMetric{
-					AppId:      testAppId,
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  100,
-				}
+				appMetric1 := newAppMetric(testAppId, 100)
 
-				appMetric2 := &models.AppMetric{
-					AppId:      testAppId,
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  200,
-				}
+				appMetric2 := newAppMetric(testAppId, 200)
 
-				appMetric3 := &models.AppMetric{
-					AppId:      testAppId,
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  300,
-				}
+				appMetric3 := newAppMetric(testAppId, 300)
 
-				appMetric4 := &models.AppMetric{
-					AppId:      testAppId,
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  400,
-				}
+				appMetric4 := newAppMetric(testAppId, 400)
 
-				anotheAppMetric1 := &models.AppMetric{
-					AppId:      "another-app-id",
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  100,
-				}
-
-				anotheAppMetric2 := &models.AppMetric{
-					AppId:      "another-app-id",
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  200,
-				}
+				anotherAppMetric1 := newAppMetric("another-app-id", 100)
+				anotherAppMetric2 := newAppMetric("another-app-id", 200)
 
 				Expect(appManager.SaveMetricToCache(appMetric1)).To(BeTrue())
 				Expect(appManager.SaveMetricToCache(appMetric2)).To(BeTrue())
 				Expect(appManager.SaveMetricToCache(appMetric3)).To(BeTrue())
 				Expect(appManager.SaveMetricToCache(appMetric4)).To(BeTrue())
-				Expect(appManager.SaveMetricToCache(anotheAppMetric1)).To(BeFalse())
-				Expect(appManager.SaveMetricToCache(anotheAppMetric2)).To(BeFalse())
+				Expect(appManager.SaveMetricToCache(anotherAppMetric1)).To(BeFalse())
+				Expect(appManager.SaveMetricToCache(anotherAppMetric2)).To(BeFalse())
 
 				By("cache hit")
 				data, err := appManager.QueryAppMetrics(testAppId, "test-metric-type", 300, 500, db.ASC)
@@ -328,13 +292,13 @@ var _ = Describe("AppManager", func() {
 					switch i {
 					case 1:
 						return []*models.PolicyJson{
-							{AppId: "app-id-1", PolicyStr: policyStr},
-							{AppId: "app-id-3", PolicyStr: policyStr},
+							{AppId: "app-id-1", PolicyStr: testPolicyStr},
+							{AppId: "app-id-3", PolicyStr: testPolicyStr},
 						}, nil
 					case 2:
 						return []*models.PolicyJson{
-							{AppId: "app-id-2", PolicyStr: policyStr},
-							{AppId: "app-id-4", PolicyStr: policyStr},
+							{AppId: "app-id-2", PolicyStr: testPolicyStr},
+							{AppId: "app-id-4", PolicyStr: testPolicyStr},
 						}, nil
 					}
 					return []*models.PolicyJson{}, nil
@@ -342,37 +306,10 @@ var _ = Describe("AppManager", func() {
 
 			})
 			It("caches app shard 0", func() {
-				appMetric1 := &models.AppMetric{
-					AppId:      "app-id-1",
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  100,
-				}
-
-				appMetric2 := &models.AppMetric{
-					AppId:      "app-id-2",
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  100,
-				}
-
-				appMetric3 := &models.AppMetric{
-					AppId:      "app-id-3",
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  100,
-				}
-
-				appMetric4 := &models.AppMetric{
-					AppId:      "app-id-4",
-					MetricType: "test-metric-type",
-					Value:      "100",
-					Unit:       "test-unit",
-					Timestamp:  100,
-				}
+				appMetric1 := newAppMetric("app-id-1", 100)
+				appMetric2 := newAppMetric("app-id-2", 100)
+				appMetric3 := newAppMetric("app-id-3", 100)
+				appMetric4 := newAppMetric("app-id-4", 100)
 
 				Eventually(appManager.GetPolicies).Should(HaveLen(1))
 
@@ -407,3 +344,13 @@ var _ = Describe("AppManager", func() {
 		})
 	})
 })
+
+func newAppMetric(appId string, ts int64) *models.AppMetric {
+	return &models.AppMetric{
+		AppId:      appId,
+		MetricType: "test-metric-type",
+		Value:      "100",
+		Unit:       "test-unit",
+		Timestamp:  ts,
+	}
+}
