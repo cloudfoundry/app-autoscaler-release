@@ -266,6 +266,7 @@ jobs:
   plan:
   - in_parallel:
     - get: "app-autoscaler-tools"
+      trigger: true
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [unit-tests, integration-tests]
@@ -319,6 +320,7 @@ jobs:
   plan:
   - in_parallel:
     - get: "app-autoscaler-tools"
+      trigger: true
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [unit-tests, integration-tests]
@@ -373,6 +375,7 @@ jobs:
   plan:
   - in_parallel:
     - get: "app-autoscaler-tools"
+      trigger: true
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [unit-tests, integration-tests]
@@ -439,6 +442,7 @@ jobs:
   plan:
   - in_parallel:
     - get: "app-autoscaler-tools"
+      trigger: true
     - get: ci
     - get: bbl-state
     - get: app-autoscaler-release
@@ -481,6 +485,7 @@ jobs:
   plan:
   - in_parallel:
     - get: "app-autoscaler-tools"
+      trigger: true
     - get: bbl-state
     - get: ci
     - get: app-autoscaler-release
@@ -609,6 +614,7 @@ jobs:
   plan:
   - in_parallel:
     - get: "app-autoscaler-tools"
+      trigger: true
     - get: ci
     - get: gh-release
     - get: app-autoscaler-release
