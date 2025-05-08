@@ -383,13 +383,7 @@ jobs:
       passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
-  - task: make-prerelease
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/make/make.yaml
-    params:
-      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
-      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
-    timeout: 15m
+  - *make-prerelease-task
   - <<: *deploy-autoscaler-task
     params:
       TARGETS: "deploy-autoscaler"
