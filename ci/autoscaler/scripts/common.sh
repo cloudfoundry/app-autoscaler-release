@@ -50,7 +50,6 @@ function cf_login(){
 	cf api "https://api.${system_domain}" --skip-ssl-validation
 	cf_admin_password="$(credhub get --quiet --name='/bosh-autoscaler/cf/cf_admin_password')"
 	cf auth admin "$cf_admin_password"
-	cf autoscaling-api "https://${DEPLOYMENT_NAME}.${SYSTEM_DOMAIN}"
 }
 
 function uaa_login(){
