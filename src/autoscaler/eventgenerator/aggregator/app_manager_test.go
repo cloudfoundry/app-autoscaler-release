@@ -2,6 +2,7 @@ package aggregator_test
 
 import (
 	"errors"
+	"sort"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -14,6 +15,7 @@ import (
 	"code.cloudfoundry.org/lager/v3"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
 )
 
 const testPolicyStr = `
@@ -111,7 +113,7 @@ var _ = Describe("AppManager", func() {
 				})
 			})
 
-			Context("when running with 3 nodes and current node index is 0", func() {
+			When("running with 3 nodes and current node index is 0", func() {
 				BeforeEach(func() {
 					testPool.TotalInstances = 3
 					testPool.InstanceIndex = 0
@@ -157,7 +159,7 @@ var _ = Describe("AppManager", func() {
 			})
 		})
 
-		Context("when the AppManager is started", func() {
+		When("the AppManager is started", func() {
 			BeforeEach(func() {
 				policyDB.RetrievePoliciesStub = func() ([]*models.PolicyJson, error) {
 					return []*models.PolicyJson{{AppId: testAppId, PolicyStr: testPolicyStr}}, nil
@@ -187,7 +189,7 @@ var _ = Describe("AppManager", func() {
 				))
 			})
 
-			Context("when running with 3 nodes", func() {
+			When("running with 3 nodes", func() {
 				BeforeEach(func() {
 					testPool.TotalInstances = 3
 
@@ -222,36 +224,26 @@ var _ = Describe("AppManager", func() {
 					}
 
 				})
-				Context("when current index is 0", func() {
+
+				When("current index is 0", func() {
 					BeforeEach(func() {
 						testPool.InstanceIndex = 0
 					})
 
 					It("retrieves app shard 0", func() {
+						Eventually(appManager.GetPolicies).Should(HaveExactKeys("app-id-3", "app-id-4"))
+						Consistently(appManager.GetPolicies).Should(HaveExactKeys("app-id-3", "app-id-4"))
 
-						Eventually(appManager.GetPolicies).Should(HaveLen(2))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-1"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-2"))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-3"))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-4"))
+						clock.Increment(testAggregator.PolicyPollerInterval)
+						Consistently(appManager.GetPolicies).Should(HaveExactKeys("app-id-3", "app-id-4"))
 
-						clock.Increment(1 * testAggregator.PolicyPollerInterval)
-						Consistently(appManager.GetPolicies).Should(HaveLen(2))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-3"))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-4"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-5"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-6"))
-
-						clock.Increment(1 * testAggregator.PolicyPollerInterval)
-						Eventually(appManager.GetPolicies).Should(HaveLen(1))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-8"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-5"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-6"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-7"))
-
+						clock.Increment(testAggregator.PolicyPollerInterval)
+						Eventually(appManager.GetPolicies).Should(HaveExactKeys("app-id-8"))
+						Consistently(appManager.GetPolicies).Should(HaveExactKeys("app-id-8"))
 					})
 				})
-				Context("when current index is 1", func() {
+
+				When("current index is 1", func() {
 					BeforeEach(func() {
 						testPool.InstanceIndex = 1
 					})
@@ -259,49 +251,36 @@ var _ = Describe("AppManager", func() {
 					It("retrieves app shard 1", func() {
 						Consistently(appManager.GetPolicies).Should(BeEmpty())
 
-						clock.Increment(1 * testAggregator.PolicyPollerInterval)
-						Eventually(appManager.GetPolicies).Should(HaveLen(2))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-3"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-4"))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-5"))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-6"))
+						clock.Increment(testAggregator.PolicyPollerInterval)
+						Eventually(appManager.GetPolicies).Should(HaveExactKeys("app-id-5", "app-id-6"))
+						Consistently(appManager.GetPolicies).Should(HaveExactKeys("app-id-5", "app-id-6"))
 
-						clock.Increment(1 * testAggregator.PolicyPollerInterval)
-						Consistently(appManager.GetPolicies).Should(HaveLen(2))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-5"))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-6"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-7"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-8"))
+						clock.Increment(testAggregator.PolicyPollerInterval)
+						Consistently(appManager.GetPolicies).Should(HaveExactKeys("app-id-5", "app-id-6"))
 					})
 				})
 
-				Context("when current index is 2", func() {
+				When("current index is 2", func() {
 					BeforeEach(func() {
 						testPool.InstanceIndex = 2
 					})
 
 					It("retrieves app shard 2", func() {
-						Eventually(appManager.GetPolicies).Should(HaveLen(2))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-1"))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-2"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-3"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-4"))
+						Eventually(appManager.GetPolicies).Should(HaveExactKeys("app-id-1", "app-id-2"))
+						Consistently(appManager.GetPolicies).Should(HaveExactKeys("app-id-1", "app-id-2"))
 
-						clock.Increment(1 * testAggregator.PolicyPollerInterval)
+						clock.Increment(testAggregator.PolicyPollerInterval)
 						Eventually(appManager.GetPolicies).Should(BeEmpty())
 
-						clock.Increment(1 * testAggregator.PolicyPollerInterval)
-						Eventually(appManager.GetPolicies).Should(HaveLen(1))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-5"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-6"))
-						Consistently(appManager.GetPolicies).Should(HaveKey("app-id-7"))
-						Consistently(appManager.GetPolicies).ShouldNot(HaveKey("app-id-8"))
+						clock.Increment(testAggregator.PolicyPollerInterval)
+						Eventually(appManager.GetPolicies).Should(HaveExactKeys("app-id-7"))
+						Consistently(appManager.GetPolicies).Should(HaveExactKeys("app-id-7"))
 					})
 				})
 
 			})
 
-			Context("when retrieving policies from database fails", func() {
+			When("retrieving policies from database fails", func() {
 				BeforeEach(func() {
 					policyDB.RetrievePoliciesStub = func() ([]*models.PolicyJson, error) {
 						return nil, errors.New("error when retrieve policies from database")
@@ -340,4 +319,16 @@ func newAppMetric(appId string, ts int64) *models.AppMetric {
 		Unit:       "test-unit",
 		Timestamp:  ts,
 	}
+}
+
+func HaveExactKeys(keys ...string) types.GomegaMatcher {
+	return WithTransform(func(m map[string]*models.AppPolicy) []string {
+		actualKeys := make([]string, 0, len(m))
+		for k := range m {
+			actualKeys = append(actualKeys, k)
+		}
+		sort.Strings(actualKeys)
+		sort.Strings(keys)
+		return actualKeys
+	}, Equal(keys))
 }
