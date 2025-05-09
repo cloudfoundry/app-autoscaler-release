@@ -53,7 +53,7 @@ var _ = Describe("MetricPoller", func() {
 		BeforeEach(func() {
 			metricFetcher, err := metric.NewLogCacheFetcherFactory(metric.StandardLogCacheFetcherCreator).CreateFetcher(logger, config.Config{
 				MetricCollector: config.MetricCollectorConfig{
-					MetricCollectorURL: "this.endpoint.does.not.exist:1234",
+					MetricCollectorURL: "this.endpoint.is.invalid:1234",
 				},
 			})
 			Expect(err).ToNot(HaveOccurred())
