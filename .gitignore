@@ -1,14 +1,3 @@
-# # Edit: Please use global git-ignore for this, see official hints in the description of gitignore
-# # on <https://git-scm.com/docs/gitignore>.
-#
-# # macOS system file that stores folder metadata (safe to ignore)
-# .DS_Store
-
-
-# ================================================================================
-# 🤖 Generated files
-# ================================================================================
-
 config/dev.yml
 config/private.yml
 releases/*.tgz
@@ -77,11 +66,16 @@ keys/
 .trunk
 
 
-# ==================== 📦 Devbox, ❄ Nix, direnv ====================
+# ==================== 📦 Devbox ====================
 .devbox
+
+# ==================== ❄ Nix ====================
 
 # Ignore links to  build-output:
 /result
 /result-*
 
 .direnv
+
+# # macOS system file that stores folder metadata (safe to ignore)
+.DS_Store

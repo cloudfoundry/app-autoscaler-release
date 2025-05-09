@@ -4,7 +4,6 @@ set -eu -o pipefail
 
 script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
-source "${script_dir}/common.sh"
 
 cf_admin_password="${CF_ADMIN_PASSWORD:-}"
 skip_ssl_validation="${SKIP_SSL_VALIDATION:-true}"
@@ -20,7 +19,10 @@ cpu_upper_threshold=${CPU_UPPER_THRESHOLD:-100}
 
 if [[ -z "${cf_admin_password}" ]]
 then
-	bosh_login "${BBL_STATE_PATH}"
+	pushd "${bbl_state_path}"
+		eval "$(bbl print-env)"
+	popd
+
 	cf_admin_password="$(credhub get --quiet --name='/bosh-autoscaler/cf/cf_admin_password')"
 fi
 

@@ -38,7 +38,7 @@ export GOWORK = off
 $(shell mkdir -p target)
 $(shell mkdir -p build)
 
-.DEFAULT_GOAL := build_all
+.DEFAULT_GOAL := build-all
 
 .PHONY: check-type
 check-db_type:
@@ -300,11 +300,8 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: bosh-release
-bosh-release: build/autoscaler-test.tgz
-# 🚸 In the next line, the order of the dependencies is important. Generated code needs to be
-# already there for `go-mod-tidy` to work. See additional comment for that target in
-# ./src/autoscaler/Makefile.
-build/autoscaler-test.tgz: build_all go-mod-tidy go-mod-vendor
+bosh-release: go-mod-tidy go-mod-vendor scheduler db build/autoscaler-test.tgz
+build/autoscaler-test.tgz:
 	@echo " - building bosh release into build/autoscaler-test.tgz"
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
@@ -373,7 +370,7 @@ deploy-autoscaler-bosh: db.java-libs go-mod-vendor scheduler.build
 	echo " - deploying autoscaler"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
 deploy-cleanup:
-	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh
+	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh;
 
 bosh-release-path := ./target/bosh-releases
 prometheus-bosh-release-path := ${bosh-release-path}/prometheus
@@ -445,11 +442,8 @@ cleanup-autoscaler-deployments:
 	@${CI_DIR}/autoscaler/scripts/cleanup-autoscaler-deployments.sh
 
 .PHONY: cf-login
-cf-login:
-	@echo '⚠️ Please note that this login only works for cf and concourse,' \
-		  'in spite of performing a login as well on bosh and credhub.' \
-		  'The necessary changes to the environment get lost when make exits its process.'
-	@${CI_DIR}/autoscaler/scripts/os-infrastructure-login.sh
+cf-login: ## Login to OSS CF dev environment
+	@${CI_DIR}/autoscaler/scripts/cf-login.sh
 
 .PHONY: setup-performance
 setup-performance: build-test-app
@@ -490,7 +484,6 @@ alerts-silence:
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill ;\
 	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy ;
 
-
 .PHONY: docker-login docker docker-image
 docker-login: target/docker-login
 target/docker-login:
@@ -499,6 +492,7 @@ target/docker-login:
 docker-image: docker-login
 	docker build -t ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest  ci/dockerfiles/autoscaler-tools
 	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
+
 
 validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
 	for file in $^ ; do \

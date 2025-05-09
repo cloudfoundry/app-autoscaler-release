@@ -21,16 +21,5 @@
           callPackages = nixpkgs.lib.customisation.callPackagesWith nixpkgs;
         in callPackages ./packages.nix {}
       );
-
-      # 🚸 Having flake.nix on top-level makes this definition easily consumable with Nix, e.g. for
-      # other repositories of Autoscaler. ⚠️ This currently is for internal use only. Autoscaler does
-      # not officially support this flake-output.
-      openapi-specifications = {
-        app-autoscaler-api =
-          let apiPath = ./api;
-          in builtins.filterSource
-            (path: type: builtins.match ".*\.ya?ml" (baseNameOf path) != null && type == "regular")
-            apiPath;
-      };
   };
 }
