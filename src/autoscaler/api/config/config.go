@@ -172,6 +172,7 @@ func loadPublicApiServerConfig(conf *Config, vcapReader configutil.VCAPConfigura
 }
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	tlsCert := vcapReader.GetInstanceTLSCerts()
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}
@@ -195,9 +196,9 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
-	conf.EventGenerator.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
-	conf.Scheduler.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
+	conf.ScalingEngine.TLSClientCerts = tlsCert
+	conf.EventGenerator.TLSClientCerts = tlsCert
+	conf.Scheduler.TLSClientCerts = tlsCert
 
 	return nil
 }
