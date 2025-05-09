@@ -57,7 +57,9 @@ export METRICSFORWARDER_UAA_SKIP_SSL_VALIDATION="$(yq ".metricsforwarder_uaa_ski
 export METRICSFORWARDER_APPNAME="${METRICSFORWARDER_APPNAME:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
 export METRICSFORWARDER_HEALTH_PASSWORD="$(yq ".metricsforwarder_health_password" /tmp/mtar-secrets.yml)"
 
-export EVENTGENERATOR_INSTANCES="${EVENTGENERATOR_INSTANCES:-1}"
+export EVENTGENERATOR_INSTANCES="${EVENTGENERATOR_INSTANCES:-2}"
+export APISERVER_INSTANCES="${APISERVER_INSTANCES:-2}"
+export METRICSFORWARDER_INSTANCES="${METRICSFORWARDER_INSTANCES:-2}"
 export EVENTGENERATOR_HEALTH_PASSWORD="$(yq ".eventgenerator_health_password" /tmp/mtar-secrets.yml)"
 export EVENTGENERATOR_LOG_CACHE_UAA_CLIENT_ID="$(yq ".eventgenerator_log_cache_uaa_client_id" /tmp/mtar-secrets.yml)"
 export EVENTGENERATOR_LOG_CACHE_UAA_CLIENT_SECRET="$(yq ".eventgenerator_log_cache_uaa_client_secret" /tmp/mtar-secrets.yml)"
@@ -92,7 +94,7 @@ _schema-version: 3.3.0
 modules:
   - name: apiserver
     parameters:
-      instances: 1
+      instances: ${APISERVER_INSTANCES}
       routes:
       - route: ${PUBLICAPISERVER_HOST}.\${default-domain}
       - route: ${SERVICEBROKER_HOST}.\${default-domain}
@@ -115,7 +117,7 @@ modules:
     - name: syslog-client
     - name: database
     parameters:
-      instances: 1
+      instances: ${METRICSFORWARDER_INSTANCES}
       routes:
       - route: ${METRICSFORWARDER_HOST}.\${default-domain}
       - route: ${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
