@@ -70,11 +70,9 @@ lint:
 	golangci-lint run --config='${GOLANGCI_CONF}' ${OPTS}
 
 
-ACCEPTANCE_CONFIG_PATH := ./acceptance_config.json
 .PHONY: acceptance-tests-config
-acceptance-tests-config: ${ACCEPTANCE_CONFIG_PATH}
-${ACCEPTANCE_CONFIG_PATH}:
-	ACCEPTANCE_CONFIG_PATH='${ACCEPTANCE_CONFIG_PATH}' ${CI_DIR}/autoscaler/scripts/acceptance-tests-config.sh
+acceptance-tests-config:
+	ACCEPTANCE_CONFIG_PATH='./acceptance_config.json' ${CI_DIR}/autoscaler/scripts/acceptance-tests-config.sh
 
 
 .PHONY: run-acceptance-tests
