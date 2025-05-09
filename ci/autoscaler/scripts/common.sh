@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 
+# shellcheck disable=SC2154
 # This file is intended to be loaded via the `source`-command.
 
 function step(){
