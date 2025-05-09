@@ -1,17 +1,18 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
 
 set -eu -o pipefail
 script_dir="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 source "${script_dir}/vars.source.sh"
+source "${script_dir}/common.sh"
 
 skip_teardown="${SKIP_TEARDOWN:-false}"
 suites="${SUITES:-"api app broker"}"
 ginkgo_opts="${GINKGO_OPTS:-}"
 nodes="${NODES:-3}"
 
-if [[ ! -d "${bbl_state_path}" ]]
+if [[ ! -d "${BBL_STATE_PATH}" ]]
 then
-	echo "FAILED: Did not find bbl-state folder at ${bbl_state_path}"
+	echo "FAILED: Did not find bbl-state folder at ${BBL_STATE_PATH}"
 	echo "Make sure you have checked out the app-autoscaler-env-bbl-state repository next to the app-autoscaler-release repository to run this target or indicate its location via BBL_STATE_PATH";
 	exit 1;
 fi
@@ -23,7 +24,8 @@ then
 fi
 
 suites_to_run=""
-for suite in $suites; do
+for suite in $suites
+do
 	log "checking suite ${suite}"
 	if [[ -d "${suite}" ]]
 	then
@@ -35,7 +37,8 @@ done
 step "running ${suites_to_run}"
 
 #run suites
-if [ "${suites_to_run}" != "" ]; then
+if [ "${suites_to_run}" != "" ]
+then
 	# shellcheck disable=SC2086
 	SKIP_TEARDOWN="${skip_teardown}" CONFIG="${PWD}/acceptance_config.json" DEBUG='true' ./bin/test -race -nodes="${nodes}" -trace $ginkgo_opts ${suites_to_run}
 else

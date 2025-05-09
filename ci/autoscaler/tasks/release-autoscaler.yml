@@ -1,12 +1,6 @@
 ---
 platform: linux
 
-image_resource:
-  type: registry-image
-  source:
-    repository: ghcr.io/cloudfoundry/app-autoscaler-release-tools
-    tag: main
-
 params:
   # The GCP key to use to configure the generated private.yml
   UPLOADER_KEY:
