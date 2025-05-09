@@ -121,10 +121,10 @@ func (sdb *StoredProcedureSQLDb) ValidateCredentials(ctx context.Context, creds 
 		Scan(&credOptions.InstanceId, &credOptions.BindingId)
 
 	if err != nil {
+		sanitizedCreds := models.Credential{Username: creds.Username, Password: "***"}
 		sdb.logger.Error(
 			"credential-validation-with-stored-function-errored",
-			err, lager.Data{"query": query, "creds": creds, "appId": appId})
-
+			err, lager.Data{"query": query, "creds": sanitizedCreds, "appId": appId})
 		return nil, err
 	}
 
