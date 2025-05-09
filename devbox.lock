@@ -601,6 +601,9 @@
         }
       }
     },
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "resolved": "github:NixOS/nixpkgs/b3582c75c7f21ce0b429898980eddbbf05c68e55?lastModified=1746576598&narHash=sha256-FshoQvr6Aor5SnORVvh%2FZdJ1Sa2U4ZrIMwKBX5k2wu0%3D"
+    },
     "gnumake@4.4": {
       "last_modified": "2025-03-11T15:50:42Z",
       "resolved": "github:NixOS/nixpkgs/b62d2a95c72fb068aecd374a7262b37ed92df82b#gnumake",
@@ -1259,7 +1262,7 @@
     },
     "mysql@10.6.12": {
       "last_modified": "2023-02-24T09:01:09Z",
-      "plugin_version": "0.0.3",
+      "plugin_version": "0.0.4",
       "resolved": "github:NixOS/nixpkgs/7d0ed7f2e5aea07ab22ccb338d27fbe347ed2f11#mysql",
       "source": "devbox-search",
       "version": "10.6.12"
@@ -1439,7 +1442,7 @@
     },
     "python@3.13.2": {
       "last_modified": "2025-03-03T13:00:40Z",
-      "plugin_version": "0.0.3",
+      "plugin_version": "0.0.4",
       "resolved": "github:NixOS/nixpkgs/95eacfb6d1accf8d59a9e570d26d04ad693d2ec3#python313",
       "source": "devbox-search",
       "version": "3.13.2",
