@@ -109,9 +109,6 @@ modules:
       routes:
       - route: ${EVENTGENERATOR_CF_HOST}.\${default-domain}
       - route: ${EVENTGENERATOR_HOST}.\${default-domain}
-		requires:
-			- name: eventgenerator-config
-			- name: database
   - name: metricsforwarder
     requires:
     - name: metricsforwarder-config
