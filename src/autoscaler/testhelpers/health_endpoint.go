@@ -16,5 +16,7 @@ func CheckHealthAuth(t GinkgoTInterface, client *http.Client, url string, userna
 
 	resp, err := client.Do(req)
 	Expect(err).NotTo(HaveOccurred())
+
+	defer resp.Body.Close()
 	Expect(resp.StatusCode).To(Equal(expectedStatus))
 }
