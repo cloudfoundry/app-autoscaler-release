@@ -49,7 +49,7 @@ modules:
             BOOT-INF/classes/dataaggregator.db.changelog.yml \
             BOOT-INF/classes/metricscollector.db.changelog.yml
 
-  - name: publicapiserver
+  - name: apiserver
     type: go
     path: .
     properties:
@@ -58,10 +58,11 @@ modules:
       GOTOOLCHAIN: local
       GOVERSION: go1.GO_MINOR_VERSION
     requires:
-    - name: publicapiserver-config
+    - name: apiserver-config
     - name: broker-catalog
     - name: database
     - name: app-autoscaler-application-logs
+    - name: app-autoscaler-dynatrace
     parameters:
       memory: 1G
       disk-quota: 1G
@@ -80,6 +81,7 @@ modules:
     - name: eventgenerator-config
     - name: database
     - name: app-autoscaler-application-logs
+    - name: app-autoscaler-dynatrace
     parameters:
       memory: 1G
       disk-quota: 1G
@@ -119,11 +121,11 @@ resources:
     service-tags:
     - eventgenerator-config
     path: eventgenerator/default_config.json
-- name: publicapiserver-config
+- name: apiserver-config
   type: org.cloudfoundry.user-provided-service
   parameters:
     service-tags:
-    - publicapiserver-config
+    - apiserver-config
     path: api/default_config.json
 - name: broker-catalog
   type: org.cloudfoundry.user-provided-service

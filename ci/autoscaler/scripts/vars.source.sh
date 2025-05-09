@@ -1,47 +1,50 @@
-#!/usr/bin/env bash
-# NOTE: to turn on debug use DEBUG=true
+#! /usr/bin/env bash
+
+# 🪧 NOTE: to turn on debug use DEBUG=true
 # shellcheck disable=SC2155,SC2034
 #
 
 if [ -z "${BASH_SOURCE[0]}" ]; then
-  echo  "### Source this from inside a script only! "
-  echo  "### ======================================="
-  echo
-  return
+	echo  "### Source this from inside a script only! "
+	echo  "### ======================================="
+	echo
+	return
 fi
 
 write_error_state() {
-  echo "Error failed execution of \"$1\" at line $2"
-  local frame=0
-  while true ; do
-    caller $frame && break
-    ((frame++));
-  done
+	echo "Error failed execution of \"$1\" at line $2"
+	local frame=0
+	while true ; do
+		caller $frame && break
+		((frame++));
+	done
 }
 
 trap 'write_error_state "$BASH_COMMAND" "$LINENO"' ERR
 
 debug=${DEBUG:-}
 if [ -n "${debug}" ] && [ ! "${debug}" = "false" ]; then
-  function debug(){ echo "  -> $1"; }
+	function debug(){ echo "  -> $1"; }
 else
-  function debug(){ :; }
+	function debug(){ :; }
 fi
 
 function warn(){
-  echo " - WARN: $1"
+	echo " - WARN: $1"
 }
 
 function log(){
-  echo " - $1"
-}
-
-function step(){
-  echo "# $1"
+	echo " - $1"
 }
 
 script_dir="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir=$(realpath -e "${script_dir}/../../..")
+
+# This environment-variable is used as the target-name for concourse that is used to communicate
+# with the concourse-instance that manages the os-pipelines of this repository under
+# <concourse.app-runtime-interfaces.ci.cloudfoundry.org>
+CONCOURSE_AAS_RELEASE_TARGET="${CONCOURSE_AAS_RELEASE_TARGET:-app-autoscaler-release}"
+debug "CONCOURSE_AAS_RELEASE_TARGET: ${CONCOURSE_AAS_RELEASE_TARGET}"
 
 export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
 debug "PR_NUMBER: '${PR_NUMBER}'"
@@ -78,10 +81,12 @@ debug "SYSTEM_DOMAIN: ${SYSTEM_DOMAIN}"
 system_domain="${SYSTEM_DOMAIN}"
 
 BBL_STATE_PATH="${BBL_STATE_PATH:-$( realpath -e "${root_dir}/../app-autoscaler-env-bbl-state/bbl-state" 2> /dev/null || echo "${root_dir}/../bbl-state/bbl-state" )}"
-BBL_STATE_PATH="$(realpath -e "${BBL_STATE_PATH}" || echo "ERR_invalid_state_path" )"
+# We want to print out the name of the variable literally and marked as shell-variable, therefore:
+# shellcheck disable=SC2016
+BBL_STATE_PATH="$(realpath --canonicalize-existing "${BBL_STATE_PATH}" \
+									|| echo 'ERR_invalid_state_path, please set ${BBL_STATE_PATH}' )"
 export BBL_STATE_PATH
-debug  "BBL_STATE_PATH: ${BBL_STATE_PATH}"
-bbl_state_path="${BBL_STATE_PATH}"
+debug "BBL_STATE_PATH: ${BBL_STATE_PATH}"
 
 AUTOSCALER_DIR="${AUTOSCALER_DIR:-${root_dir}}"
 export AUTOSCALER_DIR="$(realpath -e "${AUTOSCALER_DIR}" )"

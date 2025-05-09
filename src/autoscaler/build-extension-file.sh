@@ -90,12 +90,16 @@ version: 1.0.0
 _schema-version: 3.3.0
 
 modules:
-  - name: publicapiserver
+  - name: apiserver
     parameters:
       instances: 1
       routes:
       - route: ${PUBLICAPISERVER_HOST}.\${default-domain}
       - route: ${SERVICEBROKER_HOST}.\${default-domain}
+    requires:
+      - name: apiserver-config
+      - name: broker-catalog
+      - name: database
   - name: eventgenerator
     requires:
     - name: eventgenerator-config
@@ -105,6 +109,9 @@ modules:
       routes:
       - route: ${EVENTGENERATOR_CF_HOST}.\${default-domain}
       - route: ${EVENTGENERATOR_HOST}.\${default-domain}
+		requires:
+			- name: eventgenerator-config
+			- name: database
   - name: metricsforwarder
     requires:
     - name: metricsforwarder-config
@@ -147,10 +154,10 @@ resources:
         scalingEngine:
           scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
 
-- name: publicapiserver-config
+- name: apiserver-config
   parameters:
     config:
-      publicapiserver-config:
+      apiserver-config:
         scaling_rules:
           cpu:
             upper_threshold: $CPU_LOWER_THRESHOLD

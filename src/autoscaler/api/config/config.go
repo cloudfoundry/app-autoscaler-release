@@ -164,7 +164,7 @@ func defaultConfig() Config {
 	}
 }
 func loadPublicApiServerConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	data, err := vcapReader.GetServiceCredentialContent("publicapiserver-config", "publicapiserver-config")
+	data, err := vcapReader.GetServiceCredentialContent("apiserver-config", "apiserver-config")
 	if err != nil {
 		return fmt.Errorf("%w: %v", ErrPublicApiServerConfigNotFound, err)
 	}
