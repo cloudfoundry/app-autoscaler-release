@@ -493,7 +493,7 @@ jobs:
       - acceptance-log-cache-syslog-cf
       trigger: true
     - get: previous-stable-release
-  - task: deploy-previous-stable-release # 🚧 To-do: Check if that still works!
+  - task: deploy-previous-stable-release
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/deploy-previous-autoscaler.yml
     params:
