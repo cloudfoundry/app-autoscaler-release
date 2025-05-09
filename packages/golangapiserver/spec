@@ -13,6 +13,7 @@ files:
 - autoscaler/api/* # gosub
 - autoscaler/api/apis/* # gosub
 - autoscaler/api/apis/scalinghistory/* # gosub
+- autoscaler/api/binding_requests/* # gosub
 - autoscaler/api/broker/* # gosub
 - autoscaler/api/brokerserver/* # gosub
 - autoscaler/api/cmd/api/* # gosub
