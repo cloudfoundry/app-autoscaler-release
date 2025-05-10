@@ -31,7 +31,7 @@
     "mysql":                                "10.6.12",
     "oha":                                  "1.8.0",
     "postgresql":                           "latest",
-    "python":                               "3.13.2",
+    "python":                               "3.13.3",
     "redocly":                              "1.34.0",
     "ripgrep":                              "latest",
     "ruby":                                 "3.4.2",
