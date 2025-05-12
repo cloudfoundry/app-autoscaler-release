@@ -317,38 +317,37 @@ func getVcapServices(conf config.Config) (result string) {
 		dbType = "mysql"
 	}
 
-	vcapServices := map[string]interface{}{
-		"user-provided": []map[string]interface{}{
+	vcapServices := map[string]any{
+		"user-provided": []map[string]any{
 			{
 				"name": "eventgenerator-config",
 				"tags": []string{"eventgenerator-config"},
-				"credentials": map[string]interface{}{
+				"credentials": map[string]any{
 					"eventgenerator-config": configJson,
 				},
 			},
-			// TODO: Remove this as we are going to connect using log-cache uaa client
 			{
 				"name": "logcache-client",
-				"credentials": map[string]interface{}{
+				"tags": []string{"logcache-client"},
+				"credentials": map[string]any{
 					"client_key":  strings.ReplaceAll(string(logCacheClientKey), "\n", "\\n"),
 					"client_cert": strings.ReplaceAll(string(logCacheClientCert), "\n", "\\n"),
 					"server_ca":   strings.ReplaceAll(string(logCacheClientCA), "\n", "\\n"),
 					"uri":         mockLogCache.URL(),
 				},
-				"tags": []string{"logcache-client"},
 			},
 		},
-		"autoscaler": []map[string]interface{}{
+		"autoscaler": []map[string]any{
 			{
 				"name": "some-service",
-				"credentials": map[string]interface{}{
+				"tags": []string{"policy_db", "app_metrics_db", dbType},
+				"credentials": map[string]any{
 					"uri":         dbURL,
 					"client_cert": strings.ReplaceAll(string(dbClientCert), "\n", "\\n"),
 					"client_key":  strings.ReplaceAll(string(dbClientKey), "\n", "\\n"),
 					"server_ca":   strings.ReplaceAll(string(dbClientCA), "\n", "\\n"),
 				},
 				"syslog_drain_url": "",
-				"tags":             []string{"policy_db", "app_metrics_db", dbType},
 			},
 		},
 	}

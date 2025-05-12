@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -103,8 +102,9 @@ type Config struct {
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	conf := defaultConfig()
 
-	if err := loadYamlFile(filepath, &conf); err != nil {
+	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
 		return nil, err
+
 	}
 
 	if err := loadVcapConfig(&conf, vcapReader); err != nil {
@@ -163,26 +163,6 @@ func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurat
 
 func configureInstanceIndex(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	conf.Pool.InstanceIndex = vcapReader.GetInstanceIndex()
-	return nil
-}
-
-func loadYamlFile(filepath string, conf *Config) error {
-	if filepath == "" {
-		return nil
-	}
-	file, err := os.Open(filepath)
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "failed to open config file '%s': %s\n", filepath, err)
-		return ErrReadYaml
-	}
-	defer file.Close()
-
-	dec := yaml.NewDecoder(file)
-	dec.KnownFields(true)
-	if err := dec.Decode(conf); err != nil {
-		return fmt.Errorf("%w: %v", ErrReadYaml, err)
-	}
-
 	return nil
 }
 
