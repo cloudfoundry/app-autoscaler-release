@@ -29,14 +29,11 @@ var _ = Describe("Eventgenerator", func() {
 		healthURL   *url.URL
 		cfServerURL *url.URL
 
-		vcapPort int
-		err      error
+		err error
 	)
 
 	BeforeEach(func() {
 		runner = NewEventGeneratorRunner()
-
-		vcapPort = 8090 + GinkgoParallelProcess()
 
 		httpClientForEventGenerator = testhelpers.NewEventGeneratorClient()
 		httpClientForHealth = &http.Client{}
