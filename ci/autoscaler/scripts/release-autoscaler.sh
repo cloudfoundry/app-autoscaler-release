@@ -40,10 +40,10 @@ function create_release() {
 
    [ "${CI}" = "true" ] && git commit -S -m "Updated release version to ${version} in golangapiserver"
 
-		bosh create-release \
-          ${build_opts} \
-          --version "${version}" \
-          --tarball="${build_path}/artifacts/${release_file}"
+	 make bosh-release \
+			AUTOSCALER_BOSH_BUILD_OPTS="${build_opts}"
+			AUTOSCALER_BOSH_VERSION="${version}" \
+			AUTOSCALER_BOSH_TARBALL_PATH="${build_path}/artifacts/${release_file}"
  }
 
 function create_mtar() {
@@ -141,7 +141,7 @@ pushd "${autoscaler_dir}" > /dev/null
     create_release "${VERSION}" "${build_path}" "${RELEASE_TGZ}"
     create_tests "${VERSION}" "${build_path}"
     create_mtar "${VERSION}" "${build_path}"
-    exit 0
+    exit 1
     [ "${CI}" = "true" ] && commit_release
 
     sha256sum "${build_path}/artifacts/"* > "${build_path}/artifacts/files.sum.sha256"

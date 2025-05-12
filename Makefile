@@ -98,6 +98,10 @@ build_all: build_programs build_tests
 build_programs: autoscaler.build db.java-libs scheduler.build build-test-app
 build_tests:acceptance.build_tests autoscaler.build_tests changelog.build_tests changeloglockcleaner.build_tests
 
+# This target is used in the release-autoscaler job (ignoring the test compilation).
+.PHONY: build_autoscaler
+build_autoscaler: autoscaler.build db.java-libs scheduler.build
+
 .PHONY: acceptance.build_tests
 acceptance.build_tests:
 	@make --directory='${acceptance-dir}' build_tests
@@ -300,14 +304,19 @@ spec-test:
 	bundle exec rspec
 
 .PHONY: bosh-release
-bosh-release: build/autoscaler-test.tgz
+bosh-release: build/autoscaler-test.tgz_CI_${CI}
 # 🚸 In the next line, the order of the dependencies is important. Generated code needs to be
 # already there for `go-mod-tidy` to work. See additional comment for that target in
 # ./src/autoscaler/Makefile.
-build/autoscaler-test.tgz: build_all go-mod-tidy go-mod-vendor
+build/autoscaler-test.tgz__CI_false: build_all go-mod-tidy go-mod-vendor
 	@echo " - building bosh release into build/autoscaler-test.tgz"
 	@mkdir -p build
 	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
+
+
+build/autoscaler-test.tgz_CI_true: build_autoscaler go-mod-tidy go-mod-vendor
+	@echo " - building bosh release into ${AUTOSCALER_BOSH_TARBALL_PATH}"
+	@bosh create-release ${AUTOSCALER_BOSH_BUILD_OPTS} --version ${AUTOSCALER_BOSH_VERSION} --tarball=${AUTOSCALER_BOSH_TARBALL_PATH}
 
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
 generate-fakes: autoscaler.generate-fakes test-app.generate-fakes

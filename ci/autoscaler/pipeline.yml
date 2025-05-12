@@ -5,7 +5,7 @@ anchors:
     image: "app-autoscaler-tools"
     file: "ci/ci/autoscaler/tasks/make/make.yaml"
     params:
-      TARGETS: "build_all"
+      TARGETS: "build_autoscaler"
     timeout: "25m"
 
   deploy-autoscaler-task: &deploy-autoscaler-task
@@ -556,26 +556,26 @@ jobs:
       AUTOSCALER_CI_BOT_EMAIL: ApplicationAutoscaler@sap.com
       AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE: ((autoscaler-ci-bot-signing-key-private))
       AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC: ((autoscaler-ci-bot-signing-key-public))
-  - put: release-bucket
-    params:
-      file: "build/artifacts/app-autoscaler-v*.tgz"
-  - put: acceptance-tests-bucket
-    params:
-      file: "build/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
-  - put: mtar-bucket
-    params:
-      file: "build/artifacts/app-autoscaler-release-v*.mtar"
-  - put: gh-release
-    params:
-      name: build/name
-      tag: build/tag
-      body: build/changelog.md
-      globs: [build/artifacts/*]
-      commitish: app-autoscaler-release/.git/ref
-  - put: app-autoscaler-release
-    params:
-      rebase: true
-      repository: app-autoscaler-release
+#  - put: release-bucket
+#    params:
+#      file: "build/artifacts/app-autoscaler-v*.tgz"
+#  - put: acceptance-tests-bucket
+#    params:
+#      file: "build/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
+#  - put: mtar-bucket
+#    params:
+#      file: "build/artifacts/app-autoscaler-release-v*.mtar"
+#  - put: gh-release
+#    params:
+#      name: build/name
+#      tag: build/tag
+#      body: build/changelog.md
+#      globs: [build/artifacts/*]
+#      commitish: app-autoscaler-release/.git/ref
+#  - put: app-autoscaler-release
+#    params:
+#      rebase: true
+#      repository: app-autoscaler-release
 
 - name: cleanup-autoscaler-deployments
   public: true
