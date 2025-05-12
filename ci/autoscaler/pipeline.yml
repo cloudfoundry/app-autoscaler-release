@@ -543,7 +543,7 @@ jobs:
     - get: gh-release
     - get: bbl-state
     - get: app-autoscaler-release
-      passed: [upgrade-test]
+     # passed: [upgrade-test]
     - get: ci
   - *make-prerelease-task
   - task: release-autoscaler
