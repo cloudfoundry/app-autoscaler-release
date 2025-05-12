@@ -40,7 +40,10 @@ function create_release() {
 
    [ "${CI}" = "true" ] && git commit -S -m "Updated release version to ${version} in golangapiserver"
 
-		make bosh-release
+		bosh create-release \
+          ${build_opts} \
+          --version "${version}" \
+          --tarball="${build_path}/artifacts/${release_file}"
  }
 
 function create_mtar() {
