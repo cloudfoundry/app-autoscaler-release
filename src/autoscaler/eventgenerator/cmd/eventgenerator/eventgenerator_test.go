@@ -1,19 +1,13 @@
 package main_test
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -140,7 +134,6 @@ var _ = Describe("Eventgenerator", func() {
 	})
 
 	When("an interrupt is sent", func() {
-
 		It("should stop", func() {
 			runner.Session.Interrupt()
 			Eventually(runner.Session, 5).Should(Exit(0))
@@ -230,130 +223,4 @@ var _ = Describe("Eventgenerator", func() {
 			})
 		})
 	})
-
-	// fix logcache uaa client certs
-	XWhen("running CF server", func() {
-		var (
-			cfInstanceKeyFile  string
-			cfInstanceCertFile string
-		)
-
-		BeforeEach(func() {
-			runner = NewEventGeneratorCFRunner()
-			rsaPrivateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-			Expect(err).NotTo(HaveOccurred())
-
-			cfInstanceCert, err := testhelpers.GenerateClientCertWithPrivateKey("org-guid", "space-guid", rsaPrivateKey)
-			Expect(err).NotTo(HaveOccurred())
-
-			certTmpDir := os.TempDir()
-
-			cfInstanceCertFile, err := configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.crt", string(cfInstanceCert))
-			Expect(err).NotTo(HaveOccurred())
-			os.Setenv("CF_INSTANCE_CERT", cfInstanceCertFile)
-
-			cfInstanceKey := testhelpers.GenerateClientKeyWithPrivateKey(rsaPrivateKey)
-			cfInstanceKeyFile, err = configutil.MaterializeContentInFile(certTmpDir, "eventgenerator.key", string(cfInstanceKey))
-			Expect(err).NotTo(HaveOccurred())
-			os.Setenv("CF_INSTANCE_KEY", cfInstanceKeyFile)
-
-			os.Setenv("VCAP_APPLICATION", `{ "space_id": "space-guid", "organization_id": "org-guid" }`)
-			conf.Evaluator = nil
-			conf.Aggregator = nil
-			conf.CircuitBreaker = nil
-			conf.HttpClientTimeout = nil
-			os.Setenv("VCAP_SERVICES", getVcapServices(conf))
-			os.Setenv("PORT", fmt.Sprintf("%d", vcapPort))
-		})
-
-		AfterEach(func() {
-			runner.Interrupt()
-			Eventually(runner.Session, 5).Should(Exit(0))
-
-			os.Remove(cfInstanceKeyFile)
-			os.Remove(cfInstanceCertFile)
-
-			os.Unsetenv("CF_INSTANCE_KEY")
-			os.Unsetenv("CF_INSTANCE_CERT")
-			os.Unsetenv("VCAP_APPLICATION")
-			os.Unsetenv("VCAP_SERVICES")
-			os.Unsetenv("PORT")
-		})
-
-		It("Starts successfully, retrives metrics and generates events", func() {
-			Consistently(runner.Session).ShouldNot(Exit())
-			// refactor mocklogcache to restart on before each to avoid shared resource
-			// Eventually(func() bool { return mockLogCache.ReadRequestsCount() >= 1 }, 5*time.Second).Should(BeTrue())
-			// Eventually(func() bool { return len(mockScalingEngine.ReceivedRequests()) >= 1 }, time.Duration(2*breachDurationSecs)*time.Second).Should(BeTrue())
-		})
-	})
 })
-
-func getVcapServices(conf config.Config) (result string) {
-	var dbType string
-
-	configJson, err := configutil.ToJSON(conf)
-	Expect(err).NotTo(HaveOccurred())
-
-	dbClientCert, err := os.ReadFile("../../../../../test-certs/postgres.crt")
-	Expect(err).NotTo(HaveOccurred())
-	dbClientKey, err := os.ReadFile("../../../../../test-certs/postgres.key")
-	Expect(err).NotTo(HaveOccurred())
-	dbClientCA, err := os.ReadFile("../../../../../test-certs/autoscaler-ca.crt")
-	Expect(err).NotTo(HaveOccurred())
-
-	logCacheClientCert, err := os.ReadFile("../../../../../test-certs/log-cache.crt")
-	Expect(err).NotTo(HaveOccurred())
-	logCacheClientKey, err := os.ReadFile("../../../../../test-certs/log-cache.key")
-	Expect(err).NotTo(HaveOccurred())
-	logCacheClientCA, err := os.ReadFile("../../../../../test-certs/autoscaler-ca.crt")
-	Expect(err).NotTo(HaveOccurred())
-
-	dbURL := os.Getenv("DBURL")
-	Expect(dbURL).NotTo(BeEmpty())
-	if strings.Contains(dbURL, "postgres") {
-		dbType = "postgres"
-	} else {
-		dbType = "mysql"
-	}
-
-	vcapServices := map[string]any{
-		"user-provided": []map[string]any{
-			{
-				"name": "eventgenerator-config",
-				"tags": []string{"eventgenerator-config"},
-				"credentials": map[string]any{
-					"eventgenerator-config": configJson,
-				},
-			},
-			{
-				"name": "logcache-client",
-				"tags": []string{"logcache-client"},
-				"credentials": map[string]any{
-					"client_key":  strings.ReplaceAll(string(logCacheClientKey), "\n", "\\n"),
-					"client_cert": strings.ReplaceAll(string(logCacheClientCert), "\n", "\\n"),
-					"server_ca":   strings.ReplaceAll(string(logCacheClientCA), "\n", "\\n"),
-					"uri":         mockLogCache.URL(),
-				},
-			},
-		},
-		"autoscaler": []map[string]any{
-			{
-				"name": "some-service",
-				"tags": []string{"policy_db", "app_metrics_db", dbType},
-				"credentials": map[string]any{
-					"uri":         dbURL,
-					"client_cert": strings.ReplaceAll(string(dbClientCert), "\n", "\\n"),
-					"client_key":  strings.ReplaceAll(string(dbClientKey), "\n", "\\n"),
-					"server_ca":   strings.ReplaceAll(string(dbClientCA), "\n", "\\n"),
-				},
-				"syslog_drain_url": "",
-			},
-		},
-	}
-
-	vcapServicesJson, err := json.Marshal(vcapServices)
-	Expect(err).NotTo(HaveOccurred())
-
-	return string(vcapServicesJson)
-}

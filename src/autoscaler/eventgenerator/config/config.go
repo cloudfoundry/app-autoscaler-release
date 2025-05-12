@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -88,7 +89,7 @@ type Config struct {
 	CFServer                  helpers.ServerConfig         `yaml:"cf_server" json:"cf_server"`
 	Pool                      *PoolConfig                  `yaml:"pool" json:"pool"`
 	Health                    helpers.HealthConfig         `yaml:"health" json:"health"`
-	Db                        map[string]db.DatabaseConfig `yaml:"db"`
+	Db                        map[string]db.DatabaseConfig `yaml:"db" json:"db"`
 	Aggregator                *AggregatorConfig            `yaml:"aggregator" json:"aggregator,omitempty"`
 	Evaluator                 *EvaluatorConfig             `yaml:"evaluator" json:"evaluator,omitempty"`
 	ScalingEngine             ScalingEngineConfig          `yaml:"scalingEngine" json:"scalingEngine"`
@@ -112,14 +113,6 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 	}
 
 	return &conf, nil
-}
-
-func loadEventgeneratorConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	data, err := vcapReader.GetServiceCredentialContent("eventgenerator-config", "eventgenerator-config")
-	if err != nil {
-		return fmt.Errorf("%w: %v", ErrEventgeneratorConfigNotFound, err)
-	}
-	return yaml.Unmarshal(data, conf)
 }
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
@@ -152,6 +145,21 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 
 	return nil
+}
+
+func loadEventgeneratorConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	var raw string
+	data, err := vcapReader.GetServiceCredentialContent("eventgenerator-config", "eventgenerator-config")
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrEventgeneratorConfigNotFound, err)
+	}
+
+	// removes the first and last double quotes if they exist
+	if json.Unmarshal(data, &raw) == nil {
+		return yaml.Unmarshal([]byte(raw), conf)
+	} else {
+		return yaml.Unmarshal(data, conf)
+	}
 }
 
 func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
