@@ -169,13 +169,13 @@ resources:
     regexp: releases/app-autoscaler-acceptance-tests-v(.*).tgz
     initial_path: releases/app-autoscaler-acceptance-tests-v0.0.1.tgz
 
-- name: mtar-bucket
-  type: gcs-resource
-  source:
-    bucket: app-autoscaler-releases
-    json_key: ((autoscaler_releases_uploader_key))
-    regexp: releases/app-autoscaler-v(.*).mtar
-    initial_path: releases/app-autoscaler-v0.0.1.mtar
+#- name: mtar-bucket
+#  type: gcs-resource
+#  source:
+#    bucket: app-autoscaler-releases
+#    json_key: ((autoscaler_releases_uploader_key))
+#    regexp: releases/app-autoscaler-v(.*).mtar
+#    initial_path: releases/app-autoscaler-v0.0.1.mtar
 
 - name: golang-release
   type: git
