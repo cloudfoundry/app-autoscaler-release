@@ -243,15 +243,6 @@ func FromJSON(data []byte) (*Config, error) {
 	return result, nil
 }
 
-func (c *Config) ToJSON() (string, error) {
-	b, err := json.Marshal(c)
-
-	if err != nil {
-		err = fmt.Errorf("failed to marshal config to json: %s", err)
-		return "", err
-	}
-	return string(b), nil
-}
 func (c *Config) Validate() error {
 	err := c.CF.Validate()
 	if err != nil {

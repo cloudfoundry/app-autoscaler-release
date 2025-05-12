@@ -292,7 +292,7 @@ var _ = Describe("Eventgenerator", func() {
 func getVcapServices(conf config.Config) (result string) {
 	var dbType string
 
-	configJson, err := conf.ToJSON()
+	configJson, err := configutil.ToJSON(conf)
 	Expect(err).NotTo(HaveOccurred())
 
 	dbClientCert, err := os.ReadFile("../../../../../test-certs/postgres.crt")

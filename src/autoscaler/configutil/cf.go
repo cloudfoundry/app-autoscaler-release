@@ -313,3 +313,11 @@ func (vc *VCAPConfiguration) ConfigureDatabases(confDb *map[string]db.DatabaseCo
 
 	return nil
 }
+
+func ToJSON(v any) (string, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal to json: %w", err)
+	}
+	return string(b), nil
+}

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -338,14 +337,4 @@ func (c *Config) validatePool() error {
 
 func (c *Config) validateHealth() error {
 	return c.Health.Validate()
-}
-
-func (c *Config) ToJSON() (string, error) {
-	b, err := json.Marshal(c)
-
-	if err != nil {
-		err = fmt.Errorf("failed to marshal config to json: %s", err)
-		return "", err
-	}
-	return string(b), nil
 }

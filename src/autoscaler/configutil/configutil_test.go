@@ -15,6 +15,26 @@ import (
 )
 
 var _ = Describe("Configutil", func() {
+	var _ = Describe("ToJSON", func() {
+		type SampleConfig struct {
+			Name string `json:"name"`
+			Age  int    `json:"age"`
+		}
+
+		It("marshals struct to JSON", func() {
+			s := SampleConfig{Name: "Alice", Age: 30}
+			result, err := ToJSON(s)
+			Expect(err).To(BeNil())
+			Expect(result).To(MatchJSON(`{"name":"Alice","age":30}`))
+		})
+
+		It("fails to marshal unsupported type", func() {
+			ch := make(chan int)
+			_, err := ToJSON(ch)
+			Expect(err).To(HaveOccurred())
+		})
+	})
+
 	Describe("VCAPConfiguration", func() {
 		var (
 			vcapConfiguration         *VCAPConfiguration

@@ -31,29 +31,6 @@ var _ = Describe("Config", func() {
 		mockVCAPConfigurationReader = &fakes.FakeVCAPConfigurationReader{}
 	})
 
-	Describe("ToJSON and FromJSON", func() {
-		BeforeEach(func() {
-			configBytes = []byte(testhelpers.LoadFile("valid_config.yml"))
-		})
-
-		JustBeforeEach(func() {
-			configFile = testhelpers.BytesToFile(configBytes)
-			conf, err = LoadConfig(configFile, mockVCAPConfigurationReader)
-		})
-
-		It("should return the config in json format", func() {
-			Expect(err).NotTo(HaveOccurred())
-
-			json, err := conf.ToJSON()
-			Expect(err).NotTo(HaveOccurred())
-
-			unmarshalConfig, err := FromJSON([]byte(json))
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(unmarshalConfig).To(Equal(conf))
-		})
-	})
-
 	Describe("Load Config", func() {
 		When("runnning in a cf container", func() {
 			var expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
