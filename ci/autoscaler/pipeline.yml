@@ -5,7 +5,7 @@ anchors:
     image: "app-autoscaler-tools"
     file: "ci/ci/autoscaler/tasks/make/make.yaml"
     params:
-      TARGETS: "build_autoscaler"
+      TARGETS: "build_all"
     timeout: "25m"
 
   deploy-autoscaler-task: &deploy-autoscaler-task
