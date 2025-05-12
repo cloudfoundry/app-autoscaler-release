@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ErrReadYaml                     = errors.New("failed to read config file")
+	ErrReadYaml                     = helpers.ErrReadYaml
 	ErrReadJson                     = errors.New("failed to read vcap_services json")
 	ErrEventgeneratorConfigNotFound = errors.New("eventgenerator config service not found")
 )
