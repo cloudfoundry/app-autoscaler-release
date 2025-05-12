@@ -105,7 +105,6 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 
 	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
 		return nil, err
-
 	}
 
 	if err := loadVcapConfig(&conf, vcapReader); err != nil {
