@@ -46,7 +46,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg m
 
 # install golang
 # renovate: datasource=golang-version depName=golang
-ARG GO_VERSION=1.24.2
+ARG GO_VERSION=1.24.3
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
@@ -70,7 +70,7 @@ RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_V
 
 # Install bbl
 # renovate: datasource=github-releases depName=bosh-bootloader lookupName=cloudfoundry/bosh-bootloader
-ARG BBL_VERSION=v9.0.33
+ARG BBL_VERSION=v9.0.34
 RUN wget -q https://github.com/cloudfoundry/bosh-bootloader/releases/download/${BBL_VERSION}/bbl-${BBL_VERSION}_linux_amd64 && \
   mv bbl-* /usr/local/bin/bbl &&\
   chmod +x /usr/local/bin/bbl &&\
@@ -99,7 +99,7 @@ RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-li
 
 # install yq
 # renovate: datasource=github-releases depName=yq lookupName=mikefarah/yq
-ARG YQ_VERSION=v4.45.1
+ARG YQ_VERSION=v4.45.4
 RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 && \
     chmod a+x /usr/local/bin/yq && \
     yq --version

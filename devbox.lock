@@ -193,51 +193,51 @@
         }
       }
     },
-    "cloudfoundry-cli@8.12.0": {
-      "last_modified": "2025-04-03T14:08:01Z",
-      "resolved": "github:NixOS/nixpkgs/2bfc080955153be0be56724be6fa5477b4eefabb#cloudfoundry-cli",
+    "cloudfoundry-cli@8.13.0": {
+      "last_modified": "2025-05-06T08:06:31Z",
+      "resolved": "github:NixOS/nixpkgs/1cb1c02a6b1b7cf67e3d7731cbbf327a53da9679#cloudfoundry-cli",
       "source": "devbox-search",
-      "version": "8.12.0",
+      "version": "8.13.0",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/jlfzhrrzcr1624gkc348p8i1law8mkxz-cloudfoundry-cli-8.12.0",
+              "path": "/nix/store/2b19a9sjyj90i6j76rirg4g72izlqrbh-cloudfoundry-cli-8.13.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/jlfzhrrzcr1624gkc348p8i1law8mkxz-cloudfoundry-cli-8.12.0"
+          "store_path": "/nix/store/2b19a9sjyj90i6j76rirg4g72izlqrbh-cloudfoundry-cli-8.13.0"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/f50v33dhhlfg9x6hyyy4r328cjjj5cyy-cloudfoundry-cli-8.12.0",
+              "path": "/nix/store/9ppqhpmapsh501hi9faiv7lcsa097gdv-cloudfoundry-cli-8.13.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/f50v33dhhlfg9x6hyyy4r328cjjj5cyy-cloudfoundry-cli-8.12.0"
+          "store_path": "/nix/store/9ppqhpmapsh501hi9faiv7lcsa097gdv-cloudfoundry-cli-8.13.0"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/2xf3lwlycj8hvyhjb9fhwlfgk01bhlqv-cloudfoundry-cli-8.12.0",
+              "path": "/nix/store/j1iy0qi0hdjijnr4mjv6jrmm98hdpald-cloudfoundry-cli-8.13.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/2xf3lwlycj8hvyhjb9fhwlfgk01bhlqv-cloudfoundry-cli-8.12.0"
+          "store_path": "/nix/store/j1iy0qi0hdjijnr4mjv6jrmm98hdpald-cloudfoundry-cli-8.13.0"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/hcqf0gbg0q08w0hxxcldqm23wpwy9w9b-cloudfoundry-cli-8.12.0",
+              "path": "/nix/store/r30x62l8ibdiwy6ydi7bg6wmnz4crg5i-cloudfoundry-cli-8.13.0",
               "default": true
             }
           ],
-          "store_path": "/nix/store/hcqf0gbg0q08w0hxxcldqm23wpwy9w9b-cloudfoundry-cli-8.12.0"
+          "store_path": "/nix/store/r30x62l8ibdiwy6ydi7bg6wmnz4crg5i-cloudfoundry-cli-8.13.0"
         }
       }
     },
@@ -1465,108 +1465,88 @@
         }
       }
     },
-    "python@3.13.2": {
-      "last_modified": "2025-03-03T13:00:40Z",
+    "python@3.13.3": {
+      "last_modified": "2025-05-06T08:06:31Z",
       "plugin_version": "0.0.4",
-      "resolved": "github:NixOS/nixpkgs/95eacfb6d1accf8d59a9e570d26d04ad693d2ec3#python313",
+      "resolved": "github:NixOS/nixpkgs/1cb1c02a6b1b7cf67e3d7731cbbf327a53da9679#python313",
       "source": "devbox-search",
-      "version": "3.13.2",
+      "version": "3.13.3",
       "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/c8k24sfwckindjhdxak6z3dhn8w4anx2-python3-3.13.2",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/c8k24sfwckindjhdxak6z3dhn8w4anx2-python3-3.13.2"
-        },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/jsqky488530ax8hdaz5ckldxq9y6qr3k-python3-3.13.2",
+              "path": "/nix/store/lay2ax4czpnh2rb38l1z7gm0mh1cidac-python3-3.13.3",
               "default": true
             },
             {
               "name": "debug",
-              "path": "/nix/store/fwwjmw2yddxxm6aj51r16v0ffp77zvk1-python3-3.13.2-debug"
+              "path": "/nix/store/fy6alcbq7vypldhw13m3sgczby5ipdh4-python3-3.13.3-debug"
             }
           ],
-          "store_path": "/nix/store/jsqky488530ax8hdaz5ckldxq9y6qr3k-python3-3.13.2"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/m2bvzkwhj5b8692388dc0nim945681i0-python3-3.13.2",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/m2bvzkwhj5b8692388dc0nim945681i0-python3-3.13.2"
+          "store_path": "/nix/store/lay2ax4czpnh2rb38l1z7gm0mh1cidac-python3-3.13.3"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/1rp7i946hi7fa2wwx2f66w9jsqjh4n08-python3-3.13.2",
+              "path": "/nix/store/aicda9v5hprnbik4rwi4ajfv4ab0r5hk-python3-3.13.3",
               "default": true
             },
             {
               "name": "debug",
-              "path": "/nix/store/y0vrby8n95x50xyvg81wv7rysh2lxz06-python3-3.13.2-debug"
+              "path": "/nix/store/p39bw5qljcd4jq2p262s58sf54dbxhxr-python3-3.13.3-debug"
             }
           ],
-          "store_path": "/nix/store/1rp7i946hi7fa2wwx2f66w9jsqjh4n08-python3-3.13.2"
+          "store_path": "/nix/store/aicda9v5hprnbik4rwi4ajfv4ab0r5hk-python3-3.13.3"
         }
       }
     },
-    "redocly@1.34.0": {
-      "last_modified": "2025-04-08T07:10:31Z",
-      "resolved": "github:NixOS/nixpkgs/b2b0718004cc9a5bca610326de0a82e6ea75920b#redocly",
+    "redocly@1.34.2": {
+      "last_modified": "2025-05-06T08:06:31Z",
+      "resolved": "github:NixOS/nixpkgs/1cb1c02a6b1b7cf67e3d7731cbbf327a53da9679#redocly",
       "source": "devbox-search",
-      "version": "1.34.0",
+      "version": "1.34.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/his7h191fwxmzv279rcs3cb8vz77dbpl-redocly-1.34.0",
+              "path": "/nix/store/y7kxjv8l7aiaa5acl4wzlxxrxy3w00z1-redocly-1.34.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/his7h191fwxmzv279rcs3cb8vz77dbpl-redocly-1.34.0"
+          "store_path": "/nix/store/y7kxjv8l7aiaa5acl4wzlxxrxy3w00z1-redocly-1.34.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/1py4fr824zk90041ci8h328q453lad2c-redocly-1.34.0",
+              "path": "/nix/store/9pga83f47h4382fwlq39mjml5qbanafp-redocly-1.34.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/1py4fr824zk90041ci8h328q453lad2c-redocly-1.34.0"
+          "store_path": "/nix/store/9pga83f47h4382fwlq39mjml5qbanafp-redocly-1.34.2"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/57qgh22w6a71iiszaywzyc21rlhbg7yc-redocly-1.34.0",
+              "path": "/nix/store/cjzg2v54pc83gfi5lkg45z976b7lldln-redocly-1.34.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/57qgh22w6a71iiszaywzyc21rlhbg7yc-redocly-1.34.0"
+          "store_path": "/nix/store/cjzg2v54pc83gfi5lkg45z976b7lldln-redocly-1.34.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/6hx3pqmdac2xnpd68fcs5fba0pqdailn-redocly-1.34.0",
+              "path": "/nix/store/3py63khgzs1y8iqvg5a8sx8n5rvgw4bk-redocly-1.34.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/6hx3pqmdac2xnpd68fcs5fba0pqdailn-redocly-1.34.0"
+          "store_path": "/nix/store/3py63khgzs1y8iqvg5a8sx8n5rvgw4bk-redocly-1.34.2"
         }
       }
     },
@@ -1618,68 +1598,68 @@
         }
       }
     },
-    "ruby@3.4.2": {
-      "last_modified": "2025-03-11T17:52:14Z",
+    "ruby@3.4.3": {
+      "last_modified": "2025-05-06T08:06:31Z",
       "plugin_version": "0.0.2",
-      "resolved": "github:NixOS/nixpkgs/0d534853a55b5d02a4ababa1d71921ce8f0aee4c#ruby_3_4",
+      "resolved": "github:NixOS/nixpkgs/1cb1c02a6b1b7cf67e3d7731cbbf327a53da9679#ruby_3_4",
       "source": "devbox-search",
-      "version": "3.4.2",
+      "version": "3.4.3",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/gd8vs43rmsx6p6h9zfvh8v3ziax8w19d-ruby-3.4.2",
+              "path": "/nix/store/p2q5p49iy4llg9phm68ykm7cm2s632fj-ruby-3.4.3",
               "default": true
             },
             {
               "name": "devdoc",
-              "path": "/nix/store/9d26vkxivfrkv8gplbsf97hag8sa34vr-ruby-3.4.2-devdoc"
+              "path": "/nix/store/6z49s43069rivscpqaq4pm9iqinff18a-ruby-3.4.3-devdoc"
             }
           ],
-          "store_path": "/nix/store/gd8vs43rmsx6p6h9zfvh8v3ziax8w19d-ruby-3.4.2"
+          "store_path": "/nix/store/p2q5p49iy4llg9phm68ykm7cm2s632fj-ruby-3.4.3"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/ypx2vsab6kp8gdvwq51anjl8q78b3rai-ruby-3.4.2",
+              "path": "/nix/store/465s5bhzj6z5kwpl9r8jwpz21chz99nd-ruby-3.4.3",
               "default": true
             },
             {
               "name": "devdoc",
-              "path": "/nix/store/agc0k42gnz1cgzfnam72p1xv4w8dxfyw-ruby-3.4.2-devdoc"
+              "path": "/nix/store/10fh3y6j8kdj75jlhwykr0fn3s3qcv1g-ruby-3.4.3-devdoc"
             }
           ],
-          "store_path": "/nix/store/ypx2vsab6kp8gdvwq51anjl8q78b3rai-ruby-3.4.2"
+          "store_path": "/nix/store/465s5bhzj6z5kwpl9r8jwpz21chz99nd-ruby-3.4.3"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/z064cv129s3gaik5r6hkrq783nyzzhiv-ruby-3.4.2",
+              "path": "/nix/store/k2xxwfcgl9kldr47wcqp7qhslrhbbcxj-ruby-3.4.3",
               "default": true
             },
             {
               "name": "devdoc",
-              "path": "/nix/store/mpc7k3zli26hazcr65f0sq5fkp1z0y3q-ruby-3.4.2-devdoc"
+              "path": "/nix/store/7q4s1ndng9pwq8b2vw0vrx0f4f1bhykd-ruby-3.4.3-devdoc"
             }
           ],
-          "store_path": "/nix/store/z064cv129s3gaik5r6hkrq783nyzzhiv-ruby-3.4.2"
+          "store_path": "/nix/store/k2xxwfcgl9kldr47wcqp7qhslrhbbcxj-ruby-3.4.3"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/8ls6y03xjk1z7q472gnzfmz4zz3n0w63-ruby-3.4.2",
+              "path": "/nix/store/66h4mdpszb07x7kxab6cpi1807ikaf2h-ruby-3.4.3",
               "default": true
             },
             {
               "name": "devdoc",
-              "path": "/nix/store/r1nidfwx53h58g5dx4fz60l7d4bkgll5-ruby-3.4.2-devdoc"
+              "path": "/nix/store/yfg2m08fm6066w1ly26xxcrmrvxs5vw3-ruby-3.4.3-devdoc"
             }
           ],
-          "store_path": "/nix/store/8ls6y03xjk1z7q472gnzfmz4zz3n0w63-ruby-3.4.2"
+          "store_path": "/nix/store/66h4mdpszb07x7kxab6cpi1807ikaf2h-ruby-3.4.3"
         }
       }
     },
