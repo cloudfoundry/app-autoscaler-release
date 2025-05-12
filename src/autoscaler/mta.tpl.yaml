@@ -64,6 +64,7 @@ modules:
     - name: app-autoscaler-application-logs
     - name: app-autoscaler-dynatrace
     parameters:
+      instances: 0 # overidden in build-extension-file.sh
       memory: 1G
       disk-quota: 1G
       stack: cflinuxfs4
@@ -83,6 +84,7 @@ modules:
     - name: app-autoscaler-application-logs
     - name: app-autoscaler-dynatrace
     parameters:
+      instances: 0 # overidden in build-extension-file.sh
       memory: 1G
       disk-quota: 1G
       stack: cflinuxfs4
@@ -103,6 +105,7 @@ modules:
     - name: app-autoscaler-application-logs
     - name: app-autoscaler-dynatrace
     parameters:
+      instances: 0 # overidden in build-extension-file.sh
       memory: 1G
       disk-quota: 1G
       stack: cflinuxfs4
