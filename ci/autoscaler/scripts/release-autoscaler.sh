@@ -40,11 +40,12 @@ function create_release() {
 
    [ "${CI}" = "true" ] && git commit -S -m "Updated release version to ${version} in golangapiserver"
 
-	 CI="true" make bosh-release \
-			AUTOSCALER_BOSH_BUILD_OPTS="${build_opts}"
-			AUTOSCALER_BOSH_VERSION="${version}" \
-			AUTOSCALER_BOSH_TARBALL_PATH="${build_path}/artifacts/${release_file}"
- }
+	 CI="true" \
+	 AUTOSCALER_BOSH_BUILD_OPTS="${build_opts}"
+	 AUTOSCALER_BOSH_VERSION="${version}" \
+	 AUTOSCALER_BOSH_TARBALL_PATH="${build_path}/artifacts/${release_file}" \
+		 make bosh-release
+}
 
 function create_mtar() {
   set -e
