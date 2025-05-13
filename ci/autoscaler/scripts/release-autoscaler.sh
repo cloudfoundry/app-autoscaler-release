@@ -142,7 +142,6 @@ pushd "${autoscaler_dir}" > /dev/null
     create_release "${VERSION}" "${build_path}" "${RELEASE_TGZ}"
     create_tests "${VERSION}" "${build_path}"
     create_mtar "${VERSION}" "${build_path}"
-    exit 1
     [ "${CI}" = "true" ] && commit_release
 
     sha256sum "${build_path}/artifacts/"* > "${build_path}/artifacts/files.sum.sha256"

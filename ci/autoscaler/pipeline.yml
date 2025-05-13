@@ -169,13 +169,13 @@ resources:
     regexp: releases/app-autoscaler-acceptance-tests-v(.*).tgz
     initial_path: releases/app-autoscaler-acceptance-tests-v0.0.1.tgz
 
-#- name: mtar-bucket
-#  type: gcs-resource
-#  source:
-#    bucket: app-autoscaler-releases
-#    json_key: ((autoscaler_releases_uploader_key))
-#    regexp: releases/app-autoscaler-v(.*).mtar
-#    initial_path: releases/app-autoscaler-v0.0.1.mtar
+- name: mtar-bucket
+  type: gcs-resource
+  source:
+    bucket: app-autoscaler-releases
+    json_key: ((autoscaler_releases_uploader_key))
+    regexp: releases/app-autoscaler-v(.*).mtar
+    initial_path: releases/app-autoscaler-v0.0.1.mtar
 
 - name: golang-release
   type: git
@@ -543,7 +543,7 @@ jobs:
     - get: gh-release
     - get: bbl-state
     - get: app-autoscaler-release
-     # passed: [upgrade-test]
+      passed: [upgrade-test]
     - get: ci
   - *make-prerelease-task
   - task: release-autoscaler
@@ -556,26 +556,26 @@ jobs:
       AUTOSCALER_CI_BOT_EMAIL: ApplicationAutoscaler@sap.com
       AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE: ((autoscaler-ci-bot-signing-key-private))
       AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC: ((autoscaler-ci-bot-signing-key-public))
-#  - put: release-bucket
-#    params:
-#      file: "build/artifacts/app-autoscaler-v*.tgz"
-#  - put: acceptance-tests-bucket
-#    params:
-#      file: "build/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
-#  - put: mtar-bucket
-#    params:
-#      file: "build/artifacts/app-autoscaler-release-v*.mtar"
-#  - put: gh-release
-#    params:
-#      name: build/name
-#      tag: build/tag
-#      body: build/changelog.md
-#      globs: [build/artifacts/*]
-#      commitish: app-autoscaler-release/.git/ref
-#  - put: app-autoscaler-release
-#    params:
-#      rebase: true
-#      repository: app-autoscaler-release
+  - put: release-bucket
+    params:
+      file: "build/artifacts/app-autoscaler-v*.tgz"
+  - put: acceptance-tests-bucket
+    params:
+      file: "build/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
+  - put: mtar-bucket
+    params:
+      file: "build/artifacts/app-autoscaler-release-v*.mtar"
+  - put: gh-release
+    params:
+      name: build/name
+      tag: build/tag
+      body: build/changelog.md
+      globs: [build/artifacts/*]
+      commitish: app-autoscaler-release/.git/ref
+  - put: app-autoscaler-release
+    params:
+      rebase: true
+      repository: app-autoscaler-release
 
 - name: cleanup-autoscaler-deployments
   public: true
