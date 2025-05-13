@@ -8,7 +8,6 @@ groups:
   - destroy-infrastructure
   - bosh-cleanup
   - fetch-latest-stemcell
-  - deploy-prometheus
   - deploy-multiapps-controller
 
 - name: others
@@ -50,13 +49,6 @@ resources:
 
 - name: every-day
   type: time
-
-- name: prometheus-boshrelease
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/bosh-prometheus/prometheus-boshrelease.git
-    branch: master
 
 - name: postgres-repo
   type: git
@@ -221,25 +213,6 @@ jobs:
     - task: fetch-latest-stemcell
       file: ci/ci/autoscaler/tasks/fetch-latest-stemcell.yml
 
-- name: deploy-prometheus
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  plan:
-  - in_parallel:
-    - get: bbl-state
-      trigger: true
-      passed: [setup-infrastructure]
-    - get: ci
-    - get: prometheus-boshrelease
-      trigger: true
-  - task: deploy-prometheus
-    file: ci/ci/infrastructure/tasks/deploy-prometheus.yml
-    params:
-      BBL_GCP_REGION: europe-west3
-      BBL_GCP_ZONE: europe-west3-a
-      SLACK_WEBHOOK: ((slack_webhook))
-
 - name: deploy-cf
   serial_groups: [infra]
   public: true
@@ -248,8 +221,6 @@ jobs:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
     - get: cf-deployment
-      trigger: true
-    - get: prometheus-boshrelease
       trigger: true
     - get: bbl-state
       trigger: true
@@ -268,7 +239,7 @@ jobs:
       vars-files: autoscaler-env-vars-store
     params:
       SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/autoscaler/set-cpu-entitlement-per-share.yaml operations/autoscaler/add-trusted-certs.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/autoscaler/add-eventgenerator-log-cache-uaa-client.yml operations/prometheus/operators/cf/add-prometheus-uaa-clients.yml operations/prometheus/operators/cf/add-grafana-uaa-clients.yml operations/cf/experimental/disable-v2-api.yml"
+      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/autoscaler/set-cpu-entitlement-per-share.yaml operations/autoscaler/add-trusted-certs.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/autoscaler/add-eventgenerator-log-cache-uaa-client.yml operations/cf/experimental/disable-v2-api.yml"
       BOSH_DEPLOY_ARGS: "-v diego_cell_instances=3 -v grafana_redirect_uri=https://grafana.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org/login/generic_oauth"
     ensure:
       put: autoscaler-env-vars-store
