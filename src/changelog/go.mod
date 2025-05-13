@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/shurcooL/githubv4 v0.0.0-20240727222349-48295856cce7
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/oauth2 v0.28.0
+	golang.org/x/oauth2 v0.30.0
 )
 
 require (
