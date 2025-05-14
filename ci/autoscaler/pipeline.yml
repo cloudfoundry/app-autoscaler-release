@@ -545,11 +545,17 @@ jobs:
     - get: app-autoscaler-release
       passed: [upgrade-test]
     - get: ci
-  - *make-prerelease-task
+  - task: make-prerelease
+    file: ci/ci/autoscaler/tasks/make/make.yaml
+    image: "app-autoscaler-tools"
+    params:
+      # ⚠️ Here it is used that make officially guarantees to reach the goals in the provided order.
+      TARGETS: generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db.java-libs scheduler.build
   - task: release-autoscaler
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
+      DEBUG: true
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
       GITHUB_TOKEN: ((autoscaler_access_token))
       AUTOSCALER_CI_BOT_NAME: app-autoscaler-ci-bot
