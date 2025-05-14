@@ -33,7 +33,7 @@
     "postgresql":                           "latest",
     "python":                               "3.13.3",
     "redocly":                              "1.34.2",
-    "ripgrep":                              "latest",
+    "ripgrep":                              "14.1.1",
     "ruby":                                 "3.4.3",
     "shellcheck":                           "0.10.0",
     "temurin-bin-21":                       "21.0.3",
