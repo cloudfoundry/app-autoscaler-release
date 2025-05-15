@@ -211,7 +211,7 @@ jobs:
           trigger: true
         - get: gcp-jammy-stemcell
     - task: fetch-latest-stemcell
-      file: ci/ci/autoscaler/tasks/fetch-latest-stemcell.yml
+      file: ci/ci/infrastructure/tasks/fetch-latest-stemcell.yml
 
 - name: deploy-cf
   serial_groups: [infra]
