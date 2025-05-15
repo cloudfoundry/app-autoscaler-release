@@ -1,9 +1,12 @@
 package config_test
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -23,7 +26,69 @@ var _ = Describe("Config", func() {
 		mockVCAPConfigurationReader *fakes.FakeVCAPConfigurationReader
 	)
 
+	BeforeEach(func() {
+		mockVCAPConfigurationReader = &fakes.FakeVCAPConfigurationReader{}
+	})
 	Describe("LoadConfig", func() {
+		When("config is read from env", func() {
+			var expectedTLSConfig = models.TLSCerts{
+				KeyFile:    "some/path/in/container/cfcert.key",
+				CertFile:   "some/path/in/container/cfcert.crt",
+				CACertFile: "some/path/in/container/cfcert.crt",
+			}
+			var expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
+
+			BeforeEach(func() {
+				mockVCAPConfigurationReader.GetPortReturns(3333)
+				mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(expectedTLSConfig)
+				mockVCAPConfigurationReader.GetInstanceIndexReturns(3)
+				mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
+				mockVCAPConfigurationReader.GetSpaceGuidReturns("some-space-id")
+				mockVCAPConfigurationReader.GetOrgGuidReturns("some-org-id")
+				mockVCAPConfigurationReader.MaterializeDBFromServiceReturns(expectedDbUrl, nil)
+			})
+
+			JustBeforeEach(func() {
+				conf, err = LoadConfig("", mockVCAPConfigurationReader)
+			})
+
+			It("should set logging to plain sink", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.Logging.PlainTextSink).To(BeTrue())
+			})
+
+			It("sets env variable over config file", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.Health.ServerConfig.Port).To(Equal(3333))
+			})
+
+			It("send certs to scalingengineScalingEngine TlSClientCert", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.ScalingEngine.TLSClientCerts).To(Equal(expectedTLSConfig))
+			})
+
+			It("send certs to scheduler TLSClientCert", func() {
+				Expect(err).NotTo(HaveOccurred())
+				Expect(conf.Scheduler.TLSClientCerts).To(Equal(expectedTLSConfig))
+			})
+
+			When("handling available databases", func() {
+				It("calls vcapReader ConfigureDatabases with the right arguments", func() {
+					testhelpers.ExpectConfigureDatabasesCalledOnce(err, mockVCAPConfigurationReader, "")
+				})
+			})
+
+			When("service is empty", func() {
+				BeforeEach(func() {
+					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(""), fmt.Errorf("not found"))
+				})
+
+				It("should error with config service not found", func() {
+					Expect(errors.Is(err, ErrOperatorConfigNotFound)).To(BeTrue())
+				})
+			})
+		})
+
 		When("config is read from file", func() {
 			JustBeforeEach(func() {
 				configFile = testhelpers.BytesToFile(configBytes)
@@ -55,29 +120,34 @@ var _ = Describe("Config", func() {
 					Expect(conf.Health.ServerConfig.Port).To(Equal(9999))
 					Expect(conf.Logging.Level).To(Equal("debug"))
 
-					Expect(conf.AppMetricsDB.DB).To(Equal(db.DatabaseConfig{
+					Expect(conf.Db[db.AppMetricsDb]).To(Equal(db.DatabaseConfig{
 						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    10,
 						MaxIdleConnections:    5,
 						ConnectionMaxLifetime: 60 * time.Second,
-					}))
-					Expect(conf.AppMetricsDB.RefreshInterval).To(Equal(10 * time.Hour))
-					Expect(conf.AppMetricsDB.CutoffDuration).To(Equal(15 * time.Hour))
+					}), "app_metrics_db")
+					Expect(conf.AppMetricsDb.RefreshInterval).To(Equal(10 * time.Hour))
+					Expect(conf.AppMetricsDb.CutoffDuration).To(Equal(15 * time.Hour))
 
-					Expect(conf.ScalingEngineDB.DB).To(Equal(db.DatabaseConfig{
+					Expect(conf.Db[db.ScalingEngineDb]).To(Equal(db.DatabaseConfig{
 						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    10,
 						MaxIdleConnections:    5,
 						ConnectionMaxLifetime: 60 * time.Second,
 					}))
-					Expect(conf.ScalingEngineDB.RefreshInterval).To(Equal(36 * time.Hour))
-					Expect(conf.ScalingEngineDB.CutoffDuration).To(Equal(30 * time.Hour))
+					Expect(conf.ScalingEngineDb.RefreshInterval).To(Equal(36 * time.Hour))
+					Expect(conf.ScalingEngineDb.CutoffDuration).To(Equal(30 * time.Hour))
 
 					Expect(conf.DBLock.LockTTL).To(Equal(15 * time.Second))
 					Expect(conf.DBLock.LockRetryInterval).To(Equal(5 * time.Second))
-					Expect(conf.DBLock.DB.URL).To(Equal("postgres://postgres:password@localhost/autoscaler?sslmode=disable"))
+					Expect(conf.Db[db.LockDb]).To(Equal(db.DatabaseConfig{
+						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
+						MaxOpenConnections:    10,
+						MaxIdleConnections:    5,
+						ConnectionMaxLifetime: 60 * time.Second,
+					}))
 
-					Expect(conf.AppSyncer.DB).To(Equal(db.DatabaseConfig{
+					Expect(conf.Db[db.PolicyDb]).To(Equal(db.DatabaseConfig{
 						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    10,
 						MaxIdleConnections:    5,
@@ -98,22 +168,22 @@ var _ = Describe("Config", func() {
 
 					Expect(conf.Logging.Level).To(Equal(config.DefaultLoggingLevel))
 					Expect(conf.Health.ServerConfig.Port).To(Equal(8081))
-					Expect(conf.AppMetricsDB.DB).To(Equal(db.DatabaseConfig{
+					Expect(conf.Db[db.AppMetricsDb]).To(Equal(db.DatabaseConfig{
 						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    0,
 						MaxIdleConnections:    0,
 						ConnectionMaxLifetime: 0 * time.Second,
-					}))
-					Expect(conf.AppMetricsDB.RefreshInterval).To(Equal(config.DefaultRefreshInterval))
-					Expect(conf.AppMetricsDB.CutoffDuration).To(Equal(config.DefaultCutoffDuration))
-					Expect(conf.ScalingEngineDB.DB).To(Equal(db.DatabaseConfig{
+					}), "appmetrics_db")
+					Expect(conf.AppMetricsDb.RefreshInterval).To(Equal(config.DefaultRefreshInterval))
+					Expect(conf.AppMetricsDb.CutoffDuration).To(Equal(config.DefaultCutoffDuration))
+					Expect(conf.Db[db.ScalingEngineDb]).To(Equal(db.DatabaseConfig{
 						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    0,
 						MaxIdleConnections:    0,
 						ConnectionMaxLifetime: 0 * time.Second,
-					}))
-					Expect(conf.ScalingEngineDB.RefreshInterval).To(Equal(config.DefaultRefreshInterval))
-					Expect(conf.ScalingEngineDB.CutoffDuration).To(Equal(config.DefaultCutoffDuration))
+					}), "scalingengine_db")
+					Expect(conf.ScalingEngineDb.RefreshInterval).To(Equal(config.DefaultRefreshInterval))
+					Expect(conf.ScalingEngineDb.CutoffDuration).To(Equal(config.DefaultCutoffDuration))
 
 					Expect(conf.ScalingEngine.SyncInterval).To(Equal(config.DefaultSyncInterval))
 					Expect(conf.Scheduler.SyncInterval).To(Equal(config.DefaultSyncInterval))
@@ -122,12 +192,12 @@ var _ = Describe("Config", func() {
 					Expect(conf.DBLock.LockRetryInterval).To(Equal(config.DefaultDBLockRetryInterval))
 
 					Expect(conf.AppSyncer.SyncInterval).To(Equal(config.DefaultSyncInterval))
-					Expect(conf.AppSyncer.DB).To(Equal(db.DatabaseConfig{
+					Expect(conf.Db[db.PolicyDb]).To(Equal(db.DatabaseConfig{
 						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    0,
 						MaxIdleConnections:    0,
 						ConnectionMaxLifetime: 0 * time.Second,
-					}))
+					}), "policy_db")
 
 					Expect(conf.HttpClientTimeout).To(Equal(5 * time.Second))
 
@@ -176,13 +246,24 @@ scheduler:
 			BeforeEach(func() {
 				conf = &Config{}
 
-				conf.AppMetricsDB.DB.URL = "postgres://pqgotest:password@exampl.com/pqgotest"
-				conf.AppMetricsDB.RefreshInterval = 10 * time.Hour
-				conf.AppMetricsDB.CutoffDuration = 15 * time.Hour
+				conf.Db = make(map[string]db.DatabaseConfig)
+				conf.Db[db.PolicyDb] = db.DatabaseConfig{
+					URL: "postgres://pqgotest:password@exampl.com/pqgotest",
+				}
+				conf.Db[db.AppMetricsDb] = db.DatabaseConfig{
+					URL: "postgres://pqgotest:password@exampl.com/pqgotest",
+				}
+				conf.Db[db.LockDb] = db.DatabaseConfig{
+					URL: "postgres://pqgotest:password@exampl.com/pqgotest",
+				}
+				conf.Db[db.ScalingEngineDb] = db.DatabaseConfig{
+					URL: "postgres://pqgotest:password@exampl.com/pqgotest",
+				}
+				conf.AppMetricsDb.RefreshInterval = 10 * time.Hour
+				conf.AppMetricsDb.CutoffDuration = 15 * time.Hour
 
-				conf.ScalingEngineDB.DB.URL = "postgres://pqgotest:password@exampl.com/pqgotest"
-				conf.ScalingEngineDB.RefreshInterval = 36 * time.Hour
-				conf.ScalingEngineDB.CutoffDuration = 20 * time.Hour
+				conf.ScalingEngineDb.RefreshInterval = 36 * time.Hour
+				conf.ScalingEngineDb.CutoffDuration = 20 * time.Hour
 
 				conf.ScalingEngine.URL = "http://localhost:8082"
 				conf.ScalingEngine.SyncInterval = 15 * time.Minute
@@ -191,8 +272,6 @@ scheduler:
 				conf.Scheduler.SyncInterval = 15 * time.Minute
 
 				conf.AppSyncer.SyncInterval = 60 * time.Second
-				conf.AppSyncer.DB.URL = "postgres://pqgotest:password@exampl.com/pqgotest"
-				conf.DBLock.DB.URL = "postgres://pqgotest:password@exampl.com/pqgotest"
 				conf.HttpClientTimeout = 10 * time.Second
 				conf.Health.ServerConfig.Port = 8081
 
@@ -211,7 +290,8 @@ scheduler:
 			Context("when AppMetrics db url is not set", func() {
 
 				BeforeEach(func() {
-					conf.AppMetricsDB.DB.URL = ""
+					conf.Db[db.AppMetricsDb] = db.DatabaseConfig{}
+
 				})
 
 				It("should error", func() {
@@ -222,7 +302,7 @@ scheduler:
 			Context("when ScalingEngine db url is not set", func() {
 
 				BeforeEach(func() {
-					conf.ScalingEngineDB.DB.URL = ""
+					conf.Db[db.ScalingEngineDb] = db.DatabaseConfig{}
 				})
 
 				It("should error", func() {
@@ -233,11 +313,11 @@ scheduler:
 			Context("when AppSyncer db url is not set", func() {
 
 				BeforeEach(func() {
-					conf.AppSyncer.DB.URL = ""
+					conf.Db[db.PolicyDb] = db.DatabaseConfig{}
 				})
 
 				It("should error", func() {
-					Expect(err).To(MatchError("Configuration error: appSyncer.db.url is empty"))
+					Expect(err).To(MatchError("Configuration error: app_syncer.db.url is empty"))
 				})
 			})
 
@@ -255,7 +335,7 @@ scheduler:
 			Context("when AppMetrics db refresh interval in hours is set to a negative value", func() {
 
 				BeforeEach(func() {
-					conf.AppMetricsDB.RefreshInterval = -1
+					conf.AppMetricsDb.RefreshInterval = -1
 				})
 
 				It("should error", func() {
@@ -266,7 +346,7 @@ scheduler:
 			Context("when ScalingEngine db refresh interval in hours is set to a negative value", func() {
 
 				BeforeEach(func() {
-					conf.ScalingEngineDB.RefreshInterval = -1
+					conf.ScalingEngineDb.RefreshInterval = -1
 				})
 
 				It("should error", func() {
@@ -277,7 +357,7 @@ scheduler:
 			Context("when AppMetrics db cutoff duration is set to a negative value", func() {
 
 				BeforeEach(func() {
-					conf.AppMetricsDB.CutoffDuration = -1
+					conf.AppMetricsDb.CutoffDuration = -1
 				})
 
 				It("should error", func() {
@@ -288,7 +368,7 @@ scheduler:
 			Context("when ScalingEngine db cutoff duration is set to a negative value", func() {
 
 				BeforeEach(func() {
-					conf.ScalingEngineDB.CutoffDuration = -1
+					conf.ScalingEngineDb.CutoffDuration = -1
 				})
 
 				It("should error", func() {
@@ -343,7 +423,7 @@ scheduler:
 			Context("when db lockdb url is empty", func() {
 
 				BeforeEach(func() {
-					conf.DBLock.DB.URL = ""
+					conf.Db[db.LockDb] = db.DatabaseConfig{}
 				})
 
 				It("should error", func() {

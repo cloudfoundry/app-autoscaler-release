@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -32,15 +33,13 @@ const (
 )
 
 type DbPrunerConfig struct {
-	DB              db.DatabaseConfig `yaml:"db"`
-	RefreshInterval time.Duration     `yaml:"refresh_interval"`
-	CutoffDuration  time.Duration     `yaml:"cutoff_duration"`
+	RefreshInterval time.Duration `yaml:"refresh_interval"`
+	CutoffDuration  time.Duration `yaml:"cutoff_duration"`
 }
 
 type DBLockConfig struct {
-	LockTTL           time.Duration     `yaml:"ttl"`
-	LockRetryInterval time.Duration     `yaml:"retry_interval"`
-	DB                db.DatabaseConfig `yaml:"db"`
+	LockTTL           time.Duration `yaml:"ttl"`
+	LockRetryInterval time.Duration `yaml:"retry_interval"`
 }
 
 var defaultDBLockConfig = DBLockConfig{
@@ -61,8 +60,7 @@ type SchedulerConfig struct {
 }
 
 type AppSyncerConfig struct {
-	DB           db.DatabaseConfig `yaml:"db"`
-	SyncInterval time.Duration     `yaml:"sync_interval"`
+	SyncInterval time.Duration `yaml:"sync_interval"`
 }
 
 var defaultHealthConfig = helpers.HealthConfig{
@@ -78,17 +76,17 @@ var defaultHealthConfig = helpers.HealthConfig{
 // db_lock: db: url: <%= lock_db_url %>
 
 type Config struct {
-	CF cf.Config `yaml:"cf"`
-	// Db                        map[string]db.DatabaseConfig `yaml:"db"`
-	Health            helpers.HealthConfig  `yaml:"health"`
-	Logging           helpers.LoggingConfig `yaml:"logging"`
-	AppMetricsDB      DbPrunerConfig        `yaml:"app_metrics_db"`
-	ScalingEngineDB   DbPrunerConfig        `yaml:"scaling_engine_db"`
-	ScalingEngine     ScalingEngineConfig   `yaml:"scaling_engine"`
-	Scheduler         SchedulerConfig       `yaml:"scheduler"`
-	AppSyncer         AppSyncerConfig       `yaml:"app_syncer"`
-	DBLock            DBLockConfig          `yaml:"db_lock"`
-	HttpClientTimeout time.Duration         `yaml:"http_client_timeout"`
+	CF                cf.Config                    `yaml:"cf"`
+	Db                map[string]db.DatabaseConfig `yaml:"db" json:"db"`
+	Health            helpers.HealthConfig         `yaml:"health"`
+	Logging           helpers.LoggingConfig        `yaml:"logging"`
+	AppMetricsDb      DbPrunerConfig               `yaml:"app_metrics_db"`
+	ScalingEngineDb   DbPrunerConfig               `yaml:"scaling_engine_db"`
+	ScalingEngine     ScalingEngineConfig          `yaml:"scaling_engine"`
+	Scheduler         SchedulerConfig              `yaml:"scheduler"`
+	AppSyncer         AppSyncerConfig              `yaml:"app_syncer"`
+	DBLock            DBLockConfig                 `yaml:"db_lock"`
+	HttpClientTimeout time.Duration                `yaml:"http_client_timeout"`
 }
 
 func defaultConfig() Config {
@@ -98,11 +96,12 @@ func defaultConfig() Config {
 		},
 		Health:  defaultHealthConfig,
 		Logging: helpers.LoggingConfig{Level: DefaultLoggingLevel},
-		AppMetricsDB: DbPrunerConfig{
+		AppMetricsDb: DbPrunerConfig{
 			RefreshInterval: DefaultRefreshInterval,
 			CutoffDuration:  DefaultCutoffDuration,
 		},
-		ScalingEngineDB: DbPrunerConfig{
+		Db: make(map[string]db.DatabaseConfig),
+		ScalingEngineDb: DbPrunerConfig{
 			RefreshInterval: DefaultRefreshInterval,
 			CutoffDuration:  DefaultCutoffDuration,
 		},
@@ -130,11 +129,43 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 		return nil, err
 	}
 
+	conf.Scheduler.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
+	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 	return &conf, nil
 }
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	if !vcapReader.IsRunningOnCF() {
+		return nil
+	}
+
+	// enable plain text logging. See src/autoscaler/helpers/logger.go
+	conf.Logging.PlainTextSink = true
+
+	conf.Health.ServerConfig.Port = vcapReader.GetPort()
+	if err := loadOperatorConfig(conf, vcapReader); err != nil {
+		return err
+	}
+
+	if err := vcapReader.ConfigureDatabases(&conf.Db, nil, ""); err != nil {
+		return err
+	}
+
 	return nil
+
+}
+func loadOperatorConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	var raw string
+	data, err := vcapReader.GetServiceCredentialContent("operator-config", "operator-config")
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrOperatorConfigNotFound, err)
+	}
+	// removes the first and last double quotes if they exist
+	if json.Unmarshal(data, &raw) == nil {
+		return yaml.Unmarshal([]byte(raw), conf)
+	} else {
+		return yaml.Unmarshal(data, conf)
+	}
 }
 
 func loadYamlFile(filepath string, conf *Config) error {
@@ -156,30 +187,47 @@ func loadYamlFile(filepath string, conf *Config) error {
 
 	return nil
 }
-func (c *Config) Validate() error {
-	if c.AppMetricsDB.DB.URL == "" {
+
+func (c *Config) validateDb() error {
+	if c.Db[db.AppMetricsDb].URL == "" {
 		return fmt.Errorf("Configuration error: app_metrics_db.db.url is empty")
 	}
 
-	if c.AppMetricsDB.RefreshInterval <= 0 {
-		return fmt.Errorf("Configuration error: app_metrics_db.refresh_interval is less than or equal to 0")
-	}
-
-	if c.AppMetricsDB.CutoffDuration <= 0 {
-		return fmt.Errorf("Configuration error: app_metrics_db.cutoff_duration is less than or equal to 0")
-	}
-
-	if c.ScalingEngineDB.DB.URL == "" {
+	if c.Db[db.ScalingEngineDb].URL == "" {
 		return fmt.Errorf("Configuration error: scaling_engine_db.db.url is empty")
 	}
 
-	if c.ScalingEngineDB.RefreshInterval <= 0 {
-		return fmt.Errorf("Configuration error: scaling_engine_db.refresh_interval is less than or equal to 0")
+	if c.Db[db.PolicyDb].URL == "" {
+		return fmt.Errorf("Configuration error: app_syncer.db.url is empty")
 	}
 
-	if c.ScalingEngineDB.CutoffDuration <= 0 {
+	if c.Db[db.LockDb].URL == "" {
+		return fmt.Errorf("Configuration error: db_lock.db.url is empty")
+	}
+
+	return nil
+}
+
+func (c *Config) Validate() error {
+	if err := c.validateDb(); err != nil {
+		return err
+	}
+
+	if c.AppMetricsDb.RefreshInterval <= 0 {
+		return fmt.Errorf("Configuration error: app_metrics_db.refresh_interval is less than or equal to 0")
+	}
+
+	if c.AppMetricsDb.CutoffDuration <= 0 {
+		return fmt.Errorf("Configuration error: app_metrics_db.cutoff_duration is less than or equal to 0")
+	}
+
+	if c.ScalingEngineDb.RefreshInterval <= 0 {
+		return fmt.Errorf("Configuration error: scaling_engine_db.refresh_interval is less than or equal to 0")
+	}
+	if c.ScalingEngineDb.CutoffDuration <= 0 {
 		return fmt.Errorf("Configuration error: scaling_engine_db.cutoff_duration is less than or equal to 0")
 	}
+
 	if c.ScalingEngine.URL == "" {
 		return fmt.Errorf("Configuration error: scaling_engine.scaling_engine_url is empty")
 	}
@@ -193,13 +241,6 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("Configuration error: scheduler.sync_interval is less than or equal to 0")
 	}
 
-	if c.DBLock.DB.URL == "" {
-		return fmt.Errorf("Configuration error: db_lock.db.url is empty")
-	}
-
-	if c.AppSyncer.DB.URL == "" {
-		return fmt.Errorf("Configuration error: appSyncer.db.url is empty")
-	}
 	if c.AppSyncer.SyncInterval <= 0 {
 		return fmt.Errorf("Configuration error: appSyncer.sync_interval is less than or equal to 0")
 	}

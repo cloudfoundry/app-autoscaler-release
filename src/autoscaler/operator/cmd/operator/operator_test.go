@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
@@ -18,10 +20,21 @@ var _ = Describe("Operator", Serial, func() {
 	var (
 		runner       *OperatorRunner
 		secondRunner *OperatorRunner
+
+		healthHttpClient *http.Client
+
+		healthURL *url.URL
+
+		err error
 	)
 	BeforeEach(func() {
 		initConfig()
 		runner = NewOperatorRunner()
+
+		healthURL, err = url.Parse(fmt.Sprintf("http://127.0.0.1:%d", cfg.Health.ServerConfig.Port))
+		Expect(err).NotTo(HaveOccurred())
+
+		healthHttpClient = &http.Client{}
 	})
 
 	AfterEach(func() {
@@ -74,7 +87,7 @@ var _ = Describe("Operator", Serial, func() {
 		Context("with missing/invalid configuration", func() {
 			BeforeEach(func() {
 
-				cfg.AppMetricsDB.CutoffDuration = -1
+				cfg.AppMetricsDb.CutoffDuration = -1
 
 				cfg := writeConfig(&cfg)
 				runner.configPath = cfg.Name()
@@ -256,7 +269,10 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when connection to appmetrics db fails", func() {
 			BeforeEach(func() {
-				cfg.AppMetricsDB.DB.URL = "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable"
+				cfg.Db["appmetrics_db"] = db.DatabaseConfig{
+					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
+				}
+
 				cfg := writeConfig(&cfg)
 				runner.configPath = cfg.Name()
 				runner.Start()
@@ -275,7 +291,9 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when connection to scalingengine db fails", func() {
 			BeforeEach(func() {
-				cfg.ScalingEngineDB.DB.URL = "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable"
+				cfg.Db["scalingengine_db"] = db.DatabaseConfig{
+					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
+				}
 				cfg := writeConfig(&cfg)
 				runner.configPath = cfg.Name()
 				runner.Start()
@@ -294,7 +312,9 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when connection to apsyncer policy db fails", func() {
 			BeforeEach(func() {
-				cfg.AppSyncer.DB.URL = "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable"
+				cfg.Db["policy_db"] = db.DatabaseConfig{
+					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
+				}
 				cfg := writeConfig(&cfg)
 				runner.configPath = cfg.Name()
 				runner.Start()
@@ -329,7 +349,7 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d", healthport))
+				rsp, err := healthHttpClient.Get(healthURL.String())
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 				raw, _ := io.ReadAll(rsp.Body)
@@ -371,12 +391,9 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
 				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
 				Expect(err).NotTo(HaveOccurred())
-
 				req.SetBasicAuth(cfg.Health.BasicAuth.Username, cfg.Health.BasicAuth.Password)
-
 				rsp, err := healthHttpClient.Do(req)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
@@ -424,3 +441,8 @@ var _ = Describe("Operator", Serial, func() {
 		})
 	})
 })
+
+func getVcapServices() (result string) {
+	result = `{}`
+	return result
+}

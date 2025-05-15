@@ -27,12 +27,11 @@ import (
 )
 
 var (
-	prPath           string
-	cfg              config.Config
-	configFile       *os.File
-	cfServer         *mocks.Server
-	healthHttpClient *http.Client
-	healthport       int
+	prPath     string
+	cfg        config.Config
+	configFile *os.File
+	cfServer   *mocks.Server
+	healthport int
 )
 
 func TestOperator(t *testing.T) {
@@ -50,7 +49,6 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 }, func(pathsByte []byte) {
 	prPath = string(pathsByte)
 	initConfig()
-	healthHttpClient = &http.Client{}
 	configFile = writeConfig(&cfg)
 })
 
@@ -77,24 +75,25 @@ func initConfig() {
 	cfg.Health.ServerConfig.Port = healthport
 	cfg.Logging.Level = "debug"
 	dbUrl := testhelpers.GetDbUrl()
+	cfg.Db = make(map[string]db.DatabaseConfig)
 
-	cfg.AppMetricsDB.DB = db.DatabaseConfig{
+	cfg.Db[db.AppMetricsDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
 		ConnectionMaxLifetime: 10 * time.Second,
 	}
-	cfg.AppMetricsDB.RefreshInterval = 12 * time.Hour
-	cfg.AppMetricsDB.CutoffDuration = 20 * 24 * time.Hour
+	cfg.AppMetricsDb.RefreshInterval = 12 * time.Hour
+	cfg.AppMetricsDb.CutoffDuration = 20 * 24 * time.Hour
 
-	cfg.ScalingEngineDB.DB = db.DatabaseConfig{
+	cfg.Db[db.ScalingEngineDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
 		ConnectionMaxLifetime: 10 * time.Second,
 	}
-	cfg.ScalingEngineDB.RefreshInterval = 12 * time.Hour
-	cfg.ScalingEngineDB.CutoffDuration = 20 * 24 * time.Hour
+	cfg.ScalingEngineDb.RefreshInterval = 12 * time.Hour
+	cfg.ScalingEngineDb.CutoffDuration = 20 * 24 * time.Hour
 
 	cfg.ScalingEngine = config.ScalingEngineConfig{
 		URL:          "http://localhost:8082",
@@ -106,7 +105,7 @@ func initConfig() {
 		SyncInterval: 10 * time.Second,
 	}
 
-	cfg.DBLock.DB = db.DatabaseConfig{
+	cfg.Db[db.LockDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
@@ -115,7 +114,7 @@ func initConfig() {
 
 	cfg.DBLock.LockTTL = 15 * time.Second
 	cfg.DBLock.LockRetryInterval = 5 * time.Second
-	cfg.AppSyncer.DB = db.DatabaseConfig{
+	cfg.Db[db.PolicyDb] = db.DatabaseConfig{
 		URL:                   dbUrl,
 		MaxOpenConnections:    10,
 		MaxIdleConnections:    5,
