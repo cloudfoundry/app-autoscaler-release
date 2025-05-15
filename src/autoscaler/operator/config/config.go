@@ -69,12 +69,6 @@ var defaultHealthConfig = helpers.HealthConfig{
 	},
 }
 
-// TODO: move this to a config.Db ?
-// app_metrics_db: db: url: <%= app_metrics_db_url %>
-// scaling_engine_db: db: url: <%= scaling_engine_db_url %>
-// app_syncer: db: url: <%= policy_db_url %>
-// db_lock: db: url: <%= lock_db_url %>
-
 type Config struct {
 	CF                cf.Config                    `yaml:"cf"`
 	Db                map[string]db.DatabaseConfig `yaml:"db" json:"db"`

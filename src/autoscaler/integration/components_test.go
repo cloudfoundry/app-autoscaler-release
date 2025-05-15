@@ -393,8 +393,8 @@ func (components *Components) PrepareEventGeneratorConfig(dbURI string, port int
 			TriggerArrayChannelSize:   1,
 		},
 		Db: map[string]db.DatabaseConfig{
-			"policy_db":      {URL: dbURI},
-			"app_metrics_db": {URL: dbURI},
+			"policy_db":     {URL: dbURI},
+			"appmetrics_db": {URL: dbURI},
 		},
 		ScalingEngine: egConfig.ScalingEngineConfig{
 			ScalingEngineURL: scalingEngineURL,

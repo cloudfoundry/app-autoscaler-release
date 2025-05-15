@@ -125,7 +125,7 @@ var _ = Describe("Config", func() {
 						MaxOpenConnections:    10,
 						MaxIdleConnections:    5,
 						ConnectionMaxLifetime: 60 * time.Second,
-					}), "app_metrics_db")
+					}), "appmetrics_db")
 					Expect(conf.AppMetricsDb.RefreshInterval).To(Equal(10 * time.Hour))
 					Expect(conf.AppMetricsDb.CutoffDuration).To(Equal(15 * time.Hour))
 
