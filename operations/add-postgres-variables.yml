@@ -6,6 +6,7 @@
     options:
       is_ca: true
       common_name: postgresCA
+      key_length: 4096
 
 - type: replace
   path: /variables/-
@@ -20,6 +21,7 @@
       extended_key_usage:
         - client_auth
         - server_auth
+      key_length: 4096
 
 - type: replace
   path: /variables/-
@@ -33,3 +35,5 @@
         - ((deployment_name)).autoscalerpostgres.service.cf.internal
       extended_key_usage:
         - client_auth
+      key_length: 4096
+
