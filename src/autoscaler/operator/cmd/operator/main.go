@@ -73,8 +73,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	policyDb := sqldb.CreatePolicyDb(conf.Db[db.PolicyDb], logger)
-	defer func() { _ = policyDb.Close() }()
+	policyDb, err := sqldb.NewPolicySQLDB(conf.Db[db.PolicyDb], logger.Session("policy-db"))
+	if err != nil {
+		logger.Error("failed to connect policy db", err, lager.Data{"dbConfig": conf.Db[db.PolicyDb]})
+		os.Exit(1)
+	}
+	defer policyDb.Close()
 
 	scalingEngineHttpclient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
 	if err != nil {

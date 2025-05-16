@@ -10,6 +10,7 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
@@ -17,7 +18,6 @@ import (
 )
 
 var _ = Describe("Operator", Serial, func() {
-
 	var (
 		runner       *OperatorRunner
 		secondRunner *OperatorRunner
@@ -43,7 +43,6 @@ var _ = Describe("Operator", Serial, func() {
 	})
 
 	Describe("Using Database lock", func() {
-
 		BeforeEach(func() {
 			runner.startCheck = ""
 			runner.configPath = writeConfig(&conf).Name()
@@ -172,7 +171,6 @@ var _ = Describe("Operator", Serial, func() {
 		})
 
 		Context("When more than one instances of operator try to get the lock simultaneously", func() {
-
 			var runnerAcquiredLock bool
 
 			BeforeEach(func() {
@@ -268,68 +266,39 @@ var _ = Describe("Operator", Serial, func() {
 
 		})
 
-		Context("when connection to appmetrics db fails", func() {
-			BeforeEach(func() {
-				conf.Db["appmetrics_db"] = db.DatabaseConfig{
-					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
-				}
+		When("db config with wrong credentials", func() {
+			const dbUrl = "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable"
 
-				conf := writeConfig(&conf)
-				runner.configPath = conf.Name()
-				runner.Start()
-			})
+			type dbCase struct {
+				key         string
+				expectError string
+			}
 
-			AfterEach(func() {
-				os.Remove(runner.configPath)
-			})
+			DescribeTable("should error when db connection fails",
+				func(tc dbCase) {
+					localConf := conf
+					localConf.Db[tc.key] = db.DatabaseConfig{URL: dbUrl}
+					c := writeConfig(&localConf)
+					runner.configPath = c.Name()
+					runner.Start()
+					defer os.Remove(runner.configPath)
 
-			It("should error", func() {
-				Eventually(runner.Session).Should(Exit(1))
-				Expect(runner.Session.Buffer()).To(Say("failed to connect appmetrics db"))
-			})
-
-		})
-
-		Context("when connection to scalingengine db fails", func() {
-			BeforeEach(func() {
-				conf.Db["scalingengine_db"] = db.DatabaseConfig{
-					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
-				}
-				conf := writeConfig(&conf)
-				runner.configPath = conf.Name()
-				runner.Start()
-			})
-
-			AfterEach(func() {
-				os.Remove(runner.configPath)
-			})
-
-			It("should error", func() {
-				Eventually(runner.Session).Should(Exit(1))
-				Expect(runner.Session.Buffer()).To(Say("failed to connect scalingengine db"))
-			})
-
-		})
-
-		Context("when connection to apsyncer policy db fails", func() {
-			BeforeEach(func() {
-				conf.Db["policy_db"] = db.DatabaseConfig{
-					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
-				}
-				conf := writeConfig(&conf)
-				runner.configPath = conf.Name()
-				runner.Start()
-			})
-
-			AfterEach(func() {
-				_ = os.Remove(runner.configPath)
-			})
-
-			It("should error", func() {
-				Eventually(runner.Session).Should(Exit())
-				Expect(runner.Session.Buffer()).To(Say("Failed To connect to policyDB"))
-			})
-
+					Eventually(runner.Session).Should(Exit(1))
+					Expect(runner.Session.Buffer()).To(Say(tc.expectError))
+				},
+				Entry("appmetrics db fails", dbCase{
+					key:         "appmetrics_db",
+					expectError: "failed to connect appmetrics db",
+				}),
+				Entry("scalingengine db fails", dbCase{
+					key:         "scalingengine_db",
+					expectError: "failed to connect scalingengine db",
+				}),
+				Entry("policy db fails", dbCase{
+					key:         "policy_db",
+					expectError: "failed to connect policy db",
+				}),
+			)
 		})
 	})
 
