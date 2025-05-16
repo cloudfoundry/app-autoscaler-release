@@ -35,16 +35,11 @@ var _ = Describe("Config", func() {
 				CertFile:   "some/path/in/container/cfcert.crt",
 				CACertFile: "some/path/in/container/cfcert.crt",
 			}
-			var expectedDbUrl = "postgres://foo:bar@postgres.example.com:5432/policy_db?sslcert=%2Ftmp%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fserver_ca.sslrootcert" // #nosec G101
 
 			BeforeEach(func() {
 				mockVCAPConfigurationReader.GetPortReturns(3333)
 				mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(expectedTLSConfig)
-				mockVCAPConfigurationReader.GetInstanceIndexReturns(3)
 				mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
-				mockVCAPConfigurationReader.GetSpaceGuidReturns("some-space-id")
-				mockVCAPConfigurationReader.GetOrgGuidReturns("some-org-id")
-				mockVCAPConfigurationReader.MaterializeDBFromServiceReturns(expectedDbUrl, nil)
 			})
 
 			JustBeforeEach(func() {
