@@ -38,19 +38,3 @@ make set-autoscaler-pipeline
 # You will be prompted to select the specific jobs you want to unpause.
 make unpause-pipeline
 ```
-
-## Prometheus
-
-This is deployed using the script [deploy-prometheus](infrastructure/scripts/deploy-prometheus.sh).
-To deploy localy you will need:
-
-- bosh ca certificate and place this it is `${HOME}/.ssh/bosh.ca.crt`.
-- <https://github.com/bosh-prometheus/prometheus-boshrelease> cloned in ../
-- <https://github.com/cloudfoundry/app-autoscaler-env-bbl-state> cloned in ../
-
-Then you can run the script directly.
-
-### setup
-
-- The Slack channel is stored in the cf credhub under `/bosh-autoscaler/prometheus/alertmanager_slack_channel`
-- The Slack Message can be customised in the [slack-receiver-template.yml](operations/slack-receiver-template.yml)

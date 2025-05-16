@@ -387,23 +387,6 @@ deploy-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh
 
 bosh-release-path := ./target/bosh-releases
-prometheus-bosh-release-path := ${bosh-release-path}/prometheus
-$(shell mkdir -p ${prometheus-bosh-release-path})
-
-download-prometheus-release: ${prometheus-bosh-release-path}/manifests
-${prometheus-bosh-release-path}/manifests &:
-	pushd '${prometheus-bosh-release-path}' > /dev/null ;\
-		git clone --recurse-submodules 'https://github.com/bosh-prometheus/prometheus-boshrelease' . ;\
-	popd > /dev/null
-
-
-deploy-prometheus: ${prometheus-bosh-release-path}/manifests
-	export DEPLOYMENT_NAME='prometheus' ;\
-	export PROMETHEUS_DIR='${prometheus-bosh-release-path}' ;\
-	export BBL_GCP_REGION="$$(yq eval '.jobs.[] | select(.name == "deploy-prometheus") | .plan.[] | select(.task == "deploy-prometheus") | .params.BBL_GCP_REGION' './ci/infrastructure/pipeline.yml')" ;\
-	export BBL_GCP_ZONE="$$(yq eval '.jobs.[] | select(.name == "deploy-prometheus") | .plan.[] | select(.task == "deploy-prometheus") | .params.BBL_GCP_ZONE' './ci/infrastructure/pipeline.yml')" ;\
-	export SLACK_WEBHOOK="$$(credhub get --name='/bosh-autoscaler/prometheus/alertmanager_slack_api_url' --quiet)" ;\
-	${CI_DIR}/infrastructure/scripts/deploy-prometheus.sh;
 
 
 .PHONY: mta-release
@@ -488,18 +471,6 @@ package-specs: go-mod-tidy go-mod-vendor
 	@echo " - Updating the package specs"
 	@./scripts/sync-package-specs
 
-
-## Prometheus Alerts
-.PHONY: alerts-silence
-alerts-silence:
-	export SILENCE_TIME_MINS=480;\
-	echo " - Silencing deployment '${DEPLOYMENT_NAME} 8 hours'";\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessExtendedUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobExtendedUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobProcessUnhealthy ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobEphemeralDiskPredictWillFill ;\
-	${CI_DIR}/autoscaler/scripts/silence_prometheus_alert.sh BOSHJobUnhealthy ;
 
 
 .PHONY: docker-login docker docker-image
