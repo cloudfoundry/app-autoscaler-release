@@ -198,7 +198,7 @@ var _ = Describe("Config", func() {
 				})
 			})
 
-			Context("when scaling engine sync interval is not a time duration", func() {
+			When("scaling engine sync interval is not a time duration", func() {
 				BeforeEach(func() {
 					configBytes = []byte(`
 scaling_engine:
@@ -211,7 +211,7 @@ scaling_engine:
 				})
 			})
 
-			Context("when scheduler sync interval is not a time duration", func() {
+			When("scheduler sync interval is not a time duration", func() {
 				BeforeEach(func() {
 					configBytes = []byte(`
 scheduler:
@@ -224,7 +224,7 @@ scheduler:
 				})
 			})
 
-			Context("when http_client_timeout of http is not a time duration", func() {
+			When("http_client_timeout of http is not a time duration", func() {
 				BeforeEach(func() {
 					configBytes = []byte(`http_client_timeout: 10k`)
 				})
@@ -275,13 +275,13 @@ scheduler:
 				err = conf.Validate()
 			})
 
-			Context("when all the configs are valid", func() {
+			When("all the configs are valid", func() {
 				It("should not error", func() {
 					Expect(err).NotTo(HaveOccurred())
 				})
 			})
 
-			Context("when AppMetrics db url is not set", func() {
+			When("AppMetrics db url is not set", func() {
 
 				BeforeEach(func() {
 					conf.Db[db.AppMetricsDb] = db.DatabaseConfig{}
@@ -293,7 +293,7 @@ scheduler:
 				})
 			})
 
-			Context("when ScalingEngine db url is not set", func() {
+			When("ScalingEngine db url is not set", func() {
 
 				BeforeEach(func() {
 					conf.Db[db.ScalingEngineDb] = db.DatabaseConfig{}
@@ -304,7 +304,7 @@ scheduler:
 				})
 			})
 
-			Context("when AppSyncer db url is not set", func() {
+			When("AppSyncer db url is not set", func() {
 
 				BeforeEach(func() {
 					conf.Db[db.PolicyDb] = db.DatabaseConfig{}
@@ -315,7 +315,7 @@ scheduler:
 				})
 			})
 
-			Context("when AppSyncer sync interval is set to a negative value", func() {
+			When("AppSyncer sync interval is set to a negative value", func() {
 
 				BeforeEach(func() {
 					conf.AppSyncer.SyncInterval = -1
@@ -326,7 +326,7 @@ scheduler:
 				})
 			})
 
-			Context("when AppMetrics db refresh interval in hours is set to a negative value", func() {
+			When("AppMetrics db refresh interval in hours is set to a negative value", func() {
 
 				BeforeEach(func() {
 					conf.AppMetricsDb.RefreshInterval = -1
@@ -337,7 +337,7 @@ scheduler:
 				})
 			})
 
-			Context("when ScalingEngine db refresh interval in hours is set to a negative value", func() {
+			When("ScalingEngine db refresh interval in hours is set to a negative value", func() {
 
 				BeforeEach(func() {
 					conf.ScalingEngineDb.RefreshInterval = -1
@@ -348,7 +348,7 @@ scheduler:
 				})
 			})
 
-			Context("when AppMetrics db cutoff duration is set to a negative value", func() {
+			When("AppMetrics db cutoff duration is set to a negative value", func() {
 
 				BeforeEach(func() {
 					conf.AppMetricsDb.CutoffDuration = -1
@@ -359,7 +359,7 @@ scheduler:
 				})
 			})
 
-			Context("when ScalingEngine db cutoff duration is set to a negative value", func() {
+			When("ScalingEngine db cutoff duration is set to a negative value", func() {
 
 				BeforeEach(func() {
 					conf.ScalingEngineDb.CutoffDuration = -1
@@ -370,7 +370,7 @@ scheduler:
 				})
 			})
 
-			Context("when ScalingEngine url is not set", func() {
+			When("ScalingEngine url is not set", func() {
 
 				BeforeEach(func() {
 					conf.ScalingEngine.URL = ""
@@ -381,7 +381,7 @@ scheduler:
 				})
 			})
 
-			Context("when Scheduler url is not set", func() {
+			When("Scheduler url is not set", func() {
 
 				BeforeEach(func() {
 					conf.Scheduler.URL = ""
@@ -392,7 +392,7 @@ scheduler:
 				})
 			})
 
-			Context("when ScalingEngine sync interval is set to 0", func() {
+			When("ScalingEngine sync interval is set to 0", func() {
 
 				BeforeEach(func() {
 					conf.ScalingEngine.SyncInterval = 0
@@ -403,7 +403,7 @@ scheduler:
 				})
 			})
 
-			Context("when Scheduler sync interval is set to 0", func() {
+			When("Scheduler sync interval is set to 0", func() {
 
 				BeforeEach(func() {
 					conf.Scheduler.SyncInterval = 0
@@ -414,7 +414,7 @@ scheduler:
 				})
 			})
 
-			Context("when db lockdb url is empty", func() {
+			When("db lockdb url is empty", func() {
 
 				BeforeEach(func() {
 					conf.Db[db.LockDb] = db.DatabaseConfig{}
@@ -425,7 +425,7 @@ scheduler:
 				})
 			})
 
-			Context("when HttpClientTimeout is <= 0", func() {
+			When("HttpClientTimeout is <= 0", func() {
 				BeforeEach(func() {
 					conf.HttpClientTimeout = 0
 				})
