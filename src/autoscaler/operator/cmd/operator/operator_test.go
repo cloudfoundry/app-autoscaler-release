@@ -2,13 +2,14 @@ package main_test
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
@@ -334,10 +335,11 @@ var _ = Describe("Operator", Serial, func() {
 
 	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
-			basicAuthConfig := cfg
-			basicAuthConfig.Health.BasicAuth.Username = ""
-			basicAuthConfig.Health.BasicAuth.Password = ""
-			runner.configPath = writeConfig(&basicAuthConfig).Name()
+			cfg.Health.BasicAuth = models.BasicAuth{
+				Username: "",
+				Password: "",
+			}
+			runner.configPath = writeConfig(&cfg).Name()
 
 			runner.Start()
 			Eventually(runner.Session.Buffer, 2*time.Second).Should(Say("operator.started"))
@@ -347,19 +349,11 @@ var _ = Describe("Operator", Serial, func() {
 			runner.ClearLockDatabase()
 		})
 
-		Context("when a request to query health comes", func() {
+		When("a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := healthHttpClient.Get(healthURL.String())
-				Expect(err).NotTo(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-				raw, _ := io.ReadAll(rsp.Body)
-				healthData := string(raw)
-				Expect(healthData).To(ContainSubstring("autoscaler_operator_policyDB"))
-				Expect(healthData).To(ContainSubstring("autoscaler_operator_scalingEngineDB"))
-				Expect(healthData).To(ContainSubstring("go_goroutines"))
-				Expect(healthData).To(ContainSubstring("go_memstats_alloc_bytes"))
-				rsp.Body.Close()
-
+				testhelpers.CheckHealthResponse(healthHttpClient, healthURL.String(), []string{
+					"autoscaler_operator_policyDB", "autoscaler_operator_scalingEngineDB", "go_goroutines", "go_memstats_alloc_bytes",
+				})
 			})
 		})
 	})

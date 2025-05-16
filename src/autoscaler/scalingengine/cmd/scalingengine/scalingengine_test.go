@@ -1,11 +1,11 @@
 package main_test
 
 import (
-	"io"
 	"strconv"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -175,19 +175,11 @@ var _ = Describe("Main", func() {
 
 		When("a request to query health comes", func() {
 			It("returns with a 200", func() {
-				rsp, err := httpClient.Get(healthURL.String())
-				Expect(err).NotTo(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-				raw, _ := io.ReadAll(rsp.Body)
-				healthData := string(raw)
-				Expect(healthData).To(ContainSubstring("autoscaler_scalingengine_concurrent_http_request"))
-				Expect(healthData).To(ContainSubstring("autoscaler_scalingengine_schedulerDB"))
-				Expect(healthData).To(ContainSubstring("autoscaler_scalingengine_policyDB"))
-				Expect(healthData).To(ContainSubstring("autoscaler_scalingengine_scalingengineDB"))
-				Expect(healthData).To(ContainSubstring("go_goroutines"))
-				Expect(healthData).To(ContainSubstring("go_memstats_alloc_bytes"))
-				rsp.Body.Close()
-
+				testhelpers.CheckHealthResponse(httpClient, healthURL.String(), []string{
+					"autoscaler_scalingengine_concurrent_http_request", "autoscaler_scalingengine_schedulerDB",
+					"autoscaler_scalingengine_policyDB", "autoscaler_scalingengine_scalingengineDB",
+					"go_goroutines", "go_memstats_alloc_bytes",
+				})
 			})
 		})
 	})

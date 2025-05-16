@@ -127,6 +127,7 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 }
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	tlsCerts := vcapReader.GetInstanceTLSCerts()
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}
@@ -143,11 +144,12 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	conf.Scheduler.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
-	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
+	conf.Scheduler.TLSClientCerts = tlsCerts
+	conf.ScalingEngine.TLSClientCerts = tlsCerts
 
 	return nil
 }
+
 func loadOperatorConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	var raw string
 	data, err := vcapReader.GetServiceCredentialContent("operator-config", "operator-config")
