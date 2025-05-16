@@ -441,8 +441,3 @@ var _ = Describe("Operator", Serial, func() {
 		})
 	})
 })
-
-func getVcapServices() (result string) {
-	result = `{}`
-	return result
-}

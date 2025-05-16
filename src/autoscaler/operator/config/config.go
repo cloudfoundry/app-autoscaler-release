@@ -147,7 +147,6 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 
 	return nil
-
 }
 func loadOperatorConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	var raw string

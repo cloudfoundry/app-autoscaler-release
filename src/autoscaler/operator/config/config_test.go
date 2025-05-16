@@ -11,7 +11,6 @@ import (
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/config"
-	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/config"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -19,7 +18,7 @@ import (
 
 var _ = Describe("Config", func() {
 	var (
-		conf                        *Config
+		conf                        *config.Config
 		err                         error
 		configFile                  string
 		configBytes                 []byte
@@ -49,7 +48,7 @@ var _ = Describe("Config", func() {
 			})
 
 			JustBeforeEach(func() {
-				conf, err = LoadConfig("", mockVCAPConfigurationReader)
+				conf, err = config.LoadConfig("", mockVCAPConfigurationReader)
 			})
 
 			It("should set logging to plain sink", func() {
@@ -84,7 +83,7 @@ var _ = Describe("Config", func() {
 				})
 
 				It("should error with config service not found", func() {
-					Expect(errors.Is(err, ErrOperatorConfigNotFound)).To(BeTrue())
+					Expect(errors.Is(err, config.ErrOperatorConfigNotFound)).To(BeTrue())
 				})
 			})
 		})
@@ -92,7 +91,7 @@ var _ = Describe("Config", func() {
 		When("config is read from file", func() {
 			JustBeforeEach(func() {
 				configFile = testhelpers.BytesToFile(configBytes)
-				conf, err = LoadConfig(configFile, mockVCAPConfigurationReader)
+				conf, err = config.LoadConfig(configFile, mockVCAPConfigurationReader)
 			})
 
 			Context("with invalid yaml", func() {
@@ -244,7 +243,7 @@ scheduler:
 
 		Describe("Validate", func() {
 			BeforeEach(func() {
-				conf = &Config{}
+				conf = &config.Config{}
 
 				conf.Db = make(map[string]db.DatabaseConfig)
 				conf.Db[db.PolicyDb] = db.DatabaseConfig{
