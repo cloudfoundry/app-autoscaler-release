@@ -571,17 +571,18 @@ jobs:
   - put: mtar-bucket
     params:
       file: "build/artifacts/app-autoscaler-release-v*.mtar"
+  - put: app-autoscaler-release
+    params:
+      rebase: true
+      repository: app-autoscaler-release
+      tag: build/tag # ⚠️ Remove this again, if it breaks the subsequent step.
   - put: gh-release
     params:
       name: build/name
       tag: build/tag
       body: build/changelog.md
       globs: [build/artifacts/*]
-      commitish: app-autoscaler-release/.git/ref
-  - put: app-autoscaler-release
-    params:
-      rebase: true
-      repository: app-autoscaler-release
+      commitish: "main"
 
 - name: cleanup-autoscaler-deployments
   public: true
