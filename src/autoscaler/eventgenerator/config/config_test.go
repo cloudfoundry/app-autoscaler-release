@@ -23,10 +23,25 @@ var _ = Describe("Config", func() {
 		configBytes                 []byte
 		configFile                  string
 		mockVCAPConfigurationReader *fakes.FakeVCAPConfigurationReader
+		expectedDbConfig            map[string]db.DatabaseConfig
 	)
 
 	BeforeEach(func() {
 		mockVCAPConfigurationReader = &fakes.FakeVCAPConfigurationReader{}
+		expectedDbConfig = map[string]db.DatabaseConfig{
+			"policy_db": {
+				URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
+				MaxOpenConnections:    10,
+				MaxIdleConnections:    5,
+				ConnectionMaxLifetime: 60 * time.Second,
+			},
+			"appmetrics_db": {
+				URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
+				MaxOpenConnections:    10,
+				MaxIdleConnections:    5,
+				ConnectionMaxLifetime: 60 * time.Second,
+			},
+		}
 	})
 
 	Describe("LoadConfig", func() {
@@ -192,20 +207,7 @@ circuitBreaker:
 								Port: 9999,
 							},
 						},
-						Db: map[string]db.DatabaseConfig{
-							"policy_db": {
-								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-								MaxOpenConnections:    10,
-								MaxIdleConnections:    5,
-								ConnectionMaxLifetime: 60 * time.Second,
-							},
-							"appmetrics_db": {
-								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-								MaxOpenConnections:    10,
-								MaxIdleConnections:    5,
-								ConnectionMaxLifetime: 60 * time.Second,
-							},
-						},
+						Db: expectedDbConfig,
 						Aggregator: &AggregatorConfig{
 							AggregatorExecuteInterval: 30 * time.Second,
 							PolicyPollerInterval:      30 * time.Second,
@@ -1173,20 +1175,7 @@ health:
 						TotalInstances: 2,
 						InstanceIndex:  0,
 					},
-					Db: map[string]db.DatabaseConfig{
-						"policy_db": {
-							URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-							MaxOpenConnections:    10,
-							MaxIdleConnections:    5,
-							ConnectionMaxLifetime: 60 * time.Second,
-						},
-						"appmetrics_db": {
-							URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-							MaxOpenConnections:    10,
-							MaxIdleConnections:    5,
-							ConnectionMaxLifetime: 60 * time.Second,
-						},
-					},
+					Db: expectedDbConfig,
 					Aggregator: &AggregatorConfig{
 						AggregatorExecuteInterval: 30 * time.Second,
 						PolicyPollerInterval:      30 * time.Second,
