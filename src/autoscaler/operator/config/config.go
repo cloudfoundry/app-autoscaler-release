@@ -127,10 +127,11 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 }
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	tlsCerts := vcapReader.GetInstanceTLSCerts()
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}
+
+	tlsCerts := vcapReader.GetInstanceTLSCerts()
 
 	// enable plain text logging. See src/autoscaler/helpers/logger.go
 	conf.Logging.PlainTextSink = true

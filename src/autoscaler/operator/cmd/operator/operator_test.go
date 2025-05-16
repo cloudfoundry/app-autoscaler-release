@@ -32,7 +32,7 @@ var _ = Describe("Operator", Serial, func() {
 		initConfig()
 		runner = NewOperatorRunner()
 
-		healthURL, err = url.Parse(fmt.Sprintf("http://127.0.0.1:%d", cfg.Health.ServerConfig.Port))
+		healthURL, err = url.Parse(fmt.Sprintf("http://127.0.0.1:%d", conf.Health.ServerConfig.Port))
 		Expect(err).NotTo(HaveOccurred())
 
 		healthHttpClient = &http.Client{}
@@ -46,7 +46,7 @@ var _ = Describe("Operator", Serial, func() {
 
 		BeforeEach(func() {
 			runner.startCheck = ""
-			runner.configPath = writeConfig(&cfg).Name()
+			runner.configPath = writeConfig(&conf).Name()
 		})
 
 		AfterEach(func() {
@@ -88,10 +88,10 @@ var _ = Describe("Operator", Serial, func() {
 		Context("with missing/invalid configuration", func() {
 			BeforeEach(func() {
 
-				cfg.AppMetricsDb.CutoffDuration = -1
+				conf.AppMetricsDb.CutoffDuration = -1
 
-				cfg := writeConfig(&cfg)
-				runner.configPath = cfg.Name()
+				conf := writeConfig(&conf)
+				runner.configPath = conf.Name()
 				runner.Start()
 			})
 
@@ -147,10 +147,10 @@ var _ = Describe("Operator", Serial, func() {
 				Eventually(runner.Session.Buffer, 5*time.Second).Should(Say("operator.started"))
 				secondRunner = NewOperatorRunner()
 				secondRunner.startCheck = ""
-				cfg.Health.BasicAuth.Username = ""
-				cfg.Health.BasicAuth.Password = ""
-				cfg.Health.ServerConfig.Port = 9000 + GinkgoParallelProcess()
-				secondRunner.configPath = writeConfig(&cfg).Name()
+				conf.Health.BasicAuth.Username = ""
+				conf.Health.BasicAuth.Password = ""
+				conf.Health.ServerConfig.Port = 9000 + GinkgoParallelProcess()
+				secondRunner.configPath = writeConfig(&conf).Name()
 				secondRunner.Start()
 
 			})
@@ -164,7 +164,7 @@ var _ = Describe("Operator", Serial, func() {
 				Consistently(secondRunner.Session.Buffer, 5*time.Second).ShouldNot(Say("operator.successfully-acquired-lock"))
 
 				By("checking the health endpoint of the standing-by instance")
-				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d/health", cfg.Health.ServerConfig.Port))
+				rsp, err := healthHttpClient.Get(fmt.Sprintf("http://127.0.0.1:%d/health", conf.Health.ServerConfig.Port))
 				Expect(err).NotTo(HaveOccurred())
 				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
 
@@ -180,10 +180,10 @@ var _ = Describe("Operator", Serial, func() {
 				secondRunner = NewOperatorRunner()
 				secondRunner.startCheck = ""
 
-				cfg.Health.BasicAuth.Username = ""
-				cfg.Health.BasicAuth.Password = ""
-				cfg.Health.ServerConfig.Port = 9000 + GinkgoParallelProcess()
-				secondRunner.configPath = writeConfig(&cfg).Name()
+				conf.Health.BasicAuth.Username = ""
+				conf.Health.BasicAuth.Password = ""
+				conf.Health.ServerConfig.Port = 9000 + GinkgoParallelProcess()
+				secondRunner.configPath = writeConfig(&conf).Name()
 				secondRunner.Start()
 			})
 
@@ -224,8 +224,8 @@ var _ = Describe("Operator", Serial, func() {
 				runner.Start()
 				Eventually(runner.Session.Buffer, 10*time.Second).Should(Say("operator.started"))
 				secondRunner = NewOperatorRunner()
-				cfg.Health.ServerConfig.Port = 9000 + GinkgoParallelProcess()
-				secondRunner.configPath = writeConfig(&cfg).Name()
+				conf.Health.ServerConfig.Port = 9000 + GinkgoParallelProcess()
+				secondRunner.configPath = writeConfig(&conf).Name()
 				secondRunner.startCheck = ""
 				secondRunner.Start()
 				Consistently(secondRunner.Session.Buffer, 10*time.Second).ShouldNot(Say("operator.lock-acquired-in-first-attempt"))
@@ -247,7 +247,7 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when the operator acquires the lock", func() {
 			JustBeforeEach(func() {
-				runner.configPath = writeConfig(&cfg).Name()
+				runner.configPath = writeConfig(&conf).Name()
 				runner.Start()
 			})
 
@@ -270,12 +270,12 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when connection to appmetrics db fails", func() {
 			BeforeEach(func() {
-				cfg.Db["appmetrics_db"] = db.DatabaseConfig{
+				conf.Db["appmetrics_db"] = db.DatabaseConfig{
 					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
 				}
 
-				cfg := writeConfig(&cfg)
-				runner.configPath = cfg.Name()
+				conf := writeConfig(&conf)
+				runner.configPath = conf.Name()
 				runner.Start()
 			})
 
@@ -292,11 +292,11 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when connection to scalingengine db fails", func() {
 			BeforeEach(func() {
-				cfg.Db["scalingengine_db"] = db.DatabaseConfig{
+				conf.Db["scalingengine_db"] = db.DatabaseConfig{
 					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
 				}
-				cfg := writeConfig(&cfg)
-				runner.configPath = cfg.Name()
+				conf := writeConfig(&conf)
+				runner.configPath = conf.Name()
 				runner.Start()
 			})
 
@@ -313,11 +313,11 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when connection to apsyncer policy db fails", func() {
 			BeforeEach(func() {
-				cfg.Db["policy_db"] = db.DatabaseConfig{
+				conf.Db["policy_db"] = db.DatabaseConfig{
 					URL: "postgres://not-exist-user:not-exist-password@localhost/autoscaler?sslmode=disable",
 				}
-				cfg := writeConfig(&cfg)
-				runner.configPath = cfg.Name()
+				conf := writeConfig(&conf)
+				runner.configPath = conf.Name()
 				runner.Start()
 			})
 
@@ -335,11 +335,11 @@ var _ = Describe("Operator", Serial, func() {
 
 	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
-			cfg.Health.BasicAuth = models.BasicAuth{
+			conf.Health.BasicAuth = models.BasicAuth{
 				Username: "",
 				Password: "",
 			}
-			runner.configPath = writeConfig(&cfg).Name()
+			runner.configPath = writeConfig(&conf).Name()
 
 			runner.Start()
 			Eventually(runner.Session.Buffer, 2*time.Second).Should(Say("operator.started"))
@@ -371,26 +371,13 @@ var _ = Describe("Operator", Serial, func() {
 
 		Context("when username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth("wrongusername", "wrongpassword")
-
-				rsp, err := healthHttpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
+				testhelpers.CheckHealthAuth(GinkgoT(), healthHttpClient, healthURL.String(), "wrongusername", "wrongpassword", http.StatusUnauthorized)
 			})
 		})
 
 		Context("when username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://127.0.0.1:%d/health", healthport), nil)
-				Expect(err).NotTo(HaveOccurred())
-				req.SetBasicAuth(cfg.Health.BasicAuth.Username, cfg.Health.BasicAuth.Password)
-				rsp, err := healthHttpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+				testhelpers.CheckHealthAuth(GinkgoT(), healthHttpClient, healthURL.String(), conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password, http.StatusOK)
 			})
 		})
 	})

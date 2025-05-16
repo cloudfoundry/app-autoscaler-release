@@ -180,6 +180,7 @@ var _ = Describe("Main", func() {
 					"autoscaler_scalingengine_policyDB", "autoscaler_scalingengine_scalingengineDB",
 					"go_goroutines", "go_memstats_alloc_bytes",
 				})
+
 			})
 		})
 	})
@@ -191,62 +192,13 @@ var _ = Describe("Main", func() {
 
 		When("username and password are incorrect for basic authentication during health check", func() {
 			It("should return 401", func() {
-				req, err := http.NewRequest(http.MethodGet, healthURL.String(), nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth("wrongusername", "wrongpassword")
-
-				rsp, err := httpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
+				testhelpers.CheckHealthAuth(GinkgoT(), httpClient, healthURL.String(), "wrongusername", "wrongpassword", http.StatusUnauthorized)
 			})
 		})
 
 		When("username and password are correct for basic authentication during health check", func() {
 			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, healthURL.String(), nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
-
-				rsp, err := httpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
-			})
-		})
-	})
-
-	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
-		BeforeEach(func() {
-			healthURL.Path = "/health"
-		})
-
-		When("username and password are incorrect for basic authentication during health check", func() {
-			It("should return 401", func() {
-
-				req, err := http.NewRequest(http.MethodGet, healthURL.String(), nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth("wrongusername", "wrongpassword")
-
-				rsp, err := httpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusUnauthorized))
-			})
-		})
-
-		When("username and password are correct for basic authentication during health check", func() {
-			It("should return 200", func() {
-
-				req, err := http.NewRequest(http.MethodGet, healthURL.String(), nil)
-				Expect(err).NotTo(HaveOccurred())
-
-				req.SetBasicAuth(conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password)
-
-				rsp, err := httpClient.Do(req)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(rsp.StatusCode).To(Equal(http.StatusOK))
+				testhelpers.CheckHealthAuth(GinkgoT(), httpClient, healthURL.String(), conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password, http.StatusOK)
 			})
 		})
 	})
