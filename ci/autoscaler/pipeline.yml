@@ -582,7 +582,6 @@ jobs:
     params:
       rebase: true
       repository: app-autoscaler-release
-      tag: build/tag
 
 - name: cleanup-autoscaler-deployments
   public: true
