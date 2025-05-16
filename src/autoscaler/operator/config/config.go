@@ -123,8 +123,6 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 		return nil, err
 	}
 
-	conf.Scheduler.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
-	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 	return &conf, nil
 }
 
@@ -144,6 +142,9 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	if err := vcapReader.ConfigureDatabases(&conf.Db, nil, ""); err != nil {
 		return err
 	}
+
+	conf.Scheduler.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
+	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 
 	return nil
 
