@@ -23,10 +23,25 @@ var _ = Describe("Config", func() {
 		configBytes                 []byte
 		configFile                  string
 		mockVCAPConfigurationReader *fakes.FakeVCAPConfigurationReader
+		expectedDbConfig            map[string]db.DatabaseConfig
 	)
 
 	BeforeEach(func() {
 		mockVCAPConfigurationReader = &fakes.FakeVCAPConfigurationReader{}
+		expectedDbConfig = map[string]db.DatabaseConfig{
+			"policy_db": {
+				URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
+				MaxOpenConnections:    10,
+				MaxIdleConnections:    5,
+				ConnectionMaxLifetime: 60 * time.Second,
+			},
+			"appmetrics_db": {
+				URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
+				MaxOpenConnections:    10,
+				MaxIdleConnections:    5,
+				ConnectionMaxLifetime: 60 * time.Second,
+			},
+		}
 	})
 
 	Describe("LoadConfig", func() {
@@ -128,7 +143,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -192,20 +207,7 @@ circuitBreaker:
 								Port: 9999,
 							},
 						},
-						Db: map[string]db.DatabaseConfig{
-							"policy_db": {
-								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-								MaxOpenConnections:    10,
-								MaxIdleConnections:    5,
-								ConnectionMaxLifetime: 60 * time.Second,
-							},
-							"app_metrics_db": {
-								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-								MaxOpenConnections:    10,
-								MaxIdleConnections:    5,
-								ConnectionMaxLifetime: 60 * time.Second,
-							},
-						},
+						Db: expectedDbConfig,
 						Aggregator: &AggregatorConfig{
 							AggregatorExecuteInterval: 30 * time.Second,
 							PolicyPollerInterval:      30 * time.Second,
@@ -256,7 +258,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -291,7 +293,7 @@ defaultBreachDurationSecs: 600
 db:
   policy_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
 scalingEngine:
   scaling_engine_url: http://localhost:8082
@@ -335,7 +337,7 @@ defaultBreachDurationSecs: 600
 								MaxIdleConnections:    0,
 								ConnectionMaxLifetime: 0 * time.Second,
 							},
-							"app_metrics_db": {
+							"appmetrics_db": {
 
 								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
 								MaxOpenConnections:    0,
@@ -385,7 +387,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -425,7 +427,7 @@ db:
     max_open_connections: NOT-INTEGER-VALUE
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -465,7 +467,7 @@ db:
     max_open_connections: 10
     max_idle_connections: NOT-INTEGER-VALUE
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -505,7 +507,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 6k
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -545,7 +547,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: NOT-INTEGER-VALUE
     max_idle_connections: 5
@@ -585,7 +587,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: NOT-INTEGER-VALUE
@@ -625,7 +627,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -665,7 +667,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -705,7 +707,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -745,7 +747,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -786,7 +788,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -826,7 +828,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -932,7 +934,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -972,7 +974,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -1011,7 +1013,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -1051,7 +1053,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -1090,7 +1092,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -1130,7 +1132,7 @@ db:
     max_open_connections: 10
     max_idle_connections: 5
     connection_max_lifetime: 60s
-  app_metrics_db:
+  appmetrics_db:
     url: postgres://postgres:password@localhost/autoscaler?sslmode=disable
     max_open_connections: 10
     max_idle_connections: 5
@@ -1173,20 +1175,7 @@ health:
 						TotalInstances: 2,
 						InstanceIndex:  0,
 					},
-					Db: map[string]db.DatabaseConfig{
-						"policy_db": {
-							URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-							MaxOpenConnections:    10,
-							MaxIdleConnections:    5,
-							ConnectionMaxLifetime: 60 * time.Second,
-						},
-						"app_metrics_db": {
-							URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-							MaxOpenConnections:    10,
-							MaxIdleConnections:    5,
-							ConnectionMaxLifetime: 60 * time.Second,
-						},
-					},
+					Db: expectedDbConfig,
 					Aggregator: &AggregatorConfig{
 						AggregatorExecuteInterval: 30 * time.Second,
 						PolicyPollerInterval:      30 * time.Second,

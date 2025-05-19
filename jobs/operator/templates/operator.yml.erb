@@ -53,8 +53,6 @@ cf:
   idle_connection_timeout_ms: <%= p("autoscaler.cf.idle_connection_timeout_ms") %>
   max_idle_conns_per_host_ms: <%= p("autoscaler.cf.max_idle_conns_per_host_ms") %>
 
-
-
 logging:
   level: <%= p("autoscaler.operator.logging.level") %>
 health:
@@ -72,21 +70,33 @@ health:
 
 http_client_timeout: <%= p("autoscaler.operator.http_client_timeout") %>
 
-app_metrics_db:
-  db:
+db:
+  appmetrics_db:
     url: <%= app_metrics_db_url %>
     max_open_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.appmetrics_db_connection_config.connection_max_lifetime") %>
-  refresh_interval: <%= p("autoscaler.operator.app_metrics_db.refresh_interval") %>
-  cutoff_duration: <%= p("autoscaler.operator.app_metrics_db.cutoff_duration") %>
-
-scaling_engine_db:
-  db:
+  scalingengine_db:
     url: <%= scaling_engine_db_url %>
     max_open_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.scalingengine_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.scalingengine_db_connection_config.connection_max_lifetime") %>
+  policy_db:
+    url: <%= policy_db_url %>
+    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
+  lock_db:
+    url: <%= lock_db_url %>
+    max_open_connections: <%= p("autoscaler.lock_db_connection_config.max_open_connections") %>
+    max_idle_connections: <%= p("autoscaler.lock_db_connection_config.max_idle_connections") %>
+    connection_max_lifetime: <%= p("autoscaler.lock_db_connection_config.connection_max_lifetime") %>
+
+app_metrics_db:
+  refresh_interval: <%= p("autoscaler.operator.app_metrics_db.refresh_interval") %>
+  cutoff_duration: <%= p("autoscaler.operator.app_metrics_db.cutoff_duration") %>
+
+scaling_engine_db:
   refresh_interval: <%= p("autoscaler.operator.scaling_engine_db.refresh_interval") %>
   cutoff_duration: <%= p("autoscaler.operator.scaling_engine_db.cutoff_duration") %>
 
@@ -107,18 +117,8 @@ scheduler:
     ca_file: /var/vcap/jobs/operator/config/certs/scheduler/ca.crt
 
 app_syncer:
-  db:
-    url: <%= policy_db_url %>
-    max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
-    max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
-    connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
   sync_interval:  <%= p("autoscaler.operator.app_sync_interval")  %>
 
 db_lock:
   ttl:  <%= p("autoscaler.operator.db_lock.ttl") %>
   retry_interval: <%= p("autoscaler.operator.db_lock.retry_interval") %>
-  db:
-    url: <%= lock_db_url %>
-    max_open_connections: <%= p("autoscaler.lock_db_connection_config.max_open_connections") %>
-    max_idle_connections: <%= p("autoscaler.lock_db_connection_config.max_idle_connections") %>
-    connection_max_lifetime: <%= p("autoscaler.lock_db_connection_config.connection_max_lifetime") %>
