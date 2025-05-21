@@ -13,12 +13,14 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"github.com/cloud-gov/go-cfenv"
+	"gopkg.in/yaml.v3"
 )
 
 var (
-	ErrDbServiceNotFound = errors.New("failed to get service by name")
-	ErrMissingCredential = errors.New("failed to get required credential from service")
-	AvailableDatabases   = []string{db.PolicyDb, db.BindingDb, db.AppMetricsDb, db.LockDb, db.ScalingEngineDb}
+	ErrServiceConfigNotFound = errors.New("vcap_services config not found")
+	ErrDbServiceNotFound     = errors.New("failed to get service by name")
+	ErrMissingCredential     = errors.New("failed to get required credential from service")
+	AvailableDatabases       = []string{db.PolicyDb, db.BindingDb, db.AppMetricsDb, db.LockDb, db.ScalingEngineDb, db.SchedulerDb}
 )
 
 type VCAPConfigurationReader interface {
@@ -287,6 +289,19 @@ func (vc *VCAPConfiguration) configureDb(dbName string, confDb *map[string]db.Da
 	(*confDb)[dbName] = currentDb
 
 	return nil
+}
+
+func LoadConfig[T any](conf *T, vcapReader VCAPConfigurationReader, credentialName string) error {
+	data, err := vcapReader.GetServiceCredentialContent(credentialName, credentialName)
+	if err != nil {
+		return fmt.Errorf("%w: %v", ErrServiceConfigNotFound, err)
+	}
+
+	var raw string
+	if json.Unmarshal(data, &raw) == nil {
+		return yaml.Unmarshal([]byte(raw), conf)
+	}
+	return yaml.Unmarshal(data, conf)
 }
 
 func (vc *VCAPConfiguration) ConfigureDatabases(confDb *map[string]db.DatabaseConfig, storedProcedureConfig *models.StoredProcedureConfig, credHelperImpl string) error {

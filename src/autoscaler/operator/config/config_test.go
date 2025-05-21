@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/testhelpers"
@@ -78,7 +79,7 @@ var _ = Describe("Config", func() {
 				})
 
 				It("should error with config service not found", func() {
-					Expect(errors.Is(err, config.ErrOperatorConfigNotFound)).To(BeTrue())
+					Expect(errors.Is(err, configutil.ErrServiceConfigNotFound)).To(BeTrue())
 				})
 			})
 		})
@@ -115,7 +116,7 @@ var _ = Describe("Config", func() {
 					Expect(conf.Logging.Level).To(Equal("debug"))
 
 					Expect(conf.Db[db.AppMetricsDb]).To(Equal(db.DatabaseConfig{
-						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
+						URL:                   "postgres://localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    10,
 						MaxIdleConnections:    5,
 						ConnectionMaxLifetime: 60 * time.Second,
@@ -124,7 +125,7 @@ var _ = Describe("Config", func() {
 					Expect(conf.AppMetricsDb.CutoffDuration).To(Equal(15 * time.Hour))
 
 					Expect(conf.Db[db.ScalingEngineDb]).To(Equal(db.DatabaseConfig{
-						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
+						URL:                   "postgres://localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    10,
 						MaxIdleConnections:    5,
 						ConnectionMaxLifetime: 60 * time.Second,
@@ -135,14 +136,14 @@ var _ = Describe("Config", func() {
 					Expect(conf.DBLock.LockTTL).To(Equal(15 * time.Second))
 					Expect(conf.DBLock.LockRetryInterval).To(Equal(5 * time.Second))
 					Expect(conf.Db[db.LockDb]).To(Equal(db.DatabaseConfig{
-						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
+						URL:                   "postgres://localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    10,
 						MaxIdleConnections:    5,
 						ConnectionMaxLifetime: 60 * time.Second,
 					}))
 
 					Expect(conf.Db[db.PolicyDb]).To(Equal(db.DatabaseConfig{
-						URL:                   "postgres://postgres:postgres@localhost/autoscaler?sslmode=disable",
+						URL:                   "postgres://localhost/autoscaler?sslmode=disable",
 						MaxOpenConnections:    10,
 						MaxIdleConnections:    5,
 						ConnectionMaxLifetime: 60 * time.Second,

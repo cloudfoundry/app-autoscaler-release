@@ -437,16 +437,10 @@ func (components *Components) PrepareScalingEngineConfig(dbURI string, port int,
 		Logging: helpers.LoggingConfig{
 			Level: LOGLEVEL,
 		},
-		DB: seConfig.DBConfig{
-			PolicyDB: db.DatabaseConfig{
-				URL: dbURI,
-			},
-			ScalingEngineDB: db.DatabaseConfig{
-				URL: dbURI,
-			},
-			SchedulerDB: db.DatabaseConfig{
-				URL: dbURI,
-			},
+		Db: map[string]db.DatabaseConfig{
+			"policy_db":        {URL: dbURI},
+			"scalingengine_db": {URL: dbURI},
+			"scheduler_db":     {URL: dbURI},
 		},
 		DefaultCoolDownSecs: 300,
 		LockSize:            32,

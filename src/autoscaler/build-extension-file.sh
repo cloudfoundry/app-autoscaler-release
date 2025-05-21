@@ -32,7 +32,7 @@ eventgenerator_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler
 eventgenerator_log_cache_uaa_client_id: eventgenerator_log_cache
 eventgenerator_log_cache_uaa_client_secret: ((/bosh-autoscaler/cf/uaa_clients_eventgenerator_log_cache_secret))
 
-
+scalingengine_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_scalingengine_health_password))
 
 policy_db_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/database_password))
 policy_db_server_ca: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_server.ca))
@@ -65,11 +65,17 @@ export EVENTGENERATOR_HOST="${EVENTGENERATOR_HOST:-"${DEPLOYMENT_NAME}-eventgene
 export EVENTGENERATOR_INSTANCES="${EVENTGENERATOR_INSTANCES:-2}"
 
 
+export SCALINGENGINE_CF_CLIENT_ID="autoscaler_client_id"
+export SCALINGENGINE_CF_CLIENT_SECRET="autoscaler_client_secret"
+export SCALINGENGINE_HEALTH_PASSWORD="$(yq ".scalingengine_health_password" /tmp/mtar-secrets.yml)"
+export SCALINGENGINE_CF_HOST="${SCALINGENGINE_CF_HOST:-"${DEPLOYMENT_NAME}-cf-scalingengine"}"
+export SCALINGENGINE_HOST="${SCALINGENGINE_HOST:-"${DEPLOYMENT_NAME}-scalingengine"}"
+export SCALINGENGINE_INSTANCES="${SCALINGENGINE_INSTANCES:-2}"
+
 export SCHEDULER_HOST="${SCHEDULER_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
 
 export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
 
-export SCALINGENGINE_HOST="${SCALINGENGINE_HOST:-"${DEPLOYMENT_NAME}-cf-scalingengine"}"
 
 export OPERATOR_CF_CLIENT_ID="autoscaler_client_id"
 export OPERATOR_CF_CLIENT_SECRET="autoscaler_client_secret"
@@ -124,6 +130,15 @@ modules:
       routes:
       - route: ${EVENTGENERATOR_CF_HOST}.\${default-domain}
       - route: ${EVENTGENERATOR_HOST}.\${default-domain}
+  - name: scalingengine
+    requires:
+    - name: scalingengine-config
+    - name: database
+    parameters:
+      instances: ${SCALINGENGINE_INSTANCES}
+      routes:
+      - route: ${SCALINGENGINE_CF_HOST}.\${default-domain}
+      - route: ${SCALINGENGINE_HOST}.\${default-domain}
   - name: metricsforwarder
     requires:
     - name: metricsforwarder-config
@@ -149,7 +164,7 @@ resources:
 - name: metricsforwarder-config
   parameters:
     config:
-      metricsforwarder:
+      metricsforwarder-config:
         health:
           basic_auth:
             password: "${METRICSFORWARDER_HEALTH_PASSWORD}"
@@ -172,7 +187,7 @@ resources:
           basic_auth:
             password: "${EVENTGENERATOR_HEALTH_PASSWORD}"
         scalingEngine:
-          scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
+          scaling_engine_url: https://${SCALINGENGINE_CF_HOST}.\${default-domain}
 
 - name: apiserver-config
   parameters:
@@ -192,7 +207,7 @@ resources:
           metrics_forwarder_url: https://${METRICSFORWARDER_HOST}.\${default-domain}
           metrics_forwarder_mtls_url: https://${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
         scaling_engine:
-          scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
+          scaling_engine_url: https://${SCALINGENGINE_CF_HOST}.\${default-domain}
         event_generator:
           event_generator_url: https://${EVENTGENERATOR_CF_HOST}.\${default-domain}
         broker_credentials:
@@ -213,9 +228,21 @@ resources:
           client_id: ${OPERATOR_CF_CLIENT_ID}
           secret: ${OPERATOR_CF_CLIENT_SECRET}
         scaling_engine:
-          scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
+          scaling_engine_url: https://${SCALINGENGINE_CF_HOST}.\${default-domain}
         scheduler:
           scheduler_url: https://${SCHEDULER_HOST}.\${default-domain}
+
+- name: scalingengine-config
+  parameters:
+    config:
+      scalingengine-config:
+        health:
+          basic_auth:
+            password: "${SCALINGENGINE_HEALTH_PASSWORD}"
+        cf:
+          api:  https://api.\${default-domain}
+          client_id: ${SCALINGENGINE_CF_CLIENT_ID}
+          secret: ${SCALINGENGINE_CF_CLIENT_SECRET}
 
 - name: database
   parameters:

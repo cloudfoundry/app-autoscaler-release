@@ -1,87 +1,108 @@
 package config
 
 import (
+	"errors"
 	"fmt"
-	"io"
 	"strings"
 	"time"
 
-	"gopkg.in/yaml.v3"
-
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
+)
+
+var (
+	ErrReadYaml                    = errors.New("failed to read config file")
+	ErrScalingEngineConfigNotFound = errors.New("scalingengine config service not found")
 )
 
 const (
 	DefaultHttpClientTimeout = 5 * time.Second
 )
 
-var defaultCFConfig = cf.Config{
-	ClientConfig: cf.ClientConfig{SkipSSLValidation: false},
-}
-
-var defaultServerConfig = helpers.ServerConfig{
-	Port: 8080,
-}
-
-var defaultHealthConfig = helpers.HealthConfig{
-	ServerConfig: helpers.ServerConfig{
-		Port: 8081,
-	},
-}
-
-var defaultCFServerConfig = helpers.ServerConfig{
-	Port: 8082,
-}
-
-var defaultLoggingConfig = helpers.LoggingConfig{
-	Level: "info",
-}
-
-type DBConfig struct {
-	PolicyDB        db.DatabaseConfig `yaml:"policy_db"`
-	ScalingEngineDB db.DatabaseConfig `yaml:"scalingengine_db"`
-	SchedulerDB     db.DatabaseConfig `yaml:"scheduler_db"`
-}
-
 type SynchronizerConfig struct {
 	ActiveScheduleSyncInterval time.Duration `yaml:"active_schedule_sync_interval"`
 }
 
 type Config struct {
-	CF                  cf.Config             `yaml:"cf"`
-	Logging             helpers.LoggingConfig `yaml:"logging"`
-	Server              helpers.ServerConfig  `yaml:"server"`
-	CFServer            helpers.ServerConfig  `yaml:"cf_server"`
-	Health              helpers.HealthConfig  `yaml:"health"`
-	DB                  DBConfig              `yaml:"db"`
-	DefaultCoolDownSecs int                   `yaml:"defaultCoolDownSecs"`
-	LockSize            int                   `yaml:"lockSize"`
-	HttpClientTimeout   time.Duration         `yaml:"http_client_timeout"`
+	CF                  cf.Config                    `yaml:"cf"`
+	Logging             helpers.LoggingConfig        `yaml:"logging"`
+	Server              helpers.ServerConfig         `yaml:"server"`
+	CFServer            helpers.ServerConfig         `yaml:"cf_server"`
+	Health              helpers.HealthConfig         `yaml:"health"`
+	Db                  map[string]db.DatabaseConfig `yaml:"db" json:"db"`
+	DefaultCoolDownSecs int                          `yaml:"defaultCoolDownSecs"`
+	LockSize            int                          `yaml:"lockSize"`
+	HttpClientTimeout   time.Duration                `yaml:"http_client_timeout"`
 }
 
-func LoadConfig(reader io.Reader) (*Config, error) {
-	conf := &Config{
-		CF:                defaultCFConfig,
-		Logging:           defaultLoggingConfig,
-		Server:            defaultServerConfig,
-		CFServer:          defaultCFServerConfig,
-		Health:            defaultHealthConfig,
-		HttpClientTimeout: DefaultHttpClientTimeout,
+func defaultConfig() Config {
+	return Config{
+		CF: cf.Config{
+			ClientConfig: cf.ClientConfig{SkipSSLValidation: false},
+		},
+		Logging: helpers.LoggingConfig{
+			Level: "info",
+		},
+		CFServer: helpers.ServerConfig{
+			Port: 8082,
+		},
+		Server: helpers.ServerConfig{
+			Port: 8080,
+		},
+		Health: helpers.HealthConfig{
+			ServerConfig: helpers.ServerConfig{
+				Port: 8081,
+			},
+		},
+		Db:                  make(map[string]db.DatabaseConfig),
+		DefaultCoolDownSecs: 300,
+		LockSize:            100,
+		HttpClientTimeout:   DefaultHttpClientTimeout,
+	}
+}
+
+func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
+	conf := defaultConfig()
+
+	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
+		return nil, err
 	}
 
-	dec := yaml.NewDecoder(reader)
-	dec.KnownFields(true)
-	err := dec.Decode(conf)
-
-	if err != nil {
+	if err := loadVcapConfig(&conf, vcapReader); err != nil {
 		return nil, err
 	}
 
 	conf.Logging.Level = strings.ToLower(conf.Logging.Level)
 
-	return conf, nil
+	return &conf, nil
+}
+
+func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+	if !vcapReader.IsRunningOnCF() {
+		return nil
+	}
+
+	// enable plain text logging. See src/autoscaler/helpers/logger.go
+	conf.Logging.PlainTextSink = true
+
+	// Avoid port conflict: assign actual port to CF server, set BOSH server port to 0 (unused)
+	conf.CFServer.Port = vcapReader.GetPort()
+	conf.Server.Port = 0
+
+	if err := configutil.LoadConfig(conf, vcapReader, "scalingengine-config"); err != nil {
+		return err
+	}
+
+	if err := vcapReader.ConfigureDatabases(&conf.Db, nil, ""); err != nil {
+		return err
+	}
+
+	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
+	conf.CFServer.XFCC.ValidOrgGuid = vcapReader.GetOrgGuid()
+
+	return nil
 }
 
 func (c *Config) Validate() error {
@@ -90,15 +111,15 @@ func (c *Config) Validate() error {
 		return err
 	}
 
-	if c.DB.PolicyDB.URL == "" {
+	if c.Db[db.PolicyDb].URL == "" {
 		return fmt.Errorf("Configuration error: db.policy_db.url is empty")
 	}
 
-	if c.DB.ScalingEngineDB.URL == "" {
+	if c.Db[db.ScalingEngineDb].URL == "" {
 		return fmt.Errorf("Configuration error: db.scalingengine_db.url is empty")
 	}
 
-	if c.DB.SchedulerDB.URL == "" {
+	if c.Db[db.SchedulerDb].URL == "" {
 		return fmt.Errorf("Configuration error: db.scheduler_db.url is empty")
 	}
 

@@ -1,13 +1,9 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"time"
-
-	"gopkg.in/yaml.v3"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
@@ -115,7 +111,8 @@ func defaultConfig() Config {
 
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	conf := defaultConfig()
-	if err := loadYamlFile(filepath, &conf); err != nil {
+
+	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
 		return nil, err
 	}
 
@@ -137,7 +134,8 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	conf.Logging.PlainTextSink = true
 
 	conf.Health.ServerConfig.Port = vcapReader.GetPort()
-	if err := loadOperatorConfig(conf, vcapReader); err != nil {
+
+	if err := configutil.LoadConfig(conf, vcapReader, "operator-config"); err != nil {
 		return err
 	}
 
@@ -147,40 +145,6 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 
 	conf.Scheduler.TLSClientCerts = tlsCerts
 	conf.ScalingEngine.TLSClientCerts = tlsCerts
-
-	return nil
-}
-
-func loadOperatorConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	var raw string
-	data, err := vcapReader.GetServiceCredentialContent("operator-config", "operator-config")
-	if err != nil {
-		return fmt.Errorf("%w: %v", ErrOperatorConfigNotFound, err)
-	}
-	// removes the first and last double quotes if they exist
-	if json.Unmarshal(data, &raw) == nil {
-		return yaml.Unmarshal([]byte(raw), conf)
-	} else {
-		return yaml.Unmarshal(data, conf)
-	}
-}
-
-func loadYamlFile(filepath string, conf *Config) error {
-	if filepath == "" {
-		return nil
-	}
-	file, err := os.Open(filepath)
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "failed to open config file '%s': %s\n", filepath, err)
-		return ErrReadYaml
-	}
-	defer file.Close()
-
-	dec := yaml.NewDecoder(file)
-	dec.KnownFields(true)
-	if err := dec.Decode(conf); err != nil {
-		return fmt.Errorf("%w: %v", ErrReadYaml, err)
-	}
 
 	return nil
 }

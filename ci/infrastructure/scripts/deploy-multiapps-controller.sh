@@ -22,7 +22,7 @@ function deploy_multiapps_controller() {
 
   mv multiapps-controller-web-war/*.war .
   pushd multiapps-controller-web-manifest
-  cf push -f ./*.yml "${app_name}"
+  cf push -f ./*.yml -k 2G "${app_name}"
   popd
 }
 

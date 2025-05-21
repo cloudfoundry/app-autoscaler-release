@@ -63,3 +63,8 @@
 - type: remove
   path: /instance_groups/name=operator
 
+## ScalingEngine - remove scalingengine
+- type: remove
+  path: /instance_groups/name=scalingengine
+
+
