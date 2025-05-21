@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	ErrReadYaml                    = errors.New("failed to read config file")
+	ErrReadYaml                    = helpers.ErrReadYaml
 	ErrScalingEngineConfigNotFound = errors.New("scalingengine config service not found")
 )
 
