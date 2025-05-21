@@ -136,6 +136,22 @@ modules:
       stack: cflinuxfs4
       routes:
 
+  - name: scheduler
+    type: java
+    path: dbtasks/target/db-1.0-SNAPSHOT.jar
+    properties:
+      JBP_LOG_LEVEL:
+      DEBUG:
+    requires:
+    - name: scheduler-config
+    - name: database
+    parameters:
+      instances: 0 # overidden in build-extension-file.sh
+      memory: 1G
+      disk-quota: 1G
+      stack: cflinuxfs4
+      routes:
+
 resources:
 - name: metricsforwarder-config
   type: org.cloudfoundry.user-provided-service
@@ -160,6 +176,12 @@ resources:
   parameters:
     service-tags:
     - operator-config
+    path: operator/default_config.json
+- name: scheduler-config
+  type: org.cloudfoundry.user-provided-service
+  parameters:
+    service-tags:
+    - scheduler-config
     path: operator/default_config.json
 - name: broker-catalog
   type: org.cloudfoundry.user-provided-service
