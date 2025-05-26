@@ -150,4 +150,6 @@
       license = licenses.asl20;
     };
   };
+
+  uaac = callPackage ./packages/uaac {};
 }
