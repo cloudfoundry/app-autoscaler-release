@@ -30,7 +30,7 @@
 
     meta = {
       longDescription = ''
-        App-AutoScaler plug-in provides the command line interface to manage
+      App-AutoScaler plug-in provides the command line interface to manage
       [App AutoScaler](<https://github.com/cloudfoundry/app-autoscaler-release>)
       policies, retrieve metrics and scaling event history.
       '';
@@ -99,16 +99,24 @@
 
   log-cache-cli-plugin = buildGoModule rec {
     pname = "log-cache-cli";
-    version = "6.0.2";
+    version = "6.2.1";
     src = fetchgit {
       url = "https://github.com/cloudfoundry/log-cache-cli";
-      rev = "v${version}";
-      hash = "sha256-NhYpDxq5MhVOIMVulY1MG22cN3gaQi5agU7Aaw9Dr0A=";
+      rev = "refs/tags/v${version}";
+      hash = "sha256-A7DbmwZ20oBouH7ArxSSXertlzeMnCL814+jfyPiGCQ=";
       fetchSubmodules = true;
     };
-    doCheck = false;
     vendorHash = null;
+
     ldflags = ["-s" "-w" "-X main.version=${version}"];
+
+    doCheck = false;
+
+    meta = with lib; {
+      description = "A cf CLI plugin for interacting with Log Cache.";
+      homepage = "https://github.com/cloudfoundry/log-cache-cli";
+      license = licenses.asl20;
+    };
   };
 
   cf-deploy-plugin = buildGoModule rec {
