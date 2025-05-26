@@ -23,18 +23,33 @@
     ldflags = ["-s" "-w" "-X 'main.BuildMajorVersion=${major}'" "-X 'main.BuildMinorVersion=${minor}'" "-X 'main.BuildPatchVersion=${patch}'"];
   };
 
-  # this bosh-bootloader custom build can be removed once https://github.com/cloudfoundry/bosh-bootloader/issues/596 is implemented.
+  # This bosh-bootloader custom build can be removed once
+  # <https://github.com/cloudfoundry/bosh-bootloader/issues/596> is implemented. Code inspired by
+  # <https://github.com/cloudfoundry/bosh-bootloader/issues/596#issuecomment-1959853091>.
   bosh-bootloader = buildGoModule rec {
     pname = "bosh-bootloader";
-    version = "9.0.17";
+    version = "9.0.34";
     src = fetchgit {
       url = "https://github.com/cloudfoundry/bosh-bootloader";
-      rev = "v${version}";
+      rev = "refs/tags/v${version}";
       fetchSubmodules = true;
-      hash = "sha256-P4rS7Nv/09+9dD198z4NOXnldSE5fx3phEK24Acatps=";
+      hash = "sha256-14swFtRjbN45MyRu5k9HYZiOJRxgtS82roWo6XCJx3U=";
     };
-    doCheck = false;
     vendorHash = null;
+
+    ldflags = [
+      "-X main.Version=v${version}"
+    ];
+
+    doCheck = false;
+
+    subPackages = ["bbl"];
+
+    meta = with lib; {
+      description = "Command line utility for standing up a BOSH director on an IAAS of your choice.";
+      homepage = "https://github.com/cloudfoundry/bosh-bootloader";
+      license = licenses.asl20;
+    };
   };
 
   cloud-mta-build-tool = buildGoModule rec {
