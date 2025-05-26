@@ -10,17 +10,33 @@
 
     major = "4";
     minor = "1";
-    patch = "0";
+    patch = "2";
     version = "${major}.${minor}.${patch}";
     src = fetchgit {
       url = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
-      rev = "v${version}";
-      hash = "sha256-wWZ89Y2PGfndQERrXC3oLiQbNpbKNm63CbfK28o+mbU=";
+      rev = "refs/tags/v${version}";
+      hash = "sha256-WsX6TY0SOO1HMBfmBlZ6KPeWlLzPJh4t5hmn5aNWPzk=";
       fetchSubmodules = true;
     };
+    vendorHash = "sha256-yLI4gYciEqH1vmT4ILuY1gYCm6ehCjh7dazcEib+vkY=";
+
+    ldflags = ["-s" "-w"
+      "-X 'main.BuildMajorVersion=${major}'"
+      "-X 'main.BuildMinorVersion=${minor}'"
+      "-X 'main.BuildPatchVersion=${patch}'"
+    ];
+
     doCheck = false;
-    vendorHash = "sha256-/3bcnrn7KUUOXHKBe2WcnN9ozFQiNKXeNw2ctLKGUJg=";
-    ldflags = ["-s" "-w" "-X 'main.BuildMajorVersion=${major}'" "-X 'main.BuildMinorVersion=${minor}'" "-X 'main.BuildPatchVersion=${patch}'"];
+
+    meta = {
+      longDescription = ''
+        App-AutoScaler plug-in provides the command line interface to manage
+      [App AutoScaler](<https://github.com/cloudfoundry/app-autoscaler-release>)
+      policies, retrieve metrics and scaling event history.
+      '';
+      homepage = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
+      license = [lib.licenses.asl20];
+    };
   };
 
   # This bosh-bootloader custom build can be removed once
