@@ -89,6 +89,4 @@
     CGO_ENABLED = 0;
     ldflags = [ "-w -X main.Version=${version}" ];
   };
-
-  uaac = callPackage ./packages/uaac {};
 }

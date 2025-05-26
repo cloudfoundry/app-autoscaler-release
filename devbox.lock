@@ -601,34 +601,6 @@
         }
       }
     },
-    "glibcLocales@latest": {
-      "last_modified": "2025-05-06T08:06:31Z",
-      "resolved": "github:NixOS/nixpkgs/1cb1c02a6b1b7cf67e3d7731cbbf327a53da9679#glibcLocales",
-      "source": "devbox-search",
-      "version": "2.40-66",
-      "systems": {
-        "aarch64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/7af0gzp82zy3g8gn9khxwj60npcsmbvh-glibc-locales-2.40-66",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/7af0gzp82zy3g8gn9khxwj60npcsmbvh-glibc-locales-2.40-66"
-        },
-        "x86_64-linux": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/4blrfy4r48iv9838amm77qqizc8shd9p-glibc-locales-2.40-66",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/4blrfy4r48iv9838amm77qqizc8shd9p-glibc-locales-2.40-66"
-        }
-      }
-    },
     "gnumake@4.4": {
       "last_modified": "2025-03-11T15:50:42Z",
       "resolved": "github:NixOS/nixpkgs/b62d2a95c72fb068aecd374a7262b37ed92df82b#gnumake",
@@ -1287,7 +1259,7 @@
     },
     "mysql@10.6.12": {
       "last_modified": "2023-02-24T09:01:09Z",
-      "plugin_version": "0.0.4",
+      "plugin_version": "0.0.3",
       "resolved": "github:NixOS/nixpkgs/7d0ed7f2e5aea07ab22ccb338d27fbe347ed2f11#mysql",
       "source": "devbox-search",
       "version": "10.6.12"
@@ -1467,7 +1439,7 @@
     },
     "python@3.13.3": {
       "last_modified": "2025-05-06T08:06:31Z",
-      "plugin_version": "0.0.4",
+      "plugin_version": "0.0.3",
       "resolved": "github:NixOS/nixpkgs/1cb1c02a6b1b7cf67e3d7731cbbf327a53da9679#python313",
       "source": "devbox-search",
       "version": "3.13.3",
@@ -1660,6 +1632,54 @@
             }
           ],
           "store_path": "/nix/store/66h4mdpszb07x7kxab6cpi1807ikaf2h-ruby-3.4.3"
+        }
+      }
+    },
+    "rubyPackages.cf-uaac@latest": {
+      "last_modified": "2025-05-16T20:19:48Z",
+      "resolved": "github:NixOS/nixpkgs/12a55407652e04dcf2309436eb06fef0d3713ef3#rubyPackages.cf-uaac",
+      "source": "devbox-search",
+      "version": "4.28.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/2qz8dc0lb5yrdb3x12vxx3iz5w8i3x2a-ruby3.3-cf-uaac-4.28.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/2qz8dc0lb5yrdb3x12vxx3iz5w8i3x2a-ruby3.3-cf-uaac-4.28.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/8p825hnkhyk44hjiwsvlng90wxa17kky-ruby3.3-cf-uaac-4.28.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/8p825hnkhyk44hjiwsvlng90wxa17kky-ruby3.3-cf-uaac-4.28.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/04799nlh7k2ijlpscb5zg5l7xdlzm41h-ruby3.3-cf-uaac-4.28.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/04799nlh7k2ijlpscb5zg5l7xdlzm41h-ruby3.3-cf-uaac-4.28.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qhq5rcybil5qdi9q1r1xx3v2ymmwywji-ruby3.3-cf-uaac-4.28.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/qhq5rcybil5qdi9q1r1xx3v2ymmwywji-ruby3.3-cf-uaac-4.28.0"
         }
       }
     },
