@@ -47,6 +47,7 @@
         in {
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
+              fly
               google-cloud-sdk
               jq
               kapp
