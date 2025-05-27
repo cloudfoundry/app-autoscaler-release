@@ -1,5 +1,5 @@
 {
-  description = "Flake for ??? featuring a nix-shell";
+  description = "Flake for managing the terragrunt-resources, featuring a nix-shell";
 
   inputs = {
     # Choose your nix-branch from <https://github.com/NixOS/nixpkgs/branches>,
@@ -7,7 +7,7 @@
     nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = {self, nixpkgs}:
     let
       # Instead of using the subsequent list of self-defined helpers, one could use
       # `flake-utils.url = "github:numtide/flake-utils";` as input which provides
@@ -22,7 +22,24 @@
       forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
       # Nixpkgs instantiated for supported system types.
-      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
+      nixpkgsFor = forAllSystems (system:
+        import nixpkgs {
+          inherit system;
+
+          config = {
+            allowBroken = false;
+            allowUnfreePredicate = pkg:
+              let
+                nameAndLicense = [(nixpkgs.lib.getName pkg) pkg.meta.license.shortName];
+              in builtins.elem nameAndLicense [
+                # Used not for production but for an open-source development-setup.
+                # License-details: <https://spdx.org/licenses/BUSL-1.1.html>
+                ["terraform" "bsl11"]
+              ];
+
+            checkMeta = true;
+          };
+      });
     in {
       devShells = forAllSystems (system:
         let
