@@ -12,7 +12,7 @@ This directory contains the concourse `pipeline.yml` for the autoscaler-[pipelin
 These docker images in this repo are built and pushed with GitHub actions, they are hosted on <ghcr.io>.
 
 ## Terragrunt
-This directory contains the terragrunt managed stacks of resources in the account app-runtime-interfaces-wg GCP project.
+This directory contains the terragrunt managed stacks of resources in the account app-runtime-interfaces-wg GCP project. It comes with its dedicated instructions in <./terragrunt/app-autoscaler/concourse/README.md> on how to set-up concourse-related resources.
 
 ## Deploy pipeline
 __Setup__
