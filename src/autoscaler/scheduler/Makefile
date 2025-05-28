@@ -1,4 +1,5 @@
 war_file_path := ./target/scheduler-${scheduler_version}.war
+
 .PHONY: build
 build: ${war_file_path}
 
@@ -10,6 +11,9 @@ ${war_file_path}: $(java_files) ./pom.xml ./Makefile
 	@mvn --no-transfer-progress package '${MVN_BUILD_OPTS}'
 
 
+test:
+	@echo "Running tests..."
+	@mvn --no-transfer-progress test
 
 # Format all Java files in the src/ directory
 .PHONY: format

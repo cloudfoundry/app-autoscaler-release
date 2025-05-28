@@ -63,3 +63,9 @@
 - type: remove
   path: /instance_groups/name=operator
 
+
+## SCHEDULER - remove scheduler
+- type: remove
+  path: /instance_groups/name=scheduler
+
+

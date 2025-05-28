@@ -7,7 +7,7 @@ autoscaler-dir := ./src/autoscaler
 changelog-dir := ./src/changelog
 changeloglockcleaner-dir := ./src/changeloglockcleaner
 db-dir := ./src/db
-scheduler-dir := ./src/scheduler
+scheduler-dir := ./src/autoscaler/scheduler
 test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
@@ -76,12 +76,12 @@ clean-autoscaler:
 	@make --directory='${autoscaler-dir}' clean
 clean-scheduler:
 	@echo " - cleaning scheduler test resources"
-	@rm -rf src/scheduler/src/test/resources/certs
-	@rm -rf src/scheduler/target
+	@rm -rf ${scheduler-dir}/src/test/resources/certs
+	@rm -rf ${scheduler-dir}/target
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f test-certs/*
-	@rm --force --recursive src/scheduler/src/test/resources/certs
+	@rm --force --recursive ${scheduler-dir}/src/test/resources/certs
 clean-bosh-release:
 	@echo " - cleaning bosh dev releases"
 	@rm -rf dev_releases
@@ -90,7 +90,6 @@ clean-acceptance:
 	@echo ' - cleaning acceptance (⚠️ This keeps the file “src/acceptance/acceptance_config.json” if present!)'
 	@rm src/acceptance/ginkgo* &> /dev/null || true
 	@rm -rf src/acceptance/results &> /dev/null || true
-
 
 
 .PHONY: build_all build_programs build_tests
@@ -149,12 +148,15 @@ $(addprefix test_,$(go_modules)):
 
 
 .PHONY: test-certs
-test-certs: target/autoscaler_test_certs src/scheduler/src/test/resources/certs
+test-certs: target/autoscaler_test_certs ${scheduler-dir}/src/test/resources/certs
+
+
 target/autoscaler_test_certs:
 	@./scripts/generate_test_certs.sh
 	@touch $@
-src/scheduler/src/test/resources/certs:
-	@./src/scheduler/scripts/generate_unit_test_certs.sh
+${scheduler-dir}/src/test/resources/certs:
+	@./${scheduler-dir}/scripts/generate_unit_test_certs.sh
+
 
 
 .PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
