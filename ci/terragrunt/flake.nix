@@ -32,7 +32,7 @@
               let
                 nameAndLicense = [(nixpkgs.lib.getName pkg) pkg.meta.license.shortName];
               in builtins.elem nameAndLicense [
-                # Used not for production but for an open-source development-setup.
+                # Used not for production!
                 # License-details: <https://spdx.org/licenses/BUSL-1.1.html>
                 ["terraform" "bsl11"]
               ];
