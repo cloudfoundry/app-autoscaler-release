@@ -30,8 +30,7 @@ binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sor
 test_dirs=$(shell find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 export GO111MODULE=on
 
-#TODO: https://github.com/cloudfoundry/app-autoscaler-release/issues/564 allow the tests to be run in parallel
-#GINKGO_OPTS=-r --race --require-suite -p --randomize-all --cover
+.PHONY: clean-dbtasks package-dbtasks vendor-changelogs clean-scheduler package-scheduler
 
 GINKGO_OPTS = -r --race --require-suite --randomize-all --cover ${OPTS}
 
@@ -158,12 +157,17 @@ lint: generate-fakes
 	echo "Linting with Golang $${GOVERSION}" ;\
 	golangci-lint run --config='../../.golangci.yaml' ${OPTS}
 
-.PHONY: clean-dbtasks package-dbtasks vendor-changelogs
 clean-dbtasks:
 	pushd dbtasks; mvn clean; popd
 
 package-dbtasks:
 	pushd dbtasks; mvn package ; popd
+
+clean-scheduler:
+	pushd scheduler; mvn clean; popd
+
+build-scheduler:
+	pushd scheduler; mvn build ; popd
 
 vendor-changelogs:
 	cp $(MAKEFILE_DIR)/api/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
