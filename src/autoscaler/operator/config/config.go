@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"gopkg.in/yaml.v3"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -114,7 +116,6 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 
 	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
 		return nil, err
-	}
 
 	if err := loadVcapConfig(&conf, vcapReader); err != nil {
 		return nil, err
@@ -148,6 +149,27 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 
 	return nil
 }
+
+func (c *Config) validateDb() error {
+	if c.Db[db.AppMetricsDb].URL == "" {
+		return fmt.Errorf("Configuration error: app_metrics_db.db.url is empty")
+	}
+
+	if c.Db[db.ScalingEngineDb].URL == "" {
+		return fmt.Errorf("Configuration error: scaling_engine_db.db.url is empty")
+	}
+
+	if c.Db[db.PolicyDb].URL == "" {
+		return fmt.Errorf("Configuration error: app_syncer.db.url is empty")
+	}
+
+	if c.Db[db.LockDb].URL == "" {
+		return fmt.Errorf("Configuration error: db_lock.db.url is empty")
+	}
+
+	return nil
+}
+
 
 func (c *Config) validateDb() error {
 	if c.Db[db.AppMetricsDb].URL == "" {

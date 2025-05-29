@@ -22,3 +22,26 @@
     uris:
       - ((deployment_name))-cf-scheduler.((system_domain))
 
+## SCALINGENGINE - Enable cf Server to receive calls from api running on cf --
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine/cf_server?/xfcc?/valid_org_guid?
+  value: ((!autoscaler_cf_server_xfcc_valid_org_guid))
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine/cf_server?/xfcc?/valid_space_guid?
+  value: ((!autoscaler_cf_server_xfcc_valid_space_guid)) # variable in bosh
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=scalingengine/properties/autoscaler/scalingengine/cf_server?/port?
+  value: 6205
+
+- type: replace
+  path: /instance_groups/name=scalingengine/jobs/name=route_registrar/properties/route_registrar/routes/-
+  value:
+    name: ((deployment_name))-cf-scalingengine
+    registration_interval: 20s
+    port: 6205
+    tags:
+      component: autoscaler_cf_scalingengine
+    uris:
+      - ((deployment_name))-cf-scalingengine.((system_domain))

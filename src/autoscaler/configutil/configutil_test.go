@@ -272,7 +272,6 @@ var _ = Describe("Configutil", func() {
 							},
 							db.AppMetricsDb: {
 								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fappmetrics_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fappmetrics_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fappmetrics_db%2Fserver_ca.sslrootcert", // #nosec G101
-
 							},
 							db.SchedulerDb: {
 								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fscheduler_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fscheduler_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fscheduler_db%2Fserver_ca.sslrootcert", // #nosec G101
