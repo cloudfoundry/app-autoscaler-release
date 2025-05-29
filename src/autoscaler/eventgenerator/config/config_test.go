@@ -339,7 +339,6 @@ defaultBreachDurationSecs: 600
 								ConnectionMaxLifetime: 0 * time.Second,
 							},
 							"appmetrics_db": {
-
 								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
 								MaxOpenConnections:    0,
 								MaxIdleConnections:    0,

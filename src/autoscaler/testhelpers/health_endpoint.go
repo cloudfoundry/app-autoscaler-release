@@ -33,3 +33,4 @@ func CheckHealthResponse(client *http.Client, url string, expected []string) {
 	}
 	rsp.Body.Close()
 }
+
