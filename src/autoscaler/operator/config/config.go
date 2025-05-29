@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"gopkg.in/yaml.v3"
-
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -116,6 +114,7 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 
 	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
 		return nil, err
+	}
 
 	if err := loadVcapConfig(&conf, vcapReader); err != nil {
 		return nil, err
@@ -169,7 +168,6 @@ func (c *Config) validateDb() error {
 
 	return nil
 }
-
 
 func (c *Config) validateDb() error {
 	if c.Db[db.AppMetricsDb].URL == "" {
