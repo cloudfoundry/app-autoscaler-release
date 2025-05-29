@@ -1,7 +1,0 @@
-- type: replace
-  path: /instance_groups/name=alertmanager/jobs/name=alertmanager/properties/alertmanager/receivers/name=default/slack_configs/0/title?
-  value: ":rotating_light: Prometheus Alerts"
-
-- type: replace
-  path: /instance_groups/name=alertmanager/jobs/name=alertmanager/properties/alertmanager/receivers/name=default/slack_configs/0/text?
-  value: "{{ range .Alerts }} - {{ .Annotations.description }}\n{{ end }}"
