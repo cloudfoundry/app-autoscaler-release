@@ -169,26 +169,6 @@ func (c *Config) validateDb() error {
 	return nil
 }
 
-func (c *Config) validateDb() error {
-	if c.Db[db.AppMetricsDb].URL == "" {
-		return fmt.Errorf("Configuration error: app_metrics_db.db.url is empty")
-	}
-
-	if c.Db[db.ScalingEngineDb].URL == "" {
-		return fmt.Errorf("Configuration error: scaling_engine_db.db.url is empty")
-	}
-
-	if c.Db[db.PolicyDb].URL == "" {
-		return fmt.Errorf("Configuration error: app_syncer.db.url is empty")
-	}
-
-	if c.Db[db.LockDb].URL == "" {
-		return fmt.Errorf("Configuration error: db_lock.db.url is empty")
-	}
-
-	return nil
-}
-
 func (c *Config) Validate() error {
 	if err := c.validateDb(); err != nil {
 		return err
