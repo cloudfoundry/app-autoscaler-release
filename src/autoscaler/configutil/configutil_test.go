@@ -45,7 +45,6 @@ var _ = Describe("Configutil", func() {
 			expectedServerCAContent   = "server-ca-content"
 			expectedClientCertContent = "client-cert-content"
 			err                       error
-			databaseNames             []string
 		)
 
 		JustBeforeEach(func() {
@@ -165,6 +164,7 @@ var _ = Describe("Configutil", func() {
 			var actualDbs *map[string]db.DatabaseConfig
 			var expectedDbs *map[string]db.DatabaseConfig
 			var expectedServerCAContent = "server-ca-content"
+			var databaseNames []string
 
 			BeforeEach(func() {
 				vcapApplicationJson = `{}`
@@ -174,7 +174,7 @@ var _ = Describe("Configutil", func() {
 				var actualProcedureConfig *models.StoredProcedureConfig
 
 				BeforeEach(func() {
-					var databaseNames = []string{db.PolicyDb, db.BindingDb, db.StoredProcedureDb}
+					databaseNames = []string{db.PolicyDb, db.BindingDb, db.StoredProcedureDb}
 					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
 						"uri":         dbUri,
 						"client_cert": expectedClientCertContent,
