@@ -31,6 +31,9 @@ CI ?= false
 VERSION ?= 0.0.testing
 DEST ?= build
 
+AUTOSCALER_BOSH_VERSION ?= 0.0.1-dev
+AUTOSCALER_BOSH_TARBALL_PATH ?= build/autoscaler-test.tgz
+
 export DEBUG ?= false
 export ACCEPTANCE_TESTS_FILE ?= ${DEST}/app-autoscaler-acceptance-tests-v${VERSION}.tgz
 export GOWORK = off
@@ -62,7 +65,7 @@ clean-build:
 	@rm -rf build | true
 clean-java:
 	@echo " - cleaning java resources"
-	@cd src && mvn clean > /dev/null && cd ..
+	@cd src && mvn --quiet clean > /dev/null && cd ..
 clean-targets:
 	@echo " - cleaning build target files"
 	@rm --recursive --force target/* &> /dev/null || echo " . Already clean"
@@ -135,7 +138,7 @@ ${db.java-lib-dir} ${db.java-lib-files} &: src/db/pom.xml
 	@mkdir --parents '${db.java-lib-dir}'
 	@echo 'Fetching db.java-libs'
 	@pushd src &> /dev/null \
-		&& mvn --no-transfer-progress package --projects='db' ${MVN_OPTS} \
+		&& mvn --quiet package --projects='db' ${MVN_OPTS} \
 	&& popd
 
 .PHONY:
@@ -299,15 +302,22 @@ spec-test:
 	bundle install
 	bundle exec rspec
 
+.PHONY: bosh-release-dev
+bosh-release-dev: build/autoscaler-test.tgz
+
 .PHONY: bosh-release
-bosh-release: build/autoscaler-test.tgz
+bosh-release: build/autoscaler-test.tgz_CI_true
+
 # 🚸 In the next line, the order of the dependencies is important. Generated code needs to be
 # already there for `go-mod-tidy` to work. See additional comment for that target in
 # ./src/autoscaler/Makefile.
 build/autoscaler-test.tgz: build_all go-mod-tidy go-mod-vendor
-	@echo " - building bosh release into build/autoscaler-test.tgz"
-	@mkdir -p build
-	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz
+	@echo " - creating bosh release into build/autoscaler-test.tgz"; \
+	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz; \
+
+build/autoscaler-test.tgz_CI_true: go-mod-tidy go-mod-vendor
+	@echo " - creating bosh release into ${AUTOSCALER_BOSH_TARBALL_PATH}"
+	@bosh create-release ${AUTOSCALER_BOSH_BUILD_OPTS} --version ${AUTOSCALER_BOSH_VERSION} --tarball=${AUTOSCALER_BOSH_TARBALL_PATH}
 
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
 generate-fakes: autoscaler.generate-fakes test-app.generate-fakes
@@ -320,7 +330,8 @@ test-app.generate-fakes:
 generate-openapi-generated-clients-and-servers:
 	make --directory='${autoscaler-dir}' generate-openapi-generated-clients-and-servers
 
-.PHONY: go-mod-tidy
+
+ .PHONY: go-mod-tidy
 go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
 						 changeloglockcleaner.go-mod-tidy test-app.go-mod-tidy
 
@@ -539,7 +550,7 @@ scheduler.test: check-db_type scheduler.test-certificates init-db
 		echo "Running tests in $(pwd) …"; \
 		export DB_HOST='${DB_HOST}'; \
 		mvn test \
-			--no-transfer-progress '-Dspring.profiles.include=${db_type}'; \
+			--quiet --no-transfer-progress '-Dspring.profiles.include=${db_type}'; \
 	popd
 
 .PHONY: scheduler.test-certificates

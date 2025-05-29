@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
+        <version>3.5.0</version>
         <relativePath/>
     </parent>
 
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.6.15</version>
+            <version>1.6.16</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -179,7 +179,7 @@
                     <dependency>
                         <groupId>com.puppycrawl.tools</groupId>
                         <artifactId>checkstyle</artifactId>
-                        <version>10.23.1</version>
+                        <version>10.24.0</version>
                     </dependency>
                 </dependencies>
             </plugin>

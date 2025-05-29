@@ -27,10 +27,10 @@ var _ = Describe("Api", func() {
 		runner *ApiRunner
 		rsp    *http.Response
 
-		brokerHttpClient   *http.Client
-		healthHttpClient   *http.Client
-		apiHttpClient      *http.Client
-		cfServerHttpClient *http.Client
+		brokerHttpClient    *http.Client
+		httpClientForHealth *http.Client
+		apiHttpClient       *http.Client
+		cfServerHttpClient  *http.Client
 
 		serverURL   *url.URL
 		brokerURL   *url.URL
@@ -47,7 +47,7 @@ var _ = Describe("Api", func() {
 		vcapPort = 8080 + GinkgoParallelProcess()
 
 		brokerHttpClient = testhelpers.NewServiceBrokerClient()
-		healthHttpClient = &http.Client{}
+		httpClientForHealth = &http.Client{}
 		apiHttpClient = testhelpers.NewPublicApiClient()
 		cfServerHttpClient = &http.Client{}
 

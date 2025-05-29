@@ -196,6 +196,7 @@ var _ = Describe("Configutil", func() {
 							db.BindingDb: {
 								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fbinding_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fbinding_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fbinding_db%2Fserver_ca.sslrootcert", // #nosec G101
 							},
+							db.AppMetricsDb: {},
 							db.StoredProcedureDb: {
 								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fstoredprocedure_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fstoredprocedure_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fstoredprocedure_db%2Fserver_ca.sslrootcert",
 							},
@@ -245,6 +246,7 @@ var _ = Describe("Configutil", func() {
 
 			When("stored procedure implementation is set to default", func() {
 				BeforeEach(func() {
+					databaseNames = []string{db.PolicyDb, db.BindingDb, db.AppMetricsDb}
 					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
 						"uri":         dbUri,
 						"client_cert": expectedClientCertContent,

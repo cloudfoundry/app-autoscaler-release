@@ -63,3 +63,5 @@
 - type: remove
   path: /instance_groups/name=operator
 
+
+
