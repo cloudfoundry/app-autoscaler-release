@@ -56,4 +56,7 @@
 - type: remove
   path: /instance_groups/name=metricsforwarder
 
+## METRICSFORWARDER - remove metricsforwarder
+- type: remove
+  path: /instance_groups/name=eventgenerator
 

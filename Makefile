@@ -445,6 +445,10 @@ cf-login:
 		  'The necessary changes to the environment get lost when make exits its process.'
 	@${CI_DIR}/autoscaler/scripts/os-infrastructure-login.sh
 
+.PHONY: uaa-login
+uaa-login: ## Login to OSS CF dev environment
+	@${CI_DIR}/autoscaler/scripts/uaa-login.sh
+
 .PHONY: setup-performance
 setup-performance: build-test-app
 	export NODES=1;\
