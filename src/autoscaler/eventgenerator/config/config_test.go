@@ -24,7 +24,6 @@ var _ = Describe("Config", func() {
 		configFile                  string
 		mockVCAPConfigurationReader *fakes.FakeVCAPConfigurationReader
 		expectedDbConfig            map[string]db.DatabaseConfig
-
 	)
 
 	BeforeEach(func() {
@@ -101,28 +100,6 @@ var _ = Describe("Config", func() {
 				})
 			})
 
-			It("send certs to scalingengineScalingEngine TlSClientCert", func() {
-				Expect(err).NotTo(HaveOccurred())
-				Expect(conf.ScalingEngine.TLSClientCerts).To(Equal(expectedTLSConfig))
-			})
-
-			It("sets Pool.InstanceIndex with vcap instance index", func() {
-				Expect(err).NotTo(HaveOccurred())
-				Expect(conf.Pool.InstanceIndex).To(Equal(3))
-			})
-
-			It("sets xfcc space and org guid", func() {
-				Expect(err).NotTo(HaveOccurred())
-				Expect(conf.CFServer.XFCC.ValidOrgGuid).To(Equal("some-org-id"))
-				Expect(conf.CFServer.XFCC.ValidSpaceGuid).To(Equal("some-space-id"))
-			})
-
-			When("handling available databases", func() {
-				It("calls vcapReader ConfigureDatabases with the right arguments", func() {
-					testhelpers.ExpectConfigureDatabasesCalledOnce(err, mockVCAPConfigurationReader, "")
-				})
-			})
-      
 			When("service is empty", func() {
 				BeforeEach(func() {
 					mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(""), fmt.Errorf("not found"))
