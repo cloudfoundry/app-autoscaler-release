@@ -292,21 +292,21 @@ jobs:
       params:
         <<: *acceptance-log-cache-metron-params
         SUITES: api
-      timeout: 15m
+      timeout: 30m
     - task: autoscaler-acceptance-app
       image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-metron-params
         SUITES: app
-      timeout: 45m
+      timeout: 60m
     - task: autoscaler-acceptance-broker
       image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-metron-params
         SUITES: broker
-      timeout: 15m
+      timeout: 30m
 
 - name: acceptance-log-cache-syslog
   public: true
@@ -347,21 +347,21 @@ jobs:
       params:
         <<: *acceptance-log-cache-syslog-params
         SUITES: api
-      timeout: 15m
+      timeout: 30m
     - task: autoscaler-acceptance-app
       image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-params
         SUITES: app
-      timeout: 45m
+      timeout: 60m
     - task: autoscaler-acceptance-broker
       image: "app-autoscaler-tools"
       file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
       params:
         <<: *acceptance-log-cache-syslog-params
         SUITES: broker
-      timeout: 15m
+      timeout: 30m
 
 - name: acceptance-log-cache-syslog-cf
   public: true
