@@ -575,14 +575,13 @@ jobs:
     params:
       rebase: true
       repository: app-autoscaler-release
-      tag: build/tag # ⚠️ Remove this again, if it breaks the subsequent step.
+      tag: build/tag
   - put: gh-release
     params:
       name: build/name
       tag: build/tag
       body: build/changelog.md
       globs: [build/artifacts/*]
-      commitish: "main"
 
 - name: cleanup-autoscaler-deployments
   public: true
