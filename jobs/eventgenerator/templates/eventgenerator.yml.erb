@@ -49,10 +49,7 @@ end
   end
 
   sorted_instances=link("eventgenerator").instances.sort_by {|i|i.address}
-  nodeIndex=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
-  addrs=sorted_instances.map{|i| "'#{i.address}:#{p('autoscaler.eventgenerator.server.port')}'"}
-  nodeAddrs="[" + addrs.join(",") +"]"
-
+  instance_index=sorted_instances.index(sorted_instances.find{|i|i.id == spec.id})
 %>
 
 
@@ -62,8 +59,10 @@ server:
     key_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.key
     cert_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/server.crt
     ca_file: /var/vcap/jobs/eventgenerator/config/certs/eventgenerator/ca.crt
-  node_addrs: <%= nodeAddrs %>
-  node_index: <%= nodeIndex %>
+
+pool:
+  total_instances: <%= sorted_instances.length %>
+  instance_index: <%= instance_index %>
 
 cf_server:
   port: <%= p("autoscaler.eventgenerator.cf_server.port") %>
@@ -93,7 +92,7 @@ db:
     max_open_connections: <%= p("autoscaler.policy_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.policy_db_connection_config.max_idle_connections") %>
     connection_max_lifetime: <%= p("autoscaler.policy_db_connection_config.connection_max_lifetime") %>
-  app_metrics_db:
+  appmetrics_db:
     url: <%= app_metrics_db_url %>
     max_open_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_open_connections") %>
     max_idle_connections: <%= p("autoscaler.appmetrics_db_connection_config.max_idle_connections") %>

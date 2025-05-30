@@ -3,10 +3,7 @@
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/common.sh"
+source "${script_dir}/vars.source.sh"
 
-bosh_login
-cf_login
-cf_target "${AUTOSCALER_ORG}" "${AUTOSCALER_SPACE}"
-
-
-cf autoscaling-api "https://autoscaler-${PR_NUMBER}.${SYSTEM_DOMAIN}"
+bosh_login "${BBL_STATE_PATH}"
+uaa_login

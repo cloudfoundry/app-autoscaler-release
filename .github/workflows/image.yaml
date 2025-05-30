@@ -18,7 +18,7 @@ env:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
-    container: jetpackio/devbox:latest@sha256:4b25f2da735a739365189fd35045ddc15e4197ba00e7ff8b1c1356bfb1f6b5ec
+    container: jetpackio/devbox:latest@sha256:3d164648f5ca0fa66cd080ee7c895af54e0a3ec19e19b232a2fea21628e82cfb
     permissions:
       contents: read
       packages: write
@@ -62,7 +62,7 @@ jobs:
 
       - name: Build and push
         id: build-and-push
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0 # v6
         with:
           context: ci/dockerfiles/autoscaler-${{ matrix.image_suffix }}
           push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}

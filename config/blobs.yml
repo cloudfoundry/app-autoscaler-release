@@ -14,3 +14,7 @@ sapmachine-jdk-21.0.6_linux-x64_bin.tar.gz:
   size: 207468384
   object_id: 62e1f88d-898f-42ca-513b-d5defa26c8cc
   sha: sha256:ff64ee0a4d6e48f9d164a0de070e413455dab34c89a6fa24d2a48ea63e556dfd
+sapmachine-jdk-21.0.7_linux-x64_bin.tar.gz:
+  size: 207552976
+  object_id: 108aff5f-74aa-475a-4dd7-abb4d11abbcf
+  sha: sha256:14224f97a001c37de4a0f4d2d669e5c51495afd617560e155a09071faa4f8b97
