@@ -185,7 +185,7 @@ resources:
   parameters:
     service-tags:
     - scheduler-config
-    path: operator/default_config.json
+    path: scheduler/default_config.json
 - name: broker-catalog
   type: org.cloudfoundry.user-provided-service
   parameters:

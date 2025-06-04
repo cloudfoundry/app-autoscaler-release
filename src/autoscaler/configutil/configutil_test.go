@@ -244,6 +244,7 @@ var _ = Describe("Configutil", func() {
 			})
 
 			When("stored procedure implementation is set to default", func() {
+
 				BeforeEach(func() {
 					vcapServicesJson, err = testhelpers.GetDbVcapServices(map[string]string{
 						"uri":         dbUri,
