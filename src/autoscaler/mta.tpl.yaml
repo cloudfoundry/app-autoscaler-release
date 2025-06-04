@@ -139,6 +139,9 @@ modules:
   - name: scheduler
     type: java
     path: scheduler/target/scheduler-1.0-SNAPSHOT.war
+    build-parameters:
+      builder: custom
+      commands: []
     properties:
       JBP_LOG_LEVEL:
       DEBUG:

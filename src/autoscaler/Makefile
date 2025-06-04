@@ -167,7 +167,8 @@ clean-scheduler:
 	pushd scheduler; mvn clean; popd
 
 build-scheduler:
-	pushd scheduler; mvn build ; popd
+	pushd scheduler; mvn package -Dmaven.test.skip=true; popd
+
 
 vendor-changelogs:
 	cp $(MAKEFILE_DIR)/api/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
