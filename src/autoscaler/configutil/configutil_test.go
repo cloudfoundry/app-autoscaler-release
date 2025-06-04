@@ -203,6 +203,7 @@ var _ = Describe("Configutil", func() {
 							db.LockDb:          {},
 							db.ScalingEngineDb: {},
 							db.AppMetricsDb:    {},
+							db.SchedulerDb:     {},
 						}
 					})
 
@@ -235,6 +236,7 @@ var _ = Describe("Configutil", func() {
 							db.AppMetricsDb:    {},
 							db.ScalingEngineDb: {},
 							db.LockDb:          {},
+							db.SchedulerDb:     {},
 						}
 
 						err := vcapConfiguration.ConfigureDatabases(actualDbs, actualProcedureConfig, "stored_procedure")
@@ -270,6 +272,9 @@ var _ = Describe("Configutil", func() {
 							},
 							db.AppMetricsDb: {
 								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fappmetrics_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fappmetrics_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fappmetrics_db%2Fserver_ca.sslrootcert", // #nosec G101
+							},
+							db.SchedulerDb: {
+								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Fscheduler_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Fscheduler_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Fscheduler_db%2Fserver_ca.sslrootcert", // #nosec G101
 							},
 							db.LockDb: {
 								URL: "postgres://foo:bar@postgres.example.com:5432/some-db?sslcert=%2Ftmp%2Flock_db%2Fclient_cert.sslcert&sslkey=%2Ftmp%2Flock_db%2Fclient_key.sslkey&sslrootcert=%2Ftmp%2Flock_db%2Fserver_ca.sslrootcert", // #nosec G101

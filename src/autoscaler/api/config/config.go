@@ -13,7 +13,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/xeipuuv/gojsonschema"
-	"gopkg.in/yaml.v3"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
@@ -163,13 +162,6 @@ func defaultConfig() Config {
 		},
 	}
 }
-func loadPublicApiServerConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	data, err := vcapReader.GetServiceCredentialContent("apiserver-config", "apiserver-config")
-	if err != nil {
-		return fmt.Errorf("%w: %v", ErrPublicApiServerConfigNotFound, err)
-	}
-	return yaml.Unmarshal(data, conf)
-}
 
 func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	if !vcapReader.IsRunningOnCF() {
@@ -185,7 +177,7 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	conf.CFServer.Port = vcapReader.GetPort()
 	conf.Server.Port = 0
 
-	if err := loadPublicApiServerConfig(conf, vcapReader); err != nil {
+	if err := configutil.LoadConfig(&conf, vcapReader, "apiserver-config"); err != nil {
 		return err
 	}
 
