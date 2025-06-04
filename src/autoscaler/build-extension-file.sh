@@ -65,7 +65,9 @@ export EVENTGENERATOR_HOST="${EVENTGENERATOR_HOST:-"${DEPLOYMENT_NAME}-eventgene
 export EVENTGENERATOR_INSTANCES="${EVENTGENERATOR_INSTANCES:-2}"
 
 
-export SCHEDULER_HOST="${SCHEDULER_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
+export SCHEDULER_HOST="${SCHEDULER_HOST:-"${DEPLOYMENT_NAME}-scheduler"}"
+export SCHEDULER_CF_HOST="${SCHEDULER_CF_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
+export SCHEDULER_INSTANCES="${SCHEDULER_INSTANCES:-2}"
 
 export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
 
@@ -142,8 +144,15 @@ modules:
       instances: ${OPERATOR_INSTANCES}
       routes:
       - route: ${OPERATOR_HOST}.\${default-domain}
-
-
+  - name: scheduler
+    requires:
+    - name: scheduler-config
+    - name: database
+    parameters:
+      instances: ${SCHEDULER_INSTANCES}
+      routes:
+      - route: ${SCHEDULER_HOST}.\${default-domain}
+      - route: ${SCHEDULER_CF_HOST}.\${default-domain}
 
 resources:
 - name: metricsforwarder-config
@@ -187,7 +196,7 @@ resources:
           client_id: autoscaler_client_id
           secret: autoscaler_client_secret
         scheduler:
-          scheduler_url: https://${SCHEDULER_HOST}.\${default-domain}
+          scheduler_url: https://${SCHEDULER_CF_HOST}.\${default-domain}
         metrics_forwarder:
           metrics_forwarder_url: https://${METRICSFORWARDER_HOST}.\${default-domain}
           metrics_forwarder_mtls_url: https://${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
@@ -215,7 +224,7 @@ resources:
         scaling_engine:
           scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
         scheduler:
-          scheduler_url: https://${SCHEDULER_HOST}.\${default-domain}
+          scheduler_url: https://${SCHEDULER_CF_HOST}.\${default-domain}
 
 - name: database
   parameters:
