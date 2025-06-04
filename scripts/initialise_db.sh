@@ -50,7 +50,7 @@ files="api.db.changelog.yml \
        "
 
 class_path="$ROOT/src/db/target/lib/*:\
-$ROOT/src/scheduler/db/:\
+$ROOT/src/autoscaler/scheduler/db/:\
 $ROOT/src/autoscaler/api/db/:\
 $ROOT/src/autoscaler/servicebroker/db/:\
 $ROOT/src/autoscaler/metricsserver/db/:\
