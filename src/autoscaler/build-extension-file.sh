@@ -210,6 +210,15 @@ resources:
           - broker_username: 'autoscaler-broker-user-blue'
             broker_password: $SERVICE_BROKER_PASSWORD_BLUE
 
+- name: scheduler-config
+  parameters:
+    config:
+      scheduler-config:
+        cfserver:
+          healthserver:
+            password: "test-password"
+            username: "test-user"
+
 - name: operator-config
   parameters:
     config:

@@ -17,6 +17,7 @@ public class CfHttpConfiguration {
 
   @Bean
   public WebServerFactoryCustomizer<TomcatServletWebServerFactory> httpConnectorCustomizer() {
+    // TODO if PORT env variable set use that instead
     if (port == 0) {
       return factory -> {};
     }

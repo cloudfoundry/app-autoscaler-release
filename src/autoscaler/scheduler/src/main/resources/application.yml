@@ -141,3 +141,6 @@ server:
 cfserver:
   validOrgGuid: "some-org-guid"
   validSpaceGuid: "some-space-guid"
+  healthserver:
+    username: "test-user"
+    password: "test-password"

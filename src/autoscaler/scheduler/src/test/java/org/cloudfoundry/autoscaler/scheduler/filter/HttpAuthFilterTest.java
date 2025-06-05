@@ -87,4 +87,38 @@ public class HttpAuthFilterTest {
     assertThat(response.getErrorMessage())
         .contains("Invalid certificate: Could not parse certificate");
   }
+
+  @Test
+  public void testDoFilterHttpHealthReturnsSuccess() throws Exception {
+    var username = "test-username";
+    var password = "test-password";
+
+    this.request.setScheme("http");
+    this.request.setRequestURI("/health");
+    this.request.setMethod("GET");
+    this.request.addHeader("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
+
+    httpAuthFilter.doFilterInternal(request, response, filterChain);
+    assertThat(response.getStatus()).isEqualTo(200);
+    // response message is "OK" for successful health check
+    assertThat(response.getErrorMessage()).isEqualTo("OK");
+  }
+
+  @Test
+  public void testDoFilterHttpHealthReturnsErrorWithWrongCredentials() throws Exception {
+    var username = "test-username";
+    var password = "test-password";
+
+    this.request.setScheme("http");
+    this.request.setRequestURI("/health");
+    this.request.setMethod("GET");
+    this.request.addHeader("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
+
+    httpAuthFilter.doFilterInternal(request, response, filterChain);
+    assertThat(response.getStatus()).isEqualTo(200);
+    // response message is "OK" for successful health check
+    assertThat(response.getErrorMessage()).isEqualTo("OK");
+  }
 }
+
+
