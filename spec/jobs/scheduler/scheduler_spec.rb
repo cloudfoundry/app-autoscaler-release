@@ -35,7 +35,6 @@ describe "scheduler" do
       properties["autoscaler"]["scheduler"] = {
         "health" => {
           "port" => 1234,
-          "unprotected_endpoints" => []
         }
       }
 
@@ -48,7 +47,6 @@ describe "scheduler" do
             "username" => "",
             "password" => "",
             "basicAuthEnabled" => false,
-            "unprotected_endpoints" => []
           }
         }}
       )
@@ -60,7 +58,6 @@ describe "scheduler" do
           "port" => 1234,
           "username" => "test-user",
           "password" => "test-user-password",
-          "unprotected_endpoints" => ["/health/liveness"]
         }
       }
 
@@ -73,7 +70,6 @@ describe "scheduler" do
             "username" => "test-user",
             "password" => "test-user-password",
             "basicAuthEnabled" => false,
-            "unprotected_endpoints" => ["/health/liveness"]
           }
         }}
       )

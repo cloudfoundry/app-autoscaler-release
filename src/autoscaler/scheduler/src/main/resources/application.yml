@@ -116,7 +116,6 @@ scheduler:
     healthserver:
         password: "test-password"
         port: 8081
-        unprotectedEndpoints: /health/prometheus,/health/liveness
         username: "test-user"
 
 ############################################################
