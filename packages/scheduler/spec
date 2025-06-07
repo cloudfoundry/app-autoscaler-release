@@ -5,4 +5,4 @@ dependencies:
 - openjdk-21
 
 files:
-- scheduler/**/*
+- autoscaler/scheduler/**/*

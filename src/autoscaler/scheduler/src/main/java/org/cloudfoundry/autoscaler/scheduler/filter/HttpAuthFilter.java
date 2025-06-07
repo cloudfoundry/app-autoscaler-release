@@ -1,5 +1,6 @@
 package org.cloudfoundry.autoscaler.scheduler.filter;
 
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,21 @@ public class HttpAuthFilter extends OncePerRequestFilter {
   private String validSpaceGuid;
   private String validOrgGuid;
 
+  @Value("${cfserver.healthserver.username}")
+  private String healthServerUsername;
+  @Value("${cfserver.healthserver.password}")
+  private String healthServerPassword;
+
+  public void setHealthServerUsername(String healthServerUsername) {
+    this.healthServerUsername = healthServerUsername;
+  }
+
+  public void setHealthServerPassword(String healthServerPassword) {
+    this.healthServerPassword = healthServerPassword;
+  }
+
+
+
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -38,6 +54,7 @@ public class HttpAuthFilter extends OncePerRequestFilter {
             + " method"
             + request.getMethod());
 
+
     // Skip filter if the request is HTTPS
     if (request.getScheme().equals("https")) {
       // Do we need to the know the original request sent by the client.
@@ -46,6 +63,39 @@ public class HttpAuthFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
       return;
     }
+
+    // handles /health endpoint with basic auth
+    if (request.getRequestURI().contains("/health")) {
+      // parse request basic auth header
+      String authHeader = request.getHeader("Authorization");
+      if (authHeader == null || !authHeader.startsWith("Basic ")) {
+        logger.warn("Missing or invalid Authorization header for health check request");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        return;
+      }
+      String[] credentials = new String(Base64.getDecoder().decode(authHeader.substring(6)))
+          .split(":");
+
+      System.out.println("BANANA: Health check request received with credentials: " + credentials[0]);
+
+      if (credentials.length != 2) {
+        logger.warn("Invalid Authorization header format for health check request");
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad Request");
+        return;
+      }
+      if (!credentials[0].equals(healthServerUsername)
+          || !credentials[1].equals(healthServerPassword)) {
+        logger.warn("Invalid credentials for health check request");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        return;
+      } else {
+        response.setStatus(HttpServletResponse.SC_OK);
+      }
+
+      return;
+    }
+
+    // Check for X-Forwarded-Client-Cert header for non health endpoints
     String xfccHeader = request.getHeader("X-Forwarded-Client-Cert");
     if (xfccHeader == null || xfccHeader.isEmpty()) {
       logger.warn("Missing X-Forwarded-Client-Cert header");
@@ -102,3 +152,4 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     return isSpaceValid && isOrgValid;
   }
 }
+

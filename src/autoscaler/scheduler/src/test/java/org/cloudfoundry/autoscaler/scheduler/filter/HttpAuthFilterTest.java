@@ -87,4 +87,39 @@ public class HttpAuthFilterTest {
     assertThat(response.getErrorMessage())
         .contains("Invalid certificate: Could not parse certificate");
   }
+
+  @Test
+  public void testDoFilterHttpHealthReturnsSuccess() throws Exception {
+    var username = "test-user";
+    var password = "test-password";
+
+    this.request.setScheme("http");
+    this.request.setRequestURI("/health");
+    this.request.setMethod("GET");
+    this.request.addHeader("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
+
+    httpAuthFilter.setHealthServerUsername(username);
+    httpAuthFilter.setHealthServerPassword(password);
+    httpAuthFilter.doFilterInternal(request, response, filterChain);
+    assertThat(response.getStatus()).isEqualTo(200);
+  }
+
+  @Test
+  public void testDoFilterHttpHealthReturnsErrorWithWrongCredentials() throws Exception {
+    var username = "test-username";
+    var password = "test-password";
+
+    this.request.setScheme("http");
+    this.request.setRequestURI("/health");
+    this.request.setMethod("GET");
+    this.request.addHeader("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
+
+    httpAuthFilter.setHealthServerUsername("correct-user");
+    httpAuthFilter.setHealthServerPassword("correct-password");
+    httpAuthFilter.doFilterInternal(request, response, filterChain);
+    assertThat(response.getStatus()).isEqualTo(401);
+    assertThat(response.getErrorMessage()).isEqualTo("Unauthorized");
+  }
 }
+
+

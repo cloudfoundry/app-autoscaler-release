@@ -27,6 +27,7 @@ public class MetricsConfig {
       logger.warn("Starting plain-text (non-TLS) health endpoint server");
     }
 
+    // only for /health endpoint
     if (config.isBasicAuthEnabled()) {
       builder.withAuthenticator(
           new BasicAuthenticator("/") {

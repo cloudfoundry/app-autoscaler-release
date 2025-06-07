@@ -116,7 +116,6 @@ scheduler:
     healthserver:
         password: "test-password"
         port: 8081
-        unprotectedEndpoints: /health/prometheus,/health/liveness
         username: "test-user"
 
 ############################################################
@@ -142,3 +141,6 @@ server:
 cfserver:
   validOrgGuid: "some-org-guid"
   validSpaceGuid: "some-space-guid"
+  healthserver:
+    username: "test-user"
+    password: "test-password"
