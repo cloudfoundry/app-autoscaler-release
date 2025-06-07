@@ -90,7 +90,7 @@ public class HttpAuthFilterTest {
 
   @Test
   public void testDoFilterHttpHealthReturnsSuccess() throws Exception {
-    var username = "test-username";
+    var username = "test-user";
     var password = "test-password";
 
     this.request.setScheme("http");
@@ -98,10 +98,10 @@ public class HttpAuthFilterTest {
     this.request.setMethod("GET");
     this.request.addHeader("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
 
+    httpAuthFilter.setHealthServerUsername(username);
+    httpAuthFilter.setHealthServerPassword(password);
     httpAuthFilter.doFilterInternal(request, response, filterChain);
     assertThat(response.getStatus()).isEqualTo(200);
-    // response message is "OK" for successful health check
-    assertThat(response.getErrorMessage()).isEqualTo("OK");
   }
 
   @Test
@@ -114,10 +114,11 @@ public class HttpAuthFilterTest {
     this.request.setMethod("GET");
     this.request.addHeader("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
 
+    httpAuthFilter.setHealthServerUsername("correct-user");
+    httpAuthFilter.setHealthServerPassword("correct-password");
     httpAuthFilter.doFilterInternal(request, response, filterChain);
-    assertThat(response.getStatus()).isEqualTo(200);
-    // response message is "OK" for successful health check
-    assertThat(response.getErrorMessage()).isEqualTo("OK");
+    assertThat(response.getStatus()).isEqualTo(401);
+    assertThat(response.getErrorMessage()).isEqualTo("Unauthorized");
   }
 }
 

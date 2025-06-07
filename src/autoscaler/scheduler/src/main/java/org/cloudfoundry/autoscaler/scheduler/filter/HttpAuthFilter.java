@@ -1,5 +1,6 @@
 package org.cloudfoundry.autoscaler.scheduler.filter;
 
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,10 +28,18 @@ public class HttpAuthFilter extends OncePerRequestFilter {
   private String validSpaceGuid;
   private String validOrgGuid;
 
-  @Value("${cfserver.healthServer.username}")
-  private string healthServerUsername;
-  @Value("${cfserver.healthServer.password}")
+  @Value("${cfserver.healthserver.username}")
+  private String healthServerUsername;
+  @Value("${cfserver.healthserver.password}")
   private String healthServerPassword;
+
+  public void setHealthServerUsername(String healthServerUsername) {
+    this.healthServerUsername = healthServerUsername;
+  }
+
+  public void setHealthServerPassword(String healthServerPassword) {
+    this.healthServerPassword = healthServerPassword;
+  }
 
 
 
@@ -66,6 +75,8 @@ public class HttpAuthFilter extends OncePerRequestFilter {
       }
       String[] credentials = new String(Base64.getDecoder().decode(authHeader.substring(6)))
           .split(":");
+
+      System.out.println("BANANA: Health check request received with credentials: " + credentials[0]);
 
       if (credentials.length != 2) {
         logger.warn("Invalid Authorization header format for health check request");
