@@ -213,11 +213,10 @@ resources:
 - name: scheduler-config
   parameters:
     config:
-      scheduler-config:
-        cfserver:
-          healthserver:
-            password: "test-password"
-            username: "test-user"
+      cfserver:
+        healthserver:
+          password: "test-password"
+          username: "test-user"
 
 - name: operator-config
   parameters:
