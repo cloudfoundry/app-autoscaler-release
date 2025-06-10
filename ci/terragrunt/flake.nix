@@ -28,15 +28,6 @@
 
           config = {
             allowBroken = false;
-            allowUnfreePredicate = pkg:
-              let
-                nameAndLicense = [(nixpkgs.lib.getName pkg) pkg.meta.license.shortName];
-              in builtins.elem nameAndLicense [
-                # Used not for production!
-                # License-details: <https://spdx.org/licenses/BUSL-1.1.html>
-                ["terraform" "bsl11"]
-              ];
-
             checkMeta = true;
           };
       });
@@ -53,7 +44,6 @@
               kapp
               kubectl
               kubernetes-helm
-              terraform
               terragrunt
               vendir
               ytt
