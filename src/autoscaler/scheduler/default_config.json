@@ -1,2 +1,14 @@
 {
+  "spring": {
+    "ssl": {
+      "bundle": {
+        "pem": {}
+      }
+    }
+  },
+  "server": {
+    "ssl": {
+      "enabled": false
+    }
+  }
 }
