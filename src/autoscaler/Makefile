@@ -217,3 +217,7 @@ mta-build: mta-build-clean
 
 mta-build-clean:
 	rm -rf mta_archives
+
+deploy-apps:
+	echo " - deploying apps"
+	DEBUG="${DEBUG}" ../../ci/autoscaler/scripts/deploy-apps.sh
