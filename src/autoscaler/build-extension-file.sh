@@ -3,6 +3,9 @@
 
 set -e
 
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+source "${script_dir}/../../ci/autoscaler/scripts/vars.source.sh"
+
 if [ -z "$1" ]; then
   echo "extension file path not provided"
   exit 1
