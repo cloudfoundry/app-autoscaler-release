@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
@@ -24,23 +26,17 @@ func main() {
 	var path string
 	flag.StringVar(&path, "c", "", "config file")
 	flag.Parse()
-	if path == "" {
-		_, _ = fmt.Fprintln(os.Stderr, "missing config file")
-		os.Exit(1)
-	}
 
-	configFile, err := os.Open(path)
+	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to open config file '%s' : %s\n", path, err.Error())
-		os.Exit(1)
+		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
 	}
 
-	conf, err := config.LoadConfig(configFile)
+	conf, err := config.LoadConfig(path, vcapConfiguration)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
 		os.Exit(1)
 	}
-	_ = configFile.Close()
 
 	err = conf.Validate()
 	if err != nil {
@@ -60,19 +56,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	policyDb := sqldb.CreatePolicyDb(conf.DB.PolicyDB, logger)
-	defer func() { _ = policyDb.Close() }()
-
-	scalingEngineDB, err := sqldb.NewScalingEngineSQLDB(conf.DB.ScalingEngineDB, logger.Session("scalingengine-db"))
+	policyDb, err := sqldb.NewPolicySQLDB(conf.Db[db.PolicyDb], logger.Session("policy-db"))
 	if err != nil {
-		logger.Error("failed to connect scalingengine database", err, lager.Data{"dbConfig": conf.DB.ScalingEngineDB})
+		logger.Error("failed to connect policy db", err, lager.Data{"dbConfig": conf.Db[db.PolicyDb]})
+		os.Exit(1)
+	}
+	defer policyDb.Close()
+
+	scalingEngineDB, err := sqldb.NewScalingEngineSQLDB(conf.Db[db.ScalingEngineDb], logger.Session("scalingengine-db"))
+	if err != nil {
+		logger.Error("failed to connect scalingengine database", err, lager.Data{"dbConfig": conf.Db[db.ScalingEngineDb]})
 		os.Exit(1)
 	}
 	defer func() { _ = scalingEngineDB.Close() }()
 
-	schedulerDB, err := sqldb.NewSchedulerSQLDB(conf.DB.SchedulerDB, logger.Session("scheduler-db"))
+	schedulerDB, err := sqldb.NewSchedulerSQLDB(conf.Db[db.SchedulerDb], logger.Session("scheduler-db"))
 	if err != nil {
-		logger.Error("failed to connect scheduler database", err, lager.Data{"dbConfig": conf.DB.SchedulerDB})
+		logger.Error("failed to connect scheduler database", err, lager.Data{"dbConfig": conf.Db[db.SchedulerDb]})
 		os.Exit(1)
 	}
 	defer func() { _ = schedulerDB.Close() }()
@@ -101,9 +101,9 @@ func main() {
 	}
 
 	members := grouper.Members{
-		{"http_server", httpServer},
-		{"health_server", healthServer},
-		{"cf_server", cfServer},
+		{Name: "http_server", Runner: httpServer},
+		{Name: "health_server", Runner: healthServer},
+		{Name: "cf_server", Runner: cfServer},
 	}
 
 	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))

@@ -18,15 +18,6 @@ fi
 export SYSTEM_DOMAIN="autoscaler.app-runtime-interfaces.ci.cloudfoundry.org"
 export POSTGRES_EXTERNAL_PORT="${PR_NUMBER:-5432}"
 
-export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
-export METRICSFORWARDER_MTLS_HOST="${METRICSFORWARDER_MTLS_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder-mtls"}"
-export SCALINGENGINE_HOST="${SCALINGENGINE_HOST:-"${DEPLOYMENT_NAME}-cf-scalingengine"}"
-export EVENTGENERATOR_CF_HOST="${EVENTGENERATOR_CF_HOST:-"${DEPLOYMENT_NAME}-cf-eventgenerator"}"
-export EVENTGENERATOR_HOST="${EVENTGENERATOR_HOST:-"${DEPLOYMENT_NAME}-eventgenerator"}"
-export SCHEDULER_HOST="${SCHEDULER_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
-export PUBLICAPISERVER_HOST="${PUBLICAPISERVER_HOST:-"${DEPLOYMENT_NAME}"}"
-export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
-
 export CPU_LOWER_THRESHOLD="${CPU_LOWER_THRESHOLD:-"100"}"
 
 cat << EOF > /tmp/extension-file-secrets.yml.tpl
@@ -40,7 +31,7 @@ eventgenerator_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler
 eventgenerator_log_cache_uaa_client_id: eventgenerator_log_cache
 eventgenerator_log_cache_uaa_client_secret: ((/bosh-autoscaler/cf/uaa_clients_eventgenerator_log_cache_secret))
 
-
+scalingengine_health_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/autoscaler_scalingengine_health_password))
 
 policy_db_password: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/database_password))
 policy_db_server_ca: ((/bosh-autoscaler/${DEPLOYMENT_NAME}/postgres_server.ca))
@@ -55,15 +46,9 @@ EOF
 
 credhub interpolate -f "/tmp/extension-file-secrets.yml.tpl" > /tmp/mtar-secrets.yml
 
-export METRICSFORWARDER_UAA_SKIP_SSL_VALIDATION="$(yq ".metricsforwarder_uaa_skip_ssl_validation" /tmp/mtar-secrets.yml)"
-export METRICSFORWARDER_APPNAME="${METRICSFORWARDER_APPNAME:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
-export METRICSFORWARDER_HEALTH_PASSWORD="$(yq ".metricsforwarder_health_password" /tmp/mtar-secrets.yml)"
-export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
-export METRICSFORWARDER_MTLS_HOST="${METRICSFORWARDER_MTLS_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder-mtls"}"
-export METRICSFORWARDER_INSTANCES="${METRICSFORWARDER_INSTANCES:-2}"
-
 export APISERVER_HOST="${APISERVER_HOST:-"${DEPLOYMENT_NAME}"}"
 export APISERVER_INSTANCES="${APISERVER_INSTANCES:-2}"
+export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
 
 export EVENTGENERATOR_HEALTH_PASSWORD="$(yq ".eventgenerator_health_password" /tmp/mtar-secrets.yml)"
 export EVENTGENERATOR_LOG_CACHE_UAA_CLIENT_ID="$(yq ".eventgenerator_log_cache_uaa_client_id" /tmp/mtar-secrets.yml)"
@@ -72,25 +57,27 @@ export EVENTGENERATOR_CF_HOST="${EVENTGENERATOR_CF_HOST:-"${DEPLOYMENT_NAME}-cf-
 export EVENTGENERATOR_HOST="${EVENTGENERATOR_HOST:-"${DEPLOYMENT_NAME}-eventgenerator"}"
 export EVENTGENERATOR_INSTANCES="${EVENTGENERATOR_INSTANCES:-2}"
 
+export METRICSFORWARDER_UAA_SKIP_SSL_VALIDATION="$(yq ".metricsforwarder_uaa_skip_ssl_validation" /tmp/mtar-secrets.yml)"
+export METRICSFORWARDER_APPNAME="${METRICSFORWARDER_APPNAME:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
+export METRICSFORWARDER_HEALTH_PASSWORD="$(yq ".metricsforwarder_health_password" /tmp/mtar-secrets.yml)"
+export METRICSFORWARDER_HOST="${METRICSFORWARDER_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder"}"
+export METRICSFORWARDER_MTLS_HOST="${METRICSFORWARDER_MTLS_HOST:-"${DEPLOYMENT_NAME}-metricsforwarder-mtls"}"
+export METRICSFORWARDER_INSTANCES="${METRICSFORWARDER_INSTANCES:-2}"
 
-export SCHEDULER_HOST="${SCHEDULER_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
+export SCALINGENGINE_CF_CLIENT_ID="autoscaler_client_id"
+export SCALINGENGINE_CF_CLIENT_SECRET="autoscaler_client_secret"
+export SCALINGENGINE_HEALTH_PASSWORD="$(yq ".scalingengine_health_password" /tmp/mtar-secrets.yml)"
+export SCALINGENGINE_CF_HOST="${SCALINGENGINE_CF_HOST:-"${DEPLOYMENT_NAME}-cf-scalingengine"}"
+export SCALINGENGINE_HOST="${SCALINGENGINE_HOST:-"${DEPLOYMENT_NAME}-scalingengine"}"
+export SCALINGENGINE_INSTANCES="${SCALINGENGINE_INSTANCES:-2}"
 
-export SERVICEBROKER_HOST="${SERVICEBROKER_HOST:-"${DEPLOYMENT_NAME}servicebroker"}"
-
-export SCALINGENGINE_HOST="${SCALINGENGINE_HOST:-"${DEPLOYMENT_NAME}-cf-scalingengine"}"
+export SCHEDULER_CF_HOST="${SCHEDULER_CF_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
 
 export OPERATOR_CF_CLIENT_ID="autoscaler_client_id"
 export OPERATOR_CF_CLIENT_SECRET="autoscaler_client_secret"
 export OPERATOR_HEALTH_PASSWORD="$(yq ".operator_health_password" /tmp/mtar-secrets.yml)"
 export OPERATOR_HOST="${OPERATOR_HOST:-"${DEPLOYMENT_NAME}-operator"}"
 export OPERATOR_INSTANCES="${OPERATOR_INSTANCES:-2}"
-
-export EVENTGENERATOR_INSTANCES="${EVENTGENERATOR_INSTANCES:-2}"
-export APISERVER_INSTANCES="${APISERVER_INSTANCES:-2}"
-export METRICSFORWARDER_INSTANCES="${METRICSFORWARDER_INSTANCES:-2}"
-export EVENTGENERATOR_HEALTH_PASSWORD="$(yq ".eventgenerator_health_password" /tmp/mtar-secrets.yml)"
-export EVENTGENERATOR_LOG_CACHE_UAA_CLIENT_ID="$(yq ".eventgenerator_log_cache_uaa_client_id" /tmp/mtar-secrets.yml)"
-export EVENTGENERATOR_LOG_CACHE_UAA_CLIENT_SECRET="$(yq ".eventgenerator_log_cache_uaa_client_secret" /tmp/mtar-secrets.yml)"
 
 export POSTGRES_IP="$(yq ".postgres_ip" /tmp/mtar-secrets.yml)"
 
@@ -139,6 +126,15 @@ modules:
       routes:
       - route: ${EVENTGENERATOR_CF_HOST}.\${default-domain}
       - route: ${EVENTGENERATOR_HOST}.\${default-domain}
+  - name: scalingengine
+    requires:
+    - name: scalingengine-config
+    - name: database
+    parameters:
+      instances: ${SCALINGENGINE_INSTANCES}
+      routes:
+      - route: ${SCALINGENGINE_CF_HOST}.\${default-domain}
+      - route: ${SCALINGENGINE_HOST}.\${default-domain}
   - name: metricsforwarder
     requires:
     - name: metricsforwarder-config
@@ -158,13 +154,11 @@ modules:
       routes:
       - route: ${OPERATOR_HOST}.\${default-domain}
 
-
-
 resources:
 - name: metricsforwarder-config
   parameters:
     config:
-      metricsforwarder:
+      metricsforwarder-config:
         health:
           basic_auth:
             password: "${METRICSFORWARDER_HEALTH_PASSWORD}"
@@ -187,7 +181,7 @@ resources:
           basic_auth:
             password: "${EVENTGENERATOR_HEALTH_PASSWORD}"
         scalingEngine:
-          scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
+          scaling_engine_url: https://${SCALINGENGINE_CF_HOST}.\${default-domain}
 
 - name: apiserver-config
   parameters:
@@ -202,12 +196,12 @@ resources:
           client_id: autoscaler_client_id
           secret: autoscaler_client_secret
         scheduler:
-          scheduler_url: https://${SCHEDULER_HOST}.\${default-domain}
+          scheduler_url: https://${SCHEDULER_CF_HOST}.\${default-domain}
         metrics_forwarder:
           metrics_forwarder_url: https://${METRICSFORWARDER_HOST}.\${default-domain}
           metrics_forwarder_mtls_url: https://${METRICSFORWARDER_MTLS_HOST}.\${default-domain}
         scaling_engine:
-          scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
+          scaling_engine_url: https://${SCALINGENGINE_CF_HOST}.\${default-domain}
         event_generator:
           event_generator_url: https://${EVENTGENERATOR_CF_HOST}.\${default-domain}
         broker_credentials:
@@ -228,9 +222,21 @@ resources:
           client_id: ${OPERATOR_CF_CLIENT_ID}
           secret: ${OPERATOR_CF_CLIENT_SECRET}
         scaling_engine:
-          scaling_engine_url: https://${SCALINGENGINE_HOST}.\${default-domain}
+          scaling_engine_url: https://${SCALINGENGINE_CF_HOST}.\${default-domain}
         scheduler:
-          scheduler_url: https://${SCHEDULER_HOST}.\${default-domain}
+          scheduler_url: https://${SCHEDULER_CF_HOST}.\${default-domain}
+
+- name: scalingengine-config
+  parameters:
+    config:
+      scalingengine-config:
+        health:
+          basic_auth:
+            password: "${SCALINGENGINE_HEALTH_PASSWORD}"
+        cf:
+          api:  https://api.\${default-domain}
+          client_id: ${SCALINGENGINE_CF_CLIENT_ID}
+          secret: ${SCALINGENGINE_CF_CLIENT_SECRET}
 
 - name: database
   parameters:
@@ -239,12 +245,14 @@ resources:
       client_cert: "${POLICY_DB_CLIENT_CERT//$'\n'/\\n}"
       client_key: "${POLICY_DB_CLIENT_KEY//$'\n'/\\n}"
       server_ca: "${POLICY_DB_SERVER_CA//$'\n'/\\n}"
+
 - name: syslog-client
   parameters:
     config:
       client_cert: "${SYSLOG_CLIENT_CERT//$'\n'/\\n}"
       client_key: "${SYSLOG_CLIENT_KEY//$'\n'/\\n}"
       server_ca: "${SYSLOG_CLIENT_CA//$'\n'/\\n}"
+
 - name: broker-catalog
   parameters:
     config:
