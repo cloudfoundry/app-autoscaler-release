@@ -6,6 +6,8 @@ aes_terminal_reset := \e[0m
 VERSION ?= 0.0.0-rc.1
 DEST ?= /tmp/build
 MTAR_FILENAME ?= app-autoscaler-release-v$(VERSION).mtar
+AUTOSCALER_DIR ?= $(shell pwd)/../..
+CI_DIR ?= ${AUTOSCALER_DIR}/ci
 
 GO_VERSION = $(shell go version | sed -e 's/^[^0-9.]*\([0-9.]*\).*/\1/')
 GO_MINOR_VERSION = $(shell echo $(GO_VERSION) | cut --delimiter=. --field=2)
@@ -14,6 +16,7 @@ PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/'
 								 | grep --invert-match --regexp='e2e')
 
 
+MODULES ?= dbtasks,apiserver,eventgenerator,metrisforwarder,operator,scheduler
 db_type ?= postgres
 DB_HOST ?= localhost
 DBURL := $(shell case "${db_type}" in\
@@ -97,6 +100,10 @@ go-vendored-files = $(shell find '${go-vendoring-folder}' -type f -name '*.go' 2
 go-mod-vendor: ${go-vendoring-folder} ${go-vendored-files}
 ${go-vendoring-folder} ${go-vendored-files} &: ${app-fakes-dir} ${app-fakes-files}
 	go mod vendor
+
+.PHONY: go-mod-vendor-mta
+go-mod-vendor-mta: generate-openapi-generated-clients-and-servers
+	GOFLAGS="-tags=!test" go mod vendor -e
 
 
 # CGO_ENABLED := 1 is required to enforce dynamic linking which is a requirement of dynatrace.
@@ -189,7 +196,7 @@ clean:
 mta-deploy: mta-build build-extension-file
 	$(MAKE) -f metricsforwarder/Makefile set-security-group
 	@echo "Deploying with extension file: $(EXTENSION_FILE)"
-	@cf deploy $(DEST)/*.mtar --version-rule ALL -f --delete-services -e $(EXTENSION_FILE)
+	@cf deploy $(DEST)/*.mtar --version-rule ALL -f --delete-services -e $(EXTENSION_FILE) -m $(MODULES)
 
 
 .PHONY: mta-deploy
@@ -218,6 +225,12 @@ mta-build: mta-build-clean
 mta-build-clean:
 	rm -rf mta_archives
 
-deploy-apps:
-	echo " - deploying apps"
-	DEBUG="${DEBUG}" ../../ci/autoscaler/scripts/deploy-apps.sh
+
+.PHONY: cf-login
+cf-login:
+	@echo '⚠️ Please note that this login only works for cf and concourse,' \
+		  'in spite of performing a login as well on bosh and credhub.' \
+		  'The necessary changes to the environment get lost when make exits its process.'
+	@${CI_DIR}/autoscaler/scripts/os-infrastructure-login.sh
+
+deploy-apps: cf-login mta-deploy
