@@ -16,7 +16,7 @@ PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/'
 								 | grep --invert-match --regexp='e2e')
 
 
-MODULES ?= dbtasks,apiserver,eventgenerator,metrisforwarder,operator,scheduler
+MODULES ?= dbtasks,apiserver,eventgenerator,metricsforwarder,operator,scheduler
 db_type ?= postgres
 DB_HOST ?= localhost
 DBURL := $(shell case "${db_type}" in\
