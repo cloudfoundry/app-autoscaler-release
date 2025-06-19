@@ -1,6 +1,5 @@
 package org.cloudfoundry.autoscaler.scheduler.filter;
 
-import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +12,7 @@ import java.util.Base64;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -30,6 +30,7 @@ public class HttpAuthFilter extends OncePerRequestFilter {
 
   @Value("${cfserver.healthserver.username}")
   private String healthServerUsername;
+
   @Value("${cfserver.healthserver.password}")
   private String healthServerPassword;
 
@@ -41,8 +42,6 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     this.healthServerPassword = healthServerPassword;
   }
 
-
-
   @Override
   protected void doFilterInternal(
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -53,7 +52,6 @@ public class HttpAuthFilter extends OncePerRequestFilter {
             + request.getRequestURI()
             + " method"
             + request.getMethod());
-
 
     // Skip filter if the request is HTTPS
     if (request.getScheme().equals("https")) {
@@ -73,10 +71,11 @@ public class HttpAuthFilter extends OncePerRequestFilter {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
         return;
       }
-      String[] credentials = new String(Base64.getDecoder().decode(authHeader.substring(6)))
-          .split(":");
+      String[] credentials =
+          new String(Base64.getDecoder().decode(authHeader.substring(6))).split(":");
 
-      System.out.println("BANANA: Health check request received with credentials: " + credentials[0]);
+      System.out.println(
+          "BANANA: Health check request received with credentials: " + credentials[0]);
 
       if (credentials.length != 2) {
         logger.warn("Invalid Authorization header format for health check request");
@@ -152,4 +151,3 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     return isSpaceValid && isOrgValid;
   }
 }
-

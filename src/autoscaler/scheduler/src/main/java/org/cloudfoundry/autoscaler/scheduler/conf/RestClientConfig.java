@@ -27,8 +27,8 @@ public class RestClientConfig {
   private final boolean sslEnabled;
 
   @Autowired
-  public RestClientConfig(SslBundles sslBundles, 
-                         @Value("${client.ssl.enabled:true}") boolean sslEnabled) {
+  public RestClientConfig(
+      SslBundles sslBundles, @Value("${client.ssl.enabled:true}") boolean sslEnabled) {
     this.sslEnabled = sslEnabled;
     if (sslEnabled) {
       SslBundle sslBundle = sslBundles.getBundle("scalingengine");
@@ -56,10 +56,10 @@ public class RestClientConfig {
       throws Exception {
 
     HttpClientBuilder builder = HttpClientBuilder.create();
-    
+
     var connectionConfig =
         ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(httpClientTimeout)).build();
-    
+
     if (sslEnabled && this.sslContext != null) {
       SSLConnectionSocketFactory sslsf =
           new SSLConnectionSocketFactory(
@@ -81,7 +81,7 @@ public class RestClientConfig {
               .build();
       builder.setConnectionManager(ccm);
     }
-    
+
     RequestConfig requestConfig =
         RequestConfig.custom()
             .setConnectionRequestTimeout(Timeout.ofSeconds(httpClientTimeout))

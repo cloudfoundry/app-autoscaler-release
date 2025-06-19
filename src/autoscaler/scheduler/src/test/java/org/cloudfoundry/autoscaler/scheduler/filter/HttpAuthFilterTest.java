@@ -96,7 +96,10 @@ public class HttpAuthFilterTest {
     this.request.setScheme("http");
     this.request.setRequestURI("/health");
     this.request.setMethod("GET");
-    this.request.addHeader("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
+    this.request.addHeader(
+        "Authorization",
+        "Basic "
+            + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
 
     httpAuthFilter.setHealthServerUsername(username);
     httpAuthFilter.setHealthServerPassword(password);
@@ -112,7 +115,10 @@ public class HttpAuthFilterTest {
     this.request.setScheme("http");
     this.request.setRequestURI("/health");
     this.request.setMethod("GET");
-    this.request.addHeader("Authorization", "Basic " + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
+    this.request.addHeader(
+        "Authorization",
+        "Basic "
+            + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
 
     httpAuthFilter.setHealthServerUsername("correct-user");
     httpAuthFilter.setHealthServerPassword("correct-password");
@@ -121,5 +127,3 @@ public class HttpAuthFilterTest {
     assertThat(response.getErrorMessage()).isEqualTo("Unauthorized");
   }
 }
-
-

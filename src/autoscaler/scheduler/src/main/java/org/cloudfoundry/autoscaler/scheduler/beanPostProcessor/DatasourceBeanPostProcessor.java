@@ -1,9 +1,9 @@
 package org.cloudfoundry.autoscaler.scheduler.beanPostProcessor;
 
+import com.zaxxer.hikari.HikariDataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-import com.zaxxer.hikari.HikariDataSource;
 import org.cloudfoundry.autoscaler.scheduler.util.error.DataSourceConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +30,16 @@ public class DatasourceBeanPostProcessor implements BeanPostProcessor {
         // Log datasource details for debugging
         if (ds instanceof HikariDataSource) {
           HikariDataSource hikariDs = (HikariDataSource) ds;
-          logger.info("Attempting to connect to datasource '{}' with URL: {}", beanName, hikariDs.getJdbcUrl());
+          logger.info(
+              "Attempting to connect to datasource '{}' with URL: {}",
+              beanName,
+              hikariDs.getJdbcUrl());
           logger.info("Datasource '{}' username: {}", beanName, hikariDs.getUsername());
         } else {
-          logger.info("Attempting to connect to datasource '{}' (type: {})", beanName, ds.getClass().getSimpleName());
+          logger.info(
+              "Attempting to connect to datasource '{}' (type: {})",
+              beanName,
+              ds.getClass().getSimpleName());
         }
         con = ds.getConnection();
         logger.info("Successfully connected to datasource: {}", beanName);

@@ -3,7 +3,6 @@ package org.cloudfoundry.autoscaler.scheduler.conf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,8 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapServicesWithSchedulerConfig() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": [
             {
@@ -60,24 +60,28 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
-    assertEquals("jdbc:postgresql://cf-db-host:5432/autoscaler",
+    assertEquals(
+        "jdbc:postgresql://cf-db-host:5432/autoscaler",
         environment.getProperty("spring.datasource.url"));
     assertEquals("cf-db-user", environment.getProperty("spring.datasource.username"));
     assertEquals("cf-db-password", environment.getProperty("spring.datasource.password"));
-    assertEquals("https://cf-scaling-engine:8091",
-        environment.getProperty("autoscaler.scalingengine.url"));
+    assertEquals(
+        "https://cf-scaling-engine:8091", environment.getProperty("autoscaler.scalingengine.url"));
     assertEquals("8080", environment.getProperty("server.port"));
   }
 
   @Test
   public void testVcapServicesWithoutSchedulerConfigTag() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": [
             {
@@ -95,9 +99,11 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -108,9 +114,11 @@ public class CloudFoundryConfigurationProcessorTest {
   public void testInvalidVcapServicesJson() {
     String vcapServices = "invalid json";
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -119,9 +127,11 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testEmptyVcapServices() {
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", "")));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", "")));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -130,41 +140,46 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapServicesWithDatabaseService() {
-    String vcapServices = """
-        {
-          "postgresql-db": [
-            {
-              "label": "postgresql-db",
-              "name": "autoscaler-db",
-              "tags": ["relational", "binding_db", "policy_db"],
-              "credentials": {
-                "username": "dbuser",
-                "password": "dbpass",
-                "hostname": "db-host.example.com",
-                "dbname": "autoscaler_db",
-                "port": "5432",
-                "uri": "postgres://dbuser:dbpass@db-host.example.com:5432/autoscaler_db",
-                "sslcert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
-                "sslrootcert": "-----BEGIN CERTIFICATE-----\\nMIIRoot...\\n-----END CERTIFICATE-----"
-              }
-            }
-          ]
-        }
-        """;
+    String vcapServices =
+        """
+{
+  "postgresql-db": [
+    {
+      "label": "postgresql-db",
+      "name": "autoscaler-db",
+      "tags": ["relational", "binding_db", "policy_db"],
+      "credentials": {
+        "username": "dbuser",
+        "password": "dbpass",
+        "hostname": "db-host.example.com",
+        "dbname": "autoscaler_db",
+        "port": "5432",
+        "uri": "postgres://dbuser:dbpass@db-host.example.com:5432/autoscaler_db",
+        "sslcert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
+        "sslrootcert": "-----BEGIN CERTIFICATE-----\\nMIIRoot...\\n-----END CERTIFICATE-----"
+      }
+    }
+  ]
+}
+""";
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
+    assertEquals(
+        "jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
 
     assertEquals("dbuser", environment.getProperty("spring.datasource.username"));
     assertEquals("dbpass", environment.getProperty("spring.datasource.password"));
-    assertEquals("org.postgresql.Driver", environment.getProperty("spring.datasource.driverClassName"));
+    assertEquals(
+        "org.postgresql.Driver", environment.getProperty("spring.datasource.driverClassName"));
 
     // Should also configure policy datasource since policy_db tag is present
     String policyDatasourceUrl = environment.getProperty("spring.policy-db-datasource.url");
@@ -175,7 +190,8 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapServicesWithDatabaseServiceNoSsl() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "postgresql-db": [
             {
@@ -194,140 +210,160 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
+    assertEquals(
+        "jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
     assertEquals("dbuser", environment.getProperty("spring.datasource.username"));
     assertEquals("dbpass", environment.getProperty("spring.datasource.password"));
 
     // Should configure policy datasource since binding_db tag is present
     assertNotNull(environment.getProperty("spring.policy-db-datasource.url"));
-    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", environment.getProperty("spring.policy-db-datasource.url"));
+    assertEquals(
+        "jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require",
+        environment.getProperty("spring.policy-db-datasource.url"));
   }
 
   @Test
   public void testVcapServicesWithClientCertCredentialMapping() {
-    String vcapServices = """
-        {
-          "postgresql-db": [
-            {
-              "label": "postgresql-db",
-              "name": "autoscaler-db",
-              "tags": ["relational", "binding_db"],
-              "credentials": {
-                "username": "dbuser",
-                "password": "dbpass",
-                "hostname": "db-host.example.com",
-                "dbname": "autoscaler_db",
-                "port": "5432",
-                "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
-                "client_key": "-----BEGIN PRIVATE KEY-----\\nMIIKey...\\n-----END PRIVATE KEY-----",
-                "sslrootcert": "-----BEGIN CERTIFICATE-----\\nMIIRoot...\\n-----END CERTIFICATE-----"
-              }
-            }
-          ]
-        }
-        """;
+    String vcapServices =
+        """
+{
+  "postgresql-db": [
+    {
+      "label": "postgresql-db",
+      "name": "autoscaler-db",
+      "tags": ["relational", "binding_db"],
+      "credentials": {
+        "username": "dbuser",
+        "password": "dbpass",
+        "hostname": "db-host.example.com",
+        "dbname": "autoscaler_db",
+        "port": "5432",
+        "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
+        "client_key": "-----BEGIN PRIVATE KEY-----\\nMIIKey...\\n-----END PRIVATE KEY-----",
+        "sslrootcert": "-----BEGIN CERTIFICATE-----\\nMIIRoot...\\n-----END CERTIFICATE-----"
+      }
+    }
+  ]
+}
+""";
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
+    assertEquals(
+        "jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
 
     assertEquals("dbuser", environment.getProperty("spring.datasource.username"));
     assertEquals("dbpass", environment.getProperty("spring.datasource.password"));
-    assertEquals("org.postgresql.Driver", environment.getProperty("spring.datasource.driverClassName"));
+    assertEquals(
+        "org.postgresql.Driver", environment.getProperty("spring.datasource.driverClassName"));
   }
 
   @Test
   public void testVcapServicesWithClientCertOnlyCredentialMapping() {
-    String vcapServices = """
-        {
-          "postgresql-db": [
-            {
-              "label": "postgresql-db",
-              "name": "autoscaler-db",
-              "tags": ["relational", "binding_db"],
-              "credentials": {
-                "username": "dbuser",
-                "password": "dbpass",
-                "hostname": "db-host.example.com",
-                "dbname": "autoscaler_db",
-                "port": "5432",
-                "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----"
-              }
-            }
-          ]
-        }
-        """;
+    String vcapServices =
+        """
+{
+  "postgresql-db": [
+    {
+      "label": "postgresql-db",
+      "name": "autoscaler-db",
+      "tags": ["relational", "binding_db"],
+      "credentials": {
+        "username": "dbuser",
+        "password": "dbpass",
+        "hostname": "db-host.example.com",
+        "dbname": "autoscaler_db",
+        "port": "5432",
+        "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----"
+      }
+    }
+  ]
+}
+""";
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
+    assertEquals(
+        "jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
   }
 
   @Test
   public void testVcapServicesPrefersSslcertOverClientCert() {
-    String vcapServices = """
-        {
-          "postgresql-db": [
-            {
-              "label": "postgresql-db",
-              "name": "autoscaler-db",
-              "tags": ["relational", "binding_db"],
-              "credentials": {
-                "username": "dbuser",
-                "password": "dbpass",
-                "hostname": "db-host.example.com",
-                "dbname": "autoscaler_db",
-                "port": "5432",
-                "sslcert": "-----BEGIN CERTIFICATE-----\\nMIISSLCert...\\n-----END CERTIFICATE-----",
-                "sslkey": "-----BEGIN PRIVATE KEY-----\\nMIISSLKey...\\n-----END PRIVATE KEY-----",
-                "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
-                "client_key": "-----BEGIN PRIVATE KEY-----\\nMIIKey...\\n-----END PRIVATE KEY-----"
-              }
-            }
-          ]
-        }
-        """;
+    String vcapServices =
+        """
+{
+  "postgresql-db": [
+    {
+      "label": "postgresql-db",
+      "name": "autoscaler-db",
+      "tags": ["relational", "binding_db"],
+      "credentials": {
+        "username": "dbuser",
+        "password": "dbpass",
+        "hostname": "db-host.example.com",
+        "dbname": "autoscaler_db",
+        "port": "5432",
+        "sslcert": "-----BEGIN CERTIFICATE-----\\nMIISSLCert...\\n-----END CERTIFICATE-----",
+        "sslkey": "-----BEGIN PRIVATE KEY-----\\nMIISSLKey...\\n-----END PRIVATE KEY-----",
+        "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
+        "client_key": "-----BEGIN PRIVATE KEY-----\\nMIIKey...\\n-----END PRIVATE KEY-----"
+      }
+    }
+  ]
+}
+""";
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
+    assertEquals(
+        "jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
   }
 
   @Test
   public void testVcapApplicationWithOrgGuid() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
-    
-    String vcapApplication = """
+
+    String vcapApplication =
+        """
         {
           "application_id": "app-123",
           "application_name": "test-app",
@@ -336,11 +372,14 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -350,13 +389,15 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapApplicationWithoutOrgGuid() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
-    
-    String vcapApplication = """
+
+    String vcapApplication =
+        """
         {
           "application_id": "app-123",
           "application_name": "test-app",
@@ -364,11 +405,14 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -378,13 +422,15 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapApplicationWithEmptyOrgGuid() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
-    
-    String vcapApplication = """
+
+    String vcapApplication =
+        """
         {
           "application_id": "app-123",
           "application_name": "test-app",
@@ -393,11 +439,14 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -406,19 +455,23 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapApplicationInvalidJson() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
-    
+
     String vcapApplication = "invalid json";
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -427,15 +480,18 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testNoVcapApplication() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test", java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -444,7 +500,8 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapApplicationOverridesSchedulerConfig() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": [
             {
@@ -459,8 +516,9 @@ public class CloudFoundryConfigurationProcessorTest {
           ]
         }
         """;
-    
-    String vcapApplication = """
+
+    String vcapApplication =
+        """
         {
           "application_id": "app-123",
           "application_name": "test-app",
@@ -469,11 +527,14 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -482,13 +543,15 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapApplicationWithOnlySpaceGuid() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
-    
-    String vcapApplication = """
+
+    String vcapApplication =
+        """
         {
           "application_id": "app-123",
           "application_name": "test-app",
@@ -496,11 +559,14 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -510,13 +576,15 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapApplicationWithEmptySpaceGuid() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
-    
-    String vcapApplication = """
+
+    String vcapApplication =
+        """
         {
           "application_id": "app-123",
           "application_name": "test-app",
@@ -525,11 +593,14 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -539,13 +610,15 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapApplicationWithoutSpaceGuid() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
-    
-    String vcapApplication = """
+
+    String vcapApplication =
+        """
         {
           "application_id": "app-123",
           "application_name": "test-app",
@@ -553,11 +626,14 @@ public class CloudFoundryConfigurationProcessorTest {
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
@@ -567,24 +643,29 @@ public class CloudFoundryConfigurationProcessorTest {
 
   @Test
   public void testVcapApplicationWithNeitherOrgNorSpaceGuid() {
-    String vcapServices = """
+    String vcapServices =
+        """
         {
           "user-provided": []
         }
         """;
-    
-    String vcapApplication = """
+
+    String vcapApplication =
+        """
         {
           "application_id": "app-123",
           "application_name": "test-app"
         }
         """;
 
-    environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test",
-            java.util.Map.of(
-                "VCAP_SERVICES", vcapServices,
-                "VCAP_APPLICATION", vcapApplication)));
+    environment
+        .getPropertySources()
+        .addLast(
+            new org.springframework.core.env.MapPropertySource(
+                "test",
+                java.util.Map.of(
+                    "VCAP_SERVICES", vcapServices,
+                    "VCAP_APPLICATION", vcapApplication)));
 
     processor.postProcessEnvironment(environment, application);
 
