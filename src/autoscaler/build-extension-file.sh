@@ -220,7 +220,9 @@ resources:
         healthserver:
           password: "test-password"
           username: "test-user"
-
+      autoscaler:
+        scalingengine:
+          url: https://${SCALINGENGINE_HOST}.\${default-domain}
 - name: operator-config
   parameters:
     config:
