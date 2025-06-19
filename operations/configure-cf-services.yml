@@ -45,4 +45,3 @@
       component: autoscaler_cf_scalingengine
     uris:
       - ((deployment_name))-cf-scalingengine.((system_domain))
-
