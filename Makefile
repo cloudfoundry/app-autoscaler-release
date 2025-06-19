@@ -162,7 +162,7 @@ ${scheduler-dir}/src/test/resources/certs:
 
 
 
-.PHONY: test test-autoscaler test-scheduler test-changelog test-changeloglockcleaner
+.PHONY: test test-autoscaler test-changelog test-changeloglockcleaner
 test: test-autoscaler scheduler.test test-changelog test-changeloglockcleaner test-acceptance-unit ## Run all unit tests
 test-autoscaler: check-db_type init-db test-certs
 	@echo ' - using DBURL=${DBURL} TEST=${TEST}'
