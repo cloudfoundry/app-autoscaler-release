@@ -10,7 +10,7 @@ GOOGLE_JAR_NAME=${GOOGLE_JAR_NAME:-"google-java-format-${GOOGLE_JAR_VERSION}-all
   curl -fLJO "https://github.com/google/google-java-format/releases/download/v$GOOGLE_JAR_VERSION/$GOOGLE_JAR_NAME"
 # shellcheck disable=SC2046
 files_to_be_formatted=$(java \
-              -jar "${GOOGLE_JAR_NAME}" --dry-run --skip-javadoc-formatting $(find src/scheduler -name '*.java'))
+              -jar "${GOOGLE_JAR_NAME}" --dry-run --skip-javadoc-formatting $(find src/autoscaler/scheduler -name '*.java'))
 
 if  [ -n "$files_to_be_formatted" ]; then
   echo "Formatter Results..."

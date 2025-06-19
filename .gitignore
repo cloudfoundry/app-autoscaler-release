@@ -85,3 +85,5 @@ keys/
 /result-*
 
 .direnv
+
+**/.claude

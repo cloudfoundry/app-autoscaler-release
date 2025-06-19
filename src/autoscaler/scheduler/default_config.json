@@ -1,0 +1,33 @@
+{
+  "spring": {
+    "ssl": {
+      "bundle": {
+        "pem": {
+          "scalingengine": {
+            "keystore": {
+              "certificate": "",
+              "private-key": ""
+            },
+            "truststore": {
+              "certificate": ""
+            }
+          },
+          "server": {
+            "keystore": {
+              "certificate": "",
+              "private-key": ""
+            },
+            "truststore": {
+              "certificate": ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "server": {
+    "ssl": {
+      "enabled": false
+    }
+  }
+}

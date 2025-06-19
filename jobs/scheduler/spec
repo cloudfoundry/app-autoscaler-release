@@ -148,11 +148,6 @@ properties:
   autoscaler.scheduler.health.password:
     description: "the password to protect the health endpoint"
     default: ''
-  autoscaler.scheduler.health.unprotected_endpoints:
-    description: |
-      List of all health-endpoints, that run _without_ basic access authentication.
-      Valid endpoints are /health/liveness, /health/prometheus
-    default: [] # protect everything
   autoscaler.changeloglock_timeout_seconds:
     default: 180
     description: "Liquibase changelog lock timeout duration in seconds"
