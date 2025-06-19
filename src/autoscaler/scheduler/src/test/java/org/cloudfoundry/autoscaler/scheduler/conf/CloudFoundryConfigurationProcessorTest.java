@@ -61,16 +61,16 @@ public class CloudFoundryConfigurationProcessorTest {
         """;
 
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
-    assertEquals("jdbc:postgresql://cf-db-host:5432/autoscaler", 
+    assertEquals("jdbc:postgresql://cf-db-host:5432/autoscaler",
         environment.getProperty("spring.datasource.url"));
     assertEquals("cf-db-user", environment.getProperty("spring.datasource.username"));
     assertEquals("cf-db-password", environment.getProperty("spring.datasource.password"));
-    assertEquals("https://cf-scaling-engine:8091", 
+    assertEquals("https://cf-scaling-engine:8091",
         environment.getProperty("autoscaler.scalingengine.url"));
     assertEquals("8080", environment.getProperty("server.port"));
   }
@@ -96,7 +96,7 @@ public class CloudFoundryConfigurationProcessorTest {
         """;
 
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
@@ -109,7 +109,7 @@ public class CloudFoundryConfigurationProcessorTest {
     String vcapServices = "invalid json";
 
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
@@ -120,7 +120,7 @@ public class CloudFoundryConfigurationProcessorTest {
   @Test
   public void testEmptyVcapServices() {
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", "")));
 
     processor.postProcessEnvironment(environment, application);
@@ -136,7 +136,7 @@ public class CloudFoundryConfigurationProcessorTest {
             {
               "label": "postgresql-db",
               "name": "autoscaler-db",
-              "tags": ["relational", "database", "binding_db", "policy_db"],
+              "tags": ["relational", "binding_db", "policy_db"],
               "credentials": {
                 "username": "dbuser",
                 "password": "dbpass",
@@ -153,21 +153,19 @@ public class CloudFoundryConfigurationProcessorTest {
         """;
 
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertTrue(datasourceUrl.startsWith("jdbc:postgresql://dbuser:dbpass@db-host.example.com:5432/autoscaler_db"));
-    assertTrue(datasourceUrl.contains("sslmode=require"));
-    assertTrue(datasourceUrl.contains("sslrootcert="));
-    
+    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
+
     assertEquals("dbuser", environment.getProperty("spring.datasource.username"));
     assertEquals("dbpass", environment.getProperty("spring.datasource.password"));
     assertEquals("org.postgresql.Driver", environment.getProperty("spring.datasource.driverClassName"));
-    
+
     // Should also configure policy datasource since policy_db tag is present
     String policyDatasourceUrl = environment.getProperty("spring.policy-db-datasource.url");
     assertNotNull(policyDatasourceUrl);
@@ -183,7 +181,7 @@ public class CloudFoundryConfigurationProcessorTest {
             {
               "label": "postgresql-db",
               "name": "autoscaler-db",
-              "tags": ["database", "binding_db"],
+              "tags": ["relational", "binding_db"],
               "credentials": {
                 "username": "dbuser",
                 "password": "dbpass",
@@ -197,19 +195,20 @@ public class CloudFoundryConfigurationProcessorTest {
         """;
 
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=prefer", datasourceUrl);
+    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
     assertEquals("dbuser", environment.getProperty("spring.datasource.username"));
     assertEquals("dbpass", environment.getProperty("spring.datasource.password"));
-    
-    // Should not configure policy datasource since policy_db tag is not present
-    assertNull(environment.getProperty("spring.policy-db-datasource.url"));
+
+    // Should configure policy datasource since binding_db tag is present
+    assertNotNull(environment.getProperty("spring.policy-db-datasource.url"));
+    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", environment.getProperty("spring.policy-db-datasource.url"));
   }
 
   @Test
@@ -220,7 +219,7 @@ public class CloudFoundryConfigurationProcessorTest {
             {
               "label": "postgresql-db",
               "name": "autoscaler-db",
-              "tags": ["database", "binding_db"],
+              "tags": ["relational", "binding_db"],
               "credentials": {
                 "username": "dbuser",
                 "password": "dbpass",
@@ -237,19 +236,15 @@ public class CloudFoundryConfigurationProcessorTest {
         """;
 
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertTrue(datasourceUrl.startsWith("jdbc:postgresql://db-host.example.com:5432/autoscaler_db"));
-    assertTrue(datasourceUrl.contains("sslmode=require"));
-    assertTrue(datasourceUrl.contains("sslcert="));
-    assertTrue(datasourceUrl.contains("sslkey="));
-    assertTrue(datasourceUrl.contains("sslrootcert="));
-    
+    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
+
     assertEquals("dbuser", environment.getProperty("spring.datasource.username"));
     assertEquals("dbpass", environment.getProperty("spring.datasource.password"));
     assertEquals("org.postgresql.Driver", environment.getProperty("spring.datasource.driverClassName"));
@@ -263,7 +258,7 @@ public class CloudFoundryConfigurationProcessorTest {
             {
               "label": "postgresql-db",
               "name": "autoscaler-db",
-              "tags": ["database", "binding_db"],
+              "tags": ["relational", "binding_db"],
               "credentials": {
                 "username": "dbuser",
                 "password": "dbpass",
@@ -278,19 +273,14 @@ public class CloudFoundryConfigurationProcessorTest {
         """;
 
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertTrue(datasourceUrl.startsWith("jdbc:postgresql://db-host.example.com:5432/autoscaler_db"));
-    assertTrue(datasourceUrl.contains("sslmode=require"));
-    assertTrue(datasourceUrl.contains("sslcert="));
-    assertTrue(datasourceUrl.contains("sslrootcert="));
-    // Should not contain sslkey since client_key was not provided
-    assertTrue(!datasourceUrl.contains("sslkey="));
+    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
   }
 
   @Test
@@ -301,7 +291,7 @@ public class CloudFoundryConfigurationProcessorTest {
             {
               "label": "postgresql-db",
               "name": "autoscaler-db",
-              "tags": ["database", "binding_db"],
+              "tags": ["relational", "binding_db"],
               "credentials": {
                 "username": "dbuser",
                 "password": "dbpass",
@@ -319,17 +309,13 @@ public class CloudFoundryConfigurationProcessorTest {
         """;
 
     environment.getPropertySources().addLast(
-        new org.springframework.core.env.MapPropertySource("test", 
+        new org.springframework.core.env.MapPropertySource("test",
             java.util.Map.of("VCAP_SERVICES", vcapServices)));
 
     processor.postProcessEnvironment(environment, application);
 
     String datasourceUrl = environment.getProperty("spring.datasource.url");
     assertNotNull(datasourceUrl);
-    assertTrue(datasourceUrl.startsWith("jdbc:postgresql://db-host.example.com:5432/autoscaler_db"));
-    assertTrue(datasourceUrl.contains("sslmode=require"));
-    assertTrue(datasourceUrl.contains("sslcert="));
-    assertTrue(datasourceUrl.contains("sslkey="));
-    assertTrue(datasourceUrl.contains("sslrootcert="));
+    assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
   }
 }

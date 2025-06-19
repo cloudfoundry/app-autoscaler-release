@@ -2,7 +2,26 @@
   "spring": {
     "ssl": {
       "bundle": {
-        "pem": {}
+        "pem": {
+          "scalingengine": {
+            "keystore": {
+              "certificate": "",
+              "private-key": ""
+            },
+            "truststore": {
+              "certificate": ""
+            }
+          },
+          "server": {
+            "keystore": {
+              "certificate": "",
+              "private-key": ""
+            },
+            "truststore": {
+              "certificate": ""
+            }
+          }
+        }
       }
     }
   },

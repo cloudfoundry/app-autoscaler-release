@@ -13,54 +13,89 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 
-public class CloudFoundryConfigurationProcessor implements EnvironmentPostProcessor {
+public class CloudFoundryConfigurationProcessor implements EnvironmentPostProcessor, Ordered {
 
   private static final Logger logger = LoggerFactory.getLogger(CloudFoundryConfigurationProcessor.class);
+  
+  static {
+    System.out.println("CloudFoundryConfigurationProcessor class loaded");
+  }
   private static final String VCAP_SERVICES = "VCAP_SERVICES";
   private static final String SCHEDULER_CONFIG_TAG = "scheduler-config";
-  private static final String DATABASE_TAG = "database";
+  private static final String DATABASE_TAG = "relational";
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
-  public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-    String vcapServices = environment.getProperty(VCAP_SERVICES);
-    if (vcapServices == null || vcapServices.trim().isEmpty()) {
-      logger.debug("VCAP_SERVICES not found or empty, skipping Cloud Foundry configuration override");
-      return;
-    }
+  public int getOrder() {
+    // Run after ConfigFileApplicationListener (HIGHEST_PRECEDENCE + 10) to override application.yml
+    return Ordered.HIGHEST_PRECEDENCE + 15;
+  }
 
+  @Override
+  public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+    System.out.println("CloudFoundryConfigurationProcessor.postProcessEnvironment() called");
+    logger.info("CloudFoundryConfigurationProcessor.postProcessEnvironment() called");
+    
     try {
+      String vcapServices = environment.getProperty(VCAP_SERVICES);
+      System.out.println("VCAP_SERVICES value: " + (vcapServices != null ? "present (" + vcapServices.length() + " chars)" : "null"));
+      if (vcapServices == null || vcapServices.trim().isEmpty()) {
+        System.out.println("VCAP_SERVICES is null or empty, skipping configuration override");
+        logger.warn("VCAP_SERVICES not found or empty, skipping Cloud Foundry configuration override");
+        return;
+      }
+      System.out.println("VCAP_SERVICES found, processing Cloud Foundry configuration");
+      logger.info("VCAP_SERVICES found, processing Cloud Foundry configuration");
+      System.out.println("Starting configuration extraction...");
       Map<String, Object> allConfigs = new java.util.HashMap<>();
-      
+
       // Process scheduler-config service
+      System.out.println("Extracting scheduler-config service...");
       Map<String, Object> schedulerConfig = extractSchedulerConfig(vcapServices);
+      System.out.println("Scheduler config result: " + (schedulerConfig != null ? schedulerConfig.size() + " properties" : "null"));
       if (schedulerConfig != null && !schedulerConfig.isEmpty()) {
         logger.info("Found scheduler-config service in VCAP_SERVICES, applying configuration overrides");
         allConfigs.putAll(schedulerConfig);
       }
-      
+
+      // Always disable SSL for scaling engine in Cloud Foundry environments
+      System.out.println("Disabling SSL for scaling engine in Cloud Foundry environment...");
+      allConfigs.put("client.ssl.enabled", false);
+      logger.info("Disabled SSL for scaling engine in Cloud Foundry environment");
+
       // Process database services
+      System.out.println("Extracting database services...");
       Map<String, Object> databaseConfigs = extractDatabaseConfigs(vcapServices);
+      System.out.println("Database config result: " + (databaseConfigs != null ? databaseConfigs.size() + " properties" : "null"));
       if (databaseConfigs != null && !databaseConfigs.isEmpty()) {
         logger.info("Found database services in VCAP_SERVICES, applying datasource configurations");
         allConfigs.putAll(databaseConfigs);
       }
-      
+
+      System.out.println("Total configs collected: " + allConfigs.size());
       if (!allConfigs.isEmpty()) {
+        System.out.println("Flattening configuration...");
         Map<String, Object> flattenedConfig = flattenConfiguration("", allConfigs);
+        System.out.println("Creating property source with " + flattenedConfig.size() + " flattened properties");
+        System.out.println("Properties being set: " + flattenedConfig.keySet());
         PropertySource<?> cloudFoundryPropertySource = new MapPropertySource("cloudFoundryConfig", flattenedConfig);
         environment.getPropertySources().addFirst(cloudFoundryPropertySource);
-        
+
+        System.out.println("Successfully applied Cloud Foundry configuration");
         logger.info("Applied {} configuration properties from Cloud Foundry services", flattenedConfig.size());
       } else {
+        System.out.println("No configs to apply");
         logger.debug("No relevant Cloud Foundry services found in VCAP_SERVICES");
       }
     } catch (Exception e) {
+      System.err.println("CloudFoundryConfigurationProcessor failed: " + e.getMessage());
       logger.error("Failed to process Cloud Foundry configuration from VCAP_SERVICES", e);
+      e.printStackTrace();
     }
   }
 
@@ -95,20 +130,22 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
       Map<String, List<Map<String, Object>>> services = objectMapper.readValue(vcapServices, typeRef);
 
       Map<String, Object> databaseConfigs = new java.util.HashMap<>();
-      
+
       services.values().stream()
           .flatMap(List::stream)
           .filter(this::hasDatabaseTag)
           .forEach(service -> {
+            System.out.println("Found database service: " + service.get("name"));
             Object credentials = service.get("credentials");
             if (credentials instanceof Map) {
               @SuppressWarnings("unchecked")
               Map<String, Object> credentialsMap = (Map<String, Object>) credentials;
               Map<String, Object> datasourceConfig = mapDatabaseCredentialsToDataSource(credentialsMap, service);
+              System.out.println("Database service config generated: " + datasourceConfig.size() + " properties");
               databaseConfigs.putAll(datasourceConfig);
             }
           });
-      
+
       return databaseConfigs;
     } catch (Exception e) {
       logger.error("Failed to parse VCAP_SERVICES JSON for database services", e);
@@ -118,129 +155,150 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
 
   private Map<String, Object> mapDatabaseCredentialsToDataSource(Map<String, Object> credentials, Map<String, Object> service) {
     Map<String, Object> config = new java.util.HashMap<>();
-    
+
     // Get service tags to determine which datasources to configure
     Object tags = service.get("tags");
     if (!(tags instanceof List)) {
+      System.out.println("No tags found on service");
       return config;
     }
-    
+
     @SuppressWarnings("unchecked")
     List<String> tagList = (List<String>) tags;
-    
+    System.out.println("Service tags: " + tagList);
+
     // Build JDBC URL from credentials with SSL support
     String jdbcUrl = buildJdbcUrlWithSsl(credentials);
+    
+    // Extract username and password from URI if not provided separately
     String username = (String) credentials.get("username");
     String password = (String) credentials.get("password");
+    String uri = (String) credentials.get("uri");
     
+    if ((username == null || password == null) && uri != null) {
+      // Extract from postgres://username:password@host:port/database format
+      if (uri.startsWith("postgres://")) {
+        try {
+          String userInfo = uri.substring("postgres://".length());
+          int atIndex = userInfo.indexOf('@');
+          if (atIndex > 0) {
+            String credentials_part = userInfo.substring(0, atIndex);
+            int colonIndex = credentials_part.indexOf(':');
+            if (colonIndex > 0) {
+              username = credentials_part.substring(0, colonIndex);
+              password = credentials_part.substring(colonIndex + 1);
+              System.out.println("Extracted username from URI: " + username);
+            }
+          }
+        } catch (Exception e) {
+          System.out.println("Failed to parse username/password from URI: " + e.getMessage());
+        }
+      }
+    }
+
+    System.out.println("Database credentials - jdbcUrl: " + (jdbcUrl != null ? "present" : "null") + 
+                      ", username: " + (username != null ? "present" : "null") + 
+                      ", password: " + (password != null ? "present" : "null"));
+
     if (jdbcUrl != null && username != null && password != null) {
-      // Configure primary datasource if binding_db tag is present or no specific tags
-      if (tagList.contains("binding_db") || (!tagList.contains("policy_db") && !tagList.contains("scalingengine_db"))) {
+      // Configure primary datasource if binding_db, scalingengine_db, or lock_db tag is present or no specific tags
+      if (tagList.contains("binding_db") || tagList.contains("scalingengine_db") || tagList.contains("lock_db")) {
         config.put("spring.datasource.url", jdbcUrl);
         config.put("spring.datasource.username", username);
         config.put("spring.datasource.password", password);
         config.put("spring.datasource.driverClassName", "org.postgresql.Driver");
+        System.out.println("Configured primary datasource");
       }
-      
-      // Configure policy datasource if policy_db tag is present
-      if (tagList.contains("policy_db")) {
+
+      // Configure policy datasource if policy_db tag is present or as fallback
+      if (tagList.contains("policy_db") || tagList.contains("binding_db") || tagList.contains("scalingengine_db")) {
         config.put("spring.policy-db-datasource.url", jdbcUrl);
         config.put("spring.policy-db-datasource.username", username);
         config.put("spring.policy-db-datasource.password", password);
         config.put("spring.policy-db-datasource.driverClassName", "org.postgresql.Driver");
+        System.out.println("Configured policy datasource");
       }
-      
+
       logger.info("Configured datasources for database service with tags: {}", tagList);
+    } else {
+      System.out.println("Missing required credentials for database configuration");
     }
-    
+
     return config;
   }
-  
+
   private String buildJdbcUrlWithSsl(Map<String, Object> credentials) {
     String uri = (String) credentials.get("uri");
     String hostname = (String) credentials.get("hostname");
     Object portObj = credentials.get("port");
     String dbname = (String) credentials.get("dbname");
-    
+
     // Build base URL
     String baseUrl = null;
     if (uri != null && uri.startsWith("postgres://")) {
-      // Convert postgres:// URI to jdbc:postgresql:// format
-      baseUrl = uri.replace("postgres://", "jdbc:postgresql://");
+      // Convert postgres:// URI to jdbc:postgresql:// format and strip credentials and SSL parameters
+      String cleanUri = uri.replace("postgres://", "jdbc:postgresql://");
+      
+      // Remove credentials from URI (username:password@)
+      if (cleanUri.contains("@")) {
+        int atIndex = cleanUri.indexOf("@");
+        String protocolPart = "jdbc:postgresql://";
+        String hostPart = cleanUri.substring(atIndex + 1);
+        cleanUri = protocolPart + hostPart;
+      }
+      
+      baseUrl = cleanUri;
+      
+      // Remove existing SSL-related query parameters
+      if (baseUrl.contains("?")) {
+        String[] parts = baseUrl.split("\\?", 2);
+        String urlPart = parts[0];
+        String queryPart = parts[1];
+        
+        // Filter out SSL-related parameters
+        String[] queryParams = queryPart.split("&");
+        StringBuilder filteredQuery = new StringBuilder();
+        for (String param : queryParams) {
+          if (!param.toLowerCase().startsWith("ssl") && 
+              !param.toLowerCase().startsWith("sslmode") &&
+              !param.toLowerCase().startsWith("sslcert") &&
+              !param.toLowerCase().startsWith("sslkey") &&
+              !param.toLowerCase().startsWith("sslrootcert")) {
+            if (filteredQuery.length() > 0) {
+              filteredQuery.append("&");
+            }
+            filteredQuery.append(param);
+          }
+        }
+        
+        baseUrl = urlPart;
+        if (filteredQuery.length() > 0) {
+          baseUrl += "?" + filteredQuery.toString();
+        }
+      }
     } else if (hostname != null && portObj != null && dbname != null) {
       // Build from individual components
       String port = portObj.toString();
       baseUrl = String.format("jdbc:postgresql://%s:%s/%s", hostname, port, dbname);
     }
-    
+
     if (baseUrl == null) {
       return null;
     }
-    
-    // Handle SSL certificates - support both direct and mapped credential names
-    String sslCert = (String) credentials.get("sslcert");
-    if (sslCert == null) {
-      sslCert = (String) credentials.get("client_cert");
-    }
-    
-    String sslKey = (String) credentials.get("sslkey");
-    if (sslKey == null) {
-      sslKey = (String) credentials.get("client_key");
-    }
-    
-    String sslRootCert = (String) credentials.get("sslrootcert");
-    
+
+    // For Cloud Foundry, use simple SSL mode without certificate files
     StringBuilder urlBuilder = new StringBuilder(baseUrl);
     if (!baseUrl.contains("?")) {
       urlBuilder.append("?");
     } else {
       urlBuilder.append("&");
     }
-    
-    if (sslCert != null && !sslCert.trim().isEmpty()) {
-      try {
-        // Create temp directory for SSL certificates
-        Path tempDir = Files.createTempDirectory("db-ssl-certs");
-        tempDir.toFile().deleteOnExit();
-        
-        // Write SSL certificate to temp file
-        Path sslCertPath = tempDir.resolve("ssl-cert.pem");
-        Files.write(sslCertPath, sslCert.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-        sslCertPath.toFile().deleteOnExit();
-        urlBuilder.append("sslcert=").append(sslCertPath.toAbsolutePath()).append("&");
-        
-        // Write SSL key if available
-        if (sslKey != null && !sslKey.trim().isEmpty()) {
-          Path sslKeyPath = tempDir.resolve("ssl-key.pem");
-          Files.write(sslKeyPath, sslKey.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-          sslKeyPath.toFile().deleteOnExit();
-          urlBuilder.append("sslkey=").append(sslKeyPath.toAbsolutePath()).append("&");
-        }
-        
-        // Write SSL root certificate if available
-        if (sslRootCert != null && !sslRootCert.trim().isEmpty()) {
-          Path sslRootCertPath = tempDir.resolve("ssl-root-cert.pem");
-          Files.write(sslRootCertPath, sslRootCert.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-          sslRootCertPath.toFile().deleteOnExit();
-          urlBuilder.append("sslrootcert=").append(sslRootCertPath.toAbsolutePath()).append("&");
-        } else {
-          // Use the provided sslcert as root cert too
-          urlBuilder.append("sslrootcert=").append(sslCertPath.toAbsolutePath()).append("&");
-        }
-        
-        urlBuilder.append("sslmode=require");
-        
-        logger.info("SSL certificates materialized to temporary directory: {}", tempDir.toAbsolutePath());
-        
-      } catch (IOException e) {
-        logger.warn("Failed to materialize SSL certificates, falling back to SSL mode without cert files", e);
-        urlBuilder.append("sslmode=require");
-      }
-    } else {
-      // No SSL certificates provided, but still try to use SSL
-      urlBuilder.append("sslmode=prefer");
-    }
-    
+
+    // Use require SSL mode but without client certificates for Cloud Foundry
+    urlBuilder.append("sslmode=require");
+
+    logger.info("Using SSL mode 'require' for Cloud Foundry database connection");
+
     return urlBuilder.toString();
   }
 
@@ -266,10 +324,10 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
 
   private Map<String, Object> flattenConfiguration(String prefix, Map<String, Object> config) {
     Map<String, Object> flattened = new java.util.HashMap<>();
-    
+
     config.forEach((key, value) -> {
       String fullKey = prefix.isEmpty() ? key : prefix + "." + key;
-      
+
       if (value instanceof Map) {
         @SuppressWarnings("unchecked")
         Map<String, Object> nestedMap = (Map<String, Object>) value;
@@ -278,7 +336,7 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
         flattened.put(fullKey, value);
       }
     });
-    
+
     return flattened;
   }
 }
