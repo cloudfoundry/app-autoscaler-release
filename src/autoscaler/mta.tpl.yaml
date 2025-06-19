@@ -52,6 +52,11 @@ modules:
           chmod +x ./BOOT-INF/classes/bin/apply-changelog.sh ; \
           /home/vcap/app/BOOT-INF/classes/bin/apply-changelog.sh \
             BOOT-INF/classes/operator.db.changelog.yml
+      - name: apply-scheduler-changelog
+        command: |
+          chmod +x ./BOOT-INF/classes/bin/apply-changelog.sh ; \
+          /home/vcap/app/BOOT-INF/classes/bin/apply-changelog.sh \
+            BOOT-INF/classes/quartz.changelog-master.yaml
 
   - name: apiserver
     type: go
