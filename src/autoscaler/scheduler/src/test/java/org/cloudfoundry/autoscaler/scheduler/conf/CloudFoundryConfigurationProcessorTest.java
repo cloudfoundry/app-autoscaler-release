@@ -318,4 +318,277 @@ public class CloudFoundryConfigurationProcessorTest {
     assertNotNull(datasourceUrl);
     assertEquals("jdbc:postgresql://db-host.example.com:5432/autoscaler_db?sslmode=require", datasourceUrl);
   }
+
+  @Test
+  public void testVcapApplicationWithOrgGuid() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+    
+    String vcapApplication = """
+        {
+          "application_id": "app-123",
+          "application_name": "test-app",
+          "organization_id": "test-org-guid-123",
+          "space_id": "test-space-guid-456"
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertEquals("test-org-guid-123", environment.getProperty("cfserver.validOrgGuid"));
+    assertEquals("test-space-guid-456", environment.getProperty("cfserver.validSpaceGuid"));
+  }
+
+  @Test
+  public void testVcapApplicationWithoutOrgGuid() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+    
+    String vcapApplication = """
+        {
+          "application_id": "app-123",
+          "application_name": "test-app",
+          "space_id": "test-space-guid-456"
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertNull(environment.getProperty("cfserver.validOrgGuid"));
+    assertEquals("test-space-guid-456", environment.getProperty("cfserver.validSpaceGuid"));
+  }
+
+  @Test
+  public void testVcapApplicationWithEmptyOrgGuid() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+    
+    String vcapApplication = """
+        {
+          "application_id": "app-123",
+          "application_name": "test-app",
+          "organization_id": "",
+          "space_id": "test-space-guid-456"
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertNull(environment.getProperty("cfserver.validOrgGuid"));
+  }
+
+  @Test
+  public void testVcapApplicationInvalidJson() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+    
+    String vcapApplication = "invalid json";
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertNull(environment.getProperty("cfserver.validOrgGuid"));
+  }
+
+  @Test
+  public void testNoVcapApplication() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of("VCAP_SERVICES", vcapServices)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertNull(environment.getProperty("cfserver.validOrgGuid"));
+  }
+
+  @Test
+  public void testVcapApplicationOverridesSchedulerConfig() {
+    String vcapServices = """
+        {
+          "user-provided": [
+            {
+              "name": "scheduler-config-service",
+              "tags": ["scheduler-config"],
+              "credentials": {
+                "cfserver": {
+                  "validOrgGuid": "config-org-guid-999"
+                }
+              }
+            }
+          ]
+        }
+        """;
+    
+    String vcapApplication = """
+        {
+          "application_id": "app-123",
+          "application_name": "test-app",
+          "organization_id": "vcap-org-guid-123",
+          "space_id": "test-space-guid-456"
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertEquals("vcap-org-guid-123", environment.getProperty("cfserver.validOrgGuid"));
+  }
+
+  @Test
+  public void testVcapApplicationWithOnlySpaceGuid() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+    
+    String vcapApplication = """
+        {
+          "application_id": "app-123",
+          "application_name": "test-app",
+          "space_id": "only-space-guid-789"
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertNull(environment.getProperty("cfserver.validOrgGuid"));
+    assertEquals("only-space-guid-789", environment.getProperty("cfserver.validSpaceGuid"));
+  }
+
+  @Test
+  public void testVcapApplicationWithEmptySpaceGuid() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+    
+    String vcapApplication = """
+        {
+          "application_id": "app-123",
+          "application_name": "test-app",
+          "organization_id": "test-org-guid-123",
+          "space_id": ""
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertEquals("test-org-guid-123", environment.getProperty("cfserver.validOrgGuid"));
+    assertNull(environment.getProperty("cfserver.validSpaceGuid"));
+  }
+
+  @Test
+  public void testVcapApplicationWithoutSpaceGuid() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+    
+    String vcapApplication = """
+        {
+          "application_id": "app-123",
+          "application_name": "test-app",
+          "organization_id": "test-org-guid-123"
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertEquals("test-org-guid-123", environment.getProperty("cfserver.validOrgGuid"));
+    assertNull(environment.getProperty("cfserver.validSpaceGuid"));
+  }
+
+  @Test
+  public void testVcapApplicationWithNeitherOrgNorSpaceGuid() {
+    String vcapServices = """
+        {
+          "user-provided": []
+        }
+        """;
+    
+    String vcapApplication = """
+        {
+          "application_id": "app-123",
+          "application_name": "test-app"
+        }
+        """;
+
+    environment.getPropertySources().addLast(
+        new org.springframework.core.env.MapPropertySource("test",
+            java.util.Map.of(
+                "VCAP_SERVICES", vcapServices,
+                "VCAP_APPLICATION", vcapApplication)));
+
+    processor.postProcessEnvironment(environment, application);
+
+    assertNull(environment.getProperty("cfserver.validOrgGuid"));
+    assertNull(environment.getProperty("cfserver.validSpaceGuid"));
+  }
 }

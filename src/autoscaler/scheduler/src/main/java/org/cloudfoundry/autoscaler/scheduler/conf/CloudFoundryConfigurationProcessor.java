@@ -26,6 +26,7 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
     System.out.println("CloudFoundryConfigurationProcessor class loaded");
   }
   private static final String VCAP_SERVICES = "VCAP_SERVICES";
+  private static final String VCAP_APPLICATION = "VCAP_APPLICATION";
   private static final String SCHEDULER_CONFIG_TAG = "scheduler-config";
   private static final String DATABASE_TAG = "relational";
   private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -54,13 +55,22 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
       System.out.println("Starting configuration extraction...");
       Map<String, Object> allConfigs = new java.util.HashMap<>();
 
-      // Process scheduler-config service
+      // Process scheduler-config service first
       System.out.println("Extracting scheduler-config service...");
       Map<String, Object> schedulerConfig = extractSchedulerConfig(vcapServices);
       System.out.println("Scheduler config result: " + (schedulerConfig != null ? schedulerConfig.size() + " properties" : "null"));
       if (schedulerConfig != null && !schedulerConfig.isEmpty()) {
         logger.info("Found scheduler-config service in VCAP_SERVICES, applying configuration overrides");
         allConfigs.putAll(schedulerConfig);
+      }
+
+      // Process VCAP_APPLICATION for org GUID (this should override scheduler-config)
+      System.out.println("Extracting org GUID from VCAP_APPLICATION...");
+      Map<String, Object> vcapAppConfig = extractVcapApplicationConfig(environment);
+      System.out.println("VCAP_APPLICATION config result: " + (vcapAppConfig != null ? vcapAppConfig.size() + " properties" : "null"));
+      if (vcapAppConfig != null && !vcapAppConfig.isEmpty()) {
+        logger.info("Found VCAP_APPLICATION, applying cfserver configuration overrides");
+        allConfigs.putAll(vcapAppConfig);
       }
 
       // Always disable SSL for scaling engine in Cloud Foundry environments
@@ -96,6 +106,71 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
       System.err.println("CloudFoundryConfigurationProcessor failed: " + e.getMessage());
       logger.error("Failed to process Cloud Foundry configuration from VCAP_SERVICES", e);
       e.printStackTrace();
+    }
+  }
+
+  private Map<String, Object> extractVcapApplicationConfig(ConfigurableEnvironment environment) {
+    try {
+      String vcapApplication = environment.getProperty(VCAP_APPLICATION);
+      System.out.println("VCAP_APPLICATION value: " + (vcapApplication != null ? "present (" + vcapApplication.length() + " chars)" : "null"));
+      
+      if (vcapApplication == null || vcapApplication.trim().isEmpty()) {
+        System.out.println("VCAP_APPLICATION is null or empty, skipping org GUID extraction");
+        logger.debug("VCAP_APPLICATION not found or empty, skipping org GUID extraction");
+        return null;
+      }
+
+      TypeReference<Map<String, Object>> typeRef = new TypeReference<Map<String, Object>>() {};
+      Map<String, Object> vcapApp = objectMapper.readValue(vcapApplication, typeRef);
+      
+      Map<String, Object> config = new java.util.HashMap<>();
+      boolean foundConfig = false;
+      
+      // Extract organization_id
+      Object organizationId = vcapApp.get("organization_id");
+      if (organizationId instanceof String && !((String) organizationId).trim().isEmpty()) {
+        String orgGuid = (String) organizationId;
+        System.out.println("Found organization_id in VCAP_APPLICATION: " + orgGuid);
+        logger.info("Setting cfserver.validOrgGuid from VCAP_APPLICATION organization_id: {}", orgGuid);
+        
+        // Create nested structure to match scheduler config format
+        Map<String, Object> cfserverConfig = (Map<String, Object>) config.get("cfserver");
+        if (cfserverConfig == null) {
+          cfserverConfig = new java.util.HashMap<>();
+          config.put("cfserver", cfserverConfig);
+        }
+        cfserverConfig.put("validOrgGuid", orgGuid);
+        foundConfig = true;
+      } else {
+        System.out.println("No organization_id found in VCAP_APPLICATION");
+        logger.warn("organization_id not found or empty in VCAP_APPLICATION");
+      }
+      
+      // Extract space_id
+      Object spaceId = vcapApp.get("space_id");
+      if (spaceId instanceof String && !((String) spaceId).trim().isEmpty()) {
+        String spaceGuid = (String) spaceId;
+        System.out.println("Found space_id in VCAP_APPLICATION: " + spaceGuid);
+        logger.info("Setting cfserver.validSpaceGuid from VCAP_APPLICATION space_id: {}", spaceGuid);
+        
+        // Create nested structure to match scheduler config format
+        Map<String, Object> cfserverConfig = (Map<String, Object>) config.get("cfserver");
+        if (cfserverConfig == null) {
+          cfserverConfig = new java.util.HashMap<>();
+          config.put("cfserver", cfserverConfig);
+        }
+        cfserverConfig.put("validSpaceGuid", spaceGuid);
+        foundConfig = true;
+      } else {
+        System.out.println("No space_id found in VCAP_APPLICATION");
+        logger.warn("space_id not found or empty in VCAP_APPLICATION");
+      }
+      
+      return foundConfig ? config : null;
+    } catch (Exception e) {
+      System.err.println("Failed to parse VCAP_APPLICATION JSON: " + e.getMessage());
+      logger.error("Failed to parse VCAP_APPLICATION JSON", e);
+      return null;
     }
   }
 
