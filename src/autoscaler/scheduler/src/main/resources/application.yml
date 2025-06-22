@@ -93,7 +93,7 @@ logging:
 client:
     httpClientTimeout: 5
     ssl:
-        protocol: TLSv1.3
+        protocol: TLSv1.2
 ############################################################
 #    Scalingengine
 ############################################################
