@@ -90,6 +90,17 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
         allConfigs.putAll(databaseConfigs);
       }
 
+      // Process CF instance certificates for SSL configuration
+      System.out.println("Extracting CF instance certificates...");
+      Map<String, Object> sslConfigs = extractCfInstanceCertificates(environment);
+      System.out.println(
+          "CF SSL config result: "
+              + (sslConfigs != null ? sslConfigs.size() + " properties" : "null"));
+      if (sslConfigs != null && !sslConfigs.isEmpty()) {
+        logger.info("Found CF instance certificates, applying SSL configuration");
+        allConfigs.putAll(sslConfigs);
+      }
+
       System.out.println("Total configs collected: " + allConfigs.size());
       if (!allConfigs.isEmpty()) {
         System.out.println("Flattening configuration...");
@@ -429,6 +440,57 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
       return tagList.contains(DATABASE_TAG);
     }
     return false;
+  }
+
+  private Map<String, Object> extractCfInstanceCertificates(ConfigurableEnvironment environment) {
+    Map<String, Object> sslConfig = new java.util.HashMap<>();
+    
+    try {
+      String caCert = environment.getProperty("CF_INSTANCE_CA_CERT");
+      String instanceCert = environment.getProperty("CF_INSTANCE_CERT");
+      String instanceKey = environment.getProperty("CF_INSTANCE_KEY");
+      
+      System.out.println("CF_INSTANCE_CA_CERT: " + (caCert != null ? "present (" + caCert.length() + " chars)" : "null"));
+      System.out.println("CF_INSTANCE_CERT: " + (instanceCert != null ? "present (" + instanceCert.length() + " chars)" : "null"));
+      System.out.println("CF_INSTANCE_KEY: " + (instanceKey != null ? "present (" + instanceKey.length() + " chars)" : "null"));
+      
+      if (caCert != null && instanceCert != null && instanceKey != null) {
+        logger.info("Found CF instance certificates, configuring SSL bundle");
+        
+        // Configure SSL bundle for the scalingengine client
+        Map<String, Object> sslBundle = new java.util.HashMap<>();
+        Map<String, Object> pemBundle = new java.util.HashMap<>();
+        Map<String, Object> scalingengineBundle = new java.util.HashMap<>();
+        
+        // Configure keystore (client certificate and private key)
+        Map<String, Object> keystore = new java.util.HashMap<>();
+        keystore.put("certificate", instanceCert);
+        keystore.put("private-key", instanceKey);
+        scalingengineBundle.put("keystore", keystore);
+        
+        // Configure truststore (CA certificate)
+        Map<String, Object> truststore = new java.util.HashMap<>();
+        truststore.put("certificate", caCert);
+        scalingengineBundle.put("truststore", truststore);
+        
+        pemBundle.put("scalingengine", scalingengineBundle);
+        sslBundle.put("pem", pemBundle);
+        
+        Map<String, Object> springConfig = new java.util.HashMap<>();
+        Map<String, Object> sslBundleConfig = new java.util.HashMap<>();
+        sslBundleConfig.put("bundle", sslBundle);
+        springConfig.put("ssl", sslBundleConfig);
+        sslConfig.put("spring", springConfig);
+        
+        logger.info("Successfully configured SSL bundle with CF instance certificates");
+      } else {
+        logger.info("CF instance certificates not found, SSL bundle will not be configured");
+      }
+    } catch (Exception e) {
+      logger.error("Error processing CF instance certificates: " + e.getMessage(), e);
+    }
+    
+    return sslConfig;
   }
 
   private Map<String, Object> flattenConfiguration(String prefix, Map<String, Object> config) {
