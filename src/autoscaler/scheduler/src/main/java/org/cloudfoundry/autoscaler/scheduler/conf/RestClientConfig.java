@@ -23,17 +23,14 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RestClientConfig {
-  private final SSLContext sslContext;
-  private final boolean sslEnabled;
+  private SSLContext sslContext;
 
   @Autowired
-  public RestClientConfig(
-      SslBundles sslBundles, @Value("${client.ssl.enabled:true}") boolean sslEnabled) {
-    this.sslEnabled = sslEnabled;
-    if (sslEnabled) {
+  public RestClientConfig(SslBundles sslBundles) {
+    try {
       SslBundle sslBundle = sslBundles.getBundle("scalingengine");
       this.sslContext = sslBundle.createSslContext();
-    } else {
+    } catch (Exception e) {
       this.sslContext = null;
     }
   }
@@ -60,7 +57,7 @@ public class RestClientConfig {
     var connectionConfig =
         ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(httpClientTimeout)).build();
 
-    if (sslEnabled && this.sslContext != null) {
+    if (this.sslContext != null) {
       SSLConnectionSocketFactory sslsf =
           new SSLConnectionSocketFactory(
               this.sslContext,

@@ -79,11 +79,6 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
         allConfigs.putAll(vcapAppConfig);
       }
 
-      // Always disable SSL for scaling engine in Cloud Foundry environments
-      System.out.println("Disabling SSL for scaling engine in Cloud Foundry environment...");
-      allConfigs.put("client.ssl.enabled", false);
-      logger.info("Disabled SSL for scaling engine in Cloud Foundry environment");
-
       // Process database services
       System.out.println("Extracting database services...");
       Map<String, Object> databaseConfigs = extractDatabaseConfigs(vcapServices);
