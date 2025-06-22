@@ -149,7 +149,7 @@ modules:
       commands: []
     properties:
       JBP_LOG_LEVEL:
-      JBP_CONFIG_OPEN_JDK_JRE: '{ "version": "17.+", "jre": { "version": "17.+", "java_home": ".java-buildpack/java_home" } }'
+      JBP_CONFIG_OPEN_JDK_JRE: '{ "version": "21.+", "jre": { "version": "21.+", "java_home": ".java-buildpack/java_home" } }'
       DEBUG:
     requires:
     - name: scheduler-config
