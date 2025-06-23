@@ -56,7 +56,7 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     // Debug logging
     String forwardedProto = request.getHeader("X-Forwarded-Proto");
     boolean isHealthEndpoint = request.getRequestURI().contains("/health");
-    logger.info("DEBUG: scheme={}, X-Forwarded-Proto={}, isHealthEndpoint={}, healthServerUsername={}, healthServerPassword={}", 
+    logger.info("DEBUG: scheme={}, X-Forwarded-Proto={}, isHealthEndpoint={}, healthServerUsername={}, healthServerPassword={}",
                 request.getScheme(), forwardedProto, isHealthEndpoint, healthServerUsername, healthServerPassword);
 
     // Skip filter if X-Forwarded-Client-Cert is missing and not a health request
@@ -107,8 +107,6 @@ public class HttpAuthFilter extends OncePerRequestFilter {
       return;
     }
 
-    // Check for X-Forwarded-Client-Cert header for non health endpoints
-    String xfccHeader = request.getHeader("X-Forwarded-Client-Cert");
     if (xfccHeader == null || xfccHeader.isEmpty()) {
       logger.warn("Missing X-Forwarded-Client-Cert header");
       response.sendError(
