@@ -53,19 +53,28 @@ public class HttpAuthFilter extends OncePerRequestFilter {
             + " method"
             + request.getMethod());
 
-    // Skip filter if the request is HTTPS
-    if (request.getScheme().equals("https")) {
+    // Debug logging
+    String forwardedProto = request.getHeader("X-Forwarded-Proto");
+    boolean isHealthEndpoint = request.getRequestURI().contains("/health");
+    logger.info("DEBUG: scheme={}, X-Forwarded-Proto={}, isHealthEndpoint={}, healthServerUsername={}, healthServerPassword={}", 
+                request.getScheme(), forwardedProto, isHealthEndpoint, healthServerUsername, healthServerPassword);
+
+    // Skip filter if X-Forwarded-Proto is empty and not a health request
+    if ((forwardedProto == null || forwardedProto.isEmpty()) && !isHealthEndpoint) {
+      logger.info("DEBUG: Skipping request without X-Forwarded-Proto - URI={}", request.getRequestURI());
       // Do we need to the know the original request sent by the client.
       // If Yes, checking the X-Forwarded-Proto header sent by the load balancer or proxy make
-      // sennse
+      // sense
       filterChain.doFilter(request, response);
       return;
     }
 
     // handles /health endpoint with basic auth
     if (request.getRequestURI().contains("/health")) {
+      logger.info("DEBUG: Processing health endpoint request");
       // parse request basic auth header
       String authHeader = request.getHeader("Authorization");
+      logger.info("DEBUG: Authorization header: {}", authHeader != null ? "present" : "missing");
       if (authHeader == null || !authHeader.startsWith("Basic ")) {
         logger.warn("Missing or invalid Authorization header for health check request");
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
@@ -89,6 +98,9 @@ public class HttpAuthFilter extends OncePerRequestFilter {
         return;
       } else {
         response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json");
+        response.getWriter().write("{\"status\":\"UP\"}");
+        response.getWriter().flush();
       }
 
       return;
