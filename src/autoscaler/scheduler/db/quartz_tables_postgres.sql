@@ -4,16 +4,16 @@
 -- org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 
 drop table if exists qrtz_fired_triggers;
-DROP TABLE if exists  QRTZ_PAUSED_TRIGGER_GRPS;
-DROP TABLE if exists  QRTZ_SCHEDULER_STATE;
-DROP TABLE if exists  QRTZ_LOCKS;
-drop table if exists  qrtz_simple_triggers;
-drop table if exists  qrtz_cron_triggers;
-drop table if exists  qrtz_simprop_triggers;
-DROP TABLE if exists  QRTZ_BLOB_TRIGGERS;
-drop table if exists  qrtz_triggers;
-drop table if exists  qrtz_job_details;
-drop table if exists  qrtz_calendars;
+DROP TABLE if exists QRTZ_PAUSED_TRIGGER_GRPS;
+DROP TABLE if exists QRTZ_SCHEDULER_STATE;
+DROP TABLE if exists QRTZ_LOCKS;
+drop table if exists qrtz_simple_triggers;
+drop table if exists qrtz_cron_triggers;
+drop table if exists qrtz_simprop_triggers;
+DROP TABLE if exists QRTZ_BLOB_TRIGGERS;
+drop table if exists qrtz_triggers;
+drop table if exists qrtz_job_details;
+drop table if exists qrtz_calendars;
 
 CREATE TABLE qrtz_job_details
   (
