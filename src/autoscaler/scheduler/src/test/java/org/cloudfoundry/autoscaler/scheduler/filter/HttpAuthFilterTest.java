@@ -37,12 +37,10 @@ public class HttpAuthFilterTest {
   }
 
   @Test
-  public void testDoFilterWithMissingXfccHeaderReturnsBadRequest() throws Exception {
+  public void testDoFilterWithMissingXfccHeaderGetsSkipped() throws Exception {
 
     httpAuthFilter.doFilterInternal(request, response, filterChain);
-    assertThat(response.getStatus()).isEqualTo(400);
-    assertThat(response.getErrorMessage())
-        .isEqualTo("Missing X-Forwarded-Client-Cert header in the request");
+    assertThat(response.getStatus()).isEqualTo(200);
   }
 
   @Test
