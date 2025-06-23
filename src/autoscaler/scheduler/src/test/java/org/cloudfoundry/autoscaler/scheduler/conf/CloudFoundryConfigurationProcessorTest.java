@@ -142,26 +142,26 @@ public class CloudFoundryConfigurationProcessorTest {
   public void testVcapServicesWithDatabaseService() {
     String vcapServices =
         """
-        {
-          "postgresql-db": [
-            {
-              "label": "postgresql-db",
-              "name": "autoscaler-db",
-              "tags": ["relational", "binding_db", "policy_db"],
-              "credentials": {
-                "username": "dbuser",
-                "password": "dbpass",
-                "hostname": "db-host.example.com",
-                "dbname": "autoscaler_db",
-                "port": "5432",
-                "uri": "postgres://dbuser:dbpass@db-host.example.com:5432/autoscaler_db",
-                "sslcert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
-                "sslrootcert": "-----BEGIN CERTIFICATE-----\\nMIIRoot...\\n-----END CERTIFICATE-----"
-              }
-            }
-          ]
-        }
-        """;
+{
+  "postgresql-db": [
+    {
+      "label": "postgresql-db",
+      "name": "autoscaler-db",
+      "tags": ["relational", "binding_db", "policy_db"],
+      "credentials": {
+        "username": "dbuser",
+        "password": "dbpass",
+        "hostname": "db-host.example.com",
+        "dbname": "autoscaler_db",
+        "port": "5432",
+        "uri": "postgres://dbuser:dbpass@db-host.example.com:5432/autoscaler_db",
+        "sslcert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
+        "sslrootcert": "-----BEGIN CERTIFICATE-----\\nMIIRoot...\\n-----END CERTIFICATE-----"
+      }
+    }
+  ]
+}
+""";
 
     environment
         .getPropertySources()
@@ -236,26 +236,26 @@ public class CloudFoundryConfigurationProcessorTest {
   public void testVcapServicesWithClientCertCredentialMapping() {
     String vcapServices =
         """
-        {
-          "postgresql-db": [
-            {
-              "label": "postgresql-db",
-              "name": "autoscaler-db",
-              "tags": ["relational", "binding_db"],
-              "credentials": {
-                "username": "dbuser",
-                "password": "dbpass",
-                "hostname": "db-host.example.com",
-                "dbname": "autoscaler_db",
-                "port": "5432",
-                "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
-                "client_key": "-----BEGIN PRIVATE KEY-----\\nMIIKey...\\n-----END PRIVATE KEY-----",
-                "sslrootcert": "-----BEGIN CERTIFICATE-----\\nMIIRoot...\\n-----END CERTIFICATE-----"
-              }
-            }
-          ]
-        }
-        """;
+{
+  "postgresql-db": [
+    {
+      "label": "postgresql-db",
+      "name": "autoscaler-db",
+      "tags": ["relational", "binding_db"],
+      "credentials": {
+        "username": "dbuser",
+        "password": "dbpass",
+        "hostname": "db-host.example.com",
+        "dbname": "autoscaler_db",
+        "port": "5432",
+        "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
+        "client_key": "-----BEGIN PRIVATE KEY-----\\nMIIKey...\\n-----END PRIVATE KEY-----",
+        "sslrootcert": "-----BEGIN CERTIFICATE-----\\nMIIRoot...\\n-----END CERTIFICATE-----"
+      }
+    }
+  ]
+}
+""";
 
     environment
         .getPropertySources()
@@ -280,24 +280,24 @@ public class CloudFoundryConfigurationProcessorTest {
   public void testVcapServicesWithClientCertOnlyCredentialMapping() {
     String vcapServices =
         """
-        {
-          "postgresql-db": [
-            {
-              "label": "postgresql-db",
-              "name": "autoscaler-db",
-              "tags": ["relational", "binding_db"],
-              "credentials": {
-                "username": "dbuser",
-                "password": "dbpass",
-                "hostname": "db-host.example.com",
-                "dbname": "autoscaler_db",
-                "port": "5432",
-                "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----"
-              }
-            }
-          ]
-        }
-        """;
+{
+  "postgresql-db": [
+    {
+      "label": "postgresql-db",
+      "name": "autoscaler-db",
+      "tags": ["relational", "binding_db"],
+      "credentials": {
+        "username": "dbuser",
+        "password": "dbpass",
+        "hostname": "db-host.example.com",
+        "dbname": "autoscaler_db",
+        "port": "5432",
+        "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----"
+      }
+    }
+  ]
+}
+""";
 
     environment
         .getPropertySources()
@@ -317,27 +317,27 @@ public class CloudFoundryConfigurationProcessorTest {
   public void testVcapServicesPrefersSslcertOverClientCert() {
     String vcapServices =
         """
-        {
-          "postgresql-db": [
-            {
-              "label": "postgresql-db",
-              "name": "autoscaler-db",
-              "tags": ["relational", "binding_db"],
-              "credentials": {
-                "username": "dbuser",
-                "password": "dbpass",
-                "hostname": "db-host.example.com",
-                "dbname": "autoscaler_db",
-                "port": "5432",
-                "sslcert": "-----BEGIN CERTIFICATE-----\\nMIISSLCert...\\n-----END CERTIFICATE-----",
-                "sslkey": "-----BEGIN PRIVATE KEY-----\\nMIISSLKey...\\n-----END PRIVATE KEY-----",
-                "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
-                "client_key": "-----BEGIN PRIVATE KEY-----\\nMIIKey...\\n-----END PRIVATE KEY-----"
-              }
-            }
-          ]
-        }
-        """;
+{
+  "postgresql-db": [
+    {
+      "label": "postgresql-db",
+      "name": "autoscaler-db",
+      "tags": ["relational", "binding_db"],
+      "credentials": {
+        "username": "dbuser",
+        "password": "dbpass",
+        "hostname": "db-host.example.com",
+        "dbname": "autoscaler_db",
+        "port": "5432",
+        "sslcert": "-----BEGIN CERTIFICATE-----\\nMIISSLCert...\\n-----END CERTIFICATE-----",
+        "sslkey": "-----BEGIN PRIVATE KEY-----\\nMIISSLKey...\\n-----END PRIVATE KEY-----",
+        "client_cert": "-----BEGIN CERTIFICATE-----\\nMIICert...\\n-----END CERTIFICATE-----",
+        "client_key": "-----BEGIN PRIVATE KEY-----\\nMIIKey...\\n-----END PRIVATE KEY-----"
+      }
+    }
+  ]
+}
+""";
 
     environment
         .getPropertySources()
