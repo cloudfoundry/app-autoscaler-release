@@ -161,7 +161,7 @@ public class CloudFoundryConfigurationProcessorTest {
     }
   ]
 }
-""";
+        """;
 
     environment
         .getPropertySources()
@@ -255,7 +255,7 @@ public class CloudFoundryConfigurationProcessorTest {
     }
   ]
 }
-""";
+        """;
 
     environment
         .getPropertySources()
@@ -297,7 +297,7 @@ public class CloudFoundryConfigurationProcessorTest {
     }
   ]
 }
-""";
+        """;
 
     environment
         .getPropertySources()
@@ -337,7 +337,7 @@ public class CloudFoundryConfigurationProcessorTest {
     }
   ]
 }
-""";
+        """;
 
     environment
         .getPropertySources()
