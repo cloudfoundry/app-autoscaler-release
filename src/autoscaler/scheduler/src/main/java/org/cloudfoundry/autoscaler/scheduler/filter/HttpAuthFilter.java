@@ -84,9 +84,6 @@ public class HttpAuthFilter extends OncePerRequestFilter {
       String[] credentials =
           new String(Base64.getDecoder().decode(authHeader.substring(6))).split(":");
 
-      System.out.println(
-          "BANANA: Health check request received with credentials: " + credentials[0]);
-
       if (credentials.length != 2) {
         logger.warn("Invalid Authorization header format for health check request");
         response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad Request");
