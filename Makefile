@@ -459,7 +459,7 @@ cleanup-autoscaler-deployments:
 
 .PHONY: cf-login
 cf-login:
-	make --directory='${acceptance-dir}' cf-login
+	make --directory='${autoscaler-dir}' cf-login
 
 .PHONY: uaa-login
 uaa-login: ## Login to OSS CF dev environment
