@@ -3,6 +3,10 @@
 
 set -e
 
+script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+# shellcheck source=../../ci/autoscaler/scripts/vars.source.sh
+source "${script_dir}/../../ci/autoscaler/scripts/vars.source.sh"
+
 if [ -z "$1" ]; then
   echo "extension file path not provided"
   exit 1
@@ -70,6 +74,10 @@ export SCALINGENGINE_HEALTH_PASSWORD="$(yq ".scalingengine_health_password" /tmp
 export SCALINGENGINE_CF_HOST="${SCALINGENGINE_CF_HOST:-"${DEPLOYMENT_NAME}-cf-scalingengine"}"
 export SCALINGENGINE_HOST="${SCALINGENGINE_HOST:-"${DEPLOYMENT_NAME}-scalingengine"}"
 export SCALINGENGINE_INSTANCES="${SCALINGENGINE_INSTANCES:-2}"
+
+export SCHEDULER_HOST="${SCHEDULER_HOST:-"${DEPLOYMENT_NAME}-scheduler"}"
+export SCHEDULER_CF_HOST="${SCHEDULER_CF_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
+export SCHEDULER_INSTANCES="${SCHEDULER_INSTANCES:-2}"
 
 export SCHEDULER_CF_HOST="${SCHEDULER_CF_HOST:-"${DEPLOYMENT_NAME}-cf-scheduler"}"
 
@@ -153,6 +161,15 @@ modules:
       instances: ${OPERATOR_INSTANCES}
       routes:
       - route: ${OPERATOR_HOST}.\${default-domain}
+  - name: scheduler
+    requires:
+    - name: scheduler-config
+    - name: database
+    parameters:
+      instances: ${SCHEDULER_INSTANCES}
+      routes:
+      - route: ${SCHEDULER_HOST}.\${default-domain}
+      - route: ${SCHEDULER_CF_HOST}.\${default-domain}
 
 resources:
 - name: metricsforwarder-config
@@ -210,6 +227,16 @@ resources:
           - broker_username: 'autoscaler-broker-user-blue'
             broker_password: $SERVICE_BROKER_PASSWORD_BLUE
 
+- name: scheduler-config
+  parameters:
+    config:
+      cfserver:
+        healthserver:
+          password: "test-password"
+          username: "test-user"
+      autoscaler:
+        scalingengine:
+          url: https://${SCALINGENGINE_HOST}.\${default-domain}
 - name: operator-config
   parameters:
     config:

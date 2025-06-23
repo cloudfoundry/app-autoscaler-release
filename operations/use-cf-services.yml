@@ -66,3 +66,7 @@
 ## ScalingEngine - remove scalingengine
 - type: remove
   path: /instance_groups/name=scalingengine
+
+## SCHEDULER - remove scheduler
+- type: remove
+  path: /instance_groups/name=scheduler
