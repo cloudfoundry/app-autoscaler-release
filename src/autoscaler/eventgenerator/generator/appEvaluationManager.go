@@ -14,14 +14,14 @@ import (
 	circuit "github.com/rubyist/circuitbreaker"
 )
 
-type ConsumeAppMonitorMap func(map[string][]*models.Trigger, chan []*models.Trigger)
+type ConsumeAppMonitorMap func(map[string]*models.DynamicScalingRules, chan *models.DynamicScalingRules)
 
 type AppEvaluationManager struct {
 	evaluateInterval time.Duration
 	logger           lager.Logger
 	emClock          clock.Clock
 	doneChan         chan bool
-	triggerChan      chan []*models.Trigger
+	triggerChan      chan *models.DynamicScalingRules
 	getPolicies      aggregator.GetPoliciesFunc
 	breakerConfig    config.CircuitBreakerConfig
 	breakers         map[string]*circuit.Breaker
@@ -31,7 +31,7 @@ type AppEvaluationManager struct {
 }
 
 func NewAppEvaluationManager(logger lager.Logger, evaluateInterval time.Duration, emClock clock.Clock,
-	triggerChan chan []*models.Trigger, getPolicies aggregator.GetPoliciesFunc,
+	triggerChan chan *models.DynamicScalingRules, getPolicies aggregator.GetPoliciesFunc,
 	breakerConfig config.CircuitBreakerConfig) (*AppEvaluationManager, error) {
 	return &AppEvaluationManager{
 		evaluateInterval: evaluateInterval,
@@ -47,11 +47,11 @@ func NewAppEvaluationManager(logger lager.Logger, evaluateInterval time.Duration
 	}, nil
 }
 
-func (a *AppEvaluationManager) getTriggers(policyMap map[string]*models.AppPolicy) map[string][]*models.Trigger {
+func (a *AppEvaluationManager) getTriggers(policyMap map[string]*models.AppPolicy) map[string]*models.DynamicScalingRules {
 	if policyMap == nil {
 		return nil
 	}
-	triggersByApp := make(map[string][]*models.Trigger)
+	triggersByApp := make(map[string]*models.DynamicScalingRules)
 	for appID, policy := range policyMap {
 		now := a.emClock.Now().UnixNano()
 		a.cooldownLock.RLock()
@@ -74,7 +74,10 @@ func (a *AppEvaluationManager) getTriggers(policyMap map[string]*models.AppPolic
 				Adjustment:            rule.Adjustment,
 			})
 		}
-		triggersByApp[appID] = triggers
+		triggersByApp[appID] = &models.DynamicScalingRules{
+			Triggers:              triggers,
+			ScalingRuleEvaluation: policy.ScalingPolicy.ScalingRuleEvaluation,
+		}
 	}
 	return triggersByApp
 }
@@ -122,8 +125,8 @@ func (a *AppEvaluationManager) doEvaluate() {
 			a.breakerLock.Unlock()
 
 			triggers := a.getTriggers(policies)
-			for _, triggerArray := range triggers {
-				a.triggerChan <- triggerArray
+			for _, dynamicScalingRules := range triggers {
+				a.triggerChan <- dynamicScalingRules
 			}
 		}
 	}
