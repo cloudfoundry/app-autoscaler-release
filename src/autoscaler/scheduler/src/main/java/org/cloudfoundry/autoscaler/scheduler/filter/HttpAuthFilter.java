@@ -59,11 +59,12 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     logger.info("DEBUG: scheme={}, X-Forwarded-Proto={}, isHealthEndpoint={}, healthServerUsername={}, healthServerPassword={}", 
                 request.getScheme(), forwardedProto, isHealthEndpoint, healthServerUsername, healthServerPassword);
 
-    // Skip filter if X-Forwarded-Proto is empty and not a health request
-    if ((forwardedProto == null || forwardedProto.isEmpty()) && !isHealthEndpoint) {
-      logger.info("DEBUG: Skipping request without X-Forwarded-Proto - URI={}", request.getRequestURI());
+    // Skip filter if X-Forwarded-Client-Cert is missing and not a health request
+    String xfccHeader = request.getHeader("X-Forwarded-Client-Cert");
+    if ((xfccHeader == null || xfccHeader.isEmpty()) && !isHealthEndpoint) {
+      logger.info("DEBUG: Skipping request without X-Forwarded-Client-Cert - URI={}", request.getRequestURI());
       // Do we need to the know the original request sent by the client.
-      // If Yes, checking the X-Forwarded-Proto header sent by the load balancer or proxy make
+      // If Yes, checking the X-Forwarded-Client-Cert header sent by the load balancer or proxy make
       // sense
       filterChain.doFilter(request, response);
       return;
