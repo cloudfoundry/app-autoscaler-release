@@ -310,7 +310,7 @@ func (vc *VCAPConfiguration) ConfigureDatabases(confDb *map[string]db.DatabaseCo
 			return err
 		}
 	}
-	
+
 	if storedProcedureConfig != nil && credHelperImpl == "stored_procedure" {
 		if err := vc.configureStoredProcedureDb(db.StoredProcedureDb, confDb, storedProcedureConfig); err != nil {
 			return err
