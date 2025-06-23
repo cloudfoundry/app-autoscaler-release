@@ -161,16 +161,7 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
           .flatMap(List::stream)
           .filter(this::hasSchedulerConfigTag)
           .findFirst()
-          .map(
-              service -> {
-                Object credentials = service.get("credentials");
-                if (credentials instanceof Map) {
-                  @SuppressWarnings("unchecked")
-                  Map<String, Object> credentialsMap = (Map<String, Object>) credentials;
-                  return credentialsMap;
-                }
-                return Map.<String, Object>of();
-              })
+          .map(this::extractCredentialsFromService)
           .orElse(null);
     } catch (Exception e) {
       logger.error("Failed to parse VCAP_SERVICES JSON", e);
@@ -192,10 +183,8 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
           .filter(this::hasDatabaseTag)
           .forEach(
               service -> {
-                Object credentials = service.get("credentials");
-                if (credentials instanceof Map) {
-                  @SuppressWarnings("unchecked")
-                  Map<String, Object> credentialsMap = (Map<String, Object>) credentials;
+                Map<String, Object> credentialsMap = extractCredentialsFromService(service);
+                if (!credentialsMap.isEmpty()) {
                   Map<String, Object> datasourceConfig =
                       mapDatabaseCredentialsToDataSource(credentialsMap, service);
                   databaseConfigs.putAll(datasourceConfig);
@@ -447,5 +436,21 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
         });
 
     return flattened;
+  }
+
+  /**
+   * Helper method to extract credentials from a service map.
+   * 
+   * @param service The service map containing credentials
+   * @return The credentials map, or empty map if not found or invalid
+   */
+  private Map<String, Object> extractCredentialsFromService(Map<String, Object> service) {
+    Object credentials = service.get("credentials");
+    if (credentials instanceof Map) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> credentialsMap = (Map<String, Object>) credentials;
+      return credentialsMap;
+    }
+    return Map.<String, Object>of();
   }
 }
