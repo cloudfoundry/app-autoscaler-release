@@ -25,6 +25,21 @@
       }
     }
   },
+  "management": {
+    "endpoints": {
+      "web": {
+        "exposure": {
+          "include": "health"
+        }
+      },
+      "enabled-by-default": false
+    },
+    "endpoint": {
+      "health": {
+        "enabled": true
+      }
+    }
+  },
   "server": {
     "ssl": {
       "enabled": false
