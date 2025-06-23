@@ -22,7 +22,6 @@ public class DatasourceBeanPostProcessor implements BeanPostProcessor {
 
   @Override
   public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-    // TODO Auto-generated method stub
     if (bean instanceof DataSource) {
       DataSource ds = (DataSource) bean;
       Connection con = null;
@@ -54,7 +53,6 @@ public class DatasourceBeanPostProcessor implements BeanPostProcessor {
             con.close();
           }
         } catch (SQLException e) {
-          // TODO Auto-generated catch block
           logger.error("Failed to close connection from " + beanName, e);
         }
       }
