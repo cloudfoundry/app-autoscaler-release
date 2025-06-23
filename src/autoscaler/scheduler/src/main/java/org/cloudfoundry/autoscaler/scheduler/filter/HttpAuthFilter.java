@@ -56,13 +56,21 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     // Debug logging
     String forwardedProto = request.getHeader("X-Forwarded-Proto");
     boolean isHealthEndpoint = request.getRequestURI().contains("/health");
-    logger.info("DEBUG: scheme={}, X-Forwarded-Proto={}, isHealthEndpoint={}, healthServerUsername={}, healthServerPassword={}",
-                request.getScheme(), forwardedProto, isHealthEndpoint, healthServerUsername, healthServerPassword);
+    logger.info(
+        "DEBUG: scheme={}, X-Forwarded-Proto={}, isHealthEndpoint={}, healthServerUsername={},"
+            + " healthServerPassword={}",
+        request.getScheme(),
+        forwardedProto,
+        isHealthEndpoint,
+        healthServerUsername,
+        healthServerPassword);
 
     // Skip filter if X-Forwarded-Client-Cert is missing and not a health request
     String xfccHeader = request.getHeader("X-Forwarded-Client-Cert");
     if ((xfccHeader == null || xfccHeader.isEmpty()) && !isHealthEndpoint) {
-      logger.info("DEBUG: Skipping request without X-Forwarded-Client-Cert - URI={}", request.getRequestURI());
+      logger.info(
+          "DEBUG: Skipping request without X-Forwarded-Client-Cert - URI={}",
+          request.getRequestURI());
       // Do we need to the know the original request sent by the client.
       // If Yes, checking the X-Forwarded-Client-Cert header sent by the load balancer or proxy make
       // sense

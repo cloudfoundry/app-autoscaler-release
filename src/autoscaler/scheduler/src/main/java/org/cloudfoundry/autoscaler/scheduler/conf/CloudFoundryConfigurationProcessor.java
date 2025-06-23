@@ -235,9 +235,7 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
           }
         } catch (Exception e) {
           logger.warn(
-              "Failed to parse username/password from URI: {}. Error: {}",
-              uri,
-              e.getMessage());
+              "Failed to parse username/password from URI: {}. Error: {}", uri, e.getMessage());
         }
       }
     }
@@ -267,7 +265,8 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
       logger.info("Configured datasources for database service with tags: {}", tagList);
     } else {
       logger.warn(
-          "Missing required credentials for database configuration: jdbcUrl={}, username={}, password={}",
+          "Missing required credentials for database configuration: jdbcUrl={}, username={},"
+              + " password={}",
           jdbcUrl,
           username,
           password);
@@ -440,7 +439,7 @@ public class CloudFoundryConfigurationProcessor implements EnvironmentPostProces
 
   /**
    * Helper method to extract credentials from a service map.
-   * 
+   *
    * @param service The service map containing credentials
    * @return The credentials map, or empty map if not found or invalid
    */

@@ -141,7 +141,7 @@ public class CloudFoundryConfigurationProcessorTest {
   @Test
   public void testVcapServicesWithDatabaseService() {
     String vcapServices =
-        """
+"""
 {
   "postgresql-db": [
     {
@@ -235,7 +235,7 @@ public class CloudFoundryConfigurationProcessorTest {
   @Test
   public void testVcapServicesWithClientCertCredentialMapping() {
     String vcapServices =
-        """
+"""
 {
   "postgresql-db": [
     {
@@ -279,7 +279,7 @@ public class CloudFoundryConfigurationProcessorTest {
   @Test
   public void testVcapServicesWithClientCertOnlyCredentialMapping() {
     String vcapServices =
-        """
+"""
 {
   "postgresql-db": [
     {
@@ -316,7 +316,7 @@ public class CloudFoundryConfigurationProcessorTest {
   @Test
   public void testVcapServicesPrefersSslcertOverClientCert() {
     String vcapServices =
-        """
+"""
 {
   "postgresql-db": [
     {
