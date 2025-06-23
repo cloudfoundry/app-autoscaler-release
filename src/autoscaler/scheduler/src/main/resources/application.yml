@@ -22,14 +22,14 @@ spring:
     ############################################################
     datasource:
         driverClassName: org.postgresql.Driver
-        password: "postgres"
+        password: "${DB_PASSWORD:postgres}"
         url: jdbc:postgresql://${DB_HOST}/autoscaler
-        username: "postgres"
+        username: "${DB_USERNAME:postgres}"
     policy-db-datasource:
         driverClassName: org.postgresql.Driver
-        password: "postgres"
+        password: "${DB_PASSWORD:postgres}"
         url: jdbc:postgresql://${DB_HOST}/autoscaler
-        username: "postgres"
+        username: "${DB_USERNAME:postgres}"
 
     ############################################################
     #    Quartz Properties
@@ -114,9 +114,9 @@ scalingenginejob:
 ############################################################
 scheduler:
     healthserver:
-        password: "test-password"
+        password: "${SCHEDULER_HEALTH_PASSWORD:test-password}"
         port: 8081
-        username: "test-user"
+        username: "${SCHEDULER_HEALTH_USERNAME:test-user}"
 
 ############################################################
 #    Server SSL keys
@@ -142,5 +142,5 @@ cfserver:
   validOrgGuid: "some-org-guid"
   validSpaceGuid: "some-space-guid"
   healthserver:
-    username: "test-user"
-    password: "test-password"
+    username: "${CFSERVER_HEALTH_USERNAME:test-user}"
+    password: "${CFSERVER_HEALTH_PASSWORD:test-password}"
