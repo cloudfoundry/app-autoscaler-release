@@ -195,8 +195,7 @@ clean:
 mta-deploy: mta-build build-extension-file
 	$(MAKE) -f metricsforwarder/Makefile set-security-group
 	@echo "Deploying with extension file: $(EXTENSION_FILE)"
-	@cf deploy $(DEST)/*.mtar --version-rule ALL -f --delete-services -e $(EXTENSION_FILE) -m $(MODULES)
-
+	@cf deploy $(DEST)/$(MTAR_FILENAME) --version-rule ALL -f --delete-services -e $(EXTENSION_FILE) -m $(MODULES)
 
 mta-undeploy:
 	@cf undeploy com.github.cloudfoundry.app-autoscaler-release -f
