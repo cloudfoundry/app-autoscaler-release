@@ -11,8 +11,7 @@ bosh_login "${BBL_STATE_PATH}"
 function deploy() {
 	log "Deploying autoscaler apps for bosh deployment '${deployment_name}' "
 	pushd "${autoscaler_dir}/src/autoscaler" > /dev/null
-
-		make mta-deploy
+		VERSION="0.0.0-rc.${PR_NUMBER:-0}" make mta-deploy
 	popd > /dev/null
 }
 
