@@ -8,7 +8,7 @@ CERTS_DIR="$(mktemp -d)"
 mkdir -p "$CERTS_DIR"
 
 if [ ! -f "$JAVA_BIN" ]; then
-	echo "Java binary not found at $java_bin"
+	echo "Java binary not found at $JAVA_BIN"
 	exit 1
 fi
 
