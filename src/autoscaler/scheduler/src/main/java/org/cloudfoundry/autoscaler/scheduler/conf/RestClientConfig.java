@@ -23,16 +23,12 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RestClientConfig {
-  private SSLContext sslContext;
+  private final SSLContext sslContext;
 
   @Autowired
   public RestClientConfig(SslBundles sslBundles) {
-    try {
-      SslBundle sslBundle = sslBundles.getBundle("scalingengine");
-      this.sslContext = sslBundle.createSslContext();
-    } catch (Exception e) {
-      this.sslContext = null;
-    }
+    SslBundle sslBundle = sslBundles.getBundle("scalingengine");
+    this.sslContext = sslBundle.createSslContext();
   }
 
   @Bean
@@ -53,32 +49,21 @@ public class RestClientConfig {
       throws Exception {
 
     HttpClientBuilder builder = HttpClientBuilder.create();
+    SSLConnectionSocketFactory sslsf =
+        new SSLConnectionSocketFactory(
+            this.sslContext,
+            new String[] {protocol},
+            null,
+            HttpsSupport.getDefaultHostnameVerifier());
 
     var connectionConfig =
         ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(httpClientTimeout)).build();
-
-    if (this.sslContext != null) {
-      SSLConnectionSocketFactory sslsf =
-          new SSLConnectionSocketFactory(
-              this.sslContext,
-              new String[] {protocol},
-              null,
-              HttpsSupport.getDefaultHostnameVerifier());
-
-      HttpClientConnectionManager ccm =
-          PoolingHttpClientConnectionManagerBuilder.create()
-              .setSSLSocketFactory(sslsf)
-              .setDefaultConnectionConfig(connectionConfig)
-              .build();
-      builder.setConnectionManager(ccm);
-    } else {
-      HttpClientConnectionManager ccm =
-          PoolingHttpClientConnectionManagerBuilder.create()
-              .setDefaultConnectionConfig(connectionConfig)
-              .build();
-      builder.setConnectionManager(ccm);
-    }
-
+    HttpClientConnectionManager ccm =
+        PoolingHttpClientConnectionManagerBuilder.create()
+            .setSSLSocketFactory(sslsf)
+            .setDefaultConnectionConfig(connectionConfig)
+            .build();
+    builder.setConnectionManager(ccm);
     RequestConfig requestConfig =
         RequestConfig.custom()
             .setConnectionRequestTimeout(Timeout.ofSeconds(httpClientTimeout))
