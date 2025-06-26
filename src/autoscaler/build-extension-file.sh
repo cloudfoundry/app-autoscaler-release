@@ -5,6 +5,7 @@ set -e
 
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 # shellcheck source=../../ci/autoscaler/scripts/vars.source.sh
+# shellcheck disable=SC1091
 source "${script_dir}/../../ci/autoscaler/scripts/vars.source.sh"
 
 if [ -z "$1" ]; then
