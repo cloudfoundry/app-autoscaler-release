@@ -51,12 +51,17 @@
 - type: remove
   path: /instance_groups/name=apiserver
 
-
 ## METRICSFORWARDER - remove metricsforwarder
 - type: remove
   path: /instance_groups/name=metricsforwarder
 
-## METRICSFORWARDER - remove metricsforwarder
+## EVENTGENERATOR - remove eventgenerator
 - type: remove
   path: /instance_groups/name=eventgenerator
+
+## OPERATOR - remove operator
+- type: remove
+  path: /instance_groups/name=operator
+
+
 
