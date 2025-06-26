@@ -252,7 +252,6 @@ resources:
           scaling_engine_url: https://${SCALINGENGINE_CF_HOST}.\${default-domain}
         scheduler:
           scheduler_url: https://${SCHEDULER_CF_HOST}.\${default-domain}
-
 - name: scalingengine-config
   parameters:
     config:

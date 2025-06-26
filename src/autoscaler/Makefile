@@ -17,6 +17,7 @@ PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/'
 
 
 MODULES ?= dbtasks,apiserver,eventgenerator,metricsforwarder,operator,scheduler,scalingengine
+
 db_type ?= postgres
 DB_HOST ?= localhost
 DBURL := $(shell case "${db_type}" in\
@@ -34,6 +35,7 @@ test_dirs=$(shell find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | 
 export GO111MODULE=on
 
 .PHONY: clean-dbtasks package-dbtasks vendor-changelogs clean-scheduler package-scheduler clean mta-deploy mta-undeploy mta-build mta-logs
+
 GINKGO_OPTS = -r --race --require-suite --randomize-all --cover ${OPTS}
 
 # ogen generated OpenAPI clients and servers
@@ -88,7 +90,6 @@ go-mod-tidy: ./go.mod ./go.sum ${go_deps_without_generated_sources}
 					 'outdated. Please consider re-generating them, if this is relevant.'
 	@echo -ne '${aes_terminal_reset}'
 	go mod tidy
-
 
 
 go-vendoring-folder := ./vendor
@@ -175,7 +176,6 @@ clean-scheduler:
 build-scheduler:
 	pushd scheduler; mvn package -Dmaven.test.skip=true; popd
 
-
 vendor-changelogs:
 	cp $(MAKEFILE_DIR)/api/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
 	cp $(MAKEFILE_DIR)/eventgenerator/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
@@ -220,7 +220,6 @@ mta-build: mta-build-clean
 
 mta-build-clean:
 	rm -rf mta_archives
-
 
 .PHONY: cf-login
 cf-login:

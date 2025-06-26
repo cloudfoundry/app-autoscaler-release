@@ -71,9 +71,6 @@ public class HttpAuthFilter extends OncePerRequestFilter {
       logger.info(
           "DEBUG: Skipping request without X-Forwarded-Client-Cert - URI={}",
           request.getRequestURI());
-      // Do we need to the know the original request sent by the client.
-      // If Yes, checking the X-Forwarded-Client-Cert header sent by the load balancer or proxy make
-      // sense
       filterChain.doFilter(request, response);
       return;
     }
