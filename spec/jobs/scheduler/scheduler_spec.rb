@@ -34,8 +34,7 @@ describe "scheduler" do
     it "does set neither username nor password if not configured" do
       properties["autoscaler"]["scheduler"] = {
         "health" => {
-          "port" => 1234,
-          "unprotected_endpoints" => []
+          "port" => 1234
         }
       }
 
@@ -47,8 +46,7 @@ describe "scheduler" do
             "port" => 1234,
             "username" => "",
             "password" => "",
-            "basicAuthEnabled" => false,
-            "unprotected_endpoints" => []
+            "basicAuthEnabled" => false
           }
         }}
       )
@@ -59,8 +57,7 @@ describe "scheduler" do
         "health" => {
           "port" => 1234,
           "username" => "test-user",
-          "password" => "test-user-password",
-          "unprotected_endpoints" => ["/health/liveness"]
+          "password" => "test-user-password"
         }
       }
 
@@ -72,8 +69,7 @@ describe "scheduler" do
             "port" => 1234,
             "username" => "test-user",
             "password" => "test-user-password",
-            "basicAuthEnabled" => false,
-            "unprotected_endpoints" => ["/health/liveness"]
+            "basicAuthEnabled" => false
           }
         }}
       )
