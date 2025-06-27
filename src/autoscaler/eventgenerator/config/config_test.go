@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/fakes"
@@ -106,7 +107,7 @@ var _ = Describe("Config", func() {
 				})
 
 				It("should error with config service not found", func() {
-					Expect(errors.Is(err, ErrEventgeneratorConfigNotFound)).To(BeTrue())
+					Expect(errors.Is(err, configutil.ErrServiceConfigNotFound)).To(BeTrue())
 				})
 			})
 		})

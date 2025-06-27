@@ -71,7 +71,7 @@ for file in ${files}; do
     --driver="${DRIVER}" \
     --changeLogFile="${file}" \
     --username="${DB_USER}" \
-    ${PASSWORD_OPT} \
+    "${PASSWORD_OPT}" \
     update >> "${LOG_FILE}"
 done
 
