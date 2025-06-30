@@ -25,7 +25,7 @@ var _ = Describe("AppEvaluationManager", func() {
 		fclock               *fakeclock.FakeClock
 		manager              *AppEvaluationManager
 		testEvaluateInterval time.Duration
-		triggerArrayChan     chan []*models.Trigger
+		triggerArrayChan     chan *models.DynamicScalingRules
 		testAppId1           = "testAppId1"
 		testAppId2           = "testAppId2"
 		testMetricName       = "Test-Metric-Name"
@@ -73,7 +73,7 @@ var _ = Describe("AppEvaluationManager", func() {
 		fclock = fakeclock.NewFakeClock(fakeTime)
 		testEvaluateInterval = 1 * time.Second
 		logger = lagertest.NewTestLogger("ApplicationManager-test")
-		triggerArrayChan = make(chan []*models.Trigger, 10)
+		triggerArrayChan = make(chan *models.DynamicScalingRules, 10)
 	})
 
 	Describe("Start", func() {
@@ -103,14 +103,14 @@ var _ = Describe("AppEvaluationManager", func() {
 
 				It("should add triggers to evaluate", func() {
 					fclock.Increment(10 * testEvaluateInterval)
-					var arr []*models.Trigger
-					var triggerArray = [][]*models.Trigger{}
+					var arr *models.DynamicScalingRules
+					var triggerArray = []*models.DynamicScalingRules{}
 					Eventually(triggerArrayChan).Should(Receive(&arr))
 					triggerArray = append(triggerArray, arr)
 					Eventually(triggerArrayChan).Should(Receive(&arr))
 					triggerArray = append(triggerArray, arr)
 					Expect(triggerArray).Should(ContainElement(
-						[]*models.Trigger{{
+						&models.DynamicScalingRules{Triggers: []*models.Trigger{{
 							AppId:                 testAppId1,
 							MetricType:            testMetricName,
 							BreachDurationSeconds: 200,
@@ -118,9 +118,9 @@ var _ = Describe("AppEvaluationManager", func() {
 							Threshold:             80,
 							Operator:              ">=",
 							Adjustment:            "1",
-						}}))
+						}}}))
 					Expect(triggerArray).Should(ContainElement(
-						[]*models.Trigger{{
+						&models.DynamicScalingRules{Triggers: []*models.Trigger{{
 							AppId:                 testAppId2,
 							MetricType:            testMetricName,
 							BreachDurationSeconds: 300,
@@ -128,7 +128,7 @@ var _ = Describe("AppEvaluationManager", func() {
 							Threshold:             20,
 							Operator:              "<=",
 							Adjustment:            "-1",
-						}}))
+						}}}))
 				})
 			})
 
@@ -147,8 +147,8 @@ var _ = Describe("AppEvaluationManager", func() {
 				})
 
 				It("should add triggers to evaluate after cooldown expired", func() {
-					var arr []*models.Trigger
-					var triggerArray = [][]*models.Trigger{}
+					var arr *models.DynamicScalingRules
+					var triggerArray = []*models.DynamicScalingRules{}
 					fclock.Increment(10 * testEvaluateInterval)
 					Consistently(triggerArrayChan).ShouldNot(Receive())
 
@@ -160,7 +160,7 @@ var _ = Describe("AppEvaluationManager", func() {
 
 					triggerArray = append(triggerArray, arr)
 					Expect(triggerArray).Should(ContainElement(
-						[]*models.Trigger{{
+						&models.DynamicScalingRules{Triggers: []*models.Trigger{{
 							AppId:                 testAppId2,
 							MetricType:            testMetricName,
 							BreachDurationSeconds: 300,
@@ -168,7 +168,7 @@ var _ = Describe("AppEvaluationManager", func() {
 							Threshold:             20,
 							Operator:              "<=",
 							Adjustment:            "-1",
-						}}))
+						}}}))
 				})
 			})
 		})
