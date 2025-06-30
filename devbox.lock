@@ -1028,51 +1028,51 @@
         }
       }
     },
-    "gum@0.16.0": {
-      "last_modified": "2025-05-16T20:19:48Z",
-      "resolved": "github:NixOS/nixpkgs/12a55407652e04dcf2309436eb06fef0d3713ef3#gum",
+    "gum@0.16.2": {
+      "last_modified": "2025-06-24T02:18:21Z",
+      "resolved": "github:NixOS/nixpkgs/69dfebb3d175bde602f612915c5576a41b18486b#gum",
       "source": "devbox-search",
-      "version": "0.16.0",
+      "version": "0.16.2",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/amyw3aaqgpchs5cq8hh3d1wdy1hxfjav-gum-0.16.0",
+              "path": "/nix/store/z29nnflmjb1rsg32cqassh7cxc2xsdks-gum-0.16.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/amyw3aaqgpchs5cq8hh3d1wdy1hxfjav-gum-0.16.0"
+          "store_path": "/nix/store/z29nnflmjb1rsg32cqassh7cxc2xsdks-gum-0.16.2"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/l6v1k7zn25ndvm4axmsbf10b8v8g78jp-gum-0.16.0",
+              "path": "/nix/store/q9247cca68af4xsr5yim98nw91n41ff0-gum-0.16.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/l6v1k7zn25ndvm4axmsbf10b8v8g78jp-gum-0.16.0"
+          "store_path": "/nix/store/q9247cca68af4xsr5yim98nw91n41ff0-gum-0.16.2"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/mkz77pxvh7h0iamhwwbzmaamcbnri130-gum-0.16.0",
+              "path": "/nix/store/d3va9kzircmn7lb2ik2gc4nd1w17hmp4-gum-0.16.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/mkz77pxvh7h0iamhwwbzmaamcbnri130-gum-0.16.0"
+          "store_path": "/nix/store/d3va9kzircmn7lb2ik2gc4nd1w17hmp4-gum-0.16.2"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/w094m6kjn97wa2wrvj4mrjng0fnzmpw3-gum-0.16.0",
+              "path": "/nix/store/3kmqn7xy8pch0ivksqgmfz2wzdjhpxzq-gum-0.16.2",
               "default": true
             }
           ],
-          "store_path": "/nix/store/w094m6kjn97wa2wrvj4mrjng0fnzmpw3-gum-0.16.0"
+          "store_path": "/nix/store/3kmqn7xy8pch0ivksqgmfz2wzdjhpxzq-gum-0.16.2"
         }
       }
     },
