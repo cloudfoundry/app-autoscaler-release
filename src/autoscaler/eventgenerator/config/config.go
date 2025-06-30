@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
@@ -93,21 +94,17 @@ type Config struct {
 	HttpClientTimeout         *time.Duration               `yaml:"http_client_timeout,omitempty" json:"http_client_timeout,omitempty"`
 }
 
-func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
-	conf := defaultConfig()
-
-	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
-		return nil, err
-	}
-
-	if err := loadVcapConfig(&conf, vcapReader); err != nil {
-		return nil, err
-	}
-
-	return &conf, nil
+// SetLoggingLevel implements configutil.Configurable
+func (c *Config) SetLoggingLevel() {
+	c.Logging.Level = strings.ToLower(c.Logging.Level)
 }
 
-func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+
+func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
+	return configutil.GenericLoadConfig(filepath, vcapReader, defaultConfig, configutil.VCAPConfigurableFunc[Config](LoadVcapConfig))
+}
+
+func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}

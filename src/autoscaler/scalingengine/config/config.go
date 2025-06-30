@@ -37,6 +37,12 @@ type Config struct {
 	HttpClientTimeout   time.Duration                `yaml:"http_client_timeout"`
 }
 
+// SetLoggingLevel implements configutil.Configurable
+func (c *Config) SetLoggingLevel() {
+	c.Logging.Level = strings.ToLower(c.Logging.Level)
+}
+
+
 func defaultConfig() Config {
 	return Config{
 		CF: cf.Config{
@@ -64,22 +70,10 @@ func defaultConfig() Config {
 }
 
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
-	conf := defaultConfig()
-
-	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
-		return nil, err
-	}
-
-	if err := loadVcapConfig(&conf, vcapReader); err != nil {
-		return nil, err
-	}
-
-	conf.Logging.Level = strings.ToLower(conf.Logging.Level)
-
-	return &conf, nil
+	return configutil.GenericLoadConfig(filepath, vcapReader, defaultConfig, configutil.VCAPConfigurableFunc[Config](LoadVcapConfig))
 }
 
-func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}

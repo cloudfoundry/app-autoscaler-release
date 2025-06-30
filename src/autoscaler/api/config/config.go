@@ -123,6 +123,11 @@ type Config struct {
 	DefaultCustomMetricsCredentialType string                        `yaml:"default_credential_type" json:"default_credential_type"`
 }
 
+func (c *Config) SetLoggingLevel() {
+	c.Logging.Level = strings.ToLower(c.Logging.Level)
+}
+
+
 type PlanCheckConfig struct {
 	PlanDefinitions map[string]PlanDefinition `yaml:"plan_definitions" json:"plan_definitions"`
 }
@@ -163,7 +168,7 @@ func defaultConfig() Config {
 	}
 }
 
-func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}
@@ -213,18 +218,7 @@ func configureCatalog(conf *Config, vcapReader configutil.VCAPConfigurationReade
 }
 
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
-	conf := defaultConfig()
-
-	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
-		return nil, err
-	}
-
-	if err := loadVcapConfig(&conf, vcapReader); err != nil {
-		return nil, err
-	}
-
-	conf.Logging.Level = strings.ToLower(conf.Logging.Level)
-	return &conf, nil
+	return configutil.GenericLoadConfig(filepath, vcapReader, defaultConfig, configutil.VCAPConfigurableFunc[Config](LoadVcapConfig))
 }
 
 func FromJSON(data []byte) (*Config, error) {
