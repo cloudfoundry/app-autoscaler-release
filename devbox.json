@@ -21,7 +21,7 @@
     "gnumake":                              "4.4",
     "gnutar":                               "latest",
     "go-tools":                             "2025.1",
-    "golangci-lint":                        "1.64.8",
+    "golangci-lint":                        "2.1.6",
     "google-java-format":                   "1.27.0",
     "gopls":                                "0.18.1",
     "gum":                                  "0.16.2",
