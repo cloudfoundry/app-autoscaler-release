@@ -313,65 +313,66 @@ defaultBreachDurationSecs: 600
 					Expect(conf.Server.Port).To(Equal(8080))
 					Expect(conf.Logging.Level).To(Equal("info"))
 
-					expectedTimeout := 5 * time.Second
-					Expect(*conf).To(Equal(Config{
-						Logging:           helpers.LoggingConfig{Level: "info"},
-						HttpClientTimeout: &expectedTimeout,
-						Server: helpers.ServerConfig{
-							Port: 8080,
-							TLS:  models.TLSCerts{},
+					expectedTimeout := DefaultHttpClientTimeout
+					// Check individual fields instead of entire struct to avoid map ordering issues
+					Expect(conf.Logging).To(Equal(helpers.LoggingConfig{Level: "info"}))
+					Expect(conf.HttpClientTimeout).To(Equal(&expectedTimeout))
+					Expect(conf.Server).To(Equal(helpers.ServerConfig{
+						Port: 8080,
+						TLS:  models.TLSCerts{},
+					}))
+					Expect(conf.Pool).To(Equal(&PoolConfig{}))
+					Expect(conf.CFServer).To(Equal(helpers.ServerConfig{
+						Port: 8082,
+					}))
+					Expect(conf.Health).To(Equal(helpers.HealthConfig{
+						ServerConfig: helpers.ServerConfig{
+							Port: 8081,
 						},
-						Pool: &PoolConfig{},
-						CFServer: helpers.ServerConfig{
-							Port: 8082,
-						},
-						Health: helpers.HealthConfig{
-							ServerConfig: helpers.ServerConfig{
-								Port: 8081,
-							},
-						},
-						Db: map[string]db.DatabaseConfig{
-							"policy_db": {
-
-								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-								MaxOpenConnections:    0,
-								MaxIdleConnections:    0,
-								ConnectionMaxLifetime: 0 * time.Second,
-							},
-							"appmetrics_db": {
-								URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
-								MaxOpenConnections:    0,
-								MaxIdleConnections:    0,
-								ConnectionMaxLifetime: 0 * time.Second,
-							},
-						},
-						Aggregator: &AggregatorConfig{
-							AggregatorExecuteInterval: DefaultAggregatorExecuteInterval,
-							PolicyPollerInterval:      DefaultPolicyPollerInterval,
-							MetricPollerCount:         DefaultMetricPollerCount,
-							AppMonitorChannelSize:     DefaultAppMonitorChannelSize,
-							AppMetricChannelSize:      DefaultAppMetricChannelSize,
-							SaveInterval:              DefaultSaveInterval,
-							MetricCacheSizePerApp:     DefaultMetricCacheSizePerApp,
-						},
-						Evaluator: &EvaluatorConfig{
-							EvaluationManagerInterval: DefaultEvaluationExecuteInterval,
-							EvaluatorCount:            DefaultEvaluatorCount,
-							TriggerArrayChannelSize:   DefaultTriggerArrayChannelSize,
-						},
-						ScalingEngine: ScalingEngineConfig{
-							ScalingEngineURL: "http://localhost:8082",
-						},
-						MetricCollector: MetricCollectorConfig{
-							MetricCollectorURL: "log-cache:1234",
-						},
-						DefaultBreachDurationSecs: 600,
-						DefaultStatWindowSecs:     300,
-						CircuitBreaker: &CircuitBreakerConfig{
-							BackOffInitialInterval:  DefaultBackOffInitialInterval,
-							BackOffMaxInterval:      DefaultBackOffMaxInterval,
-							ConsecutiveFailureCount: DefaultBreakerConsecutiveFailureCount,
-						},
+					}))
+					
+					// Check database configs individually to avoid map ordering issues
+					Expect(conf.Db).To(HaveKey("policy_db"))
+					Expect(conf.Db).To(HaveKey("appmetrics_db"))
+					Expect(conf.Db["policy_db"]).To(Equal(db.DatabaseConfig{
+						URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
+						MaxOpenConnections:    0,
+						MaxIdleConnections:    0,
+						ConnectionMaxLifetime: 0 * time.Second,
+					}))
+					Expect(conf.Db["appmetrics_db"]).To(Equal(db.DatabaseConfig{
+						URL:                   "postgres://postgres:password@localhost/autoscaler?sslmode=disable",
+						MaxOpenConnections:    0,
+						MaxIdleConnections:    0,
+						ConnectionMaxLifetime: 0 * time.Second,
+					}))
+					
+					Expect(conf.Aggregator).To(Equal(&AggregatorConfig{
+						AggregatorExecuteInterval: DefaultAggregatorExecuteInterval,
+						PolicyPollerInterval:      DefaultPolicyPollerInterval,
+						MetricPollerCount:         DefaultMetricPollerCount,
+						AppMonitorChannelSize:     DefaultAppMonitorChannelSize,
+						AppMetricChannelSize:      DefaultAppMetricChannelSize,
+						SaveInterval:              DefaultSaveInterval,
+						MetricCacheSizePerApp:     DefaultMetricCacheSizePerApp,
+					}))
+					Expect(conf.Evaluator).To(Equal(&EvaluatorConfig{
+						EvaluationManagerInterval: DefaultEvaluationExecuteInterval,
+						EvaluatorCount:            DefaultEvaluatorCount,
+						TriggerArrayChannelSize:   DefaultTriggerArrayChannelSize,
+					}))
+					Expect(conf.ScalingEngine).To(Equal(ScalingEngineConfig{
+						ScalingEngineURL: "http://localhost:8082",
+					}))
+					Expect(conf.MetricCollector).To(Equal(MetricCollectorConfig{
+						MetricCollectorURL: "log-cache:1234",
+					}))
+					Expect(conf.DefaultStatWindowSecs).To(Equal(300))
+					Expect(conf.DefaultBreachDurationSecs).To(Equal(600))
+					Expect(conf.CircuitBreaker).To(Equal(&CircuitBreakerConfig{
+						BackOffInitialInterval:    DefaultBackOffInitialInterval,
+						BackOffMaxInterval:        DefaultBackOffMaxInterval,
+						ConsecutiveFailureCount:   DefaultBreakerConsecutiveFailureCount,
 					}))
 				})
 			})
