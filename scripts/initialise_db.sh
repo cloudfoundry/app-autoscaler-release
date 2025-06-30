@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+
+set -x
 echo "Running $0"
 
 DB_HOST="${DB_HOST:-localhost}"
@@ -66,12 +68,13 @@ trap 'rm -f "${LOG_FILE}" || echo "no log file"' EXIT
 echo "# Applying liquibase change sets to: '${URL}'"
 for file in ${files}; do
   echo "  - applying: '$file'" | tee -a "${LOG_FILE}"
+  # shellcheck disable=SC2086
   java -cp "${class_path}" liquibase.integration.commandline.Main \
     --url="${URL}" \
     --driver="${DRIVER}" \
     --changeLogFile="${file}" \
     --username="${DB_USER}" \
-    "${PASSWORD_OPT}" \
+    ${PASSWORD_OPT} \
     update >> "${LOG_FILE}"
 done
 
