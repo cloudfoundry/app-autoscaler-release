@@ -330,7 +330,7 @@ defaultBreachDurationSecs: 600
 							Port: 8081,
 						},
 					}))
-					
+
 					// Check database configs individually to avoid map ordering issues
 					Expect(conf.Db).To(HaveKey("policy_db"))
 					Expect(conf.Db).To(HaveKey("appmetrics_db"))
@@ -346,7 +346,7 @@ defaultBreachDurationSecs: 600
 						MaxIdleConnections:    0,
 						ConnectionMaxLifetime: 0 * time.Second,
 					}))
-					
+
 					Expect(conf.Aggregator).To(Equal(&AggregatorConfig{
 						AggregatorExecuteInterval: DefaultAggregatorExecuteInterval,
 						PolicyPollerInterval:      DefaultPolicyPollerInterval,
@@ -370,9 +370,9 @@ defaultBreachDurationSecs: 600
 					Expect(conf.DefaultStatWindowSecs).To(Equal(300))
 					Expect(conf.DefaultBreachDurationSecs).To(Equal(600))
 					Expect(conf.CircuitBreaker).To(Equal(&CircuitBreakerConfig{
-						BackOffInitialInterval:    DefaultBackOffInitialInterval,
-						BackOffMaxInterval:        DefaultBackOffMaxInterval,
-						ConsecutiveFailureCount:   DefaultBreakerConsecutiveFailureCount,
+						BackOffInitialInterval:  DefaultBackOffInitialInterval,
+						BackOffMaxInterval:      DefaultBackOffMaxInterval,
+						ConsecutiveFailureCount: DefaultBreakerConsecutiveFailureCount,
 					}))
 				})
 			})

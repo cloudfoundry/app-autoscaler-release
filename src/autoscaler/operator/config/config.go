@@ -85,7 +85,6 @@ func (c *Config) SetLoggingLevel() {
 	c.Logging.Level = strings.ToLower(c.Logging.Level)
 }
 
-
 func defaultConfig() Config {
 	return Config{
 		CF: cf.Config{
