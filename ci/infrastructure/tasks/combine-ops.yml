@@ -7,7 +7,6 @@ image_resource:
     tag: main
 inputs:
   - name: cf-deployment
-  - name: prometheus-boshrelease
   - name: ci
 outputs:
   - name: combined-ops
