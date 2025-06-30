@@ -29,10 +29,11 @@
     doCheck = false;
 
     meta = {
+      description = "A plug-in for the cf-cli for managing automated scaling of apps.";
       longDescription = ''
-      App-AutoScaler plug-in provides the command line interface to manage
-      [App AutoScaler](<https://github.com/cloudfoundry/app-autoscaler-release>)
-      policies, retrieve metrics and scaling event history.
+        App-AutoScaler plug-in provides the command line interface to manage
+        [App AutoScaler](<https://github.com/cloudfoundry/app-autoscaler-release>)
+        policies, retrieve metrics and scaling event history.
       '';
       homepage = "https://github.com/cloudfoundry/app-autoscaler-cli-plugin";
       license = [lib.licenses.asl20];
@@ -113,7 +114,7 @@
     doCheck = false;
 
     meta = with lib; {
-      description = "A cf CLI plugin for interacting with Log Cache.";
+      description = "A plug-in for the cf-cli to interact with Log Cache.";
       homepage = "https://github.com/cloudfoundry/log-cache-cli";
       license = licenses.asl20;
     };
@@ -135,10 +136,9 @@
     ldflags = ["-w -X main.Version=${version}"];
 
     meta = with lib; {
-      description = "";
+      description = "A plug-in for the cf-cli to manage multitarget-apps.";
       longDescription = ''
-        This is a Cloud Foundry CLI plugin (formerly known as CF MTA Plugin) for performing
-        operations on
+        This is a Cloud Foundry CLI plugin (formerly known as CF MTA Plugin) for performing operations on
         [Multitarget Applications (MTAs)](<https://www.sap.com/documents/2021/09/66d96898-fa7d-0010-bca6-c68f7e60039b.html>)
         in Cloud Foundry, such as deploying, removing, viewing, etc. It is a client for the
         [CF MultiApps Controller](<https://github.com/cloudfoundry-incubator/multiapps-controller>)
