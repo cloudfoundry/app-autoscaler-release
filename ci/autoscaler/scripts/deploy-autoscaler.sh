@@ -22,6 +22,7 @@ ${autoscaler_dir}/operations/add-extra-plan.yml
 ${autoscaler_dir}/operations/set-release-version.yml
 ${autoscaler_dir}/operations/enable-metricsforwarder-via-syslog-agent.yml
 ${autoscaler_dir}/operations/enable-scheduler-logging.yml
+${autoscaler_dir}/operations/add-custom-tags.yml
 EOF
 )}
 
