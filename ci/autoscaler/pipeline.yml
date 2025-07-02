@@ -25,6 +25,7 @@ anchors:
       operations/set-release-version.yml
       operations/enable-metricsforwarder-via-metron-agent.yml
       operations/enable-scheduler-logging.yml
+      operations/add-custom-tags.yml
 
   app-autoscaler-ops-files-log-cache-syslog: &app-autoscaler-ops-files-log-cache-syslog
     OPS_FILES: |
@@ -35,6 +36,7 @@ anchors:
       operations/add-extra-plan.yml
       operations/set-release-version.yml
       operations/enable-scheduler-logging.yml
+      operations/add-custom-tags.yml
 
   app-autoscaler-ops-files-log-cache-syslog-cf: &app-autoscaler-ops-files-log-cache-syslog-cf
     ENABLE_MTAR: true
@@ -47,6 +49,7 @@ anchors:
       operations/set-release-version.yml
       operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
+      operations/add-custom-tags.yml
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
     OPS_FILES: |
@@ -57,6 +60,7 @@ anchors:
       operations/postgres-persistent-disk.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
+      operations/add-custom-tags.yml
 
 groups:
 - name: all
