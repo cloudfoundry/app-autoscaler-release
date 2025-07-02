@@ -22,7 +22,6 @@ ${autoscaler_dir}/operations/add-extra-plan.yml
 ${autoscaler_dir}/operations/set-release-version.yml
 ${autoscaler_dir}/operations/enable-metricsforwarder-via-syslog-agent.yml
 ${autoscaler_dir}/operations/enable-scheduler-logging.yml
-${autoscaler_dir}/operations/add-custom-tags.yml
 EOF
 )}
 
@@ -79,6 +78,8 @@ function create_manifest() {
 
 
 	bosh_deploy_vars=""
+
+	OPS_FILES_TO_USE+=" ${ci_dir}/operations/add-custom-tags.yml"
 
 	# add deployment name
 	bosh -n -d "${deployment_name}" interpolate "${deployment_manifest}" ${OPS_FILES_TO_USE} \
