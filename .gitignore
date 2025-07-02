@@ -86,3 +86,5 @@ keys/
 
 .direnv
 
+# IntelliJ IDEA
+.idea
