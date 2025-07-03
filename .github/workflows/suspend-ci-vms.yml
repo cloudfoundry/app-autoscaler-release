@@ -23,5 +23,8 @@ jobs:
       - name: suspend VMs
         run: |
           gcloud compute instances list --filter="labels.belongs-to:autoscaler" --format="value(name,zone)" | while read -r INSTANCE_NAME ZONE; do
-            gcloud compute instances suspend "$INSTANCE_NAME" --zone="$ZONE"
+            if ! gcloud compute instances suspend "$INSTANCE_NAME" --zone="$ZONE"; then
+              echo "failed to suspend $INSTANCE_NAME in $ZONE, continuing with next instance"
+              continue
+            fi
           done
