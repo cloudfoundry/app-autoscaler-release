@@ -18,9 +18,8 @@ jobs:
       - name: set up gcloud
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: suspend VMs
+      - name: resume VMs
         run: |
           gcloud compute instances list --filter="labels.belongs-to:autoscaler" --format="value(name,zone)" | while read -r INSTANCE_NAME ZONE; do
-            echo "suspending instance: $INSTANCE_NAME (zone: $ZONE)"
-            gcloud compute instances suspend "$INSTANCE_NAME" --zone="$ZONE"
+            gcloud compute instances resume "$INSTANCE_NAME" --zone="$ZONE"
           done
