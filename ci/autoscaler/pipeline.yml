@@ -269,7 +269,7 @@ jobs:
       trigger: true
     - get: bbl-state
     - get: app-autoscaler-release
-      #passed: [unit-tests, integration-tests]
+      passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
   - *make-prerelease-task
