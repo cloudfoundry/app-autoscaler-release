@@ -79,8 +79,8 @@ function create_manifest() {
 
 	bosh_deploy_vars=""
 
-	# always use the ops file that applies the custom tags to all VMs and disks
-	OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${ci_dir}/operations/add-custom-tags.yml"
+	# always use the ops file that tags all deployment related VMs and disks
+	OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${ci_dir}/operations/tag-vms-and-disks.yml"
 
 	# add deployment name
 	bosh -n -d "${deployment_name}" interpolate "${deployment_manifest}" ${OPS_FILES_TO_USE} \
