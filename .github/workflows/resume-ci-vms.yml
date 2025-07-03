@@ -2,7 +2,7 @@ name: Resume CI VMs
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # 06:00 UTC / 07:00 CET / 08:00 CEST
+    - cron: '0 5 * * *'  # 05:00 UTC / 06:00 CET / 07:00 CEST
   workflow_dispatch:
 
 jobs:
@@ -12,14 +12,16 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
+      - name: auth gcloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GCP_APP_RUNTIME_INTERFACES_AUTOSCALER_DEPLOYER_KEY }}'
+
       - name: set up gcloud
         uses: google-github-actions/setup-gcloud@v2
-        with:
-          credentials_json: ${{ secrets.GCP_APP_RUNTIME_INTERFACES_AUTOSCALER_DEPLOYER_KEY }}
 
       - name: resume VMs
         run: |
           gcloud compute instances list --filter="labels.belongs-to:autoscaler" --format="value(name,zone)" | while read -r INSTANCE_NAME ZONE; do
-            echo "resuming instance: $INSTANCE_NAME (zone: $ZONE)"
             gcloud compute instances resume "$INSTANCE_NAME" --zone="$ZONE"
           done
