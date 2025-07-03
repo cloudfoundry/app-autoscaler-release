@@ -40,7 +40,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler-deploy-key-private))
-    branch: main
+    branch: aas903-add-autoscaler-label
     fetch_tags: true
     paths:
       - ci/infrastructure
