@@ -2,7 +2,7 @@ name: Resume CI VMs
 
 on:
   schedule:
-    - cron: '0 5 * * 1-5'  # 17:00 UTC / 18:00 CET / 19:00 CEST, Monday to Friday
+    - cron: '0 5 * * 1-5'  # 05:00 UTC / 06:00 CET / 07:00 CEST, Monday to Friday
   workflow_dispatch:
 
 jobs:
