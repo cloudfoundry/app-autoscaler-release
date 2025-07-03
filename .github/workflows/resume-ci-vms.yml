@@ -24,7 +24,7 @@ jobs:
         run: |
           gcloud compute instances list --filter="labels.belongs-to:autoscaler" --format="value(name,zone)" | while read -r INSTANCE_NAME ZONE; do
             if ! gcloud compute instances resume "$INSTANCE_NAME" --zone="$ZONE"; then
-              echo "failed to resuming $INSTANCE_NAME in $ZONE, continuing with next instance"
+              echo "failed to resume $INSTANCE_NAME in $ZONE, continuing with next instance"
               continue
             fi
           done
