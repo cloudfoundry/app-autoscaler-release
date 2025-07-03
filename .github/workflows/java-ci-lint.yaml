@@ -17,22 +17,30 @@ jobs:
   code-style:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: auth gcloud
-        uses: google-github-actions/auth@v2
+      - name: Get Repository content
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@734088efddca47cf44ff8a09289c6d0e51b73218 # v0.12.0
         with:
-          credentials_json: '${{ secrets.GCP_APP_RUNTIME_INTERFACES_AUTOSCALER_DEPLOYER_KEY }}'
-
-      - name: set up gcloud
-        uses: google-github-actions/setup-gcloud@v2
-
-      - name: resume VMs
+          enable-cache: 'true'
+      - name: Make devbox shellenv available
         run: |
-          gcloud compute instances list --filter="labels.belongs-to:autoscaler" --format="value(name,zone)" | while read -r INSTANCE_NAME ZONE; do
-            if ! gcloud compute instances resume "$INSTANCE_NAME" --zone="$ZONE"; then
-              echo "failed to resume $INSTANCE_NAME in $ZONE, continuing with next instance"
-              continue
-            fi
-          done
+          eval "$(devbox shellenv)"
+          printenv >> "$GITHUB_ENV"
+      - name: Check Code Formatting
+        run: |
+          sh ./style-guide/google-format-ci-v0.1.sh
+        env:
+          GOOGLE_JAR_VERSION: 1.22.0
+          GOOGLE_JAR_NAME: google-java-format-1.22.0-all-deps.jar
+
+      - name: Checkstyle
+        run: |
+          pushd src/autoscaler/scheduler
+            mvn --no-transfer-progress jxr:jxr
+            mvn --no-transfer-progress checkstyle:checkstyle
+          popd
+
+      - name: Publish Results on Pull Request
+        run: |
+          go run src/fmt_chkstyle/format_checkstyle.go
