@@ -79,7 +79,7 @@ function create_manifest() {
 
 	bosh_deploy_vars=""
 
-	OPS_FILES_TO_USE+=" ${ci_dir}/operations/add-custom-tags.yml"
+	OPS_FILES_TO_USE="${OPS_FILES_TO_USE} -o ${ci_dir}/operations/add-custom-tags.yml"
 
 	# add deployment name
 	bosh -n -d "${deployment_name}" interpolate "${deployment_manifest}" ${OPS_FILES_TO_USE} \
