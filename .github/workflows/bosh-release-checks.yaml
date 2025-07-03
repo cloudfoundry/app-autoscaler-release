@@ -3,21 +3,66 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: "${{ github.workflow }}/${{ github.ref }}"
+  cancel-in-progress: true
+
 jobs:
-  suspend:
+  generate-gosub:
+    name: ensure gosub specs are up to date
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:5277733db60d4e659404ad330e7c0da790cb65c18b41cf0b2ca6e424294c5dd9
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
-
-      - name: set up gcloud
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          credentials_json: ${{ secrets.GCP_APP_RUNTIME_INTERFACES_AUTOSCALER_DEPLOYER_KEY }}
-
-      - name: suspend VMs
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: sync-package-specs
+        shell: bash
         run: |
-          gcloud compute instances list --filter="labels.belongs-to:autoscaler" --format="value(name,zone)" | while read -r INSTANCE_NAME ZONE; do
-            echo "suspending instance: $INSTANCE_NAME (zone: $ZONE)"
-            gcloud compute instances suspend "$INSTANCE_NAME" --zone="$ZONE"
-          done
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          make generate-fakes
+          make generate-openapi-generated-clients-and-servers
+          make package-specs
+      - name: Check if there is any change
+        run: |
+          if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then
+            git status
+            git diff
+            echo "::error::Specs are out of date, run \"make package-specs\" to update"
+            exit 1
+          fi
+  bosh-release:
+    needs: generate-gosub
+    name: Create Bosh Release
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:5277733db60d4e659404ad330e7c0da790cb65c18b41cf0b2ca6e424294c5dd9
+    steps:
+      - name: Trust my checkout
+        run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Run Update
+        shell: bash
+        run: |
+          #! /usr/bin/env bash
+          set -eu -o pipefail
+
+          make generate-fakes
+          make generate-openapi-generated-clients-and-servers
+
+          export PATH="${PATH}:/usr/local/maven/bin"
+          make go-mod-tidy go-mod-vendor db.java-libs scheduler.build
+
+      - name: Build Dev Release
+        id: build
+        uses: orange-cloudfoundry/bosh-release-action@a124f0c7eda59d3070c66507bcda21196d7e0a90 # v2.1.0
+
+      - name: Compile Dev Release
+        uses: cloudfoundry/bosh-compile-action@main
+        with:
+          file: ${{ steps.build.outputs.file }}
+          args: --guess --debug
