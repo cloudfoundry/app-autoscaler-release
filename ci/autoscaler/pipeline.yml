@@ -107,12 +107,14 @@ resources:
     repository: "ghcr.io/cloudfoundry/app-autoscaler-release-tools"
     tag: "main"
 
-- name: every-night
+  # start/stop/days of this resource fall into the timeframe where the CI related VMs are awake. see also .github/workflows/resume-ci-vms.yml
+- name: every-morning
   type: time
   source:
-    start: 10:00 PM
-    stop: 11:00 PM
-    location: "Europe/Berlin"
+    start: 05:30 AM
+    stop: 06:30 AM
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+    location: "UTC"
 
 - name: ci
   type: git
@@ -591,7 +593,7 @@ jobs:
     - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: ci
-    - get: every-night
+    - get: every-morning
       trigger: true
   - task: cleanup-autoscaler-deployments
     image: "app-autoscaler-tools"
@@ -605,7 +607,7 @@ jobs:
     - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: ci
-    - get: every-night
+    - get: every-morning
       passed: [ cleanup-autoscaler-deployments ]
       trigger: true
     - get: gcp-jammy-stemcell
