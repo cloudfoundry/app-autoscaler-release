@@ -76,5 +76,6 @@
   "lockFileMaintenance": {
     "enabled": true
   },
-  "timezone": "Europe/Berlin"
+  "timezone": "UTC",
+  "schedule": ["* 5-17 * * 1-5"]
 }
