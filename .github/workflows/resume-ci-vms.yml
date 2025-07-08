@@ -48,8 +48,9 @@ jobs:
         with:
           repository: cloudfoundry/app-autoscaler-env-bbl-state
           ssh-key: ${{ secrets.bbl_ssh_key }}
-          path: bbl
+          path: app-autoscaler-env-bbl-state
 
       - name: test bosh command
         run: |
+          direnv reload
           bosh vms -d cf
