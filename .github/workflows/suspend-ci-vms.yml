@@ -22,7 +22,7 @@ jobs:
 
       - name: suspend VMs
         run: |
-          gcloud compute instances list --filter="networkInterfaces.network:autoscaler-network" --format="value(name,zone)" --sort-by="labels.deployment:bosh") | while read -r INSTANCE_NAME ZONE; do
+          gcloud compute instances list --filter="networkInterfaces.network:autoscaler-network" --format="value(name,zone)" --sort-by="labels.deployment:bosh" | while read -r INSTANCE_NAME ZONE; do
             if ! gcloud compute instances suspend "$INSTANCE_NAME" --zone="$ZONE"; then
               echo "failed to suspend $INSTANCE_NAME in $ZONE, continuing with next instance"
               continue
