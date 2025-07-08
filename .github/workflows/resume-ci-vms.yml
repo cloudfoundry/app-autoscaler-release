@@ -19,7 +19,11 @@ jobs:
 
       - name: resume VMs
         run: |
-          gcloud compute instances list --filter="networkInterfaces.network:autoscaler-network" --format="value(name,zone)" --sort-by="~labels.deployment:bosh" | while read -r INSTANCE_NAME ZONE; do
+          gcloud compute instances list \
+            --filter="networkInterfaces.network:autoscaler-network" \
+            --format="value(name,zone)" \
+            --sort-by="~labels.deployment:bosh" \ # resume bosh director last
+          | while read -r INSTANCE_NAME ZONE; do
             if ! gcloud compute instances resume "$INSTANCE_NAME" --zone="$ZONE" --async; then
               echo "failed to initiate resuming $INSTANCE_NAME in $ZONE, continuing with next instance"
               continue
