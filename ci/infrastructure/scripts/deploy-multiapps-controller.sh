@@ -24,7 +24,7 @@ function deploy_multiapps_controller() {
   pushd multiapps-controller-web-manifest
   cf push -f ./*.yml "${app_name}"
   # scale up to be able to handle huge (>1GB) .MTARs
-  cf scale -m 4G -k 2G deploy-service
+  cf scale -m 4G -k 2G deploy-service -f
   popd
 }
 
