@@ -52,5 +52,6 @@ jobs:
 
       - name: test bosh command
         run: |
-          direnv reload
+          cd "${GITHUB_WORKSPACE}/app-autoscaler-release"
+          direnv reload .
           bosh vms -d cf
