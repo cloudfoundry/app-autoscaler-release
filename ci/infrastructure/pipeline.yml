@@ -267,7 +267,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
       trigger: true
-      passed: [setup-infrastructure]
+      passed: [setup-infrastructure, deploy-cf]
     - get: ci
     - get: postgres-repo
     - get: postgres-release
