@@ -46,7 +46,8 @@ jobs:
           ssh-key: ${{ secrets.BBL_SSH_KEY }}
           path: app-autoscaler-env-bbl-state
 
-      - name: login to bosh
+      # after suspension and resumption, backend VMs become unreachable by the load balancer and require recreation.
+      - name: recreate router VM
         run: |
           pushd "${GITHUB_WORKSPACE}/app-autoscaler-env-bbl-state/bbl-state" > /dev/null
             eval "$(bbl print-env)"
