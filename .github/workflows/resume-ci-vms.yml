@@ -7,8 +7,6 @@ on:
 
 jobs:
   resume:
-    env:
-      BBL_STATE_PATH: ${{ github.workspace }}/app-autoscaler-env-bbl-state/bbl-state
     runs-on: ubuntu-latest
     steps:
       - name: checkout app-autoscaler-release
@@ -33,10 +31,9 @@ jobs:
 
       - name: test bosh command
         run: |
-          ls -l app-autoscaler-env-bbl-state
-          ls -l
-          pwd
-          direnv reload .
+          pushd "${GITHUB_WORKSPACE}/app-autoscaler-env-bbl-state/bbl-state" > /dev/null
+            eval "$(bbl print-env)"
+          popd > /dev/null
           bosh vms -d cf
 
 #
