@@ -52,6 +52,4 @@ jobs:
             eval "$(bbl print-env)"
           popd > /dev/null
 
-      - name: recreate router VM
-        run: |
           bosh recreate router -d cf -n
