@@ -33,6 +33,9 @@ jobs:
 
       - name: test bosh command
         run: |
+          ls -l app-autoscaler-env-bbl-state
+          ls -l
+          pwd
           direnv reload .
           bosh vms -d cf
 
