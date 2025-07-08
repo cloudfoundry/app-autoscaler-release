@@ -55,4 +55,5 @@ jobs:
           export BBL_STATE_PATH="${GITHUB_WORKSPACE}/app-autoscaler-env-bbl-state/bbl-state"
           cd "${GITHUB_WORKSPACE}/app-autoscaler-release"
           direnv reload .
-          bosh vms -d cf
+          env
+          #bosh vms -d cf
