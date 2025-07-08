@@ -47,8 +47,14 @@ resources:
       - ci/autoscaler
       - ci/operations
 
-- name: every-day
+  # start/stop/days of this resource fall into the timeframe where the CI related VMs are awake. see also .github/workflows/resume-ci-vms.yml
+- name: every-morning-monday-till-friday
   type: time
+  source:
+    start: 05:30 AM
+    stop: 06:30 AM
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+    location: "UTC"
 
 - name: postgres-repo
   type: git
@@ -194,7 +200,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: cf-deployment-concourse-tasks
-    - get: every-day
+    - get: every-morning-monday-till-friday
       trigger: true
   - task: bosh-cleanup
     file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
@@ -206,7 +212,7 @@ jobs:
     - in_parallel:
         - get: bbl-state
         - get: ci
-        - get: every-day
+        - get: every-morning-monday-till-friday
           passed: [ bosh-cleanup ]
           trigger: true
         - get: gcp-jammy-stemcell
@@ -261,7 +267,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
       trigger: true
-      passed: [setup-infrastructure]
+      passed: [setup-infrastructure, deploy-cf]
     - get: ci
     - get: postgres-repo
     - get: postgres-release
