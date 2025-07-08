@@ -40,7 +40,7 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/app-autoscaler-release
     private_key: ((autoscaler-deploy-key-private))
-    branch: ci-fixes-123
+    branch: main
     fetch_tags: true
     paths:
       - ci/infrastructure
