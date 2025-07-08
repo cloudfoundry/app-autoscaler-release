@@ -77,5 +77,5 @@
     "enabled": true
   },
   "timezone": "UTC",
-  "schedule": ["* 5-17 * * 1-5"]
+  "schedule": ["* 6-16 * * 1-5"]
 }

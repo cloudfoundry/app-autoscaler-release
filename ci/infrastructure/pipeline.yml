@@ -48,7 +48,7 @@ resources:
       - ci/operations
 
   # start/stop/days of this resource fall into the timeframe where the CI related VMs are awake. see also .github/workflows/resume-ci-vms.yml
-- name: every-morning
+- name: every-morning-monday-till-friday
   type: time
   source:
     start: 05:30 AM
@@ -200,7 +200,7 @@ jobs:
   - in_parallel:
     - get: bbl-state
     - get: cf-deployment-concourse-tasks
-    - get: every-morning
+    - get: every-morning-monday-till-friday
       trigger: true
   - task: bosh-cleanup
     file: cf-deployment-concourse-tasks/bosh-cleanup/task.yml
@@ -212,7 +212,7 @@ jobs:
     - in_parallel:
         - get: bbl-state
         - get: ci
-        - get: every-morning
+        - get: every-morning-monday-till-friday
           passed: [ bosh-cleanup ]
           trigger: true
         - get: gcp-jammy-stemcell
@@ -245,7 +245,7 @@ jobs:
       vars-files: autoscaler-env-vars-store
     params:
       SYSTEM_DOMAIN: autoscaler.app-runtime-interfaces.ci.cloudfoundry.org
-      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/autoscaler/set-cpu-entitlement-per-share.yaml operations/autoscaler/add-trusted-certs.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/autoscaler/add-eventgenerator-log-cache-uaa-client.yml operations/cf/experimental/disable-v2-api.yml operations/autoscaler/tag-vms-and-disks.yml"
+      OPS_FILES: "operations/cf/scale-to-one-az.yml operations/autoscaler/scale_out_cf_for_app-autoscaler.yaml operations/autoscaler/set-cpu-entitlement-per-share.yaml operations/autoscaler/add-trusted-certs.yaml operations/cf/use-compiled-releases.yml operations/autoscaler/enable_mtls.yml operations/autoscaler/add-eventgenerator-log-cache-uaa-client.yml operations/cf/experimental/disable-v2-api.yml"
       BOSH_DEPLOY_ARGS: "-v diego_cell_instances=3 -v grafana_redirect_uri=https://grafana.autoscaler.app-runtime-interfaces.ci.cloudfoundry.org/login/generic_oauth"
     ensure:
       put: autoscaler-env-vars-store
