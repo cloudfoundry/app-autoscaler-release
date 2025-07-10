@@ -27,7 +27,7 @@ type (
  * Gets the root information from the v3 api. This consists mostly of the endpoints needed to use the cf environment.
  */
 func (c *Client) GetEndpoints() (Endpoints, error) {
-	return c.CtxClient.endpoints.Get(context.Background())
+	return c.endpoints.Get(context.Background())
 }
 
 func (c *CtxClient) GetEndpoints(ctx context.Context) (Endpoints, error) {
