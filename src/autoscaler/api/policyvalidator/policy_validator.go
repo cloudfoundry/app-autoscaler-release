@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	DateTimeLayout = "2006-01-02T15:04"
-	DateLayout     = "2006-01-02"
-	TimeLayout     = "15:04"
+	DateTimeSecondsLayout = "2006-01-02T15:04:05"
+	DateTimeLayout        = "2006-01-02T15:04"
+	DateLayout            = "2006-01-02"
+	TimeLayout            = "15:04"
 )
 
 type (
@@ -66,9 +67,18 @@ func (v ValidationErrors) Error() string {
 func newDateTimeRange(startDateTime string, endDateTime string, timezone string) *DateTimeRange {
 	location, _ := time.LoadLocation(timezone)
 	dateTimeRange := DateTimeRange{}
-	dateTimeRange.startDateTime, _ = time.ParseInLocation(DateTimeLayout, startDateTime, location)
-	dateTimeRange.endDateTime, _ = time.ParseInLocation(DateTimeLayout, endDateTime, location)
+	dateTimeRange.startDateTime, _ = parseTime(startDateTime, location)
+	dateTimeRange.endDateTime, _ = parseTime(endDateTime, location)
 	return &dateTimeRange
+}
+
+func parseTime(value string, location *time.Location) (result time.Time, err error) {
+	result, err = time.ParseInLocation(DateTimeSecondsLayout, value, location)
+	if err != nil {
+		result, err = time.ParseInLocation(DateTimeLayout, value, location)
+	}
+
+	return
 }
 
 func (dtr *DateTimeRange) overlaps(otherDtr *DateTimeRange) bool {
