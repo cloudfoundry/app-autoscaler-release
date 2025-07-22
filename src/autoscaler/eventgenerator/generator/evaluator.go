@@ -122,27 +122,30 @@ func checkForBreach(appMetricList []*models.AppMetric, e *Evaluator, trigger *mo
 			e.logger.Debug("should not send trigger alarm to scaling engine because there is empty value metric", lager.Data{"trigger": trigger, "appMetric": appMetric})
 			return false, appMetric
 		}
-		value, err := strconv.ParseInt(appMetric.Value, 10, 64)
+		var value int64
+		var err error
+		value, err = strconv.ParseInt(appMetric.Value, 10, 64)
 		if err != nil {
 			e.logger.Debug("should not send trigger alarm to scaling engine because parse metric value fails", lager.Data{"trigger": trigger, "appMetric": appMetric})
 			return false, appMetric
 		}
-		if operator == ">" {
+		switch operator {
+		case ">":
 			if value <= threshold {
 				e.logger.Debug("should not send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "appMetric": appMetric})
 				return false, appMetric
 			}
-		} else if operator == ">=" {
+		case ">=":
 			if value < threshold {
 				e.logger.Debug("should not send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "appMetric": appMetric})
 				return false, appMetric
 			}
-		} else if operator == "<" {
+		case "<":
 			if value >= threshold {
 				e.logger.Debug("should not send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "appMetric": appMetric})
 				return false, appMetric
 			}
-		} else if operator == "<=" {
+		case "<=":
 			if value > threshold {
 				e.logger.Debug("should not send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "appMetric": appMetric})
 				return false, appMetric
