@@ -107,10 +107,9 @@ files:
 - autoscaler/vendor/go.opentelemetry.io/contrib/instrumentation/github.com/gorilla/mux/otelmux/internal/semconvutil/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/attribute/* # gosub
+- autoscaler/vendor/go.opentelemetry.io/otel/attribute/internal/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/baggage/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/codes/* # gosub
-- autoscaler/vendor/go.opentelemetry.io/otel/internal/* # gosub
-- autoscaler/vendor/go.opentelemetry.io/otel/internal/attribute/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/internal/baggage/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/internal/global/* # gosub
 - autoscaler/vendor/go.opentelemetry.io/otel/metric/* # gosub
