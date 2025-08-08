@@ -85,12 +85,12 @@ func GenerateOutput(prs []github.PullRequest, previousVersion string) (string, s
 }
 
 func Header(sb *strings.Builder, header string) {
-	sb.WriteString(fmt.Sprintf("\n## %s\n\n", header))
+	fmt.Fprintf(sb, "\n## %s\n\n", header)
 }
 
 func DisplayPRs(sb *strings.Builder, prs []github.PullRequest) {
 	for _, p := range prs {
-		sb.WriteString(fmt.Sprintf("* [%s](%s) - **%s**\n", p.Title, strings.ReplaceAll(p.Url, "\"", ""), p.Author))
+		fmt.Fprintf(sb, "* [%s](%s) - **%s**\n", p.Title, strings.ReplaceAll(p.Url, "\"", ""), p.Author)
 	}
 }
 
