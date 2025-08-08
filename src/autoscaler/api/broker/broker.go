@@ -489,13 +489,24 @@ func (b *Broker) LastOperation(_ context.Context, instanceID string, details dom
 
 // Bind creates a new service binding
 // PUT /v2/service_instances/{instance_id}/service_bindings/{binding_id}
+// 🚧 To-do: Check if the last parameter can not just be removed seamlessly.
 func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, details domain.BindDetails, _ bool) (domain.Binding, error) {
 	logger := b.logger.Session("bind", lager.Data{"instanceID": instanceID, "bindingID": bindingID, "bindDetails": details})
 	logger.Info("begin")
 	defer logger.Info("end")
 
 	result := domain.Binding{}
-	appGUID := details.AppGUID
+
+	var bindingConfigRaw json.RawMessage
+	if details.RawParameters != nil {
+		bindingConfigRaw = details.RawParameters
+	}
+	bindingConfig, err := b.getBindingConfigurationFromRequest(bindingConfigRaw, logger)
+
+	// // 🚧 To-do: Check if exactly one is provided.
+	// requestAppGuid := details.BindResource.AppGuid
+	// paramsAppGuid := bindingConfig.Configuration.AppGUID
+	appGUID := details.BindResource.AppGuid
 
 	if appGUID == "" {
 		err := errors.New("error: service must be bound to an application - service key creation is not supported")
@@ -503,21 +514,16 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 		return result, apiresponses.NewFailureResponseBuilder(err, http.StatusUnprocessableEntity, "check-required-app-guid").WithErrorKey("RequiresApp").Build()
 	}
 
-	var policyJson json.RawMessage
-	if details.RawParameters != nil {
-		policyJson = details.RawParameters
-	}
-	bindingConfiguration, err := b.getBindingConfigurationFromRequest(policyJson, logger)
 	if err != nil {
 		logger.Error("get-binding-configuration-from-request", err)
 		return result, err
 	}
-	policy, err := b.getPolicyFromJsonRawMessage(policyJson, instanceID, details.PlanID)
+	policy, err := b.getPolicyFromJsonRawMessage(bindingConfigRaw, instanceID, details.PlanID)
 	if err != nil {
 		logger.Error("get-default-policy", err)
 		return result, err
 	}
-	bindingConfiguration, err = bindingConfiguration.ValidateOrGetDefaultCustomMetricsStrategy()
+	bindingConfig, err = bindingConfig.ValidateOrGetDefaultCustomMetricsStrategy()
 	if err != nil {
 		actionName := "validate-or-get-default-custom-metric-strategy"
 		logger.Error(actionName, err)
@@ -526,7 +532,7 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 			WithErrorKey(actionName).Build()
 	}
 	defaultCustomMetricsCredentialType := b.conf.DefaultCustomMetricsCredentialType
-	customMetricsBindingAuthScheme, err := getOrDefaultCredentialType(policyJson, defaultCustomMetricsCredentialType, logger)
+	customMetricsBindingAuthScheme, err := getOrDefaultCredentialType(bindingConfigRaw, defaultCustomMetricsCredentialType, logger)
 	if err != nil {
 		return result, err
 	}
@@ -552,7 +558,7 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 	if err := b.handleExistingBindingsResiliently(ctx, instanceID, appGUID, logger); err != nil {
 		return result, err
 	}
-	err = createServiceBinding(ctx, b.bindingdb, bindingID, instanceID, appGUID, bindingConfiguration.GetCustomMetricsStrategy())
+	err = createServiceBinding(ctx, b.bindingdb, bindingID, instanceID, appGUID, bindingConfig.GetCustomMetricsStrategy())
 
 	if err != nil {
 		actionCreateServiceBinding := "create-service-binding"
@@ -605,11 +611,11 @@ func (b *Broker) Bind(ctx context.Context, instanceID string, bindingID string, 
 	return result, nil
 }
 
-func (b *Broker) getBindingConfigurationFromRequest(policyJson json.RawMessage, logger lager.Logger) (*models.BindingConfig, error) {
+func (b *Broker) getBindingConfigurationFromRequest(bindingConfigRaw json.RawMessage, logger lager.Logger) (*models.BindingConfig, error) {
 	bindingConfiguration := &models.BindingConfig{}
 	var err error
-	if policyJson != nil {
-		err = json.Unmarshal(policyJson, &bindingConfiguration)
+	if bindingConfigRaw != nil {
+		err = json.Unmarshal(bindingConfigRaw, &bindingConfiguration)
 		if err != nil {
 			actionReadBindingConfiguration := "read-binding-configurations"
 			logger.Error("unmarshal-binding-configuration", err)
@@ -737,7 +743,7 @@ func (b *Broker) GetBinding(ctx context.Context, instanceID string, bindingID st
 		return domain.GetBindingSpec{}, apiresponses.NewFailureResponse(errors.New("failed to retrieve scaling policy"), http.StatusInternalServerError, "get-policy")
 	}
 	if policy != nil {
-		policyAndBinding, err := models.GetBindingConfigAndPolicy(policy, serviceBinding.CustomMetricsStrategy)
+		policyAndBinding, err := models.GetBindingConfigAndPolicy(policy, serviceBinding)
 		if err != nil {
 			return domain.GetBindingSpec{}, apiresponses.NewFailureResponse(errors.New("failed to build policy and config object"), http.StatusInternalServerError, "determine-BindingConfig-and-Policy")
 		}
