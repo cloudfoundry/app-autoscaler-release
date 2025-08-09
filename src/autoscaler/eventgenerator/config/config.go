@@ -1,12 +1,10 @@
 package config
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
-
-	"gopkg.in/yaml.v3"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
@@ -40,10 +38,6 @@ const (
 )
 
 var DefaultHttpClientTimeout = 5 * time.Second
-
-var defaultCFServerConfig = helpers.ServerConfig{
-	Port: 8082,
-}
 
 type PoolConfig struct {
 	TotalInstances int `yaml:"total_instances" json:"total_instances"`
@@ -100,21 +94,16 @@ type Config struct {
 	HttpClientTimeout         *time.Duration               `yaml:"http_client_timeout,omitempty" json:"http_client_timeout,omitempty"`
 }
 
-func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
-	conf := defaultConfig()
-
-	if err := helpers.LoadYamlFile(filepath, &conf); err != nil {
-		return nil, err
-	}
-
-	if err := loadVcapConfig(&conf, vcapReader); err != nil {
-		return nil, err
-	}
-
-	return &conf, nil
+// SetLoggingLevel implements configutil.Configurable
+func (c *Config) SetLoggingLevel() {
+	c.Logging.Level = strings.ToLower(c.Logging.Level)
 }
 
-func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
+func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
+	return configutil.GenericLoadConfig(filepath, vcapReader, defaultConfig, configutil.VCAPConfigurableFunc[Config](LoadVcapConfig))
+}
+
+func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	if !vcapReader.IsRunningOnCF() {
 		return nil
 	}
@@ -125,7 +114,7 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 	conf.CFServer.Port = vcapReader.GetPort()
 	conf.Server.Port = 0
 
-	if err := loadEventgeneratorConfig(conf, vcapReader); err != nil {
+	if err := configutil.LoadConfig(conf, vcapReader, "eventgenerator-config"); err != nil {
 		return err
 	}
 
@@ -133,43 +122,13 @@ func loadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 		return err
 	}
 
-	if err := configureInstanceIndex(conf, vcapReader); err != nil {
-		return err
-	}
+	conf.Pool.InstanceIndex = vcapReader.GetInstanceIndex()
 
-	if err := configureXfccSpaceAndOrg(conf, vcapReader); err != nil {
-		return err
-	}
-
-	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
-
-	return nil
-}
-
-func loadEventgeneratorConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	var raw string
-	data, err := vcapReader.GetServiceCredentialContent("eventgenerator-config", "eventgenerator-config")
-	if err != nil {
-		return fmt.Errorf("%w: %v", ErrEventgeneratorConfigNotFound, err)
-	}
-
-	// removes the first and last double quotes if they exist
-	if json.Unmarshal(data, &raw) == nil {
-		return yaml.Unmarshal([]byte(raw), conf)
-	} else {
-		return yaml.Unmarshal(data, conf)
-	}
-}
-
-func configureXfccSpaceAndOrg(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
 	conf.CFServer.XFCC.ValidOrgGuid = vcapReader.GetOrgGuid()
 
-	return nil
-}
+	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 
-func configureInstanceIndex(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	conf.Pool.InstanceIndex = vcapReader.GetInstanceIndex()
 	return nil
 }
 
@@ -188,7 +147,9 @@ func defaultConfig() Config {
 			BackOffMaxInterval:      DefaultBackOffMaxInterval,
 			ConsecutiveFailureCount: DefaultBreakerConsecutiveFailureCount,
 		},
-		CFServer: defaultCFServerConfig,
+		CFServer: helpers.ServerConfig{
+			Port: 8082,
+		},
 		Health: helpers.HealthConfig{
 			ServerConfig: helpers.ServerConfig{
 				Port: DefaultHealthServerPort,
