@@ -591,93 +591,93 @@ variables:
 - name: uaa_secret
   type: password
   options:
-    length: 128
+    length: 64
 - name: uaa_client_id
   type: password
   options:
-    length: 128
+    length: 64
 - name: autoscaler_eventgenerator_health_password
   type: password
 - name: service_broker_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: service_broker_password_blue
   type: password
   options:
-    length: 128
+    length: 64
 - name: autoscaler_metricsforwarder_health_password
   type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: autoscaler_operator_health_password
   type: password
 - name: app_autoscaler_sbss_restricted_dbuser_password_blue
   type: password
   options:
-    length: 128
+    length: 64
 - name: dashboard_client_id
   type: password
   options:
-    length: 128
+    length: 64
 - name: dashboard_client_secret
   type: password
   options:
-    length: 128
+    length: 64
 - name: api_client_id
   type: password
   options:
-    length: 128
+    length: 64
 - name: api_client_secret
   type: password
   options:
-    length: 128
+    length: 64
 - name: auditlog_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: dashboard_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: autoscaler_scheduler_health_password
   type: password
 - name: ratelimiter_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: metriccollector_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: scalingengine_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: eventgenerator_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: scheduler_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: apiserver_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: metricsforwarder_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: autoscaler_scalingengine_health_password
   type: password
 - name: operator_monitor_basic_auth_password
   type: password
   options:
-    length: 128
+    length: 64
 - name: app_autoscaler_ca_cert
   type: certificate
   update_mode: converge
