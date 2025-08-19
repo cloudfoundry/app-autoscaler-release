@@ -56,14 +56,6 @@ resources:
     days: [Monday, Tuesday, Wednesday, Thursday, Friday]
     location: "UTC"
 
-- name: every-morning-9am-monday-till-friday
-  type: time
-  source:
-    start: 09:00 AM
-    stop: 09:30 AM
-    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
-    location: "UTC"
-
 - name: postgres-repo
   type: git
   icon: github
@@ -281,8 +273,6 @@ jobs:
     - get: postgres-release
     - get: multiapps-controller-web-war
     - get: multiapps-controller-web-manifest
-    - get: every-morning-9am-monday-till-friday
-      trigger: true
   - task: deploy-postgres
     file: ci/ci/infrastructure/tasks/deploy-postgres.yml
     params:
