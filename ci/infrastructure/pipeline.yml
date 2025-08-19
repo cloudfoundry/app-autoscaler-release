@@ -273,6 +273,8 @@ jobs:
     - get: postgres-release
     - get: multiapps-controller-web-war
     - get: multiapps-controller-web-manifest
+    - get: every-morning-monday-till-friday
+      trigger: true
   - task: deploy-postgres
     file: ci/ci/infrastructure/tasks/deploy-postgres.yml
     params:
