@@ -20,7 +20,7 @@
     "instance_max_count": {
       "$id": "#/properties/instance_max_count",
       "type": "integer",
-      "title": "Maximum how many instances of application can be provisioned as part o f application scaling"
+      "title": "Maximum how many instances of application can be provisioned as part of application scaling"
     },
     "scaling_rules": {
       "$id": "#/properties/scaling_rules",
