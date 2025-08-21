@@ -1,14 +1,15 @@
 package envelopeprocessor
 
 import (
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
-	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
-	"code.cloudfoundry.org/lager/v3"
 	"fmt"
-	"golang.org/x/exp/maps"
 	"math"
 	"slices"
 	"strconv"
+
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/go-loggregator/v10/rpc/loggregator_v2"
+	"code.cloudfoundry.org/lager/v3"
+	"golang.org/x/exp/maps"
 )
 
 type EnvelopeProcessorCreator interface {
