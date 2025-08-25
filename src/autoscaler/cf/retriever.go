@@ -49,7 +49,7 @@ func (r PagedResourceRetriever[T]) GetAllPages(ctx context.Context, pathAndQuery
 	pageNumber := 1
 	var resources []T
 
-	url := r.Retriever.ApiUrl(pathAndQuery)
+	url := r.ApiUrl(pathAndQuery)
 
 	for url != "" && ctx.Err() == nil {
 		page, err := r.getPage(ctx, url)
@@ -64,7 +64,7 @@ func (r PagedResourceRetriever[T]) GetAllPages(ctx context.Context, pathAndQuery
 }
 
 func (r PagedResourceRetriever[T]) GetPage(ctx context.Context, pathAndQuery string) (Response[T], error) {
-	return r.getPage(ctx, r.Retriever.ApiUrl(pathAndQuery))
+	return r.getPage(ctx, r.ApiUrl(pathAndQuery))
 }
 
 func (r PagedResourceRetriever[T]) getPage(ctx context.Context, url string) (Response[T], error) {
@@ -72,7 +72,7 @@ func (r PagedResourceRetriever[T]) getPage(ctx context.Context, url string) (Res
 }
 
 func (r ResourceRetriever[T]) Get(ctx context.Context, pathAndQuery string) (T, error) {
-	return r.get(ctx, r.Retriever.ApiUrl(pathAndQuery))
+	return r.get(ctx, r.ApiUrl(pathAndQuery))
 }
 
 func (r ResourceRetriever[T]) get(ctx context.Context, url string) (T, error) {
@@ -102,7 +102,7 @@ func (r ResourceRetriever[T]) sendAndDeserialise(ctx context.Context, req *http.
 }
 
 func (r ResourceRetriever[T]) Post(ctx context.Context, pathAndQuery string, bodyStuct any) (T, error) {
-	return r.post(ctx, r.Retriever.ApiUrl(pathAndQuery), bodyStuct)
+	return r.post(ctx, r.ApiUrl(pathAndQuery), bodyStuct)
 }
 
 func (r ResourceRetriever[T]) post(ctx context.Context, url string, bodyStuct any) (T, error) {
@@ -125,7 +125,7 @@ func (r AuthenticatedClient) SendRequest(ctx context.Context, req *http.Request)
 	if err != nil {
 		return nil, err
 	}
-	return r.Retriever.SendRequest(ctx, req)
+	return r.SendRequest(ctx, req)
 }
 
 func (c *CtxClient) SendRequest(_ context.Context, req *http.Request) (*http.Response, error) {
@@ -152,7 +152,7 @@ func (c *CtxClient) ApiUrl(pathAndQuery string) string {
 }
 
 func (r AuthenticatedClient) addAuth(ctx context.Context, req *http.Request) error {
-	tokens, err := r.Retriever.GetTokens(ctx)
+	tokens, err := r.GetTokens(ctx)
 	if err != nil {
 		return fmt.Errorf("get token failed: %w", err)
 	}
