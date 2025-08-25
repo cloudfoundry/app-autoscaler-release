@@ -73,6 +73,11 @@ properties:
     description: ""
   autoscaler.apiserver.broker.server.dashboard_redirect_uri:
     description: ""
+  autoscaler.apiserver.public_api.autoscaler_api_client_id:
+    description: |
+      If set, restricts the public API endpoint, to only allow requests providing an oauth token from this client id to access the public API.
+      The token needs to be provided in the request header X-Autoscaler-Token.
+    default: ""
   autoscaler.apiserver.public_api.server.port:
     description: "Port where broker server will run"
     default: 6102
