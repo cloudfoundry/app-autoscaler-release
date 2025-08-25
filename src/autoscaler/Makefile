@@ -16,7 +16,8 @@ PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/'
 								 | grep --invert-match --regexp='e2e')
 
 
-MODULES ?= dbtasks,apiserver,eventgenerator,metricsforwarder,operator,scheduler
+MODULES ?= dbtasks,apiserver,eventgenerator,metricsforwarder,operator,scheduler,scalingengine
+
 db_type ?= postgres
 DB_HOST ?= localhost
 DBURL := $(shell case "${db_type}" in\
@@ -33,7 +34,7 @@ binaries=$(shell find . -name "main.go" -exec dirname {} \; |  cut -d/ -f2 | sor
 test_dirs=$(shell find . -name "*_test.go" -exec dirname {} \; |  cut -d/ -f2 | sort | uniq)
 export GO111MODULE=on
 
-.PHONY: clean-dbtasks package-dbtasks vendor-changelogs clean-scheduler package-scheduler
+.PHONY: clean-dbtasks package-dbtasks vendor-changelogs clean-scheduler package-scheduler clean mta-deploy mta-undeploy mta-build mta-logs
 
 GINKGO_OPTS = -r --race --require-suite --randomize-all --cover ${OPTS}
 
@@ -89,7 +90,6 @@ go-mod-tidy: ./go.mod ./go.sum ${go_deps_without_generated_sources}
 					 'outdated. Please consider re-generating them, if this is relevant.'
 	@echo -ne '${aes_terminal_reset}'
 	go mod tidy
-
 
 
 go-vendoring-folder := ./vendor
@@ -176,14 +176,13 @@ clean-scheduler:
 build-scheduler:
 	pushd scheduler; mvn package -Dmaven.test.skip=true; popd
 
-
 vendor-changelogs:
 	cp $(MAKEFILE_DIR)/api/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
 	cp $(MAKEFILE_DIR)/eventgenerator/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
 	cp $(MAKEFILE_DIR)/operator/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
+	cp $(MAKEFILE_DIR)/scalingengine/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
 	cp $(MAKEFILE_DIR)/scheduler/db/* $(MAKEFILE_DIR)/dbtasks/src/main/resources/.
 
-.PHONY: clean
 clean:
 	@echo "# cleaning autoscaler"
 	@go clean -cache -testcache
@@ -193,13 +192,11 @@ clean:
 	@rm --force --recursive "${openapi-generated-clients-and-servers-api-dir}"
 	@rm --force --recursive "${openapi-generated-clients-and-servers-scalingengine-dir}"
 
-.PHONY: mta-deploy
 mta-deploy: mta-build build-extension-file
 	$(MAKE) -f metricsforwarder/Makefile set-security-group
 	@echo "Deploying with extension file: $(EXTENSION_FILE)"
 	@cf deploy $(DEST)/$(MTAR_FILENAME) --version-rule ALL -f --delete-services -e $(EXTENSION_FILE) -m $(MODULES)
 
-.PHONY: mta-deploy
 mta-undeploy:
 	@cf undeploy com.github.cloudfoundry.app-autoscaler-release -f
 
@@ -212,7 +209,6 @@ mta-logs:
 	cf dmol --mta com.github.cloudfoundry.app-autoscaler-release --last 1
 	vim mta-*
 
-.PHONY: mta-build
 mta-build: mta-build-clean
 	@echo "building mtar file for version: $(VERSION)"
 	cp mta.tpl.yaml mta.yaml
@@ -226,7 +222,6 @@ mta-build: mta-build-clean
 
 mta-build-clean:
 	rm -rf mta_archives
-
 
 .PHONY: cf-login
 cf-login:
