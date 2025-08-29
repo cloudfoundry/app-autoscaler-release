@@ -15,7 +15,6 @@ GO_DEPENDENCIES = $(shell find . -type f -name '*.go')
 PACKAGE_DIRS = $(shell go list './...' | grep --invert-match --regexp='/vendor/' \
 								 | grep --invert-match --regexp='e2e')
 
-
 MODULES ?= dbtasks,apiserver,eventgenerator,metricsforwarder,operator,scheduler
 db_type ?= postgres
 DB_HOST ?= localhost
