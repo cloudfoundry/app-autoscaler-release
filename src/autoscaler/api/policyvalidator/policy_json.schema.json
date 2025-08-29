@@ -58,6 +58,12 @@
       "type": "integer",
       "title": "Maximum how many instances of application can be provisioned as part of application scaling"
     },
+"scaling_rule_evaluation": {
+      "type": "string",
+      "enum": ["first_matching", "biased_to_scale_out"],
+      "default": "first_matching",
+      "title": "The Scaling Rule Evaluation Schema"
+    },
     "scaling_rules": {
       "$id": "#/properties/scaling_rules",
       "type": "array",
