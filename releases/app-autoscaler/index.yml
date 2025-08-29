@@ -69,6 +69,8 @@ builds:
     version: 5.2.5
   56272bf0-7d8a-4118-70d7-222bc05a8d60:
     version: 4.0.0
+  5c909295-58ec-44ef-7f3c-c4e525eb1cd7:
+    version: 15.6.0
   5e54cb52-6229-4ddb-4ba5-e0564b0b5a06:
     version: 3.7.1
   5f38ba56-e30d-4777-4494-637db067ca26:
@@ -91,6 +93,8 @@ builds:
     version: 11.3.0
   772ca542-1476-4dbc-53d0-4b778417d0e6:
     version: 11.2.1
+  78ac7c6c-4971-4c2e-7242-400ec95fc51c:
+    version: 15.7.0
   79137a8a-8a53-4880-657d-95b98bc512f8:
     version: 10.0.1
   7a55c584-d7da-4133-48f7-75e23cfa7a99:
@@ -105,6 +109,8 @@ builds:
     version: 13.0.0
   84ae8135-f1fe-4a6c-446c-e9f7b9703041:
     version: 14.4.1
+  8653c387-86b0-4a0f-7275-1fe3fa34d45b:
+    version: 15.6.1
   8a76bebf-e8d0-4fcb-4434-55a738b2acb4:
     version: 15.0.1
   8b04ebf3-1984-4e90-40ae-12514ff970d4:
