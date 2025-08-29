@@ -1,6 +1,8 @@
 package models_test
 
 import (
+	"encoding/json"
+
 	. "code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -8,144 +10,162 @@ import (
 
 var _ = Describe("BindingConfigs", func() {
 
-	var bindingConfig *BindingConfig
+	var (
+		bindingConfig *BindingConfig
+		err           error
+		testAppGUID   GUID = GUID("test-app-guid")
+	)
 
-	Context("GetBindingConfigAndPolicy", func() {
+	Context("BindingConfigFromServiceBinding", func() {
 		var (
-			scalingPolicy        *ScalingPolicy
-			customMetricStrategy string
-			result               interface{}
-			err                  error
+			serviceBinding *ServiceBinding
 		)
 
 		JustBeforeEach(func() {
-			result, err = GetBindingConfigAndPolicy(scalingPolicy, customMetricStrategy)
+			bindingConfig, err = BindingConfigFromServiceBinding(serviceBinding)
 		})
 
-		When("both scaling policy and custom metric strategy are present", func() {
-			BeforeEach(func() {
-				scalingPolicy = &ScalingPolicy{
-					InstanceMax: 5,
-					InstanceMin: 1,
-					ScalingRules: []*ScalingRule{
-						{
-							MetricType:            "memoryused",
-							BreachDurationSeconds: 300,
-							CoolDownSeconds:       300,
-							Threshold:             30,
-							Operator:              ">",
-							Adjustment:            "-1",
-						},
-					},
-				}
-				customMetricStrategy = CustomMetricsBoundApp
+		When("valid service binding is provided", func() {
+			Context("with CustomMetricsBoundApp strategy and AppID", func() {
+				BeforeEach(func() {
+					serviceBinding = &ServiceBinding{
+						AppID:                 string(testAppGUID),
+						CustomMetricsStrategy: CustomMetricsBoundApp.String(),
+					}
+				})
+
+				It("should create binding config with correct values", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(bindingConfig).NotTo(BeNil())
+					Expect(bindingConfig.GetAppGUID()).To(Equal(testAppGUID))
+					Expect(bindingConfig.GetCustomMetricStrategy()).To(Equal(CustomMetricsBoundApp))
+				})
 			})
 
-			It("should return combined configuration", func() {
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result).To(BeAssignableToTypeOf(&ScalingPolicyWithBindingConfig{}))
-				combinedConfig := result.(*ScalingPolicyWithBindingConfig)
-				Expect(combinedConfig.ScalingPolicy).To(Equal(*scalingPolicy))
-				Expect(combinedConfig.BindingConfig.GetCustomMetricsStrategy()).To(Equal(customMetricStrategy))
+			Context("with CustomMetricsSameApp strategy and AppID", func() {
+				BeforeEach(func() {
+					serviceBinding = &ServiceBinding{
+						AppID:                 string(testAppGUID),
+						CustomMetricsStrategy: CustomMetricsSameApp.String(),
+					}
+				})
+
+				It("should create binding config with correct values", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(bindingConfig).NotTo(BeNil())
+					Expect(bindingConfig.GetAppGUID()).To(Equal(testAppGUID))
+					Expect(bindingConfig.GetCustomMetricStrategy()).To(Equal(CustomMetricsSameApp))
+				})
+			})
+
+			Context("with only CustomMetricsBoundApp strategy (no AppID)", func() {
+				BeforeEach(func() {
+					serviceBinding = &ServiceBinding{
+						AppID:                 "",
+						CustomMetricsStrategy: CustomMetricsBoundApp.String(),
+					}
+				})
+
+				It("should create binding config with correct strategy", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(bindingConfig).NotTo(BeNil())
+					Expect(bindingConfig.GetAppGUID()).To(Equal(GUID("")))
+					Expect(bindingConfig.GetCustomMetricStrategy()).To(Equal(CustomMetricsBoundApp))
+				})
+			})
+
+			Context("with empty strategy", func() {
+				BeforeEach(func() {
+					serviceBinding = &ServiceBinding{
+						CustomMetricsStrategy: "",
+					}
+				})
+
+				It("should create a binding-config with default-strategy", func() {
+					Expect(err).NotTo(HaveOccurred())
+					Expect(bindingConfig.GetCustomMetricStrategy()).To(Equal(DefaultCustomMetricsStrategy))
+				})
 			})
 		})
 
-		When("only scaling policy is present", func() {
-			BeforeEach(func() {
-				scalingPolicy = &ScalingPolicy{
-					InstanceMax: 5,
-					InstanceMin: 1,
-					ScalingRules: []*ScalingRule{
-						{
-							MetricType:            "memoryused",
-							BreachDurationSeconds: 300,
-							CoolDownSeconds:       300,
-							Threshold:             30,
-							Operator:              ">",
-							Adjustment:            "-1",
-						},
-					},
-				}
-				customMetricStrategy = ""
+		When("invalid parameters are provided", func() {
+			Context("with nil service binding", func() {
+				BeforeEach(func() {
+					serviceBinding = nil
+				})
+
+				It("should return an error", func() {
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("serviceBinding must not be nil"))
+					Expect(bindingConfig).To(BeNil())
+				})
 			})
 
-			It("should return scaling policy", func() {
-				Expect(err).NotTo(HaveOccurred())
-				Expect(result).To(Equal(&ScalingPolicyWithBindingConfig{ScalingPolicy: *scalingPolicy, BindingConfig: nil}))
-			})
-		})
+			Context("with invalid custom metrics strategy", func() {
+				BeforeEach(func() {
+					serviceBinding = &ServiceBinding{
+						AppID:                 string(testAppGUID),
+						CustomMetricsStrategy: "invalid_strategy",
+					}
+				})
 
-		When("policy is not found", func() {
-			BeforeEach(func() {
-				scalingPolicy = nil
-				customMetricStrategy = CustomMetricsBoundApp
-			})
-
-			It("should return an error", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("policy not found"))
+				It("should return an error", func() {
+					Expect(err).To(HaveOccurred())
+					Expect(err.Error()).To(ContainSubstring("serviceBinding contained unsupported strategy"))
+					Expect(bindingConfig).To(BeNil())
+				})
 			})
 		})
 	})
 
-	Context("GetCustomMetricsStrategy", func() {
-		It("should return the correct custom metrics strategy", func() {
-			bindingConfig = &BindingConfig{
-				Configuration: Configuration{
-					CustomMetrics: CustomMetricsConfig{
-						MetricSubmissionStrategy: MetricsSubmissionStrategy{
-							AllowFrom: CustomMetricsBoundApp,
-						},
-					},
-				},
-			}
-			Expect(bindingConfig.GetCustomMetricsStrategy()).To(Equal(CustomMetricsBoundApp))
+	Context("ToRawJSON", func() {
+		var strategy CustomMetricsStrategy = CustomMetricsBoundApp
+		var err error
+		var rawJSON json.RawMessage
+		var rawJSONString string
+
+		BeforeEach(func() {
+			bindingConfig = NewBindingConfig(testAppGUID, strategy)
+			rawJSON, err = bindingConfig.ToRawJSON()
+			rawJSONString = string(rawJSON)
+		})
+
+		It("should serialize to raw JSON without error", func() {
+			Expect(err).NotTo(HaveOccurred())
+			Expect(rawJSON).NotTo(BeNil())
+			Expect(string(rawJSON)).To(ContainSubstring(`"app_guid":"test-app-guid"`))
+			Expect(string(rawJSON)).To(ContainSubstring(`"allow_from":"bound_app"`))
+		})
+
+		It("should be compliant with our official format", func() {
+			correctJSONString := `{"app_guid":"test-app-guid","custom_metrics":{"metric_submission_strategy":{"allow_from":"bound_app"}}}`
+			Expect(err).NotTo(HaveOccurred())
+			Expect(rawJSON).NotTo(BeNil())
+			Expect(rawJSONString).To(Equal(string(correctJSONString)))
 		})
 	})
 
-	Context("SetCustomMetricsStrategy", func() {
-		It("should set the custom metrics strategy correctly", func() {
-			bindingConfig = &BindingConfig{}
-			bindingConfig.SetCustomMetricsStrategy(CustomMetricsBoundApp)
-			Expect(bindingConfig.Configuration.CustomMetrics.MetricSubmissionStrategy.AllowFrom).To(Equal(CustomMetricsBoundApp))
-		})
-	})
+	Context("FromRawJSON", func() {
+		var rawJSON json.RawMessage
+		var err error
 
-	Context("ValidateOrGetDefaultCustomMetricsStrategy", func() {
-		var (
-			validatedBindingConfig *BindingConfig
-			err                    error
-		)
-		JustBeforeEach(func() {
-			validatedBindingConfig, err = bindingConfig.ValidateOrGetDefaultCustomMetricsStrategy()
-		})
-		When("custom metrics strategy is empty", func() {
-
-			BeforeEach(func() {
-				bindingConfig = &BindingConfig{}
-			})
-			It("should set the default custom metrics strategy", func() {
-				Expect(err).NotTo(HaveOccurred())
-				Expect(validatedBindingConfig.GetCustomMetricsStrategy()).To(Equal(CustomMetricsSameApp))
-			})
+		BeforeEach(func() {
+			rawJSON = json.RawMessage(`{"app_guid":"test-app-guid","custom_metrics":{"metric_submission_strategy":{"allow_from":"bound_app"}}}`)
 		})
 
-		When("custom metrics strategy is unsupported", func() {
-			BeforeEach(func() {
-				bindingConfig = &BindingConfig{
-					Configuration: Configuration{
-						CustomMetrics: CustomMetricsConfig{
-							MetricSubmissionStrategy: MetricsSubmissionStrategy{
-								AllowFrom: "unsupported_strategy",
-							},
-						},
-					},
-				}
-			})
-			It("should return an error", func() {
-				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("error: custom metrics strategy not supported"))
-			})
+		It("should deserialize from raw JSON without error", func() {
+			bindingConfig, err = BindingConfigFromRawJSON(rawJSON)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(bindingConfig).NotTo(BeNil())
+			Expect(bindingConfig.GetAppGUID()).To(Equal(testAppGUID))
+			Expect(bindingConfig.GetCustomMetricStrategy()).To(Equal(CustomMetricsBoundApp))
+		})
+
+		It("should return an error for invalid JSON", func() {
+			rawJSON = json.RawMessage(`{"invalid_json"}`)
+			bindingConfig, err = BindingConfigFromRawJSON(rawJSON)
+			Expect(err).To(HaveOccurred())
+			Expect(bindingConfig).To(BeNil())
 		})
 	})
 })

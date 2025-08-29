@@ -1,7 +1,7 @@
 package models
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
 )
 
@@ -9,81 +9,226 @@ import (
 /* The configuration object received as part of the binding parameters. Example config:
 {
   "configuration": {
-    "custom_metrics": {
-      "metric_submission_strategy": {
-        "allow_from": "bound_app"
-      }
-    }
+	"app-guid": "8d0cee08-23ad-4813-a779-ad8118ea0b91",
+	"custom_metrics": {
+	  "metric_submission_strategy": {
+		"allow_from": "bound_app"
+	  }
+	}
   }
+}
 */
 
-const (
-	CustomMetricsBoundApp = "bound_app"
+// BindingConfig represents the configuration for a service binding.
+//
+// ⛔ Do not create `BindingConfig` values directly via `BindingConfig{}` because it can lead to
+// undefined behaviour due to bypassing all validations.  Use the constructor-functions instead!
+type BindingConfig struct {
+	appGUID       GUID                 // Empty value represents null-value (i.e. not set).
+	customMetrics customMetricsConfig
+}
+
+
+// NewBindingConfig creates a new BindingConfig with the specified application GUID and custom metrics strategy.
+// This constructor ensures proper initialization of the BindingConfig structure with its nested configuration objects.
+//
+// Parameters:
+//   - appGUID: The GUID of the application to associate with this binding configuration.
+//     Can be empty (GUID("")) to represent no specific application association.
+//   - customMetricStrategy: The custom metrics submission strategy to use for this binding.
+//     Must be one of the predefined CustomMetricsStrategy values (CustomMetricsBoundApp or CustomMetricsSameApp).
+//
+// Returns:
+//   - *BindingConfig: A pointer to a newly created and initialized BindingConfig instance.
+//     The returned instance is never nil and contains properly initialized nested structures.
+func NewBindingConfig(appGUID GUID, customMetricStrategy CustomMetricsStrategy) *BindingConfig {
+	return &BindingConfig{
+		appGUID:       appGUID,
+		customMetrics: customMetricsConfig{
+			MetricSubmissionStrategy: metricsSubmissionStrategy{
+				AllowFrom: customMetricStrategy,
+			},
+		},
+	}
+}
+
+func DefaultBindingConfig() *BindingConfig {
+	return NewBindingConfig(GUID(""), DefaultCustomMetricsStrategy)
+}
+
+
+// BindingConfigFromServiceBinding creates a new BindingConfig from an existing ServiceBinding.
+//
+// Parameters:
+//   - serviceBinding: The ServiceBinding instance from which to extract configuration data.
+//     Must not be nil. The AppID field is used as the application GUID, and the
+//     CustomMetricsStrategy field determines the metrics submission strategy.
+//
+// Returns:
+//   - *BindingConfig: A newly created BindingConfig instance with the extracted configuration.
+//     Returns nil if an error occurs during processing.
+//   - error: An InvalidArgumentError if serviceBinding is nil, or a formatting error if the
+//     CustomMetricsStrategy contains an unsupported value.
+//
+// Edge cases:
+//   - If serviceBinding is nil, returns an InvalidArgumentError with detailed parameter information.
+//   - If CustomMetricsStrategy is empty string, defaults to CustomMetricsSameApp strategy.
+//   - If CustomMetricsStrategy contains an unsupported value, returns a descriptive error.
+func BindingConfigFromServiceBinding(serviceBinding *ServiceBinding) (*BindingConfig, error) {
+	var bindingConfig *BindingConfig
+
+	if serviceBinding == nil {
+		err := InvalidArgumentError{
+			Param: "serviceBinding",
+			Value: serviceBinding,
+			Msg:   "serviceBinding must not be nil, see function-contract;",
+		}
+		return nil, &err
+	}
+
+	bindingConfig = &BindingConfig{
+		appGUID: GUID(serviceBinding.AppID),
+	}
+
+	var customMetricStrategy CustomMetricsStrategy // Validierung nötig!
+	switch serviceBinding.CustomMetricsStrategy {
+	case "bound_app": customMetricStrategy = CustomMetricsBoundApp
+	case "same_app", "": customMetricStrategy = CustomMetricsSameApp
+	default: {
+		err := fmt.Errorf(
+			"error: serviceBinding contained unsupported strategy:\n\t%s",
+			serviceBinding)
+		return nil, err
+	}}
+
+	bindingConfig.customMetrics = customMetricsConfig{
+		MetricSubmissionStrategy: metricsSubmissionStrategy{
+			AllowFrom: customMetricStrategy,
+		},
+	}
+	return bindingConfig, nil
+}
+
+// GetAppGUID returns the GUID of the application associated with this binding.
+func (bc *BindingConfig) GetAppGUID() GUID {
+	return bc.appGUID
+}
+
+// GetCustomMetricStrategy returns the custom metrics configuration for this binding.
+func (bc *BindingConfig) GetCustomMetricStrategy() CustomMetricsStrategy {
+	return bc.customMetrics.MetricSubmissionStrategy.AllowFrom
+}
+
+
+
+// ================================================================================
+// Types expressing a binding-configuration
+// ================================================================================
+
+// CustomMetricsStrategy defines the strategy for submitting custom metrics. It can be either
+// "bound_app" or "same_app".
+//
+// ⛔ Do not create CustomMetricsStrategy values directly via `CustomMetricsStrategy{}` because it
+// can lead to undefined behaviour due to bypassing all validations.  Use the predefined constants
+// instead.
+type CustomMetricsStrategy struct {
+	value string // Not exported to prohibit construction of CustomMetricsStrategy values outside
+				 // this package.
+}
+
+var (
+	CustomMetricsBoundApp = CustomMetricsStrategy{"bound_app"}
+
 	// CustomMetricsSameApp default value if not specified
-	CustomMetricsSameApp = "same_app"
+	CustomMetricsSameApp = CustomMetricsStrategy{"same_app"}
+	DefaultCustomMetricsStrategy = CustomMetricsSameApp
 )
 
-type BindingConfig struct {
-	Configuration Configuration `json:"configuration"`
+func (s CustomMetricsStrategy) String() string {
+	return s.value
 }
-type Configuration struct {
-	CustomMetrics CustomMetricsConfig `json:"custom_metrics"`
-}
+var _ fmt.Stringer = CustomMetricsStrategy{}
 
-type CustomMetricsConfig struct {
-	MetricSubmissionStrategy MetricsSubmissionStrategy `json:"metric_submission_strategy"`
+func (s CustomMetricsStrategy) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.value)
 }
 
-type MetricsSubmissionStrategy struct {
-	AllowFrom string `json:"allow_from"`
-}
-
-func (b *BindingConfig) GetCustomMetricsStrategy() string {
-	return b.Configuration.CustomMetrics.MetricSubmissionStrategy.AllowFrom
-}
-
-func (b *BindingConfig) SetCustomMetricsStrategy(allowFrom string) {
-	b.Configuration.CustomMetrics.MetricSubmissionStrategy.AllowFrom = allowFrom
-}
-
-/**
- * GetBindingConfigAndPolicy combines the binding configuration and policy based on the given parameters.
- * It establishes the relationship between the scaling policy and the custom metrics strategy.
- * @param scalingPolicy the scaling policy
- * @param customMetricStrategy the custom metric strategy
- * @return the binding configuration and policy if both are present, the scaling policy if only the policy is present,
-* 			the binding configuration if only the configuration is present
- * @throws an error if no policy or custom metrics strategy is found
-*/
-
-func GetBindingConfigAndPolicy(scalingPolicy *ScalingPolicy, customMetricStrategy string) (*ScalingPolicyWithBindingConfig, error) {
-	if scalingPolicy == nil {
-		return nil, fmt.Errorf("policy not found")
+func (s *CustomMetricsStrategy) UnmarshalJSON(data []byte) error {
+	var value string
+	if err := json.Unmarshal(data, &value); err != nil {
+		return err
 	}
-	if customMetricStrategy != "" && customMetricStrategy != CustomMetricsSameApp { //if customMetricStrategy found
-		return buildPolicyAndConfig(scalingPolicy, customMetricStrategy), nil
+
+	switch value {
+	case "bound_app":
+		*s = CustomMetricsBoundApp
+	case "same_app":
+		*s = CustomMetricsSameApp
+	default:
+		return fmt.Errorf("unsupported CustomMetricsStrategy: %s", value)
 	}
-	return &ScalingPolicyWithBindingConfig{
-		ScalingPolicy: *scalingPolicy,
-	}, nil
+
+	return nil
 }
 
-func buildPolicyAndConfig(scalingPolicy *ScalingPolicy, customMetricStrategy string) *ScalingPolicyWithBindingConfig {
-	bindingConfig := &BindingConfig{}
-	bindingConfig.SetCustomMetricsStrategy(customMetricStrategy)
 
-	return &ScalingPolicyWithBindingConfig{
-		BindingConfig: bindingConfig,
-		ScalingPolicy: *scalingPolicy,
-	}
+
+// ================================================================================
+// Deserialization and serialization methods for BindingConfig
+// ================================================================================
+
+type bindingConfigJsonRawRepr struct {
+	AppGUID       GUID                 `json:"app_guid,omitempty"`       // Empty value represents null-value (i.e. not set).
+	CustomMetrics *customMetricsConfig `json:"custom_metrics,omitempty"` // nil value represents null-value (i.e. not set).
 }
 
-func (b *BindingConfig) ValidateOrGetDefaultCustomMetricsStrategy() (*BindingConfig, error) {
-	strategy := b.GetCustomMetricsStrategy()
-	if strategy == "" {
-		b.SetCustomMetricsStrategy(CustomMetricsSameApp)
-	} else if strategy != CustomMetricsBoundApp {
-		return nil, errors.New("error: custom metrics strategy not supported")
+type customMetricsConfig struct {
+	MetricSubmissionStrategy metricsSubmissionStrategy `json:"metric_submission_strategy"`
+}
+
+type metricsSubmissionStrategy struct {
+	AllowFrom CustomMetricsStrategy `json:"allow_from"`
+}
+
+func (bc BindingConfig) ToRawJSON() (json.RawMessage, error) {
+	var customMetrics *customMetricsConfig
+	if bc.GetCustomMetricStrategy() == DefaultCustomMetricsStrategy{
+		customMetrics = nil // Default strategy does not need to be serialized
+	} else {
+		customMetrics = &bc.customMetrics
 	}
-	return b, nil
+	bindingConfigRaw := bindingConfigJsonRawRepr{
+		AppGUID:       bc.appGUID,
+		CustomMetrics: customMetrics,
+	}
+
+	data, err := json.Marshal(bindingConfigRaw)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal BindingConfig: %w", err)
+	}
+	return json.RawMessage(data), nil
+}
+
+func BindingConfigFromRawJSON(data json.RawMessage) (*BindingConfig, error) {
+	if len(data) <= 0 {
+		return NewBindingConfig(GUID(""), DefaultCustomMetricsStrategy), nil
+	}
+
+	var bindingConfigRaw bindingConfigJsonRawRepr
+	if err := json.Unmarshal(data, &bindingConfigRaw); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal BindingConfig: %w", err)
+	}
+	bindingConfig := &BindingConfig{
+		appGUID: bindingConfigRaw.AppGUID,
+	}
+	if bindingConfigRaw.CustomMetrics != nil {
+		bindingConfig.customMetrics = *bindingConfigRaw.CustomMetrics
+	} else {
+		bindingConfig.customMetrics = customMetricsConfig{
+			MetricSubmissionStrategy: metricsSubmissionStrategy{
+				AllowFrom: DefaultCustomMetricsStrategy,
+			},
+		}
+	}
+	return bindingConfig, nil
 }
