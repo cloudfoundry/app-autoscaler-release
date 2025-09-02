@@ -5,33 +5,17 @@
   "type": "object",
 
   "properties": {
-    "custom_metrics": {
-      "type": "object",
-      "properties": {
-        "metric_submission_strategy": {
-          "type": "object",
-          "properties": {
-            "allow_from": {
-              "type": "string",
-              "enum": [
-                "bound_app",
-                "same_app"
-              ]
-            }
-          },
-          "required": [
-            "allow_from"
-          ]
-        }
-      },
-      "required": [
-        "metric_submission_strategy"
-      ],
-      "additionalProperties": false
-    },
     "app_guid": {
       "$ref": "./shared_definitions.json#/schemas/guid"
+    },
+    "credential-type": {
+      "type": "string",
+      "enum": [
+        "x509",
+        "binding-secret"
+      ],
     }
   },
+  "required": ["app_guid"],
   "additionalProperties": false
 }
