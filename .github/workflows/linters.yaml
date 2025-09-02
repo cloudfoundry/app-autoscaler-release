@@ -25,7 +25,7 @@ jobs:
         run: |
           make lint-go
       - name: shellcheck
-        uses: reviewdog/action-shellcheck@5ebd09ddbe2ebb471646ce234c6c8dd18663ca7c # v1
+        uses: reviewdog/action-shellcheck@1bb9751763fdfbee4b5043772c37374f103bff9e # v1
         with:
           reporter: github-pr-review
       - name: actionlint
