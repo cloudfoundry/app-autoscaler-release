@@ -5,11 +5,11 @@
   "type": "object",
 
   "properties": {
-    "configuration": {
+    "binding-configuration": {
       "$ref": "./binding-configuration.json"
     },
     "scaling-policy": {
-      "$ref": "./autoscaler-policy.json"
+      "$ref": "./scaling-policy.json"
     }
   },
 
