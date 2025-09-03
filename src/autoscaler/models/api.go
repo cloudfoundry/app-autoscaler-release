@@ -4,11 +4,6 @@ import (
 	"encoding/json"
 )
 
-const (
-	BindingSecret   = "binding-secret"
-	X509Certificate = "x509"
-)
-
 type XFCCAuth struct {
 	ValidOrgGuid   string `yaml:"valid_org_guid" json:"valid_org_guid"`
 	ValidSpaceGuid string `yaml:"valid_space_guid" json:"valid_space_guid"`
@@ -60,14 +55,16 @@ type ServiceBinding struct {
 	CustomMetricsStrategy string `db:"custom_metrics_strategy"`
 }
 
+// 🚧 To-do: We now have `BindingParameters` and this is obsolete!
 type ScalingPolicyWithBindingConfig struct {
-	ScalingPolicy
-	*BindingConfig
+	PolicyDefinition
+	*BindingConfig `json:"configuration,omitempty"`
 }
 
 type BindingRequestBody struct {
 	BrokerCommonRequestBody
 	AppID  string          `json:"app_guid"`
+	// 🚧 To-do: Support `bind_resource` as described in https://github.com/openservicebrokerapi/servicebroker/blob/v2.17/spec.md#request-creating-a-service-binding; Afterwards make use of it in tests;
 	Policy json.RawMessage `json:"parameters,omitempty"`
 }
 
@@ -90,8 +87,4 @@ type AppMetricResponse struct {
 type AppScalingHistoryResponse struct {
 	PublicApiResponseBase
 	Resources []AppScalingHistory `json:"resources"`
-}
-
-type CustomMetricsBindingAuthScheme struct {
-	CredentialType string `json:"credential-type"`
 }
