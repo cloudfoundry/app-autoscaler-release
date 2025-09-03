@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        postgres: [12, 15, 16]
+        postgres: [15, 16]
         suite: [test, integration]
     env:
       DB_DATABASE: autoscaler
