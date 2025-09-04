@@ -71,7 +71,7 @@ func (ldb *LockSQLDB) fetch(tx *sql.Tx) (*models.Lock, error) {
 	var (
 		owner     string
 		timestamp time.Time
-		ttl       time.Duration
+		ttlSec    int64
 	)
 
 	if ldb.sqldb.DriverName() == "pgx" {
@@ -87,7 +87,7 @@ func (ldb *LockSQLDB) fetch(tx *sql.Tx) (*models.Lock, error) {
 		query = query + " NOWAIT "
 	}
 	row := tx.QueryRow(query)
-	err := row.Scan(&owner, &timestamp, &ttl)
+	err := row.Scan(&owner, &timestamp, &ttlSec)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ldb.logger.Error("no-lock-found", err)
@@ -96,6 +96,7 @@ func (ldb *LockSQLDB) fetch(tx *sql.Tx) (*models.Lock, error) {
 		ldb.logger.Error("failed-to-fetch-lock-details", err)
 		return &models.Lock{}, err
 	}
+	ttl := time.Duration(ttlSec) * time.Second
 	fetchedLock := &models.Lock{Owner: owner, LastModifiedTimestamp: timestamp, Ttl: ttl}
 	return fetchedLock, nil
 }
@@ -175,7 +176,7 @@ func (ldb *LockSQLDB) Lock(lock *models.Lock) (bool, error) {
 				isLockAcquired = false
 				return err
 			}
-			if lastUpdatedTimestamp.Add(time.Second * fetchedLock.Ttl).Before(currentTimestamp) {
+			if lastUpdatedTimestamp.Add(fetchedLock.Ttl).Before(currentTimestamp) {
 				ldb.logger.Info("lock-expired", lager.Data{"Owner": fetchedLock.Owner})
 				err = ldb.remove(fetchedLock.Owner, tx)
 				if err != nil {
