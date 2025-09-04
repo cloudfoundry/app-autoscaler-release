@@ -99,7 +99,7 @@ func getStartAndEndTime(location *time.Location, offset, duration time.Duration)
 func DeletePolicyWithAPI(appGUID string) {
 	By(fmt.Sprintf("Deleting policy using api for appguid :'%s'", appGUID))
 	oauthToken := OauthToken(cfg)
-	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
+	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.ReplaceAll(PolicyPath, "{appId}", appGUID))
 	req, err := http.NewRequest(http.MethodDelete, policyURL, nil)
 	Expect(err).ShouldNot(HaveOccurred())
 	req.Header.Add("Authorization", oauthToken)
