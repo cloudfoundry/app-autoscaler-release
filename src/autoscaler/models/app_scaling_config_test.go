@@ -33,7 +33,7 @@ var _ = Describe("AppScalingConfig", func() {
 
 			It("should create app scaling config with default policy", func() {
 				Expect(appScalingCfg).NotTo(BeNil())
-				Expect(appScalingCfg.GetConfiguration()).To(Equal(config))
+				Expect(appScalingCfg.GetConfiguration()).To(Equal(&config))
 				Expect(appScalingCfg.GetScalingPolicy()).NotTo(BeNil())
 				Expect(appScalingCfg.GetScalingPolicy().GetPolicyDefinition()).To(BeNil())
 			})
@@ -61,7 +61,7 @@ var _ = Describe("AppScalingConfig", func() {
 
 			It("should create app scaling config with provided policy", func() {
 				Expect(appScalingCfg).NotTo(BeNil())
-				Expect(appScalingCfg.GetConfiguration()).To(Equal(config))
+				Expect(appScalingCfg.GetConfiguration()).To(Equal(&config))
 				Expect(appScalingCfg.GetScalingPolicy()).NotTo(BeNil())
 				Expect(appScalingCfg.GetScalingPolicy().GetPolicyDefinition()).NotTo(BeNil())
 				Expect(appScalingCfg.GetScalingPolicy().GetCustomMetricsStrategy()).To(Equal(CustomMetricsBoundApp))
