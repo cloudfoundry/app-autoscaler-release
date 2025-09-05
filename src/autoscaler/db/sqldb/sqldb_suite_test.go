@@ -360,21 +360,22 @@ func createLockTable() error {
 func validateLockInDB(ownerid string, expectedLock *models.Lock) error {
 	var (
 		timestamp time.Time
-		ttl       time.Duration
+		ttlSec    int64
 		owner     string
 	)
 	query := dbHelper.Rebind(fmt.Sprintf("SELECT owner,lock_timestamp,ttl FROM %s WHERE owner=?", lockTable))
 	row := dbHelper.QueryRow(query, ownerid)
-	err := row.Scan(&owner, &timestamp, &ttl)
+	err := row.Scan(&owner, &timestamp, &ttlSec)
 	if err != nil {
 		return err
 	}
+	ttl := time.Duration(ttlSec) * time.Second
 	errMsg := ""
 	if expectedLock.Owner != owner {
 		errMsg += fmt.Sprintf("mismatch owner (%s, %s),", expectedLock.Owner, owner)
 	}
-	if expectedLock.Ttl != time.Second*ttl {
-		errMsg += fmt.Sprintf("mismatch ttl (%d, %d),", expectedLock.Ttl, time.Second*ttl)
+	if expectedLock.Ttl != ttl {
+		errMsg += fmt.Sprintf("mismatch ttl (%d, %d),", expectedLock.Ttl, ttl)
 	}
 	if errMsg != "" {
 		return errors.New(errMsg)
@@ -385,11 +386,11 @@ func validateLockInDB(ownerid string, expectedLock *models.Lock) error {
 func validateLockNotInDB(owner string) error {
 	var (
 		timestamp time.Time
-		ttl       time.Duration
+		ttlSec    int64
 	)
 	query := dbHelper.Rebind(fmt.Sprintf("SELECT owner,lock_timestamp,ttl FROM %s WHERE owner=?", lockTable))
 	row := dbHelper.QueryRow(query, owner)
-	err := row.Scan(&owner, &timestamp, &ttl)
+	err := row.Scan(&owner, &timestamp, &ttlSec)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil
