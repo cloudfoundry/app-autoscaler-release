@@ -4,8 +4,8 @@ MAINTAINER autoscaler-team
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/London"
 
 RUN apt-get update && \
-    apt-get -qqy install --fix-missing gnupg apt-transport-https wget && \
-    apt-get clean
+	apt-get -qqy install --fix-missing gnupg apt-transport-https wget && \
+	apt-get clean
 
 RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add - && \
 	  echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list && \
@@ -53,16 +53,16 @@ ARG GO_VERSION=1.24.3
 ENV GOPATH $HOME/go
 ENV PATH $HOME/go/bin:/usr/local/go/bin:$PATH
 RUN wget -q https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz -P /tmp &&\
-    tar xzvf /tmp/go${GO_VERSION}.linux-amd64.tar.gz -C /usr/local &&\
-    mkdir $GOPATH &&\
-    rm -rf /tmp/* &&\
-    go version
+	tar xzvf /tmp/go${GO_VERSION}.linux-amd64.tar.gz -C /usr/local &&\
+	mkdir $GOPATH &&\
+	rm -rf /tmp/* &&\
+	go version
 
 ARG POSTGRES_VERSION=12
 RUN apt-get update && \
-    apt-get install -y postgresql-${POSTGRES_VERSION} && \
-    apt-get install -y libjson-perl && \
-    apt-get clean
+	apt-get install -y postgresql-${POSTGRES_VERSION} && \
+	apt-get install -y libjson-perl && \
+	apt-get clean
 
 # Install bosh_cli
 # renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
@@ -90,22 +90,22 @@ RUN wget -q https://github.com/cloudfoundry/credhub-cli/releases/download/${CRED
 
 # Install uaac
 RUN gem install cf-uaac &&\
-    uaac --version
+	uaac --version
 
 # Install jq as a nice to have on container debugging
 # renovate: datasource=github-releases depName=jq lookupName=stedolan/jq
 ARG JQ_VERSION=jq-1.6
 RUN wget -q https://github.com/stedolan/jq/releases/download/${JQ_VERSION}/jq-linux64 && \
-    mv jq-linux64 /usr/local/bin/jq && \
-    chmod +x /usr/local/bin/jq &&\
-    jq --version
+	mv jq-linux64 /usr/local/bin/jq && \
+	chmod +x /usr/local/bin/jq &&\
+	jq --version
 
 # install yq
 # renovate: datasource=github-releases depName=yq lookupName=mikefarah/yq
 ARG YQ_VERSION=v4.45.4
 RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 && \
-    chmod a+x /usr/local/bin/yq && \
-    yq --version
+	chmod a+x /usr/local/bin/yq && \
+	yq --version
 
 # get maven
 # renovate: datasource=maven depName=org.apache.maven:maven-core
@@ -116,13 +116,13 @@ RUN wget --no-verbose -O /tmp/apache-maven-${MAVEN_VERSION}.tar.gz http://archiv
 	ln -s /opt/apache-maven-${MAVEN_VERSION} /opt/maven && \
 	ln -s /opt/maven/bin/mvn /usr/local/bin && \
 	rm -rf /tmp/* &&\
-    mvn --version
+	mvn --version
 
 # install postgres
 ENV PGDATA /var/lib/postgresql/${POSTGRES_VERSION}/main
 ENV PGCONFIG /etc/postgresql/${POSTGRES_VERSION}/main
 RUN sed -i 's/peer/trust/' ${PGCONFIG}/pg_hba.conf \
-  	&& sed -i 's/md5/trust/' ${PGCONFIG}/pg_hba.conf
+	&& sed -i 's/md5/trust/' ${PGCONFIG}/pg_hba.conf
 
 # Install gcloud
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
@@ -135,15 +135,15 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
 # renovate: datasource=github-releases depName=ginkgo lookupName=onsi/ginkgo
 ARG GINKGO_VERSION=v2.23.4
 RUN go install github.com/onsi/ginkgo/v2/ginkgo@${GINKGO_VERSION} && \
-    ginkgo version
+	ginkgo version
 
 ARG NODE_VERSION=18
 RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
-    && apt-get update -y \
-    && apt install nodejs -y \
-    && apt-get clean \
-    && npm --version \
-    && node -v
+	&& apt-get update -y \
+	&& apt install nodejs -y \
+	&& apt-get clean \
+	&& npm --version \
+	&& node -v
 
 # Install swagger-cli as described on <https://apitools.dev/swagger-cli>
 RUN npm install --global --ignore-scripts 'https://github.com/empire-medical/swagger-cli'
@@ -160,8 +160,8 @@ RUN wget -q https://github.com/SAP/cloud-mta-build-tool/releases/download/v1.2.3
 
 ENV CF_PLUGIN_HOME "/cf_plugins"
 RUN mkdir -p "${CF_PLUGIN_HOME}" \
-    && cf install-plugin -f -r CF-Community app-autoscaler-plugin \
-    && cf install-plugin -f -r CF-Community multiapps \
-    && echo "${CF_PLUGIN_HOME}" \
-    && ls -la "${CF_PLUGIN_HOME}" \
-    && cf plugins
+	&& cf install-plugin -f -r CF-Community app-autoscaler-plugin \
+	&& cf install-plugin -f -r CF-Community multiapps \
+	&& echo "${CF_PLUGIN_HOME}" \
+	&& ls -la "${CF_PLUGIN_HOME}" \
+	&& cf plugins
