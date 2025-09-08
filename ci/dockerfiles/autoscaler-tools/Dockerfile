@@ -8,38 +8,41 @@ RUN apt-get update && \
     apt-get clean
 
 RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add - && \
-      echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list && \
-      wget -q -O - https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
-      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+	  echo "deb https://packages.cloudfoundry.org/debian stable main" | tee /etc/apt/sources.list.d/cloudfoundry-cli.list && \
+	  wget -q -O - https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+	  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
 
-RUN apt-get update && \
-    apt-get -qqy install --fix-missing \
-            file \
-            lsb-release \
-            build-essential \
-            inetutils-ping \
-            vim \
-            curl \
-            libcurl4-openssl-dev \
-            git \
-            wget \
-            runit \
-            openssl \
-            unzip \
-            gcc \
-            openjdk-21-jdk \
-            zip \
-            ruby \
-            ruby-dev \
-            python3 \
-            ca-certificates \
-            cf8-cli \
-            gnupg \
-            gnupg2 \
-            gh  \
-            make \
-            mysql-client && \
-    apt-get clean
+RUN <<EOF
+	apt-get update
+	apt-get -qqy install --fix-missing \
+		file \
+		lsb-release \
+		build-essential \
+		inetutils-ping \
+		vim \
+		curl \
+		libcurl4-openssl-dev \
+		git \
+		wget \
+		runit \
+		openssl \
+		unzip \
+		gcc \
+		openjdk-21-jdk \
+		zip \
+		ruby \
+		ruby-dev \
+		python3 \
+		ca-certificates \
+		cf8-cli \
+		gnupg \
+		gnupg2 \
+		gh \
+		make \
+		xq \
+		mysql-client
+	apt-get clean
+EOF
 
 RUN wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O- | apt-key add -
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | tee /etc/apt/sources.list.d/postgresql.list
