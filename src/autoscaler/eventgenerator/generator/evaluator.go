@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strconv"
 	"time"
 
@@ -24,7 +25,7 @@ type Evaluator struct {
 	logger                    lager.Logger
 	httpClient                *http.Client
 	scalingEngineUrl          string
-	triggerChan               chan []*models.Trigger
+	triggerChan               chan *models.DynamicScalingRules
 	doneChan                  chan bool
 	defaultBreachDurationSecs int
 	queryAppMetrics           aggregator.QueryAppMetricsFunc
@@ -32,7 +33,7 @@ type Evaluator struct {
 	setCoolDownExpired        func(string, int64)
 }
 
-func NewEvaluator(logger lager.Logger, httpClient *http.Client, scalingEngineUrl string, triggerChan chan []*models.Trigger,
+func NewEvaluator(logger lager.Logger, httpClient *http.Client, scalingEngineUrl string, triggerChan chan *models.DynamicScalingRules,
 	defaultBreachDurationSecs int, queryAppMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) *Evaluator {
 	return &Evaluator{
 		logger:                    logger.Session("Evaluator"),
@@ -57,8 +58,8 @@ func (e *Evaluator) start() {
 		select {
 		case <-e.doneChan:
 			return
-		case triggerArray := <-e.triggerChan:
-			e.doEvaluate(triggerArray)
+		case dynamicScalingRules := <-e.triggerChan:
+			e.doEvaluate(dynamicScalingRules)
 		}
 	}
 }
@@ -69,18 +70,45 @@ func (e *Evaluator) Stop() {
 	e.logger.Info("stopped")
 }
 
-func (e *Evaluator) doEvaluate(triggerArray []*models.Trigger) {
-	for _, trigger := range triggerArray {
+func (e *Evaluator) filterOutInvalidTriggers(rules *models.DynamicScalingRules) {
+	validTriggers := rules.Triggers[:0]
+	for _, trigger := range rules.Triggers {
 		if trigger.BreachDurationSeconds <= 0 {
 			trigger.BreachDurationSeconds = e.defaultBreachDurationSecs
 		}
-		threshold := trigger.Threshold
-		operator := trigger.Operator
-		if !e.isValidOperator(operator) {
+		if !e.hasValidOperator(trigger) {
 			e.logger.Error("operator-is-invalid", nil, lager.Data{"trigger": trigger})
 			continue
 		}
+		validTriggers = append(validTriggers, trigger)
+	}
+	rules.Triggers = validTriggers
+}
 
+func (e *Evaluator) doEvaluate(rules *models.DynamicScalingRules) {
+	e.filterOutInvalidTriggers(rules)
+	if rules.ScalingRuleEvaluation == models.BiasedToScaleOut {
+		slices.SortStableFunc(rules.Triggers, func(a, b *models.Trigger) int {
+			adj1, err1 := models.ParseAdjustment(a.Adjustment)
+			if err1 != nil {
+				e.logger.Error("do-evaluate", err1)
+			}
+
+			adj2, err2 := models.ParseAdjustment(b.Adjustment)
+			if err2 != nil {
+				e.logger.Error("do-evaluate", err2)
+			}
+
+			// sort in descending order, so that the biggest scale out adjustment is evaluated first
+			return -models.CompareAdjustments(adj1, adj2)
+		})
+	}
+
+	e.evaluateFirstMatching(rules)
+}
+
+func (e *Evaluator) evaluateFirstMatching(rules *models.DynamicScalingRules) {
+	for _, trigger := range rules.Triggers {
 		appMetricList, err := e.retrieveAppMetrics(trigger)
 		if err != nil {
 			continue
@@ -90,67 +118,71 @@ func (e *Evaluator) doEvaluate(triggerArray []*models.Trigger) {
 			continue
 		}
 
-		isBreached, appMetric := checkForBreach(appMetricList, e, trigger, operator, threshold)
-
-		if isBreached {
+		if e.isBreached(trigger, appMetricList) {
 			trigger.MetricUnit = appMetricList[0].Unit
-			e.logger.Info("send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "last_metric": appMetric})
-
-			if appBreaker := e.getBreaker(trigger.AppId); appBreaker != nil {
-				if appBreaker.Tripped() {
-					e.logger.Info("circuit-tripped", lager.Data{"appId": trigger.AppId, "consecutiveFailures": appBreaker.ConsecFailures()})
-				}
-				err = appBreaker.Call(func() error { return e.sendTriggerAlarm(trigger) }, 0)
-				if err != nil {
-					e.logger.Error("circuit-alarm-failed", err, lager.Data{"appId": trigger.AppId})
-				}
-			} else {
-				err = e.sendTriggerAlarm(trigger)
-				if err != nil {
-					e.logger.Error("circuit-alarm-failed", err, lager.Data{"appId": trigger.AppId})
-				}
-			}
+			e.logger.Info("send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "last_metric": appMetricList[len(appMetricList)-1]})
+			e.sendToScalingEngine(trigger)
 			return
 		}
 	}
 }
 
-func checkForBreach(appMetricList []*models.AppMetric, e *Evaluator, trigger *models.Trigger, operator string, threshold int64) (bool, *models.AppMetric) {
+func (e *Evaluator) sendToScalingEngine(trigger *models.Trigger) {
+	if appBreaker := e.getBreaker(trigger.AppId); appBreaker != nil {
+		if appBreaker.Tripped() {
+			e.logger.Info("circuit-tripped", lager.Data{"appId": trigger.AppId, "consecutiveFailures": appBreaker.ConsecFailures()})
+		}
+		err := appBreaker.Call(func() error { return e.sendTriggerAlarm(trigger) }, 0)
+		if err != nil {
+			e.logger.Error("circuit-alarm-failed", err, lager.Data{"appId": trigger.AppId})
+		}
+	} else {
+		err := e.sendTriggerAlarm(trigger)
+		if err != nil {
+			e.logger.Error("circuit-alarm-failed", err, lager.Data{"appId": trigger.AppId})
+		}
+	}
+}
+
+func (e *Evaluator) isBreached(trigger *models.Trigger, appMetricList []*models.AppMetric) bool {
+	operator := trigger.Operator
+	threshold := trigger.Threshold
+
 	var appMetric *models.AppMetric
 	for _, appMetric = range appMetricList {
 		if appMetric.Value == "" {
 			e.logger.Debug("should not send trigger alarm to scaling engine because there is empty value metric", lager.Data{"trigger": trigger, "appMetric": appMetric})
-			return false, appMetric
+			return false
 		}
 		value, err := strconv.ParseInt(appMetric.Value, 10, 64)
 		if err != nil {
 			e.logger.Debug("should not send trigger alarm to scaling engine because parse metric value fails", lager.Data{"trigger": trigger, "appMetric": appMetric})
-			return false, appMetric
+			return false
 		}
 		switch operator {
 		case ">":
 			if value <= threshold {
 				e.logger.Debug("should not send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "appMetric": appMetric})
-				return false, appMetric
+				return false
 			}
 		case ">=":
 			if value < threshold {
 				e.logger.Debug("should not send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "appMetric": appMetric})
-				return false, appMetric
+				return false
 			}
 		case "<":
 			if value >= threshold {
 				e.logger.Debug("should not send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "appMetric": appMetric})
-				return false, appMetric
+				return false
 			}
 		case "<=":
 			if value > threshold {
 				e.logger.Debug("should not send trigger alarm to scaling engine", lager.Data{"trigger": trigger, "appMetric": appMetric})
-				return false, appMetric
+				return false
 			}
 		}
 	}
-	return true, appMetric
+	return true
 }
 
 func (e *Evaluator) retrieveAppMetrics(trigger *models.Trigger) ([]*models.AppMetric, error) {
@@ -203,7 +235,7 @@ func (e *Evaluator) sendTriggerAlarm(trigger *models.Trigger) error {
 		return err
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -228,9 +260,9 @@ func (e *Evaluator) sendTriggerAlarm(trigger *models.Trigger) error {
 	return err
 }
 
-func (e *Evaluator) isValidOperator(operator string) bool {
+func (e *Evaluator) hasValidOperator(trigger *models.Trigger) bool {
 	for _, o := range validOperators {
-		if o == operator {
+		if o == trigger.Operator {
 			return true
 		}
 	}

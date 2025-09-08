@@ -78,7 +78,7 @@ func main() {
 	//appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, conf.Pool.TotalInstances, conf.Pool.InstanceIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
 	appManager := aggregator.NewAppManager(logger, egClock, *conf.Aggregator, *conf.Pool, policyDb, appMetricDB)
 
-	triggersChan := make(chan []*models.Trigger, conf.Evaluator.TriggerArrayChannelSize)
+	triggersChan := make(chan *models.DynamicScalingRules, conf.Evaluator.TriggerArrayChannelSize)
 
 	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, appManager.GetPolicies, *conf.CircuitBreaker)
 	if err != nil {
@@ -180,7 +180,7 @@ func runFunc(appManager *aggregator.AppManager, evaluators []*generator.Evaluato
 	}
 }
 
-func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan chan []*models.Trigger, queryMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) ([]*generator.Evaluator, error) {
+func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan chan *models.DynamicScalingRules, queryMetrics aggregator.QueryAppMetricsFunc, getBreaker func(string) *circuit.Breaker, setCoolDownExpired func(string, int64)) ([]*generator.Evaluator, error) {
 	count := conf.Evaluator.EvaluatorCount
 
 	seClient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
