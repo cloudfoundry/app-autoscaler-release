@@ -29,7 +29,7 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:eb5e8c7074c444fe3e33a24802a16349884ccbe8c11fa58de40a1345d4372125
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:8c855fe84767f10077cfddd06e9653c45c3989c490460894fe65077f597cc8e3
 
     permissions:
       actions: read
@@ -51,7 +51,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3
+      uses: github/codeql-action/init@d3678e237b9c32a6c9bffb3315c335f976f3549f # v3
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -63,4 +63,4 @@ jobs:
       run: make generate-openapi-generated-clients-and-servers scheduler.build
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@3c3833e0f8c1c83d449a7478aa59c036a9165498 # v3
+      uses: github/codeql-action/analyze@d3678e237b9c32a6c9bffb3315c335f976f3549f # v3

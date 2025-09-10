@@ -19,7 +19,7 @@ jobs:
     name: Manifest Tests
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:eb5e8c7074c444fe3e33a24802a16349884ccbe8c11fa58de40a1345d4372125
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:8c855fe84767f10077cfddd06e9653c45c3989c490460894fe65077f597cc8e3
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
