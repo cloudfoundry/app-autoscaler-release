@@ -1939,6 +1939,54 @@
         }
       }
     },
+    "rubyPackages.cf-uaac@latest": {
+      "last_modified": "2025-07-28T17:09:23Z",
+      "resolved": "github:NixOS/nixpkgs/648f70160c03151bc2121d179291337ad6bc564b#rubyPackages.cf-uaac",
+      "source": "devbox-search",
+      "version": "4.28.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7hzfldhb0xlfm7aq8rkgwrxhgh9gskpx-ruby3.3-cf-uaac-4.28.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7hzfldhb0xlfm7aq8rkgwrxhgh9gskpx-ruby3.3-cf-uaac-4.28.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/awc6828f8qsd5dk7di9grzxm79z5553r-ruby3.3-cf-uaac-4.28.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/awc6828f8qsd5dk7di9grzxm79z5553r-ruby3.3-cf-uaac-4.28.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7azn1k1jdflm5xbfgk1cn6raf5v66xgr-ruby3.3-cf-uaac-4.28.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7azn1k1jdflm5xbfgk1cn6raf5v66xgr-ruby3.3-cf-uaac-4.28.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/w9ly99pml0zcbvl9arrknfq83n1hlbc4-ruby3.3-cf-uaac-4.28.0",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/w9ly99pml0zcbvl9arrknfq83n1hlbc4-ruby3.3-cf-uaac-4.28.0"
+        }
+      }
+    },
     "shellcheck@0.10.0": {
       "last_modified": "2025-07-13T22:45:35Z",
       "resolved": "github:NixOS/nixpkgs/a421ac6595024edcfbb1ef950a3712b89161c359#shellcheck",
