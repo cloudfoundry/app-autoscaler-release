@@ -3,10 +3,11 @@ package main
 import (
 	"changelog/display"
 	"changelog/github"
-	"code.cloudfoundry.org/lager/v3"
 	"flag"
 	"fmt"
 	"os"
+
+	"code.cloudfoundry.org/lager/v3"
 )
 
 type cliOpts struct {
