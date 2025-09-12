@@ -136,7 +136,7 @@ test: generate-fakes
 	APP_AUTOSCALER_TEST_RUN='true' ginkgo -p ${GINKGO_OPTS} ${TEST} --skip-package='integration'
 
 .PHONY: testsuite
-testsuite: build-gorouterproxy
+testsuite: build-gorouterproxy generate-fakes
 	@echo " - using DBURL=${DBURL} TEST=${TEST}"
 	APP_AUTOSCALER_TEST_RUN='true' ginkgo -p ${GINKGO_OPTS} ${TEST}
 
