@@ -1,11 +1,10 @@
 { buildGoModule
-, buildGo123Module
 , callPackage
 , fetchFromGitHub
 , fetchgit
 , lib
 }: {
-  app-autoscaler-cli-plugin = buildGo123Module rec {
+  app-autoscaler-cli-plugin = buildGoModule rec {
     pname = "app-autoscaler-cli-plugin";
 
     major = "4";
