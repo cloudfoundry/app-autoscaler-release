@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/app"
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -18,8 +17,6 @@ import (
 func main() {
 	logger := createLogger()
 	sugar := logger.Sugar()
-
-	gin.SetMode(gin.ReleaseMode)
 
 	address := os.Getenv("SERVER_ADDRESS") + ":" + getPort(sugar)
 	sugar.Infof("Starting test-app : %s\n", address)

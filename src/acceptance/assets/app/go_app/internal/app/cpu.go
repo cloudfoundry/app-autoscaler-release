@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
 )
 
@@ -25,41 +24,39 @@ type ConcurrentBusyLoopCPUWaster struct {
 
 var _ CPUWaster = &ConcurrentBusyLoopCPUWaster{}
 
-func CPUTests(logger logr.Logger, r *gin.RouterGroup, cpuTest CPUWaster) *gin.RouterGroup {
-	r.GET("/:utilization/:minutes", func(c *gin.Context) {
+func CPUTests(logger logr.Logger, mux *http.ServeMux, cpuTest CPUWaster) {
+	mux.HandleFunc("GET /cpu/{utilization}/{minutes}", func(w http.ResponseWriter, r *http.Request) {
 		if cpuTest.IsRunning() {
-			Error(c, http.StatusConflict, "CPU test is already running")
+			Error(w, http.StatusConflict, "CPU test is already running")
 			return
 		}
 		var utilization int64
 		var minutes int64
 		var err error
-		utilization, err = strconv.ParseInt(c.Param("utilization"), 10, 64)
+		utilization, err = strconv.ParseInt(r.PathValue("utilization"), 10, 64)
 		if err != nil {
-			Error(c, http.StatusBadRequest, "invalid utilization: %s", err.Error())
+			Error(w, http.StatusBadRequest, "invalid utilization: %s", err.Error())
 			return
 		}
-		if minutes, err = strconv.ParseInt(c.Param("minutes"), 10, 64); err != nil {
-			Error(c, http.StatusBadRequest, "invalid minutes: %s", err.Error())
+		if minutes, err = strconv.ParseInt(r.PathValue("minutes"), 10, 64); err != nil {
+			Error(w, http.StatusBadRequest, "invalid minutes: %s", err.Error())
 			return
 		}
 		duration := time.Duration(minutes) * time.Minute
 		go func() {
 			cpuTest.UseCPU(utilization, duration)
 		}()
-		c.JSON(http.StatusOK, gin.H{"utilization": utilization, "minutes": minutes})
+		writeJSON(w, http.StatusOK, JSONResponse{"utilization": utilization, "minutes": minutes})
 	})
 
-	r.GET("/close", func(c *gin.Context) {
-		if cpuTest.IsRunning() {
-			logger.Info("stop CPU test")
-			cpuTest.StopTest()
-			c.JSON(http.StatusOK, gin.H{"status": "close cpu test"})
-		} else {
-			Error(c, http.StatusBadRequest, "CPU test not running")
+	mux.HandleFunc("GET /cpu/stop", func(w http.ResponseWriter, r *http.Request) {
+		if !cpuTest.IsRunning() {
+			Error(w, http.StatusConflict, "CPU test is not running")
+			return
 		}
+		cpuTest.StopTest()
+		writeJSON(w, http.StatusOK, JSONResponse{"message": "Stopped CPU test"})
 	})
-	return r
 }
 
 func (m *ConcurrentBusyLoopCPUWaster) UseCPU(utilisation int64, duration time.Duration) {
