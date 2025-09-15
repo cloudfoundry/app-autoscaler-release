@@ -85,6 +85,11 @@ func (c *Config) SetLoggingLevel() {
 	c.Logging.Level = strings.ToLower(c.Logging.Level)
 }
 
+// GetLogging returns the logging configuration
+func (c *Config) GetLogging() *helpers.LoggingConfig {
+	return &c.Logging
+}
+
 func defaultConfig() Config {
 	return Config{
 		CF: cf.Config{

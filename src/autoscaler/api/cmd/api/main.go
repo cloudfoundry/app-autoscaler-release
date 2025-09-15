@@ -8,7 +8,6 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/publicapiserver"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cred_helper"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
@@ -21,18 +20,12 @@ import (
 	"github.com/tedsuo/ifrit/grouper"
 )
 
-type configLoader struct{}
-
-func (c *configLoader) LoadConfig(path string, vcapConfigReader configutil.VCAPConfigurationReader) (*config.Config, error) {
-	return config.LoadConfig(path, vcapConfigReader)
-}
-
 func main() {
 	path := startup.ParseFlags()
-	
+
 	vcapConfiguration, _ := startup.LoadVCAPConfiguration()
-	
-	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, &configLoader{})
+
+	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, config.LoadConfig)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -40,8 +33,6 @@ func main() {
 	startup.SetupEnvironment()
 
 	logger := startup.InitLogger(&conf.Logging, "api")
-
-	members := grouper.Members{}
 
 	policyDb := sqldb.CreatePolicyDb(conf.Db[db.PolicyDb], logger)
 	defer func() { _ = policyDb.Close() }()
@@ -86,11 +77,12 @@ func main() {
 	unifiedServer, err := publicApiServer.CreateCFServer()
 	startup.ExitOnError(err, logger, "failed to create public api http server")
 
+	members := grouper.Members{}
 	members = append(members,
-		grouper.Member{"public_api_http_server", mtlsServer},
-		grouper.Member{"broker", brokerHttpServer},
-		grouper.Member{"health_server", healthServer},
-		grouper.Member{"unified_server", unifiedServer},
+		grouper.Member{Name: "public_api_http_server", Runner: mtlsServer},
+		grouper.Member{Name: "broker", Runner: brokerHttpServer},
+		grouper.Member{Name: "health_server", Runner: healthServer},
+		grouper.Member{Name: "unified_server", Runner: unifiedServer},
 	)
 
 	err = startup.StartServices(logger, members)
@@ -98,4 +90,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-

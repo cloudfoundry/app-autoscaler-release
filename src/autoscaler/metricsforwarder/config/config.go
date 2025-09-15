@@ -184,3 +184,8 @@ func (c *Config) validateCredHelperImpl() error {
 func (c *Config) UsingSyslog() bool {
 	return c.SyslogConfig.ServerAddress != "" && c.SyslogConfig.Port != 0
 }
+
+// GetLogging returns the logging configuration
+func (c *Config) GetLogging() *helpers.LoggingConfig {
+	return &c.Logging
+}

@@ -99,6 +99,11 @@ func (c *Config) SetLoggingLevel() {
 	c.Logging.Level = strings.ToLower(c.Logging.Level)
 }
 
+// GetLogging returns the logging configuration
+func (c *Config) GetLogging() *helpers.LoggingConfig {
+	return &c.Logging
+}
+
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	return configutil.GenericLoadConfig(filepath, vcapReader, defaultConfig, configutil.VCAPConfigurableFunc[Config](LoadVcapConfig))
 }

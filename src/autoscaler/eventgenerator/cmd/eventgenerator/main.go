@@ -3,9 +3,7 @@ package main
 import (
 	"os"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/aggregator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/eventgenerator/generator"
@@ -22,52 +20,33 @@ import (
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager/v3"
 	"github.com/tedsuo/ifrit"
-	"github.com/tedsuo/ifrit/grouper"
 )
 
-type configLoader struct{}
-
-func (c *configLoader) LoadConfig(path string, vcapConfigReader configutil.VCAPConfigurationReader) (*config.Config, error) {
-	return config.LoadConfig(path, vcapConfigReader)
-}
-
 func main() {
-	path := startup.ParseFlags()
-	
-	vcapConfiguration, _ := startup.LoadVCAPConfiguration()
-	
-	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, &configLoader{})
-	if err != nil {
-		os.Exit(1)
-	}
+	conf, logger := startup.Bootstrap("eventgenerator", config.LoadConfig)
 
-	startup.SetupEnvironment()
+	clock := clock.NewClock()
 
-	logger := startup.InitLogger(&conf.Logging, "eventgenerator")
+	// Database connections
+	appMetricDB := startup.CreateAppMetricDB(conf.Db[db.AppMetricsDb], logger)
+	defer func() { _ = appMetricDB.Closer() }()
 
-	egClock := clock.NewClock()
+	policyDb := startup.CreatePolicyDB(conf.Db[db.PolicyDb], logger)
+	defer func() { _ = policyDb.Closer() }()
 
-	appMetricDB, err := sqldb.NewAppMetricSQLDB(conf.Db[db.AppMetricsDb], logger.Session("appMetric-db"))
-	startup.ExitOnError(err, logger, "failed to connect app-metric database", lager.Data{"dbConfig": conf.Db[db.AppMetricsDb]})
-	defer func() { _ = appMetricDB.Close() }()
-
-	policyDb := sqldb.CreatePolicyDb(conf.Db[db.PolicyDb], logger)
-	defer func() { _ = policyDb.Close() }()
-
+	// Setup components
 	httpStatusCollector := healthendpoint.NewHTTPStatusCollector("autoscaler", "eventgenerator")
 	promRegistry := prometheus.NewRegistry()
 	healthendpoint.RegisterCollectors(promRegistry, []prometheus.Collector{
-		healthendpoint.NewDatabaseStatusCollector("autoscaler", "eventgenerator", "appMetricDB", appMetricDB),
-		healthendpoint.NewDatabaseStatusCollector("autoscaler", "eventgenerator", "policyDB", policyDb),
+		healthendpoint.NewDatabaseStatusCollector("autoscaler", "eventgenerator", "appMetricDB", appMetricDB.DB),
+		healthendpoint.NewDatabaseStatusCollector("autoscaler", "eventgenerator", "policyDB", policyDb.DB),
 		httpStatusCollector,
 	}, true, logger.Session("eventgenerator-prometheus"))
 
-	//appManager := aggregator.NewAppManager(logger, egClock, conf.Aggregator.PolicyPollerInterval, conf.Pool.TotalInstances, conf.Pool.InstanceIndex, conf.Aggregator.MetricCacheSizePerApp, policyDb, appMetricDB)
-	appManager := aggregator.NewAppManager(logger, egClock, *conf.Aggregator, *conf.Pool, policyDb, appMetricDB)
-
+	appManager := aggregator.NewAppManager(logger, clock, *conf.Aggregator, *conf.Pool, policyDb.DB, appMetricDB.DB)
 	triggersChan := make(chan []*models.Trigger, conf.Evaluator.TriggerArrayChannelSize)
 
-	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, appManager.GetPolicies, *conf.CircuitBreaker)
+	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, clock, triggersChan, appManager.GetPolicies, *conf.CircuitBreaker)
 	startup.ExitOnError(err, logger, "failed to create Evaluation Manager")
 
 	evaluators, err := createEvaluators(logger, conf, triggersChan, appManager.QueryAppMetrics, evaluationManager.GetBreaker, evaluationManager.SetCoolDownExpired)
@@ -82,37 +61,23 @@ func main() {
 
 	metricPollers, err := createMetricPollers(logger, conf, appMonitorsChan, appMetricChan, metricFetcher)
 	startup.ExitOnError(err, logger, "failed to create MetricPoller")
-	
-	anAggregator, err := aggregator.NewAggregator(logger, egClock, conf.Aggregator.AggregatorExecuteInterval, conf.Aggregator.SaveInterval, appMonitorsChan, appManager.GetPolicies, appManager.SaveMetricToCache, conf.DefaultStatWindowSecs, appMetricChan, appMetricDB)
+
+	anAggregator, err := aggregator.NewAggregator(logger, clock, conf.Aggregator.AggregatorExecuteInterval, conf.Aggregator.SaveInterval, appMonitorsChan, appManager.GetPolicies, appManager.SaveMetricToCache, conf.DefaultStatWindowSecs, appMetricChan, appMetricDB.DB)
 	startup.ExitOnError(err, logger, "failed to create Aggregator")
 
 	eventGenerator := ifrit.RunFunc(runFunc(appManager, evaluators, evaluationManager, metricPollers, anAggregator))
 
-	eventgeneratorServer := server.NewServer(
-		logger.Session("http_server"), conf, appMetricDB,
-		policyDb, appManager.QueryAppMetrics, httpStatusCollector)
-
-	mtlsServer, err := eventgeneratorServer.CreateMtlsServer()
-	startup.ExitOnError(err, logger, "failed to create http server")
-
-	healthServer, err := eventgeneratorServer.CreateHealthServer()
-	startup.ExitOnError(err, logger, "failed to create health server")
-
+	// Server setup
+	eventgeneratorServer := server.NewServer(logger.Session("http_server"), conf, appMetricDB.DB, policyDb.DB, appManager.QueryAppMetrics, httpStatusCollector)
 	xm := auth.NewXfccAuthMiddleware(logger, conf.CFServer.XFCC)
-	cfServer, err := eventgeneratorServer.CreateCFServer(xm)
-	startup.ExitOnError(err, logger, "failed to create cf server")
 
-	members := grouper.Members{
-		{Name: "eventGenerator", Runner: eventGenerator},
-		{Name: "https_server", Runner: mtlsServer},
-		{Name: "health_server", Runner: healthServer},
-		{Name: "cf_server", Runner: cfServer},
-	}
-
-	err = startup.StartServices(logger, members)
-	if err != nil {
-		os.Exit(1)
-	}
+	// Start services
+	startup.StartService(logger,
+		startup.Server("eventGenerator", func() (ifrit.Runner, error) { return eventGenerator, nil }),
+		startup.Server("https_server", eventgeneratorServer.CreateMtlsServer),
+		startup.Server("health_server", eventgeneratorServer.CreateHealthServer),
+		startup.Server("cf_server", func() (ifrit.Runner, error) { return eventgeneratorServer.CreateCFServer(xm) }),
+	)
 }
 
 func runFunc(appManager *aggregator.AppManager, evaluators []*generator.Evaluator, evaluationManager *generator.AppEvaluationManager, metricPollers []*aggregator.MetricPoller, anAggregator *aggregator.Aggregator) func(signals <-chan os.Signal, ready chan<- struct{}) error {
@@ -164,4 +129,3 @@ func createMetricPollers(logger lager.Logger, conf *config.Config, appMonitorsCh
 	}
 	return pollers, nil
 }
-

@@ -13,17 +13,16 @@ import (
 	"github.com/tedsuo/ifrit/sigmon"
 )
 
-type ConfigLoader[T any] interface {
-	LoadConfig(path string, vcapConfigReader configutil.VCAPConfigurationReader) (T, error)
-}
-
 type ConfigValidator interface {
 	Validate() error
 }
 
-type LoggerConfigProvider interface {
+type ConfigWithLogging interface {
+	ConfigValidator
 	GetLogging() *helpers.LoggingConfig
 }
+
+type ConfigLoader[T ConfigWithLogging] func(path string, vcapConfigReader configutil.VCAPConfigurationReader) (T, error)
 
 func ParseFlags() string {
 	var path string
@@ -40,9 +39,9 @@ func LoadVCAPConfiguration() (configutil.VCAPConfigurationReader, error) {
 	return vcapConfiguration, err
 }
 
-func LoadAndValidateConfig[T ConfigValidator](path string, vcapConfig configutil.VCAPConfigurationReader, loader ConfigLoader[T]) (T, error) {
+func LoadAndValidateConfig[T ConfigWithLogging](path string, vcapConfig configutil.VCAPConfigurationReader, loader ConfigLoader[T]) (T, error) {
 	var zero T
-	conf, err := loader.LoadConfig(path, vcapConfig)
+	conf, err := loader(path, vcapConfig)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
 		return zero, err
@@ -87,4 +86,20 @@ func ExitOnError(err error, logger lager.Logger, message string, data ...lager.D
 		}
 		os.Exit(1)
 	}
+}
+
+// Bootstrap provides a complete service initialization
+func Bootstrap[T ConfigWithLogging](serviceName string, configLoader ConfigLoader[T]) (T, lager.Logger) {
+	path := ParseFlags()
+	vcapConfiguration, _ := LoadVCAPConfiguration()
+	
+	conf, err := LoadAndValidateConfig(path, vcapConfiguration, configLoader)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	SetupEnvironment()
+	logger := InitLogger(conf.GetLogging(), serviceName)
+	
+	return conf, logger
 }

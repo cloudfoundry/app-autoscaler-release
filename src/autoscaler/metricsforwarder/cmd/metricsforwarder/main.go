@@ -32,7 +32,7 @@ func main() {
 	
 	vcapConfiguration, _ := startup.LoadVCAPConfiguration()
 	
-	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, &configLoader{})
+	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, config.LoadConfig)
 	if err != nil {
 		os.Exit(1)
 	}

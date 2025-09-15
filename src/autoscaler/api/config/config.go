@@ -127,6 +127,11 @@ func (c *Config) SetLoggingLevel() {
 	c.Logging.Level = strings.ToLower(c.Logging.Level)
 }
 
+// GetLogging returns the logging configuration
+func (c *Config) GetLogging() *helpers.LoggingConfig {
+	return &c.Logging
+}
+
 type PlanCheckConfig struct {
 	PlanDefinitions map[string]PlanDefinition `yaml:"plan_definitions" json:"plan_definitions"`
 }

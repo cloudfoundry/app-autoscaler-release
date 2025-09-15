@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
@@ -22,18 +21,12 @@ import (
 	"github.com/tedsuo/ifrit/grouper"
 )
 
-type configLoader struct{}
-
-func (c *configLoader) LoadConfig(path string, vcapConfigReader configutil.VCAPConfigurationReader) (*config.Config, error) {
-	return config.LoadConfig(path, vcapConfigReader)
-}
-
 func main() {
 	path := startup.ParseFlags()
-	
+
 	vcapConfiguration, _ := startup.LoadVCAPConfiguration()
-	
-	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, &configLoader{})
+
+	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, config.LoadConfig)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -61,7 +54,7 @@ func main() {
 
 	scalingEngineHttpclient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
 	startup.ExitOnError(err, logger, "failed to create http client for scalingengine", lager.Data{"scalingengineTLS": conf.ScalingEngine.TLSClientCerts})
-	
+
 	schedulerHttpclient, err := helpers.CreateHTTPSClient(&conf.Scheduler.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scheduler_client"))
 	startup.ExitOnError(err, logger, "failed to create http client for scheduler", lager.Data{"schedulerTLS": conf.Scheduler.TLSClientCerts})
 
@@ -134,4 +127,3 @@ func createPrometheusRegistry(policyDB db.PolicyDB, appMetricsDB db.AppMetricDB,
 	}, true, logger.Session("operator-prometheus"))
 	return promRegistry
 }
-
