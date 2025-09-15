@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 	"time"
 )
 
-func DiskTest(mux *http.ServeMux, diskOccupier DiskOccupier) {
+func DiskTest(logger *slog.Logger, mux *http.ServeMux, diskOccupier DiskOccupier) {
 	mux.HandleFunc("GET /disk/{utilization}/{minutes}", func(w http.ResponseWriter, r *http.Request) {
 		var utilisation int64
 		var minutes int64
@@ -19,28 +20,28 @@ func DiskTest(mux *http.ServeMux, diskOccupier DiskOccupier) {
 
 		utilisation, err = strconv.ParseInt(r.PathValue("utilization"), 10, 64)
 		if err != nil {
-			Error(w, http.StatusBadRequest, "invalid utilization: %s", err.Error())
+			Errorf(logger, w, http.StatusBadRequest, "invalid utilization: %s", err.Error())
 			return
 		}
 		if minutes, err = strconv.ParseInt(r.PathValue("minutes"), 10, 64); err != nil {
-			Error(w, http.StatusBadRequest, "invalid minutes: %s", err.Error())
+			Errorf(logger, w, http.StatusBadRequest, "invalid minutes: %s", err.Error())
 			return
 		}
 		duration := time.Duration(minutes) * time.Minute
 		spaceInMB := utilisation * 1000 * 1000
 		if err = diskOccupier.Occupy(spaceInMB, duration); err != nil {
-			Error(w, http.StatusInternalServerError, "error invoking occupation: %s", err.Error())
+			Errorf(logger, w, http.StatusInternalServerError, "error invoking occupation: %s", err.Error())
 			return
 		}
-		writeJSON(w, http.StatusOK, JSONResponse{"utilization": utilisation, "minutes": minutes})
+		if err := writeJSON(w, http.StatusOK, JSONResponse{"utilization": utilisation, "minutes": minutes}); err != nil {
+			slog.Error("Failed to write JSON response", slog.Any("error", err))
+		}
 	})
 
 	mux.HandleFunc("GET /disk/close", func(w http.ResponseWriter, r *http.Request) {
 		diskOccupier.Stop()
-		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write([]byte("close disk test")); err != nil {
-			// Log error but don't fail the response since headers are already written
+		if err := writeJSON(w, http.StatusOK, JSONResponse{"message": "close disk test"}); err != nil {
+			logger.Error("Failed to write JSON response", slog.Any("error", err))
 		}
 	})
 }

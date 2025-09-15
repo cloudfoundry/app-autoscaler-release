@@ -3,31 +3,29 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"time"
 
-	"github.com/go-logr/zapr"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 // JSONResponse represents a JSON response structure
 type JSONResponse map[string]interface{}
 
 // writeJSON writes a JSON response with the given status code
-func writeJSON(w http.ResponseWriter, statusCode int, data JSONResponse) {
+func writeJSON(w http.ResponseWriter, statusCode int, data JSONResponse) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(data)
+	return json.NewEncoder(w).Encode(data)
 }
 
 // loggingMiddleware provides request logging functionality
-func loggingMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
+func loggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
@@ -35,35 +33,35 @@ func loggingMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
 			// Wrap ResponseWriter to capture status code
 			wrapped := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 
-			fields := []zapcore.Field{
-				zap.String("method", r.Method),
-				zap.String("path", r.URL.Path),
-				zap.String("remote_addr", r.RemoteAddr),
-				zap.String("user_agent", r.UserAgent()),
+			attrs := []slog.Attr{
+				slog.String("method", r.Method),
+				slog.String("path", r.URL.Path),
+				slog.String("remote_addr", r.RemoteAddr),
+				slog.String("user_agent", r.UserAgent()),
 			}
 
 			// Log CF ID
 			if requestID := r.Header.Get("X-Vcap-Request-Id"); requestID != "" {
-				fields = append(fields, zap.String("vcap_request_id", requestID))
+				attrs = append(attrs, slog.String("vcap_request_id", requestID))
 			}
 			if passport := r.Header.Get("SAP-PASSPORT"); passport != "" {
-				fields = append(fields, zap.String("sap_passport", passport))
+				attrs = append(attrs, slog.String("sap_passport", passport))
 			}
 
 			// Support OpenTelemetry trace ID
 			if span := trace.SpanFromContext(r.Context()); span.SpanContext().IsValid() {
-				fields = append(fields, zap.String("w3c_trace-id", span.SpanContext().TraceID().String()))
+				attrs = append(attrs, slog.String("w3c_trace-id", span.SpanContext().TraceID().String()))
 			}
 
 			next.ServeHTTP(wrapped, r)
 
 			duration := time.Since(start)
-			fields = append(fields,
-				zap.Int("status_code", wrapped.statusCode),
-				zap.Duration("duration", duration),
+			attrs = append(attrs,
+				slog.Int("status_code", wrapped.statusCode),
+				slog.Duration("duration", duration),
 			)
 
-			logger.Info("HTTP request", fields...)
+			logger.LogAttrs(r.Context(), slog.LevelInfo, "HTTP request", attrs...)
 		})
 	}
 }
@@ -80,18 +78,18 @@ func (rw *responseWriter) WriteHeader(code int) {
 }
 
 // recoveryMiddleware provides panic recovery functionality
-func recoveryMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
+func recoveryMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if err := recover(); err != nil {
 					logger.Error("Panic recovered",
-						zap.Any("error", err),
-						zap.String("stack", string(debug.Stack())),
-						zap.String("path", r.URL.Path),
-						zap.String("method", r.Method),
+						slog.Any("error", err),
+						slog.String("stack", string(debug.Stack())),
+						slog.String("path", r.URL.Path),
+						slog.String("method", r.Method),
 					)
-					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					http.Error(w, "Internal Server Errorf", http.StatusInternalServerError)
 				}
 			}()
 			next.ServeHTTP(w, r)
@@ -112,32 +110,33 @@ func otelMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler,
+func Router(logger *slog.Logger, timewaster TimeWaster, memoryTest MemoryGobbler,
 	cpuTest CPUWaster, diskOccupier DiskOccupier, customMetricTest CustomMetricClient) http.Handler {
-
 	mux := http.NewServeMux()
 
 	// Set up OpenTelemetry
 	otel.SetTracerProvider(sdktrace.NewTracerProvider())
 	otel.SetTextMapPropagator(propagation.TraceContext{})
 
-	logr := zapr.NewLogger(logger)
-
 	// Root routes
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, http.StatusOK, JSONResponse{"name": "test-app"})
+		if err := writeJSON(w, http.StatusOK, JSONResponse{"name": "test-app"}); err != nil {
+			logger.Error("Failed to write JSON response", slog.Any("error", err))
+		}
 	})
 
 	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, http.StatusOK, JSONResponse{"status": "ok"})
+		if err := writeJSON(w, http.StatusOK, JSONResponse{"status": "ok"}); err != nil {
+			logger.Error("Failed to write JSON response", slog.Any("error", err))
+		}
 	})
 
 	// Register test endpoints
-	MemoryTests(logr, mux, memoryTest)
-	ResponseTimeTests(mux, timewaster)
-	CPUTests(logr, mux, cpuTest)
-	DiskTest(mux, diskOccupier)
-	CustomMetricsTests(logr, mux, customMetricTest)
+	MemoryTests(logger, mux, memoryTest)
+	ResponseTimeTests(logger, mux, timewaster)
+	CPUTests(logger, mux, cpuTest)
+	DiskTest(logger, mux, diskOccupier)
+	CustomMetricsTests(logger, mux, customMetricTest)
 
 	// Apply middleware in order: recovery -> logging -> otel -> router
 	var handler http.Handler = mux
@@ -148,8 +147,7 @@ func Router(logger *zap.Logger, timewaster TimeWaster, memoryTest MemoryGobbler,
 	return handler
 }
 
-func New(logger *zap.Logger, address string) *http.Server {
-	errorLog, _ := zap.NewStdLogAt(logger, zapcore.ErrorLevel)
+func New(logger *slog.Logger, address string) *http.Server {
 	return &http.Server{
 		Addr: address,
 		Handler: Router(
@@ -163,6 +161,5 @@ func New(logger *zap.Logger, address string) *http.Server {
 		ReadTimeout:  5 * time.Second,
 		IdleTimeout:  2 * time.Second,
 		WriteTimeout: 30 * time.Second,
-		ErrorLog:     errorLog,
 	}
 }

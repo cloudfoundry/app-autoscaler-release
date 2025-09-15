@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
@@ -11,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/prometheus/procfs"
 )
 
@@ -37,10 +37,10 @@ type ListBasedMemoryGobbler struct {
 
 var _ MemoryGobbler = &ListBasedMemoryGobbler{}
 
-func MemoryTests(logger logr.Logger, mux *http.ServeMux, memoryTest MemoryGobbler) {
+func MemoryTests(logger *slog.Logger, mux *http.ServeMux, memoryTest MemoryGobbler) {
 	mux.HandleFunc("GET /memory/{memoryMiB}/{minutes}", func(w http.ResponseWriter, r *http.Request) {
 		if memoryTest.IsRunning() {
-			Error(w, http.StatusConflict, "memory test is already running")
+			Errorf(logger, w, http.StatusConflict, "memory test is already running")
 			return
 		}
 		var memoryMiB int64
@@ -48,20 +48,20 @@ func MemoryTests(logger logr.Logger, mux *http.ServeMux, memoryTest MemoryGobble
 		var err error
 		memoryMiB, err = strconv.ParseInt(r.PathValue("memoryMiB"), 10, 64)
 		if err != nil {
-			Error(w, http.StatusBadRequest, "invalid memoryMiB: %s", err.Error())
+			Errorf(logger, w, http.StatusBadRequest, "invalid memoryMiB: %s", err.Error())
 			return
 		}
 		minutes, err = strconv.ParseInt(r.PathValue("minutes"), 10, 64)
 		if err != nil {
-			Error(w, http.StatusBadRequest, "invalid minutes: %s", err.Error())
+			Errorf(logger, w, http.StatusBadRequest, "invalid minutes: %s", err.Error())
 			return
 		}
 		if memoryMiB < 1 {
-			Error(w, http.StatusBadRequest, "memoryMiB must be > 0")
+			Errorf(logger, w, http.StatusBadRequest, "memoryMiB must be > 0")
 			return
 		}
 		if minutes < 1 {
-			Error(w, http.StatusBadRequest, "minutes must be > 0")
+			Errorf(logger, w, http.StatusBadRequest, "minutes must be > 0")
 			return
 		}
 		duration := time.Duration(minutes) * time.Minute
@@ -75,51 +75,59 @@ func MemoryTests(logger logr.Logger, mux *http.ServeMux, memoryTest MemoryGobble
 			memoryTest.Sleep(duration)
 			memoryTest.StopTest()
 		}()
-		writeJSON(w, http.StatusOK, JSONResponse{
+		if err := writeJSON(w, http.StatusOK, JSONResponse{
 			"memoryMiB": memoryMiB,
 			"minutes":   minutes,
-		})
+		}); err != nil {
+			logger.Error("Failed to write JSON response", slog.Any("error", err))
+		}
 	})
 
 	mux.HandleFunc("GET /memory/stop", func(w http.ResponseWriter, r *http.Request) {
 		if !memoryTest.IsRunning() {
-			Error(w, http.StatusConflict, "memory test is not running")
+			Errorf(logger, w, http.StatusConflict, "memory test is not running")
 			return
 		}
 		memoryTest.StopTest()
-		writeJSON(w, http.StatusOK, JSONResponse{"message": "Stopped memory test"})
+		if err := writeJSON(w, http.StatusOK, JSONResponse{"status": "close memory test"}); err != nil {
+			logger.Error("Failed to write JSON response", slog.Any("error", err))
+		}
 	})
 
 	mux.HandleFunc("GET /memory/usage", func(w http.ResponseWriter, r *http.Request) {
 		pid := os.Getpid()
 		proc, err := procfs.NewProc(pid)
 		if err != nil {
-			Error(w, http.StatusInternalServerError, "failed to get process info: %s", err.Error())
+			Errorf(logger, w, http.StatusInternalServerError, "failed to get process info: %s", err.Error())
 			return
 		}
 		stat, err := proc.Stat()
 		if err != nil {
-			Error(w, http.StatusInternalServerError, "failed to get process stats: %s", err.Error())
+			Errorf(logger, w, http.StatusInternalServerError, "failed to get process stats: %s", err.Error())
 			return
 		}
 		var m runtime.MemStats
 		runtime.ReadMemStats(&m)
 
-		writeJSON(w, http.StatusOK, JSONResponse{
+		if err := writeJSON(w, http.StatusOK, JSONResponse{
 			"rss":         stat.RSS * 4096,
 			"vms":         stat.VSize,
 			"alloc":       m.Alloc,
 			"total_alloc": m.TotalAlloc,
 			"sys":         m.Sys,
 			"num_gc":      m.NumGC,
-		})
+		}); err != nil {
+			logger.Error("Failed to write JSON response", slog.Any("error", err))
+		}
 	})
 }
 
-// Error writes an error response
-func Error(w http.ResponseWriter, statusCode int, format string, args ...interface{}) {
+// Errorf writes an error response
+func Errorf(logger *slog.Logger, w http.ResponseWriter, statusCode int, format string, args ...any) {
 	message := fmt.Sprintf(format, args...)
-	writeJSON(w, statusCode, JSONResponse{"error": JSONResponse{"description": message}})
+	if err := writeJSON(w, statusCode, JSONResponse{"error": JSONResponse{"description": message}}); err != nil {
+		logger.Error("Failed to write JSON error response", slog.Any("error", err))
+	}
 }
 
 const chunkSize = 4 * Kibi

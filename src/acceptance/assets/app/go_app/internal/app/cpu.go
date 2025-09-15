@@ -1,13 +1,12 @@
 package app
 
 import (
+	"log/slog"
 	"net/http"
 	"runtime"
 	"strconv"
 	"sync"
 	"time"
-
-	"github.com/go-logr/logr"
 )
 
 //counterfeiter:generate . CPUWaster
@@ -24,10 +23,10 @@ type ConcurrentBusyLoopCPUWaster struct {
 
 var _ CPUWaster = &ConcurrentBusyLoopCPUWaster{}
 
-func CPUTests(logger logr.Logger, mux *http.ServeMux, cpuTest CPUWaster) {
+func CPUTests(logger *slog.Logger, mux *http.ServeMux, cpuTest CPUWaster) {
 	mux.HandleFunc("GET /cpu/{utilization}/{minutes}", func(w http.ResponseWriter, r *http.Request) {
 		if cpuTest.IsRunning() {
-			Error(w, http.StatusConflict, "CPU test is already running")
+			Errorf(logger, w, http.StatusConflict, "CPU test is already running")
 			return
 		}
 		var utilization int64
@@ -35,27 +34,31 @@ func CPUTests(logger logr.Logger, mux *http.ServeMux, cpuTest CPUWaster) {
 		var err error
 		utilization, err = strconv.ParseInt(r.PathValue("utilization"), 10, 64)
 		if err != nil {
-			Error(w, http.StatusBadRequest, "invalid utilization: %s", err.Error())
+			Errorf(logger, w, http.StatusBadRequest, "invalid utilization: %s", err.Error())
 			return
 		}
 		if minutes, err = strconv.ParseInt(r.PathValue("minutes"), 10, 64); err != nil {
-			Error(w, http.StatusBadRequest, "invalid minutes: %s", err.Error())
+			Errorf(logger, w, http.StatusBadRequest, "invalid minutes: %s", err.Error())
 			return
 		}
 		duration := time.Duration(minutes) * time.Minute
 		go func() {
 			cpuTest.UseCPU(utilization, duration)
 		}()
-		writeJSON(w, http.StatusOK, JSONResponse{"utilization": utilization, "minutes": minutes})
+		if err := writeJSON(w, http.StatusOK, JSONResponse{"utilization": utilization, "minutes": minutes}); err != nil {
+			logger.Error("Failed to write JSON response", slog.Any("error", err))
+		}
 	})
 
 	mux.HandleFunc("GET /cpu/stop", func(w http.ResponseWriter, r *http.Request) {
 		if !cpuTest.IsRunning() {
-			Error(w, http.StatusConflict, "CPU test is not running")
+			Errorf(logger, w, http.StatusConflict, "CPU test is not running")
 			return
 		}
 		cpuTest.StopTest()
-		writeJSON(w, http.StatusOK, JSONResponse{"message": "Stopped CPU test"})
+		if err := writeJSON(w, http.StatusOK, JSONResponse{"status": "close cpu test"}); err != nil {
+			logger.Error("Failed to write JSON response", slog.Any("error", err))
+		}
 	})
 }
 
