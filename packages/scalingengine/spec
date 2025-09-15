@@ -27,6 +27,7 @@ files:
 - autoscaler/scalingengine/config/* # gosub
 - autoscaler/scalingengine/schedule/* # gosub
 - autoscaler/scalingengine/server/* # gosub
+- autoscaler/startup/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/lager/v3/* # gosub
