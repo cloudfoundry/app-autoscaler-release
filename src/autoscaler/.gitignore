@@ -7,3 +7,4 @@ mta.yaml
 Makefile_*
 
 src/autoscaler/api/cmd/api/api
+scalingengine/cmd/scalingengine/scalingengine
