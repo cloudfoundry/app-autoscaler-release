@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
@@ -13,55 +15,40 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers/auth"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/startup"
 	"github.com/prometheus/client_golang/prometheus"
 	circuit "github.com/rubyist/circuitbreaker"
-
-	"flag"
-	"fmt"
-	"os"
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager/v3"
 	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/grouper"
-	"github.com/tedsuo/ifrit/sigmon"
 )
 
+type configLoader struct{}
+
+func (c *configLoader) LoadConfig(path string, vcapConfigReader configutil.VCAPConfigurationReader) (*config.Config, error) {
+	return config.LoadConfig(path, vcapConfigReader)
+}
+
 func main() {
-	var path string
-	flag.StringVar(&path, "c", "", "config file")
-	flag.Parse()
-
-	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
+	path := startup.ParseFlags()
+	
+	vcapConfiguration, _ := startup.LoadVCAPConfiguration()
+	
+	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, &configLoader{})
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
-	}
-
-	conf, err := config.LoadConfig(path, vcapConfiguration)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
 		os.Exit(1)
 	}
 
-	err = conf.Validate()
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to validate configuration : %s\n", err.Error())
-		os.Exit(1)
-	}
+	startup.SetupEnvironment()
 
-	helpers.AssertFIPSMode()
-
-	helpers.SetupOpenTelemetry()
-
-	logger := helpers.InitLoggerFromConfig(&conf.Logging, "eventgenerator")
+	logger := startup.InitLogger(&conf.Logging, "eventgenerator")
 
 	egClock := clock.NewClock()
 
 	appMetricDB, err := sqldb.NewAppMetricSQLDB(conf.Db[db.AppMetricsDb], logger.Session("appMetric-db"))
-	if err != nil {
-		logger.Error("failed to connect app-metric database", err, lager.Data{"dbConfig": conf.Db[db.AppMetricsDb]})
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to connect app-metric database", lager.Data{"dbConfig": conf.Db[db.AppMetricsDb]})
 	defer func() { _ = appMetricDB.Close() }()
 
 	policyDb := sqldb.CreatePolicyDb(conf.Db[db.PolicyDb], logger)
@@ -81,37 +68,23 @@ func main() {
 	triggersChan := make(chan []*models.Trigger, conf.Evaluator.TriggerArrayChannelSize)
 
 	evaluationManager, err := generator.NewAppEvaluationManager(logger, conf.Evaluator.EvaluationManagerInterval, egClock, triggersChan, appManager.GetPolicies, *conf.CircuitBreaker)
-	if err != nil {
-		logger.Error("failed to create Evaluation Manager", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create Evaluation Manager")
 
 	evaluators, err := createEvaluators(logger, conf, triggersChan, appManager.QueryAppMetrics, evaluationManager.GetBreaker, evaluationManager.SetCoolDownExpired)
-	if err != nil {
-		logger.Error("failed to create Evaluators", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create Evaluators")
 
 	appMonitorsChan := make(chan *models.AppMonitor, conf.Aggregator.AppMonitorChannelSize)
 	appMetricChan := make(chan *models.AppMetric, conf.Aggregator.AppMetricChannelSize)
 
 	fetcherFactory := metric.NewLogCacheFetcherFactory(metric.StandardLogCacheFetcherCreator)
 	metricFetcher, err := fetcherFactory.CreateFetcher(logger, *conf)
-	if err != nil {
-		logger.Error("failed to create metric fetcher", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create metric fetcher")
 
 	metricPollers, err := createMetricPollers(logger, conf, appMonitorsChan, appMetricChan, metricFetcher)
-	if err != nil {
-		logger.Error("failed to create MetricPoller", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create MetricPoller")
+	
 	anAggregator, err := aggregator.NewAggregator(logger, egClock, conf.Aggregator.AggregatorExecuteInterval, conf.Aggregator.SaveInterval, appMonitorsChan, appManager.GetPolicies, appManager.SaveMetricToCache, conf.DefaultStatWindowSecs, appMetricChan, appMetricDB)
-	if err != nil {
-		logger.Error("failed to create Aggregator", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create Aggregator")
 
 	eventGenerator := ifrit.RunFunc(runFunc(appManager, evaluators, evaluationManager, metricPollers, anAggregator))
 
@@ -120,23 +93,14 @@ func main() {
 		policyDb, appManager.QueryAppMetrics, httpStatusCollector)
 
 	mtlsServer, err := eventgeneratorServer.CreateMtlsServer()
-	if err != nil {
-		logger.Error("failed to create http server", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create http server")
 
 	healthServer, err := eventgeneratorServer.CreateHealthServer()
-	if err != nil {
-		logger.Error("failed to create health server", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create health server")
 
 	xm := auth.NewXfccAuthMiddleware(logger, conf.CFServer.XFCC)
 	cfServer, err := eventgeneratorServer.CreateCFServer(xm)
-	if err != nil {
-		logger.Error("failed to create cf server", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create cf server")
 
 	members := grouper.Members{
 		{Name: "eventGenerator", Runner: eventGenerator},
@@ -145,14 +109,10 @@ func main() {
 		{Name: "cf_server", Runner: cfServer},
 	}
 
-	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))
-	logger.Info("started")
-	err = <-monitor.Wait()
+	err = startup.StartServices(logger, members)
 	if err != nil {
-		logger.Error("exited-with-failure", err)
 		os.Exit(1)
 	}
-	logger.Info("exited")
 }
 
 func runFunc(appManager *aggregator.AppManager, evaluators []*generator.Evaluator, evaluationManager *generator.AppEvaluationManager, metricPollers []*aggregator.MetricPoller, anAggregator *aggregator.Aggregator) func(signals <-chan os.Signal, ready chan<- struct{}) error {
@@ -185,8 +145,7 @@ func createEvaluators(logger lager.Logger, conf *config.Config, triggersChan cha
 
 	seClient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
 	if err != nil {
-		logger.Error("failed to create http client for ScalingEngine", err, lager.Data{"scalingengineTLS": conf.ScalingEngine.TLSClientCerts})
-		os.Exit(1)
+		return nil, err
 	}
 
 	evaluators := make([]*generator.Evaluator, count)
@@ -205,3 +164,4 @@ func createMetricPollers(logger lager.Logger, conf *config.Config, appMonitorsCh
 	}
 	return pollers, nil
 }
+

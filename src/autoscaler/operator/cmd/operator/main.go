@@ -1,8 +1,6 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"os"
 	"time"
 
@@ -14,84 +12,58 @@ import (
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator/config"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/startup"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/sync"
 	"github.com/google/uuid"
 
 	"code.cloudfoundry.org/clock"
 	"code.cloudfoundry.org/lager/v3"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/tedsuo/ifrit"
 	"github.com/tedsuo/ifrit/grouper"
-	"github.com/tedsuo/ifrit/sigmon"
 )
 
+type configLoader struct{}
+
+func (c *configLoader) LoadConfig(path string, vcapConfigReader configutil.VCAPConfigurationReader) (*config.Config, error) {
+	return config.LoadConfig(path, vcapConfigReader)
+}
+
 func main() {
-	var path string
-	flag.StringVar(&path, "c", "", "config file")
-	flag.Parse()
-
-	vcapConfiguration, err := configutil.NewVCAPConfigurationReader()
+	path := startup.ParseFlags()
+	
+	vcapConfiguration, _ := startup.LoadVCAPConfiguration()
+	
+	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, &configLoader{})
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to read vcap configuration : %s\n", err.Error())
-	}
-
-	conf, err := config.LoadConfig(path, vcapConfiguration)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to read config file '%s' : %s\n", path, err.Error())
 		os.Exit(1)
 	}
 
-	err = conf.Validate()
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stdout, "failed to validate configuration : %s\n", err.Error())
-		os.Exit(1)
-	}
+	startup.SetupEnvironment()
 
-	helpers.AssertFIPSMode()
-
-	helpers.SetupOpenTelemetry()
-
-	logger := helpers.InitLoggerFromConfig(&conf.Logging, "operator")
+	logger := startup.InitLogger(&conf.Logging, "operator")
 	prClock := clock.NewClock()
 
 	appMetricsDB, err := sqldb.NewAppMetricSQLDB(conf.Db[db.AppMetricsDb], logger.Session("appmetrics-db"))
-	if err != nil {
-		logger.Error("failed to connect appmetrics db", err, lager.Data{"dbConfig": conf.Db[db.AppMetricsDb]})
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to connect appmetrics db", lager.Data{"dbConfig": conf.Db[db.AppMetricsDb]})
 	defer appMetricsDB.Close()
 
 	scalingEngineDB, err := sqldb.NewScalingEngineSQLDB(conf.Db[db.ScalingEngineDb], logger.Session("scalingengine-db"))
-	if err != nil {
-		logger.Error("failed to connect scalingengine db", err, lager.Data{"dbConfig": conf.Db[db.ScalingEngineDb]})
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to connect scalingengine db", lager.Data{"dbConfig": conf.Db[db.ScalingEngineDb]})
 	defer scalingEngineDB.Close()
 
 	cfClient := cf.NewCFClient(&conf.CF, logger.Session("cf"), prClock)
 	err = cfClient.Login()
-	if err != nil {
-		logger.Error("failed to login cloud foundry", err, lager.Data{"API": conf.CF.API})
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to login cloud foundry", lager.Data{"API": conf.CF.API})
 
 	policyDb, err := sqldb.NewPolicySQLDB(conf.Db[db.PolicyDb], logger.Session("policy-db"))
-	if err != nil {
-		logger.Error("failed to connect policy db", err, lager.Data{"dbConfig": conf.Db[db.PolicyDb]})
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to connect policy db", lager.Data{"dbConfig": conf.Db[db.PolicyDb]})
 	defer policyDb.Close()
 
 	scalingEngineHttpclient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
-	if err != nil {
-		logger.Error("failed to create http client for scalingengine", err, lager.Data{"scalingengineTLS": conf.ScalingEngine.TLSClientCerts})
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create http client for scalingengine", lager.Data{"scalingengineTLS": conf.ScalingEngine.TLSClientCerts})
+	
 	schedulerHttpclient, err := helpers.CreateHTTPSClient(&conf.Scheduler.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scheduler_client"))
-	if err != nil {
-		logger.Error("failed to create http client for scheduler", err, lager.Data{"schedulerTLS": conf.Scheduler.TLSClientCerts})
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create http client for scheduler", lager.Data{"schedulerTLS": conf.Scheduler.TLSClientCerts})
 
 	loggerSessionName := "appmetrics-dbpruner"
 	appMetricsDBPruner := operator.NewAppMetricsDbPruner(appMetricsDB, conf.AppMetricsDb.CutoffDuration, prClock, logger.Session(loggerSessionName))
@@ -124,10 +96,7 @@ func main() {
 	const lockTableName = "operator_lock"
 	var lockDB db.LockDB
 	lockDB, err = sqldb.NewLockSQLDB(conf.Db[db.LockDb], lockTableName, logger.Session("lock-db"))
-	if err != nil {
-		logger.Error("failed-to-connect-lock-database", err, lager.Data{"dbConfig": conf.Db[db.LockDb]})
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed-to-connect-lock-database", lager.Data{"dbConfig": conf.Db[db.LockDb]})
 	defer lockDB.Close()
 	prdl := sync.NewDatabaseLock(logger)
 	dbLockMaintainer := prdl.InitDBLockRunner(conf.DBLock.LockRetryInterval, conf.DBLock.LockTTL, guid, lockDB, func() {}, func() {
@@ -140,32 +109,20 @@ func main() {
 	)
 	gatherer := createPrometheusRegistry(policyDb, appMetricsDB, scalingEngineDB, logger)
 	healthRouter, err := healthendpoint.NewHealthRouter(conf.Health, []healthendpoint.Checker{}, logger, gatherer, time.Now)
-	if err != nil {
-		logger.Error("failed to create health router", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create health router")
 
 	healthServer, err := helpers.NewHTTPServer(logger, conf.Health.ServerConfig, healthRouter)
-	if err != nil {
-		logger.Error("failed to create health server", err)
-		os.Exit(1)
-	}
+	startup.ExitOnError(err, logger, "failed to create health server")
 
 	members = append(
 		grouper.Members{{Name: "health_server", Runner: healthServer}},
 		members...,
 	)
-	monitor := ifrit.Invoke(sigmon.New(grouper.NewOrdered(os.Interrupt, members)))
 
-	logger.Info("started")
-
-	err = <-monitor.Wait()
+	err = startup.StartServices(logger, members)
 	if err != nil {
-		logger.Error("exited-with-failure", err)
 		os.Exit(1)
 	}
-
-	logger.Info("exited")
 }
 
 func createPrometheusRegistry(policyDB db.PolicyDB, appMetricsDB db.AppMetricDB, scalingEngineDB db.ScalingEngineDB, logger lager.Logger) *prometheus.Registry {
@@ -177,3 +134,4 @@ func createPrometheusRegistry(policyDB db.PolicyDB, appMetricsDB db.AppMetricDB,
 	}, true, logger.Session("operator-prometheus"))
 	return promRegistry
 }
+
