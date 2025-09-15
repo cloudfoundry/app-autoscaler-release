@@ -133,12 +133,12 @@ check: fmt lint build test
 .PHONY: generate-fakes
 test: generate-fakes
 	@echo "Running tests"
-	APP_AUTOSCALER_TEST_RUN='true' ginkgo -p ${GINKGO_OPTS} ${TEST} --skip-package='integration'
+	APP_AUTOSCALER_TEST_RUN='true' go run github.com/onsi/ginkgo/v2/ginkgo -p ${GINKGO_OPTS} ${TEST} --skip-package='integration'
 
 .PHONY: testsuite
 testsuite: build-gorouterproxy
 	@echo " - using DBURL=${DBURL} TEST=${TEST}"
-	APP_AUTOSCALER_TEST_RUN='true' ginkgo -p ${GINKGO_OPTS} ${TEST}
+	APP_AUTOSCALER_TEST_RUN='true' go run github.com/onsi/ginkgo/v2/ginkgo -p ${GINKGO_OPTS} ${TEST}
 
 .PHONY: build-gorouterproxy
 build-gorouterproxy:
@@ -148,7 +148,7 @@ build-gorouterproxy:
 .PHONY: integration
 integration: generate-fakes
 	@echo "# Running integration tests"
-	APP_AUTOSCALER_TEST_RUN='true' ginkgo ${GINKGO_OPTS} integration
+	APP_AUTOSCALER_TEST_RUN='true' go run github.com/onsi/ginkgo/v2/ginkgo ${GINKGO_OPTS} integration
 
 importfmt:
 	@echo "# Formatting the imports"
