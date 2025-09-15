@@ -9,40 +9,40 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
-func DiskTest(r *gin.RouterGroup, diskOccupier DiskOccupier) *gin.RouterGroup {
-	r.GET("/:utilization/:minutes", func(c *gin.Context) {
+func DiskTest(mux *http.ServeMux, diskOccupier DiskOccupier) {
+	mux.HandleFunc("GET /disk/{utilization}/{minutes}", func(w http.ResponseWriter, r *http.Request) {
 		var utilisation int64
 		var minutes int64
 		var err error
 
-		utilisation, err = strconv.ParseInt(c.Param("utilization"), 10, 64)
+		utilisation, err = strconv.ParseInt(r.PathValue("utilization"), 10, 64)
 		if err != nil {
-			Error(c, http.StatusBadRequest, "invalid utilization: %s", err.Error())
+			Error(w, http.StatusBadRequest, "invalid utilization: %s", err.Error())
 			return
 		}
-		if minutes, err = strconv.ParseInt(c.Param("minutes"), 10, 64); err != nil {
-			Error(c, http.StatusBadRequest, "invalid minutes: %s", err.Error())
+		if minutes, err = strconv.ParseInt(r.PathValue("minutes"), 10, 64); err != nil {
+			Error(w, http.StatusBadRequest, "invalid minutes: %s", err.Error())
 			return
 		}
 		duration := time.Duration(minutes) * time.Minute
 		spaceInMB := utilisation * 1000 * 1000
 		if err = diskOccupier.Occupy(spaceInMB, duration); err != nil {
-			Error(c, http.StatusInternalServerError, "error invoking occupation: %s", err.Error())
+			Error(w, http.StatusInternalServerError, "error invoking occupation: %s", err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"utilization": utilisation, "minutes": minutes})
+		writeJSON(w, http.StatusOK, JSONResponse{"utilization": utilisation, "minutes": minutes})
 	})
 
-	r.GET("/close", func(c *gin.Context) {
+	mux.HandleFunc("GET /disk/close", func(w http.ResponseWriter, r *http.Request) {
 		diskOccupier.Stop()
-		c.String(http.StatusOK, "close disk test")
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusOK)
+		if _, err := w.Write([]byte("close disk test")); err != nil {
+			// Log error but don't fail the response since headers are already written
+		}
 	})
-
-	return r
 }
 
 //counterfeiter:generate . DiskOccupier

@@ -11,7 +11,6 @@ import (
 
 	api "code.cloudfoundry.org/app-autoscaler-release/src/acceptance/assets/app/go_app/internal/custommetrics"
 	"github.com/cloudfoundry-community/go-cfenv"
-	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
 	json "github.com/json-iterator/go"
 	"github.com/mitchellh/mapstructure"
@@ -28,43 +27,46 @@ var _ CustomMetricClient = &CustomMetricAPIClient{}
 
 var CfenvCurrent = cfenv.Current
 
-func CustomMetricsTests(logger logr.Logger, r *gin.RouterGroup, customMetricTest CustomMetricClient) *gin.RouterGroup {
-	r.GET("/mtls/:name/:value", handleCustomMetricsEndpoint(logger, customMetricTest, true))
-	r.GET("/:name/:value", handleCustomMetricsEndpoint(logger, customMetricTest, false))
-
-	return r
+func CustomMetricsTests(logger logr.Logger, mux *http.ServeMux, customMetricTest CustomMetricClient) {
+	mux.HandleFunc("GET /custom-metrics/mtls/{name}/{value}", handleCustomMetricsEndpoint(logger, customMetricTest, true))
+	mux.HandleFunc("GET /custom-metrics/{name}/{value}", handleCustomMetricsEndpoint(logger, customMetricTest, false))
 }
 
-func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetricClient, useMtls bool) func(c *gin.Context) {
-	return func(c *gin.Context) {
+func handleCustomMetricsEndpoint(logger logr.Logger, customMetricTest CustomMetricClient, useMtls bool) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		var (
 			metricName  string
 			metricValue uint64
 		)
 		var err error
 
-		if metricName = c.Param("name"); metricName == "" {
+		if metricName = r.PathValue("name"); metricName == "" {
 			err = fmt.Errorf("empty metric name")
 			logger.Error(err, err.Error())
-			Error(c, http.StatusBadRequest, "empty metric name")
+			Error(w, http.StatusBadRequest, "empty metric name")
 			return
 		}
-		if metricValue, err = strconv.ParseUint(c.Param("value"), 10, 64); err != nil {
+
+		if metricValue, err = strconv.ParseUint(r.PathValue("value"), 10, 64); err != nil {
 			logger.Error(err, "invalid metric value")
-			Error(c, http.StatusBadRequest, "invalid metric value: %s", err.Error())
+			Error(w, http.StatusBadRequest, "invalid metric value: %s", err.Error())
 			return
 		}
+
 		// required if producer app is sending metric for appToScaleGuid
-		appToScaleGuid := c.Query("appToScaleGuid")
+		appToScaleGuid := r.URL.Query().Get("appToScaleGuid")
 		appConfig := &cfenv.App{AppID: appToScaleGuid}
 
-		err = customMetricTest.PostCustomMetric(c, logger, appConfig, float64(metricValue), metricName, useMtls)
+		err = customMetricTest.PostCustomMetric(r.Context(), logger, appConfig, float64(metricValue), metricName, useMtls)
 		if err != nil {
-			logger.Error(err, "failed to submit custom metric")
-			Error(c, http.StatusInternalServerError, "failed to submit custom metric: %s", err.Error())
+			logger.Error(err, "error sending custom metric")
+			Error(w, http.StatusInternalServerError, "error sending custom metric: %s", err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"mtls": useMtls})
+
+		writeJSON(w, http.StatusOK, JSONResponse{
+			"mtls": useMtls,
+		})
 	}
 }
 
