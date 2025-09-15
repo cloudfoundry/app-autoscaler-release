@@ -5,3 +5,5 @@ api/default_catalog.json
 mta.yaml
 *.mta
 Makefile_*
+
+src/autoscaler/api/cmd/api/api
