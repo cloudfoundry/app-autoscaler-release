@@ -15,10 +15,10 @@
     platforms = [];
     source = {
       remotes = ["https://rubygems.org"];
-      sha256 = "01qml0yilb9basf7is2614skjp8384h2pycfx86cr8023arfj98g";
+      sha256 = "0yx9yn47a8lkfcjmigk79fykxvr80r4m1i35q82sxzynpbm7lcr7";
       type = "gem";
     };
-    version = "0.2.0";
+    version = "0.3.0";
   };
   cf-uaa-lib = {
     dependencies = ["addressable" "base64" "httpclient" "json" "mutex_m"];
@@ -132,20 +132,20 @@
     platforms = [];
     source = {
       remotes = ["https://rubygems.org"];
-      sha256 = "18pgvl7lfjpichdfh1g50rpz0zpaqrpr52ybn9liv1v9pjn9ysnd";
+      sha256 = "1jszj95hazqqpnrjjzr326nn1j32xmsc9xvd97mbcrrgdc54858y";
       type = "gem";
     };
-    version = "0.8.0";
+    version = "0.8.1";
   };
   json = {
     groups = ["default"];
     platforms = [];
     source = {
       remotes = ["https://rubygems.org"];
-      sha256 = "1x5b8ipv6g0z44wgc45039k04smsyf95h2m5m67mqq35sa5a955s";
+      sha256 = "0s5vklcy2fgdxa9c6da34jbfrqq7xs6mryjglqqb5iilshcg3q82";
       type = "gem";
     };
-    version = "2.12.2";
+    version = "2.13.2";
   };
   launchy = {
     dependencies = ["addressable" "childprocess" "logger"];
@@ -193,10 +193,10 @@
     platforms = [];
     source = {
       remotes = ["https://rubygems.org"];
-      sha256 = "197wpw61cfwwdrwfdns0zx4mndrv1qn0y9b1v7g2d2nic2ckwayi";
+      sha256 = "0cwy1br09dh5fklwf5xna7vabns8c1229kr2v0a0s6y2brz3zbrh";
       type = "gem";
     };
-    version = "3.1.15";
+    version = "3.2.1";
   };
   reline = {
     dependencies = ["io-console"];
@@ -204,9 +204,9 @@
     platforms = [];
     source = {
       remotes = ["https://rubygems.org"];
-      sha256 = "1yvm0svcdk6377ng6l00g39ldkjijbqg4whdg2zcsa8hrgbwkz0s";
+      sha256 = "0ii8l0q5zkang3lxqlsamzfz5ja7jc8ln905isfdawl802k2db8x";
       type = "gem";
     };
-    version = "0.6.1";
+    version = "0.6.2";
   };
 }
