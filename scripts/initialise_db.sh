@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-set -x
 echo "Running $0"
 
 DB_HOST="${DB_HOST:-localhost}"
