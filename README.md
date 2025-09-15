@@ -1,5 +1,5 @@
 # Application Autoscaler
-
+ 
 The Application Autoscaler provides the capability to adjust the computation resources for Cloud Foundry applications
 through
 
