@@ -12,7 +12,7 @@ import (
 )
 
 func GetPolicy(cfg *config.Config, appGUID string) ScalingPolicy {
-	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.Replace(PolicyPath, "{appId}", appGUID, -1))
+	policyURL := fmt.Sprintf("%s%s", cfg.ASApiEndpoint, strings.ReplaceAll(PolicyPath, "{appId}", appGUID))
 	oauthToken := OauthToken(cfg)
 	client := GetHTTPClient(cfg)
 

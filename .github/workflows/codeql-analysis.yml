@@ -29,7 +29,7 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:5277733db60d4e659404ad330e7c0da790cb65c18b41cf0b2ca6e424294c5dd9
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:e91783ca009f906e3a78edca376d1507222cb5c3763cbdebeb624bd8ee09b90a
 
     permissions:
       actions: read
@@ -44,14 +44,14 @@ jobs:
         # Learn more about CodeQL language support at https://git.io/codeql-language-support
     steps:
     - name: Checkout repository
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
     - name: Trust my checkout
       run: git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@39edc492dbe16b1465b0cafca41432d857bdb31a # v3
+      uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -63,4 +63,4 @@ jobs:
       run: make generate-openapi-generated-clients-and-servers scheduler.build
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@39edc492dbe16b1465b0cafca41432d857bdb31a # v3
+      uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
