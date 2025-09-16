@@ -104,35 +104,42 @@ func (c *Config) GetLogging() *helpers.LoggingConfig {
 	return &c.Logging
 }
 
+// SetLoggingPlainText implements configutil.CommonVCAPConfig
+func (c *Config) SetLoggingPlainText() {
+	c.Logging.PlainTextSink = true
+}
+
+// SetPortsForCF implements configutil.CommonVCAPConfig
+func (c *Config) SetPortsForCF(cfPort int) {
+	c.CFServer.Port = cfPort
+	c.Server.Port = 0
+}
+
+// SetXFCCValidation implements configutil.CommonVCAPConfig
+func (c *Config) SetXFCCValidation(spaceGuid, orgGuid string) {
+	c.CFServer.XFCC.ValidSpaceGuid = spaceGuid
+	c.CFServer.XFCC.ValidOrgGuid = orgGuid
+}
+
+// GetDatabaseConfig implements configutil.CommonVCAPConfig
+func (c *Config) GetDatabaseConfig() *map[string]db.DatabaseConfig {
+	return &c.Db
+}
+
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	return configutil.GenericLoadConfig(filepath, vcapReader, defaultConfig, configutil.VCAPConfigurableFunc[Config](LoadVcapConfig))
 }
 
 func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	if !vcapReader.IsRunningOnCF() {
-		return nil
-	}
-	// enable plain text logging. See src/autoscaler/helpers/logger.go
-	conf.Logging.PlainTextSink = true
-
-	// Avoid port conflict: assign actual port to CF server, set BOSH server port to 0 (unused)
-	conf.CFServer.Port = vcapReader.GetPort()
-	conf.Server.Port = 0
-
-	if err := configutil.LoadConfig(conf, vcapReader, "eventgenerator-config"); err != nil {
+	if err := configutil.ApplyCommonVCAPConfiguration(conf, vcapReader, "eventgenerator-config"); err != nil {
 		return err
 	}
 
-	if err := vcapReader.ConfigureDatabases(&conf.Db, nil, ""); err != nil {
-		return err
+	// EventGenerator-specific VCAP configuration
+	if vcapReader.IsRunningOnCF() {
+		conf.Pool.InstanceIndex = vcapReader.GetInstanceIndex()
+		conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 	}
-
-	conf.Pool.InstanceIndex = vcapReader.GetInstanceIndex()
-
-	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
-	conf.CFServer.XFCC.ValidOrgGuid = vcapReader.GetOrgGuid()
-
-	conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 
 	return nil
 }

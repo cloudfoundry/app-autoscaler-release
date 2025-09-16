@@ -47,6 +47,28 @@ func (c *Config) GetLogging() *helpers.LoggingConfig {
 	return &c.Logging
 }
 
+// SetLoggingPlainText implements configutil.CommonVCAPConfig
+func (c *Config) SetLoggingPlainText() {
+	c.Logging.PlainTextSink = true
+}
+
+// SetPortsForCF implements configutil.CommonVCAPConfig
+func (c *Config) SetPortsForCF(cfPort int) {
+	c.CFServer.Port = cfPort
+	c.Server.Port = 0
+}
+
+// SetXFCCValidation implements configutil.CommonVCAPConfig
+func (c *Config) SetXFCCValidation(spaceGuid, orgGuid string) {
+	c.CFServer.XFCC.ValidSpaceGuid = spaceGuid
+	c.CFServer.XFCC.ValidOrgGuid = orgGuid
+}
+
+// GetDatabaseConfig implements configutil.CommonVCAPConfig
+func (c *Config) GetDatabaseConfig() *map[string]db.DatabaseConfig {
+	return &c.Db
+}
+
 func defaultConfig() Config {
 	return Config{
 		CF: cf.Config{
@@ -78,29 +100,7 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 }
 
 func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	if !vcapReader.IsRunningOnCF() {
-		return nil
-	}
-
-	// enable plain text logging. See src/autoscaler/helpers/logger.go
-	conf.Logging.PlainTextSink = true
-
-	// Avoid port conflict: assign actual port to CF server, set BOSH server port to 0 (unused)
-	conf.CFServer.Port = vcapReader.GetPort()
-	conf.Server.Port = 0
-
-	if err := configutil.LoadConfig(conf, vcapReader, "scalingengine-config"); err != nil {
-		return err
-	}
-
-	if err := vcapReader.ConfigureDatabases(&conf.Db, nil, ""); err != nil {
-		return err
-	}
-
-	conf.CFServer.XFCC.ValidSpaceGuid = vcapReader.GetSpaceGuid()
-	conf.CFServer.XFCC.ValidOrgGuid = vcapReader.GetOrgGuid()
-
-	return nil
+	return configutil.ApplyCommonVCAPConfiguration(conf, vcapReader, "scalingengine-config")
 }
 
 func (c *Config) Validate() error {
