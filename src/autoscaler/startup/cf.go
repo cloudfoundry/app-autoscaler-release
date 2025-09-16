@@ -13,3 +13,4 @@ func CreateAndLoginCFClient(cfConfig *cf.Config, logger lager.Logger, clock cloc
 	ExitOnError(err, logger, "failed to login cloud foundry", lager.Data{"API": cfConfig.API})
 	return cfClient
 }
+

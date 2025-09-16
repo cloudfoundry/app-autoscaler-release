@@ -4,9 +4,7 @@ import (
 	"os"
 	"time"
 
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
-	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db/sqldb"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/healthendpoint"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/operator"
@@ -22,49 +20,39 @@ import (
 )
 
 func main() {
-	path := startup.ParseFlags()
-
-	vcapConfiguration, _ := startup.LoadVCAPConfiguration()
-
-	conf, err := startup.LoadAndValidateConfig(path, vcapConfiguration, config.LoadConfig)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	startup.SetupEnvironment()
-
-	logger := startup.InitLogger(&conf.Logging, "operator")
+	conf, logger := startup.Bootstrap("operator", config.LoadConfig)
+	
 	prClock := clock.NewClock()
 
-	appMetricsDB, err := sqldb.NewAppMetricSQLDB(conf.Db[db.AppMetricsDb], logger.Session("appmetrics-db"))
-	startup.ExitOnError(err, logger, "failed to connect appmetrics db", lager.Data{"dbConfig": conf.Db[db.AppMetricsDb]})
-	defer appMetricsDB.Close()
+	// Database connections using startup factories
+	appMetricsDB := startup.CreateAppMetricDB(conf.Db[db.AppMetricsDb], logger)
+	defer func() { _ = appMetricsDB.Closer() }()
 
-	scalingEngineDB, err := sqldb.NewScalingEngineSQLDB(conf.Db[db.ScalingEngineDb], logger.Session("scalingengine-db"))
-	startup.ExitOnError(err, logger, "failed to connect scalingengine db", lager.Data{"dbConfig": conf.Db[db.ScalingEngineDb]})
-	defer scalingEngineDB.Close()
+	scalingEngineDB := startup.CreateScalingEngineDB(conf.Db[db.ScalingEngineDb], logger)
+	defer func() { _ = scalingEngineDB.Closer() }()
 
-	cfClient := cf.NewCFClient(&conf.CF, logger.Session("cf"), prClock)
-	err = cfClient.Login()
-	startup.ExitOnError(err, logger, "failed to login cloud foundry", lager.Data{"API": conf.CF.API})
+	policyDb := startup.CreatePolicyDB(conf.Db[db.PolicyDb], logger)
+	defer func() { _ = policyDb.Closer() }()
 
-	policyDb, err := sqldb.NewPolicySQLDB(conf.Db[db.PolicyDb], logger.Session("policy-db"))
-	startup.ExitOnError(err, logger, "failed to connect policy db", lager.Data{"dbConfig": conf.Db[db.PolicyDb]})
-	defer policyDb.Close()
+	// CF Client
+	cfClient := startup.CreateAndLoginCFClient(&conf.CF, logger, prClock)
 
+	// HTTP clients
 	scalingEngineHttpclient, err := helpers.CreateHTTPSClient(&conf.ScalingEngine.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scaling_client"))
 	startup.ExitOnError(err, logger, "failed to create http client for scalingengine", lager.Data{"scalingengineTLS": conf.ScalingEngine.TLSClientCerts})
 
 	schedulerHttpclient, err := helpers.CreateHTTPSClient(&conf.Scheduler.TLSClientCerts, helpers.DefaultClientConfig(), logger.Session("scheduler_client"))
 	startup.ExitOnError(err, logger, "failed to create http client for scheduler", lager.Data{"schedulerTLS": conf.Scheduler.TLSClientCerts})
 
+	// Operator components
 	loggerSessionName := "appmetrics-dbpruner"
-	appMetricsDBPruner := operator.NewAppMetricsDbPruner(appMetricsDB, conf.AppMetricsDb.CutoffDuration, prClock, logger.Session(loggerSessionName))
+	appMetricsDBPruner := operator.NewAppMetricsDbPruner(appMetricsDB.DB, conf.AppMetricsDb.CutoffDuration, prClock, logger.Session(loggerSessionName))
 	appMetricsDBOperatorRunner := operator.NewOperatorRunner(appMetricsDBPruner, conf.AppMetricsDb.RefreshInterval, prClock, logger.Session(loggerSessionName))
 
 	loggerSessionName = "scalingengine-dbpruner"
-	scalingEngineDBPruner := operator.NewScalingEngineDbPruner(scalingEngineDB, conf.ScalingEngineDb.CutoffDuration, prClock, logger.Session(loggerSessionName))
+	scalingEngineDBPruner := operator.NewScalingEngineDbPruner(scalingEngineDB.DB, conf.ScalingEngineDb.CutoffDuration, prClock, logger.Session(loggerSessionName))
 	scalingEngineDBOperatorRunner := operator.NewOperatorRunner(scalingEngineDBPruner, conf.ScalingEngineDb.RefreshInterval, prClock, logger.Session(loggerSessionName))
+	
 	loggerSessionName = "scalingengine-sync"
 	scalingEngineSync := operator.NewScheduleSynchronizer(scalingEngineHttpclient, conf.ScalingEngine.URL, prClock, logger.Session(loggerSessionName))
 	scalingEngineSyncRunner := operator.NewOperatorRunner(scalingEngineSync, conf.ScalingEngine.SyncInterval, prClock, logger.Session(loggerSessionName))
@@ -74,9 +62,10 @@ func main() {
 	schedulerSyncRunner := operator.NewOperatorRunner(schedulerSync, conf.Scheduler.SyncInterval, prClock, logger.Session(loggerSessionName))
 
 	loggerSessionName = "application-sync"
-	applicationSync := operator.NewApplicationSynchronizer(cfClient.GetCtxClient(), policyDb, logger.Session(loggerSessionName))
+	applicationSync := operator.NewApplicationSynchronizer(cfClient.GetCtxClient(), policyDb.DB, logger.Session(loggerSessionName))
 	applicationSyncRunner := operator.NewOperatorRunner(applicationSync, conf.AppSyncer.SyncInterval, prClock, logger.Session(loggerSessionName))
 
+	// Service members
 	members := grouper.Members{
 		{Name: "appmetrics-dbpruner", Runner: appMetricsDBOperatorRunner},
 		{Name: "scalingEngine-dbpruner", Runner: scalingEngineDBOperatorRunner},
@@ -85,14 +74,14 @@ func main() {
 		{Name: "application-sync", Runner: applicationSyncRunner},
 	}
 
+	// Database lock
 	guid := uuid.NewString()
 	const lockTableName = "operator_lock"
-	var lockDB db.LockDB
-	lockDB, err = sqldb.NewLockSQLDB(conf.Db[db.LockDb], lockTableName, logger.Session("lock-db"))
-	startup.ExitOnError(err, logger, "failed-to-connect-lock-database", lager.Data{"dbConfig": conf.Db[db.LockDb]})
-	defer lockDB.Close()
+	lockDB := startup.CreateLockDB(conf.Db[db.LockDb], lockTableName, logger)
+	defer func() { _ = lockDB.Closer() }()
+	
 	prdl := sync.NewDatabaseLock(logger)
-	dbLockMaintainer := prdl.InitDBLockRunner(conf.DBLock.LockRetryInterval, conf.DBLock.LockTTL, guid, lockDB, func() {}, func() {
+	dbLockMaintainer := prdl.InitDBLockRunner(conf.DBLock.LockRetryInterval, conf.DBLock.LockTTL, guid, lockDB.DB, func() {}, func() {
 		os.Exit(1)
 	})
 
@@ -100,7 +89,9 @@ func main() {
 		grouper.Members{{Name: "db-lock-maintainer", Runner: dbLockMaintainer}},
 		members...,
 	)
-	gatherer := createPrometheusRegistry(policyDb, appMetricsDB, scalingEngineDB, logger)
+
+	// Health server
+	gatherer := createPrometheusRegistry(policyDb.DB, appMetricsDB.DB, scalingEngineDB.DB, logger)
 	healthRouter, err := healthendpoint.NewHealthRouter(conf.Health, []healthendpoint.Checker{}, logger, gatherer, time.Now)
 	startup.ExitOnError(err, logger, "failed to create health router")
 
@@ -112,6 +103,7 @@ func main() {
 		members...,
 	)
 
+	// Start services
 	err = startup.StartServices(logger, members)
 	if err != nil {
 		os.Exit(1)
