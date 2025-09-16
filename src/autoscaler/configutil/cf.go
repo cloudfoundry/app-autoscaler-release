@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/db"
+	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/helpers"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"github.com/cloud-gov/go-cfenv"
 	"gopkg.in/yaml.v3"
@@ -335,6 +336,47 @@ type CommonVCAPConfig interface {
 	SetPortsForCF(cfPort int)
 	SetXFCCValidation(spaceGuid, orgGuid string)
 	GetDatabaseConfig() *map[string]db.DatabaseConfig
+}
+
+// BaseConfig contains common configuration fields and methods shared across components
+type BaseConfig struct {
+	Logging   helpers.LoggingConfig        `yaml:"logging" json:"logging"`
+	Server    helpers.ServerConfig         `yaml:"server" json:"server"`
+	CFServer  helpers.ServerConfig         `yaml:"cf_server" json:"cf_server"`
+	Health    helpers.HealthConfig         `yaml:"health" json:"health"`
+	Db        map[string]db.DatabaseConfig `yaml:"db" json:"db"`
+}
+
+// SetLoggingLevel implements configutil.Configurable
+func (c *BaseConfig) SetLoggingLevel() {
+	c.Logging.Level = strings.ToLower(c.Logging.Level)
+}
+
+// GetLogging returns the logging configuration
+func (c *BaseConfig) GetLogging() *helpers.LoggingConfig {
+	return &c.Logging
+}
+
+// SetLoggingPlainText implements configutil.CommonVCAPConfig
+func (c *BaseConfig) SetLoggingPlainText() {
+	c.Logging.PlainTextSink = true
+}
+
+// SetPortsForCF implements configutil.CommonVCAPConfig
+func (c *BaseConfig) SetPortsForCF(cfPort int) {
+	c.CFServer.Port = cfPort
+	c.Server.Port = 0
+}
+
+// SetXFCCValidation implements configutil.CommonVCAPConfig
+func (c *BaseConfig) SetXFCCValidation(spaceGuid, orgGuid string) {
+	c.CFServer.XFCC.ValidSpaceGuid = spaceGuid
+	c.CFServer.XFCC.ValidOrgGuid = orgGuid
+}
+
+// GetDatabaseConfig implements configutil.CommonVCAPConfig
+func (c *BaseConfig) GetDatabaseConfig() *map[string]db.DatabaseConfig {
+	return &c.Db
 }
 
 // ApplyCommonVCAPConfiguration handles the common VCAP configuration steps

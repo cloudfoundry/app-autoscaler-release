@@ -186,29 +186,31 @@ circuitBreaker:
 					expectedTime := 10 * time.Second
 					Expect(err).NotTo(HaveOccurred())
 					Expect(conf).To(Equal(&Config{
-						Logging:           helpers.LoggingConfig{Level: "info"},
+						BaseConfig: configutil.BaseConfig{
+							Logging: helpers.LoggingConfig{Level: "info"},
+							Server: helpers.ServerConfig{
+								Port: 9080,
+								TLS: models.TLSCerts{
+									KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/server.key",
+									CertFile:   "/var/vcap/jobs/autoscaler/config/certs/server.crt",
+									CACertFile: "/var/vcap/jobs/autoscaler/config/certs/ca.crt",
+								},
+							},
+							CFServer: helpers.ServerConfig{
+								Port: 9082,
+							},
+							Health: helpers.HealthConfig{
+								ServerConfig: helpers.ServerConfig{
+									Port: 9999,
+								},
+							},
+							Db: expectedDbConfig,
+						},
 						HttpClientTimeout: &expectedTime,
 						Pool: &PoolConfig{
 							InstanceIndex:  1,
 							TotalInstances: 2,
 						},
-						Server: helpers.ServerConfig{
-							Port: 9080,
-							TLS: models.TLSCerts{
-								KeyFile:    "/var/vcap/jobs/autoscaler/config/certs/server.key",
-								CertFile:   "/var/vcap/jobs/autoscaler/config/certs/server.crt",
-								CACertFile: "/var/vcap/jobs/autoscaler/config/certs/ca.crt",
-							},
-						},
-						CFServer: helpers.ServerConfig{
-							Port: 9082,
-						},
-						Health: helpers.HealthConfig{
-							ServerConfig: helpers.ServerConfig{
-								Port: 9999,
-							},
-						},
-						Db: expectedDbConfig,
 						Aggregator: &AggregatorConfig{
 							AggregatorExecuteInterval: 30 * time.Second,
 							PolicyPollerInterval:      30 * time.Second,
@@ -1171,12 +1173,14 @@ health:
 			BeforeEach(func() {
 				expectedTimeout := 10 * time.Second
 				conf = &Config{
-					Logging: helpers.LoggingConfig{Level: "info"},
+					BaseConfig: configutil.BaseConfig{
+						Logging: helpers.LoggingConfig{Level: "info"},
+						Db:      expectedDbConfig,
+					},
 					Pool: &PoolConfig{
 						TotalInstances: 2,
 						InstanceIndex:  0,
 					},
-					Db: expectedDbConfig,
 					Aggregator: &AggregatorConfig{
 						AggregatorExecuteInterval: 30 * time.Second,
 						PolicyPollerInterval:      30 * time.Second,

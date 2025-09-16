@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/configutil"
@@ -78,53 +77,18 @@ type CircuitBreakerConfig struct {
 }
 
 type Config struct {
-	Logging                   helpers.LoggingConfig        `yaml:"logging" json:"logging"`
-	Server                    helpers.ServerConfig         `yaml:"server" json:"server"`
-	CFServer                  helpers.ServerConfig         `yaml:"cf_server" json:"cf_server"`
-	Pool                      *PoolConfig                  `yaml:"pool" json:"pool"`
-	Health                    helpers.HealthConfig         `yaml:"health" json:"health"`
-	Db                        map[string]db.DatabaseConfig `yaml:"db" json:"db"`
-	Aggregator                *AggregatorConfig            `yaml:"aggregator" json:"aggregator,omitempty"`
-	Evaluator                 *EvaluatorConfig             `yaml:"evaluator" json:"evaluator,omitempty"`
-	ScalingEngine             ScalingEngineConfig          `yaml:"scalingEngine" json:"scalingEngine"`
-	MetricCollector           MetricCollectorConfig        `yaml:"metricCollector" json:"metricCollector"`
-	DefaultStatWindowSecs     int                          `yaml:"defaultStatWindowSecs" json:"defaultStatWindowSecs"`
-	DefaultBreachDurationSecs int                          `yaml:"defaultBreachDurationSecs" json:"defaultBreachDurationSecs"`
-	CircuitBreaker            *CircuitBreakerConfig        `yaml:"circuitBreaker,omitempty" json:"circuitBreaker,omitempty"`
-	HttpClientTimeout         *time.Duration               `yaml:"http_client_timeout,omitempty" json:"http_client_timeout,omitempty"`
+	configutil.BaseConfig     `yaml:",inline" json:",inline"`
+	Pool                      *PoolConfig           `yaml:"pool" json:"pool"`
+	Aggregator                *AggregatorConfig     `yaml:"aggregator" json:"aggregator,omitempty"`
+	Evaluator                 *EvaluatorConfig      `yaml:"evaluator" json:"evaluator,omitempty"`
+	ScalingEngine             ScalingEngineConfig   `yaml:"scalingEngine" json:"scalingEngine"`
+	MetricCollector           MetricCollectorConfig `yaml:"metricCollector" json:"metricCollector"`
+	DefaultStatWindowSecs     int                   `yaml:"defaultStatWindowSecs" json:"defaultStatWindowSecs"`
+	DefaultBreachDurationSecs int                   `yaml:"defaultBreachDurationSecs" json:"defaultBreachDurationSecs"`
+	CircuitBreaker            *CircuitBreakerConfig `yaml:"circuitBreaker,omitempty" json:"circuitBreaker,omitempty"`
+	HttpClientTimeout         *time.Duration        `yaml:"http_client_timeout,omitempty" json:"http_client_timeout,omitempty"`
 }
 
-// SetLoggingLevel implements configutil.Configurable
-func (c *Config) SetLoggingLevel() {
-	c.Logging.Level = strings.ToLower(c.Logging.Level)
-}
-
-// GetLogging returns the logging configuration
-func (c *Config) GetLogging() *helpers.LoggingConfig {
-	return &c.Logging
-}
-
-// SetLoggingPlainText implements configutil.CommonVCAPConfig
-func (c *Config) SetLoggingPlainText() {
-	c.Logging.PlainTextSink = true
-}
-
-// SetPortsForCF implements configutil.CommonVCAPConfig
-func (c *Config) SetPortsForCF(cfPort int) {
-	c.CFServer.Port = cfPort
-	c.Server.Port = 0
-}
-
-// SetXFCCValidation implements configutil.CommonVCAPConfig
-func (c *Config) SetXFCCValidation(spaceGuid, orgGuid string) {
-	c.CFServer.XFCC.ValidSpaceGuid = spaceGuid
-	c.CFServer.XFCC.ValidOrgGuid = orgGuid
-}
-
-// GetDatabaseConfig implements configutil.CommonVCAPConfig
-func (c *Config) GetDatabaseConfig() *map[string]db.DatabaseConfig {
-	return &c.Db
-}
 
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	return configutil.GenericLoadConfig(filepath, vcapReader, defaultConfig, configutil.VCAPConfigurableFunc[Config](LoadVcapConfig))
@@ -146,26 +110,28 @@ func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader)
 
 func defaultConfig() Config {
 	return Config{
-		Logging: helpers.LoggingConfig{
-			Level: DefaultLoggingLevel,
-		},
-		Server: helpers.ServerConfig{
-			Port: DefaultServerPort,
+		BaseConfig: configutil.BaseConfig{
+			Logging: helpers.LoggingConfig{
+				Level: DefaultLoggingLevel,
+			},
+			Server: helpers.ServerConfig{
+				Port: DefaultServerPort,
+			},
+			CFServer: helpers.ServerConfig{
+				Port: 8082,
+			},
+			Health: helpers.HealthConfig{
+				ServerConfig: helpers.ServerConfig{
+					Port: DefaultHealthServerPort,
+				},
+			},
+			Db: make(map[string]db.DatabaseConfig),
 		},
 		Pool: &PoolConfig{},
-		Db:   make(map[string]db.DatabaseConfig),
 		CircuitBreaker: &CircuitBreakerConfig{
 			BackOffInitialInterval:  DefaultBackOffInitialInterval,
 			BackOffMaxInterval:      DefaultBackOffMaxInterval,
 			ConsecutiveFailureCount: DefaultBreakerConsecutiveFailureCount,
-		},
-		CFServer: helpers.ServerConfig{
-			Port: 8082,
-		},
-		Health: helpers.HealthConfig{
-			ServerConfig: helpers.ServerConfig{
-				Port: DefaultHealthServerPort,
-			},
 		},
 		Aggregator: &AggregatorConfig{
 			AggregatorExecuteInterval: DefaultAggregatorExecuteInterval,

@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/cf"
@@ -26,69 +25,36 @@ type SynchronizerConfig struct {
 }
 
 type Config struct {
-	CF                  cf.Config                    `yaml:"cf"`
-	Logging             helpers.LoggingConfig        `yaml:"logging"`
-	Server              helpers.ServerConfig         `yaml:"server"`
-	CFServer            helpers.ServerConfig         `yaml:"cf_server"`
-	Health              helpers.HealthConfig         `yaml:"health"`
-	Db                  map[string]db.DatabaseConfig `yaml:"db" json:"db"`
-	DefaultCoolDownSecs int                          `yaml:"defaultCoolDownSecs"`
-	LockSize            int                          `yaml:"lockSize"`
-	HttpClientTimeout   time.Duration                `yaml:"http_client_timeout"`
+	configutil.BaseConfig `yaml:",inline"`
+	CF                    cf.Config     `yaml:"cf"`
+	DefaultCoolDownSecs   int           `yaml:"defaultCoolDownSecs"`
+	LockSize              int           `yaml:"lockSize"`
+	HttpClientTimeout     time.Duration `yaml:"http_client_timeout"`
 }
 
-// SetLoggingLevel implements configutil.Configurable
-func (c *Config) SetLoggingLevel() {
-	c.Logging.Level = strings.ToLower(c.Logging.Level)
-}
-
-// GetLogging returns the logging configuration
-func (c *Config) GetLogging() *helpers.LoggingConfig {
-	return &c.Logging
-}
-
-// SetLoggingPlainText implements configutil.CommonVCAPConfig
-func (c *Config) SetLoggingPlainText() {
-	c.Logging.PlainTextSink = true
-}
-
-// SetPortsForCF implements configutil.CommonVCAPConfig
-func (c *Config) SetPortsForCF(cfPort int) {
-	c.CFServer.Port = cfPort
-	c.Server.Port = 0
-}
-
-// SetXFCCValidation implements configutil.CommonVCAPConfig
-func (c *Config) SetXFCCValidation(spaceGuid, orgGuid string) {
-	c.CFServer.XFCC.ValidSpaceGuid = spaceGuid
-	c.CFServer.XFCC.ValidOrgGuid = orgGuid
-}
-
-// GetDatabaseConfig implements configutil.CommonVCAPConfig
-func (c *Config) GetDatabaseConfig() *map[string]db.DatabaseConfig {
-	return &c.Db
-}
 
 func defaultConfig() Config {
 	return Config{
+		BaseConfig: configutil.BaseConfig{
+			Logging: helpers.LoggingConfig{
+				Level: "info",
+			},
+			CFServer: helpers.ServerConfig{
+				Port: 8082,
+			},
+			Server: helpers.ServerConfig{
+				Port: 8080,
+			},
+			Health: helpers.HealthConfig{
+				ServerConfig: helpers.ServerConfig{
+					Port: 8081,
+				},
+			},
+			Db: make(map[string]db.DatabaseConfig),
+		},
 		CF: cf.Config{
 			ClientConfig: cf.ClientConfig{SkipSSLValidation: false},
 		},
-		Logging: helpers.LoggingConfig{
-			Level: "info",
-		},
-		CFServer: helpers.ServerConfig{
-			Port: 8082,
-		},
-		Server: helpers.ServerConfig{
-			Port: 8080,
-		},
-		Health: helpers.HealthConfig{
-			ServerConfig: helpers.ServerConfig{
-				Port: 8081,
-			},
-		},
-		Db:                  make(map[string]db.DatabaseConfig),
 		DefaultCoolDownSecs: 300,
 		LockSize:            100,
 		HttpClientTimeout:   DefaultHttpClientTimeout,
