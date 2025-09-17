@@ -340,11 +340,11 @@ type CommonVCAPConfig interface {
 
 // BaseConfig contains common configuration fields and methods shared across components
 type BaseConfig struct {
-	Logging   helpers.LoggingConfig        `yaml:"logging" json:"logging"`
-	Server    helpers.ServerConfig         `yaml:"server" json:"server"`
-	CFServer  helpers.ServerConfig         `yaml:"cf_server" json:"cf_server"`
-	Health    helpers.HealthConfig         `yaml:"health" json:"health"`
-	Db        map[string]db.DatabaseConfig `yaml:"db" json:"db"`
+	Logging  helpers.LoggingConfig        `yaml:"logging" json:"logging"`
+	Server   helpers.ServerConfig         `yaml:"server" json:"server"`
+	CFServer helpers.ServerConfig         `yaml:"cf_server" json:"cf_server"`
+	Health   helpers.HealthConfig         `yaml:"health" json:"health"`
+	Db       map[string]db.DatabaseConfig `yaml:"db" json:"db"`
 }
 
 // SetLoggingLevel implements configutil.Configurable

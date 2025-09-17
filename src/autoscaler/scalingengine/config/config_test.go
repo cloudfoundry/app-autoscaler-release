@@ -374,4 +374,80 @@ health:
 			})
 		})
 	})
+
+	Describe("LoadVcapConfig", func() {
+		var (
+			conf *Config
+			err  error
+		)
+
+		BeforeEach(func() {
+			conf = &Config{
+				BaseConfig: configutil.BaseConfig{
+					Db: make(map[string]db.DatabaseConfig),
+				},
+			}
+			mockVCAPConfigurationReader.IsRunningOnCFReturns(true)
+			mockVCAPConfigurationReader.GetPortReturns(8080)
+			mockVCAPConfigurationReader.GetSpaceGuidReturns("space-guid")
+			mockVCAPConfigurationReader.GetOrgGuidReturns("org-guid")
+			mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(`{"key": "value"}`), nil)
+		})
+
+		It("should apply common VCAP configuration when running on CF", func() {
+			err = LoadVcapConfig(conf, mockVCAPConfigurationReader)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Verify that various interface methods were called
+			Expect(mockVCAPConfigurationReader.IsRunningOnCFCallCount()).To(Equal(1))
+			Expect(mockVCAPConfigurationReader.GetPortCallCount()).To(Equal(1))
+			Expect(mockVCAPConfigurationReader.GetServiceCredentialContentCallCount()).To(Equal(1))
+			Expect(mockVCAPConfigurationReader.ConfigureDatabasesCallCount()).To(Equal(1))
+			Expect(mockVCAPConfigurationReader.GetSpaceGuidCallCount()).To(Equal(1))
+			Expect(mockVCAPConfigurationReader.GetOrgGuidCallCount()).To(Equal(1))
+
+			// Verify service name passed to GetServiceCredentialContent
+			serviceName, credentialKey := mockVCAPConfigurationReader.GetServiceCredentialContentArgsForCall(0)
+			Expect(serviceName).To(Equal("scalingengine-config"))
+			Expect(credentialKey).To(Equal("scalingengine-config"))
+
+			// Verify common configuration was applied
+			Expect(conf.Logging.PlainTextSink).To(BeTrue())
+			Expect(conf.CFServer.Port).To(Equal(8080))
+			Expect(conf.Server.Port).To(Equal(0))
+			Expect(conf.CFServer.XFCC.ValidSpaceGuid).To(Equal("space-guid"))
+			Expect(conf.CFServer.XFCC.ValidOrgGuid).To(Equal("org-guid"))
+		})
+
+		When("not running on CF", func() {
+			BeforeEach(func() {
+				mockVCAPConfigurationReader.IsRunningOnCFReturns(false)
+			})
+
+			It("should not apply VCAP configuration", func() {
+				err = LoadVcapConfig(conf, mockVCAPConfigurationReader)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(mockVCAPConfigurationReader.IsRunningOnCFCallCount()).To(Equal(1))
+				// Other methods should not be called when not on CF
+				Expect(mockVCAPConfigurationReader.GetPortCallCount()).To(Equal(0))
+				Expect(mockVCAPConfigurationReader.GetServiceCredentialContentCallCount()).To(Equal(0))
+			})
+		})
+
+		When("GetServiceCredentialContent returns an error", func() {
+			var expectedError error
+
+			BeforeEach(func() {
+				expectedError = errors.New("service credential error")
+				mockVCAPConfigurationReader.GetServiceCredentialContentReturns(nil, expectedError)
+			})
+
+			It("should return the error", func() {
+				err = LoadVcapConfig(conf, mockVCAPConfigurationReader)
+				Expect(err).To(HaveOccurred())
+				Expect(errors.Is(err, configutil.ErrServiceConfigNotFound)).To(BeTrue())
+			})
+		})
+	})
 })
