@@ -92,7 +92,7 @@ func ExitOnError(err error, logger lager.Logger, message string, data ...lager.D
 func Bootstrap[T ConfigWithLogging](serviceName string, configLoader ConfigLoader[T]) (T, lager.Logger) {
 	path := ParseFlags()
 	vcapConfiguration, _ := LoadVCAPConfiguration()
-	
+
 	conf, err := LoadAndValidateConfig(path, vcapConfiguration, configLoader)
 	if err != nil {
 		os.Exit(1)
@@ -100,6 +100,6 @@ func Bootstrap[T ConfigWithLogging](serviceName string, configLoader ConfigLoade
 
 	SetupEnvironment()
 	logger := InitLogger(conf.GetLogging(), serviceName)
-	
+
 	return conf, logger
 }

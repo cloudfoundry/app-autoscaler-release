@@ -32,7 +32,6 @@ type Config struct {
 	HttpClientTimeout     time.Duration `yaml:"http_client_timeout"`
 }
 
-
 func defaultConfig() Config {
 	return Config{
 		BaseConfig: configutil.BaseConfig{

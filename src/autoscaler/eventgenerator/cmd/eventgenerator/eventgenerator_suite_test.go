@@ -308,7 +308,7 @@ func initConfig() {
 		},
 		DefaultBreachDurationSecs: 600,
 		DefaultStatWindowSecs:     300,
-		HttpClientTimeout: &timeout,
+		HttpClientTimeout:         &timeout,
 	}
 
 	conf.Health.ServerConfig.Port = 8000 + GinkgoParallelProcess()

@@ -21,7 +21,7 @@ import (
 
 func main() {
 	conf, logger := startup.Bootstrap("operator", config.LoadConfig)
-	
+
 	prClock := clock.NewClock()
 
 	// Database connections using startup factories
@@ -52,7 +52,7 @@ func main() {
 	loggerSessionName = "scalingengine-dbpruner"
 	scalingEngineDBPruner := operator.NewScalingEngineDbPruner(scalingEngineDB.DB, conf.ScalingEngineDb.CutoffDuration, prClock, logger.Session(loggerSessionName))
 	scalingEngineDBOperatorRunner := operator.NewOperatorRunner(scalingEngineDBPruner, conf.ScalingEngineDb.RefreshInterval, prClock, logger.Session(loggerSessionName))
-	
+
 	loggerSessionName = "scalingengine-sync"
 	scalingEngineSync := operator.NewScheduleSynchronizer(scalingEngineHttpclient, conf.ScalingEngine.URL, prClock, logger.Session(loggerSessionName))
 	scalingEngineSyncRunner := operator.NewOperatorRunner(scalingEngineSync, conf.ScalingEngine.SyncInterval, prClock, logger.Session(loggerSessionName))
@@ -79,7 +79,7 @@ func main() {
 	const lockTableName = "operator_lock"
 	lockDB := startup.CreateLockDB(conf.Db[db.LockDb], lockTableName, logger)
 	defer func() { _ = lockDB.Closer() }()
-	
+
 	prdl := sync.NewDatabaseLock(logger)
 	dbLockMaintainer := prdl.InitDBLockRunner(conf.DBLock.LockRetryInterval, conf.DBLock.LockTTL, guid, lockDB.DB, func() {}, func() {
 		os.Exit(1)
