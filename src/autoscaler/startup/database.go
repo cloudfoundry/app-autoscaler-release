@@ -21,10 +21,10 @@ func CreatePolicyDB(dbConfig db.DatabaseConfig, logger lager.Logger) *DatabaseCo
 	}
 }
 
-// CreateAppMetricDB creates and connects to app metric database  
+// CreateAppMetricDB creates and connects to app metric database
 func CreateAppMetricDB(dbConfig db.DatabaseConfig, logger lager.Logger) *DatabaseConnection[db.AppMetricDB] {
 	appMetricDB, err := sqldb.NewAppMetricSQLDB(dbConfig, logger.Session("appmetric-db"))
-	ExitOnError(err, logger, "failed to connect app-metric database", lager.Data{"dbConfig": dbConfig})
+	ExitOnError(err, logger, "failed to connect appmetrics db", lager.Data{"dbConfig": dbConfig})
 	return &DatabaseConnection[db.AppMetricDB]{
 		DB:     appMetricDB,
 		Closer: appMetricDB.Close,
@@ -34,7 +34,7 @@ func CreateAppMetricDB(dbConfig db.DatabaseConfig, logger lager.Logger) *Databas
 // CreateScalingEngineDB creates and connects to scaling engine database
 func CreateScalingEngineDB(dbConfig db.DatabaseConfig, logger lager.Logger) *DatabaseConnection[db.ScalingEngineDB] {
 	scalingEngineDB, err := sqldb.NewScalingEngineSQLDB(dbConfig, logger.Session("scalingengine-db"))
-	ExitOnError(err, logger, "failed to connect scalingengine database", lager.Data{"dbConfig": dbConfig})
+	ExitOnError(err, logger, "failed to connect scalingengine db", lager.Data{"dbConfig": dbConfig})
 	return &DatabaseConnection[db.ScalingEngineDB]{
 		DB:     scalingEngineDB,
 		Closer: scalingEngineDB.Close,
