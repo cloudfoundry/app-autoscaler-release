@@ -89,19 +89,20 @@ type Config struct {
 	HttpClientTimeout         *time.Duration        `yaml:"http_client_timeout,omitempty" json:"http_client_timeout,omitempty"`
 }
 
-
 func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) (*Config, error) {
 	return configutil.GenericLoadConfig(filepath, vcapReader, defaultConfig, configutil.VCAPConfigurableFunc[Config](LoadVcapConfig))
 }
 
 func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
-	if err := configutil.ApplyCommonVCAPConfiguration(conf, vcapReader, "eventgenerator-config"); err != nil {
-		return err
-	}
-
 	// EventGenerator-specific VCAP configuration
 	if vcapReader.IsRunningOnCF() {
-		conf.Pool.InstanceIndex = vcapReader.GetInstanceIndex()
+		if err := configutil.ApplyCommonVCAPConfiguration(conf, vcapReader, "eventgenerator-config"); err != nil {
+			return err
+		}
+
+		if conf.Pool != nil {
+			conf.Pool.InstanceIndex = vcapReader.GetInstanceIndex()
+		}
 		conf.ScalingEngine.TLSClientCerts = vcapReader.GetInstanceTLSCerts()
 	}
 

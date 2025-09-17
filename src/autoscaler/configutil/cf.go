@@ -384,10 +384,6 @@ func ApplyCommonVCAPConfiguration[T any, PT interface {
 	*T
 	CommonVCAPConfig
 }](conf PT, vcapReader VCAPConfigurationReader, serviceName string) error {
-	if !vcapReader.IsRunningOnCF() {
-		return nil
-	}
-
 	// enable plain text logging. See src/autoscaler/helpers/logger.go
 	conf.SetLoggingPlainText()
 

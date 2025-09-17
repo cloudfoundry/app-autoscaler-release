@@ -1427,6 +1427,9 @@ health:
 			mockVCAPConfigurationReader.GetSpaceGuidReturns("space-guid")
 			mockVCAPConfigurationReader.GetOrgGuidReturns("org-guid")
 			mockVCAPConfigurationReader.GetServiceCredentialContentReturns([]byte(`{"key": "value"}`), nil)
+			mockVCAPConfigurationReader.ConfigureDatabasesReturns(nil)
+			mockVCAPConfigurationReader.GetInstanceIndexReturns(0)
+			mockVCAPConfigurationReader.GetInstanceTLSCertsReturns(models.TLSCerts{})
 		})
 
 		It("should apply common VCAP configuration when running on CF", func() {
