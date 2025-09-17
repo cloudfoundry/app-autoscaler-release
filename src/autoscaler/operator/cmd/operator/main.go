@@ -81,7 +81,10 @@ func main() {
 	defer func() { _ = lockDB.Closer() }()
 
 	prdl := sync.NewDatabaseLock(logger)
-	dbLockMaintainer := prdl.InitDBLockRunner(conf.DBLock.LockRetryInterval, conf.DBLock.LockTTL, guid, lockDB.DB, func() {}, func() {
+	dbLockMaintainer := prdl.InitDBLockRunner(conf.DBLock.LockRetryInterval, conf.DBLock.LockTTL, guid, lockDB.DB, func() {
+		// Empty callback for lock acquisition - no special action needed when lock is obtained
+		// The operator services will start normally once the lock is acquired
+	}, func() {
 		os.Exit(1)
 	})
 
