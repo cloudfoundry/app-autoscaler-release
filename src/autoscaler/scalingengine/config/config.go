@@ -66,7 +66,7 @@ func LoadConfig(filepath string, vcapReader configutil.VCAPConfigurationReader) 
 
 func LoadVcapConfig(conf *Config, vcapReader configutil.VCAPConfigurationReader) error {
 	if vcapReader.IsRunningOnCF() {
-		if err := configutil.ApplyCommonVCAPConfiguration(conf, vcapReader, "eventgenerator-config"); err != nil {
+		if err := configutil.ApplyCommonVCAPConfiguration(conf, vcapReader, "scalingengine-config"); err != nil {
 			return err
 		}
 	}
