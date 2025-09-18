@@ -34,6 +34,7 @@ files:
 - autoscaler/ratelimiter/* # gosub
 - autoscaler/routes/* # gosub
 - autoscaler/scalingengine/apis/scalinghistory/* # gosub
+- autoscaler/startup/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/brokerapi/v13/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/brokerapi/v13/auth/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/brokerapi/v13/domain/* # gosub

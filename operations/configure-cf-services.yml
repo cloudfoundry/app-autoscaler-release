@@ -69,4 +69,3 @@
       component: autoscaler_cf_eventgenerator
     uris:
       - ((deployment_name))-cf-eventgenerator.((system_domain))
-
