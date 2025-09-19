@@ -5,8 +5,9 @@ import (
 	"changelog/github"
 	"flag"
 	"fmt"
-	"log"
 	"os"
+
+	"code.cloudfoundry.org/lager/v3"
 )
 
 type cliOpts struct {
@@ -43,12 +44,14 @@ func parseCliOpts() cliOpts {
 }
 
 func main() {
+	var logger = lager.NewLogger("changelog")
+
 	opts := parseCliOpts()
 
 	client := github.New(opts.token, opts.owner, opts.repo, opts.branch)
 	tagsToSha, err := client.GetTagsToSha()
 	if err != nil {
-		log.Fatalf("ERROR: Failed connect with github client:%s", err.Error())
+		logger.Fatal("failed connect with github client", err, lager.Data{"owner": opts.owner, "repo": opts.repo, "branch": opts.branch})
 	}
 
 	// ToDo: Refactor in own function?
@@ -58,26 +61,26 @@ func main() {
 		previousReleaseSHAId = oldNameing
 	}
 	if previousReleaseSHAId == "" {
-		log.Fatalf("ERROR: Could not find the previous release sha for tag: '%s'", opts.previousReleaseTagName)
+		logger.Fatal("could not find the previous release", nil, lager.Data{"previousReleaseTag": opts.previousReleaseTagName})
 	}
 
 	var allPullRequests []github.PullRequest
 
 	prs, err := client.FetchPullRequests(previousReleaseSHAId, opts.latestCommitSHAId)
 	if err != nil {
-		log.Fatalf("ERROR: failed to get pull requests: '%s'", opts.previousReleaseTagName)
+		logger.Fatal("failed to get pull requests", err, lager.Data{"previousReleaseSHAId": previousReleaseSHAId, "latestCommitSHAId": opts.latestCommitSHAId})
 	}
 	allPullRequests = append(allPullRequests, prs...)
 
 	changelog, nextVersion, err := display.GenerateOutput(allPullRequests, opts.previousReleaseTagName)
 	if err != nil {
-		log.Fatalf("ERROR: failed to generate md file: '%s'", opts.previousReleaseTagName)
+		logger.Fatal("failed to generate md file", nil, lager.Data{"numberPRs": len(allPullRequests), "previousReleaseTag": opts.previousReleaseTagName})
 	}
 
 	if opts.changelogFile != "" {
 		err := os.WriteFile(opts.changelogFile, []byte(changelog), 0600)
 		if err != nil {
-			log.Fatalf("ERROR: failed write md file '%s':%s", opts.changelogFile, err.Error())
+			logger.Fatal("failed write md file", err, lager.Data{"file": opts.changelogFile})
 		}
 	} else {
 		fmt.Println(changelog)

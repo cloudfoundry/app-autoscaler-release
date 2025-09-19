@@ -6,7 +6,7 @@
     "path:./nix#cf-deploy-plugin":          "",
     "path:./nix#cloud-mta-build-tool":      "",
     "path:./nix#uaac":                      "",
-    "act":                                  "0.2.78",
+    "act":                                  "0.2.80",
     "actionlint":                           "1.7.7",
     "bosh-cli":                             "7.3.1",
     "bundix":                               "2.5.2",

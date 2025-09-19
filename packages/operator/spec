@@ -20,6 +20,7 @@ files:
 - autoscaler/operator/cmd/operator/* # gosub
 - autoscaler/operator/config/* # gosub
 - autoscaler/routes/* # gosub
+- autoscaler/startup/* # gosub
 - autoscaler/sync/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub

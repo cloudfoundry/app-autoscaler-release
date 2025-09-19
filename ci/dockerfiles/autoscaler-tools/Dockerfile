@@ -1,4 +1,4 @@
-FROM ubuntu:noble@sha256:9cbed754112939e914291337b5e554b07ad7c392491dba6daf25eef1332a22e8
+FROM ubuntu:noble@sha256:353675e2a41babd526e2b837d7ec780c2a05bca0164f7ea5dbbd433d21d166fc
 MAINTAINER autoscaler-team
 
 ENV DEBIAN_FRONTEND="noninteractive" TZ="Europe/London"
@@ -66,7 +66,7 @@ RUN apt-get update && \
 
 # Install bosh_cli
 # renovate: datasource=github-releases depName=bosh-cli lookupName=cloudfoundry/bosh-cli
-ARG BOSH_VERSION=7.9.7
+ARG BOSH_VERSION=7.9.11
 RUN wget -q https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64 && \
   mv bosh-cli-* /usr/local/bin/bosh && \
   chmod +x /usr/local/bin/bosh

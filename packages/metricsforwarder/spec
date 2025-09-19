@@ -26,6 +26,7 @@ files:
 - autoscaler/models/* # gosub
 - autoscaler/ratelimiter/* # gosub
 - autoscaler/routes/* # gosub
+- autoscaler/startup/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/cfhttp/v2/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/clock/* # gosub
 - autoscaler/vendor/code.cloudfoundry.org/go-diodes/* # gosub
