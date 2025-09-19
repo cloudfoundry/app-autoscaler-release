@@ -9,7 +9,7 @@ jobs:
     name: "go get -u"
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:e91783ca009f906e3a78edca376d1507222cb5c3763cbdebeb624bd8ee09b90a
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:aed5f7cc4b22337f1bebaada709d42f36bf393b033d991209738efb86111082b
     permissions:
       pull-requests: write
       contents: write
