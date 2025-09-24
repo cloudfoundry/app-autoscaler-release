@@ -28,6 +28,7 @@ public class HttpAuthFilter extends OncePerRequestFilter {
   private String validSpaceGuid;
   private String validOrgGuid;
 
+  // TODO: check if this entry works as expected when deploying scheduler as an app and relaying on the scheduler.yml template (that missies this entry)
   @Value("${cfserver.healthserver.username}")
   private String healthServerUsername;
 
