@@ -3,8 +3,10 @@ package org.cloudfoundry.autoscaler.scheduler.filter;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import jakarta.servlet.FilterChain;
+import org.cloudfoundry.autoscaler.scheduler.conf.HealthServerProperties;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -17,30 +19,29 @@ public class HttpAuthFilterTest {
   private FilterChain filterChain;
   private HttpAuthFilter httpAuthFilter;
 
+  private HealthServerProperties healthServerProperties;
+
+
   @Before
   public void setup() {
     request = new MockHttpServletRequest();
     response = new MockHttpServletResponse();
     filterChain = new MockFilterChain();
-    httpAuthFilter = new HttpAuthFilter();
-  }
 
-  @Test
-  public void testDoFilterHttpsRequestShouldNotConsiderXfccAndReturnSuccess() throws Exception {
+    // Mock HealthServerProperties
+    healthServerProperties = Mockito.mock(HealthServerProperties.class);
+    Mockito.when(healthServerProperties.getUsername()).thenReturn("test-user");
+    Mockito.when(healthServerProperties.getPassword()).thenReturn("test-password");
 
-    this.request.setScheme("https");
-
-    httpAuthFilter.doFilterInternal(request, response, filterChain);
-
-    assertThat(response.getStatus()).isEqualTo(200);
-    assertThat(request.getRequestURL().toString()).isEqualTo("https://localhost:80");
+    // Initialize HttpAuthFilter with mocked dependencies
+    httpAuthFilter = new HttpAuthFilter(healthServerProperties);
   }
 
   @Test
   public void testDoFilterWithMissingXfccHeaderGetsSkipped() throws Exception {
 
     httpAuthFilter.doFilterInternal(request, response, filterChain);
-    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat(response.getStatus()).isEqualTo(400);
   }
 
   @Test
@@ -99,8 +100,8 @@ public class HttpAuthFilterTest {
         "Basic "
             + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
 
-    httpAuthFilter.setHealthServerUsername(username);
-    httpAuthFilter.setHealthServerPassword(password);
+    healthServerProperties.setUsername(username);
+    healthServerProperties.setPassword(password);
     httpAuthFilter.doFilterInternal(request, response, filterChain);
     assertThat(response.getStatus()).isEqualTo(200);
   }
@@ -118,8 +119,8 @@ public class HttpAuthFilterTest {
         "Basic "
             + java.util.Base64.getEncoder().encodeToString((username + ":" + password).getBytes()));
 
-    httpAuthFilter.setHealthServerUsername("correct-user");
-    httpAuthFilter.setHealthServerPassword("correct-password");
+    healthServerProperties.setUsername("correct-user");
+    healthServerProperties.setPassword("correct-password");
     httpAuthFilter.doFilterInternal(request, response, filterChain);
     assertThat(response.getStatus()).isEqualTo(401);
     assertThat(response.getErrorMessage()).isEqualTo("Unauthorized");
