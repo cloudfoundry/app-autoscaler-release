@@ -4,7 +4,6 @@ MAKEFLAGS = -s
 
 acceptance-dir := ./src/acceptance
 autoscaler-dir := ./src/autoscaler
-changelog-dir := ./src/changelog
 changeloglockcleaner-dir := ./src/changeloglockcleaner
 db-dir := ./src/db
 scheduler-dir := ./src/autoscaler/scheduler
@@ -112,13 +111,7 @@ autoscaler.build:
 autoscaler.build_tests:
 	@make --directory='${autoscaler-dir}' build_tests
 
-.PHONY: changelog.build
-changelog.build:
-	@make --directory='${changelog-dir}' build
 
-.PHONY: changelog.build_tests
-changelog.build_tests:
-	@make --directory='${changelog-dir}' build_tests
 
 .PHONY: changeloglockcleaner.build
 changeloglockcleaner.build:
@@ -170,8 +163,6 @@ test-autoscaler: check-db_type init-db test-certs
 test-autoscaler-suite: check-db_type init-db test-certs
 	@make --directory='${autoscaler-dir}' testsuite TEST='${TEST}' DBURL='${DBURL}' GINKGO_OPTS='${GINKGO_OPTS}'
 
-test-changelog:
-	@make --directory='${changelog-dir}' test
 test-changeloglockcleaner: init-db test-certs
 	@make --directory='${changeloglockcleaner-dir}' test DBURL='${DBURL}'
 test-acceptance-unit:
@@ -273,9 +264,6 @@ autoscaler.lint:
 test-app.lint:
 	@echo 'Linting test-app …'
 	make --directory='${test-app-dir}' lint
-changelog.lint:
-	@echo 'Linting changelog …'
-	make --directory='${changelog-dir}' lint
 changeloglockcleaner.lint:
 	@echo 'Linting changeloglockcleaner …'
 	make --directory='${changeloglockcleaner-dir}' lint
@@ -343,8 +331,6 @@ acceptance.go-mod-tidy:
 	make --directory='${acceptance-dir}' go-mod-tidy
 autoscaler.go-mod-tidy:
 	make --directory='${autoscaler-dir}' go-mod-tidy
-changelog.go-mod-tidy:
-	make --directory='${changelog-dir}' go-mod-tidy
 changeloglockcleaner.go-mod-tidy:
 	make --directory='${changeloglockcleaner-dir}' go-mod-tidy
 test-app.go-mod-tidy:
@@ -366,8 +352,6 @@ acceptance.go-mod-vendor:
 	make --directory='${acceptance-dir}' go-mod-vendor
 autoscaler.go-mod-vendor:
 	make --directory='${autoscaler-dir}' go-mod-vendor
-changelog.go-mod-vendor:
-	make --directory='${changelog-dir}' go-mod-vendor
 changeloglockcleaner.go-mod-vendor:
 	make --directory='${changeloglockcleaner-dir}' go-mod-vendor
 

@@ -90,19 +90,6 @@ EOF
     yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "$config_file"
 }
 
-function generate_changelog(){
-  [ -e "${build_path}/changelog.md" ] && return
-  LAST_COMMIT_SHA="$(git rev-parse HEAD)"
-  echo " - Generating release notes including commits up to: ${LAST_COMMIT_SHA}"
-  pushd src/changelog > /dev/null
-    echo " - running changelog"
-    go run main.go \
-      --changelog-file "${build_path}/changelog.md" \
-      --last-commit-sha-id "${LAST_COMMIT_SHA}"\
-      --prev-rel-tag "${previous_version}"\
-      --version-file "${build_path}/name"
-  popd
-}
 function setup_git(){
   if [[ -z $(git config --global user.email) ]]; then
     git config --global user.email "${AUTOSCALER_CI_BOT_EMAIL}"
@@ -127,7 +114,6 @@ function setup_git(){
 pushd "${autoscaler_dir}" > /dev/null
   setup_git
   create_bosh_config
-  generate_changelog
 
   echo " - Displaying diff..."
   export GIT_PAGER=cat
