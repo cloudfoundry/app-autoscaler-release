@@ -582,7 +582,7 @@ jobs:
     params:
       name: build/name
       tag: build/tag
-      body: build/changelog.md
+      generate_release_notes: true
       globs: [build/artifacts/*]
 
 - name: cleanup-autoscaler-deployments
