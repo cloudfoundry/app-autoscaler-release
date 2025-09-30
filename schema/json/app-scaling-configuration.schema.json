@@ -6,10 +6,10 @@
 
   "properties": {
     "binding-configuration": {
-      "$ref": "./binding-configuration.json"
+      "$ref": "./binding-configuration.schema.json"
     },
     "scaling-policy": {
-      "$ref": "./scaling-policy.json"
+      "$ref": "./scaling-policy.schema.json"
     }
   },
 
