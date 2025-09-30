@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-05/schema#",
+  "title": "Binding-request-parameters-schema",
+  "description": "Schema for parameters for a service-binding creation with an instances of Application Autoscaler.",
+  "type": "object",
+
+  "properties": {
+    "binding-configuration": {
+      "$ref": "./binding-configuration.schema.json"
+    },
+    "scaling-policy": {
+      "$ref": "./scaling-policy.schema.json"
+    }
+  },
+
+  "additionalProperties": false
+}
