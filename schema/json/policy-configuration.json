@@ -31,13 +31,13 @@
             "metric_submission_strategy"
           ],
           "additionalProperties": false
-        },
+        }
       },
       "required": [
         "custom_metrics"
       ],
       "additionalProperties": false
-    },
+    }
   },
   "additionalProperties": false
 }
