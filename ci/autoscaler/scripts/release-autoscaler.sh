@@ -90,6 +90,64 @@ EOF
     yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "$config_file"
 }
 
+function determine_next_version(){
+  echo " - Determining next version..."
+  echo " - Previous version: $previous_version"
+
+  # Remove 'v' prefix if present
+  local version_number=${previous_version#v}
+
+  # Parse version components
+  IFS='.' read -r major minor patch <<< "$version_number"
+
+  # Get commits since last tag
+  local commits_since_tag=$(git rev-list ${previous_version}..HEAD --oneline 2>/dev/null || git rev-list HEAD --oneline)
+  local commit_count=$(echo "$commits_since_tag" | wc -l)
+
+  if [ -z "$commits_since_tag" ] || [ "$commit_count" -eq 0 ]; then
+    echo " - No commits since last tag, keeping current version"
+    echo "$version_number" > "${build_path}/name"
+    return
+  fi
+
+  # Check for breaking changes, features, and fixes
+  local breaking_changes=$(grep -ciE 'breaking|!:' <<<"$commits_since_tag" || true)
+	local features=$(grep -c -iE "feat\(|feature\(|add\(|feat:|feature:|add:" <<<"$commits_since_tag" || true)
+	local fixes=$(grep -c -iE "fix\(|bug\(|fix:|bug:" <<<"$commits_since_tag" || true)
+
+  # Determine version increment based on conventional commits
+  if [[ "$breaking_changes" -gt 0 ]]; then
+    major=$((major + 1))
+    minor=0
+    patch=0
+    echo " - Found breaking changes, incrementing major version"
+  elif [[ "$features" -gt 0 ]]; then
+    minor=$((minor + 1))
+    patch=0
+    echo " - Found new features, incrementing minor version"
+  else
+    patch=$((patch + 1))
+    echo " - Found commits, incrementing patch version"
+  fi
+
+  local new_version="${major}.${minor}.${patch}"
+  echo " - Next version: $new_version"
+  echo "$new_version" > "${build_path}/name"
+}
+
+function generate_changelog(){
+  [ -e "${build_path}/changelog.md" ] && return
+  LAST_COMMIT_SHA="$(git rev-parse HEAD)"
+	echo " - Generating changelog using github cli..."
+	mkdir -p "${build_path}"
+	if gh release view ${VERSION} &>/dev/null; then
+		echo " - Deleting existing draft release ${VERSION}"
+		gh release delete ${VERSION} --yes
+	fi
+	gh release create ${VERSION} --generate-notes --draft
+	gh release view ${VERSION} > "${build_path}/changelog.md"
+}
+
 function setup_git(){
   if [[ -z $(git config --global user.email) ]]; then
     git config --global user.email "${AUTOSCALER_CI_BOT_EMAIL}"
@@ -114,12 +172,14 @@ function setup_git(){
 pushd "${autoscaler_dir}" > /dev/null
   setup_git
   create_bosh_config
+  determine_next_version
+
+  VERSION=${VERSION:-$(cat "${build_path}/name")}
+  generate_changelog
 
   echo " - Displaying diff..."
   export GIT_PAGER=cat
   git diff
-
-  VERSION=${VERSION:-$(cat "${build_path}/name")}
   echo "v${VERSION}" > "${build_path}/tag"
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"

@@ -625,12 +625,13 @@ jobs:
     - get: ci
     - get: gh-release
     - get: app-autoscaler-release
-      passed: [upgrade-test]
+      #passed: [upgrade-test]
       trigger: true
   - task: dummy-release-autoscaler
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/release-autoscaler.yml
     params:
+      DEBUG: true
       UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
       GITHUB_TOKEN: ((autoscaler_access_token))
       PERFORM_BOSH_RELEASE: false
