@@ -13,7 +13,7 @@
       "enum": [
         "x509",
         "binding-secret"
-      ],
+      ]
     }
   },
   "required": ["app_guid"],
