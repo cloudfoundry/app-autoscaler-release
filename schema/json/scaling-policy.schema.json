@@ -1,51 +1,17 @@
 {
-  "definitions": {},
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
+  "$schema": "http://json-schema.org/draft-05/schema#",
   "title": "Autoscaler Policy JSON Schema",
-  "required": [
-    "instance_min_count",
-    "instance_max_count"
-  ],
-  "anyOf": [
-    {
-      "required": [
-        "scaling_rules"
-      ]
-    },
-    {
-      "required": [
-        "schedules"
-      ]
-    }
-  ],
+  "description": "Schema for scaling-policies for Autoscaler",
+  "type": "object",
+
   "properties": {
+    "schema-version": {
+      "description": "Version-identifier for the used schema of this parameters-object.",
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]+)?$"
+    },
     "configuration": {
-      "type": "object",
-      "properties": {
-        "custom_metrics": {
-          "type": "object",
-          "properties": {
-            "metric_submission_strategy": {
-              "type": "object",
-              "properties": {
-                "allow_from": {
-                  "type": "string",
-                  "enum": [
-                    "bound_app"
-                  ]
-                }
-              },
-              "required": [
-                "allow_from"
-              ]
-            }
-          },
-          "required": [
-            "metric_submission_strategy"
-          ]
-        }
-      }
+      "$ref": "./policy-configuration.schema.json"
     },
     "instance_min_count": {
       "$id": "#/properties/instance_min_count",
@@ -928,5 +894,23 @@
         }
       }
     }
-  }
+  },
+
+  "required": [
+    "instance_min_count",
+    "instance_max_count"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "scaling_rules"
+      ]
+    },
+    {
+      "required": [
+        "schedules"
+      ]
+    }
+  ],
+  "additionalProperties": false
 }

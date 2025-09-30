@@ -11,7 +11,7 @@
       "pattern": "^[0-9]+(\\.[0-9]+)?$"
     },
     "configuration": {
-      "$ref": "./policy-configuration.json"
+      "$ref": "./policy-configuration.legacy-schema.json"
     },
     "instance_min_count": {
       "$id": "#/properties/instance_min_count",
