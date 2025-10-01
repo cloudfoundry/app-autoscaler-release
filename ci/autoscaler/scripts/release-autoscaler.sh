@@ -101,8 +101,10 @@ function determine_next_version(){
   IFS='.' read -r major minor patch <<< "$version_number"
 
   # Get commits since last tag
-  local commits_since_tag=$(git rev-list ${previous_version}..HEAD --oneline 2>/dev/null || git rev-list HEAD --oneline)
-  local commit_count=$(echo "$commits_since_tag" | wc -l)
+  local commits_since_tag
+  commits_since_tag=$(git rev-list ${previous_version}..HEAD --oneline 2>/dev/null || git rev-list HEAD --oneline)
+  local commit_count
+  commit_count=$(echo "$commits_since_tag" | wc -l)
 
   if [ -z "$commits_since_tag" ] || [ "$commit_count" -eq 0 ]; then
     echo " - No commits since last tag, keeping current version"
@@ -110,24 +112,59 @@ function determine_next_version(){
     return
   fi
 
-  # Check for breaking changes, features, and fixes
-  local breaking_changes=$(grep -ciE 'breaking|!:' <<<"$commits_since_tag" || true)
-	local features=$(grep -c -iE "feat\(|feature\(|add\(|feat:|feature:|add:" <<<"$commits_since_tag" || true)
-	local fixes=$(grep -c -iE "fix\(|bug\(|fix:|bug:" <<<"$commits_since_tag" || true)
+  # Extract PR numbers from commits
+  local pr_numbers
+  pr_numbers=$(echo "$commits_since_tag" | grep -oE '\(#[0-9]+\)' | grep -oE '[0-9]+' | sort -u)
 
-  # Determine version increment based on conventional commits
-  if [[ "$breaking_changes" -gt 0 ]]; then
+  if [ -z "$pr_numbers" ]; then
+    echo " - No PR numbers found in commits, incrementing patch version"
+    patch=$((patch + 1))
+    local new_version="${major}.${minor}.${patch}"
+    echo " - Next version: $new_version"
+    echo "$new_version" > "${build_path}/name"
+    return
+  fi
+
+  # Query GitHub API for PR labels and categorize
+  local has_breaking=0
+  local has_enhancement=0
+  local pr_count=0
+
+  echo " - Checking PR labels for version determination..."
+  while IFS= read -r pr_num; do
+    if [ -n "$pr_num" ]; then
+      pr_count=$((pr_count + 1))
+      local labels
+      labels=$(gh pr view "$pr_num" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+
+      if echo "$labels" | grep -q "exclude-from-changelog"; then
+        echo "   - PR #$pr_num: excluded from changelog"
+        continue
+      fi
+
+      if echo "$labels" | grep -q "breaking-change"; then
+        echo "   - PR #$pr_num: breaking change"
+        has_breaking=1
+      elif echo "$labels" | grep -q "enhancement"; then
+        echo "   - PR #$pr_num: enhancement"
+        has_enhancement=1
+      fi
+    fi
+  done <<< "$pr_numbers"
+
+  # Determine version increment based on PR labels
+  if [[ "$has_breaking" -eq 1 ]]; then
     major=$((major + 1))
     minor=0
     patch=0
     echo " - Found breaking changes, incrementing major version"
-  elif [[ "$features" -gt 0 ]]; then
+  elif [[ "$has_enhancement" -eq 1 ]]; then
     minor=$((minor + 1))
     patch=0
-    echo " - Found new features, incrementing minor version"
+    echo " - Found enhancements, incrementing minor version"
   else
     patch=$((patch + 1))
-    echo " - Found commits, incrementing patch version"
+    echo " - Found changes, incrementing patch version"
   fi
 
   local new_version="${major}.${minor}.${patch}"
@@ -137,7 +174,6 @@ function determine_next_version(){
 
 function generate_changelog(){
   [ -e "${build_path}/changelog.md" ] && return
-  LAST_COMMIT_SHA="$(git rev-parse HEAD)"
 	echo " - Generating changelog using github cli..."
 	mkdir -p "${build_path}"
 	if gh release view ${VERSION} &>/dev/null; then
