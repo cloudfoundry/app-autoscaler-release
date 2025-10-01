@@ -176,12 +176,12 @@ function generate_changelog(){
   [ -e "${build_path}/changelog.md" ] && return
 	echo " - Generating changelog using github cli..."
 	mkdir -p "${build_path}"
-	if gh release view ${VERSION} &>/dev/null; then
+	if gh release view "${VERSION}" &>/dev/null; then
 		echo " - Deleting existing draft release ${VERSION}"
-		gh release delete ${VERSION} --yes
+		gh release delete "${VERSION}" --yes
 	fi
-	gh release create ${VERSION} --generate-notes --draft
-	gh release view ${VERSION} > "${build_path}/changelog.md"
+	gh release create "${VERSION}" --generate-notes --draft
+	gh release view "${VERSION}" > "${build_path}/changelog.md"
 }
 
 function setup_git(){
