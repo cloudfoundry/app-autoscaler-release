@@ -102,7 +102,7 @@ function determine_next_version(){
 
   # Get commits since last tag
   local commits_since_tag
-  commits_since_tag=$(git rev-list ${previous_version}..HEAD --oneline 2>/dev/null || git rev-list HEAD --oneline)
+  commits_since_tag=$(git rev-list "${previous_version}"..HEAD --oneline 2>/dev/null || git rev-list HEAD --oneline)
   local commit_count
   commit_count=$(echo "$commits_since_tag" | wc -l)
 
