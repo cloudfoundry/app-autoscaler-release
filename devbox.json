@@ -42,7 +42,11 @@
     "temurin-bin-21":                       "21.0.3",
     "which":                                "latest",
     "xq-xml":                               "1.3.0",
-    "yq-go":                                "4.45.4"
+    "yq-go":                                "4.45.4",
+    "apple-sdk":{
+      "version": "latest",
+      "platforms": ["aarch64-darwin"]
+    }
   },
   "shell": {
     "init_hook": [

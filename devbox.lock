@@ -97,6 +97,34 @@
         }
       }
     },
+    "apple-sdk@latest": {
+      "last_modified": "2025-09-18T16:33:27Z",
+      "resolved": "github:NixOS/nixpkgs/f4b140d5b253f5e2a1ff4e5506edbf8267724bde#apple-sdk",
+      "source": "devbox-search",
+      "version": "11.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/rhlyld20zdzdi5wghb4b12gw52s9whr9-apple-sdk-11.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/rhlyld20zdzdi5wghb4b12gw52s9whr9-apple-sdk-11.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/p7rrw0n9rx3pd5klpvigxb32daa4c4zj-apple-sdk-11.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/p7rrw0n9rx3pd5klpvigxb32daa4c4zj-apple-sdk-11.3"
+        }
+      }
+    },
     "bosh-cli@7.3.1": {
       "last_modified": "2023-08-22T06:04:29Z",
       "resolved": "github:NixOS/nixpkgs/9d757ec498666cc1dcc6f2be26db4fd3e1e9ab37#bosh-cli",
