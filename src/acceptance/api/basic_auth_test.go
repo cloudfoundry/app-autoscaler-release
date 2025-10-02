@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"encoding/base64"
 	"net/http"
 	"strings"
 
@@ -40,8 +41,28 @@ var _ = Describe("AutoScaler Basic Auth Tests", func() {
 		Entry("Scaling Engine", urlfor("scalingengine"), getStatus),
 		Entry("Operator", urlfor("operator"), getStatus),
 		Entry("Metrics Forwarder", urlfor("metricsforwarder"), getStatus),
-		Entry("Scheduler", urlfor("scheduler"), getStatus),
+		Entry("Scheduler without Basic Auth", urlfor("scheduler"), getStatus),
 	)
+	Describe("Scheduler Health Endpoint Basic Auth Tests", func() {
+
+		It("returns 200 when valid basic auth credentials are provided", func() {
+			url := urlfor("scheduler")()
+
+			req, err := http.NewRequest(http.MethodGet, url, nil)
+			Expect(err).ShouldNot(HaveOccurred())
+
+			auth := cfg.HealthEndpointUsername + ":" + cfg.HealthEndpointPassword
+
+			encodedAuth := base64.StdEncoding.EncodeToString([]byte(auth))
+			req.Header.Add("Authorization", "Basic "+encodedAuth)
+
+			resp, err := client.Do(req)
+			Expect(err).ShouldNot(HaveOccurred())
+			defer func() { _ = resp.Body.Close() }()
+
+			Expect(resp.StatusCode).To(Equal(http.StatusOK))
+		})
+	})
 
 })
 
