@@ -17,9 +17,6 @@ performance_app_percentage_to_scale="${PERFORMANCE_APP_PERCENTAGE_TO_SCALE:-}"
 performance_setup_workers="${PERFORMANCE_SETUP_WORKERS:-}"
 performance_update_existing_org_quota=${PERFORMANCE_UPDATE_EXISTING_ORG_QUOTA:-true}
 cpu_upper_threshold=${CPU_UPPER_THRESHOLD:-100}
-health_endpoint_username="${HEALTH_ENDPOINT_USERNAME:-test-user}"
-health_endpoint_password="${HEALTH_ENDPOINT_PASSWORD:-test-password}"
-
 
 if [[ -z "${cf_admin_password}" ]]
 then
@@ -54,8 +51,6 @@ function write_app_config() {
 	"cpu_upper_threshold": ${cpu_upper_threshold},
 	"name_prefix": "${name_prefix}",
 	"autoscaler_api": "${deployment_name}.${system_domain}",
-	"health_endpoint_username": "${health_endpoint_username}",
-	"health_endpoint_password": "${health_endpoint_password}",
 
 	"performance": {
 		"app_count": ${performance_app_count},

@@ -80,9 +80,7 @@ type Config struct {
 	MetricsforwarderHealthEndpoint string `json:"metricsforwarder_health_endpoint"`
 	SchedulerHealthEndpoint        string `json:"scheduler_health_endpoint"`
 
-	HealthEndpointsBasicAuthEnabled bool   `json:"health_endpoints_basic_auth_enabled"`
-	HealthEndpointUsername          string `json:"health_endpoint_username"`
-	HealthEndpointPassword          string `json:"health_endpoint_password"`
+	HealthEndpointsBasicAuthEnabled bool `json:"health_endpoints_basic_auth_enabled"`
 
 	CPUUpperThreshold int64 `json:"cpu_upper_threshold"`
 
