@@ -50,7 +50,7 @@ public class HttpAuthFilter extends OncePerRequestFilter {
       handleHealthEndpoint(request, response);
       return;
     }
-    // Only enforce XFCC for HTTPS requests
+    // Check for XFCC header
     String xfccHeader = request.getHeader(XFCC_HEADER);
     if (xfccHeader == null || xfccHeader.isEmpty()) {
       logger.warn("Missing X-Forwarded-Client-Cert header, URI={}", request.getRequestURI());
