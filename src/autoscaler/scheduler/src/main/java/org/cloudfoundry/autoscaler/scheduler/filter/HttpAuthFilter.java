@@ -40,33 +40,32 @@ public class HttpAuthFilter extends OncePerRequestFilter {
     boolean isHealthEndpoint = request.getRequestURI().contains(HEALTH_ENDPOINT);
 
     logger.info(
-        "Received {} request, scheme={},X-Forwarded-Proto={} isHealthEndpoint={}",
+        "Received {} request, scheme={},X-Forwarded-Proto={}, isHealthEndpoint={}, username={}",
         request.getMethod(),
         request.getScheme(),
         forwardedProto,
-        isHealthEndpoint);
+        isHealthEndpoint, cfServerConfiguration.getHealthserver().getUsername());
 
     if (isHealthEndpoint) {
       handleHealthEndpoint(request, response);
       return;
     }
-    // Only enforce XFCC for HTTPS requests
+    // Check for XFCC header
     String xfccHeader = request.getHeader(XFCC_HEADER);
     if (xfccHeader == null || xfccHeader.isEmpty()) {
       logger.warn("Missing X-Forwarded-Client-Cert header, URI={}", request.getRequestURI());
       filterChain.doFilter(request, response);
       return;
     }
-
-    logger.info(
-        "X-Forwarded-Client-Cert header received ... checking authorized org and space in OU");
     validateOrganizationAndSpace(xfccHeader, response);
-    // Proceed with valid request
     filterChain.doFilter(request, response);
   }
 
   private void validateOrganizationAndSpace(String xfccHeader, HttpServletResponse response)
       throws IOException {
+    logger.info(
+        "X-Forwarded-Client-Cert header received ... checking authorized cf organization and space"
+            + " in Organizational Unit");
     try {
       String organizationalUnit = extractOrganizationalUnit(xfccHeader);
       // Validate both key-value pairs in OrganizationalUnit
