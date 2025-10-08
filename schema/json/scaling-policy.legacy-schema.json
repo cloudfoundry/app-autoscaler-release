@@ -10,6 +10,13 @@
       "type": "string",
       "pattern": "^[0-9]+(\\.[0-9]+)?$"
     },
+    "credential-type": {
+      "type": "string",
+      "enum": [
+        "x509",
+        "binding-secret"
+      ]
+    },
     "configuration": {
       "$ref": "./policy-configuration.legacy-schema.json"
     },
