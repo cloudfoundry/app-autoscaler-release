@@ -61,5 +61,5 @@ func TestCertFolder() string {
 		}
 		certPath = filepath.Join(certPath, path)
 	}
-	return filepath.Join(certPath, "../test-certs")
+	return filepath.Join(certPath, "autoscaler", "test-certs")
 }

@@ -65,7 +65,7 @@ var (
 	httpClientForPublicApi *http.Client
 	logger                 lager.Logger
 
-	testCertDir = "../../../test-certs"
+	testCertDir = "../test-certs"
 )
 
 func TestIntegration(t *testing.T) {

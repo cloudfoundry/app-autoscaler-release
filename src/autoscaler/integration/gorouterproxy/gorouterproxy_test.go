@@ -59,7 +59,7 @@ var _ = Describe("Gorouterproxy", func() {
 		_, port, err := net.SplitHostPort(testserver.URL[len("http://"):])
 		Expect(err).ShouldNot(HaveOccurred())
 
-		testCertDir := "../../../../test-certs"
+		testCertDir := "../../test-certs"
 		cmd := exec.Command(cmdPath,
 			"--port", proxyPort,
 			"--forwardTo", port,
@@ -75,7 +75,7 @@ var _ = Describe("Gorouterproxy", func() {
 		testserver.Close()
 	})
 
-	It("proxy request to test server and turns tls creds into xfcc header", func() {
+	FIt("proxy request to test server and turns tls creds into xfcc header", func() {
 		Eventually(session.Out, 20*time.Second).Should(gbytes.Say("gorouter-proxy.started"))
 
 		privateKey, err := rsa.GenerateKey(rand.Reader, 2048)

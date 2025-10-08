@@ -1,11 +1,16 @@
+## Source code organization 
+
+- src/autoscaler/acceptance to src autoscaler/app-autoscaler/acceptance
+
 ## Github actions separation
 
 ### To migrate to new repo: 
 
+- WIP - mysql.yaml - Builds and tests with MySQL 8 (test & integration suites)
+
 - resume-ci-vms.yml - Resumes suspended CI VMs weekday mornings (05:00 UTC) and recreates router VM
 - suspend-ci-vms.yml - Suspends CI VMs weekday evenings (17:00 UTC) to save costs
 - acceptance_tests_mta.yaml - Runs acceptance tests for MTA deployment with additional operations on PRs
-- mysql.yaml - Builds and tests with MySQL 8 (test & integration suites)
 - postgres.yaml - Builds and tests with PostgreSQL 15 & 16 (test & integration suites)
 - java-ci-lint.yaml - Checks Java code formatting with google-java-format and runs checkstyle
 - openapi-specs-check.yaml - Validates OpenAPI specifications on PRs
