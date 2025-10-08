@@ -97,6 +97,34 @@
         }
       }
     },
+    "apple-sdk@latest": {
+      "last_modified": "2025-09-18T16:33:27Z",
+      "resolved": "github:NixOS/nixpkgs/f4b140d5b253f5e2a1ff4e5506edbf8267724bde#apple-sdk",
+      "source": "devbox-search",
+      "version": "11.3",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/rhlyld20zdzdi5wghb4b12gw52s9whr9-apple-sdk-11.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/rhlyld20zdzdi5wghb4b12gw52s9whr9-apple-sdk-11.3"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/p7rrw0n9rx3pd5klpvigxb32daa4c4zj-apple-sdk-11.3",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/p7rrw0n9rx3pd5klpvigxb32daa4c4zj-apple-sdk-11.3"
+        }
+      }
+    },
     "bosh-cli@7.3.1": {
       "last_modified": "2023-08-22T06:04:29Z",
       "resolved": "github:NixOS/nixpkgs/9d757ec498666cc1dcc6f2be26db4fd3e1e9ab37#bosh-cli",
@@ -313,51 +341,51 @@
         }
       }
     },
-    "credhub-cli@2.9.47": {
-      "last_modified": "2025-07-13T22:45:35Z",
-      "resolved": "github:NixOS/nixpkgs/a421ac6595024edcfbb1ef950a3712b89161c359#credhub-cli",
+    "credhub-cli@2.9.48": {
+      "last_modified": "2025-07-28T17:09:23Z",
+      "resolved": "github:NixOS/nixpkgs/648f70160c03151bc2121d179291337ad6bc564b#credhub-cli",
       "source": "devbox-search",
-      "version": "2.9.47",
+      "version": "2.9.48",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/wdi890jrdpl7afqmyc5jd5n2r6zap70i-credhub-cli-2.9.47",
+              "path": "/nix/store/6ll4a83ib2k1p73ff9sih281crj0zk5c-credhub-cli-2.9.48",
               "default": true
             }
           ],
-          "store_path": "/nix/store/wdi890jrdpl7afqmyc5jd5n2r6zap70i-credhub-cli-2.9.47"
+          "store_path": "/nix/store/6ll4a83ib2k1p73ff9sih281crj0zk5c-credhub-cli-2.9.48"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/0r6cmsph9251bhlk95383aasp3d4apcw-credhub-cli-2.9.47",
+              "path": "/nix/store/8qf4pxk4skjb8z32ic8zbydj99yj8f8n-credhub-cli-2.9.48",
               "default": true
             }
           ],
-          "store_path": "/nix/store/0r6cmsph9251bhlk95383aasp3d4apcw-credhub-cli-2.9.47"
+          "store_path": "/nix/store/8qf4pxk4skjb8z32ic8zbydj99yj8f8n-credhub-cli-2.9.48"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/3lwfx39jrdff14d9aa3i5837s6q7im9k-credhub-cli-2.9.47",
+              "path": "/nix/store/jqkn12a6yg0cgyr9y3i8n1pjp8aj7wmf-credhub-cli-2.9.48",
               "default": true
             }
           ],
-          "store_path": "/nix/store/3lwfx39jrdff14d9aa3i5837s6q7im9k-credhub-cli-2.9.47"
+          "store_path": "/nix/store/jqkn12a6yg0cgyr9y3i8n1pjp8aj7wmf-credhub-cli-2.9.48"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/chjdwsnh87k9b6vji4yja5d2l19bhw0v-credhub-cli-2.9.47",
+              "path": "/nix/store/1jizswgy85fr5nfhl2hldybl2bbi8h9a-credhub-cli-2.9.48",
               "default": true
             }
           ],
-          "store_path": "/nix/store/chjdwsnh87k9b6vji4yja5d2l19bhw0v-credhub-cli-2.9.47"
+          "store_path": "/nix/store/1jizswgy85fr5nfhl2hldybl2bbi8h9a-credhub-cli-2.9.48"
         }
       }
     },
@@ -1305,51 +1333,51 @@
         }
       }
     },
-    "maven@3.9.9": {
-      "last_modified": "2025-06-20T02:24:11Z",
-      "resolved": "github:NixOS/nixpkgs/076e8c6678d8c54204abcb4b1b14c366835a58bb#maven",
+    "maven@3.9.11": {
+      "last_modified": "2025-07-28T17:09:23Z",
+      "resolved": "github:NixOS/nixpkgs/648f70160c03151bc2121d179291337ad6bc564b#maven",
       "source": "devbox-search",
-      "version": "3.9.9",
+      "version": "3.9.11",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/4sg474wyf2s8j57w83c11zd557gyimmp-maven-3.9.9",
+              "path": "/nix/store/4l03gxm9lnkap9z4s219lk2lmznf6ksr-maven-3.9.11",
               "default": true
             }
           ],
-          "store_path": "/nix/store/4sg474wyf2s8j57w83c11zd557gyimmp-maven-3.9.9"
+          "store_path": "/nix/store/4l03gxm9lnkap9z4s219lk2lmznf6ksr-maven-3.9.11"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/qkfdylysqwrzwspwxqqyv7lq244p39qc-maven-3.9.9",
+              "path": "/nix/store/6663sm7x2b6lh3lcy40ysng365h0n41w-maven-3.9.11",
               "default": true
             }
           ],
-          "store_path": "/nix/store/qkfdylysqwrzwspwxqqyv7lq244p39qc-maven-3.9.9"
+          "store_path": "/nix/store/6663sm7x2b6lh3lcy40ysng365h0n41w-maven-3.9.11"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/j0pdklgk93si47d1d28l7278n96akx8p-maven-3.9.9",
+              "path": "/nix/store/i1fz4dsqcfy2ilz9yq0z84n973iw4k8z-maven-3.9.11",
               "default": true
             }
           ],
-          "store_path": "/nix/store/j0pdklgk93si47d1d28l7278n96akx8p-maven-3.9.9"
+          "store_path": "/nix/store/i1fz4dsqcfy2ilz9yq0z84n973iw4k8z-maven-3.9.11"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/vzx36lvpjzsinzw6hkhklpc4yfs8f3pn-maven-3.9.9",
+              "path": "/nix/store/f055dmaqf8japp7nqww78zp3g37j5qfs-maven-3.9.11",
               "default": true
             }
           ],
-          "store_path": "/nix/store/vzx36lvpjzsinzw6hkhklpc4yfs8f3pn-maven-3.9.9"
+          "store_path": "/nix/store/f055dmaqf8japp7nqww78zp3g37j5qfs-maven-3.9.11"
         }
       }
     },
