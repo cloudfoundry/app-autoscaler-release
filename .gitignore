@@ -34,7 +34,6 @@ bosh-lite/deployments/*
 /.recommenders
 target
 /app-autoscaler-release/
-test-certs
 *.coverprofile
 src/autoscaler/build
 src/autoscaler/vendor
@@ -51,13 +50,6 @@ acceptance_config.json
 # Generated, intermediate openapi-specs:
 src/acceptance/assets/app/go_app/internal/openapi-specs.bundled
 
-# Generated api-clients:
-src/acceptance/assets/app/go_app/internal/applicationmetric/oas*gen.go
-src/acceptance/assets/app/go_app/internal/custommetrics/oas*gen.go
-src/acceptance/assets/app/go_app/internal/policy/oas*gen.go
-src/autoscaler/api/apis/scalinghistory/oas*gen.go
-src/autoscaler/scalingengine/apis/scalinghistory/oas*gen.go
-
 # https://go.dev/ref/mod#go-work-file
 go.work*
 
@@ -72,7 +64,6 @@ keys/
 .vscode
 
 .trunk
-
 
 # ==================== 📦 Devbox, ❄ Nix, direnv ====================
 .devbox

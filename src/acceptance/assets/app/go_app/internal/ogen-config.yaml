@@ -1,8 +1,0 @@
-parser:
-  allow_remote: true
-generator:
-  features:
-    disable:
-      - paths/server
-  ignore_not_implemented:
-    - mutualTLS security

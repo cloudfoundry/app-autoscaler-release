@@ -6,9 +6,7 @@ acceptance-dir := ./src/acceptance
 autoscaler-dir := ./src/autoscaler
 changelog-dir := ./src/changelog
 changeloglockcleaner-dir := ./src/changeloglockcleaner
-db-dir := ./src/db
 scheduler-dir := ./src/autoscaler/scheduler
-test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
 go_modules := $(shell find . -maxdepth 6 -name "*.mod" -exec dirname {} \; | sed 's|\./src/||' | sort)
@@ -21,13 +19,10 @@ DBURL := $(shell case "${db_type}" in\
 			 (postgres) printf "postgres://postgres:postgres@${DB_HOST}/autoscaler?sslmode=disable"; ;; \
 				 (mysql) printf "root@tcp(${DB_HOST})/autoscaler?tls=false"; ;; esac)
 DEBUG := false
-MYSQL_TAG := 8
-POSTGRES_TAG := 16
 SUITES ?= broker api app
 AUTOSCALER_DIR ?= $(shell pwd)
 lint_config := ${AUTOSCALER_DIR}/.golangci.yaml
 CI_DIR ?= ${AUTOSCALER_DIR}/ci
-CI ?= false
 VERSION ?= 0.0.testing
 DEST ?= build
 
@@ -42,19 +37,6 @@ $(shell mkdir -p target)
 $(shell mkdir -p build)
 
 .DEFAULT_GOAL := build_all
-
-.PHONY: check-type
-check-db_type:
-	@case "${db_type}" in\
-	 (mysql|postgres) echo " - using db_type:${db_type}"; ;;\
-	 (*) echo "ERROR: db_type needs to be one of mysql|postgres"; exit 1;;\
-	 esac
-
-.PHONY: init-db
-init-db: check-db_type start-db db.java-libs target/init-db-${db_type}
-target/init-db-${db_type}:
-	@./scripts/initialise_db.sh '${db_type}'
-	@touch $@
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 .PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
@@ -100,17 +82,6 @@ build_all: build_programs build_tests
 build_programs: autoscaler.build db.java-libs scheduler.build build-test-app
 build_tests:acceptance.build_tests autoscaler.build_tests changelog.build_tests changeloglockcleaner.build_tests
 
-.PHONY: acceptance.build_tests
-acceptance.build_tests:
-	@make --directory='${acceptance-dir}' build_tests
-
-.PHONY: autoscaler.build
-autoscaler.build:
-	@make --directory='${autoscaler-dir}' build
-
-.PHONY: autoscaler.build_tests
-autoscaler.build_tests:
-	@make --directory='${autoscaler-dir}' build_tests
 
 .PHONY: changelog.build
 changelog.build:
@@ -128,39 +99,10 @@ changeloglockcleaner.build:
 changeloglockcleaner.build_tests:
 	@make --directory='${changeloglockcleaner-dir}' build_tests
 
-MVN_OPTS ?= -Dmaven.test.skip=true
-db.java-lib-dir := src/db/target/lib
-db.java-lib-files = $(shell find '${db.java-lib-dir}' -type f -name '*.jar' 2> /dev/null)
-.PHONY: db.java-libs
-db.java-libs: ${db.java-lib-dir} ${db.java-lib-files}
-${db.java-lib-dir} ${db.java-lib-files} &: src/db/pom.xml
-	@mkdir --parents '${db.java-lib-dir}'
-	@echo 'Fetching db.java-libs'
-	@pushd src &> /dev/null \
-		&& mvn --quiet package --projects='db' ${MVN_OPTS} \
-	&& popd
-
-.PHONY:
-scheduler.build:
-	@make --directory='${scheduler-dir}' build
-
 # 🚧 To-do: Substitute me by definitions that call the Makefile-targets of the other Makefiles!
 $(addprefix test_,$(go_modules)):
 	@echo "# Compiling '$(patsubst test_%,%,$@)' tests"
 	@make --directory='./src/$(patsubst test_%,%,$@)' build_tests
-
-
-.PHONY: test-certs
-test-certs: target/autoscaler_test_certs ${scheduler-dir}/src/test/resources/certs
-
-
-target/autoscaler_test_certs:
-	@./scripts/generate_test_certs.sh
-	@touch $@
-${scheduler-dir}/src/test/resources/certs:
-	@./${scheduler-dir}/scripts/generate_unit_test_certs.sh
-
-
 
 .PHONY: test test-autoscaler test-changelog test-changeloglockcleaner
 test: test-autoscaler scheduler.test test-changelog test-changeloglockcleaner test-acceptance-unit ## Run all unit tests
@@ -176,89 +118,6 @@ test-changeloglockcleaner: init-db test-certs
 	@make --directory='${changeloglockcleaner-dir}' test DBURL='${DBURL}'
 test-acceptance-unit:
 	@make --directory='${acceptance-dir}' test-unit
-	@make --directory='${test-app-dir}' test
-
-.PHONY: start-db
-start-db: check-db_type target/start-db-${db_type}_CI_${CI} waitfor_${db_type}_CI_${CI}
-	@echo " SUCCESS"
-
-.PHONY: waitfor_postgres_CI_false waitfor_postgres_CI_true
-target/start-db-postgres_CI_false:
-	@if [ ! "$(shell docker ps -q -f name="^${db_type}")" ]; then \
-		if [ "$(shell docker ps -aq -f status=exited -f name="^${db_type}")" ]; then \
-			docker rm ${db_type}; \
-		fi;\
-		echo " - starting docker for ${db_type}";\
-		docker run -p 5432:5432 --name postgres \
-			-e POSTGRES_PASSWORD=postgres \
-			-e POSTGRES_USER=postgres \
-			-e POSTGRES_DB=autoscaler \
-			--health-cmd pg_isready \
-			--health-interval 1s \
-			--health-timeout 2s \
-			--health-retries 10 \
-			-d \
-			postgres:${POSTGRES_TAG} \
-			-c 'max_connections=1000' >/dev/null;\
-	else echo " - $@ already up'"; fi;
-	@touch $@
-target/start-db-postgres_CI_true:
-	@echo " - $@ already up'"
-waitfor_postgres_CI_false:
-	@echo -n " - waiting for ${db_type} ."
-	@COUNTER=0; until $$(docker exec postgres pg_isready &>/dev/null) || [ $$COUNTER -gt 10 ]; do echo -n "."; sleep 1; let COUNTER+=1; done;\
-	if [ $$COUNTER -gt 10 ]; then echo; echo "Error: timed out waiting for postgres. Try \"make clean\" first." >&2 ; exit 1; fi
-waitfor_postgres_CI_true:
-	@echo " - no ci postgres checks"
-
-.PHONY: waitfor_mysql_CI_false waitfor_mysql_CI_true
-target/start-db-mysql_CI_false:
-	@if [  ! "$(shell docker ps -q -f name="^${db_type}")" ]; then \
-		if [ "$(shell docker ps -aq -f status=exited -f name="^${db_type}")" ]; then \
-			docker rm ${db_type}; \
-		fi;\
-		echo " - starting docker for ${db_type}";\
-		docker pull mysql:${MYSQL_TAG}; \
-		docker run -p 3306:3306  --name mysql \
-			-e MYSQL_ALLOW_EMPTY_PASSWORD=true \
-			-e MYSQL_DATABASE=autoscaler \
-			-d \
-			mysql:${MYSQL_TAG} \
-			>/dev/null;\
-	else echo " - $@ already up"; fi;
-	@touch $@
-target/start-db-mysql_CI_true:
-	@echo " - $@ already up'"
-waitfor_mysql_CI_false:
-	@echo -n " - waiting for ${db_type} ."
-	@until docker exec mysql mysqladmin ping &>/dev/null ; do echo -n "."; sleep 1; done
-	@echo " SUCCESS"
-	@echo -n " - Waiting for table creation ."
-	@until [[ ! -z `docker exec mysql mysql -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null` ]]; do echo -n "."; sleep 1; done
-waitfor_mysql_CI_true:
-	@echo -n " - Waiting for table creation"
-	@which mysql > /dev/null &&\
-	{\
-		T=0;\
-		until [[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}"  --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'" 2> /dev/null)" ]]\
-			|| [[ $${T} -gt 30 ]];\
-		do echo -n "."; sleep 1; T=$$((T+1)); done;\
-	}
-	@[ ! -z "$(shell mysql -u "root" -h "${DB_HOST}" --port=3306 -qfsBe "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='autoscaler'"  2> /dev/null)" ]\
-		|| { echo "ERROR: Mysql timed out creating database"; exit 1; }
-
-
-.PHONY: stop-db
-stop-db: check-db_type
-	@echo " - Stopping ${db_type}"
-	@rm target/start-db-${db_type} &> /dev/null || echo " - Seems the make target was deleted stopping anyway!"
-	@docker rm -f ${db_type} &> /dev/null || echo " - we could not stop and remove docker named '${db_type}'"
-
-.PHONY: integration
-integration: init-db test-certs build_all build-gorouterproxy
-	@echo " - using DBURL=${DBURL}"
-	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
-
 
 .PHONY: lint lint-go acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
 lint: lint-go lint-ruby lint-actions lint-markdown lint-gorouterproxy
@@ -328,12 +187,7 @@ autoscaler.generate-fakes:
 test-app.generate-fakes:
 	make --directory='${test-app-dir}' generate-fakes
 
-.PHONY: generate-openapi-generated-clients-and-servers
-generate-openapi-generated-clients-and-servers:
-	make --directory='${autoscaler-dir}' generate-openapi-generated-clients-and-servers
-
-
- .PHONY: go-mod-tidy
+.PHONY: go-mod-tidy
 go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
 						 changeloglockcleaner.go-mod-tidy test-app.go-mod-tidy
 
@@ -407,12 +261,6 @@ mta-build:
 	@echo " - building mta"
 	@make --directory='${autoscaler-dir}' mta-build
 
-.PHONY: build-test-app
-build-test-app:
-	@make --directory='${test-app-dir}' build
-
-build-gorouterproxy:
-	@make --directory='${autoscaler-dir}' build-gorouterproxy
 
 .PHONY: deploy-test-app
 deploy-test-app:
@@ -513,14 +361,6 @@ scheduler.start: check-db_type init-db
 			'-Dspring.config.location=./src/main/resources/application.yml'; \
 	popd
 
-# This target is defined here rather than directly in the component “scheduler” itself, because it depends on targets outside that component. In the future, it will be moved back to that component and reference a dependency to a Makefile on the same level – the one for the component it depends on.
-.PHONY: scheduler.test
-scheduler.test: check-db_type scheduler.test-certificates init-db
-	pushd '${scheduler-dir}'; \
-		echo "Running tests in $(pwd) …"; \
-		export DB_HOST='${DB_HOST}'; \
-		mvn test \
-			--quiet --no-transfer-progress '-Dspring.profiles.include=${db_type}'; \
 	popd
 
 .PHONY: scheduler.test-certificates

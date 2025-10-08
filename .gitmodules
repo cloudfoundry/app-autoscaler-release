@@ -1,0 +1,3 @@
+[submodule "src/autoscaler"]
+	path = src/autoscaler
+	url = https://github.com/bonzofenix/app-autoscaler
