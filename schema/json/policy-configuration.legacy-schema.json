@@ -5,49 +5,36 @@
   "type": "object",
 
   "properties": {
-    "configuration": {
+    "custom_metrics": {
       "type": "object",
       "properties": {
-        "custom_metrics": {
+        "metric_submission_strategy": {
           "type": "object",
           "properties": {
-            "metric_submission_strategy": {
-              "type": "object",
-              "properties": {
-                "allow_from": {
-                  "type": "string",
-                  "enum": [
-                    "bound_app",
-                    "same_app"
-                  ]
-                }
-              },
-              "required": [
-                "allow_from"
+            "allow_from": {
+              "type": "string",
+              "enum": [
+                "bound_app",
+                "same_app"
               ]
             }
           },
           "required": [
-            "metric_submission_strategy"
-          ],
-          "additionalProperties": false
-        },
-        "app_guid": {
-          "$ref": "./shared_definitions.json#/schemas/guid"
-        },
-        "credential-type": {
-          "type": "string",
-          "enum": [
-            "x509",
-            "binding-secret"
+            "allow_from"
           ]
         }
       },
       "required": [
-        "custom_metrics"
+        "metric_submission_strategy"
       ],
       "additionalProperties": false
+    },
+    "app_guid": {
+      "$ref": "./shared_definitions.json#/schemas/guid"
     }
   },
+  "required": [
+    "custom_metrics"
+  ],
   "additionalProperties": false
 }

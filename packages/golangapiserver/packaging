@@ -1,20 +1,17 @@
 set -e -x
 
 export GOROOT=$(readlink -nf /var/vcap/packages/golang-1-linux)
-export PATH=$GOROOT/bin:$PATH
-export GOPATH=${BOSH_COMPILE_TARGET}
+export PATH="${GOROOT}/bin:${PATH}"
+export GOPATH="${BOSH_COMPILE_TARGET}"
 export GOCACHE=/tmp/gocache
 
-pushd ${BOSH_COMPILE_TARGET}/autoscaler
+pushd "${BOSH_COMPILE_TARGET}/autoscaler"
   GOPROXY=off make build-api
 popd
 
-cp -a ${BOSH_COMPILE_TARGET}/autoscaler/build/api ${BOSH_INSTALL_TARGET}
-cp -a ${BOSH_COMPILE_TARGET}/autoscaler/api/db/api.db.changelog.yml ${BOSH_INSTALL_TARGET}
-cp -a ${BOSH_COMPILE_TARGET}/autoscaler/api/db/servicebroker.db.changelog.yaml ${BOSH_INSTALL_TARGET}
+cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/build/api" "${BOSH_INSTALL_TARGET}"
+cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/api/db/api.db.changelog.yml" "${BOSH_INSTALL_TARGET}"
+cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/api/db/servicebroker.db.changelog.yaml" "${BOSH_INSTALL_TARGET}"
 
-cp -a ${BOSH_COMPILE_TARGET}/autoscaler/api/policyvalidator/policy_json.schema.json ${BOSH_INSTALL_TARGET}
-cp -a ${BOSH_COMPILE_TARGET}/autoscaler/api/schemas/catalog.schema.json ${BOSH_INSTALL_TARGET}
-
-
-
+cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/api/policyvalidator/policy_json.schema.json" "${BOSH_INSTALL_TARGET}"
+cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/api/catalog.schema.json" "${BOSH_INSTALL_TARGET}"
