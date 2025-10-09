@@ -11,7 +11,7 @@ jobs:
     name: Cleanup deployments
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:c5ad379f5672cee49b4f39645acd11c592970a3b10887832508a040a3e241934
+      image: ghcr.io/cloudfoundry/app-autoscaler-release-tools:main@sha256:09e7ef38d9e11d1731ef21d433c681d7e9895a04462fca8c45551b5ef696d511
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
