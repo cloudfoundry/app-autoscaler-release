@@ -13,5 +13,5 @@ cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/build/api" "${BOSH_INSTALL_TARGE
 cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/api/db/api.db.changelog.yml" "${BOSH_INSTALL_TARGET}"
 cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/api/db/servicebroker.db.changelog.yaml" "${BOSH_INSTALL_TARGET}"
 
-cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/api/policyvalidator/policy_json.schema.json" "${BOSH_INSTALL_TARGET}"
+cp --archive "${BOSH_COMPILE_TARGET}"/autoscaler/api/policyvalidator/*.json "${BOSH_INSTALL_TARGET}" # 🚧 To-do! Check if the files are found.
 cp --archive "${BOSH_COMPILE_TARGET}/autoscaler/api/catalog.schema.json" "${BOSH_INSTALL_TARGET}"
