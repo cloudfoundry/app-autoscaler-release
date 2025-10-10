@@ -521,7 +521,7 @@ var _ = Describe("BrokerHandler", func() {
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-2", "app-id-1"}, nil)
 				bindingdb.GetAppIdsByInstanceIdReturns([]string{"app-id-1", "app-id-2"}, nil)
 
-				var encodedTestDefaultPolicy models.ScalingPolicy
+				var encodedTestDefaultPolicy models.PolicyDefinition
 				err = json.Unmarshal([]byte(testDefaultPolicy), &encodedTestDefaultPolicy)
 				Expect(err).To(BeNil())
 				policydb.GetAppPolicyReturns(&encodedTestDefaultPolicy, nil)
@@ -623,7 +623,7 @@ var _ = Describe("BrokerHandler", func() {
 					DefaultPolicy:     testDefaultPolicy,
 					DefaultPolicyGuid: "default-policy-guid",
 				}, nil)
-				policydb.GetAppPolicyReturns(&models.ScalingPolicy{}, nil)
+				policydb.GetAppPolicyReturns(&models.PolicyDefinition{}, nil)
 			})
 
 			It("Succeeds and leaves the old default policy in place", func() {
@@ -934,7 +934,7 @@ var _ = Describe("BrokerHandler", func() {
 				  "configuration": {
 					"custom_metrics": {
 					  "metric_submission_strategy": {
-						"allow_from": "same_app"
+						"allow_from": "different_app"
 					  }
 					}
 				  },
@@ -995,7 +995,7 @@ var _ = Describe("BrokerHandler", func() {
 					verifyScheduleIsUpdatedInScheduler(testAppId, bindingPolicy)
 				})
 				It("should fail with 400", func() {
-					Expect(resp.Body.String()).To(ContainSubstring("{\"description\":\"invalid policy provided: [{\\\"context\\\":\\\"(root).configuration.custom_metrics.metric_submission_strategy.allow_from\\\",\\\"description\\\":\\\"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \\\\\\\"bound_app\\\\\\\"\\\"}]\"}"))
+					Expect(resp.Body.String()).To(ContainSubstring("{\"description\":\"invalid policy provided: [{\\\"context\\\":\\\"(root).configuration.custom_metrics.metric_submission_strategy.allow_from\\\",\\\"description\\\":\\\"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \\\\\\\"bound_app\\\\\\\", \\\\\\\"same_app\\\\\\\"\\\"}]\"}"))
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
 				})
 			})
@@ -1028,6 +1028,7 @@ var _ = Describe("BrokerHandler", func() {
 					}]
 				}`
 					bindingRequestBody.Policy = json.RawMessage(bindingPolicy)
+					bindingRequestBody.AppID = "an-app-id"
 					body, err = json.Marshal(bindingRequestBody)
 					Expect(err).NotTo(HaveOccurred())
 
@@ -1195,8 +1196,9 @@ var _ = Describe("BrokerHandler", func() {
 				})
 				It("fails with 400", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-					Expect(resp.Body.String()).To(MatchJSON(`{"error": "validate-credential-type","description": "invalid credential type provided: allowed values are [binding-secret, x509]"}`))
+					Expect(resp.Body.String()).To(MatchJSON(`{"description": "invalid policy provided: [{\"context\":\"(root).credential-type\",\"description\":\"credential-type must be one of the following: \\\"x509\\\", \\\"binding-secret\\\"\"}]"}`))
 				})
+
 			})
 			Context("credential-type is set to binding-secret", func() {
 				const testBindingPolicy = `{
