@@ -125,7 +125,7 @@ addons:
 stemcells:
 - alias: default
   os: ubuntu-jammy
-  version: latest
+  version: "1.915" # 🚧 To-do: Use "latest" again after successfully passing all tests;
 
 instance_groups:
 # Postgres Instance Group
