@@ -16,6 +16,7 @@ deployment_manifest=${DEPLOYMENT_MANIFEST:-"${repo_dir}/templates/postgres.yml"}
 release_ops="${repo_dir}/templates/operations"
 ops_files=${OPS_FILES:-"${release_ops}/add_static_ips.yml\
                        ${ci_dir}/operations/set-postgres-disk.yml\
+                       ${ci_dir}/operations/set-postgres-tls.yml\
                        ${ci_dir}/operations/add-multiapps-databases-to-postgres.yml \
                        ${ci_dir}/operations/tag-vms-and-disks.yml \
                        "}
