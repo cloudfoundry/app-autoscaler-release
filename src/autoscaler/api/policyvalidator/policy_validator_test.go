@@ -48,7 +48,7 @@ var _ = Describe("PolicyValidator", func() {
 		upperDiskThreshold = 2 * 1024
 
 		policyValidator = NewPolicyValidator(
-			"./policy_json.schema.json",
+			"./scaling-policy.legacy-schema.json",
 			lowerCPUThreshold,
 			upperCPUThreshold,
 			lowerCPUUtilThreshold,
@@ -63,10 +63,10 @@ var _ = Describe("PolicyValidator", func() {
 		policy, errResult = policyValidator.ParseAndValidatePolicy(json.RawMessage(policyString))
 		if policy != nil && len(errResult) <= 0 {
 			policyDefinition = policy.GetPolicyDefinition()
+			policyBytes, err := json.Marshal(policyDefinition)
+			Expect(err).ToNot(HaveOccurred())
+			policyJson = string(policyBytes)
 		}
-		policyBytes, err := json.Marshal(policyDefinition)
-		Expect(err).ToNot(HaveOccurred())
-		policyJson = string(policyBytes)
 	})
 
 	Context("Policy Schema &  Validation", func() {
@@ -108,6 +108,7 @@ var _ = Describe("PolicyValidator", func() {
 				}))
 			})
 		})
+
 		Context("when instance_min_count is < 1", func() {
 			BeforeEach(func() {
 				policyString = `{
@@ -221,7 +222,10 @@ var _ = Describe("PolicyValidator", func() {
 			})
 		})
 
-		Context("when additional fields are present", func() {
+		// This needs to be passed for backwards-compatibility. We allowed in former times to set
+		// this parameter `stats_window_secs` via configuration. We must silently ignore this
+		// parameter today.
+		Context("when legacy-fields are present", func() {
 			BeforeEach(func() {
 				policyString = `{
 					"instance_max_count":4,
@@ -235,10 +239,7 @@ var _ = Describe("PolicyValidator", func() {
 						"operator":">=",
 						"cool_down_secs":300,
 						"adjustment":"+1"
-					}],
-					"is_admin": true,
-					"is_sso": true,
-					"role": "admin"
+					}]
 				}`
 			})
 			It("the validation succeed and remove them", func() {
@@ -255,6 +256,7 @@ var _ = Describe("PolicyValidator", func() {
 						"adjustment":"+1"
 					}]
 				}`
+				Expect(errResult).To(BeNil())
 				Expect(policyJson).To(MatchJSON(validPolicyString))
 			})
 		})
@@ -2648,7 +2650,7 @@ var _ = Describe("PolicyValidator", func() {
 				Expect(errResult).To(Equal([]PolicyValidationErrors{
 					{
 						Context:     "(root).configuration.custom_metrics.metric_submission_strategy.allow_from",
-						Description: "configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\"",
+						Description: "configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\", \"same_app\"",
 					},
 				}))
 			})
