@@ -1,9 +1,9 @@
 package org.cloudfoundry.autoscaler.scheduler.conf;
 
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.Properties;
-import javax.sql.DataSource;
 import org.cloudfoundry.autoscaler.scheduler.beanPostProcessor.DatasourceBeanPostProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -15,16 +15,38 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.sql.DataSource;
+import java.util.Properties;
+
 @Configuration
 @EnableTransactionManagement
 public class DataSourceConfig {
+
+  private static final Logger logger = LoggerFactory.getLogger(DataSourceConfig.class);
+
+  /**
+   * Configures FIPS-compatible TLS properties for database connections.
+   * Disables XDH key exchange algorithms that are not supported by BC-FIPS.
+   */
+  private void configureFipsCompatibleTLSProperties(HikariDataSource dataSource) {
+    // Set system properties to configure TLS for FIPS compatibility
+    System.setProperty("jdk.tls.namedGroups", "secp256r1,secp384r1,secp521r1");
+    System.setProperty("jdk.tls.disabledAlgorithms",
+                      "SSLv3, RC4, DES, MD5withRSA, DH keySize < 1024, " +
+                      "EC keySize < 224, 3DES_EDE_CBC, anon, NULL, " +
+                      "X25519, X448, XDH"); // Disable XDH algorithms
+
+    logger.info("Configured FIPS-compatible SSL properties for PostgreSQL datasource");
+  }
 
   @Bean
   @Primary
   @Qualifier("primary")
   @ConfigurationProperties(prefix = "spring.datasource")
   public DataSource dataSource(@Qualifier("primary") DataSourceProperties properties) {
-    return properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
+    HikariDataSource dataSource = properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
+    configureFipsCompatibleTLSProperties(dataSource);
+    return dataSource;
   }
 
   @Bean
@@ -45,7 +67,9 @@ public class DataSourceConfig {
   @Qualifier("policy")
   @ConfigurationProperties("spring.policy-db-datasource")
   public DataSource policyDbDataSource(@Qualifier("policy") DataSourceProperties properties) {
-    return properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
+    HikariDataSource dataSource = properties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
+    configureFipsCompatibleTLSProperties(dataSource);
+    return dataSource;
   }
 
   @Bean
