@@ -1,6 +1,6 @@
 module code.cloudfoundry.org/app-autoscaler/src/autoscaler
 
-go 1.24.3
+go 1.25.0
 
 require (
 	code.cloudfoundry.org/brokerapi/v13 v13.0.4
@@ -9,7 +9,7 @@ require (
 	code.cloudfoundry.org/go-log-cache/v3 v3.1.1
 	code.cloudfoundry.org/go-loggregator/v10 v10.2.0
 	code.cloudfoundry.org/lager/v3 v3.37.0
-	code.cloudfoundry.org/loggregator-agent-release/src 1648952268ac
+	code.cloudfoundry.org/loggregator-agent-release/src v0.0.0-20251017014437-1648952268ac
 	code.cloudfoundry.org/tlsconfig v0.29.0
 	github.com/cenkalti/backoff/v5 v5.0.2
 	github.com/cloud-gov/go-cfenv v1.19.1
