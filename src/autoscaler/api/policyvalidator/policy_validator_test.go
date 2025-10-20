@@ -1564,6 +1564,34 @@ var _ = Describe("PolicyValidator", func() {
 						Expect(policyJson).To(MatchJSON(policyString))
 					})
 				})
+				Context("when start_time and/or end_time includes seconds", func() {
+					BeforeEach(func() {
+						policyString = `{
+							"instance_max_count":4,
+							"instance_min_count":1,
+							"schedules":{
+								"timezone":"Asia/Kolkata",
+								"recurring_schedule":[
+									{
+										"start_time":"10:00:01",
+										"end_time":"18:00:59",
+										"days_of_week":[
+											1,
+											2,
+											3
+										],
+										"instance_min_count":2,
+										"instance_max_count":5
+									}
+								]
+							}
+						}
+					`
+					})
+					It("should succeed", func() {
+						Expect(policyJson).To(MatchJSON(policyString))
+					})
+				})
 				Context("when instance_min_count is greater than instance_max_count", func() {
 					BeforeEach(func() {
 						policyString = `{
