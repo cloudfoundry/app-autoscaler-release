@@ -134,6 +134,17 @@
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Bouncy Castle FIPS for FIPS 140-2 compliance -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bc-fips</artifactId>
+            <version>2.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bctls-fips</artifactId>
+            <version>2.1.20</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
