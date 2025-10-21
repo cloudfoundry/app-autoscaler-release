@@ -171,7 +171,7 @@ components:
           type: string
           example: Asia/Shanghai
           # TODO: Try to make use of <https://stackoverflow.com/a/71121905>
-          #- $ref: "../../src/autoscaler/api/policyvalidator/policy_json.schema.json#/" # TODO:
+          #- $ref: "../../src/autoscaler/schema/api/policyvalidator/policy_json.schema.json#/" # TODO:
         recurring_schedule:
           type: array
           items:

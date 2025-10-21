@@ -314,12 +314,12 @@ bosh-release: build/autoscaler-test.tgz_CI_true
 # already there for `go-mod-tidy` to work. See additional comment for that target in
 # ./src/autoscaler/Makefile.
 build/autoscaler-test.tgz: build_all go-mod-tidy go-mod-vendor
-	@echo " - creating bosh release into build/autoscaler-test.tgz"; \
-	@bosh create-release --force --timestamp-version --tarball=build/autoscaler-test.tgz; \
+	@echo ' - creating bosh release into build/autoscaler-test.tgz'
+	@bosh create-release --force --timestamp-version --tarball='build/autoscaler-test.tgz'
 
 build/autoscaler-test.tgz_CI_true: go-mod-tidy go-mod-vendor
-	@echo " - creating bosh release into ${AUTOSCALER_BOSH_TARBALL_PATH}"
-	@bosh create-release ${AUTOSCALER_BOSH_BUILD_OPTS} --version ${AUTOSCALER_BOSH_VERSION} --tarball=${AUTOSCALER_BOSH_TARBALL_PATH}
+	@echo ' - creating bosh release into ${AUTOSCALER_BOSH_TARBALL_PATH}'
+	@bosh create-release ${AUTOSCALER_BOSH_BUILD_OPTS} --version='${AUTOSCALER_BOSH_VERSION}' --tarball='${AUTOSCALER_BOSH_TARBALL_PATH}'
 
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
 generate-fakes: autoscaler.generate-fakes test-app.generate-fakes
