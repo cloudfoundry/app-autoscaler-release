@@ -127,7 +127,7 @@ function setup_git(){
 pushd "${autoscaler_dir}" > /dev/null
   setup_git
   create_bosh_config
-  generate_changelog
+# generate_changelog
 
   echo " - Displaying diff..."
   export GIT_PAGER=cat
