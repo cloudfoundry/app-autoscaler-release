@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
 
       - name: Log in to the Container registry
-        uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -47,7 +47,7 @@ jobs:
 
       - name: Install devbox
         uses: jetify-com/devbox-install-action@22b0f5500b14df4ea357ce673fbd4ced940ed6a1 # v0.13.0
-      
+
       - name: Get ginkgo version from autoscaler-release
         id: ginkgo
         run: |
@@ -55,12 +55,19 @@ jobs:
           echo "GINKGO version from devbox: '${version}'"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
-      - id: get-golang-version
-        shell: bash
-        run: |
-          version=$(devbox info go | head --lines=1 | cut --field=2 --delimiter=" ")
-          echo "Go version from devbox: '${version}'"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
+      - name: Get Go version from devbox.json
+        id: get-golang-version
+        uses: jannekem/run-python-script-action@bbfca66c612a28f3eeca0ae40e1f810265e2ea68 # v1
+        with:
+          script: |
+            import json
+            import os
+            with open('devbox.json', 'r') as f:
+                devbox_config = json.load(f)
+            go_version = devbox_config['packages']['go']
+            print(f"Go version from devbox.json: '{go_version}'")
+            with open(os.environ['GITHUB_OUTPUT'], 'a') as hf:
+                print(f"version={go_version}", file=hf)
 
       - name: Build and push
         id: build-and-push

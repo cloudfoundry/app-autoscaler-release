@@ -125,7 +125,7 @@ addons:
 stemcells:
 - alias: default
   os: ubuntu-jammy
-  version: latest
+  version: "latest"
 
 instance_groups:
 # Postgres Instance Group
