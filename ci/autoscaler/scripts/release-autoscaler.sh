@@ -176,9 +176,18 @@ function generate_changelog(){
   [ -e "${build_path}/changelog.md" ] && return
 	echo " - Generating changelog using github cli..."
 	mkdir -p "${build_path}"
+	# Check if release exists and is a draft before deleting
 	if gh release view "${VERSION}" &>/dev/null; then
-		echo " - Deleting existing draft release ${VERSION}"
-		gh release delete "${VERSION}" --yes
+		local is_draft
+		is_draft=$(gh release view "${VERSION}" --json isDraft --jq '.isDraft')
+		if [ "$is_draft" = "true" ]; then
+			echo " - Deleting existing draft release ${VERSION}"
+			gh release delete "${VERSION}" --yes
+		else
+			echo " - ERROR: Release ${VERSION} already exists and is published (not a draft)"
+			echo " - Refusing to delete published release. Please check version logic."
+			exit 1
+		fi
 	fi
 	gh release create "${VERSION}" --generate-notes --draft
 	gh release view "${VERSION}" > "${build_path}/changelog.md"

@@ -97,7 +97,7 @@ clean-acceptance:
 .PHONY: build_all build_programs build_tests
 build_all: build_programs build_tests
 build_programs: autoscaler.build db.java-libs scheduler.build build-test-app
-build_tests:acceptance.build_tests autoscaler.build_tests changelog.build_tests changeloglockcleaner.build_tests
+build_tests:acceptance.build_tests autoscaler.build_tests changeloglockcleaner.build_tests
 
 .PHONY: acceptance.build_tests
 acceptance.build_tests:
