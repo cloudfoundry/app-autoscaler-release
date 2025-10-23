@@ -115,13 +115,13 @@ var _ = Describe("AutoScaler Public API", func() {
 		It("should fail to create an invalid custom metrics submission", func() {
 			By("creating custom metrics submission with invalid string")
 			response, status := createPolicy(GenerateBindingsWithScalingPolicy("invalid-value", 1, 2, "memoryused", 30, 100))
-			Expect(string(response)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\""}]`))
+			Expect(string(response)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\", \"same_app\""}]`))
 			Expect(status).To(Equal(400))
 
 			By("creating custom metrics submission with empty value ' '")
 			policy := GenerateBindingsWithScalingPolicy("", 1, 2, "memoryused", 30, 100)
 			newPolicy, status := createPolicy(policy)
-			Expect(string(newPolicy)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\""}]`))
+			Expect(string(newPolicy)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\", \"same_app\""}]`))
 			Expect(status).To(Equal(400))
 		})
 
@@ -277,7 +277,7 @@ var _ = Describe("AutoScaler Public API", func() {
 		It("should fail to update an invalid custom metrics strategy", func() {
 			expectedPolicy = GenerateBindingsWithScalingPolicy("invalid-update", 1, 2, "memoryused", 30, 100)
 			actualPolicy, status = createPolicy(expectedPolicy)
-			Expect(string(actualPolicy)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\""}]`))
+			Expect(string(actualPolicy)).Should(MatchJSON(`[{"context":"(root).configuration.custom_metrics.metric_submission_strategy.allow_from","description":"configuration.custom_metrics.metric_submission_strategy.allow_from must be one of the following: \"bound_app\", \"same_app\""}]`))
 			Expect(status).To(Equal(400))
 		})
 		It("should succeed to update a valid custom metrics strategy", func() {
