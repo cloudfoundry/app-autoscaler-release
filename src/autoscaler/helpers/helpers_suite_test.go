@@ -46,6 +46,3 @@ func (writer *copyWriter) Copy() []byte {
 	copy(contents, writer.contents)
 	return contents
 }
-func timestamp2String(timestamp int64) string {
-	return fmt.Sprintf("%.9f", float64(timestamp)/1e9)
-}
