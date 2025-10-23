@@ -55,12 +55,16 @@ func createPlaintextSink(logLevel lager.LogLevel) lager.Sink {
 }
 
 func createRedactedSink(logLevel lager.LogLevel) lager.Sink {
+	slogger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slogSink := lager.NewSlogSink(slogger)
+	withMinLevelConfig := lager.NewReconfigurableSink(slogSink, logLevel)
+
 	keyPatterns := []string{"[Pp]wd", "[Pp]ass", "[Ss]ecret", "[Tt]oken"}
-	redactedSink, err := NewRedactingWriterWithURLCredSink(os.Stdout, logLevel, keyPatterns, nil)
+	withRedaction, err := lager.NewRedactingSink(withMinLevelConfig, keyPatterns, nil)
 	if err != nil {
 		handleError("failed to create redacted sink", err)
 	}
-	return redactedSink
+	return withRedaction
 }
 
 func handleError(message string, err error) {
