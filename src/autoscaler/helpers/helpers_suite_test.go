@@ -1,7 +1,6 @@
 package helpers_test
 
 import (
-	"fmt"
 	"sync"
 
 	. "github.com/onsi/ginkgo/v2"
