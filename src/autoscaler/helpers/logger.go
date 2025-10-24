@@ -60,7 +60,8 @@ func createRedactedSink(logLevel lager.LogLevel) lager.Sink {
 	withMinLevelConfig := lager.NewReconfigurableSink(slogSink, logLevel)
 
 	keyPatterns := []string{"[Pp]wd", "[Pp]ass", "[Ss]ecret", "[Tt]oken"}
-	withRedaction, err := lager.NewRedactingSink(withMinLevelConfig, keyPatterns, nil)
+	valuePatterns := []string{":[^/@]+"} // URL-passwords like in `postgresql://user:password@server`
+	withRedaction, err := lager.NewRedactingSink(withMinLevelConfig, keyPatterns, valuePatterns)
 	if err != nil {
 		handleError("failed to create redacted sink", err)
 	}
