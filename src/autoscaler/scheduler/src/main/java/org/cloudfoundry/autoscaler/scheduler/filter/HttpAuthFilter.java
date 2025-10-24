@@ -44,7 +44,8 @@ public class HttpAuthFilter extends OncePerRequestFilter {
         request.getMethod(),
         request.getScheme(),
         forwardedProto,
-        isHealthEndpoint, cfServerConfiguration.getHealthserver().getUsername());
+        isHealthEndpoint,
+        cfServerConfiguration.getHealthserver().getUsername());
 
     if (isHealthEndpoint) {
       handleHealthEndpoint(request, response);
