@@ -205,9 +205,7 @@ func (b *Broker) validateAndCheckPolicy(rawJson json.RawMessage, instanceID stri
 		}
 		return policy, apiresponses.NewFailureResponse(fmt.Errorf("invalid policy provided: %s", string(resultsJson)), http.StatusBadRequest, "failed-to-validate-policy")
 	}
-	if err := b.planDefinitionExceeded(policy.GetPolicyDefinition(), planID, instanceID); err != nil {
-		return policy, err
-	}
+
 	return policy, nil
 }
 
@@ -533,7 +531,13 @@ func (b *Broker) Bind(
 		logger.Error("get-scaling-policy-configuration-from-request", err)
 		return result, err
 	}
-	policyGuidStr := uuid.NewString()
+
+	// ⚠️ I need to stay here after factorising out the request-parsing!
+	if err := b.planDefinitionExceeded(scalingPolicy.GetPolicyDefinition(), details.PlanID, instanceID); err != nil {
+		return result, err
+	}
+
+	policyGuidStr := uuid.NewString() // ⚠️ I need to stay here after factorising out the request-parsing!
 
 	// // 🚧 To-do: Check if exactly one is provided. We don't want to accept both to be present.
 	// requestAppGuid := details.BindResource.AppGuid
