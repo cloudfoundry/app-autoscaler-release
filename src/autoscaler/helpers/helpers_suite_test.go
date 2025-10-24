@@ -1,7 +1,6 @@
 package helpers_test
 
 import (
-	"fmt"
 	"sync"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -45,7 +44,4 @@ func (writer *copyWriter) Copy() []byte {
 	contents := make([]byte, len(writer.contents))
 	copy(contents, writer.contents)
 	return contents
-}
-func timestamp2String(timestamp int64) string {
-	return fmt.Sprintf("%.9f", float64(timestamp)/1e9)
 }
