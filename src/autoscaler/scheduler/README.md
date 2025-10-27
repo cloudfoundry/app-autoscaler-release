@@ -3,7 +3,7 @@
 ## Database
 
 ### Create tables
-
+ 
 #### Create Scheduler tables
 ```sh
 java -cp 'db/target/lib/*'  liquibase.integration.commandline.Main --changeLogFile=scheduler/db/scheduler.changelog-master.yaml --url jdbc:postgresql://127.0.0.1/autoscaler --driver=org.postgresql.Driver update
