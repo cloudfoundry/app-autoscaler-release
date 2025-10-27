@@ -582,6 +582,7 @@ jobs:
     params:
       name: build/name
       tag: build/tag
+      commitish: build/tag
       generate_release_notes: true
       globs: [build/artifacts/*]
 
