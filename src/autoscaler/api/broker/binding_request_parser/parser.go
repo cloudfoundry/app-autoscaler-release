@@ -13,7 +13,7 @@ import (
 )
 
 type BindRequestParser = interface {
-	Parse(instanceID string, details domain.BindDetails) (models.AppScalingConfig, error)
+	Parse(details domain.BindDetails) (models.AppScalingConfig, error)
 }
 
 type bindRequestParser struct {
@@ -33,7 +33,7 @@ func NewBindRequestParser(policyValidator *policyvalidator.PolicyValidator, defa
 	}
 }
 
-func (brp *bindRequestParser) Parse(instanceID string, details domain.BindDetails) (models.AppScalingConfig, error) {
+func (brp *bindRequestParser) Parse(details domain.BindDetails) (models.AppScalingConfig, error) {
 	var scalingPolicyRaw json.RawMessage
 	if details.RawParameters != nil {
 		scalingPolicyRaw = details.RawParameters
@@ -41,7 +41,7 @@ func (brp *bindRequestParser) Parse(instanceID string, details domain.BindDetail
 
 	// This just gets used for legacy-reasons. The actually parsing happens in the step
 	// afterwards. But it still does not validate against the schema, which is done here.
-	_, err := brp.getPolicyFromJsonRawMessage(scalingPolicyRaw, instanceID, details.PlanID)
+	_, err := brp.getPolicyFromJsonRawMessage(scalingPolicyRaw)
 	if err != nil {
 		err := fmt.Errorf("validation-error against the json-schema:\n\t%w", err)
 		return models.AppScalingConfig{}, err
@@ -133,7 +133,7 @@ func (brp *bindRequestParser) Parse(instanceID string, details domain.BindDetail
 	return *appScalingConfig, models.ErrUnimplemented
 }
 
-func (brp *bindRequestParser) getPolicyFromJsonRawMessage(policyJson json.RawMessage, instanceID string, planID string) (*models.ScalingPolicy, error) {
+func (brp *bindRequestParser) getPolicyFromJsonRawMessage(policyJson json.RawMessage) (*models.ScalingPolicy, error) {
 	if isEmptyPolicy := len(policyJson) <= 0; isEmptyPolicy { // no nil-check needed: `len(nil) == 0`
 		return nil, nil
 	}

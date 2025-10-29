@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	brParser "code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/broker/binding_request_parser"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/config"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/plancheck"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/policyvalidator"
@@ -27,15 +28,16 @@ import (
 var _ domain.ServiceBroker = &Broker{}
 
 type Broker struct {
-	logger          lager.Logger
-	conf            *config.Config
-	bindingdb       db.BindingDB
-	policydb        db.PolicyDB
-	policyValidator *policyvalidator.PolicyValidator
-	schedulerUtil   *schedulerclient.Client
-	catalog         []domain.Service
-	PlanChecker     plancheck.PlanChecker
-	credentials     cred_helper.Credentials
+	logger           lager.Logger
+	conf             *config.Config
+	bindingdb        db.BindingDB
+	policydb         db.PolicyDB
+	policyValidator  *policyvalidator.PolicyValidator // 🚧 To-do: Probably not needed anymore!
+	bindingReqParser brParser.BindRequestParser
+	schedulerUtil    *schedulerclient.Client
+	catalog          []domain.Service
+	PlanChecker      plancheck.PlanChecker
+	credentials      cred_helper.Credentials
 }
 
 var (
@@ -65,26 +67,40 @@ func (e Errors) Error() string {
 var _ error = Errors{}
 
 func New(logger lager.Logger, conf *config.Config, bindingDb db.BindingDB, policyDb db.PolicyDB, catalog []domain.Service, credentials cred_helper.Credentials) *Broker {
+	policyValidator := policyvalidator.NewPolicyValidator(
+		conf.PolicySchemaPath,
+		conf.ScalingRules.CPU.LowerThreshold,
+		conf.ScalingRules.CPU.UpperThreshold,
+		conf.ScalingRules.CPUUtil.LowerThreshold,
+		conf.ScalingRules.CPUUtil.UpperThreshold,
+		conf.ScalingRules.DiskUtil.LowerThreshold,
+		conf.ScalingRules.DiskUtil.UpperThreshold,
+		conf.ScalingRules.Disk.LowerThreshold,
+		conf.ScalingRules.Disk.UpperThreshold,
+	)
+
+	defaultCustomMetricsCredentialType, err := models.ParseCustomMetricsBindingAuthScheme(
+		conf.DefaultCustomMetricsCredentialType)
+	if err != nil {
+		logger.Fatal("parse-default-credential-type", err, lager.Data{
+			"default-credential-type": conf.DefaultCustomMetricsCredentialType,
+		})
+	}
+
+	bindingReqParser := brParser.NewBindRequestParser(
+		policyValidator, *defaultCustomMetricsCredentialType)
+
 	broker := &Broker{
-		logger:    logger,
-		conf:      conf,
-		bindingdb: bindingDb,
-		policydb:  policyDb,
-		catalog:   catalog,
-		policyValidator: policyvalidator.NewPolicyValidator(
-			conf.PolicySchemaPath,
-			conf.ScalingRules.CPU.LowerThreshold,
-			conf.ScalingRules.CPU.UpperThreshold,
-			conf.ScalingRules.CPUUtil.LowerThreshold,
-			conf.ScalingRules.CPUUtil.UpperThreshold,
-			conf.ScalingRules.DiskUtil.LowerThreshold,
-			conf.ScalingRules.DiskUtil.UpperThreshold,
-			conf.ScalingRules.Disk.LowerThreshold,
-			conf.ScalingRules.Disk.UpperThreshold,
-		),
-		schedulerUtil: schedulerclient.New(conf, logger),
-		PlanChecker:   plancheck.NewPlanChecker(conf.PlanCheck, logger),
-		credentials:   credentials,
+		logger:           logger,
+		conf:             conf,
+		bindingdb:        bindingDb,
+		policydb:         policyDb,
+		catalog:          catalog,
+		policyValidator:  policyValidator,
+		bindingReqParser: bindingReqParser,
+		schedulerUtil:    schedulerclient.New(conf, logger),
+		PlanChecker:      plancheck.NewPlanChecker(conf.PlanCheck, logger),
+		credentials:      credentials,
 	}
 	return broker
 }
@@ -513,94 +529,23 @@ func (b *Broker) Bind(
 
 	result := domain.Binding{}
 
-	var scalingPolicyRaw json.RawMessage
-	if details.RawParameters != nil {
-		scalingPolicyRaw = details.RawParameters
+	appScalingConfig, err := b.bindingReqParser.Parse(details)
+	if err != nil {
+		logger.Error("parse-binding-request", err)
+		return result, apiresponses.NewFailureResponse(
+			err, http.StatusBadRequest, "parse-binding-request")
 	}
 
-	// This just gets used for legacy-reasons. The actually parsing happens in the step
-	// afterwards. But it still does not validate against the schema, which is done here.
-	_, err := b.getPolicyFromJsonRawMessage(scalingPolicyRaw, instanceID, details.PlanID)
-	if err != nil {
-		logger.Error("get-default-policy", err)
+	if err := b.planDefinitionExceeded(appScalingConfig.GetScalingPolicy().GetPolicyDefinition(), details.PlanID, instanceID); err != nil {
 		return result, err
 	}
 
-	scalingPolicy, err := b.getScalingPolicyFromRequest(scalingPolicyRaw, logger)
-	if err != nil {
-		logger.Error("get-scaling-policy-configuration-from-request", err)
-		return result, err
-	}
-
-	// ⚠️ I need to stay here after factorising out the request-parsing!
-	if err := b.planDefinitionExceeded(scalingPolicy.GetPolicyDefinition(), details.PlanID, instanceID); err != nil {
-		return result, err
-	}
-
-	policyGuidStr := uuid.NewString() // ⚠️ I need to stay here after factorising out the request-parsing!
-
-	// // 🚧 To-do: Check if exactly one is provided. We don't want to accept both to be present.
-	// requestAppGuid := details.BindResource.AppGuid
-	// paramsAppGuid := bindingConfig.Configuration.AppGUID
-	var appGUID string
-	if details.BindResource != nil {
-		appGUID = details.BindResource.AppGuid
-	} else {
-		// 👎 Access to `details.AppGUID` has been deprecated, see:
-		// <https://github.com/openservicebrokerapi/servicebroker/blob/v2.17/spec.md#request-creating-a-service-binding>
-		appGUID = details.AppGUID
-	}
-
-	// 🚧 To-do: Implement feature: service-key-creation; Use appID from `bindingConfig`!
-	if appGUID == "" {
-		err := errors.New("error: service must be bound to an application - service key creation is not supported")
-		logger.Error("check-required-app-guid", err)
-		return result, apiresponses.NewFailureResponseBuilder(
-			err, http.StatusUnprocessableEntity, "check-required-app-guid").
-			WithErrorKey("RequiresApp").Build()
-	}
-
-	// 💡🚧 To-do: We should fail during startup if this does not work. Because then the
-	// configuration of the service is corrupted.
-	var defaultCustomMetricsCredentialType *models.CustomMetricsBindingAuthScheme
-	defaultCustomMetricsCredentialType, err = models.ParseCustomMetricsBindingAuthScheme(
-		b.conf.DefaultCustomMetricsCredentialType)
-	if err != nil {
-		programmingError := &models.InvalidArgumentError{
-			Param: "default-credential-type",
-			Value: b.conf.DefaultCustomMetricsCredentialType,
-			Msg:   "error parsing default credential type",
-		}
-		logger.Error("parse-default-credential-type", programmingError,
-			lager.Data{
-				"default-credential-type": b.conf.DefaultCustomMetricsCredentialType,
-			})
-		return result, apiresponses.NewFailureResponse(err, http.StatusInternalServerError,
-			"parse-default-credential-type")
-	}
-	// 🏚️ Subsequently we assume that this credential-type-configuration is part of the
-	// scaling-policy and check it accordingly. However this is legacy and not in line with the
-	// current terminology of “PolicyDefinition”, “ScalingPolicy”, “BindingConfig” and
-	// “AppScalingConfig”.
-	customMetricsBindingAuthScheme, err := getOrDefaultCredentialType(scalingPolicyRaw,
-		defaultCustomMetricsCredentialType, logger)
-	if err != nil {
-		return result, err
-	}
-
-	// To-do: 🚧 Factor everything that is involved in this creation out into an own
-	// helper-function. Consider a function analogous to `getScalingPolicyFromRequest` that is
-	// defined within this file.
-	appScalingConfig := models.NewAppScalingConfig(
-		*models.NewBindingConfig(models.GUID(appGUID), customMetricsBindingAuthScheme),
-		*scalingPolicy)
-
-	if err := b.handleExistingBindingsResiliently(ctx, instanceID, appGUID, logger); err != nil {
+	appGUID := appScalingConfig.GetConfiguration().GetAppGUID()
+	if err := b.handleExistingBindingsResiliently(ctx, instanceID,
+		appGUID, logger); err != nil {
 		return result, err
 	}
 	err = createServiceBinding(
-		// First time in this function and its recursions, that `instanceID` is used for something
-		// different but logging:
 		ctx, b.bindingdb, bindingID, instanceID,
 		appScalingConfig.GetConfiguration().GetAppGUID(),
 		appScalingConfig.GetScalingPolicy().GetCustomMetricsStrategy())
@@ -613,7 +558,7 @@ func (b *Broker) Bind(
 				errors.New("error: an autoscaler service instance is already bound to the application and multiple bindings are not supported"),
 				http.StatusConflict, actionCreateServiceBinding)
 		}
-		if errors.Is(err, ErrInvalidCustomMetricsStrategy) {
+		if errors.Is(err, ErrInvalidCustomMetricsStrategy) { // 🚧 To-do: Can not happen anymore!
 			return result, apiresponses.NewFailureResponse(
 				err, http.StatusBadRequest, actionCreateServiceBinding)
 		}
@@ -625,14 +570,14 @@ func (b *Broker) Bind(
 		MtlsUrl: b.conf.MetricsForwarder.MetricsForwarderMtlsUrl,
 	}
 
-	if customMetricsBindingAuthScheme == &models.BindingSecret {
+	if appScalingConfig.GetConfiguration().GetCustomMetricsBindingAuth() == &models.BindingSecret {
 		// create credentials
-		cred, err := b.credentials.Create(ctx, appGUID, nil)
+		cred, err := b.credentials.Create(ctx, string(appGUID), nil)
 		if err != nil {
 			//revert binding creating
 			logger.Error("create-credentials", err)
 
-			err = b.bindingdb.DeleteServiceBindingByAppId(ctx, appGUID)
+			err = b.bindingdb.DeleteServiceBindingByAppId(ctx, string(appGUID))
 			if err != nil {
 				logger.Error("revert-binding-creation-due-to-credentials-creation-failure", err)
 			}
@@ -642,6 +587,7 @@ func (b *Broker) Bind(
 		customMetricsCredentials.Credential = cred
 	}
 
+	policyGuidStr := uuid.NewString()
 	if err := b.attachPolicyOrDefaultPolicyToApp(ctx,
 		instanceID, appScalingConfig.GetConfiguration().GetAppGUID(),
 		appScalingConfig.GetScalingPolicy().GetPolicyDefinition(), policyGuidStr,
@@ -653,56 +599,6 @@ func (b *Broker) Bind(
 		CustomMetrics: *customMetricsCredentials,
 	}
 	return result, nil
-}
-
-func (b *Broker) getScalingPolicyFromRequest(
-	scalingPolicyRaw json.RawMessage, logger lager.Logger,
-) (*models.ScalingPolicy, error) {
-	scalingPolicy, err := models.ScalingPolicyFromRawJSON(scalingPolicyRaw)
-	if err != nil {
-		actionReadScalingPolicy := "read-scaling-policy"
-		logger.Error("unmarshal-scaling-policy", err)
-		return nil, apiresponses.NewFailureResponseBuilder(
-			ErrInvalidConfigurations, http.StatusBadRequest, actionReadScalingPolicy).
-			WithErrorKey(actionReadScalingPolicy).
-			Build()
-	}
-	logger.Debug("getScalingPolicyFromRequest", lager.Data{"scalingPolicy": scalingPolicy})
-	return scalingPolicy, nil
-}
-
-func getOrDefaultCredentialType(
-	policyJson json.RawMessage, defaultCredentialType *models.CustomMetricsBindingAuthScheme,
-	logger lager.Logger,
-) (*models.CustomMetricsBindingAuthScheme, error) {
-	credentialType := defaultCredentialType
-
-	if len(policyJson) > 0 {
-		var policy struct {
-			CredentialType string `json:"credential-type,omitempty"`
-		}
-		err := json.Unmarshal(policyJson, &policy)
-		if err != nil {
-			logger.Error("error: unmarshal-credential-type", err)
-			return nil, apiresponses.NewFailureResponse(ErrCreatingServiceBinding,
-				http.StatusInternalServerError, "error-unmarshal-credential-type")
-		}
-
-		if policy.CredentialType != "" {
-			parsedCredentialType, err := models.ParseCustomMetricsBindingAuthScheme(policy.CredentialType)
-			if err != nil {
-				logger.Error("error: parse-credential-type", err)
-				return nil, apiresponses.NewFailureResponseBuilder(
-					ErrInvalidCredentialType, http.StatusBadRequest, "error-parse-credential-type").
-					WithErrorKey("validate-credential-type").Build()
-				// For backwards-compatibility we use "validate-credential-type" here.
-			}
-			credentialType = parsedCredentialType
-		}
-	}
-
-	logger.Debug("getOrDefaultCredentialType", lager.Data{"credential-type": credentialType})
-	return credentialType, nil
 }
 
 func (b *Broker) attachPolicyOrDefaultPolicyToApp(
@@ -790,7 +686,7 @@ func attachPolicyToApp(
 	return nil
 }
 
-func (b *Broker) handleExistingBindingsResiliently(ctx context.Context, instanceID string, appGUID string, logger lager.Logger) error {
+func (b *Broker) handleExistingBindingsResiliently(ctx context.Context, instanceID string, appGUID models.GUID, logger lager.Logger) error {
 	// fetch and all service bindings for the service instance
 	logger = logger.Session("handleExistingBindingsResiliently", lager.Data{"app_id": appGUID, "instance_id": instanceID})
 	bindingIds, err := b.bindingdb.GetBindingIdsByInstanceId(ctx, instanceID)
@@ -808,7 +704,7 @@ func (b *Broker) handleExistingBindingsResiliently(ctx context.Context, instance
 		}
 
 		//select the binding-id for the appGUID
-		if fetchedAppID == appGUID {
+		if models.GUID(fetchedAppID) == appGUID {
 			err = b.deleteBinding(ctx, existingBindingId, instanceID)
 
 			if err != nil {
