@@ -286,7 +286,7 @@ var _ = Describe("Broker", func() {
 							var bindingParams = []byte(`
 								{
 								  "configuration": {
-										"app-guid": "8d0cee08-23ad-4813-a779-ad8118ea0b91",
+										"app_guid": "8d0cee08-23ad-4813-a779-ad8118ea0b91",
 										"custom_metrics": {
 											"metric_submission_strategy": {
 												"allow_from": "bound_app"
@@ -323,7 +323,7 @@ var _ = Describe("Broker", func() {
 							_, err := aBroker.Bind(ctx, instanceID, bindingID, details, false)
 
 							Expect(err).NotTo(BeNil())
-							Expect(err).To(MatchError(ContainSubstring("app-guid is not supported in configuration")))
+							Expect(err).To(MatchError(ContainSubstring("app GUID provided in both, binding resource and binding configuration")))
 						})
 			It("Supports provision of an Autoscaler Policy as RawParameters", func() {
 				var bindingParams = []byte(`

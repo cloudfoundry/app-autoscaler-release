@@ -163,19 +163,19 @@ func (brp *bindRequestParser) getAppGuidFromBindingConfig(policyJson json.RawMes
 		return "", nil
 	}
 
-	var policy struct {
+	var appGuidRawStruct struct {
 		BindingConfig struct {
 			AppGUID string `json:"app_guid,omitempty"`
-		} `json:"binding-configuration,omitempty"`
+		} `json:"configuration,omitempty"`
 	}
-	err := json.Unmarshal(policyJson, &policy)
+	err := json.Unmarshal(policyJson, &appGuidRawStruct)
 	if err != nil {
 		// 🚸 This can not happen because the input at this point has already been checked
 		// against the json-schema.
 		return "", fmt.Errorf("could not parse scaling policy to get app-guid from binding-configuration: %w", err)
 	}
 
-	appGuid := models.GUID(policy.BindingConfig.AppGUID)
+	appGuid := models.GUID(appGuidRawStruct.BindingConfig.AppGUID)
 
 	return appGuid, nil
 }
