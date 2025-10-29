@@ -79,7 +79,7 @@ func (brp *bindRequestParser) Parse(details domain.BindDetails) (models.AppScali
 	var appGuid models.GUID
 	appGuidIsFromCC := details.BindResource != nil && details.BindResource.AppGuid != ""
 	appGuidIsFromCCDeprField := details.AppGUID != ""
-	appGuidIsFromBindingConfig := appGuidFromBindingConfig == ""
+	appGuidIsFromBindingConfig := appGuidFromBindingConfig != ""
 	switch {
 	case (appGuidIsFromCC || appGuidIsFromCCDeprField) && appGuidIsFromBindingConfig:
 		msg := "error: app GUID provided in both, binding resource and binding configuration"
@@ -98,39 +98,11 @@ func (brp *bindRequestParser) Parse(details domain.BindDetails) (models.AppScali
 		return models.AppScalingConfig{}, err
 	}
 
-	// 🚧 To-do: This should go to the service-broker.
-	// if appGUID == "" {
-	//	err := errors.New("error: service must be bound to an application - service key creation is not supported")
-	//	logger.Error("check-required-app-guid", err)
-	//	return result, apiresponses.NewFailureResponseBuilder(
-	//		err, http.StatusUnprocessableEntity, "check-required-app-guid").
-	//		WithErrorKey("RequiresApp").Build()
-	// }
-
-	// // 💡🚧 To-do: We should fail during startup if this does not work. Because then the
-	// // configuration of the service is corrupted.
-	// var defaultCustomMetricsCredentialType *models.CustomMetricsBindingAuthScheme
-	// defaultCustomMetricsCredentialType, err = models.ParseCustomMetricsBindingAuthScheme(
-	//	b.conf.DefaultCustomMetricsCredentialType)
-	// if err != nil {
-	//	programmingError := &models.InvalidArgumentError{
-	//		Param: "default-credential-type",
-	//		Value: b.conf.DefaultCustomMetricsCredentialType,
-	//		Msg:   "error parsing default credential type",
-	//	}
-	//	logger.Error("parse-default-credential-type", programmingError,
-	//		lager.Data{
-	//			"default-credential-type": b.conf.DefaultCustomMetricsCredentialType,
-	//		})
-	//	return result, apiresponses.NewFailureResponse(err, http.StatusInternalServerError,
-	//		"parse-default-credential-type")
-	// }
-
 	appScalingConfig := models.NewAppScalingConfig(
 		*models.NewBindingConfig(appGuid, customMetricsBindingAuthScheme),
 		*scalingPolicy)
 
-	return *appScalingConfig, models.ErrUnimplemented
+	return *appScalingConfig, nil
 }
 
 func (brp *bindRequestParser) getPolicyFromJsonRawMessage(policyJson json.RawMessage) (*models.ScalingPolicy, error) {
