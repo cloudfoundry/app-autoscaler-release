@@ -153,6 +153,10 @@ func (b *Broker) Provision(ctx context.Context, instanceID string, details domai
 		return result, err
 	}
 
+	if err := b.planDefinitionExceeded(policy.GetPolicyDefinition(), details.PlanID, instanceID); err != nil {
+		return result, err
+	}
+
 	var policyStr, policyGuidStr string
 	if policy != nil {
 		policyGuidStr = uuid.NewString()
@@ -322,6 +326,10 @@ func (b *Broker) Update(ctx context.Context, instanceID string, details domain.U
 	// determine new default policy if any
 	defaultPolicy, defaultPolicyGuid, defaultPolicyIsNew, err := b.determineDefaultPolicy(parameters, serviceInstance, servicePlan)
 	if err != nil {
+		return result, err
+	}
+
+	if err := b.planDefinitionExceeded(defaultPolicy, servicePlan, instanceID); err != nil {
 		return result, err
 	}
 
@@ -530,7 +538,28 @@ func (b *Broker) Bind(
 	result := domain.Binding{}
 
 	appScalingConfig, err := b.bindingReqParser.Parse(details)
-	if err != nil {
+	var schemaErr policyvalidator.ValidationErrors
+	var appGuidErr *brParser.BindReqNoAppGuid
+	switch {
+	case errors.As(err, &schemaErr):
+		resultsJson, err := json.Marshal(schemaErr)
+		if err != nil {
+			return result, &models.InvalidArgumentError{
+				Param: "errResults",
+				Value: schemaErr,
+				Msg:   "Failed to json-marshal validation results; This should never happen."}
+		}
+		apiErr := apiresponses.NewFailureResponse(
+			fmt.Errorf("invalid policy provided: %s", resultsJson),
+			http.StatusUnprocessableEntity, "failed-to-validate-policy")
+
+		return result, apiErr
+	case errors.As(err, &appGuidErr):
+		logger.Error("bind-no-app-guid-provided", err)
+		return result, apiresponses.NewFailureResponseBuilder(
+			err, http.StatusUnprocessableEntity, "bind-no-app-guid-provided").
+			WithErrorKey("RequiresApp").Build()
+	case err != nil:
 		logger.Error("parse-binding-request", err)
 		return result, apiresponses.NewFailureResponse(
 			err, http.StatusBadRequest, "parse-binding-request")

@@ -2,19 +2,37 @@ package bindingrequestparser
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
 
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/api/policyvalidator"
 	"code.cloudfoundry.org/app-autoscaler/src/autoscaler/models"
 	"code.cloudfoundry.org/brokerapi/v13/domain"
-	"code.cloudfoundry.org/brokerapi/v13/domain/apiresponses"
 )
+
+
+
+// ================================================================================
+// Parser-interface
+// ================================================================================
 
 type BindRequestParser = interface {
 	Parse(details domain.BindDetails) (models.AppScalingConfig, error)
 }
+
+// This error type is used, when the passed binding-request fails to validate against the schema.
+type BindReqNoAppGuid struct {} // 🚧 To-do: Generalise for every appGuidError (as well if two are provided)
+
+func (e BindReqNoAppGuid) Error() string {
+	return "error: service must be bound to an application; Please provide a GUID of an app!"
+}
+
+var _ error = BindReqNoAppGuid{}
+
+
+
+// ================================================================================
+// Parser-implementation
+// ================================================================================
 
 type bindRequestParser struct {
 	policyValidator                    *policyvalidator.PolicyValidator
@@ -33,15 +51,20 @@ func NewBindRequestParser(policyValidator *policyvalidator.PolicyValidator, defa
 	}
 }
 
+
+
+
 func (brp *bindRequestParser) Parse(details domain.BindDetails) (models.AppScalingConfig, error) {
 	var scalingPolicyRaw json.RawMessage
 	if details.RawParameters != nil {
 		scalingPolicyRaw = details.RawParameters
 	}
 
+	var err error
+
 	// This just gets used for legacy-reasons. The actually parsing happens in the step
 	// afterwards. But it still does not validate against the schema, which is done here.
-	_, err := brp.getPolicyFromJsonRawMessage(scalingPolicyRaw)
+	_, err = brp.getPolicyFromJsonRawMessage(scalingPolicyRaw)
 	if err != nil {
 		err := fmt.Errorf("validation-error against the json-schema:\n\t%w", err)
 		return models.AppScalingConfig{}, err
@@ -94,8 +117,7 @@ func (brp *bindRequestParser) Parse(details domain.BindDetails) (models.AppScali
 	case appGuidIsFromBindingConfig:
 		appGuid = appGuidFromBindingConfig
 	default:
-		err := errors.New("error: service must be bound to an application; Please provide a GUID of an app!")
-		return models.AppScalingConfig{}, err
+		return models.AppScalingConfig{}, &BindReqNoAppGuid{}
 	}
 
 	appScalingConfig := models.NewAppScalingConfig(
@@ -111,18 +133,8 @@ func (brp *bindRequestParser) getPolicyFromJsonRawMessage(policyJson json.RawMes
 	}
 
 	policy, errResults := brp.policyValidator.ParseAndValidatePolicy(policyJson)
-	if errResults != nil {
-		// 🚫 The subsequent log-message is a strong assumption about the context of the caller. But
-		// how can we actually know here that we operate on a default-policy? In fact, when we are
-		// in the call-stack of `Bind` then we are *not* called with a default-policy.
-		resultsJson, err := json.Marshal(errResults)
-		if err != nil {
-			return nil, &models.InvalidArgumentError{
-				Param: "errResults",
-				Value: errResults,
-				Msg:   "Failed to json-marshal validation results; This should never happen."}
-		}
-		return policy, apiresponses.NewFailureResponse(fmt.Errorf("invalid policy provided: %s", string(resultsJson)), http.StatusBadRequest, "failed-to-validate-policy")
+	if errResults != nil && len(errResults) > 0 {
+		return policy, &errResults
 	}
 
 	return policy, nil
