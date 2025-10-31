@@ -135,6 +135,7 @@ resources:
     private_key: ((autoscaler-deploy-key-private))
     branch: ((branch_name))
     fetch_tags: true
+    submodules: all
 
 - name: gh-release
   type: github-release
