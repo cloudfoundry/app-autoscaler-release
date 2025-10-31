@@ -9,8 +9,6 @@ import (
 	"code.cloudfoundry.org/brokerapi/v13/domain"
 )
 
-
-
 // ================================================================================
 // Parser-interface
 // ================================================================================
@@ -20,15 +18,13 @@ type BindRequestParser = interface {
 }
 
 // This error type is used, when the passed binding-request fails to validate against the schema.
-type BindReqNoAppGuid struct {} // 🚧 To-do: Generalise for every appGuidError (as well if two are provided)
+type BindReqNoAppGuid struct{} // 🚧 To-do: Generalise for every appGuidError (as well if two are provided)
 
 func (e BindReqNoAppGuid) Error() string {
 	return "error: service must be bound to an application; Please provide a GUID of an app!"
 }
 
 var _ error = BindReqNoAppGuid{}
-
-
 
 // ================================================================================
 // Parser-implementation
@@ -50,9 +46,6 @@ func NewBindRequestParser(policyValidator *policyvalidator.PolicyValidator, defa
 		defaultCustomMetricsCredentialType: defaultCredentialType,
 	}
 }
-
-
-
 
 func (brp *bindRequestParser) Parse(details domain.BindDetails) (models.AppScalingConfig, error) {
 	var scalingPolicyRaw json.RawMessage
@@ -133,7 +126,7 @@ func (brp *bindRequestParser) getPolicyFromJsonRawMessage(policyJson json.RawMes
 	}
 
 	policy, errResults := brp.policyValidator.ParseAndValidatePolicy(policyJson)
-	if errResults != nil && len(errResults) > 0 {
+	if len(errResults) > 0 {
 		return policy, &errResults
 	}
 
