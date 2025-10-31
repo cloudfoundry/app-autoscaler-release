@@ -96,6 +96,7 @@ jobs:
           # the derivation python.
           git restore devbox.lock
           git checkout 'HEAD~1'
+          git submodule update --init --recursive
 
           make generate-fakes
           make generate-openapi-generated-clients-and-servers
@@ -105,6 +106,7 @@ jobs:
           # the derivation python.
           git restore devbox.lock
           git checkout "${current_branch_head}"
+          git submodule update --init --recursive
 
           # ⚠️ For this workflow to be successful, the subsequent line must not
           # trigger again the creation of the generated files.
