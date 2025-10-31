@@ -92,6 +92,12 @@ jobs:
                " on revision \`$(git rev-parse 'HEAD')\`."
 
           echo "Generating clients, servers and fakes on \`${current_branch_head}~1\`"
+          # Clean up any untracked files in submodule before switching branches
+          if [ -d "src/autoscaler" ]; then
+            git -C src/autoscaler clean -fd
+          fi
+          # Deinitialize submodules to prevent checkout conflicts
+          git submodule deinit -f --all
           # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
           # the derivation python.
           git restore devbox.lock
@@ -103,7 +109,11 @@ jobs:
 
           echo "Successfully generated the code. Switching back to \`${current_branch_head}\`!"
           # Clean up generated files in submodule before switching branches
-          git -C src/autoscaler clean -fd
+          if [ -d "src/autoscaler" ]; then
+            git -C src/autoscaler clean -fd
+          fi
+          # Deinitialize submodules to prevent checkout conflicts
+          git submodule deinit -f --all
           # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
           # the derivation python.
           git restore devbox.lock
