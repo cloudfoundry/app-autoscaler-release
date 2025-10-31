@@ -102,6 +102,8 @@ jobs:
           make generate-openapi-generated-clients-and-servers
 
           echo "Successfully generated the code. Switching back to \`${current_branch_head}\`!"
+          # Clean up generated files in submodule before switching branches
+          git -C src/autoscaler clean -fd
           # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
           # the derivation python.
           git restore devbox.lock
@@ -114,7 +116,7 @@ jobs:
           make update-uaac-nix-package
 
           declare -i num_changed_files
-          num_changed_files="$(git status --porcelain | wc --lines)"
+          num_changed_files="$(git status --porcelain packages/ nix/ | wc --lines)"
           readonly num_changed_files
 
           if ((num_changed_files > 0))
