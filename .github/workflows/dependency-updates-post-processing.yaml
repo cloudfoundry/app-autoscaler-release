@@ -120,7 +120,7 @@ jobs:
           if ((num_changed_files > 0))
           then
             echo 'Changes to some files were necessary!'
-            git add .
+            git add packages/ nix/
             git commit --message="${tidy_message}"
             git pull --rebase=true
             git push
