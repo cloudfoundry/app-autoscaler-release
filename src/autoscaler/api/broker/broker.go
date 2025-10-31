@@ -153,8 +153,10 @@ func (b *Broker) Provision(ctx context.Context, instanceID string, details domai
 		return result, err
 	}
 
-	if err := b.planDefinitionExceeded(policy.GetPolicyDefinition(), details.PlanID, instanceID); err != nil {
-		return result, err
+	if policy != nil {
+		if err := b.planDefinitionExceeded(policy.GetPolicyDefinition(), details.PlanID, instanceID); err != nil {
+			return result, err
+		}
 	}
 
 	var policyStr, policyGuidStr string
@@ -599,7 +601,7 @@ func (b *Broker) Bind(
 		MtlsUrl: b.conf.MetricsForwarder.MetricsForwarderMtlsUrl,
 	}
 
-	if appScalingConfig.GetConfiguration().GetCustomMetricsBindingAuth() == &models.BindingSecret {
+	if *appScalingConfig.GetConfiguration().GetCustomMetricsBindingAuth() == models.BindingSecret {
 		// create credentials
 		cred, err := b.credentials.Create(ctx, string(appGUID), nil)
 		if err != nil {
