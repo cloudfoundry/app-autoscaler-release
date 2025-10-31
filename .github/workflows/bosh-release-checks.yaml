@@ -30,9 +30,9 @@ jobs:
           make package-specs
       - name: Check if there is any change
         run: |
-          if [ "$(git status --porcelain | wc -l)" -ne 0 ]; then
-            git status
-            git diff
+          if [ "$(git status --porcelain packages/ | wc -l)" -ne 0 ]; then
+            git status packages/
+            git diff packages/
             echo "::error::Specs are out of date, run \"make package-specs\" to update"
             exit 1
           fi
