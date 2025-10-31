@@ -15,17 +15,6 @@ anchors:
     params:
       TARGETS: "deploy-autoscaler"
 
-  app-autoscaler-ops-files-log-cache-metron: &app-autoscaler-ops-files-log-cache-metron
-    OPS_FILES: |
-      operations/add-releases.yml
-      operations/instance-identity-cert-from-cf.yml
-      operations/add-postgres-variables.yml
-      operations/enable-nats-tls.yml
-      operations/add-extra-plan.yml
-      operations/set-release-version.yml
-      operations/enable-metricsforwarder-via-metron-agent.yml
-      operations/enable-scheduler-logging.yml
-
   app-autoscaler-ops-files-log-cache-syslog: &app-autoscaler-ops-files-log-cache-syslog
     OPS_FILES: |
       operations/add-releases.yml
@@ -34,18 +23,6 @@ anchors:
       operations/enable-nats-tls.yml
       operations/add-extra-plan.yml
       operations/set-release-version.yml
-      operations/enable-scheduler-logging.yml
-
-  app-autoscaler-ops-files-log-cache-syslog-cf: &app-autoscaler-ops-files-log-cache-syslog-cf
-    ENABLE_MTAR: true
-    OPS_FILES: |
-      operations/add-releases.yml
-      operations/instance-identity-cert-from-cf.yml
-      operations/add-postgres-variables.yml
-      operations/enable-nats-tls.yml
-      operations/add-extra-plan.yml
-      operations/set-release-version.yml
-      operations/enable-metricsforwarder-via-syslog-agent.yml
       operations/enable-scheduler-logging.yml
 
   app-autoscaler-ops-files-upgrade: &app-autoscaler-ops-files-upgrade
@@ -61,9 +38,7 @@ anchors:
 groups:
 - name: all
   jobs:
-  - acceptance-log-cache-metron
   - acceptance-log-cache-syslog
-  - acceptance-log-cache-syslog-cf
   - cleanup-autoscaler-deployments
   - fetch-latest-stemcell
   - draft
@@ -77,7 +52,6 @@ groups:
   - update-java
 - name: autoscaler-release
   jobs:
-  - acceptance-log-cache-metron
   - acceptance-log-cache-syslog
   - draft
   - integration-tests
@@ -256,61 +230,6 @@ jobs:
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
     timeout: 45m
 
-- name: acceptance-log-cache-metron
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  on_success:
-    task: cleanup
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-log-cache-metron-params
-      DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_metron))
-  plan:
-  - in_parallel:
-    - get: "app-autoscaler-tools"
-      trigger: true
-    - get: bbl-state
-    - get: app-autoscaler-release
-      passed: [unit-tests, integration-tests]
-      trigger: true
-    - get: ci
-  - *make-prerelease-task
-  - <<: *deploy-autoscaler-task
-    params:
-      TARGETS: "deploy-autoscaler"
-      <<: *acceptance-log-cache-metron-params
-      <<: *app-autoscaler-ops-files-log-cache-metron
-    timeout: "30m"
-  - task: register-broker
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/register-broker.yml
-    params:
-      <<: *acceptance-log-cache-metron-params
-    timeout: 5m
-  - in_parallel:
-    - task: autoscaler-acceptance-api
-      image: "app-autoscaler-tools"
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-log-cache-metron-params
-        SUITES: api
-      timeout: 30m
-    - task: autoscaler-acceptance-app
-      image: "app-autoscaler-tools"
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-log-cache-metron-params
-        SUITES: app
-      timeout: 60m
-    - task: autoscaler-acceptance-broker
-      image: "app-autoscaler-tools"
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-log-cache-metron-params
-        SUITES: broker
-      timeout: 30m
-
 - name: acceptance-log-cache-syslog
   public: true
   build_logs_to_retain: 100
@@ -365,67 +284,6 @@ jobs:
         <<: *acceptance-log-cache-syslog-params
         SUITES: broker
       timeout: 30m
-
-- name: acceptance-log-cache-syslog-cf
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  on_success:
-    task: cleanup
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/cleanup-autoscaler.yml
-    params: &acceptance-log-cache-syslog-cf-params
-      DEPLOYMENT_NAME: ((acceptance_deployment_name_logcache_syslog_cf))
-      PR_NUMBER: ((pr_number))
-  plan:
-  - in_parallel:
-    - get: "app-autoscaler-tools"
-      trigger: true
-    - get: bbl-state
-    - get: app-autoscaler-release
-      passed: [unit-tests, integration-tests]
-      trigger: true
-    - get: ci
-  - *make-prerelease-task
-  - <<: *deploy-autoscaler-task
-    params:
-      TARGETS: "deploy-autoscaler"
-      <<: *acceptance-log-cache-syslog-cf-params
-      <<: *app-autoscaler-ops-files-log-cache-syslog-cf
-  - task: deploy-apps
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/deploy-apps.yml
-    params:
-      <<: *acceptance-log-cache-syslog-cf-params
-    timeout: 30m
-  - task: register-broker
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/register-broker.yml
-    params:
-      <<: *acceptance-log-cache-syslog-cf-params
-    timeout: 5m
-  - in_parallel:
-    - task: autoscaler-acceptance-api
-      image: "app-autoscaler-tools"
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-log-cache-syslog-cf-params
-        SUITES: api
-      timeout: 15m
-    - task: autoscaler-acceptance-app
-      image: "app-autoscaler-tools"
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-log-cache-syslog-cf-params
-        SUITES: app
-      timeout: 45m
-    - task: autoscaler-acceptance-broker
-      image: "app-autoscaler-tools"
-      file: ci/ci/autoscaler/tasks/run-acceptance-tests.yml
-      params:
-        <<: *acceptance-log-cache-syslog-cf-params
-        SUITES: broker
-      timeout: 15m
 
 - name: performance
   public: true
@@ -491,9 +349,7 @@ jobs:
     - get: ci
     - get: app-autoscaler-release
       passed:
-      - acceptance-log-cache-metron
       - acceptance-log-cache-syslog
-      - acceptance-log-cache-syslog-cf
       trigger: true
     - get: previous-stable-release
   - task: deploy-previous-stable-release
