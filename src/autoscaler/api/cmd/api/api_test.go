@@ -130,7 +130,6 @@ var _ = Describe("Api", func() {
 		})
 
 	})
-
 	Describe("when interrupt is sent", func() {
 		It("should stop", func() {
 			runner.Session.Interrupt()
@@ -138,7 +137,6 @@ var _ = Describe("Api", func() {
 		})
 
 	})
-
 	Describe("Broker Rest API", func() {
 		AfterEach(func() {
 			runner.Interrupt()
@@ -173,7 +171,6 @@ var _ = Describe("Api", func() {
 			})
 		})
 	})
-
 	Describe("Pubic API", func() {
 		AfterEach(func() {
 			runner.Interrupt()
@@ -195,7 +192,6 @@ var _ = Describe("Api", func() {
 			})
 		})
 	})
-
 	Describe("when Health server is ready to serve RESTful API", func() {
 		BeforeEach(func() {
 			basicAuthConfig := conf
@@ -217,20 +213,17 @@ var _ = Describe("Api", func() {
 			})
 		})
 	})
-
 	Describe("when Health server is ready to serve RESTful API with basic Auth", func() {
 		AfterEach(func() {
 			runner.Interrupt()
 			Eventually(runner.Session, 5).Should(Exit(0))
 		})
-
 		When("Health server is ready to serve RESTful API with basic Auth", func() {
 			When("username and password are incorrect for basic authentication during health check", func() {
 				It("should return 401", func() {
 					testhelpers.CheckHealthAuth(GinkgoT(), healthHttpClient, healthURL.String(), "wrongusername", "wrongpassword", http.StatusUnauthorized)
 				})
 			})
-
 			When("username and password are correct for basic authentication during health check", func() {
 				It("should return 200", func() {
 					testhelpers.CheckHealthAuth(GinkgoT(), healthHttpClient, healthURL.String(), conf.Health.BasicAuth.Username, conf.Health.BasicAuth.Password, http.StatusOK)
@@ -238,7 +231,6 @@ var _ = Describe("Api", func() {
 			})
 		})
 	})
-
 	Describe("can start with default plugin", func() {
 		BeforeEach(func() {
 			pluginPathConfig := conf
@@ -265,7 +257,6 @@ var _ = Describe("Api", func() {
 			})
 		})
 	})
-
 	When("running CF server", func() {
 		var (
 			cfInstanceKeyFile  string
@@ -362,7 +353,7 @@ func getVcapServices() (result string) {
 			"user-provided": [
 			  { "name": "apiserver-config", "tags": ["apiserver-config"], "credentials": { "apiserver-config": { } }},
 			  { "name": "broker-catalog", "tags": ["broker-catalog"], "credentials": { "broker-catalog": ` + string(catalogBytes) + ` }}
-            ],
+			],
 			"autoscaler": [ {
 				"name": "some-service",
 				"credentials": {

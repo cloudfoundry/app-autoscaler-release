@@ -79,12 +79,16 @@ func New(logger lager.Logger, conf *config.Config, bindingDb db.BindingDB, polic
 		conf.ScalingRules.Disk.UpperThreshold,
 	)
 
-	defaultCustomMetricsCredentialType, err := models.ParseCustomMetricsBindingAuthScheme(
-		conf.DefaultCustomMetricsCredentialType)
-	if err != nil {
-		logger.Fatal("parse-default-credential-type", err, lager.Data{
-			"default-credential-type": conf.DefaultCustomMetricsCredentialType,
-		})
+	defaultCustomMetricsCredentialType := &models.X509Certificate
+	if len(conf.DefaultCustomMetricsCredentialType) > 0 {
+		var err error
+		defaultCustomMetricsCredentialType, err = models.ParseCustomMetricsBindingAuthScheme(
+			conf.DefaultCustomMetricsCredentialType)
+		if err != nil {
+			logger.Fatal("parse-default-credential-type", err, lager.Data{
+				"default-credential-type": conf.DefaultCustomMetricsCredentialType,
+			})
+		}
 	}
 
 	bindingReqParser := brParser.NewBindRequestParser(
