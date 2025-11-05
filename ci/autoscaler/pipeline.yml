@@ -190,8 +190,6 @@ jobs:
     file: ci/ci/autoscaler/pipeline.yml
     vars:
       branch_name: ((branch_name))
-      acceptance_deployment_name: ((acceptance_deployment_name))
-      acceptance_deployment_name_logcache_metron: ((acceptance_deployment_name_logcache_metron))
       acceptance_deployment_name_logcache_syslog: ((acceptance_deployment_name_logcache_syslog))
       acceptance_deployment_name_logcache_syslog_cf: ((acceptance_deployment_name_logcache_syslog_cf))
       pr_number: ((pr_number))
