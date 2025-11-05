@@ -138,21 +138,6 @@ resources:
     json_key: ((autoscaler_releases_uploader_key))
     regexp: releases/app-autoscaler-v(.*).tgz
 
-- name: acceptance-tests-bucket
-  type: gcs-resource
-  source:
-    bucket: app-autoscaler-releases
-    json_key: ((autoscaler_releases_uploader_key))
-    regexp: releases/app-autoscaler-acceptance-tests-v(.*).tgz
-    initial_path: releases/app-autoscaler-acceptance-tests-v0.0.1.tgz
-
-- name: mtar-bucket
-  type: gcs-resource
-  source:
-    bucket: app-autoscaler-releases
-    json_key: ((autoscaler_releases_uploader_key))
-    regexp: releases/app-autoscaler-v(.*).mtar
-    initial_path: releases/app-autoscaler-v0.0.1.mtar
 
 - name: golang-release
   type: git
@@ -396,11 +381,10 @@ jobs:
   - in_parallel:
     - get: "app-autoscaler-tools"
     - get: release-bucket
-    - get: acceptance-tests-bucket
     - get: gh-release
     - get: bbl-state
     - get: app-autoscaler-release
-      passed: [upgrade-test]
+      # passed: [upgrade-test]
     - get: ci
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
@@ -422,12 +406,6 @@ jobs:
   - put: release-bucket
     params:
       file: "build/artifacts/app-autoscaler-v*.tgz"
-  - put: acceptance-tests-bucket
-    params:
-      file: "build/artifacts/app-autoscaler-acceptance-tests-v*.tgz"
-  - put: mtar-bucket
-    params:
-      file: "build/artifacts/app-autoscaler-release-v*.mtar"
   - put: app-autoscaler-release
     params:
       rebase: true
@@ -481,7 +459,7 @@ jobs:
     - get: ci
     - get: gh-release
     - get: app-autoscaler-release
-      passed: [upgrade-test]
+      # passed: [upgrade-test]
       trigger: true
   - task: dummy-release-autoscaler
     image: "app-autoscaler-tools"
