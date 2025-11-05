@@ -1,10 +1,5 @@
 #! /usr/bin/env bash
 
-# NOTE: you can run this locally for testing !!!
-#
-# ./script/local_release_autoscaler.sh
-
-
 [ -n "${DEBUG}" ] && set -x
 
 set -euo pipefail
@@ -47,27 +42,7 @@ function create_release() {
         --tarball="${build_path}/artifacts/${release_file}"
 }
 
-function create_mtar() {
-  set -e
-  mkdir -p "${build_path}/artifacts"
-  local version=$1
-  local build_path=$2
-  echo " - creating autorscaler mtar artifact"
-  pushd "${autoscaler_dir}" > /dev/null
-    make mta-release VERSION="${version}" DEST="${build_path}/artifacts/"
-  popd > /dev/null
-}
 
-function create_tests() {
-  set -e
-  mkdir -p "${build_path}/artifacts"
-  local version=$1
-  local build_path=$2
-  echo " - creating acceptance test artifact"
-  pushd "${autoscaler_dir}" > /dev/null
-    make acceptance-release VERSION="${version}" DEST="${build_path}/artifacts/"
-  popd > /dev/null
-}
 
 function commit_release(){
   pushd "${autoscaler_dir}"
@@ -228,25 +203,15 @@ pushd "${autoscaler_dir}" > /dev/null
   echo "v${VERSION}" > "${build_path}/tag"
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
-    ACCEPTANCE_TEST_TGZ="app-autoscaler-acceptance-tests-v${VERSION}.tgz"
-    AUTOSCALER_MTAR="app-autoscaler-release-v${VERSION}.mtar"
     create_release "${VERSION}" "${build_path}" "${RELEASE_TGZ}"
-    create_tests "${VERSION}" "${build_path}"
-    create_mtar "${VERSION}" "${build_path}"
     [ "${CI}" = "true" ] && commit_release
 
     sha256sum "${build_path}/artifacts/"* > "${build_path}/artifacts/files.sum.sha256"
-    ACCEPTANCE_SHA256=$( grep "${ACCEPTANCE_TEST_TGZ}$" "${SUM_FILE}" | awk '{print $1}' )
     RELEASE_SHA256=$( grep "${RELEASE_TGZ}$" "${SUM_FILE}" | awk '{print $1}')
-    MTAR_SHA256=$( grep "${AUTOSCALER_MTAR}$" "${SUM_FILE}" | awk '{print $1}')
   else
-    ACCEPTANCE_SHA256="dummy-sha"
     RELEASE_SHA256="dummy-sha"
-    MTAR_SHA256="dummy-sha"
   fi
-  export ACCEPTANCE_SHA256
   export RELEASE_SHA256
-	export MTAR_SHA256
 
   cat >> "${build_path}/changelog.md" <<EOF
 
@@ -258,14 +223,6 @@ releases:
   version: ${VERSION}
   url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-v${VERSION}.tgz
   sha1: sha256:${RELEASE_SHA256}
-- name: app-autoscaler-acceptance-tests
-  version: ${VERSION}
-  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-acceptance-tests-v${VERSION}.tgz
-  sha1: sha256:${ACCEPTANCE_SHA256}
-- name: app-autoscaler-mtar
-  version: ${VERSION}
-  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-release-v${VERSION}.mtar
-  sha1: sha256:${MTAR_SHA256}
 \`\`\`
 EOF
   echo "---------- Changelog file ----------"
