@@ -1,0 +1,58 @@
+---
+name: Update Autoscaler Submodule
+
+on:
+  repository_dispatch:
+    types: [autoscaler-release-published]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-submodule:
+    runs-on: ubuntu-latest
+    name: Update autoscaler submodule to new release
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update submodule to release tag
+        run: |
+          cd src/autoscaler
+          git fetch origin
+          git checkout ${{ github.event.client_payload.release_tag }}
+          cd ../..
+          git add src/autoscaler
+
+      - name: Create Pull Request
+        # https://github.com/peter-evans/create-pull-request/releases/tag/v7.0.8
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            Update autoscaler submodule to ${{ github.event.client_payload.release_tag }}
+
+            Release: ${{ github.event.client_payload.release_url }}
+          branch: update-autoscaler-${{ github.event.client_payload.release_tag }}
+          delete-branch: true
+          title: "Update autoscaler to ${{ github.event.client_payload.release_tag }}"
+          body: |
+            ## Autoscaler Submodule Update
+
+            This PR updates the `src/autoscaler` submodule to the newly released version.
+
+            **Release:** [${{ github.event.client_payload.release_tag }}](${{ github.event.client_payload.release_url }})
+            **Commit:** ${{ github.event.client_payload.commit_sha }}
+
+            ### Changes
+            - Updates `src/autoscaler` submodule reference
+
+            🤖 This PR was automatically created by the release workflow.
+          labels: |
+            dependencies
+            autoscaler-update
+            automated
