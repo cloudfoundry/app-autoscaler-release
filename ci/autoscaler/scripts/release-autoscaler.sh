@@ -1,24 +1,17 @@
 #! /usr/bin/env bash
 
-# NOTE: you can run this locally for testing !!!
-#
-# ./script/local_release_autoscaler.sh
-
-
 [ -n "${DEBUG}" ] && set -x
 
 set -euo pipefail
 script_dir=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${script_dir}/vars.source.sh"
 
-previous_version=${PREV_VERSION:-$(cat gh-release/tag)}
 mkdir -p "build"
 build_path=$(realpath build)
 build_opts=${BUILD_OPTS:-"--final"}
 mkdir -p "keys"
 keys_path="$(realpath keys)"
 PERFORM_BOSH_RELEASE=${PERFORM_BOSH_RELEASE:-"true"}
-REPO_OUT=${REPO_OUT:-}
 export UPLOADER_KEY=${UPLOADER_KEY:-"NOT_SET"}
 CI=${CI:-false}
 SUM_FILE="${build_path}/artifacts/files.sum.sha256"
@@ -47,30 +40,9 @@ function create_release() {
         --tarball="${build_path}/artifacts/${release_file}"
 }
 
-function create_mtar() {
-  set -e
-  mkdir -p "${build_path}/artifacts"
-  local version=$1
-  local build_path=$2
-  echo " - creating autorscaler mtar artifact"
-  pushd "${autoscaler_dir}" > /dev/null
-    make mta-release VERSION="${version}" DEST="${build_path}/artifacts/"
-  popd > /dev/null
-}
 
-function create_tests() {
-  set -e
-  mkdir -p "${build_path}/artifacts"
-  local version=$1
-  local build_path=$2
-  echo " - creating acceptance test artifact"
-  pushd "${autoscaler_dir}" > /dev/null
-    make acceptance-release VERSION="${version}" DEST="${build_path}/artifacts/"
-  popd > /dev/null
-}
 
 function commit_release(){
-  pushd "${autoscaler_dir}"
   git add -A
   git status
   git commit -S -m "created release v${VERSION}"
@@ -90,86 +62,23 @@ EOF
     yq eval -i '.blobstore.options.json_key = strenv(UPLOADER_KEY)' "$config_file"
 }
 
-function determine_next_version(){
-  echo " - Determining next version..."
-  echo " - Previous version: $previous_version"
+function get_version_from_submodule(){
+  echo " - Getting version from src/autoscaler submodule..."
+  pushd "${autoscaler_dir}/src/autoscaler" > /dev/null
+  local tag_version
+  tag_version=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+  popd > /dev/null
+
+  if [ -z "$tag_version" ]; then
+    echo " - ERROR: No tag found in src/autoscaler submodule"
+    exit 1
+  fi
 
   # Remove 'v' prefix if present
-  local version_number=${previous_version#v}
+  local version_number=${tag_version#v}
 
-  # Parse version components
-  IFS='.' read -r major minor patch <<< "$version_number"
-
-  # Get commits since last tag
-  local commits_since_tag
-  commits_since_tag=$(git rev-list "${previous_version}"..HEAD --oneline 2>/dev/null || git rev-list HEAD --oneline)
-  local commit_count
-  commit_count=$(echo "$commits_since_tag" | wc -l)
-
-  if [ -z "$commits_since_tag" ] || [ "$commit_count" -eq 0 ]; then
-    echo " - No commits since last tag, keeping current version"
-    echo "$version_number" > "${build_path}/name"
-    return
-  fi
-
-  # Extract PR numbers from commits
-  local pr_numbers
-  pr_numbers=$(echo "$commits_since_tag" | grep -oE '\(#[0-9]+\)' | grep -oE '[0-9]+' | sort -u)
-
-  if [ -z "$pr_numbers" ]; then
-    echo " - No PR numbers found in commits, incrementing patch version"
-    patch=$((patch + 1))
-    local new_version="${major}.${minor}.${patch}"
-    echo " - Next version: $new_version"
-    echo "$new_version" > "${build_path}/name"
-    return
-  fi
-
-  # Query GitHub API for PR labels and categorize
-  local has_breaking=0
-  local has_enhancement=0
-  local pr_count=0
-
-  echo " - Checking PR labels for version determination..."
-  while IFS= read -r pr_num; do
-    if [ -n "$pr_num" ]; then
-      pr_count=$((pr_count + 1))
-      local labels
-      labels=$(gh pr view "$pr_num" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
-
-      if echo "$labels" | grep -q "exclude-from-changelog"; then
-        echo "   - PR #$pr_num: excluded from changelog"
-        continue
-      fi
-
-      if echo "$labels" | grep -q "breaking-change"; then
-        echo "   - PR #$pr_num: breaking change"
-        has_breaking=1
-      elif echo "$labels" | grep -q "enhancement"; then
-        echo "   - PR #$pr_num: enhancement"
-        has_enhancement=1
-      fi
-    fi
-  done <<< "$pr_numbers"
-
-  # Determine version increment based on PR labels
-  if [[ "$has_breaking" -eq 1 ]]; then
-    major=$((major + 1))
-    minor=0
-    patch=0
-    echo " - Found breaking changes, incrementing major version"
-  elif [[ "$has_enhancement" -eq 1 ]]; then
-    minor=$((minor + 1))
-    patch=0
-    echo " - Found enhancements, incrementing minor version"
-  else
-    patch=$((patch + 1))
-    echo " - Found changes, incrementing patch version"
-  fi
-
-  local new_version="${major}.${minor}.${patch}"
-  echo " - Next version: $new_version"
-  echo "$new_version" > "${build_path}/name"
+  echo " - Version from submodule: $version_number"
+  echo "$version_number" > "${build_path}/name"
 }
 
 function generate_changelog(){
@@ -217,7 +126,7 @@ function setup_git(){
 pushd "${autoscaler_dir}" > /dev/null
   setup_git
   create_bosh_config
-  determine_next_version
+  get_version_from_submodule
 
   VERSION=${VERSION:-$(cat "${build_path}/name")}
   generate_changelog
@@ -228,25 +137,15 @@ pushd "${autoscaler_dir}" > /dev/null
   echo "v${VERSION}" > "${build_path}/tag"
   if [ "${PERFORM_BOSH_RELEASE}" == "true" ]; then
     RELEASE_TGZ="app-autoscaler-v${VERSION}.tgz"
-    ACCEPTANCE_TEST_TGZ="app-autoscaler-acceptance-tests-v${VERSION}.tgz"
-    AUTOSCALER_MTAR="app-autoscaler-release-v${VERSION}.mtar"
     create_release "${VERSION}" "${build_path}" "${RELEASE_TGZ}"
-    create_tests "${VERSION}" "${build_path}"
-    create_mtar "${VERSION}" "${build_path}"
     [ "${CI}" = "true" ] && commit_release
 
     sha256sum "${build_path}/artifacts/"* > "${build_path}/artifacts/files.sum.sha256"
-    ACCEPTANCE_SHA256=$( grep "${ACCEPTANCE_TEST_TGZ}$" "${SUM_FILE}" | awk '{print $1}' )
     RELEASE_SHA256=$( grep "${RELEASE_TGZ}$" "${SUM_FILE}" | awk '{print $1}')
-    MTAR_SHA256=$( grep "${AUTOSCALER_MTAR}$" "${SUM_FILE}" | awk '{print $1}')
   else
-    ACCEPTANCE_SHA256="dummy-sha"
     RELEASE_SHA256="dummy-sha"
-    MTAR_SHA256="dummy-sha"
   fi
-  export ACCEPTANCE_SHA256
   export RELEASE_SHA256
-	export MTAR_SHA256
 
   cat >> "${build_path}/changelog.md" <<EOF
 
@@ -258,14 +157,6 @@ releases:
   version: ${VERSION}
   url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-v${VERSION}.tgz
   sha1: sha256:${RELEASE_SHA256}
-- name: app-autoscaler-acceptance-tests
-  version: ${VERSION}
-  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-acceptance-tests-v${VERSION}.tgz
-  sha1: sha256:${ACCEPTANCE_SHA256}
-- name: app-autoscaler-mtar
-  version: ${VERSION}
-  url: https://storage.googleapis.com/app-autoscaler-releases/releases/app-autoscaler-release-v${VERSION}.mtar
-  sha1: sha256:${MTAR_SHA256}
 \`\`\`
 EOF
   echo "---------- Changelog file ----------"
