@@ -159,27 +159,12 @@ function find_or_upload_release() {
 }
 
 function pre_deploy() {
-	if [[ "${enable_mtar}" == "true" ]]; then
-		ops_files+=" ${autoscaler_dir}/operations/configure-cf-services.yml"
-		ops_files+=" ${autoscaler_dir}/operations/use-cf-services.yml"
-
-		cf_login
-
-		cf_target ${autoscaler_org} ${autoscaler_space}
-		local autoscaler_cf_server_xfcc_valid_org_guid=$(cf org ${AUTOSCALER_ORG} --guid)
-		local autoscaler_cf_server_xfcc_valid_space_guid=$(cf space ${AUTOSCALER_SPACE} --guid)
-
-		add_variable "autoscaler_cf_server_xfcc_valid_org_guid" "${autoscaler_cf_server_xfcc_valid_org_guid}"
-		add_variable "autoscaler_cf_server_xfcc_valid_space_guid" "${autoscaler_cf_server_xfcc_valid_space_guid}"
-	else
-		case "${cpu_upper_threshold}" in
-			"100") ;;
-			"200") ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_200.yml" ;;
-			"400") ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_400.yml" ;;
-			*) echo "No Ops file for cpu_upper_threshold of ${cpu_upper_threshold}"; exit 1 ;;
-		esac
-	fi
-
+	case "${cpu_upper_threshold}" in
+		"100") ;;
+		"200") ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_200.yml" ;;
+		"400") ops_files+=" ${autoscaler_dir}/operations/cpu_upper_threshold_400.yml" ;;
+		*) echo "No Ops file for cpu_upper_threshold of ${cpu_upper_threshold}"; exit 1 ;;
+	esac
 }
 
 log "Deploying autoscaler '${bosh_release_version}' with name '${deployment_name}'"

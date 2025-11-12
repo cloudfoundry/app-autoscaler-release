@@ -104,35 +104,6 @@ function cleanup_credhub(){
 	retry 3 credhub delete --path="/bosh-autoscaler/${deployment_name}"
 }
 
-function cleanup_apps(){
-	step "cleaning up apps"
-	local mtar_app
-	local space_guid
-
-	cf_target "${autoscaler_org}" "${autoscaler_space}"
-
-	space_guid="$(cf space --guid "${autoscaler_space}")"
-	mtar_app="$(curl --header "Authorization: $(cf oauth-token)" "deploy-service.${system_domain}/api/v2/spaces/${space_guid}/mtas"  | jq ". | .[] | .metadata | .id" -r)"
-
-	if [ -n "${mtar_app}" ]; then
-		set +e
-		cf undeploy "${mtar_app}" -f --delete-service-brokers --delete-service-keys --delete-services --do-not-fail-on-missing-permissions
-		set -e
-	else
-		 echo "No app to undeploy"
-	fi
-
-	if cf spaces | grep --quiet --regexp="^${AUTOSCALER_SPACE}$"; then
-		cf delete-space -f "${AUTOSCALER_SPACE}"
-	fi
-
-	if cf orgs | grep --quiet --regexp="^${AUTOSCALER_ORG}$"
-	then
-		cf delete-org -f "${AUTOSCALER_ORG}"
-	fi
-}
-
-
 function unset_vars() {
 	unset PR_NUMBER
 	unset DEPLOYMENT_NAME
