@@ -79,6 +79,7 @@ files:
 - autoscaler/vendor/github.com/klauspost/compress/fse/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/gzip/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/huff0/* # gosub
+- autoscaler/vendor/github.com/klauspost/compress/internal/cpuinfo/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/internal/le/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/internal/snapref/* # gosub
 - autoscaler/vendor/github.com/klauspost/compress/zlib/* # gosub
