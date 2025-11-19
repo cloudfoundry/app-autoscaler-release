@@ -374,22 +374,12 @@ deploy-cleanup:
 
 bosh-release-path := ./target/bosh-releases
 
-
-.PHONY: mta-release
-mta-release: mta-build
-	@echo " - building mtar release '${VERSION}' to dir: '${DEST}' "
-
 .PHONY: acceptance-release
 acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
 	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
 	@mkdir -p ${DEST}
 	${AUTOSCALER_DIR}/scripts/compile-acceptance-tests.sh
 	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
-
-.PHONY: mta-build
-mta-build:
-	@echo " - building mta"
-	@make --directory='${autoscaler-dir}' mta-build
 
 .PHONY: build-test-app
 build-test-app:
