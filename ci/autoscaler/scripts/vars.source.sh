@@ -50,17 +50,9 @@ export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
 debug "PR_NUMBER: '${PR_NUMBER}'"
 user=${USER:-"test"}
 
-export ENABLE_MTAR=${ENABLE_MTAR:-false}
-debug "ENABLE_MTAR: ${ENABLE_MTAR}"
-enable_mtar=${ENABLE_MTAR}
 
-if [ "${ENABLE_MTAR}" = "true" ]; then
-	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-mta-${PR_NUMBER}"}"
-	[ "${DEPLOYMENT_NAME}" = "autoscaler-mta" ] && DEPLOYMENT_NAME="${user}"
-else
-	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
-	[ "${DEPLOYMENT_NAME}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
-fi
+export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
+[ "${DEPLOYMENT_NAME}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
 
 debug "DEPLOYMENT_NAME: ${DEPLOYMENT_NAME}"
 log "set up vars: DEPLOYMENT_NAME=${DEPLOYMENT_NAME}"
