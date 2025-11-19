@@ -9,9 +9,6 @@ on:
       deployment_name:
         required: true
         type: string
-      deploy_apps:
-        required: false
-        type: boolean
       ops_files:
         required: false
         type: string
@@ -61,13 +58,7 @@ jobs:
         shell: bash
         env:
           OPS_FILES: ${{ inputs.ops_files }}
-          ENABLE_MTAR: ${{ inputs.deploy_apps }}
         run: make --directory="${AUTOSCALER_DIR}" deploy-autoscaler
-
-      - name: Deploy Apps
-        shell: bash
-        run: make --directory="${AUTOSCALER_DIR}" deploy-apps
-        if: ${{ inputs.deploy_apps }}
 
       - name: Register autoscaler
         shell: bash
