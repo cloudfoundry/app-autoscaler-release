@@ -2,11 +2,11 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MAKEFLAGS = -s
 
-acceptance-dir := ./src/acceptance
 autoscaler-dir := ./src/autoscaler
 changeloglockcleaner-dir := ./src/changeloglockcleaner
 db-dir := ./src/db
 scheduler-dir := ./src/autoscaler/scheduler
+acceptance-dir := {acceptance-dir}/acceptance
 test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
