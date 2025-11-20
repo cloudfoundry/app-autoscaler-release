@@ -90,7 +90,7 @@ export CI_DIR="$(realpath -e "${CI_DIR}")"
 debug "CI_DIR: ${CI_DIR}"
 ci_dir="${CI_DIR}"
 
-AUTOSCALER_ACCEPTANCE_DIR="${AUTOSCALER_ACCEPTANCE_DIR:-${root_dir}/src/acceptance}"
+AUTOSCALER_ACCEPTANCE_DIR="${AUTOSCALER_ACCEPTANCE_DIR:-${root_dir}/src/autoscaler/acceptance}"
 export AUTOSCALER_ACCEPTANCE_DIR="$(realpath -e "${AUTOSCALER_ACCEPTANCE_DIR}" )"
 debug "AUTOSCALER_ACCEPTANCE_DIR: ${AUTOSCALER_ACCEPTANCE_DIR}"
 autoscaler_acceptance_dir="${AUTOSCALER_ACCEPTANCE_DIR}"

@@ -62,7 +62,7 @@ function uaa_login(){
 
 function cleanup_acceptance_run(){
 	step "cleaning up from acceptance tests"
-	pushd "${ci_dir}/../src/acceptance" > /dev/null
+	pushd "${ci_dir}/../src/autoscaler/acceptance" > /dev/null
 		retry 5 ./cleanup.sh
 	popd > /dev/null
 }
