@@ -374,13 +374,6 @@ deploy-cleanup:
 
 bosh-release-path := ./target/bosh-releases
 
-.PHONY: acceptance-release
-acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
-	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
-	@mkdir -p ${DEST}
-	${AUTOSCALER_DIR}/scripts/compile-acceptance-tests.sh
-	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
-
 .PHONY: build-test-app
 build-test-app:
 	@make --directory='${test-app-dir}' build
@@ -391,20 +384,6 @@ build-gorouterproxy:
 .PHONY: deploy-test-app
 deploy-test-app:
 	@make --directory='${test-app-dir}' deploy
-
-.PHONY: build-acceptance-tests
-build-acceptance-tests:
-	@make --directory='${acceptance-dir}' build_tests
-
-.PHONY: acceptance-tests
-acceptance-tests: build-test-app acceptance-tests-config ## Run acceptance tests against OSS dev environment (requrires a previous deployment of the autoscaler)
-	@make --directory='${acceptance-dir}' run-acceptance-tests
-.PHONY: acceptance-cleanup
-acceptance-cleanup:
-	@make --directory='${acceptance-dir}' acceptance-tests-cleanup
-.PHONY: acceptance-tests-config
-acceptance-tests-config:
-	make --directory='${acceptance-dir}' acceptance-tests-config
 
 .PHONY: cleanup-concourse
 cleanup-concourse:
