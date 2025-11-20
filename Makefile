@@ -322,19 +322,11 @@ generate-openapi-generated-clients-and-servers:
 
 
  .PHONY: go-mod-tidy
-go-mod-tidy: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
-						 changeloglockcleaner.go-mod-tidy test-app.go-mod-tidy
+go-mod-tidy: changeloglockcleaner.go-mod-tidy
 
-.PHONY: acceptance.go-mod-tidy autoscaler.go-mod-tidy changelog.go-mod-tidy \
-				changeloglockcleaner.go-mod-tidy test-app.go-mod-tidy
-acceptance.go-mod-tidy:
-	make --directory='${acceptance-dir}' go-mod-tidy
-autoscaler.go-mod-tidy:
-	make --directory='${autoscaler-dir}' go-mod-tidy
+.PHONY: changeloglockcleaner.go-mod-tidy
 changeloglockcleaner.go-mod-tidy:
 	make --directory='${changeloglockcleaner-dir}' go-mod-tidy
-test-app.go-mod-tidy:
-	make --directory='${test-app-dir}' go-mod-tidy
 
 
 .PHONY: mod-download
@@ -348,10 +340,13 @@ mod-download:
 				changeloglockcleaner.go-mod-vendor
 go-mod-vendor: clean-vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 							 changeloglockcleaner.go-mod-vendor
+
 acceptance.go-mod-vendor:
 	make --directory='${acceptance-dir}' go-mod-vendor
+
 autoscaler.go-mod-vendor:
 	make --directory='${autoscaler-dir}' go-mod-vendor
+
 changeloglockcleaner.go-mod-vendor:
 	make --directory='${changeloglockcleaner-dir}' go-mod-vendor
 

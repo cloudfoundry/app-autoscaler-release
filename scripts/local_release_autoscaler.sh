@@ -41,7 +41,7 @@ find_or_create_ssh_key() {
 
 prerelease() {
 	pushd "${script_dir}/.." > /dev/null
-		make clean generate-fakes generate-openapi-generated-clients-and-servers go-mod-tidy go-mod-vendor db scheduler
+		make clean generate-fakes generate-openapi-generated-clients-and-servers go-mod-vendor db scheduler
 	popd > /dev/null
 }
 
