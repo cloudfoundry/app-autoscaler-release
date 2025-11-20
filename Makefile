@@ -6,7 +6,7 @@ autoscaler-dir := ./src/autoscaler
 changeloglockcleaner-dir := ./src/changeloglockcleaner
 db-dir := ./src/db
 scheduler-dir := ./src/autoscaler/scheduler
-acceptance-dir := {acceptance-dir}/acceptance
+acceptance-dir := {autoscaler-dir}/acceptance
 test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
