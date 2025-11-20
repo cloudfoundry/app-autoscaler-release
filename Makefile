@@ -56,8 +56,8 @@ target/init-db-${db_type}:
 	@touch $@
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
-.PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance ## Clean all build and test artifacts
+.PHONY: clean-autoscaler clean-java clean-acceptance
+clean: clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance ## Clean all build and test artifacts
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 clean-build:
@@ -68,9 +68,6 @@ clean-java:
 clean-targets:
 	@echo " - cleaning build target files"
 	@rm --recursive --force target/* &> /dev/null || echo " . Already clean"
-clean-vendor:
-	@echo " - cleaning vendored go"
-	@find . -depth -name "vendor" -type d -exec rm -rf {} \;
 clean-fakes:
 	@echo " - cleaning fakes"
 	@find . -depth -name "fakes" -type d -exec rm -rf {} \;
@@ -338,7 +335,7 @@ mod-download:
 
 .PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 				changeloglockcleaner.go-mod-vendor
-go-mod-vendor: clean-vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
+go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
 							 changeloglockcleaner.go-mod-vendor
 
 acceptance.go-mod-vendor:
@@ -364,6 +361,7 @@ deploy-register-cf:
 deploy-autoscaler-bosh: db.java-libs go-mod-vendor scheduler.build
 	echo " - deploying autoscaler"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+
 deploy-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh
 
