@@ -100,7 +100,6 @@ jobs:
           #! /usr/bin/env bash
           set -eu -o pipefail
 
-          make --directory="${AUTOSCALER_RELEASE_DIR}/src/acceptance/assets/app/go_app" generate-fakes
           make --directory="${AUTOSCALER_RELEASE_DIR}/src/autoscaler" generate-fakes
           make --directory="${AUTOSCALER_RELEASE_DIR}/src/autoscaler" acceptance-tests SUITES="${MATRIX_SUITE,,}"
 
