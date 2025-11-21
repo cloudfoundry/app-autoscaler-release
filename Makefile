@@ -248,9 +248,9 @@ integration: init-db test-certs build_all build-gorouterproxy
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
 
-.PHONY: lint lint-go acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
+.PHONY: lint lint-go acceptance.lint autoscaler.lint test-app.lint changeloglockcleaner.lint
 lint: lint-go lint-ruby lint-actions lint-markdown lint-gorouterproxy
-lint-go: acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
+lint-go: acceptance.lint autoscaler.lint test-app.lint changeloglockcleaner.lint
 acceptance.lint:
 	@echo 'Linting acceptance-tests …'
 	make --directory='${acceptance-dir}' lint
@@ -318,7 +318,7 @@ generate-openapi-generated-clients-and-servers:
 	make --directory='${autoscaler-dir}' generate-openapi-generated-clients-and-servers
 
 
-.PHONY: go-mod-tidy changeloglockcleaner.go-mod-tidy 
+.PHONY: go-mod-tidy changeloglockcleaner.go-mod-tidy
 go-mod-tidy: changeloglockcleaner.go-mod-tidy
 
 changeloglockcleaner.go-mod-tidy:
@@ -332,10 +332,8 @@ mod-download:
 		 cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
 	done
 
-.PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
-				changeloglockcleaner.go-mod-vendor
-go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
-							 changeloglockcleaner.go-mod-vendor
+.PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changeloglockcleaner.go-mod-vendor
+go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changeloglockcleaner.go-mod-vendor
 
 acceptance.go-mod-vendor:
 	make --directory='${acceptance-dir}' go-mod-vendor
