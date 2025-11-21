@@ -2,10 +2,10 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MAKEFLAGS = -s
 
-autoscaler-dir := ./src/autoscaler
-changeloglockcleaner-dir := ./src/changeloglockcleaner
 db-dir := ./src/db
-scheduler-dir := ./src/autoscaler/scheduler
+changeloglockcleaner-dir := ./src/changeloglockcleaner
+autoscaler-dir := ./src/autoscaler
+scheduler-dir := ${autoscaler-dir}/scheduler
 acceptance-dir := ${autoscaler-dir}/acceptance
 test-app-dir := ${acceptance-dir}/assets/app/go_app
 
@@ -23,9 +23,9 @@ DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 16
 SUITES ?= broker api app
-AUTOSCALER_DIR ?= $(shell pwd)
-lint_config := ${AUTOSCALER_DIR}/.golangci.yaml
-CI_DIR ?= ${AUTOSCALER_DIR}/ci
+AUTOSCALER_RELEASE_DIR ?= $(shell pwd)
+lint_config := ${AUTOSCALER_RELEASE_DIR}/.golangci.yaml
+CI_DIR ?= ${AUTOSCALER_RELEASE_DIR}/ci
 CI ?= false
 VERSION ?= 0.0.testing
 DEST ?= build
@@ -55,9 +55,8 @@ target/init-db-${db_type}:
 	@./scripts/initialise_db.sh '${db_type}'
 	@touch $@
 
-# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 .PHONY: clean-autoscaler clean-java clean-acceptance
-clean: clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance ## Clean all build and test artifacts
+clean: clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 clean-build:
@@ -74,9 +73,7 @@ clean-fakes:
 clean-autoscaler:
 	@make --directory='${autoscaler-dir}' clean
 clean-scheduler:
-	@echo " - cleaning scheduler test resources"
-	@rm -rf ${scheduler-dir}/src/test/resources/certs
-	@rm -rf ${scheduler-dir}/target
+	@make --directory='${autoscaler-dir}/scheduler' clean
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f test-certs/*
@@ -149,7 +146,6 @@ target/autoscaler_test_certs:
 	@touch $@
 ${scheduler-dir}/src/test/resources/certs:
 	@./${scheduler-dir}/scripts/generate_unit_test_certs.sh
-
 
 
 .PHONY: test test-autoscaler test-changelog test-changeloglockcleaner
@@ -410,7 +406,7 @@ run-performance:
 
 .PHONY: run-act
 run-act:
-	${AUTOSCALER_DIR}/scripts/run_act.sh;\
+	${AUTOSCALER_RELEASE_DIR}/scripts/run_act.sh;\
 
 
 package-specs: go-mod-tidy go-mod-vendor
