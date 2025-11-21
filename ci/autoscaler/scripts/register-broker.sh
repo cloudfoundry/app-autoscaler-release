@@ -19,7 +19,7 @@ if [[ -n "${existing_service_broker}" ]]
 then
 	echo "Service Broker ${existing_service_broker} already exists"
 	echo " - cleaning up pr"
-	pushd "${autoscaler_dir}/src/acceptance" > /dev/null
+	pushd "${autoscaler_dir}/src/autoscaler/acceptance" > /dev/null
 		./cleanup.sh
 	popd  > /dev/null
 	echo ' - deleting broker'

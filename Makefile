@@ -2,11 +2,11 @@ SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c ${SHELLFLAGS}
 MAKEFLAGS = -s
 
-acceptance-dir := ./src/acceptance
-autoscaler-dir := ./src/autoscaler
-changeloglockcleaner-dir := ./src/changeloglockcleaner
 db-dir := ./src/db
-scheduler-dir := ./src/autoscaler/scheduler
+changeloglockcleaner-dir := ./src/changeloglockcleaner
+autoscaler-dir := ./src/autoscaler
+scheduler-dir := ${autoscaler-dir}/scheduler
+acceptance-dir := ${autoscaler-dir}/acceptance
 test-app-dir := ${acceptance-dir}/assets/app/go_app
 
 # 🚧 To-do: Remove me!
@@ -23,9 +23,9 @@ DEBUG := false
 MYSQL_TAG := 8
 POSTGRES_TAG := 16
 SUITES ?= broker api app
-AUTOSCALER_DIR ?= $(shell pwd)
-lint_config := ${AUTOSCALER_DIR}/.golangci.yaml
-CI_DIR ?= ${AUTOSCALER_DIR}/ci
+AUTOSCALER_RELEASE_DIR ?= $(shell pwd)
+lint_config := ${AUTOSCALER_RELEASE_DIR}/.golangci.yaml
+CI_DIR ?= ${AUTOSCALER_RELEASE_DIR}/ci
 CI ?= false
 VERSION ?= 0.0.testing
 DEST ?= build
@@ -55,9 +55,8 @@ target/init-db-${db_type}:
 	@./scripts/initialise_db.sh '${db_type}'
 	@touch $@
 
-# 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
-.PHONY: clean-autoscaler clean-java clean-vendor clean-acceptance
-clean: clean-vendor clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance ## Clean all build and test artifacts
+.PHONY: clean-autoscaler clean-java clean-acceptance
+clean: clean-autoscaler clean-java clean-targets clean-scheduler clean-certs clean-bosh-release clean-build clean-acceptance
 	@make stop-db db_type=mysql
 	@make stop-db db_type=postgres
 clean-build:
@@ -68,18 +67,13 @@ clean-java:
 clean-targets:
 	@echo " - cleaning build target files"
 	@rm --recursive --force target/* &> /dev/null || echo " . Already clean"
-clean-vendor:
-	@echo " - cleaning vendored go"
-	@find . -depth -name "vendor" -type d -exec rm -rf {} \;
 clean-fakes:
 	@echo " - cleaning fakes"
 	@find . -depth -name "fakes" -type d -exec rm -rf {} \;
 clean-autoscaler:
 	@make --directory='${autoscaler-dir}' clean
 clean-scheduler:
-	@echo " - cleaning scheduler test resources"
-	@rm -rf ${scheduler-dir}/src/test/resources/certs
-	@rm -rf ${scheduler-dir}/target
+	@make --directory='${autoscaler-dir}/scheduler' clean
 clean-certs:
 	@echo " - cleaning test certs"
 	@rm -f test-certs/*
@@ -152,7 +146,6 @@ target/autoscaler_test_certs:
 	@touch $@
 ${scheduler-dir}/src/test/resources/certs:
 	@./${scheduler-dir}/scripts/generate_unit_test_certs.sh
-
 
 
 .PHONY: test test-autoscaler test-changelog test-changeloglockcleaner
@@ -251,9 +244,9 @@ integration: init-db test-certs build_all build-gorouterproxy
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
 
-.PHONY: lint lint-go acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
+.PHONY: lint lint-go acceptance.lint autoscaler.lint test-app.lint changeloglockcleaner.lint
 lint: lint-go lint-ruby lint-actions lint-markdown lint-gorouterproxy
-lint-go: acceptance.lint autoscaler.lint test-app.lint changelog.lint changeloglockcleaner.lint
+lint-go: acceptance.lint autoscaler.lint test-app.lint changeloglockcleaner.lint
 acceptance.lint:
 	@echo 'Linting acceptance-tests …'
 	make --directory='${acceptance-dir}' lint
@@ -321,9 +314,9 @@ generate-openapi-generated-clients-and-servers:
 	make --directory='${autoscaler-dir}' generate-openapi-generated-clients-and-servers
 
 
- .PHONY: go-mod-tidy
-.PHONY: changelog.go-mod-tidy changeloglockcleaner.go-mod-tidy
-go-mod-tidy: changelog.go-mod-tidy changeloglockcleaner.go-mod-tidy
+.PHONY: go-mod-tidy changeloglockcleaner.go-mod-tidy
+go-mod-tidy: changeloglockcleaner.go-mod-tidy
+
 changeloglockcleaner.go-mod-tidy:
 	make --directory='${changeloglockcleaner-dir}' go-mod-tidy
 
@@ -335,10 +328,8 @@ mod-download:
 		 cd $${folder}; echo " - go mod download '$${folder}'"; go mod download; cd - >/dev/null;\
 	done
 
-.PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
-				changeloglockcleaner.go-mod-vendor
-go-mod-vendor: clean-vendor acceptance.go-mod-vendor autoscaler.go-mod-vendor changelog.go-mod-vendor \
-							 changeloglockcleaner.go-mod-vendor
+.PHONY: acceptance.go-mod-vendor autoscaler.go-mod-vendor changeloglockcleaner.go-mod-vendor
+go-mod-vendor: acceptance.go-mod-vendor autoscaler.go-mod-vendor changeloglockcleaner.go-mod-vendor
 
 acceptance.go-mod-vendor:
 	make --directory='${acceptance-dir}' go-mod-vendor
@@ -363,17 +354,11 @@ deploy-register-cf:
 deploy-autoscaler-bosh: db.java-libs go-mod-vendor scheduler.build
 	echo " - deploying autoscaler"
 	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-autoscaler.sh
+
 deploy-cleanup:
 	${CI_DIR}/autoscaler/scripts/cleanup-autoscaler.sh
 
 bosh-release-path := ./target/bosh-releases
-
-.PHONY: acceptance-release
-acceptance-release: clean-acceptance go-mod-tidy go-mod-vendor build-test-app
-	@echo " - building acceptance test release '${VERSION}' to dir: '${DEST}' "
-	@mkdir -p ${DEST}
-	${AUTOSCALER_DIR}/scripts/compile-acceptance-tests.sh
-	@tar --create --auto-compress --directory="src" --file="${ACCEPTANCE_TESTS_FILE}" 'acceptance'
 
 .PHONY: build-test-app
 build-test-app:
@@ -385,20 +370,6 @@ build-gorouterproxy:
 .PHONY: deploy-test-app
 deploy-test-app:
 	@make --directory='${test-app-dir}' deploy
-
-.PHONY: build-acceptance-tests
-build-acceptance-tests:
-	@make --directory='${acceptance-dir}' build_tests
-
-.PHONY: acceptance-tests
-acceptance-tests: build-test-app acceptance-tests-config ## Run acceptance tests against OSS dev environment (requrires a previous deployment of the autoscaler)
-	@make --directory='${acceptance-dir}' run-acceptance-tests
-.PHONY: acceptance-cleanup
-acceptance-cleanup:
-	@make --directory='${acceptance-dir}' acceptance-tests-cleanup
-.PHONY: acceptance-tests-config
-acceptance-tests-config:
-	make --directory='${acceptance-dir}' acceptance-tests-config
 
 .PHONY: cleanup-concourse
 cleanup-concourse:
@@ -435,7 +406,7 @@ run-performance:
 
 .PHONY: run-act
 run-act:
-	${AUTOSCALER_DIR}/scripts/run_act.sh;\
+	${AUTOSCALER_RELEASE_DIR}/scripts/run_act.sh;\
 
 
 package-specs: go-mod-tidy go-mod-vendor
@@ -494,8 +465,6 @@ scheduler.test: check-db_type scheduler.test-certificates init-db
 .PHONY: scheduler.test-certificates
 scheduler.test-certificates:
 	make --directory='${scheduler-dir}' test-certificates
-
-
 
 list-apps:
 	echo " - listing apps"
