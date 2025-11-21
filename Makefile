@@ -318,10 +318,9 @@ generate-openapi-generated-clients-and-servers:
 	make --directory='${autoscaler-dir}' generate-openapi-generated-clients-and-servers
 
 
- .PHONY: go-mod-tidy
+.PHONY: go-mod-tidy changeloglockcleaner.go-mod-tidy 
 go-mod-tidy: changeloglockcleaner.go-mod-tidy
 
-.PHONY: changeloglockcleaner.go-mod-tidy
 changeloglockcleaner.go-mod-tidy:
 	make --directory='${changeloglockcleaner-dir}' go-mod-tidy
 
@@ -472,8 +471,6 @@ scheduler.test: check-db_type scheduler.test-certificates init-db
 .PHONY: scheduler.test-certificates
 scheduler.test-certificates:
 	make --directory='${scheduler-dir}' test-certificates
-
-
 
 list-apps:
 	echo " - listing apps"
