@@ -322,9 +322,8 @@ generate-openapi-generated-clients-and-servers:
 
 
  .PHONY: go-mod-tidy
-go-mod-tidy: changelog.go-mod-tidy changeloglockcleaner.go-mod-tidy
-
 .PHONY: changelog.go-mod-tidy changeloglockcleaner.go-mod-tidy
+go-mod-tidy: changelog.go-mod-tidy changeloglockcleaner.go-mod-tidy
 changeloglockcleaner.go-mod-tidy:
 	make --directory='${changeloglockcleaner-dir}' go-mod-tidy
 
