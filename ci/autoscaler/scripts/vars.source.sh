@@ -50,17 +50,9 @@ export PR_NUMBER=${PR_NUMBER:-$(gh pr view --json number --jq '.number' )}
 debug "PR_NUMBER: '${PR_NUMBER}'"
 user=${USER:-"test"}
 
-export ENABLE_MTAR=${ENABLE_MTAR:-false}
-debug "ENABLE_MTAR: ${ENABLE_MTAR}"
-enable_mtar=${ENABLE_MTAR}
 
-if [ "${ENABLE_MTAR}" = "true" ]; then
-	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-mta-${PR_NUMBER}"}"
-	[ "${DEPLOYMENT_NAME}" = "autoscaler-mta" ] && DEPLOYMENT_NAME="${user}"
-else
-	export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
-	[ "${DEPLOYMENT_NAME}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
-fi
+export DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-"autoscaler-${PR_NUMBER}"}"
+[ "${DEPLOYMENT_NAME}" = "autoscaler-" ] && DEPLOYMENT_NAME="${user}"
 
 debug "DEPLOYMENT_NAME: ${DEPLOYMENT_NAME}"
 log "set up vars: DEPLOYMENT_NAME=${DEPLOYMENT_NAME}"
@@ -98,7 +90,7 @@ export CI_DIR="$(realpath -e "${CI_DIR}")"
 debug "CI_DIR: ${CI_DIR}"
 ci_dir="${CI_DIR}"
 
-AUTOSCALER_ACCEPTANCE_DIR="${AUTOSCALER_ACCEPTANCE_DIR:-${root_dir}/src/acceptance}"
+AUTOSCALER_ACCEPTANCE_DIR="${AUTOSCALER_ACCEPTANCE_DIR:-${root_dir}/src/autoscaler/acceptance}"
 export AUTOSCALER_ACCEPTANCE_DIR="$(realpath -e "${AUTOSCALER_ACCEPTANCE_DIR}" )"
 debug "AUTOSCALER_ACCEPTANCE_DIR: ${AUTOSCALER_ACCEPTANCE_DIR}"
 autoscaler_acceptance_dir="${AUTOSCALER_ACCEPTANCE_DIR}"
