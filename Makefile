@@ -392,7 +392,7 @@ setup-performance: build-test-app
 	export NODES=1;\
 	export SUITES="setup_performance";\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
-	make acceptance-tests-config;\
+	make --directory='${autoscaler-dir}' acceptance-tests-config;\
 	make --directory='${acceptance-dir}' run-acceptance-tests
 
 .PHONY: run-performance
@@ -400,7 +400,7 @@ run-performance:
 	export NODES=1;\
 	export DEPLOYMENT_NAME="autoscaler-performance";\
 	export SUITES="run_performance";\
-	make acceptance-tests-config;\
+	make --directory='${autoscaler-dir}' acceptance-tests-config;\
 	make --directory='${acceptance-dir}' run-acceptance-tests
 
 
