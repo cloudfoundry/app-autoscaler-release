@@ -470,12 +470,6 @@ list-apps:
 	echo " - listing apps"
 	DEBUG="${DEBUG}" ${CI_DIR}/../scripts/list_apps.sh
 
-deploy-apps:
-	echo " - deploying apps"
-	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/deploy-apps.sh
 
-undeploy-apps:
-	echo " - undeploying apps"
-	DEBUG="${DEBUG}" ${CI_DIR}/autoscaler/scripts/undeploy-apps.sh
 help: ## Show this help
 	@grep --extended-regexp --no-filename '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
