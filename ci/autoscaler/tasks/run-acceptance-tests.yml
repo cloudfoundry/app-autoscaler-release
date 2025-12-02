@@ -3,6 +3,7 @@ platform: linux
 
 params:
   NODES: 3
+  BBL_STATE_PATH: ../../../../bbl-state/bbl-state
 inputs:
 - name: app-autoscaler-release
 - name: bbl-state
