@@ -42,11 +42,9 @@ groups:
   - cleanup-autoscaler-deployments
   - fetch-latest-stemcell
   - draft
-  - integration-tests
   - performance
   - release
   - set-pipeline
-  - unit-tests
   - upgrade-test
   - update-golang
   - update-java
@@ -54,10 +52,8 @@ groups:
   jobs:
   - acceptance-log-cache-syslog
   - draft
-  - integration-tests
   - release
   - set-pipeline
-  - unit-tests
   - upgrade-test
 - name: update-sdks
   jobs:
@@ -179,41 +175,6 @@ jobs:
       acceptance_deployment_name_logcache_syslog_cf: ((acceptance_deployment_name_logcache_syslog_cf))
       pr_number: ((pr_number))
 
-- name: unit-tests
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  plan:
-  - in_parallel:
-    - get: "app-autoscaler-tools"
-      trigger: true
-    - get: app-autoscaler-release
-      trigger: true
-    - get: ci
-      params: { submodules: none }
-  - task: run-unit-tests
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/run-unit-tests.yml
-    attempts: 3
-    timeout: 45m
-
-- name: integration-tests
-  public: true
-  build_logs_to_retain: 100
-  serial: true
-  serial_groups: [integration]
-  plan:
-  - in_parallel:
-    - get: "app-autoscaler-tools"
-      trigger: true
-    - get: app-autoscaler-release
-      trigger: true
-    - get: ci
-      params: { submodules: none }
-  - task: run-integration-tests
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/run-integration-tests.yml
-    timeout: 45m
 
 - name: acceptance-log-cache-syslog
   public: true
@@ -231,7 +192,6 @@ jobs:
       trigger: true
     - get: bbl-state
     - get: app-autoscaler-release
-      passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
       params: { submodules: none }
@@ -291,7 +251,6 @@ jobs:
       params: { submodules: none }
     - get: bbl-state
     - get: app-autoscaler-release
-      passed: [unit-tests, integration-tests]
       trigger: true
   - *make-prerelease-task
   - <<: *deploy-autoscaler-task
