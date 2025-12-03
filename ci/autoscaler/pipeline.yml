@@ -270,13 +270,15 @@ jobs:
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-     TARGETS: setup-performance
+      TARGETS: setup-performance
+      BBL_STATE_PATH: ../../../../bbl-state/bbl-state
     timeout: 15m
   - task: run-performance
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/make/make.yaml
     params:
-     TARGETS: run-performance
+      TARGETS: run-performance
+      BBL_STATE_PATH: ../../../../bbl-state/bbl-state
     timeout: 15m
 
 - name: upgrade-test

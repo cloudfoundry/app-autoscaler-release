@@ -3,7 +3,6 @@ platform: linux
 
 params:
   TARGETS:
-  BBL_STATE_PATH: ../../../../bbl-state/bbl-state
 
 inputs:
 - name: app-autoscaler-release
