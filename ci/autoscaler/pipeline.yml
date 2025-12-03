@@ -432,14 +432,12 @@ jobs:
   - in_parallel:
     - get: "app-autoscaler-tools"
     - get: bbl-state
-    - get: ci
-      params: { submodules: none }
+    - get: app-autoscaler-release
     - get: every-morning-monday-till-friday
       trigger: true
   - task: cleanup-autoscaler-deployments
     image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
-
+    file: app-autoscaler-release/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
 - name: fetch-latest-stemcell
   public: true
   build_logs_to_retain: 100
