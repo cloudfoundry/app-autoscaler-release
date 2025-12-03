@@ -3,8 +3,6 @@ on:
   pull_request:
     paths:
       - ".github/workflows/dependency-updates-post-processing.yaml"
-      - "src/**/go.mod"
-      - "src/**/go.sum"
       - "devbox.json"
       - "nix/packages/uaac/Gemfile*"
   workflow_dispatch: {}
@@ -58,7 +56,7 @@ jobs:
           eval "$(devbox shellenv)"
           printenv >> "${GITHUB_ENV}"
 
-      - name: go-mod-tidy and make package-specs
+      - name: make package-specs
         shell: bash
         env:
           GH_TOKEN: "${{ secrets.APP_AUTOSCALER_CI_TOKEN }}"
@@ -92,33 +90,13 @@ jobs:
                " on revision \`$(git rev-parse 'HEAD')\`."
 
           echo "Generating clients, servers and fakes on \`${current_branch_head}~1\`"
-          # Clean up any untracked files in submodule before switching branches
-          if [ -d "src/autoscaler" ]; then
-            git -C src/autoscaler clean -fd
-          fi
-          # Deinitialize submodules to prevent checkout conflicts
-          git submodule deinit -f --all
-          # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
-          # the derivation python.
-          git restore devbox.lock
           git checkout 'HEAD~1'
-          git submodule update --init --recursive
 
           make generate-fakes
           make generate-openapi-generated-clients-and-servers
 
           echo "Successfully generated the code. Switching back to \`${current_branch_head}\`!"
-          # Clean up generated files in submodule before switching branches
-          if [ -d "src/autoscaler" ]; then
-            git -C src/autoscaler clean -fd
-          fi
-          # Deinitialize submodules to prevent checkout conflicts
-          git submodule deinit -f --all
-          # Sometimes just loading an env may trigger a change regarding the `plugin_version` of
-          # the derivation python.
-          git restore devbox.lock
           git checkout "${current_branch_head}"
-          git submodule update --init --recursive
 
           # ⚠️ For this workflow to be successful, the subsequent line must not
           # trigger again the creation of the generated files.
@@ -126,13 +104,13 @@ jobs:
           make update-uaac-nix-package
 
           declare -i num_changed_files
-          num_changed_files="$(git status --porcelain packages/ nix/ | wc --lines)"
+          num_changed_files="$(git status --porcelain | wc --lines)"
           readonly num_changed_files
 
           if ((num_changed_files > 0))
           then
             echo 'Changes to some files were necessary!'
-            git add packages/ nix/
+            git add .
             git commit --message="${tidy_message}"
             git pull --rebase=true
             git push

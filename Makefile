@@ -244,19 +244,10 @@ integration: init-db test-certs build_all build-gorouterproxy
 	@make --directory='${autoscaler-dir}' integration DBURL="${DBURL}"
 
 
-.PHONY: lint lint-go acceptance.lint autoscaler.lint test-app.lint changeloglockcleaner.lint
-lint: lint-go lint-ruby lint-actions lint-markdown lint-gorouterproxy
-lint-go: acceptance.lint autoscaler.lint test-app.lint changeloglockcleaner.lint
-acceptance.lint:
-	@echo 'Linting acceptance-tests …'
-	make --directory='${acceptance-dir}' lint
-autoscaler.lint:
-	@echo 'Linting autoscaler …'
-	make --directory='${autoscaler-dir}' lint
+.PHONY: lint changeloglockcleaner.lint
+lint: lint-ruby lint-actions lint-markdown
+
 # ⚠️ Not existing: scheduler.lint:
-test-app.lint:
-	@echo 'Linting test-app …'
-	make --directory='${test-app-dir}' lint
 changeloglockcleaner.lint:
 	@echo 'Linting changeloglockcleaner …'
 	make --directory='${changeloglockcleaner-dir}' lint
@@ -275,10 +266,6 @@ lint-markdown:
 lint-actions:
 	@echo " - linting GitHub actions"
 	actionlint
-
-lint-gorouterproxy:
-	@echo " - linting: gorouterproxy"
-	@pushd src/autoscaler/integration/gorouterproxy >/dev/null && golangci-lint run --config='${lint_config}' $(OPTS)
 
 .PHONY: spec-test
 spec-test:
@@ -303,11 +290,9 @@ build/autoscaler-test.tgz_CI_true: go-mod-tidy go-mod-vendor
 	@bosh create-release ${AUTOSCALER_BOSH_BUILD_OPTS} --version='${AUTOSCALER_BOSH_VERSION}' --tarball='${AUTOSCALER_BOSH_TARBALL_PATH}'
 
 .PHONY: generate-fakes autoscaler.generate-fakes test-app.generate-fakes
-generate-fakes: autoscaler.generate-fakes test-app.generate-fakes
+generate-fakes: autoscaler.generate-fakes
 autoscaler.generate-fakes:
 	make --directory='${autoscaler-dir}' generate-fakes
-test-app.generate-fakes:
-	make --directory='${test-app-dir}' generate-fakes
 
 .PHONY: generate-openapi-generated-clients-and-servers
 generate-openapi-generated-clients-and-servers:
@@ -424,11 +409,6 @@ docker-image: docker-login
 	docker build -t ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest  ci/dockerfiles/autoscaler-tools
 	docker push ghcr.io/cloudfoundry/app-autoscaler-release-tools:latest
 
-validate-openapi-specs: $(wildcard ./api/*.openapi.yaml)
-	for file in $^ ; do \
-		redocly lint --extends=minimal --format=$(if $(GITHUB_ACTIONS),github-actions,codeframe) "$${file}" ; \
-	done
-
 
 # 🚧 To-do: Substitute me by a definition that calls the Makefile-targets of the other Makefiles!
 .PHONY: go-get-u
@@ -469,7 +449,6 @@ scheduler.test-certificates:
 list-apps:
 	echo " - listing apps"
 	DEBUG="${DEBUG}" ${CI_DIR}/../scripts/list_apps.sh
-
 
 help: ## Show this help
 	@grep --extended-regexp --no-filename '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
