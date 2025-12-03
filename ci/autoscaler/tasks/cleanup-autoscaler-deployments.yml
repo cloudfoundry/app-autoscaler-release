@@ -5,10 +5,10 @@ params:
   AUTOSCALER_DIR: app-autoscaler-release
 
 inputs:
-- name: ci
+- name: app-autoscaler-release
 - name: bbl-state
 
 outputs:
 
 run:
-  path: ci/ci/autoscaler/scripts/cleanup-autoscaler-deployments.sh
+  path: app-autoscaler-release/ci/autoscaler/scripts/cleanup-autoscaler-deployments.sh

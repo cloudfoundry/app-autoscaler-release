@@ -438,6 +438,7 @@ jobs:
   - task: cleanup-autoscaler-deployments
     image: "app-autoscaler-tools"
     file: app-autoscaler-release/ci/autoscaler/tasks/cleanup-autoscaler-deployments.yml
+
 - name: fetch-latest-stemcell
   public: true
   build_logs_to_retain: 100
