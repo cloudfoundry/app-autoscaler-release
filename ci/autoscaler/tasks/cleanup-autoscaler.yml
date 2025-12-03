@@ -12,10 +12,9 @@ params:
 
 inputs:
 - name: app-autoscaler-release
-- name: ci
 - name: bbl-state
 
 outputs:
 
 run:
-  path: ci/ci/autoscaler/scripts/cleanup-autoscaler.sh
+  path: app-autoscaler-release/ci/autoscaler/scripts/cleanup-autoscaler.sh

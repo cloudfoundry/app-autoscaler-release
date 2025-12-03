@@ -1,7 +1,7 @@
 name: Acceptance Tests - BOSH release
 on:
-  pull_request:
-    types: [ opened, synchronize ]
+  pull_request_target:
+    types: [ opened, synchronize, labeled ]
 
 concurrency:
   group: "${{ github.workflow }}/${{ github.ref }}"
@@ -13,5 +13,6 @@ jobs:
     uses: ./.github/workflows/acceptance_tests_reusable.yaml
     with:
       deployment_name: "autoscaler-${{ github.event.pull_request.number }}"
+      git_ref: "${{ github.event.pull_request.head.sha }}"
     secrets:
       bbl_ssh_key: "${{ secrets.BBL_SSH_KEY }}"
