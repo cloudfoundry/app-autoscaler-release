@@ -234,6 +234,7 @@ jobs:
 - name: performance
   public: true
   build_logs_to_retain: 100
+  serial: true
   on_failure:
     task: cleanup
     image: "app-autoscaler-tools"
