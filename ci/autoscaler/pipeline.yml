@@ -109,7 +109,6 @@ resources:
     private_key: ((autoscaler-deploy-key-private))
     branch: ((branch_name))
     fetch_tags: true
-    submodules: all
 
 - name: gh-release
   type: github-release
@@ -171,6 +170,7 @@ jobs:
   plan:
   - get: ci
     trigger: true
+    params: { submodules: none }
   - set_pipeline: self
     file: ci/ci/autoscaler/pipeline.yml
     vars:
@@ -190,6 +190,7 @@ jobs:
     - get: app-autoscaler-release
       trigger: true
     - get: ci
+      params: { submodules: none }
   - task: run-unit-tests
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/run-unit-tests.yml
@@ -208,6 +209,7 @@ jobs:
     - get: app-autoscaler-release
       trigger: true
     - get: ci
+      params: { submodules: none }
   - task: run-integration-tests
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/run-integration-tests.yml
@@ -232,6 +234,7 @@ jobs:
       passed: [unit-tests, integration-tests]
       trigger: true
     - get: ci
+      params: { submodules: none }
   - *make-prerelease-task
   - <<: *deploy-autoscaler-task
     params:
@@ -285,6 +288,7 @@ jobs:
     - get: "app-autoscaler-tools"
       trigger: true
     - get: ci
+      params: { submodules: none }
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [unit-tests, integration-tests]
@@ -330,6 +334,7 @@ jobs:
       trigger: true
     - get: bbl-state
     - get: ci
+      params: { submodules: none }
     - get: app-autoscaler-release
       passed:
       - acceptance-log-cache-syslog
@@ -386,6 +391,7 @@ jobs:
     - get: app-autoscaler-release
       passed: [upgrade-test]
     - get: ci
+      params: { submodules: none }
   - task: make-prerelease
     file: ci/ci/autoscaler/tasks/make/make.yaml
     image: "app-autoscaler-tools"
@@ -427,6 +433,7 @@ jobs:
     - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: ci
+      params: { submodules: none }
     - get: every-morning-monday-till-friday
       trigger: true
   - task: cleanup-autoscaler-deployments
@@ -441,6 +448,7 @@ jobs:
     - get: "app-autoscaler-tools"
     - get: bbl-state
     - get: ci
+      params: { submodules: none }
     - get: every-morning-monday-till-friday
       passed: [ cleanup-autoscaler-deployments ]
       trigger: true
@@ -457,6 +465,7 @@ jobs:
     - get: "app-autoscaler-tools"
       trigger: true
     - get: ci
+      params: { submodules: none }
     - get: gh-release
     - get: app-autoscaler-release
       passed: [upgrade-test]
@@ -478,6 +487,7 @@ jobs:
     - get: golang-release
       trigger: true
     - get: ci
+      params: { submodules: none }
   - task: update-golang-sdk
     file: ci/ci/autoscaler/tasks/update-sdk/go_task.yml
     params:
@@ -492,6 +502,7 @@ jobs:
     - get: java-release
       trigger: true
     - get: ci
+      params: { submodules: none }
   - task: update-java-sdk
     file: ci/ci/autoscaler/tasks/update-sdk/java_task.yml
     params:
