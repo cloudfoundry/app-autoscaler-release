@@ -26,10 +26,8 @@ function create_release() {
    echo " - creating release '${version}' in '${build_path}' as ${release_file}"
 
    yq eval -i ".properties.\"autoscaler.apiserver.info.build\".default = \"${version}\"" jobs/golangapiserver/spec
-   yq eval -i ".build = \"${version}\"" src/autoscaler/api/default_info.json
 
    git add jobs/golangapiserver/spec
-   git add src/autoscaler/api/default_info.json
 
    [ "${CI}" = "true" ] && git commit -S -m "Updated release version to ${version} in golangapiserver"
 
