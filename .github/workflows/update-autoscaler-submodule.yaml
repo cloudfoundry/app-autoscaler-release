@@ -4,6 +4,7 @@ name: Update Autoscaler Submodule
 on:
   repository_dispatch:
     types: [autoscaler-release-published]
+  workflow_dispatch:
 
 permissions:
   contents: write
