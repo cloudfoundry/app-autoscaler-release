@@ -70,6 +70,12 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
+- name: github-release
+  type: registry-image
+  source:
+    repository: concourse/github-release-resource
+    tag: dev
+
 resources:
 - name: "app-autoscaler-tools"
   type: "registry-image"
