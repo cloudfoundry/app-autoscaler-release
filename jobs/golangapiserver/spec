@@ -95,7 +95,7 @@ properties:
     default: "Autoscaler"
   autoscaler.apiserver.info.build:
     description: "Autoscaler application build number"
-    default: "15.10.0"
+    default: "15.12.0"
   autoscaler.apiserver.info.support_url:
     description: "Autoscaler application support page URL"
     default: "https://github.com/cloudfoundry/app-autoscaler-release"
