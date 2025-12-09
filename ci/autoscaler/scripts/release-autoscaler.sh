@@ -97,7 +97,24 @@ function generate_changelog(){
 		fi
 	fi
 	gh release create "${VERSION}" --generate-notes --draft
-	gh release view "${VERSION}" > "${build_path}/changelog.md"
+	gh release view "${VERSION}" --json body --jq '.body' > "${build_path}/changelog.md"
+}
+
+function upload_assets_and_promote(){
+  if [ "${PERFORM_BOSH_RELEASE}" != "true" ]; then
+    echo " - Skipping asset upload and promotion (PERFORM_BOSH_RELEASE=${PERFORM_BOSH_RELEASE})"
+    return
+  fi
+
+  echo " - Uploading artifacts to release ${VERSION}..."
+  gh release upload "${VERSION}" "${build_path}/artifacts/"* --clobber
+
+  echo " - Updating release notes with deployment information..."
+  gh release edit "${VERSION}" --notes-file "${build_path}/changelog.md"
+
+  echo " - Publishing release ${VERSION}..."
+  gh release edit "${VERSION}" --draft=false --target="v${VERSION}"
+  echo " - Release ${VERSION} published successfully!"
 }
 
 function setup_git(){
@@ -145,6 +162,14 @@ pushd "${autoscaler_dir}" > /dev/null
   fi
   export RELEASE_SHA256
 
+  # Push commits and tag before promoting the release
+  if [ "${CI}" = "true" ]; then
+    echo " - Creating and pushing tag v${VERSION}..."
+    git tag -s -m "Release v${VERSION}" "v${VERSION}"
+    git push origin main
+    git push origin "v${VERSION}"
+  fi
+
   cat >> "${build_path}/changelog.md" <<EOF
 
 ## Deployment
@@ -160,6 +185,8 @@ EOF
   echo "---------- Changelog file ----------"
   cat "${build_path}/changelog.md"
   echo "---------- end file ----------"
+
+  upload_assets_and_promote
 
 popd > /dev/null
 echo " - Completed"

@@ -70,12 +70,6 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-- name: github-release
-  type: registry-image
-  source:
-    repository: concourse/github-release-resource
-    tag: dev
-
 resources:
 - name: "app-autoscaler-tools"
   type: "registry-image"
@@ -385,13 +379,6 @@ jobs:
       rebase: true
       repository: app-autoscaler-release
       tag: build/tag
-  - put: gh-release
-    params:
-      name: build/name
-      tag: build/tag
-      commitish: build/tag
-      generate_release_notes: true
-      globs: [build/artifacts/*]
 
 - name: cleanup-autoscaler-deployments
   public: true
