@@ -1,7 +1,5 @@
 ## Migration cleanup
 
-### Development workflow
-- Deploy single modules. MODULES=apiserver make deploy-apps.
 
 ### integration test
 - use the gorouter proxy in all integration tests, use example in `src/autoscaler/integration/integration_golangapi_scheduler_test.go`
