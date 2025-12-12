@@ -20,6 +20,9 @@ params:
   # the public part of the signing key from the ci-bot
   AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC:
 
+  # the SSH key for GitHub authentication (push access)
+  AUTOSCALER_CI_BOT_SSH_KEY:
+
   # if set to false, the bosh release will be skipped and only the changelog & next version generated
   PERFORM_BOSH_RELEASE: true
   CI: true
