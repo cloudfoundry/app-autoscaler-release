@@ -89,6 +89,8 @@ builds:
     version: 14.1.0
   66e5289b-6c9e-4842-52c7-74c753bd9cc5:
     version: 11.4.1
+  673ed160-cba3-4ac2-7d53-3563be9d645d:
+    version: 15.12.1
   6c3ea2f6-7059-473f-77f2-42463b9722af:
     version: 7.0.0
   71482850-8e53-4ff2-7757-60595ef562d1:
