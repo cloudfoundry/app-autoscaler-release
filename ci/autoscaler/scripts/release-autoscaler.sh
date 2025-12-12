@@ -130,6 +130,23 @@ function setup_git(){
   mkdir -p ~/.ssh
   ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
 
+  # Setup SSH authentication key for GitHub pushes
+  if [ -n "${AUTOSCALER_CI_BOT_SSH_KEY:-}" ]; then
+    ssh_auth_key_path="${keys_path}/autoscaler-ci-bot-ssh-key"
+    echo "$AUTOSCALER_CI_BOT_SSH_KEY" > "${ssh_auth_key_path}"
+    chmod 600 "${ssh_auth_key_path}"
+
+    # Configure SSH to use this key for GitHub
+    cat >> ~/.ssh/config <<EOF
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ${ssh_auth_key_path}
+  IdentitiesOnly yes
+EOF
+    chmod 600 ~/.ssh/config
+  fi
+
   public_key_path="${keys_path}/autoscaler-ci-bot-signing-key.pub"
   private_key_path="${keys_path}/autoscaler-ci-bot-signing-key"
   echo "$AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC" > "${public_key_path}"
