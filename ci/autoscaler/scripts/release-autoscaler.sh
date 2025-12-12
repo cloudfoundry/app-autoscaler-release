@@ -126,6 +126,10 @@ function setup_git(){
     git config --global user.name "${AUTOSCALER_CI_BOT_NAME}"
   fi
 
+  # Add GitHub's SSH host keys to known_hosts to avoid interactive prompt
+  mkdir -p ~/.ssh
+  ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+
   public_key_path="${keys_path}/autoscaler-ci-bot-signing-key.pub"
   private_key_path="${keys_path}/autoscaler-ci-bot-signing-key"
   echo "$AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC" > "${public_key_path}"
