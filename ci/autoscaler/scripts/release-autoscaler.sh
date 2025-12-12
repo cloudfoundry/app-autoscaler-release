@@ -191,6 +191,9 @@ pushd "${autoscaler_dir}" > /dev/null
     echo " - Fetching latest changes from remote..."
     git fetch origin main
 
+    echo " - Checking out main branch..."
+    git checkout -B main
+
     echo " - Rebasing local changes on top of remote..."
     git rebase origin/main
 
