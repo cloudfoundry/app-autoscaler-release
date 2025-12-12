@@ -187,7 +187,17 @@ pushd "${autoscaler_dir}" > /dev/null
   if [ "${CI}" = "true" ]; then
     echo " - Creating and pushing tag v${VERSION}..."
     git tag -s -m "Release v${VERSION}" "v${VERSION}"
+
+    echo " - Fetching latest changes from remote..."
+    git fetch origin main
+
+    echo " - Rebasing local changes on top of remote..."
+    git rebase origin/main
+
+    echo " - Pushing to main branch..."
     git push origin main
+
+    echo " - Pushing tag..."
     git push origin "v${VERSION}"
   fi
 
