@@ -371,7 +371,7 @@ jobs:
       AUTOSCALER_CI_BOT_EMAIL: ApplicationAutoscaler@sap.com
       AUTOSCALER_CI_BOT_SIGNING_KEY_PRIVATE: ((autoscaler-ci-bot-signing-key-private))
       AUTOSCALER_CI_BOT_SIGNING_KEY_PUBLIC: ((autoscaler-ci-bot-signing-key-public))
-      AUTOSCALER_CI_BOT_SSH_KEY: ((autoscaler-ci-bot-ssh-key))
+      AUTOSCALER_CI_BOT_SSH_KEY: ((autoscaler-deploy-key-private))
   - put: release-bucket
     params:
       file: "build/artifacts/app-autoscaler-v*.tgz"
