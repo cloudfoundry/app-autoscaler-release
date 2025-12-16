@@ -113,7 +113,7 @@ function upload_assets_and_promote(){
   gh release edit "${VERSION}" --notes-file "${build_path}/changelog.md"
 
   echo " - Publishing release ${VERSION}..."
-  gh release edit "${VERSION}" --draft=false --target="v${VERSION}"
+  gh release edit "${VERSION}" --draft=false --tag="v${VERSION}"
   echo " - Release ${VERSION} published successfully!"
 }
 
