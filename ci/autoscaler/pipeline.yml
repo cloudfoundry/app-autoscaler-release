@@ -375,11 +375,6 @@ jobs:
   - put: release-bucket
     params:
       file: "build/artifacts/app-autoscaler-v*.tgz"
-  - put: app-autoscaler-release
-    params:
-      rebase: true
-      repository: app-autoscaler-release
-      tag: build/tag
 
 - name: cleanup-autoscaler-deployments
   public: true
