@@ -10,6 +10,7 @@ files:
 - autoscaler/api/db/*
 - autoscaler/api/policyvalidator/*
 - autoscaler/api/schemas/*
+- autoscaler/api/policyvalidator/json-schema/** # json-schemas
 - autoscaler/api/* # gosub
 - autoscaler/api/apis/* # gosub
 - autoscaler/api/apis/scalinghistory/* # gosub

@@ -113,7 +113,7 @@ function upload_assets_and_promote(){
   gh release edit "${VERSION}" --notes-file "${build_path}/changelog.md"
 
   echo " - Publishing release ${VERSION}..."
-  gh release edit "${VERSION}" --draft=false --target="v${VERSION}"
+  gh release edit "${VERSION}" --draft=false --tag="v${VERSION}"
   echo " - Release ${VERSION} published successfully!"
 }
 
@@ -124,6 +124,27 @@ function setup_git(){
 
   if [[ -z $(git config --global user.name) ]]; then
     git config --global user.name "${AUTOSCALER_CI_BOT_NAME}"
+  fi
+
+  # Add GitHub's SSH host keys to known_hosts to avoid interactive prompt
+  mkdir -p ~/.ssh
+  ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+
+  # Setup SSH authentication key for GitHub pushes
+  if [ -n "${AUTOSCALER_CI_BOT_SSH_KEY:-}" ]; then
+    ssh_auth_key_path="${keys_path}/autoscaler-ci-bot-ssh-key"
+    echo "$AUTOSCALER_CI_BOT_SSH_KEY" > "${ssh_auth_key_path}"
+    chmod 600 "${ssh_auth_key_path}"
+
+    # Configure SSH to use this key for GitHub
+    cat >> ~/.ssh/config <<EOF
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ${ssh_auth_key_path}
+  IdentitiesOnly yes
+EOF
+    chmod 600 ~/.ssh/config
   fi
 
   public_key_path="${keys_path}/autoscaler-ci-bot-signing-key.pub"
@@ -166,7 +187,20 @@ pushd "${autoscaler_dir}" > /dev/null
   if [ "${CI}" = "true" ]; then
     echo " - Creating and pushing tag v${VERSION}..."
     git tag -s -m "Release v${VERSION}" "v${VERSION}"
+
+    echo " - Fetching latest changes from remote..."
+    git fetch origin main
+
+    echo " - Checking out main branch..."
+    git checkout -B main
+
+    echo " - Rebasing local changes on top of remote..."
+    git rebase origin/main
+
+    echo " - Pushing to main branch..."
     git push origin main
+
+    echo " - Pushing tag..."
     git push origin "v${VERSION}"
   fi
 
