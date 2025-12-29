@@ -131,7 +131,7 @@ cf scale deploy-service -m 4G -k 2G -f
 cf apps | grep deploy-service
 
 # Test the MultiApps Controller endpoint
-cf app deploy-service
+cf mtas
 ```
 
 The MultiApps Controller should now be accessible and ready to deploy MTAR files
