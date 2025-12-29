@@ -8,7 +8,8 @@ This guide provides instructions for migrating App Autoscaler from BOSH-based de
 
 ### Key Changes
 
-- **Deployment Method**: BOSH VMs → MultiApps Controller (MTAR)
+- **Deployment Tooling**: BOSH → MultiApps Controller
+- **Deployment Target**: BOSH-managed VMs → CF apps
 - **Maintenance Location**: Current repo → [cloudfoundry/app-autoscaler](https://github.com/cloudfoundry/app-autoscaler)
 - **Acceptance Tests**: BOSH jobs → CF tasks (distributed within MTAR releases)
 - **Service Discovery**: Route Registrar → Cloud Foundry routes
