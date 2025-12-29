@@ -507,7 +507,7 @@ export MTAR_FILE="app-autoscaler-release-${AUTOSCALER_VERSION}.mtar"
 wget "https://github.com/cloudfoundry/app-autoscaler/releases/download/${AUTOSCALER_VERSION}/${MTAR_FILE}"
 
 # Deploy update (blue-green deployment recommended)
-cf bg-deploy $MTAR_FILE -e autoscaler-custom.mtaext
+cf deploy --strategy blue-green $MTAR_FILE -e autoscaler-custom.mtaext
 ```
 
 ### Community Contribution
