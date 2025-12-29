@@ -139,9 +139,7 @@ The MultiApps Controller should now be accessible and ready to deploy MTAR files
 #### Required Permissions
 
 ### 1. Ensure you have the following CF roles:
-- **Space Developer** or **Space Manager** in the target space
-- Access to create service instances and bind services
-- Permissions to deploy applications
+- **SpaceDeveloper** in the target space
 
 ### 3. Current BOSH Deployment Information
 
