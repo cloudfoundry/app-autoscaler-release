@@ -143,13 +143,6 @@ The MultiApps Controller should now be accessible and ready to deploy MTAR files
 - Access to create service instances and bind services
 - Permissions to deploy applications
 
-### 2. Database Access
-
-You will need:
-- **Connection details** for your current production PostgreSQL database
-- **Admin credentials** to run database migrations
-- **Backup** of the current database (recommended before migration)
-
 ### 3. Current BOSH Deployment Information
 
 Gather the following from your existing BOSH deployment:
