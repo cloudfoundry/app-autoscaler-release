@@ -4,7 +4,7 @@
 
 This guide provides instructions for migrating App Autoscaler from BOSH-based deployments to MTAR (Multi-Target Application Archive) deployments using the MultiApps Controller. MTAR is the new supported deployment method for App Autoscaler.
 
-**Important:** In the near future, this repository will transition to community maintenance. The new MTAR releases are now maintained at [cloudfoundry/app-autoscaler](https://github.com/cloudfoundry/app-autoscaler).
+**Important:** In the near future, this repository will be archived and no new BOSH releases will be provided. The new MTAR releases are now maintained at [cloudfoundry/app-autoscaler](https://github.com/cloudfoundry/app-autoscaler).
 
 ### Key Changes
 
