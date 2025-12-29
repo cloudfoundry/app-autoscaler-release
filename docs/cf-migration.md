@@ -299,12 +299,6 @@ The deployment process will:
 5. Create and bind service instances (database, configurations)
 6. Map routes to the deployed applications
 
-**Deployment Options:**
-
-```bash
-cf deploy app-autoscaler.mtar -e production.mtaext 
-
-```
 
 #### 2. Monitor Deployment
 
