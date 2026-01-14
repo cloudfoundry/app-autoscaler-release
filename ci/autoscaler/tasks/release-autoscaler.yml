@@ -35,7 +35,6 @@ params:
 inputs:
 - name: app-autoscaler-release
 - name: ci
-- name: gh-release
 
 outputs:
 - name: build

@@ -348,7 +348,6 @@ jobs:
   - in_parallel:
     - get: "app-autoscaler-tools"
     - get: release-bucket
-    - get: gh-release
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [upgrade-test]
@@ -416,7 +415,6 @@ jobs:
       trigger: true
     - get: ci
       params: { submodules: none }
-    - get: gh-release
     - get: app-autoscaler-release
       passed: [upgrade-test]
       trigger: true
