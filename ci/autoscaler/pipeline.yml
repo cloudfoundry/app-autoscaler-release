@@ -106,12 +106,6 @@ resources:
     branch: ((branch_name))
     fetch_tags: true
 
-- name: gh-release
-  type: github-release
-  source:
-    owner: cloudfoundry
-    repository: app-autoscaler-release
-    access_token: ((autoscaler_access_token))
 
 - name: previous-stable-release
   type: bosh-io-release
@@ -348,7 +342,6 @@ jobs:
   - in_parallel:
     - get: "app-autoscaler-tools"
     - get: release-bucket
-    - get: gh-release
     - get: bbl-state
     - get: app-autoscaler-release
       passed: [upgrade-test]
@@ -416,7 +409,6 @@ jobs:
       trigger: true
     - get: ci
       params: { submodules: none }
-    - get: gh-release
     - get: app-autoscaler-release
       passed: [upgrade-test]
       trigger: true
@@ -456,4 +448,5 @@ jobs:
   - task: update-java-sdk
     file: ci/ci/autoscaler/tasks/update-sdk/java_task.yml
     params:
+      DEBUG: "true"
       type: java
