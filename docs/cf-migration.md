@@ -141,13 +141,11 @@ The MultiApps Controller should now be accessible and ready to deploy MTAR files
 ### 1. Ensure you have the following CF roles:
 - **SpaceDeveloper** in the target space
 
-### 3. Current BOSH Deployment Information
+### 2. Current BOSH Deployment Information
 
 Gather the following from your existing BOSH deployment:
-- Current service URLs and endpoints
-- TLS certificates and credentials
-- Database connection strings
-- Service instance configurations
+- Current app-autoscaler URLs and endpoints
+- Database connection strings, TLS certificates and credentials
 
 ---
 
