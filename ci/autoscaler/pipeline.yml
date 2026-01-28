@@ -41,7 +41,6 @@ groups:
   - acceptance-log-cache-syslog
   - cleanup-autoscaler-deployments
   - fetch-latest-stemcell
-  - draft
   - performance
   - release
   - set-pipeline
@@ -51,7 +50,6 @@ groups:
 - name: autoscaler-release
   jobs:
   - acceptance-log-cache-syslog
-  - draft
   - release
   - set-pipeline
   - upgrade-test
@@ -399,26 +397,6 @@ jobs:
   - task: fetch-latest-stemcell
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/fetch-latest-stemcell.yml
-
-- name: draft
-  public: true
-  build_logs_to_retain: 100
-  plan:
-  - in_parallel:
-    - get: "app-autoscaler-tools"
-      trigger: true
-    - get: ci
-      params: { submodules: none }
-    - get: app-autoscaler-release
-      passed: [upgrade-test]
-      trigger: true
-  - task: dummy-release-autoscaler
-    image: "app-autoscaler-tools"
-    file: ci/ci/autoscaler/tasks/release-autoscaler.yml
-    params:
-      UPLOADER_KEY: ((autoscaler_blobstore_uploader_key))
-      GITHUB_TOKEN: ((autoscaler_access_token))
-      PERFORM_BOSH_RELEASE: false
 
 - name: update-golang
   public: true
