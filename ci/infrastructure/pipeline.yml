@@ -273,7 +273,7 @@ jobs:
     - get: postgres-repo
     - get: postgres-release
   - task: deploy-postgres
-    file: ci/infrastructure/tasks/deploy-postgres.yml
+    file: ci/ci/infrastructure/tasks/deploy-postgres.yml
     params:
       BBL_GCP_REGION: europe-west3
       BBL_GCP_ZONE: europe-west3-a
