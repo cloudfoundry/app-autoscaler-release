@@ -17,4 +17,4 @@ inputs:
 - name: postgres-repo
 
 run:
-  path: ci/ci/infrastructure/scripts/deploy-postgres.sh
+  path: ci/infrastructure/scripts/deploy-postgres.sh

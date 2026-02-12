@@ -272,11 +272,11 @@ jobs:
     - get: ci
     - get: postgres-repo
     - get: postgres-release
-    - task: deploy-postgres
-      file: ci/ci/infrastructure/tasks/deploy-postgres.yml
-      params:
-        BBL_GCP_REGION: europe-west3
-        BBL_GCP_ZONE: europe-west3-a
+  - task: deploy-postgres
+    file: ci/infrastructure/tasks/deploy-postgres.yml
+    params:
+      BBL_GCP_REGION: europe-west3
+      BBL_GCP_ZONE: europe-west3-a
 
 - name: deploy-multiapps-controller
   serial_groups: [infra]
