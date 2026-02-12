@@ -10,7 +10,7 @@
     name: pgadmin
     password: ((pgadmin_database_password))
     permissions:
-    - "CONNECTION LIMIT 5000"
+    - "CONNECTION LIMIT 1000"
 
 - type: replace
   path: /variables?/name=pgadmin_database_password?

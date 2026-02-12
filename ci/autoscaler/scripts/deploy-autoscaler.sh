@@ -33,6 +33,7 @@ bosh_login "${BBL_STATE_PATH}"
 
 function setup_autoscaler_uaac() {
 	local uaac_authorities="cloud_controller.read,cloud_controller.admin,uaa.resource,routing.routes.write,routing.routes.read,routing.router_groups.read"
+
 	local autoscaler_secret="autoscaler_client_secret"
 	local uaa_client_secret=$(credhub get -n /bosh-autoscaler/cf/uaa_admin_client_secret --quiet)
 

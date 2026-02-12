@@ -4,6 +4,7 @@ groups:
   jobs:
   - setup-infrastructure
   - deploy-cf
+  - deploy-postgres
   - delete-cf
   - destroy-infrastructure
   - bosh-cleanup
@@ -259,7 +260,7 @@ jobs:
     params:
       ERRAND_NAME: smoke-tests
 
-- name: deploy-multiapps-controller
+- name: deploy-postgres
   serial_groups: [infra]
   public: true
   build_logs_to_retain: 100
@@ -271,14 +272,25 @@ jobs:
     - get: ci
     - get: postgres-repo
     - get: postgres-release
+    - task: deploy-postgres
+      file: ci/ci/infrastructure/tasks/deploy-postgres.yml
+      params:
+        BBL_GCP_REGION: europe-west3
+        BBL_GCP_ZONE: europe-west3-a
+
+- name: deploy-multiapps-controller
+  serial_groups: [infra]
+  public: true
+  build_logs_to_retain: 100
+  plan:
+  - in_parallel:
+    - get: bbl-state
+      trigger: true
+      passed: [deploy-postgres]
+    - get: ci
     - get: multiapps-controller-web-war
     - get: multiapps-controller-web-manifest
     - get: every-morning-monday-till-friday
       trigger: true
-  - task: deploy-postgres
-    file: ci/ci/infrastructure/tasks/deploy-postgres.yml
-    params:
-      BBL_GCP_REGION: europe-west3
-      BBL_GCP_ZONE: europe-west3-a
   - task: deploy-multiapps-controller
     file: ci/ci/infrastructure/tasks/deploy-multiapps-controller.yml
