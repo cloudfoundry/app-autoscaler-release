@@ -52,8 +52,8 @@ resources:
 - name: every-morning-monday-till-friday
   type: time
   source:
-    start: 05:30 AM
-    stop: 06:30 AM
+    start: 06:00 AM
+    stop: 07:00 AM
     days: [Monday, Tuesday, Wednesday, Thursday, Friday]
     location: "UTC"
 
