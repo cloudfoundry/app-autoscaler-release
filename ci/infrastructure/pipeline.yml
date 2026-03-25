@@ -17,7 +17,7 @@ groups:
 
 resource_types:
 - name: file-url
-  type: docker-image
+  type: registry-image
   source:
     repository: pivotalservices/concourse-curl-resource
     tag: latest
