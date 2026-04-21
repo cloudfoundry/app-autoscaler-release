@@ -293,4 +293,6 @@ jobs:
     - get: every-morning-monday-till-friday
       trigger: true
   - task: deploy-multiapps-controller
+    attempts: 3
+    timeout: 3h
     file: ci/ci/infrastructure/tasks/deploy-multiapps-controller.yml
