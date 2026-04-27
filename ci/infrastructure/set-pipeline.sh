@@ -10,8 +10,10 @@ set -euo pipefail
 SCRIPT_RELATIVE_DIR=$(dirname "${BASH_SOURCE[0]}")
 pushd "${SCRIPT_RELATIVE_DIR}" > /dev/null
   TARGET="${TARGET:-app-autoscaler-release}"
+  FLY_OPTS="${FLY_OPTS:-}"
 
   PIPELINE_NAME="infrastructure"
 
-  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${PIPELINE_NAME}"
+  # shellcheck disable=SC2086
+  fly -t "${TARGET}" set-pipeline --config="pipeline.yml" --pipeline="${PIPELINE_NAME}" ${FLY_OPTS}
 popd

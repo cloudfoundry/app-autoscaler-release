@@ -123,7 +123,8 @@ jobs:
 - name: setup-infrastructure
   serial_groups: [infra]
   public: true
-  build_logs_to_retain: 100
+  build_log_retention:
+    builds: 100
   plan:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
@@ -155,7 +156,8 @@ jobs:
 - name: delete-cf
   serial_groups: [infra]
   public: true
-  build_logs_to_retain: 100
+  build_log_retention:
+    builds: 100
   plan:
   - in_parallel:
     - get: bbl-state
@@ -170,7 +172,8 @@ jobs:
 - name: destroy-infrastructure
   serial_groups: [infra]
   public: true
-  build_logs_to_retain: 100
+  build_log_retention:
+    builds: 100
   plan:
   - in_parallel:
     - get: bbl-state
@@ -196,7 +199,8 @@ jobs:
 
 - name: bosh-cleanup
   public: true
-  build_logs_to_retain: 100
+  build_log_retention:
+    builds: 100
   plan:
   - in_parallel:
     - get: bbl-state
@@ -208,7 +212,8 @@ jobs:
 
 - name: fetch-latest-stemcell
   public: true
-  build_logs_to_retain: 100
+  build_log_retention:
+    builds: 100
   plan:
     - in_parallel:
         - get: bbl-state
@@ -223,7 +228,8 @@ jobs:
 - name: deploy-cf
   serial_groups: [infra]
   public: true
-  build_logs_to_retain: 100
+  build_log_retention:
+    builds: 100
   plan:
   - in_parallel:
     - get: cf-deployment-concourse-tasks
@@ -263,7 +269,8 @@ jobs:
 - name: deploy-postgres
   serial_groups: [infra]
   public: true
-  build_logs_to_retain: 100
+  build_log_retention:
+    builds: 100
   plan:
   - in_parallel:
     - get: bbl-state
@@ -281,7 +288,8 @@ jobs:
 - name: deploy-multiapps-controller
   serial_groups: [infra]
   public: true
-  build_logs_to_retain: 100
+  build_log_retention:
+    builds: 100
   plan:
   - in_parallel:
     - get: bbl-state
