@@ -7,7 +7,7 @@ source "${script_dir}/common.sh"
 
 function main(){
 	bosh_login "${BBL_STATE_PATH}"
-	bosh upload-stemcell --sha1 "sha256:$(cat gcp-jammy-stemcell/sha256)" "$(cat gcp-jammy-stemcell/url)"
+	bosh upload-stemcell --sha1 "sha256:$(cat gcp-noble-stemcell/sha256)" "$(cat gcp-noble-stemcell/url)"
 }
 
 [ "${BASH_SOURCE[0]}" == "${0}" ] && main "$@"

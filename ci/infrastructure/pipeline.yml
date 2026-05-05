@@ -105,10 +105,10 @@ resources:
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
     tag_filter: v15.*
 
-- name: gcp-jammy-stemcell
+- name: gcp-noble-stemcell
   type: bosh-io-stemcell
   source:
-    name: bosh-google-kvm-ubuntu-jammy-go_agent
+    name: bosh-google-kvm-ubuntu-noble-go_agent
 
 jobs:
 - name: set-pipeline
@@ -221,7 +221,7 @@ jobs:
         - get: every-morning-monday-till-friday
           passed: [ bosh-cleanup ]
           trigger: true
-        - get: gcp-jammy-stemcell
+        - get: gcp-noble-stemcell
     - task: fetch-latest-stemcell
       file: ci/ci/infrastructure/tasks/fetch-latest-stemcell.yml
 

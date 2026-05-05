@@ -10,7 +10,7 @@ image_resource:
 inputs:
 - name: ci
 - name: bbl-state
-- name: gcp-jammy-stemcell
+- name: gcp-noble-stemcell
 outputs:
 
 run:
