@@ -28,6 +28,8 @@ params:
   BBL_LB_KEY:
   TF_VAR_parent_dns_zone:
   BBL_STATE_DIR: bbl-state
+  GIT_COMMIT_EMAIL: "cf-release-integration@pivotal.io"
+  GIT_COMMIT_USERNAME: "CI Bot"
 
 run:
   path: ci/ci/infrastructure/scripts/setup-infrastructure.sh
