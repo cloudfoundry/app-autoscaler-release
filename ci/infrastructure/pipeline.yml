@@ -131,7 +131,7 @@ jobs:
     - get: ci
     - get: bbl-state
   - task: setup-infrastructure
-    file: cf-deployment-concourse-tasks/bbl-up/task.yml
+    file: ci/ci/infrastructure/tasks/setup-infrastructure.yml
     params:
       BBL_IAAS: gcp
       BBL_ENV_NAME: autoscaler
@@ -144,9 +144,6 @@ jobs:
       BBL_LB_CERT: ((autoscaler_lb_cert))
       BBL_LB_KEY: ((autoscaler_lb_key))
       TF_VAR_parent_dns_zone: app-runtime-interfaces
-    input_mapping:
-      bbl-state: bbl-state
-      bbl-config: bbl-state
     ensure:
       put: bbl-state
       params:
