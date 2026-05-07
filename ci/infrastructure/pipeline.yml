@@ -103,7 +103,7 @@ resources:
   source:
     branch: main
     uri: https://github.com/cloudfoundry/cf-deployment-concourse-tasks.git
-    tag_filter: v16.*
+    tag_filter: v20.*
 
 - name: gcp-noble-stemcell
   type: bosh-io-stemcell
