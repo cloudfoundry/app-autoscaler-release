@@ -59,6 +59,14 @@ pushd "bbl-state/${BBL_STATE_DIR}"
   rm -f terraform/network_lb_override.tf
   rm -f terraform/network_lb.tf
 
+  # Re-init terraform after patching to resolve provider correctly
+  pushd terraform
+    terraform init --upgrade
+    # Migrate legacy provider address in state (TF 0.12 → 1.x migration)
+    terraform state replace-provider -auto-approve \
+      "registry.terraform.io/-/google" "registry.terraform.io/hashicorp/google" 2>/dev/null || true
+  popd
+
   # Step 3: bbl up (terraform apply + bosh create-env)
   echo "=== Running bbl up ==="
   eval bbl --debug up \
