@@ -59,24 +59,8 @@ pushd "bbl-state/${BBL_STATE_DIR}"
   rm -f terraform/network_lb_override.tf
   rm -f terraform/network_lb.tf
 
-  # Re-init terraform after patching to resolve provider correctly
-  pushd terraform
-    terraform init --upgrade
-    # Migrate legacy provider address in state (TF 0.12 → 1.x migration)
-    terraform state replace-provider -auto-approve \
-      "registry.terraform.io/-/google" "registry.terraform.io/hashicorp/google" 2>/dev/null || true
-  popd
-
-  # Step 3: Run terraform apply directly (not through bbl up, which re-plans)
-  echo "=== Running terraform apply ==="
-  pushd terraform
-    terraform apply -auto-approve \
-      -var-file="../vars/bbl.tfvars" \
-      -var "credentials=/tmp/google_service_account.json"
-  popd
-
-  # Step 4: bbl up for bosh create-env and cloud-config (skip terraform with SKIP_TERRAFORM)
-  echo "=== Running bbl up (bosh only) ==="
+  # Step 3: bbl up (terraform apply + bosh create-env)
+  echo "=== Running bbl up ==="
   eval bbl --debug up \
     ${name_flag} \
     ${lb_flags} "2>&1" ${drain} "${ROOT_DIR}/bbl_up.log"
