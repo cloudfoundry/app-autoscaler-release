@@ -59,6 +59,13 @@ pushd "bbl-state/${BBL_STATE_DIR}"
   rm -f terraform/network_lb_override.tf
   rm -f terraform/network_lb.tf
 
+  # Migrate TF 0.11 state (version 3) to TF 1.x state (version 4)
+  # BBL v8 used TF 0.11. BBL v9 uses TF 1.4 which cannot read v3 state directly.
+  if [ -f vars/terraform.tfstate ] && grep -q '"version": 3' vars/terraform.tfstate; then
+    echo "=== Migrating terraform state from v3 (TF 0.11) to v4 (TF 1.x) ==="
+    "${ROOT_DIR}/ci/ci/infrastructure/scripts/migrate-terraform-state.py" vars/terraform.tfstate
+  fi
+
   # Step 3: bbl up (terraform apply + bosh create-env)
   echo "=== Running bbl up ==="
   eval bbl --debug up \
