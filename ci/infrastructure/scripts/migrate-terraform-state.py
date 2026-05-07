@@ -49,7 +49,7 @@ def migrate_v3_to_v4(state_v3):
         primary = res_data.get("primary", {})
         attributes = primary.get("attributes", {})
         meta = primary.get("meta", {})
-        schema_version = meta.get("schema_version", 0) if isinstance(meta, dict) else 0
+        schema_version = int(meta.get("schema_version", 0)) if isinstance(meta, dict) else 0
 
         instance = {
             "schema_version": schema_version,
