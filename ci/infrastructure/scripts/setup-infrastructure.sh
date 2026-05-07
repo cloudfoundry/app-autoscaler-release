@@ -67,8 +67,14 @@ pushd "bbl-state/${BBL_STATE_DIR}"
       "registry.terraform.io/-/google" "registry.terraform.io/hashicorp/google" 2>/dev/null || true
   popd
 
-  # Step 3: bbl up (terraform apply + bosh create-env)
-  echo "=== Running bbl up ==="
+  # Step 3: Run terraform apply directly (not through bbl up, which re-plans)
+  echo "=== Running terraform apply ==="
+  pushd terraform
+    terraform apply -auto-approve
+  popd
+
+  # Step 4: bbl up for bosh create-env and cloud-config (skip terraform with SKIP_TERRAFORM)
+  echo "=== Running bbl up (bosh only) ==="
   eval bbl --debug up \
     ${name_flag} \
     ${lb_flags} "2>&1" ${drain} "${ROOT_DIR}/bbl_up.log"
