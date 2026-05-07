@@ -84,11 +84,11 @@ def remove_block(text, header):
                 line_start = text.rfind('\n', 0, idx)
                 if line_start == -1:
                     line_start = 0
-                # Include trailing newlines
                 end = i + 1
-                while end < len(text) and text[end] == '\n':
+                # Consume exactly one trailing newline to avoid collapsing blocks
+                if end < len(text) and text[end] == '\n':
                     end += 1
-                text = text[:line_start] + text[end:]
+                text = text[:line_start + 1] + text[end:]
                 break
         i += 1
     return text
