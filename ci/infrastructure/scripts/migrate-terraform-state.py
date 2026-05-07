@@ -10,6 +10,18 @@ import json
 import sys
 
 
+def convert_output_type(tf11_type, value):
+    """Convert TF 0.11 output type to TF 1.x type expression."""
+    if tf11_type == "list":
+        count = len(value) if isinstance(value, list) else 0
+        return ["tuple", ["string"] * count]
+    if tf11_type == "map":
+        if isinstance(value, dict):
+            return ["object", {k: "string" for k in value}]
+        return ["object", {}]
+    return "string"
+
+
 def migrate_v3_to_v4(state_v3):
     provider_map = {
         "provider.google": 'provider["registry.terraform.io/hashicorp/google"]',
@@ -29,8 +41,10 @@ def migrate_v3_to_v4(state_v3):
     for out_name, out_val in module.get("outputs", {}).items():
         state_v4["outputs"][out_name] = {
             "value": out_val["value"],
-            "type": out_val.get("type", "string"),
+            "type": convert_output_type(out_val.get("type", "string"), out_val["value"]),
         }
+        if out_val.get("sensitive"):
+            state_v4["outputs"][out_name]["sensitive"] = True
 
     for res_key, res_data in module.get("resources", {}).items():
         parts = res_key.split(".")
