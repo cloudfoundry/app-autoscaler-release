@@ -70,7 +70,9 @@ pushd "bbl-state/${BBL_STATE_DIR}"
   # Step 3: Run terraform apply directly (not through bbl up, which re-plans)
   echo "=== Running terraform apply ==="
   pushd terraform
-    terraform apply -auto-approve
+    terraform apply -auto-approve \
+      -var-file="../vars/bbl.tfvars" \
+      -var "credentials=/tmp/google_service_account.json"
   popd
 
   # Step 4: bbl up for bosh create-env and cloud-config (skip terraform with SKIP_TERRAFORM)
