@@ -1,5 +1,6 @@
 ---
 applications:
 - name: deploy-service
+  path: ../multiapps-controller-web-1.174.0.war
   env:
     JBP_CONFIG_TOMCAT: '{"tomcat": {"version": "9.+"}}'
