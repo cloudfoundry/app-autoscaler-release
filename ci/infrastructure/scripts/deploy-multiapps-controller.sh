@@ -23,7 +23,9 @@ function deploy_multiapps_controller() {
   mv multiapps-controller-web-war/*.war .
   pushd multiapps-controller-web-manifest
 
-  cf push -f ./*.yml -f "${script_dir}/../assets/multiapps-controller-manifest-override.yml" "${app_name}"
+  cf push --no-start -f ./*.yml "${app_name}"
+  cf set-env "${app_name}" JBP_CONFIG_TOMCAT '{"tomcat": {"version": "9.+"}}'
+  cf start "${app_name}"
   # scale up to be able to handle huge (>1GB) .MTARs
   cf scale -m 4G -k 2G deploy-service -f
 
