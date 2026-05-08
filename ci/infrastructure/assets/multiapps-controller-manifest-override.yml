@@ -1,0 +1,5 @@
+---
+applications:
+- name: deploy-service
+  env:
+    JBP_CONFIG_TOMCAT: '{"tomcat": {"version": "9.+"}}'
