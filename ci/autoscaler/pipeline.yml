@@ -191,8 +191,7 @@ jobs:
   - <<: *deploy-autoscaler-task
     params:
       TARGETS: "deploy-autoscaler"
-      <<: *acceptance-log-cache-syslog-params
-      <<: *app-autoscaler-ops-files-log-cache-syslog
+      <<: [*acceptance-log-cache-syslog-params, *app-autoscaler-ops-files-log-cache-syslog]
     timeout: 30m
   - task: register-broker
     image: "app-autoscaler-tools"
@@ -249,8 +248,7 @@ jobs:
   - <<: *deploy-autoscaler-task
     params:
       TARGETS: "deploy-autoscaler"
-      <<: *performance-env
-      <<: *app-autoscaler-ops-files-log-cache-syslog
+      <<: [*performance-env, *app-autoscaler-ops-files-log-cache-syslog]
     timeout: 30m
   - task: register-broker
     image: "app-autoscaler-tools"
@@ -298,8 +296,7 @@ jobs:
     image: "app-autoscaler-tools"
     file: ci/ci/autoscaler/tasks/deploy-previous-autoscaler.yml
     params:
-      <<: *upgrade-test-params
-      <<: *app-autoscaler-ops-files-upgrade
+      <<: [*upgrade-test-params, *app-autoscaler-ops-files-upgrade]
     timeout: 30m
   - task: register-broker
     image: "app-autoscaler-tools"
@@ -320,8 +317,7 @@ jobs:
   - <<: *deploy-autoscaler-task
     params:
       TARGETS: "deploy-autoscaler"
-      <<: *upgrade-test-params
-      <<: *app-autoscaler-ops-files-upgrade
+      <<: [*upgrade-test-params, *app-autoscaler-ops-files-upgrade]
     timeout: 30m
   - task: autoscaler-post-upgrade
     image: "app-autoscaler-tools"
