@@ -9,9 +9,8 @@ source "${script_dir}/utils.source.sh"
 MTAR_PATH="${MTAR_PATH:-$(ls app-autoscaler-mtar/app-autoscaler-release-*.mtar 2>/dev/null | head -1)}"
 DEPLOYMENT_NAME="${DEPLOYMENT_NAME:-app-autoscaler}"
 
-# Override default org/space from vars.source.sh
-export CF_ORG="${CF_ORG:-SAP_autoscaler_tests_OSS}"
-export CF_SPACE="${CF_SPACE:-SAP_autoscaler_tests_OSS}"
+export CF_ORG="SAP_autoscaler_tests_OSS"
+export CF_SPACE="SAP_autoscaler_tests_OSS"
 export cf_org="${CF_ORG}"
 export cf_space="${CF_SPACE}"
 
