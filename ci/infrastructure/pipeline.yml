@@ -10,6 +10,7 @@ groups:
   - bosh-cleanup
   - fetch-latest-stemcell
   - deploy-multiapps-controller
+  - deploy-metricsgateway
 
 - name: others
   jobs:
@@ -23,6 +24,16 @@ resource_types:
     tag: latest
 
 resources:
+- name: app-autoscaler-mtar
+  type: github-release
+  icon: github
+  source:
+    owner: cloudfoundry
+    repository: app-autoscaler
+    access_token: ((autoscaler_access_token))
+    release: true
+    tag_filter: "v(.*)"
+
 - name: multiapps-controller-web-war
   type: file-url
   source:
@@ -301,3 +312,19 @@ jobs:
     attempts: 3
     timeout: 3h
     file: ci/ci/infrastructure/tasks/deploy-multiapps-controller.yml
+
+- name: deploy-metricsgateway
+  serial_groups: [infra]
+  public: true
+  build_log_retention:
+    builds: 100
+  plan:
+  - in_parallel:
+    - get: bbl-state
+    - get: ci
+    - get: app-autoscaler-mtar
+      trigger: true
+  - task: deploy-metricsgateway
+    attempts: 3
+    timeout: 3h
+    file: ci/ci/infrastructure/tasks/deploy-metricsgateway.yml

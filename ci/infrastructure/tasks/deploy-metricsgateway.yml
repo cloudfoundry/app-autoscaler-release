@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: ghcr.io/cloudfoundry/app-autoscaler-release-tools
+    tag: main
+
+inputs:
+- name: bbl-state
+- name: ci
+- name: app-autoscaler-mtar
+
+run:
+  path: ci/ci/infrastructure/scripts/deploy-metricsgateway.sh
