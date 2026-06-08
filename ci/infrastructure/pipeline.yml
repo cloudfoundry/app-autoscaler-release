@@ -314,7 +314,6 @@ jobs:
     file: ci/ci/infrastructure/tasks/deploy-multiapps-controller.yml
 
 - name: deploy-metricsgateway
-  serial_groups: [infra]
   public: true
   build_log_retention:
     builds: 100
